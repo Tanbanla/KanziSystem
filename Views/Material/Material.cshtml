@@ -1,0 +1,139 @@
+﻿@{
+    ViewData["Title"] = "Material";
+}
+<style>
+    .card .card-header {
+        min-height: 0px;
+    }
+    .card .card-header .form-control {
+        height: 42px;
+        font-size: 13px;
+        border-radius: 0px;
+    }
+</style>
+<div class="row">
+    <div hidden>
+        <div class="col-2">
+            <div class="card-body pb-1 bg-white">
+                <div class="summary-item text-center">
+                    <ul class="list-unstyled list-unstyled-border">
+                        <li class="media">
+                            <a href="#">
+                                <img alt="image" class="mr-3 rounded" width="50" src="~/img/box_1.png">
+                            </a>
+                            <div class="media-body text-left">
+                                <div><a href="#">Mã hàng hiện có :</a></div>
+                                <div class=" badge badge-primary">$805</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="card-body pb-1 bg-white">
+                <div class="summary-item text-center">
+                    <ul class="list-unstyled list-unstyled-border">
+                        <li class="media">
+                            <a href="#">
+                                <img alt="image" class="mr-3 rounded" width="50" src="~/img/box_3.png">
+                            </a>
+                            <div class="media-body text-left">
+                                <div><a href="#">Mã hàng sắp hết :</a></div>
+                                <div class=" badge badge-danger">$805</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="card-body pb-1 bg-white">
+                <div class="summary-item text-center">
+                    <ul class="list-unstyled list-unstyled-border">
+                        <li class="media">
+                            <a href="#">
+                                <img alt="image" class="mr-3 rounded" width="50" src="~/img/box_2.png">
+                            </a>
+                            <div class="media-body text-left">
+                                <div><a href="#">Mã hàng còn nhiều :</a></div>
+                                <div class=" badge badge-success">$805</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="form-group" style="margin-bottom:0px ; margin-top:10px">
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text"><i class="ion ion-ios-barcode"></i></div>
+                            </div>
+                            <input type="text" class="form-control" id="Material_Code" placeholder="Material_Code">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin : 10px 0 0 20px">
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text"><i class="ion ion-ios-paper"></i></div>
+                            </div>
+                            <input type="text" class="form-control" id="Material_Name_VN" placeholder="Material_Name_VN">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin : 10px 0 0 20px">
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text"><i class="ion ion-key"></i></div>
+                            </div>
+                            <input type="text" class="form-control" id="Account_Name_VN" placeholder="Account_Name_VN">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" style="border-radius :5px; height:42px; margin-left:20px" onclick="_load_material()"><i class="ion ion-ios-search-strong"></i></button>
+                    <button type="button" class="btn btn-success" style="border-radius :5px; height:42px; margin-left:50%"><i class="fa fa-file-excel"></i> Export</button>
+                </div>
+                <div>
+                    <div class="table-responsive">
+                        <div class="card-body" style="padding-top:0px">
+                            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                                <table class="table table-bordered">
+                                    <thead class="bg-primary">
+                                        <tr>                                        
+                                            <th>Material_Code</th>
+                                            <th>Material_Name_VN</th>
+                                            <th>Material_Name_EN</th>
+                                            <th>Material_Name_JP</th>
+                                            <th>Account_Code</th>
+                                            <th>Account_Name_VN</th>
+                                            <th>Account_Name_EN</th>
+                                            <th>Unit</th>
+                                            <th>Unit_Note </th>
+                                            <th>Price </th>
+                                            <th>Currency </th>
+                                            <th>Group_Code </th>
+                                            <th>GoodKind </th>
+                                            <th colspan="2"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="show_material"></tbody>
+                                </table>
+                                @* <div id="pagination-controls" class="d-flex justify-content-center mt-3 gap-1"></div> *@
+                                <ul class="pagination" id="pagination-controls"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+<script src="~/scripts/material_process.js"></script>
+<script>
+    window.onload = function(){
+        _load_material();
+    }
+</script>

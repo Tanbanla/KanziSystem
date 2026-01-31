@@ -1,0 +1,43 @@
+﻿<form class="modal-part" id="modal-login-part">
+    <div class="row">
+        <div class="form-group col-6">
+            <label for="employee_code">Mã nhân viên</label>
+            <input id="ed_employee_code" type="text" class="form-control" name="frist_name" autofocus>
+        </div>
+        <div class="form-group col-6">
+            <label for="employee_name">Họ tên</label>
+            <input id="ed_employee_name" type="text" class="form-control" name="last_name">
+        </div>
+        <div class="form-group col-4">
+            <label for="employee_adid">ADID</label>
+            <input id="ed_employee_adid" type="text" class="form-control" name="frist_name" autofocus>
+        </div>
+        <div class="form-group col-8">
+            <label for="employee_mail">Mail</label>
+            <input id="ed_employee_mail" type="text" class="form-control" name="last_name">
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-6">
+            <label>Phòng ban</label>
+            <input type="text" list="dept_dt" class="form-control" id="ed_employee_dept" />
+            <datalist class="form-control selectric" id="dept_dt" hidden>
+                <option>R&D - PE</option>
+                <option>R&D - EE</option>
+                <option>R&D - DE</option>
+                <option>R&D - IT</option>
+            </datalist>
+        </div>
+        <div class="form-group col-6">
+            <label>Quyền truy cập</label>
+            <input type="text" list="role_dt" class="form-control" id="ed_employee_role" />
+            <datalist class="form-control selectric" id="role_dt" hidden>
+                <option value="5">Admin</option>
+                <option value="4">Middle Management</option>
+                <option value="3">Junior Management</option>
+                <option value="2">Warehouse Management</option>
+                <option value="1">User</option>
+            </datalist>
+        </div>
+    </div>
+</form>

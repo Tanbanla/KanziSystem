@@ -1,0 +1,31 @@
+/* Simplified login CSS tailored to Views/Account/Login.cshtml
+   Kept only the styles used by that view and removed heavy animations/particles.
+*/
+
+* { box-sizing: border-box; }
+
+body { margin:0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: #f5f7fb; }
+
+.center-wrapper { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+
+.simple-card { width:100%; max-width:420px; background: #fff; border-radius:12px; box-shadow:0 6px 24px rgba(18,38,63,0.08); padding:28px; }
+
+.brand { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+.brand .icon { width:48px; height:48px; border-radius:8px; background:linear-gradient(135deg,#2563eb,#60a5fa); display:flex; align-items:center; justify-content:center; color:#fff; }
+.brand h2 { margin:0; font-size:20px; color:#0f172a; }
+.subtitle { margin:6px 0 18px; color:#475569; font-size:14px; }
+
+.form-control:focus { box-shadow:0 6px 18px rgba(37,99,235,0.12); border-color:#2563eb; }
+
+.btn-primary { background:linear-gradient(90deg,#2563eb,#60a5fa); border:none; }
+.btn-primary:disabled { opacity:.7; }
+
+.small-note { text-align:center; color:#94a3b8; font-size:13px; margin-top:14px; }
+
+.text-danger.small { font-size:13px; margin-top:6px; display:block; }
+
+/* small responsive tweaks */
+@media (max-width:480px) {
+    .simple-card { padding:20px; border-radius:10px; }
+}
+

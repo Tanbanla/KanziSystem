@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "Vender";
+}
+<style>
+    .card .card-header {
+        min-height: 0px;
+    }
+    .card .card-header .form-control {
+        height: 42px;
+        font-size: 13px;
+        border-radius: 0px;
+    }
+    .modal-dialog{
+        max-width : 800px;
+    }
+</style>
+<div class="row">
+    <div class="col-9">
+        <div class="card">
+            <div class="input-group mt-2 mb-2">
+                <div class="col-2 input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text"><i class="ion ion-ios-barcode"></i></div>
+                    </div>
+                    <input type="text" class="form-control" id="vd_code" placeholder="Mã nhà cung cấp">
+                </div>
+                <div class="col-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text"><i class="ion ion-ios-paper"></i></div>
+                    </div>
+                    <input type="text" class="form-control" id="vd_name" placeholder="Tên nhà cung cấp">
+                </div>
+                <div class="col-2 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text"><i class="ion ion-key"></i></div>
+                    </div>
+                    <input type="text" class="form-control" id="vd_group" placeholder="Nhóm">
+                </div>
+                <button type="button" class="btn btn-primary" style="border-radius :0px; height:42px; margin-left:20px" onclick="_load_vender()"><i class="ion ion-ios-search-strong"></i></button>
+            </div>
+            <div class="card-body p-0">
+                <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary text-center">
+                            <tr class="text-primary">
+                                <th>Mã NCC</th>
+                                <th>Tên NCC</th>
+                                <th>Địa chỉ</th>
+                                <th>Số điện thoại</th>
+                                <th>Fax</th>
+                                <th>Khu vực</th>
+                                <th>Ghi chú</th>
+                                <th>Khai hải quan</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="master_vender"></tbody>
+                    </table>
+                    <ul class="pagination" id="pagination-controls"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="d-block">Upload dữ liệu master kho &nbsp;&nbsp;<i class="fas fa-file-excel text-primary"></i> File mẫu</label>
+                    <a class="btn btn-primary daterange-btn icon-left btn-icon float-right text-white" id="modal-vd-add">
+                        <i class="ion ion-ios-plus-outline"></i> Đăng ký tay
+                    </a>
+                </div>
+                <div class="form-group">
+                    <label>Chọn file master : </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <i class="ion ion-paperclip"></i>
+                            </div>
+                        </div>
+                        <input type="file" class="form-control timepicker">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú :</label>
+                    <textarea class="summernote-simple"></textarea>
+                </div>
+                <button class="btn btn-success"><i class="ion ion-upload"></i> Upload </button>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_modal", "Master")
+<script src="~/scripts/master_process.js"></script>
+<script>
+    window.onload = function(){
+        _load_vender();
+    }
+</script>

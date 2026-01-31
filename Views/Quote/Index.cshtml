@@ -1,0 +1,232 @@
+﻿@using Newtonsoft.Json
+@using PRJ_WAREHOUSE_BIVN.DTO
+@{
+    ViewData["Title"] = "Tạo yêu cầu báo giá";
+    List<ACC_NHOMVITRIDTO> nhomViTri = Model.DanhSachNhomViTri;
+    List<string> phanLoais = ["A","B","C","E","NO LIST"];
+    List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
+    List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
+    List<dynamic> categoryS = Model.DanhSachCategory;
+    string currentUser = Model.NguoiThaoTac;
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+</head>
+<div class="container-fluid" id="quote-request">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold text-primary">PHIẾU YÊU CẦU BÁO GIÁ</h4>
+            <small class="text-muted">見積依頼書 (非共通間材、固定資産用)</small>
+        </div>
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+            <div class="btn-group me-2 mb-2" role="group">
+                <button type="button" class="btn btn-outline-success" id="btnDownloadExcel"><i class="fas fa-file-excel"></i> Download Excel</button>
+                <button type="button" class="btn btn-outline-primary" id="btnUploadExcel"><i class="fas fa-upload"></i> Upload Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <form id="quoteForm" method="post" enctype="multipart/form-data" class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h6 class="mb-0 text-secondary" style="color:black !important">Thao tác / Operations</h6>
+        </div>
+        <div class="btn_quote">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary" id="btnReset"><i class="fas fa-undo"></i> Reset</button>
+                <button type="button" class="btn btn-outline-success" id="btnAuto"><i class="fas fa-file-excel"></i>Auto render</button>
+                <button type="button" class="btn btn-primary" id="btnCreate"><i class="fas fa-check"></i> Submit</button>
+            </div>
+        </div>
+        <div class="card-header bg-white border-top">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h6 class="mb-0 text-secondary" style="color:black !important">Chi tiết yêu cầu / Request Detail</h6>
+            </div>
+        </div>
+        <div class="card-body pt-2">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered align-middle" id="quoteTable">
+                    <thead class="table-light">
+                        <tr class="text-center align-middle">
+                            <th rowspan="2" class="title_column_stt">No</th>
+                            <th rowspan="2" class="title_column" style="min-width: 200px">Mã phòng ban<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Chủng loại hàng<br /></th>
+                            <th rowspan="2" class="title_column">Phân loại(A/B/C/E/Non list)<br /> </th>
+                            <th rowspan="2" class="title_column">Mã thiết bị<br /></th>
+                            <th rowspan="2" class="title_column" style="min-width: 230px">Mã hàng nội bộ<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Mã hàng của NCC<br /></th>
+                            <th rowspan="2" class="title_column">Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Tên hàng EN<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Số lượng<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Đơn vị<span class="text-danger">*</span></th>
+                            @* Mô tà hàng hóa *@
+                            <th colspan="6" class="title_column">Mô tả hàng hóa<br /></th>
+                            @* -------- *@
+                            <th rowspan="2" class="title_column" style="width: 100px">Yêu cầu ROHS<br /> </th>
+                            <th rowspan="2" class="title_column" style="width: 100px">Yêu cầu CO/CQ<br /> </th>
+                            <th rowspan="2" class="title_column" style="min-width: 200px">Yêu cầu MSDS<br /> </th>
+                            <th rowspan="2" class="title_column">Yêu cầu tiêu chuẩn an toàn<br /> </th>
+                            <th rowspan="2" class="title_column">File thiết kế<br /></th>
+                            <th rowspan="2" class="title_column">Nhà sản xuất</th>
+                            <th rowspan="2" class="title_column" style="min-width: 250px">Nhà cung cấp<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Lấy báo giá<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Lý do <br /></th>
+                            <th rowspan="2" class="title_column">Ngày muốn nhận hàng<span class="text-danger">*</span></th>
+                            <th rowspan="2" class="title_column">Kỳ hạn lựa chọn NCC<br /></th>
+                            <th rowspan="2" class="title_column" style="width: 50px">Gấp<br /></th>
+                            <th rowspan="2" class="title_column">Người yêu cầu<br /></th>
+                            <th rowspan="2" class="title_column_stt">#</th>
+                        </tr>
+                        <tr class="text-center align-middle">
+                            <th class="title_column">Hình dáng<br /></th>
+                            <th class="title_column">Chất liệu<br /></th>
+                            <th class="title_column">
+                                Thành phần, hàm lượng (đối với hóa chất) <br />
+                            </th>
+                            <th class="title_column">
+                                Kích thước(mm) (dài/rộng/cao)<br />
+                            </th>
+                            <th class="title_column">
+                                Dùng cho máy/thiết bị/vị trí nào<br />
+                            </th>
+                            <th class="title_column">
+                                Dùng đề làm gì(tính năng)<br />
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="quoteTableBody">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            <tr>
+                                <td class="text-center">@i</td>
+                                <td>
+                                    <select id="tenPhongBanTb_@i" name="tenPhongBanTb_@i" class="form-select tenPhongBanTb searchable-select">
+                                        <option value="" selected>Chọn phòng ban</option>
+                                        @foreach (var s in nhomViTri)
+                                        {
+                                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="chungLoai_@i" name="chungLoai_@i" class="form-select chungLoaiTb">
+                                        <option value="" selected>-- Chọn chủng loại --</option>
+                                        @foreach (var s in categoryS)
+                                        {
+                                            <option value="@s.Category_VN">@s.Category_VN</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="tenPhanLoaiTb_@i" name="tenPhanLoaiTb_@i" class="form-select tenPhanLoaiTb">
+                                        <option value="" selected>-- Chọn phân loại --</option>
+                                        @foreach (var s in phanLoais)
+                                        {
+                                            <option value="@s">@s</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td><input id="maThietBi_@i" name="maThietBi_@i" type="text" class="form-control form-control-sm" placeholder="Mã thiết bị" /></td>
+                                <td>
+                                    <select id="maHangNoiBo_@i" name="maHangNoiBo_@i" class="form-select maHangNoiBo searchable-select">
+                                        <option value="" selected>-- Chọn mã hàng nội bộ --</option>
+                                        @foreach (var s in mATERIAs)
+                                        {
+                                            <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td><input id="maHangNCC_@i" name="maHangNCC_@i" type="text" class="form-control form-control-sm" placeholder="Mã hàng NCC" /></td>
+                                <td><input id="tenHangVN_@i" name="tenHangVN_@i" type="text" class="form-control form-control-sm" placeholder="Tên hàng VN dùng để mở thủ tục hải quan" /></td>
+                                <td><input id="tenHangEN_@i" name="tenHangEN_@i" style="width: 270px" type="text" class="form-control form-control-sm" placeholder="Tên hàng EN" /></td>
+                                <td><input id="soLuong_@i" name="soLuong_@i" type="number" class="form-control form-control-sm text-end" placeholder="0" min="0" /></td>
+                                <td><input id="donVi_@i" name="donVi_@i" type="text" class="form-control form-control-sm" placeholder="Đơn vị" /></td>
+                                <td><input id="hinhDang_@i" name="hinhDang_@i" type="text" class="form-control form-control-sm" placeholder="Hình dáng" /></td>
+                                <td><input id="chatLieu_@i" name="chatLieu_@i" type="text" class="form-control form-control-sm" placeholder="Chất liệu" /></td>
+                                <td><input id="thanhPhan_@i" name="thanhPhan_@i" type="text" class="form-control form-control-sm" placeholder="Thành phần, hàm lượng" /></td>
+                                <td><input id="kichThuoc_@i" name="kichThuoc_@i" type="text" class="form-control form-control-sm" placeholder="Kích thước(mm)" /></td>
+                                <td><input id="viTriSuDung_@i" name="viTriSuDung_@i" type="text" class="form-control form-control-sm" placeholder=" Dùng cho máy/thiết bị/vị trí" /></td>
+                                <td><input id="tinhNang_@i" name="tinhNang_@i" type="text" class="form-control form-control-sm" placeholder="Dùng để làm gì" /></td>
+                                <td>
+                                    <select id="rohsTb_@i" name="rohsTb_@i" class="form-select rohsTb">
+                                        <option value="No Need" selected>No Need</option>
+                                        <option value="Need">Need</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="CoCqTb_@i" name="CoCqTb_@i" class="form-select CoCqTb">
+                                        <option value="" selected>-- Chọn CO/CQ --</option>
+                                        <option value="CO">CO</option>
+                                        <option value="CQ">CQ</option>
+                                        <option value="CO&CQ">CO&CQ</option>
+                                    </select>
+                                </td>
+                                <td><input id="msds_@i" name="msds_@i" type="text" class="form-control form-control-sm" placeholder="Yêu cầu MSDS kèm CAS" /></td>
+                                <td><input id="tieuChuanAnToan_@i" name="tieuChuanAnToan_@i" type="text" class="form-control form-control-sm" placeholder="Yêu cầu an toàn" /></td>
+                                <td><input id="fileThietKe_@i" name="fileThietKe_@i" type="text" class="form-control form-control-sm" placeholder="File thiết kế" /></td>
+                                <td><input id="nsx_@i" name="nsx_@i" type="text" class="form-control form-control-sm" placeholder="NSX" /></td>
+                                <td>
+                                    <select id="nhaCungCapTb_@i" name="nhaCungCapTb_@i" class="form-select nhaCungCapTb searchable-select">
+                                        <option value="" selected>Chọn NCC</option>
+                                        @foreach (var s in nccNews)
+                                        {
+                                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="laybaogiaTb_@i" name="laybaogiaTb_@i" class="form-select laybaogiaTb">
+                                        <option value="true" selected>O</option>
+                                        <option value="false">X</option>
+                                    </select>
+                                </td>
+                                <td><input id="lyDo_@i" name="lyDo_@i" type="text" class="form-control form-control-sm" placeholder="Lý do" /></td>
+                                <td><input id="ngayMuonNhan_@i" name="ngayMuonNhan_@i" type="date" class="form-control form-control-sm" /></td>
+                                <td><input id="kyHanChonNCC_@i" name="kyHanChonNCC_@i" type="date" class="form-control form-control-sm" /></td>
+                                <td>
+                                    <select id="gapTb_@i" name="gapTb_@i" class="form-select gapTb">
+                                        <option value="false" selected>X</option>
+                                        <option value="true">O</option>
+                                    </select>
+                                </td>
+                                <td><input id="nguoiYeuCauRow_@i" name="nguoiYeuCauRow_@i" type="text" class="form-control form-control-sm" placeholder="Người yêu cầu" /></td>
+                                <td class="text-center"><button type="button" class="btn btn-sm btn-link text-danger px-0 btn-remove-row" title="Xóa dòng"><i class="fas fa-times"></i></button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex align-items-center gap-2 mt-2">
+                <button type="button" id="btnAddRow" class="btn btn-sm btn-outline-secondary"><i class="fas fa-plus"></i> Thêm 1 dòng</button>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="small text-muted">Trường có dấu * là bắt buộc / Required fields are marked *</div>
+        </div>
+
+        <input type="file" id="excelUpload" accept=".xlsx,.xls" class="d-none" />
+    </form>
+</div>
+<!-- Custom dialog root -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">Thông báo</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="Đóng">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer">
+            <!-- Buttons injected by JS -->
+        </div>
+    </div>
+    <!-- Make overlay clickable to close for info dialogs -->
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
+<script>
+    window.indexQuoteData = {
+        user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser))
+    };
+</script>
+@section Scripts {
+    <script src="~/js/Quote.js"></script>
+}

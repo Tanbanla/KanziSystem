@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Phê duyệt đơn";
+}
+<style>
+    .form-control, .input-group-text, .custom-select, .custom-file-label {
+        border-color: #6e75c4;
+    }
+</style>
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <div class="form-group" style="margin : 10px 0 0 0">
+                    <div class="input-group mb-2">
+                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="Khối" />
+                        <datalist id="lst_khoi">
+                            <option>PROD</option>
+                            <option>GA</option>
+                            <option>IT</option>
+                            <option></option>
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 0">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="mnl" placeholder="Mã yêu cầu ">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                     
+                        <input type="text" class="form-control" id="kho" placeholder="Tình trạng đơn">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">                     
+                        <input type="text" class="form-control" id="cost" placeholder="Cost">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <input type="date" class="form-control" id="cost" placeholder="Ngày yêu cầu">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="cost" placeholder="Người tạo">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> Tìm kiếm</button>
+
+                <button type="button" class="btn btn-success ml-3"><i class="fa fa-file-excel"></i> download excel</button>
+                <span class="text-success ml-4">✓ : Đã duyệt </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : Đang đợi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : Từ chối</span>
+            </div>
+            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                <div class="table-responsive card">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th rowspan="2"></th>
+                                <th rowspan="2">Chi tiết</th>                                         
+                                <th rowspan="2">Tình trạng đơn</th>
+                                <th rowspan="2">Trạng thái đơn</th>
+                                <th rowspan="2">Mã yêu cầu</th>
+                                <th rowspan="2">Cost Center</th>
+                                <th rowspan="2">Ngày yêu cầu</th>
+                                <th rowspan="2">Thời hạn mong muốn</th>
+                                <th rowspan="2">Tổng tiền</th>
+                                <th rowspan="2">Người tạo</th>
+                                <th colspan="3">Phòng yêu cầu</th>
+                                <th colspan="2">Phòng tiếp nhận</th>
+                                <th rowspan="2">Người nhận</th>
+                            </tr>
+                            <tr>
+                                <th>Người dự thảo</th>
+                                <th>Người thẩm tra</th>
+                                <th>Người phê duyệt</th>
+                                <th>Đồng ý bởi</th>
+                                <th>Người xuất kho</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list_approve"></tbody>
+                    </table>
+                </div>           
+            </div>
+        </div>
+    </div>
+</div>
+<button id="modal-7" hidden></button>
+@await Html.PartialAsync("_modal", "Approval")
+<script src="~/scripts/request.js"></script>
+<script>
+    window.onload = function()
+    {
+        var us = document.getElementById("us").innerHTML;
+        _load_confirm(us);
+    }
+</script>

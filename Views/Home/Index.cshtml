@@ -1,8 +1,359 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Index";
 }
+<div class="row" >
+    <div class="col-3 card ml-3">
+        <figure class="highcharts-figure">
+            <div id="container"></div>
+            <p class="highcharts-description">
+                In Highcharts, pie charts can also feature an empty center, they are
+                often referred to as donut charts.
+            </p>
+        </figure>
+    </div>
+    <div class="col-4 card ml-5">
+        <figure class="highcharts-figure">
+            <div id="container1"></div>
+            <p class="highcharts-description">
+                This chart shows the use of a logarithmic y-axis. Logarithmic axes can
+                be useful when dealing with data with spikes or large value gaps,
+                as they allow variance in the smaller values to remain visible.
+            </p>
+        </figure>
+    </div>
+    <div class="col-4 card ml-5">
+        <figure class="highcharts-figure">
+            <div id="container2"></div>
+            <p class="highcharts-description">
+                This chart shows the use of a logarithmic y-axis. Logarithmic axes can
+                be useful when dealing with data with spikes or large value gaps,
+                as they allow variance in the smaller values to remain visible.
+            </p>
+        </figure>
+    </div>
+    <div class="col-lg-6 ml-3 card">
+        <figure class="highcharts-figure">
+            <div id="container3"></div>
+            <p class="highcharts-description">
+                This chart shows the use of a logarithmic y-axis. Logarithmic axes can
+                be useful when dealing with data with spikes or large value gaps,
+                as they allow variance in the smaller values to remain visible.
+            </p>
+        </figure>
+    </div>
+    <div class="col-lg-5 card ml-5">
+ 
+        <div class="card-header">
+            <h4>Số lượng linh kiện theo phòng</h4>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <div class="text-small float-right font-weight-bold text-muted">2,100</div>
+                <div class="font-weight-bold mb-1">RDPE</div>
+                <div class="progress" data-height="3">
+                    <div class="progress-bar" role="progressbar" data-width="80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+            <div class="mb-4">
+                <div class="text-small float-right font-weight-bold text-muted">1,880</div>
+                <div class="font-weight-bold mb-1">RDEE</div>
+                <div class="progress" data-height="3">
+                    <div class="progress-bar" role="progressbar" data-width="67%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="text-small float-right font-weight-bold text-muted">1,521</div>
+                <div class="font-weight-bold mb-1">RDIT</div>
+                <div class="progress" data-height="3">
+                    <div class="progress-bar" role="progressbar" data-width="58%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="text-small float-right font-weight-bold text-muted">884</div>
+                <div class="font-weight-bold mb-1">RDDE</div>
+                <div class="progress" data-height="3">
+                    <div class="progress-bar" role="progressbar" data-width="36%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="text-small float-right font-weight-bold text-muted">473</div>
+                <div class="font-weight-bold mb-1">GA-FAC</div>
+                <div class="progress" data-height="3">
+                    <div class="progress-bar" role="progressbar" data-width="28%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="text-small float-right font-weight-bold text-muted">418</div>
+                <div class="font-weight-bold mb-1">GA-GA</div>
+                <div class="progress" data-height="3">
+                    <div class="progress-bar" role="progressbar" data-width="20%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
+
+<script src="~/Highcharts-11.4.8/code/highcharts.js"></script>
+<script src="~/Highcharts-11.4.8/code/modules/exporting.js"></script>
+<script src="~/Highcharts-11.4.8/code/modules/export-data.js"></script>
+<script src="~/Highcharts-11.4.8/code/modules/accessibility.js"></script>
+<script type="text/javascript">
+    Highcharts.chart('container', {
+        chart: {
+            type: 'pie',
+            custom: {},
+            events: {
+                render() {
+                    const chart = this,
+                        series = chart.series[0];
+                    let customLabel = chart.options.chart.custom.label;
+
+                    if (!customLabel) {
+                        customLabel = chart.options.chart.custom.label =
+                            chart.renderer.label(
+                                'Total<br/>' +
+                                '<strong>2 877 820</strong>'
+                            )
+                                .css({
+                                    color: '#000',
+                                    textAnchor: 'middle'
+                                })
+                                .add();
+                    }
+
+                    const x = series.center[0] + chart.plotLeft,
+                        y = series.center[1] + chart.plotTop -
+                        (customLabel.attr('height') / 2);
+
+                    customLabel.attr({
+                        x,
+                        y
+                    });
+                    // Set font size based on chart diameter
+                    customLabel.css({
+                        fontSize: `${series.center[2] / 12}px`
+                    });
+                }
+            }
+        },
+        accessibility: {
+            point: {
+                valueSuffix: '%'
+            }
+        },
+        title: {
+            text: 'Tỉ lệ mã hàng các phòng ban'
+        },
+        subtitle: {
+            text: 'Source: <a href="https://www.ssb.no/transport-og-reiseliv/faktaside/bil-og-transport">SSB</a>'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            series: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                borderRadius: 8,
+                dataLabels: [{
+                    enabled: true,
+                    distance: 20,
+                    format: '{point.name}'
+                }, {
+                    enabled: true,
+                    distance: -15,
+                    format: '{point.percentage:.0f}%',
+                    style: {
+                        fontSize: '0.9em'
+                    }
+                }],
+                showInLegend: true
+            }
+        },
+        series: [{
+            name: 'Registrations',
+            colorByPoint: true,
+            innerSize: '75%',
+            data: [{
+                name: 'EV',
+                y: 23.9
+            }, {
+                name: 'Hybrids',
+                y: 12.6
+            }, {
+                name: 'Diesel',
+                y: 37.0
+            }, {
+                name: 'Petrol',
+                y: 26.4
+            }]
+        }]
+    });
+
+    Highcharts.chart('container1', {
+        title: {
+            text: 'Mã hàng trong kho theo các tháng'
+        },
+
+        accessibility: {
+            point: {
+                valueDescriptionFormat:
+                    '{xDescription}{separator}{value} million(s)'
+            }
+        },
+
+        xAxis: {
+            title: {
+                text: 'Year'
+            },
+            categories: [1995, 2000, 2005, 2010, 2015, 2020, 2023]
+        },
+
+        yAxis: {
+            type: 'logarithmic',
+            title: {
+                text: 'Number of Internet Users (in millions)'
+            }
+        },
+
+        tooltip: {
+            headerFormat: '<b>{series.name}</b><br />',
+            pointFormat: '{point.y} million(s)'
+        },
+
+        series: [{
+            name: 'Internet Users',
+            keys: ['y', 'color'],
+            data: [
+                [16, '#0000ff'],
+                [361, '#8d0073'],
+                [1018, '#ba0046'],
+                [2025, '#d60028'],
+                [3192, '#eb0014'],
+                [4673, '#fb0004'],
+                [5200, '#ff0000']
+            ],
+            color: {
+                linearGradient: {
+                    x1: 0,
+                    x2: 0,
+                    y1: 1,
+                    y2: 0
+                },
+                stops: [
+                    [0, '#0000ff'],
+                    [1, '#ff0000']
+                ]
+            }
+        }]
+    });
+
+    Highcharts.chart('container2', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Số tiền theo phòng ban',
+            align: 'left'
+        },
+        subtitle: {
+            text:
+                'Source: <a target="_blank" ' +
+                'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>',
+            align: 'left'
+        },
+        xAxis: {
+            categories: ['RDPE', 'RDEE', 'RDDE', 'RDIT', 'A', 'B'],
+            crosshair: true,
+            accessibility: {
+                description: 'Countries'
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '1000 metric tons (MT)'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' (1000 MT)'
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [
+            {
+                name: 'Tổng tiền $',
+                data: [97749, 120000, 129000, 64300, 54000, 34300]
+            },
+            {
+                name: 'Còn tồn $',
+                data: [45321, 140000, 10000, 140500, 19500, 113500]
+            },
+            {
+                name: 'Sử dụng $',
+                data: [41321, 110000, 8000, 70500, 8500, 63500]
+            }
+        ]
+    });
+
+    Highcharts.chart('container3', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Số lượng nhập xuất theo các tháng',
+            align: 'left'
+        },
+        subtitle: {
+            text:
+                'Source: <a target="_blank" ' +
+                'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>',
+            align: 'left'
+        },
+        xAxis: {
+            categories: ['RDPE', 'RDEE', 'RDDE', 'RDIT', 'A', 'B'],
+            crosshair: true,
+            accessibility: {
+                description: 'Countries'
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '1000 metric tons (MT)'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' (1000 MT)'
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [
+            {
+                name: 'Lượng nhập',
+                data: [97749, 120000, 129000, 64300, 54000, 34300]
+            },
+            {
+                name: 'Lượng xuất',
+                data: [45321, 140000, 10000, 140500, 19500, 113500]
+            }
+        ]
+    });
+</script>

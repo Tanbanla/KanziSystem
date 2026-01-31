@@ -1,4 +1,4 @@
-namespace AspnetCoreMvcFull.Models;
+namespace PRJ_WAREHOUSE_BIVN.Models;
 
 public class ErrorViewModel
 {

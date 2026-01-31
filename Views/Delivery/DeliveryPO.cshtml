@@ -1,0 +1,323 @@
+﻿@{
+    ViewData["Title"] = "Nhận hàng theo PO";
+}
+
+
+<script type="text/javascript" src="~/scripts/delivery.js"></script>
+
+<style>
+    .card .card-header .form-control {
+        height: 42px;
+        font-size: 13px;
+        border-radius: 2px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 0;
+        border-radius: 12px;
+        width: 400px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: 20px;
+        color: #444;
+        line-height: 1.6;
+    }
+
+    .modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid #eee;
+        text-align: right;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .btn-open {
+        padding: 10px 20px;
+        cursor: pointer;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .close-btn {
+        font-size: 24px;
+        cursor: pointer;
+        color: #888;
+    }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+    }
+
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+        .table-responsive table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            z-index: 10;
+            border-bottom: 2px solid #dee2e6;
+            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+        }
+
+        .table-responsive table tbody td {
+            position: relative;
+            z-index: 1;
+        }
+</style>
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="ion ion-android-contact"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="poNumber" placeholder="Nhập PO number">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="ion ion-code-working"></i></div>
+                            <div class="input-group-text">Khối : </div>
+                        </div>
+                        <select class="form-control" id="IdDept">
+                            <option value="GA">GA</option>
+                            <option value="IT">IT</option>
+                            <option value="PROD" selected>PROD</option>
+                            <option value="PUR">PUR</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="margin-left:20px;" onclick="SearchPoDelivery()"> <i class="ion ion-search" style="align-content:center; margin:5px;vertical-align:middle;"></i>Tìm kiếm</button>
+                <button id="openModal" class="btn btn-danger btn-open" style="margin-left:20px;"> <i class="ion ion-cash" style="align-content:center; margin:5px;vertical-align:middle;"></i>Đơn vị quy đổi</button>
+                <button class="btn btn-info" style="margin-left:20px;"> <i class="ion ion-ios-refresh" style="align-content:center; margin:5px;vertical-align:middle;"></i>Reset</button>
+
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="ion ion-home"></i></div>
+                            <div class="input-group-text">Kho nhận hàng : </div>
+                        </div>
+                        <select class="form-control" id="IdWarehouse">
+                            <option>--</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="ion ion-android-time"></i></div>
+                            <div class="input-group-text">Thời gian nhận hàng : </div>
+                        </div>
+                        <input type="date" class="form-control" id="idTimeDelivery" />
+                    </div>
+                </div>
+
+                <button class="btn btn-success" style="margin-left:20px;" onclick="ImportWarehouse()"> <i class="ion ion-pull-request" style="align-content:center; margin:5px;vertical-align:middle;"></i>Nhập kho</button>
+
+            </div>
+            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer" id="table-1_wrapper">
+                <div class="table-responsive">
+                    <div class="card-body" style="padding-top:0px">
+                        <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                            <table class="table table-bordered">
+                                <thead class="bg-primary">
+                                    <tr>
+                                        <th>Chọn</th>
+                                        <th>Mã hệ thống</th>
+                                        <th>Được tách từ</th>
+                                        <th>Bên nhập trước</th>
+                                        <th>Số PO</th>
+                                        <th>Mã Hàng</th>
+                                        <th>Mã sản phẩm</th>
+                                        <th>Tên hàng bằng tiếng Anh/Nhật</th>
+                                        <th>Tên hàng bằng tiếng Việt </th>
+                                        <th>Số lượng Order</th>
+                                        <th>Lượng thực tế về kho</th>
+                                        <th>Lượng hàng làm thủ tục hải quan</th>
+                                        <th>Ngày nhập kho</th>
+                                        <th>Người nhập kho</th>
+                                        <th>Đơn vị</th>
+                                        <th>Đơn giá ước tính</th>
+                                        <th>Điều kiện giao hàng</th>
+                                        <th>Địa điêm giao hàng</th>
+                                        <th>Phương thức vận chuyển</th>
+                                        <th>Số tiền</th>
+                                        <th>VAT(%)</th>
+                                        <th>Phòng ban yêu cầu</th>
+                                        <th>Tên phòng yêu cầu</th>
+                                        <th>Ngày giao hàng dự kiến</th>
+                                        <th>Nơi giao hàng dự kiến</th>
+                                        <th>Thời hạn thanh toán</th>
+                                        <th>Loại tiền</th>
+                                        <th>Tỷ giá</th>
+                                        <th>Đổi sang USD</th>
+                                        <th>Danh mục</th>
+                                        <th>Thuộc đơn yêu cầu</th>
+                                        <th>Tình trạng tờ khai</th>
+                                        <th>Nhà cung cấp</th>
+                                        <th>ID Lịch sử nhập</th>
+                                        <th>Lượng về kho đã nhập</th>
+                                        <th>Invoice</th>
+                                        <th>Tình trạng hải quan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="show_kho" style="color:black;"></tbody>
+                            </table>
+                            <ul class="pagination" id="pagination-controls"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById("CommonModal");
+        const btn = document.getElementById("openModal") || document.querySelector(".btn-open");
+        const closeBtn = modal ? modal.querySelector(".close-btn") : null;
+        const closeBottom = modal ? modal.querySelector(".close-modal") : null;
+
+        async function openModal() {
+        const url = '/Delivery/GetExchangeUnit';
+        const options =
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        };
+
+        try
+        {
+            const response = await fetch(url, options);
+            const result = await response.json();
+            console.log('openModal Data : ', result);
+            populateConversionTable(result);
+        }
+        catch(error)
+        {
+           console.error('Error : ', error);
+        }
+        if (modal) modal.style.display = "flex";
+        }
+
+        function closeModal() {
+            if (modal) modal.style.display = "none";
+        }
+
+        if (btn) btn.addEventListener('click', openModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (closeBottom) closeBottom.addEventListener('click', closeModal);
+
+        window.addEventListener('click', function (event) {
+            if (event.target === modal) closeModal();
+        });
+
+        if (typeof loadListWarehouse === 'function') loadListWarehouse();
+
+        function populateConversionTable(data) {
+            let body = document.getElementById('bodyModal');
+            if (!body) return;
+            let html = '<div class="table-responsive"><table class="table table-bordered"><thead style="background:blue;"><tr>' +
+                       '<th>Mã nguyên liệu</th><th>Đơn vị PO</th><th>Đơn vị quy đổi</th><th>Số lượng quy đổi</th><th>Đơn vị đang sử dụng cho phòng ban đặt hàng</th>' +
+                       '</tr></thead><tbody>';
+            if (!data || data.length === 0) {
+                html += '<tr><td colspan="5" class="text-center">Không có dữ liệu</td></tr>';
+            } else {
+                data.forEach(item => {
+                    html += '<tr>' +
+                            `<td>${escapeHtml(item.materialCode || '')}</td>` +
+                            `<td>${escapeHtml(item.poUnit || '')}</td>` +
+                            `<td>${escapeHtml(item.convertedUnit || '')}</td>` +
+                            `<td>${escapeHtml(item.conversionQty || '')}</td>` +
+                            `<td>${escapeHtml(item.deptUnit || '')}</td>` +
+                            '</tr>';
+                });
+            }
+            html += '</tbody></table></div>';
+            body.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function (m) {
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+            });
+        }
+    });
+</script>
+
+<div class="modal" id="CommonModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="headerModal" style="color:deepskyblue;">Danh sách đơn vị quy đổi</h3>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body" id="bodyModal">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary close-modal">Đóng</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,167 @@
+﻿@{
+    ViewData["Title"] = "Master luồng phê duyệt báo giá";
+    var listSteps = Model.baoGiaSteps;
+    var listSections = Model.NhomViTris;
+}
+<div class="container-fluid mt-3">
+    <h3>@ViewData["Title"]</h3>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Tìm kiếm & Thêm mới</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label">Tên phòng (section)</label>
+                            <select id="searchSection" class="form-control form-control-sm">
+                                <option value="">-- Tất cả --</option>
+                                @foreach (var item in listSections)
+                                {
+                                    <option value="@item.Mahangmuctheovitri">@item.Tenhangmuctheovitri</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Bước</label>
+                            <select id="searchStep" class="form-control form-control-sm">
+                                <option value="">-- Tất cả --</option>
+                                @foreach (var item in listSteps)
+                                {
+                                    <option value="@item.INT_StepNumber">@item.CHR_StepName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">ADID</label>
+                            <input id="searchAdid" class="form-control" placeholder="Nhập ADID..." />
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <div class="d-grid gap-2">
+                                <button id="btnSearch" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i> Tìm kiếm
+                                </button>
+                                <button id="btnAddNew" class="btn btn-success">
+                                    <i class="fas fa-plus-circle me-1"></i> Thêm mới
+                                </button>
+                                <button id="btnClear" class="btn btn-outline-secondary">
+                                    <i class="fas fa-broom me-1"></i> Xóa tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Add/Edit (inline thay vì modal) -->
+            <div class="card shadow-sm" id="formContainer" style="display: none;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0" id="formTitle">Thêm người phê duyệt</h5>
+                </div>
+                <div class="card-body">
+                    <form id="approverForm">
+                        <input type="hidden" id="approverId" value="0" />
+
+                        <div class="mb-3">
+                            <label class="form-label">ADID <span class="text-danger">*</span></label>
+                            <input id="modalAdid" class="form-control" required />
+                            <div id="modalLookupStatus" class="small text-muted mt-1"></div>
+                            <div class="invalid-feedback">Vui lòng nhập ADID</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên người <span class="text-danger">*</span></label>
+                            <input id="modalName" class="form-control" required />
+                            <div class="invalid-feedback">Vui lòng nhập tên</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Chức danh</label>
+                            <input id="modalPosition" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phòng <span class="text-danger">*</span></label>
+                            <select id="modalSectionCode" class="form-control form-control-sm" required>
+                                <option value="">-- Chọn phòng --</option>
+                                @foreach (var s in listSections)
+                                {
+                                    <option value="@s.Mahangmuctheovitri">@s.Tenhangmuctheovitri</option>
+                                }
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn phòng</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Bước <span class="text-danger">*</span></label>
+                            <select id="modalStep" class="form-control form-control-sm" required>
+                                <option value="">-- Chọn bước --</option>
+                                @foreach (var st in listSteps)
+                                {
+                                    <option value="@st.INT_StepNumber">@st.CHR_StepName</option>
+                                }
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn bước</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" id="saveApprover" class="btn btn-primary flex-grow-1" style="margin-right: 8px;">
+                                <i class="fas fa-save me-1"></i> Lưu
+                            </button>
+                            <button type="button" id="cancelForm" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>Luồng phê duyệt
+                    </h5>
+                    <span class="badge bg-light text-dark" id="totalCount">0 người phê duyệt</span>
+                </div>
+                <div class="card-body" style="overflow-y: auto; max-height: 600px;">
+                    <div id="flowContainer">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <p>Sử dụng bộ lọc bên trái để tìm kiếm và hiển thị luồng phê duyệt</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Expose server-side steps to external JS file (no external libraries)
+    window.approvalSteps = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listSteps));
+</script>
+<link rel="stylesheet" href="/css/sendApprover.css" />
+<!-- Custom dialog root -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">Thông báo</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="Đóng">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer">
+            <!-- Buttons injected by JS -->
+        </div>
+    </div>
+    <!-- Make overlay clickable to close for info dialogs -->
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
+@section Scripts {
+    <script src="/js/sendApprover.js"></script>
+}

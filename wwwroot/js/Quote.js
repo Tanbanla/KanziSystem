@@ -1,0 +1,1063 @@
+﻿// JS for Quote page: handle buttons, validations, row operations, autofill from material selection, and API calls
+(() => {
+    const api = {
+        insertListBaoGia: '/Quote/InsertDanhSachBaoGia',
+        getMaterials: (keyword) => `/Quote/GetMaterialsByNameOrCode?keyword=${encodeURIComponent(keyword || '')}`,
+        searchMaterials: '/Quote/GetSearchMaterial'
+        , getSuppliersByMaHang: '/Quote/GetNhaCungCapByMaHang'
+        , uploadQuoteExcel: '/Quote/UploadQuoteExcel'
+    };
+
+    const qs = (sel, root = document) => root.querySelector(sel);
+    const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function renumberRows() {
+        qsa('#quoteTableBody tr').forEach((tr, idx) => {
+            const noCell = tr.children[0];
+            if (noCell) noCell.textContent = String(idx + 1);
+        });
+    assignRowIds();
+    }
+
+    function updateSearchableSelectDisplay(sel) {
+        if (!sel) return;
+        try {
+            const wrapper = sel.nextElementSibling;
+            if (!wrapper || !wrapper.classList || !wrapper.classList.contains('ms-container')) return;
+            const btn = wrapper.querySelector('.ms-btn');
+            const values = wrapper.querySelector('.ms-values');
+            const placeholder = wrapper.querySelector('.ms-placeholder');
+            const opt = Array.from(sel.options).find(o => o.value === sel.value);
+            if (opt && opt.text) {
+                if (values) values.textContent = opt.text;
+                if (placeholder) placeholder.textContent = '';
+            } else {
+                if (values) values.textContent = '';
+                if (placeholder) placeholder.textContent = '-- Chọn --';
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+  function assignRowIds() {
+    // Ensure each row's fields have unique ids matching the pattern used in the server view
+    qsa('#quoteTableBody tr').forEach((tr, idx) => {
+      const i = idx + 1;
+      const setId = (sel, idBase) => {
+        const el = tr.querySelector(sel);
+        if (el) el.id = `${idBase}_${i}`;
+      };
+      setId('.tenPhongBanTb', 'tenPhongBanTb');
+      setId('.tenPhanLoaiTb', 'tenPhanLoaiTb');
+      setId('.maHangNoiBo', 'maHangNoiBo');
+      setId('input[placeholder*="Mã thiết bị"]', 'maThietBi');
+      setId('input[placeholder*="Mã hàng NCC"]', 'maHangNCC');
+      setId('input[placeholder*="Tên hàng VN"]', 'tenHangVN');
+      setId('input[placeholder*="Tên hàng"]', 'tenHangEN');
+      setId('input[type="number"]', 'soLuong');
+      setId('input[placeholder*="Đơn vị"]', 'donVi');
+      setId('.rohsTb', 'rohsTb');
+      setId('.nhaCungCapTb', 'nhaCungCapTb');
+      setId('.laybaogiaTb', 'laybaogiaTb');
+      setId('input[type="date"]', 'ngayMuonNhan');
+      setId('input[placeholder*="Người yêu cầu"]', 'nguoiYeuCauRow');
+    });
+  }
+
+    function addRow() {
+        const tbody = qs('#quoteTableBody');
+        const lastRow = tbody.lastElementChild;
+        const newRow = lastRow ? lastRow.cloneNode(true) : null;
+        if (!newRow) return;
+        // clear inputs/selects
+        qsa('input', newRow).forEach((inp) => {
+            inp.value = '';
+            inp.classList.remove('is-invalid');
+        });
+        qsa('select', newRow).forEach((sel) => {
+            if (sel.classList.contains('rohsTb')) {
+                sel.value = 'No Need';
+            } else if (sel.classList.contains('laybaogiaTb')) {
+                sel.value = 'true';
+            } else if (sel.classList.contains('gapTb')) {
+                sel.value = 'false';
+            } else {
+                sel.value = '';
+            }
+            sel.classList.remove('is-invalid');
+            // if previously enhanced as searchable, remove flag so we can re-initialize
+            try { $(sel).data('search-dropdown', false); } catch { }
+        });
+
+        // Remove any old searchable dropdown wrappers copied by clone
+        // and show original selects so they can be re-enhanced
+        qsa('.ms-container', newRow).forEach(w => w.remove());
+        qsa('select.searchable-select', newRow).forEach(s => { s.style.display = ''; });
+
+        tbody.appendChild(newRow);
+
+        // Re-initialize searchable dropdowns for the new row
+        try { buildSearchableDropdown($(newRow)); } catch { }
+
+        renumberRows();
+    }
+
+    function removeRow(btn) {
+        const tbody = qs('#quoteTableBody');
+        const rows = qsa('tr', tbody);
+        const tr = btn.closest('tr');
+        if (rows.length > 1 && tr) {
+            tr.remove();
+            renumberRows();
+        }
+    }
+
+    function resetForm() {
+        const form = qs('#quoteForm');
+        form.reset();
+        // keep 5 rows
+        const tbody = qs('#quoteTableBody');
+        if (tbody) {
+            // remove extra rows until only 5 remain
+            while (tbody.children.length > 5) {
+                tbody.removeChild(tbody.lastElementChild);
+            }
+
+            // Remove any searchable dropdown wrappers inside the table and reset selects
+            qsa('.ms-container', tbody).forEach((w) => w.remove());
+
+            qsa('select.searchable-select', tbody).forEach((sel) => {
+                // if wrapper was inserted as sibling after select, remove it
+                try {
+                    const next = sel.nextElementSibling;
+                    if (next && next.classList && next.classList.contains('ms-container')) next.remove();
+                } catch (e) { }
+
+                // show original select
+                sel.style.display = '';
+
+                // reset stored enhanced flag so buildSearchableDropdown will re-run
+                try { $(sel).data('search-dropdown', false); } catch (e) { }
+
+                // set default value based on classes
+                if (sel.classList.contains('rohsTb')) {
+                    sel.value = 'No Need';
+                } else if (sel.classList.contains('laybaogiaTb')) {
+                    sel.value = 'true';
+                } else if (sel.classList.contains('gapTb')) {
+                    sel.value = 'false';
+                } else {
+                    // reset to first option if exists
+                    if (sel.options && sel.options.length) sel.selectedIndex = 0;
+                }
+                sel.classList.remove('is-invalid');
+            });
+
+            // clear all inputs inside remaining rows
+            qsa('tr', tbody).forEach((tr) => {
+                qsa('input', tr).forEach((inp) => {
+                    if (inp.type === 'checkbox' || inp.type === 'radio') inp.checked = false;
+                    else inp.value = '';
+                    inp.classList.remove('is-invalid');
+                });
+            });
+        }
+
+        // clear validation styles for form-level controls
+        qsa('input, select', form).forEach((el) => el.classList.remove('is-invalid'));
+
+        // close any open dropdowns and reattach them to their wrappers
+        try {
+            $('.ms-dropdown.open').each(function () {
+                const $d = $(this);
+                $d.removeClass('open');
+                if ($d.data('detached')) {
+                    const $wrapper = $d.data('wrapper');
+                    if ($wrapper && $wrapper.length) $d.appendTo($wrapper).css({ position: '', top: '', left: '', width: '', zIndex: '' }).data('detached', false);
+                }
+            });
+        } catch (ex) { /* ignore if jquery missing */ }
+
+        // re-init searchable dropdowns for remaining selects (use document to ensure all get processed)
+        try { buildSearchableDropdown($(document)); }
+        catch (ex) { console.error('Error re-initializing searchable dropdowns:', ex); }
+
+        renumberRows();
+    }
+
+    // No header validation: the view does not include header fields
+
+    function validateRow(tr) {
+        // required fields per row: department, internal code, VN name, EN name, qty, unit, supplier, laybaogia, desired date
+        let ok = true;
+
+        // Helper function to get value and mark as invalid
+        const validateField = (selector, isSelect = false) => {
+            let element;
+
+            if (isSelect) {
+                element = tr.querySelector(selector);
+            } else {
+                // For inputs, we need to be more specific
+                const elements = qsa(selector, tr);
+                if (elements.length > 0) {
+                    element = elements[0];
+                }
+            }
+
+            if (!element) return false;
+
+            const val = element.value ? element.value.toString().trim() : '';
+            const isValid = val !== '';
+
+            if (!isValid) ok = false;
+
+            // Mark element as invalid
+            element.classList.toggle('is-invalid', !isValid);
+
+            // For searchable selects, also mark the custom dropdown UI
+            if (element.classList && element.classList.contains('searchable-select')) {
+                const $element = $(element);
+                const $wrapper = $element.siblings('.ms-container');
+                if ($wrapper.length) {
+                    $wrapper.find('.ms-btn').toggleClass('is-invalid', !isValid);
+                }
+            }
+
+            return isValid;
+        };
+
+        // Danh sách các trường bắt buộc (có dấu *)
+        const requiredFields = [
+            // Phòng ban (select)
+            { selector: '.tenPhongBanTb', isSelect: true, name: 'Phòng ban' },
+
+            // Mã hàng nội bộ (select)
+            { selector: '.maHangNoiBo', isSelect: true, name: 'Mã hàng nội bộ' },
+
+            // Tên hàng VN (input)
+            { selector: 'input[name^="tenHangVN_"]', isSelect: false, name: 'Tên hàng VN' },
+
+            // Tên hàng EN (input)
+            { selector: 'input[name^="tenHangEN_"]', isSelect: false, name: 'Tên hàng EN' },
+
+            // Số lượng (input number)
+            { selector: 'input[type="number"]', isSelect: false, name: 'Số lượng' },
+
+            // Đơn vị (input)
+            { selector: 'input[name^="donVi_"]', isSelect: false, name: 'Đơn vị' },
+
+            // Nhà cung cấp (select)
+            { selector: '.nhaCungCapTb', isSelect: true, name: 'Nhà cung cấp' },
+
+            // Lấy báo giá (select)
+            { selector: '.laybaogiaTb', isSelect: true, name: 'Lấy báo giá' }
+        ];
+
+        // Validate all required fields
+        requiredFields.forEach(field => {
+            validateField(field.selector, field.isSelect);
+        });
+
+        // Ngày muốn nhận hàng (required - có dấu *)
+        const dateInputs = qsa('input[type="date"]', tr);
+        if (dateInputs.length >= 1) {
+            const ngayMuonNhan = dateInputs[0]; // First date input is ngayMuonNhan
+            const ngayMuonNhanValid = ngayMuonNhan.value && ngayMuonNhan.value.toString().trim() !== '';
+
+            if (!ngayMuonNhanValid) ok = false;
+            ngayMuonNhan.classList.toggle('is-invalid', !ngayMuonNhanValid);
+        }
+
+        return ok;
+    }
+    // điền thông tin dữ liệu từ một hàng
+    function collectRow(tr) {
+        const getSel = (selector) => {
+            const el = tr.querySelector(selector);
+            return el ? (el.value || '').toString() : '';
+        };
+        // lay thong tin 
+        const src = window.indexQuoteData || {};
+
+        const getSelDisplay = (selector) => {
+            const el = tr.querySelector(selector);
+            if (!el) return '';
+            try {
+                const wrapper = el.nextElementSibling;
+                if (wrapper && wrapper.classList && wrapper.classList.contains('ms-container')) {
+                    const values = wrapper.querySelector('.ms-values');
+                    if (values && values.textContent && values.textContent.trim() !== '') return values.textContent.trim();
+                }
+            } catch (e) { /* ignore */ }
+            // fallback to option text
+            try {
+                const opt = el.options && el.options[el.selectedIndex];
+                if (opt && opt.text) return opt.text;
+            } catch (e) { }
+            return el.value ? el.value.toString() : '';
+        };
+
+        const getInputBy = (selectors) => {
+            for (const s of selectors) {
+                const el = tr.querySelector(s);
+                if (el) return (el.value || '').toString();
+            }
+            return '';
+        };
+
+        const dates = qsa('input[type="date"]', tr);
+
+        // Hàm lấy ngày giờ hiện tại theo múi giờ +7 (Việt Nam)
+        const getVietnamTime = () => {
+            const now = new Date();
+            // Lấy UTC time và cộng thêm 7 giờ
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            return new Date(utc + (7 * 60 * 60000)); // +7 giờ
+        };
+
+        // Hàm format date thành string theo định dạng yyyy-mm-dd
+        const formatDateString = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        // Hàm format datetime thành ISO string với múi giờ +7
+        const toVietnamISOString = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}+07:00`;
+        };
+
+        // Tạo mã đơn tự động dựa trên tên phòng và ngày hiện tại (theo giờ VN)
+        const generateMaDon = () => {
+            const maPhongBan = getSel('.tenPhongBanTb');
+            const nowVN = getVietnamTime();
+            const year = nowVN.getFullYear();
+            const month = String(nowVN.getMonth() + 1).padStart(2, '0');
+            const day = String(nowVN.getDate()).padStart(2, '0');
+            return `RQ_${maPhongBan}_${year}_${month}_${day}`;
+        };
+
+        // Lấy ngày tạo theo múi giờ +7
+        const createDateVN = getVietnamTime();
+
+        const obj = {
+            ID: 0,
+            CHR_MaDon: generateMaDon(),
+            CHR_MaThietBi: getInputBy(['input[id^="maThietBi_"]', 'input[placeholder*="Mã thiết bị"]']),
+            CHR_Phanloai: getSel('.tenPhanLoaiTb'),
+            CHR_MaHangNoiBo: getSel('.maHangNoiBo'),
+            CHR_MaHangNCC: getInputBy(['input[id^="maHangNCC_"]', 'input[placeholder*="Mã hàng NCC"]']),
+            NVCHR_NameVN: getInputBy(['input[id^="tenHangVN_"]', 'input[placeholder*="thủ tục hải quan"]']),
+            CHR_NameEN: getInputBy(['input[id^="tenHangEN_"]', 'input[placeholder*="tên hàng"]']),
+            INT_SoLuong: getInputBy(['input[type="number"]']),
+            NVCHR_DonVi: getInputBy(['input[id^="donVi_"]', 'input[placeholder*="Đơn vị"]']),
+            NVCHR_ChungLoai: getSel('.chungLoaiTb'),
+            NVCHR_HinhDang: getInputBy(['input[id^="hinhDang_"]', 'input[placeholder*="Hình dáng"]']),
+            NVCHR_ChatLieu: getInputBy(['input[id^="chatLieu_"]', 'input[placeholder*="Chất liệu"]']),
+            NVCHR_ThanhPhan: getInputBy(['input[id^="thanhPhan_"]', 'input[placeholder*="Thành phần"]']),
+            NVCHR_KichThuoc: getInputBy(['input[id^="kichThuoc_"]', 'input[placeholder*="Kích thước"]']),
+            NVCHR_DongMay: getInputBy(['input[id^="viTriSuDung_"]', 'input[placeholder*="Dùng cho máy"]']),
+            NVCHR_TinhNang: getInputBy(['input[id^="tinhNang_"]', 'input[placeholder*="Dùng để làm gì"]']),
+            NVCHR_Rohs: getSel('.rohsTb'),
+            NVCHR_COCQ: getSel('.CoCqTb'),
+            NVCHR_MSDS: getInputBy(['input[id^="msds_"]', 'input[placeholder*="MSDS"]']),
+            NVCHR_AnToan: getInputBy(['input[id^="tieuChuanAnToan_"]', 'input[placeholder*="an toàn"]']),
+            NVCHR_FileThietKe: getInputBy(['input[id^="fileThietKe_"]', 'input[placeholder*="File thiết kế"]']),
+            NVCHR_NhaSanXuat: getInputBy(['input[id^="nsx_"]', 'input[placeholder*="NSX"]']),
+            CHR_MaNCC: getSel('.nhaCungCapTb'),
+            NVCHR_TenNCC: getSelDisplay('.nhaCungCapTb'),
+            BIT_LayBaoGia: getSel('.laybaogiaTb') === 'true' || getSel('.laybaogiaTb') === '1' ? true : false,
+            NVCHR_LyDo: getInputBy(['input[id^="lyDo_"]', 'input[placeholder*="Lý do"]']),
+            DTM_NgayMuonNhan: (tr.querySelector('input[id^="ngayMuonNhan_"]') || dates[0])?.value || null,
+            DTM_KyHan: (tr.querySelector('input[id^="kyHanChonNCC_"]') || dates[1])?.value || null,
+            CHR_Gap: getSel('.gapTb'),
+            CHR_SectionCode: getSel('.tenPhongBanTb'),
+            CHR_SectionName: getSelDisplay('.tenPhongBanTb'),
+            CHR_CreateBy: getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']) === '' ? src.user : getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']),
+            // Sử dụng ISO string với múi giờ +7
+            DTM_CreateDate: toVietnamISOString(createDateVN),
+            ID_StepBaoGia: 1,
+            ID_Status: 'CREATE',
+            INT_SoLanUpdate: 0,
+            DTM_UpdateLater: null,
+            DTM_Deadline: null,
+            BIT_IsTemplate: false
+        };
+
+        // Normalize numeric and date fields so JSON deserializer can parse them
+        if (obj.INT_SoLuong === '') {
+            obj.INT_SoLuong = null;
+        } else if (obj.INT_SoLuong != null) {
+            // parse as number (allow decimals)
+            const n = parseFloat(obj.INT_SoLuong);
+            obj.INT_SoLuong = Number.isFinite(n) ? n : null;
+        }
+
+        // Xử lý ngày tháng từ input date (giả định người dùng chọn theo giờ VN)
+        if (obj.DTM_NgayMuonNhan === '' || obj.DTM_NgayMuonNhan == null) {
+            obj.DTM_NgayMuonNhan = null;
+        } else {
+            try {
+                // Tạo ngày từ input và thiết lập theo giờ VN
+                const dateParts = obj.DTM_NgayMuonNhan.split('-');
+                if (dateParts.length === 3) {
+                    const year = parseInt(dateParts[0]);
+                    const month = parseInt(dateParts[1]) - 1;
+                    const day = parseInt(dateParts[2]);
+                    const dateVN = new Date(Date.UTC(year, month, day, 7, 0, 0)); // 7:00 AM giờ VN
+                    obj.DTM_NgayMuonNhan = dateVN.toISOString();
+                }
+            } catch (e) {
+                console.error('Error parsing DTM_NgayMuonNhan:', e);
+                obj.DTM_NgayMuonNhan = null;
+            }
+        }
+
+        if (obj.DTM_KyHan === '' || obj.DTM_KyHan == null) {
+            obj.DTM_KyHan = null;
+        } else {
+            try {
+                const dateParts = obj.DTM_KyHan.split('-');
+                if (dateParts.length === 3) {
+                    const year = parseInt(dateParts[0]);
+                    const month = parseInt(dateParts[1]) - 1;
+                    const day = parseInt(dateParts[2]);
+                    const dateVN = new Date(Date.UTC(year, month, day, 7, 0, 0));
+                    obj.DTM_KyHan = dateVN.toISOString();
+                }
+            } catch (e) {
+                console.error('Error parsing DTM_KyHan:', e);
+                obj.DTM_KyHan = null;
+            }
+        }
+
+        return obj;
+    }
+    // check ly do tu choi
+    function CheckLyDoTuChoi(tr) {
+        const getVal = (selector) => {
+            const el = tr.querySelector(selector);
+            return el ? (el.value || '').toString() : '';
+        };
+
+        const getEl = (selector) => tr.querySelector(selector);
+
+        // bắt buộc nhập lý do khi từ chối lấy báo giá
+        const layBaoGiaVal = getVal('.laybaogiaTb');
+        const lyDoEl = getEl('.lydoTb') || getEl('input[placeholder*="Lý do"]') || getEl('input[id^="lyDo_"]');
+
+        if (layBaoGiaVal === 'false') {
+            const lyDoVal = lyDoEl ? (lyDoEl.value || '').toString() : '';
+            if (!lyDoVal) {
+                if (lyDoEl) lyDoEl.classList.add('is-invalid');
+                return false;
+            } else {
+                if (lyDoEl) lyDoEl.classList.remove('is-invalid');
+            }
+        } else {
+            if (lyDoEl) lyDoEl.classList.remove('is-invalid');
+        }
+        return true;
+    }
+    async function submitForm() {
+        const rows = qsa('#quoteTableBody tr');
+        let rowsValid = true;
+        let rowsCheckReason = true;
+        const payload = [];
+        rows.forEach((tr) => {
+            if (!validateRow(tr)) rowsValid = false;
+            if (!CheckLyDoTuChoi(tr)) rowsCheckReason = false;
+            payload.push(collectRow(tr));
+        });
+        if (!rowsCheckReason) {
+            showDialog({
+                title: 'Lỗi', message: 'Vui lòng nhập lý do từ chối lấy báo giá', type: 'error'
+            });
+            return;
+        }
+        if (!rowsValid) {
+            showDialog({
+                title: 'Lỗi', message: 'Vui lòng điền đầy đủ các trường bắt buộc(*)', type: 'error'
+            });
+            return;
+        }
+        try {
+            const res = await fetch(api.insertListBaoGia, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            showDialog({ title: 'Thành công', message: 'Gửi yêu cầu báo giá thành công', type: 'success' });
+            resetForm();
+        } catch (err) {
+            showDialog({
+                title: 'Lỗi', message: err.message, type: 'error'
+            });
+        }
+    }
+
+    async function autofillFromMaterialSelect(selectEl) {
+        const tr = selectEl.closest('tr');
+        const code = selectEl.value;
+        if (!code) return;
+        try {
+            const res = await fetch(api.getMaterials(code));
+            if (!res.ok) throw new Error(await res.text());
+            const materials = await res.json();
+            const material = Array.isArray(materials) ? materials.find((m) => m.material_Code === code) : null;
+            if (!material) return;
+            // Fill EN name
+            const enInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('tên hàng en'));
+            if (enInput && material.material_Name_EN) enInput.value = material.material_Name_EN;
+            // Fill unit
+            const unitInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('đơn vị'));
+            if (unitInput && (material.unit || material.material_Unit)) unitInput.value = material.unit || material.material_Unit;
+            // Fill tên mở thủ tục hải quan
+            const vnInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('thủ tục hải quan'));
+            const tenMoThuTucValue = material.tenMoThuTuc || material.TenMoThuTuc || (typeof material.GetTenMoThuTuc === 'function' ? material.GetTenMoThuTuc() : null);
+            if (vnInput && tenMoThuTucValue) vnInput.value = tenMoThuTucValue;
+            // Fill hinh dang
+            const shapeInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('hình dáng'));
+            if (shapeInput && material.shape) shapeInput.value = material.shape;
+            // Fill chất liệu
+            const materialInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('chất liệu'));
+            if (materialInput && material.material) materialInput.value = material.material;
+            // Fill thành phần
+            const componentInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('thành phần'));
+            if (componentInput && material.composition) componentInput.value = material.composition;
+            // Fill kích thước
+            const sizeInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('kích thước'));
+            if (sizeInput && material.dimension) sizeInput.value = material.dimension;
+            // Fill dùng cho máy 
+            const usageInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('dùng cho máy/thiết bị/vị trí'));
+            if (usageInput && material.usedFor) usageInput.value = material.usedFor;
+            // Fill để làm gì
+            const functionInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('dùng để làm gì'));
+            if (functionInput && material.purpose) functionInput.value = material.purpose;
+            // Chủng loại hàng
+            const categorySelect = tr.querySelector('.chungLoaiTb');
+            if (categorySelect && material.category_VN) categorySelect.value = material.category_VN;
+            // Optionally set PHAN LOẠI 
+            const categoryInput = tr.querySelector('.tenPhanLoaiTb');
+            const loaiHangValue = material.loaiHang || material.LoaiHang || (typeof material.GetLoaiHang === 'function' ? material.GetLoaiHang() : null);
+            if (categoryInput && loaiHangValue) categoryInput.value = loaiHangValue;
+
+            // Fetch suppliers for this material and if >1 create rows per supplier
+            try {
+                const supRes = await fetch(api.getSuppliersByMaHang, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(code)
+                });
+                if (!supRes.ok) throw new Error(await supRes.text());
+                const suppliers = await supRes.json();
+                if (Array.isArray(suppliers) && suppliers.length > 0) {
+                    // Helper to extract supplier code
+                    const getSupCode = (s) => s?.chR_MaNCC ||  (typeof s === 'string' ? s : undefined) || '';
+                    // If only one supplier, set current row's supplier
+                    if (suppliers.length === 1) {
+                        const supCode = getSupCode(suppliers[0]);
+                        const supSel = tr.querySelector('.nhaCungCapTb');
+                        if (supSel) {
+                            supSel.value = supCode;
+                            updateSearchableSelectDisplay(supSel);
+                        }
+                    } else if (suppliers.length > 1) {
+                        // Collect current row values to replicate
+                        const values = {};
+                        // copy inputs
+                        qsa('input', tr).forEach((inp) => values[inp.name || inp.id || inp.placeholder || inp.type] = inp.value);
+                        // copy selects
+                        qsa('select', tr).forEach((sel) => values[sel.className || sel.name || sel.id] = sel.value);
+
+                        // For first supplier, set current row
+                        const firstCode = getSupCode(suppliers[0]);
+                        const supSel0 = tr.querySelector('.nhaCungCapTb');
+                        if (supSel0) {
+                            supSel0.value = firstCode;
+                            // update visible searchable UI for this existing row
+                            updateSearchableSelectDisplay(supSel0);
+                        }
+
+                        // Insert additional rows for remaining suppliers
+                        let insertAfter = tr;
+                        for (let i = 1; i < suppliers.length; i++) {
+                            const s = suppliers[i];
+                            const supCode = getSupCode(s);
+                            // clone the row
+                            const newRow = tr.cloneNode(true);
+                            // clean any ms-container wrappers inside clone
+                            qsa('.ms-container', newRow).forEach(w => w.remove());
+                            // restore selects display
+                            qsa('select.searchable-select', newRow).forEach(sv => sv.style.display = '');
+
+                            // set values on inputs/selects in newRow
+                            qsa('input', newRow).forEach((inp) => {
+                                const key = inp.name || inp.id || inp.placeholder || inp.type;
+                                if (values.hasOwnProperty(key)) inp.value = values[key];
+                                inp.classList.remove('is-invalid');
+                            });
+                            qsa('select', newRow).forEach((sel) => {
+                                const key = sel.className || sel.name || sel.id;
+                                if (values.hasOwnProperty(key)) sel.value = values[key];
+                                sel.classList.remove('is-invalid');
+                            });
+                            // Set supplier value for this clone
+                            const supSel = newRow.querySelector('.nhaCungCapTb');
+                            if (supSel) supSel.value = supCode || '';
+
+                            // insert after last inserted
+                            insertAfter.parentNode.insertBefore(newRow, insertAfter.nextSibling);
+                            insertAfter = newRow;
+                        }
+
+                        // re-init searchable dropdowns and ids
+                        try { buildSearchableDropdown($(document)); } catch (ex) { }
+                        renumberRows();
+                    }
+                }
+            } catch (err) {
+                console.warn('Không thể lấy NCC cho mã hàng:', err);
+            }
+        } catch (err) {
+            console.warn('Không thể tự động điền thông tin vật tư:', err);
+            showDialog({
+                title: 'Lỗi', message: err.message, type: 'error'
+            });
+        }
+    }
+
+    function wireEvents() {
+        const container = qs('#quote-request');
+        if (!container) return;
+        qs('#btnAddRow')?.addEventListener('click', addRow);
+        qs('#btnReset')?.addEventListener('click', resetForm);
+        qs('#btnCreate')?.addEventListener('click', submitForm);
+        qsa('.btn-remove-row', container).forEach((btn) => {
+            btn.addEventListener('click', (e) => removeRow(e.currentTarget));
+        });
+        // Delegate for future rows
+        qs('#quoteTableBody')?.addEventListener('click', (e) => {
+            const t = e.target;
+            if (t.closest('.btn-remove-row')) {
+                removeRow(t.closest('.btn-remove-row'));
+            }
+        });
+
+        // Upload Excel
+        qs('#btnUploadExcel')?.addEventListener('click', () => qs('#excelUpload')?.click());
+        qs('#excelUpload')?.addEventListener('change', async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+                const res = await fetch(api.uploadQuoteExcel, { method: 'POST', body: fd });
+                if (!res.ok) throw new Error(await res.text());
+                const items = await res.json();
+                if (!Array.isArray(items)) throw new Error('Dữ liệu không hợp lệ');
+                populateTableFromItems(items);
+                showDialog({ title: 'Thành công', message: `Đã tải ${items.length} dòng từ Excel`, type: 'success' });
+            } catch (err) {
+                showDialog({ title: 'Lỗi', message: err.message || 'Không thể đọc file', type: 'error' });
+            } finally {
+                e.target.value = '';
+            }
+        });
+        // Download Excel stub
+        qs('#btnDownloadExcel')?.addEventListener('click', () => {
+            try {
+                const url = '/template/TemPlateQuote.xlsx';
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Mau_Quote.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (err) {
+                console.error('Error downloading template', err);
+            }
+
+        });
+
+        // Autofill when selecting internal material code
+        qs('#quoteTableBody')?.addEventListener('change', (e) => {
+            const t = e.target;
+            if (t.classList && t.classList.contains('maHangNoiBo')) {
+                autofillFromMaterialSelect(t);
+            }
+        });
+
+        // When category changes, reload material list from server and update material selects
+        qs('#quoteTableBody')?.addEventListener('change', async (e) => {
+            const t = e.target;
+            if (t.classList && t.classList.contains('chungLoaiTb')) {
+                const nhomHang = (t.value || '').toString();
+                try {
+                    // call POST /Quote/GetSearchMaterial with JSON body
+                    const body = { MaHang: '', Name: '', NhomHang: nhomHang, PageIndex: 0, PageSize: 0 };
+                    const res = await fetch(api.searchMaterials, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!res.ok) throw new Error(await res.text());
+                    const materials = await res.json();
+                    // Update all maHangNoiBo selects in the table
+                    const selects = qsa('.maHangNoiBo');
+                    selects.forEach((sel) => {
+                        // remove any custom wrapper
+                        try {
+                            const $sel = $(sel);
+                            const next = sel.nextElementSibling;
+                            if (next && next.classList && next.classList.contains('ms-container')) {
+                                next.remove();
+                            }
+                            // preserve current selection if any, then rebuild options
+                            const prevValue = sel.value;
+                            sel.style.display = '';
+                            sel.innerHTML = '';
+                            const optDefault = document.createElement('option');
+                            optDefault.value = '';
+                            optDefault.textContent = '-- Chọn mã hàng nội bộ --';
+                            sel.appendChild(optDefault);
+                            if (Array.isArray(materials)) {
+                                materials.forEach((m) => {
+                                    const code = m.material_Code || '';
+                                    const name = m.material_Name_VN || '';
+                                    if (!code) return;
+                                    const o = document.createElement('option');
+                                    o.value = code;
+                                    o.textContent = `${code} - ${name}`;
+                                    sel.appendChild(o);
+                                });
+                            }
+                            // restore previous selection if it still exists; otherwise keep default
+                            try {
+                                if (prevValue && Array.from(sel.options).some(o => o.value === prevValue)) {
+                                    sel.value = prevValue;
+                                } else {
+                                    sel.selectedIndex = 0;
+                                }
+                            } catch (ex) {
+                                sel.selectedIndex = 0;
+                            }
+                            // mark for rebuild
+                            try { $sel.data('search-dropdown', false); } catch { }
+                        } catch (err) {
+                            console.warn('Error updating material select:', err);
+                        }
+                    });
+                    // reinitialize searchable dropdowns
+                    try { buildSearchableDropdown($(document)); } catch (ex) { }
+                } catch (err) {
+                    console.warn('Không thể tải danh sách vật tư:', err);
+                }
+            }
+        });
+    }
+
+    // Tìm kiếm 
+    function buildSearchableDropdown($container) {
+        $container.find('select.searchable-select').each(function () {
+            const $select = $(this);
+            if ($select.data('search-dropdown') === true) return;
+
+            // Cache options
+            const options = $select.find('option').map(function () {
+                return { value: this.value, text: $(this).text(), selected: this.selected };
+            }).get();
+
+            // Build UI
+            const $wrapper = $('<div class="ms-container"></div>');
+            const $btn = $('<div class="ms-btn"><span class="ms-values"></span><span class="ms-placeholder"></span><span class="ms-caret">▾</span></div>');
+            const $dropdown = $('<div class="ms-dropdown"></div>');
+            const $search = $('<div class="ms-search"><input type="text" placeholder="Tìm..." /></div>');
+            const $list = $('<div class="ms-list"></div>');
+
+            // Populate list
+            function renderList(query) {
+                const q = (query || '').toLowerCase();
+                $list.empty();
+                let hasItems = false;
+                options.forEach(function (opt) {
+                    if (!q || opt.text.toLowerCase().includes(q)) {
+                        const $item = $('<div class="ms-item"></div>').attr('data-value', opt.value).text(opt.text);
+                        if ($select.val() === opt.value || opt.selected) {
+                            $item.addClass('selected');
+                        }
+                        $list.append($item);
+                        hasItems = true;
+                    }
+                });
+                if (!hasItems) {
+                    $list.append('<div class="ms-empty">Không có kết quả</div>');
+                }
+            }
+
+            function updateButtonText() {
+                const val = $select.val();
+                const found = options.find(o => o.value === val);
+                if (found && found.text) {
+                    $btn.find('.ms-values').text(found.text);
+                    $btn.find('.ms-placeholder').text('');
+                } else {
+                    $btn.find('.ms-values').text('');
+                    $btn.find('.ms-placeholder').text('-- Chọn --');
+                }
+            }
+
+            updateButtonText();
+            renderList('');
+
+            $dropdown.append($search).append($list);
+            $select.after($wrapper);
+            $wrapper.append($btn).append($dropdown);
+            $select.hide();
+            // store reference to wrapper for reattaching
+            $dropdown.data('wrapper', $wrapper);
+
+            // Events
+            $btn.on('click', function (e) {
+                e.stopPropagation();
+                // close other dropdowns and reattach them
+                $('.ms-dropdown').not($dropdown).each(function () {
+                    const $other = $(this);
+                    if ($other.hasClass('open')) {
+                        $other.removeClass('open');
+                        if ($other.data('detached')) {
+                            $other.appendTo($other.data('wrapper')).css({ position: '', top: '', left: '', width: '', zIndex: '' }).data('detached', false);
+                        }
+                    }
+                });
+
+                if ($dropdown.hasClass('open')) {
+                    // close
+                    $dropdown.removeClass('open');
+                    if ($dropdown.data('detached')) {
+                        $dropdown.appendTo($dropdown.data('wrapper')).css({ position: '', top: '', left: '', width: '', zIndex: '' }).data('detached', false);
+                    }
+                } else {
+                    // open: detach and append to body so it's not clipped by table container
+                    const btnRect = $btn[0].getBoundingClientRect();
+                    const top = btnRect.top + window.scrollY + $btn.outerHeight();
+                    const left = btnRect.left + window.scrollX;
+                    $dropdown.appendTo('body').css({ position: 'absolute', top: top + 'px', left: left + 'px', width: $btn.outerWidth() + 'px', zIndex: 3000 }).addClass('open').data('detached', true);
+                    $search.find('input').val('');
+                    renderList('');
+                    $search.find('input').focus();
+                }
+            });
+
+            // clicking outside should close and reattach any open dropdowns
+            $(document).on('click.quoteDropdown', function () {
+                $('.ms-dropdown').each(function () {
+                    const $d = $(this);
+                    if ($d.hasClass('open')) {
+                        $d.removeClass('open');
+                        if ($d.data('detached')) {
+                            $d.appendTo($d.data('wrapper')).css({ position: '', top: '', left: '', width: '', zIndex: '' }).data('detached', false);
+                        }
+                    }
+                });
+            });
+
+            $dropdown.on('click', function (e) { e.stopPropagation(); });
+
+            $list.on('click', '.ms-item', function () {
+                const value = $(this).attr('data-value');
+                // set value via jQuery
+                $select.val(value);
+                // trigger both jQuery and native change so listeners attached via addEventListener are invoked
+                try { $select.trigger('change'); } catch(e) { }
+                try {
+                    const sel = $select[0];
+                    if (sel && typeof sel.dispatchEvent === 'function') {
+                        sel.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                } catch (ex) { }
+                updateButtonText();
+                $dropdown.removeClass('open');
+                if ($dropdown.data('detached')) {
+                    $dropdown.appendTo($dropdown.data('wrapper')).css({ position: '', top: '', left: '', width: '', zIndex: '' }).data('detached', false);
+                }
+            });
+
+            $search.find('input').on('input', function () {
+                renderList($(this).val());
+            });
+
+            // Mark enhanced
+            $select.data('search-dropdown', true);
+        });
+    }
+
+    // Initialize for existing selects
+    buildSearchableDropdown($(document));
+
+    function setSelectValueByText(select, textOrValue) {
+        if (!select) return;
+        const val = textOrValue ?? '';
+        // try match by value first
+        let opt = Array.from(select.options).find(o => o.value === val);
+        if (!opt) {
+            // try match by text prefix before ' - '
+            opt = Array.from(select.options).find(o => (o.text || '').toLowerCase() === (val || '').toLowerCase() || (o.text || '').toLowerCase().startsWith((val || '').toLowerCase()));
+        }
+        if (opt) {
+            select.value = opt.value;
+            updateSearchableSelectDisplay(select);
+        }
+    }
+
+    function populateRowFromDto(tr, dto) {
+        // Phòng ban
+        setSelectValueByText(tr.querySelector('.tenPhongBanTb'), dto.chR_SectionCode || dto.chR_SectionName);
+        // Chủng loại
+        setSelectValueByText(tr.querySelector('.chungLoaiTb'), dto.nvchR_ChungLoai);
+        // Phân loại
+        setSelectValueByText(tr.querySelector('.tenPhanLoaiTb'), dto.chR_Phanloai);
+        // Inputs
+        const setInput = (sel, val) => { const el = tr.querySelector(sel); if (el) el.value = val ?? ''; };
+        setInput('input[placeholder*="Mã thiết bị"]', dto.chR_MaThietBi);
+        // Mã hàng nội bộ select
+        setSelectValueByText(tr.querySelector('.maHangNoiBo'), dto.chR_MaHangNoiBo);
+        setInput('input[placeholder*="Mã hàng NCC"]', dto.chR_MaHangNCC);
+        setInput('input[placeholder*="thủ tục hải quan"]', dto.nvchR_NameVN);
+        setInput('input[placeholder*="tên hàng en"]', dto.chR_NameEN);
+        setInput('input[type="number"]', dto.inT_SoLuong);
+        setInput('input[placeholder*="Đơn vị"]', dto.nvchR_DonVi);
+        setInput('input[placeholder*="Hình dáng"]', dto.nvchR_HinhDang);
+        setInput('input[placeholder*="Chất liệu"]', dto.nvchR_ChatLieu);
+        setInput('input[placeholder*="Thành phần"]', dto.nvchR_ThanhPhan);
+        setInput('input[placeholder*="Kích thước"]', dto.nvchR_KichThuoc);
+        setInput('input[placeholder*="Dùng cho máy"]', dto.nvchR_DongMay);
+        setInput('input[placeholder*="Dùng để làm gì"]', dto.nvchR_TinhNang);
+        setSelectValueByText(tr.querySelector('.rohsTb'), dto.nvchR_Rohs);
+        setSelectValueByText(tr.querySelector('.CoCqTb'), dto.nvchR_COCQ);
+        setInput('input[placeholder*="MSDS"]', dto.nvchR_MSDS);
+        setInput('input[placeholder*="an toàn"]', dto.nvchR_AnToan);
+        setInput('input[placeholder*="File thiết kế"]', dto.nvchR_FileThietKe);
+        setInput('input[placeholder*="NSX"]', dto.nvchR_NhaSanXuat);
+        // NCC
+        setSelectValueByText(tr.querySelector('.nhaCungCapTb'), dto.chR_MaNCC || dto.nvchR_TenNCC);
+        setSelectValueByText(tr.querySelector('.laybaogiaTb'), (dto.biT_LayBaoGia === true ? 'true' : dto.biT_LayBaoGia === false ? 'false' : ''));
+        setInput('input[placeholder*="Lý do"]', dto.nvchR_LyDo);
+        const dateVN = (d) => {
+            try { if (!d) return ''; const dt = new Date(d); return dt.toISOString().slice(0,10); } catch { return ''; }
+        };
+        const ngayMuon = tr.querySelector('input[id^="ngayMuonNhan_"]'); if (ngayMuon) ngayMuon.value = dateVN(dto.dtM_NgayMuonNhan);
+        const kyHan = tr.querySelector('input[id^="kyHanChonNCC_"]'); if (kyHan) kyHan.value = dateVN(dto.dtM_KyHan);
+        setSelectValueByText(tr.querySelector('.gapTb'), dto.chR_Gap);
+        const nguoi = tr.querySelector('input[placeholder*="Người yêu cầu"]'); if (nguoi) nguoi.value = dto.chR_CreateBy || (window.indexQuoteData && window.indexQuoteData.user) || '';
+    }
+
+    async function populateTableFromItems(items) {
+        const tbody = qs('#quoteTableBody');
+        if (!tbody) return;
+        // capture a base row before clearing, so we keep structure
+        const existing = qs('#quoteTableBody tr');
+        // clear existing rows
+        tbody.innerHTML = '';
+        const template = document.createElement('tr');
+        const baseRow = existing ? existing.cloneNode(true) : null;
+        for (let i = 0; i < items.length; i++) {
+            const dto = items[i] || {};
+            const row = baseRow ? baseRow.cloneNode(true) : template.cloneNode(true);
+            if (!baseRow) {
+                continue;
+            }
+            // clean wrappers
+            qsa('.ms-container', row).forEach(w => w.remove());
+            qsa('select.searchable-select', row).forEach(s => { s.style.display = ''; $(s).data('search-dropdown', false); });
+            // reset fields
+            qsa('input', row).forEach(inp => { inp.value = ''; inp.classList.remove('is-invalid'); });
+            qsa('select', row).forEach(sel => { sel.value = ''; sel.classList.remove('is-invalid'); });
+
+            // populate
+            populateRowFromDto(row, dto);
+            tbody.appendChild(row);
+        }
+        try { buildSearchableDropdown($(tbody)); } catch {}
+        renumberRows();
+    }
+    // show message dialog
+    function getDialogEls() {
+        const overlay = document.getElementById('cmDialogOverlay');
+        const titleEl = document.getElementById('cmDialogTitle');
+        const bodyEl = document.getElementById('cmDialogBody');
+        const footerEl = document.getElementById('cmDialogFooter');
+        return { overlay, titleEl, bodyEl, footerEl };
+    }
+    function showDialog({ title = 'Thông báo', message = '', type = 'info', buttons } = {}) {
+        const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+        if (!overlay) return alert(message);
+
+        // Ensure overlay is attached to body so fixed positioning is not clipped by parent containers
+        try {
+            if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
+        } catch (e) { /* ignore */ }
+
+        titleEl.textContent = title;
+        bodyEl.innerHTML = `<div class="d-flex align-items-start gap-2">
+            <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : type === 'error' ? 'fa-exclamation-circle text-danger' : 'fa-info-circle text-primary'}"></i>
+            <div>${message}</div>
+        </div>`;
+        footerEl.innerHTML = '';
+        const okBtn = document.createElement('button');
+        okBtn.className = 'cm-btn cm-btn-primary';
+        okBtn.textContent = (buttons && buttons.okText) || 'Đồng ý';
+        okBtn.addEventListener('click', () => hideDialog());
+        footerEl.appendChild(okBtn);
+
+        overlay.setAttribute('aria-hidden', 'false');
+        overlay.style.display = 'flex';
+        attachDialogCloseHandlers();
+    }
+    function hideDialog() {
+        const { overlay } = getDialogEls();
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    function attachDialogCloseHandlers() {
+        const { overlay, footerEl } = getDialogEls();
+        const closeBtn = overlay.querySelector('[data-cm-action="close"]');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                // If a confirm dialog is waiting, resolve it as false
+                if (typeof window.__cmPendingResolve === 'function') {
+                    const r = window.__cmPendingResolve;
+                    window.__cmPendingResolve = null;
+                    r(false);
+                }
+                hideDialog();
+            };
+        }
+        const overlayClick = overlay.querySelector('[data-cm-action="overlay"]');
+        if (overlayClick) overlayClick.onclick = () => {
+            if (typeof window.__cmPendingResolve === 'function') {
+                const r = window.__cmPendingResolve;
+                window.__cmPendingResolve = null;
+                r(false);
+            }
+            hideDialog();
+        };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        wireEvents();
+        renumberRows();
+    });
+})();

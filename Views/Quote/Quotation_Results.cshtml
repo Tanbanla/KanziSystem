@@ -1,0 +1,338 @@
+﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@{
+    ViewData["Title"] = "Quotation Results";
+    string[] allStatuses = new[] { "Chưa chọn NCC", "Đang chờ" };
+    List<MATERIALDTO> listMaterials = Model.DanhSachVatTu;
+    List<ACC_NHOMVITRIDTO> listPhong = Model.DanhSachNhomViTri;
+    List<IM_NCC_NEWDTO> listNCC = Model.DanhSachNhaCungCap;
+    List<BaoGia_StatusDTO> listStatus = Model.DanhSachStatus;
+    List<string> madons = Model.DanhSachMaDon;
+    List<dynamic> data = Model.DanhSachBaoGiaGomNhom;
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/Quotation_Results.css" />
+</head>
+<div class="quotation-page page-bg py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Kết quả báo giá</h4>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success" id="btnConfirmTop">Xác nhận lựa chọn</button>
+        </div>
+    </div>
+    <!-- Filters -->
+    <div class="card mb-4 shadow-sm filter-card">
+        <div class="card-body py-2">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Mã đơn</label>
+                    <select id="filterRq" name="filterRq" class="form-select filterRq searchable-select">
+                        <option value="">Chọn mã đơn</option>
+                        @foreach (var s in madons)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Mã hàng</label>
+                    <select id="filterInternal" name="filterInternal" class="form-select filterInternal searchable-select">
+                        <option value="" selected>Chọn mã hàng</option>
+                        @foreach (var s in listMaterials)
+                        {
+                            <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Phòng ban</label>
+                    <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
+                        <option value="" selected>Chọn phòng ban</option>
+                        @foreach (var s in listPhong)
+                        {
+                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <label class="form-label small mb-1">Trạng thái</label>
+                    <div class="status-filter d-flex flex-wrap gap-1" id="statusFilter">
+                        <label class="status-option active" data-value="">Tất cả</label>
+                        <label class="status-option" data-value="Chưa chọn NCC">Chưa chọn NCC</label>
+                        <label class="status-option" data-value="Đang chờ">Đang chờ</label>
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-2">
+                    <label class="form-label small mb-1">&nbsp;</label>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-primary" id="btnSearch"><i class="fas fa-search me-1"></i> Tìm kiếm</button>
+                        <div style="min-width: 6px"></div>
+                        <button class="btn btn-sm btn-outline-secondary" id="btnReset"><i class="fas fa-redo me-1"></i> Làm mới</button>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive shadow-sm rounded overflow-hidden">
+        <table class="table table-hover table-bordered quot-table mb-0 align-middle text-center">
+            <thead>
+                <tr class="main-head">
+                    <th>Chi tiết</th>
+                    <th>Mã đơn</th>
+                    <th>Mã hàng nội bộ</th>
+                    <th>Chủng loại</th>
+                    <th>Tên hành hải quan</th>
+                    <th>Số lượng</th>
+                    <th>Đơn vị</th>
+                    <th>Ngày muốn nhận</th>
+                    <th>Trạng thái</th>
+                    <th>Chọn</th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+                @foreach (var i in data)
+                {
+                    <tr class="item-row" data-item-index="@i.INT_SoLuong" data-status="@i.Status">
+                        <td class="detail-cell text-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary toggle-sup" data-target="#sup-rows-@i.CHR_MaDon-@i.CHR_MaHangNoiBo" data-madon="@i.CHR_MaDon" data-mahang="@i.CHR_MaHangNoiBo" data-ngay="@i.DTM_NgayMuonNhan" aria-expanded="false" title="Xem chi tiết">
+                                <span class="ms-1">Chi tiết</span>
+                            </button>
+                        </td>
+                        <td class="text-start"><span class="ms-1 fw-semibold">@i.CHR_MaDon</span></td>
+                        <td>@i.CHR_MaHangNoiBo</td>
+                        <td class="text-start">@i.CHR_Phanloai</td>
+                        <td class="text-end">@i.NVCHR_NameVN</td>
+                        <td>@i.INT_SoLuong</td>
+                        <td>@i.NVCHR_DonVi</td>
+                        <td>@i.DTM_NgayMuonNhan.ToString("dd/MM/yyyy")</td>
+                        <td><span class="badge status-badge @GetStatusClass(@i.Status)">@i.Status</span></td>
+                        <td class="text-center"><input type="checkbox" class="form-check-input item-select" value="@i" /></td>
+                    </tr>
+                    <tr id="sup-rows-@i.CHR_MaDon-@i.CHR_MaHangNoiBo" class="supplier-group d-none">
+                        <td colspan="13" class="p-0">
+                            <table class="table table-sm mb-0 supplier-table">
+                                <thead>
+                                    <tr class="supplier-head text-center">
+                                        <th>Nội dung</th>
+                                        <th>Nhà cung cấp</th>
+                                        <th>Mã HS</th>
+                                        <th>Tên hàng (HQ)</th>
+                                        <th>Đơn giá USD</th>
+                                        <th>Đơn giá VND</th>
+                                        <th>MOQ</th>
+                                        <th>Lead time</th>
+                                        <th>Ngày giao</th>
+                                        <th>CO/CQ</th>
+                                        <th>Chọn</th>
+                                        <th>Lý do</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supplier-body-@i.CHR_MaDon-@i.CHR_MaHangNoiBo"></tbody>
+                            </table>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-secondary" id="btnCancel">Hủy</button>
+        <div style="min-width:12px"></div>
+        <button type="button" class="btn btn-success" id="btnConfirmBottom">Xác nhận lựa chọn</button>
+        <div style="min-width:12px"></div>
+        <button type="button" class="btn btn-warning" id="btnExport">Xuất danh sách</button>
+    </div>
+</div>
+<!-- Edit modal for uncompleted orders -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" style="min-width: 50%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết yêu cầu báo giá của phòng ban</h5>
+                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
+                    <i class="fas fa-times fa-sm"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 500px; overflow-y: auto">
+                <form id="editHistoryForm" class="row g-3">
+                    <input type="hidden" id="editRequestId" />
+                    <div class="col-12">
+                        <div class="d-flex gap-3">
+                            <div>
+                                <label class="form-label">Mã đơn (Nhóm)</label>
+                                <input type="text" class="form-control" id="editMaDon" readonly />
+                            </div>
+                            <div style="margin-left: 8px;">
+                                <label class="form-label">Người yêu cầu</label>
+                                <input type="text" class="form-control" id="editRequester" readonly />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mã phòng ban</label>
+                        <input type="text" class="form-control" id="editSectionName" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Phân loại</label>
+                        <input type="text" class="form-control" id="editPhanLoai" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label w-100">Chủng loại</label>
+                        <input type="text" class="form-control" id="editChungLoai" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mã hàng nội bộ</label>
+                        <input type="text" class="form-control" id="editMaHangNoiBo" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mã thiết bị</label>
+                        <input type="text" class="form-control" id="editMaThietBi" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mã hàng NCC</label>
+                        <input type="text" class="form-control" id="editMaHangNCC" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tên hàng VN</label>
+                        <input type="text" class="form-control" id="editTenHangVN" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tên hàng EN</label>
+                        <input type="text" class="form-control" id="editTenHangEN" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Số lượng</label>
+                        <input type="number" class="form-control" id="editSoLuong" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Đơn vị</label>
+                        <input type="text" class="form-control" id="editDonVi" readonly />
+                    </div>
+                    <!-- Description fields -->
+                    <div class="col-md-4">
+                        <label class="form-label">Hình dáng</label>
+                        <input type="text" class="form-control" id="editHinhDang" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Chất liệu</label>
+                        <input type="text" class="form-control" id="editChatLieu" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Thành phần</label>
+                        <input type="text" class="form-control" id="editThanhPhan" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Kích thước</label>
+                        <input type="text" class="form-control" id="editKichThuoc" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Dùng cho máy</label>
+                        <input type="text" class="form-control" id="editDongMay" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tính năng</label>
+                        <input type="text" class="form-control" id="editTinhNang" readonly />
+                    </div>
+                    <!-- Regulatory and files -->
+                    <div class="col-md-4">
+                        <label class="form-label w-100">ROHS</label>
+                        <input type="text" class="form-control" id="editRohs" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label w-100">CO/CQ</label>
+                        <input type="text" class="form-control" id="editCOCQ" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">MSDS</label>
+                        <input type="text" class="form-control" id="editMSDS" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tiêu chuẩn an toàn</label>
+                        <input type="text" class="form-control" id="editAnToan" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">File thiết kế</label>
+                        <input type="text" class="form-control" id="editFileThietKe" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nhà sản xuất</label>
+                        <input type="text" class="form-control" id="editNhaSanXuat" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nhà cung cấp</label>
+                        <input type="text" class="form-control" id="editNhaCungCap" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label w-100">Lấy báo giá</label>
+                        <select class="form-select" id="editLayBaoGia" style="min-height: 40px;">
+                            <option value="true">O</option>
+                            <option value="false">X</option>
+                        </select>
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label">Lý do</label>
+                        <input type="text" class="form-control lydoTb" id="editLyDo" placeholder="Lý do" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Ngày muốn nhận</label>
+                        <input type="date" class="form-control" id="editNgayMuonNhan" readonly/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Kỳ hạn lựa chọn NCC</label>
+                        <input type="date" class="form-control" id="editKyHan" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label w-100">Gấp</label>
+                        <select class="form-select" id="editGap" style="min-height: 40px">
+                            <option value="false">X</option>
+                            <option value="true">O</option>
+                        </select>
+                    </div>
+                    @* Cac thuoc tinh khac *@
+                    <div class="col-md-6" hidden>
+                        <input type="date" class="form-control" id="editDaycreate" hidden />
+                        <input type="text" class="form-control" id="editStatus" hidden />
+                        <input type="text" class="form-control" id="editStep" hidden />
+                        <input type="hidden" id="editSectionCode" />
+                        <input type="hidden" id="editTenNCC" />
+                        <input type="number" class="form-control" id="editSoLanUpdate" hidden />
+                        <input type="date" class="form-control" id="editUpdateLater" hidden />
+                        <input type="date" class="form-control" id="editDeadline" hidden />
+                        <input type="hidden" id="editIsTemplate" />
+                        <input type="hidden" id="editSectionCode" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Dialogs reused from Quote -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">Thông báo</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="Đóng">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer"></div>
+    </div>
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
+@functions {
+    private string GetStatusClass(string status) => status switch
+    {
+        "Chưa chọn NCC" => "bg-success",
+        "Đang chờ" => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+}
+
+@section Scripts {
+    <script src="~/js/Quotation_Results.js"></script>
+}
+

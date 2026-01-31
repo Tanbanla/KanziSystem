@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Xác nhận tên và mã hàng nội bộ";
+    var role = ViewBag.Role as string ?? "UserPUR"; // UserShip | UserAcc | UserPUR
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/ConfirmName.css" />
+    
+</head>
+
+<div class="container-fluid" id="confirm-name" data-role="@role">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold text-primary">Xác nhận tên và mã hàng nội bộ</h4>
+            <small class="text-muted">Confirm customs name and internal code</small>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h6 class="mb-0 text-secondary" style="color:black !important">Tìm kiếm</h6>
+        </div>
+        <div class="card-body">
+            <form id="searchForm" class="row g-2">
+                <div class="col-sm-12 col-md-4">
+                    <label class="form-label mb-1">Tên hàng</label>
+                    <input type="text" class="form-control" id="tenHang" placeholder="Nhập tên hàng" />
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="form-label mb-1">Số đơn</label>
+                    <input type="text" class="form-control" id="soDon" placeholder="Nhập số đơn" />
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="form-label mb-1">Trạng thái xác nhận</label>
+                    <select id="trangThai" class="form-select">
+                        <option value="">Tất cả</option>
+                        <option value="Draft">Mới</option>
+                        <option value="Confirming">Đang xác nhận</option>
+                        <option value="Confirmed">Đã xác nhận</option>
+                        <option value="Rejected">Từ chối</option>
+                    </select>
+                </div>
+                <div class="col-sm-12 col-md-2 d-flex align-items-end gap-2">
+                    <button type="button" class="btn btn-primary w-100" id="btnSearch"><i class="fas fa-search"></i> Tìm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-secondary" style="color:black !important">Danh sách</h6>
+            <div class="small text-muted">Vai trò: <b>@role</b></div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 70vh;">
+                <table class="table table-sm table-hover table-bordered align-middle table-fixed mb-0" id="confirmTable">
+                    <thead class="table-light">
+                        <tr class="text-center align-middle">
+                            <th style="width:60px">#</th>
+                            <th style="min-width:120px">Số đơn</th>
+                            <th style="min-width:240px">Tên hàng HQ</th>
+                            <th style="min-width:180px">Mã hàng nội bộ</th>
+                            <th style="min-width:120px">Trạng thái</th>
+                            <th style="min-width:160px">Tạo lúc</th>
+                            <th style="min-width:220px">Người/Thời gian xử lý</th>
+                            <th style="min-width:220px">Ghi chú</th>
+                            <th style="min-width:220px">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="confirmTableBody">
+                        <tr><td colspan="9" class="text-center text-muted">Không có dữ liệu</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="small text-muted" id="resultCount"></div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" id="prevPage">Prev</button>
+                <span class="align-self-center small" id="pageInfo">1/1</span>
+                <button class="btn btn-sm btn-outline-secondary" id="nextPage">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/utils/date.js"></script>
+    <script src="~/js/ConfirmName.js"></script>
+}

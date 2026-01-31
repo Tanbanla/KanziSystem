@@ -1,0 +1,95 @@
+﻿namespace PRJ_WAREHOUSE_BIVN.Models
+
+{
+    public class MST_INVENTORY
+    {
+        public int? Id_Kho { get;set; }
+        public string? MaNguyenLieu { get;set; }
+        public string? Hientai { get;set; }
+        public string? ToiThieu { get;set; }
+        public string? ToiDa { get;set; }
+        public string? Group_Code { get;set; }
+        public string? Kho { get;set; }
+        public string? nvchr_note { get;set; }
+        public string? NVCHR_COST { get;set; }
+        public string? DTM_UPDATE { get;set; }
+        public string? IS_SAVE_WH { get;set; }
+
+
+        public static List<MST_INVENTORY> inventory_process(MST_INVENTORY para)
+        {
+            SQL_Connect_DB20 _context = new SQL_Connect_DB20();
+            para.MaNguyenLieu = para.MaNguyenLieu is null ? "NULL" : para.MaNguyenLieu!.ToString().Length > 0 ? $"N'{para.MaNguyenLieu}'" : "NULL";
+            para.Kho = para.Kho is null ? "NULL" : para.Kho!.ToString().Length > 0 ? $"N'{para.Kho}'" : "NULL";
+            para.NVCHR_COST = para.NVCHR_COST is null ? "NULL" : para.NVCHR_COST!.ToString().Length > 0 ? $"N'{para.NVCHR_COST}'" : "NULL";
+            para.IS_SAVE_WH = para.IS_SAVE_WH is null ? "NULL" : para.IS_SAVE_WH!.ToString().Length > 0 ? $"N'{para.IS_SAVE_WH}'" : "NULL";
+
+            var _cmd = _context.GET_DATA_FROM_SQL($"EXEC [dbo].[PE_KHO_GetData] {para.MaNguyenLieu}, {para.Kho}, {para.NVCHR_COST}, {para.IS_SAVE_WH} ");
+            List<MST_INVENTORY> _inv = new List<MST_INVENTORY>();
+            for (int i = 0; i < _cmd.Rows.Count; i++)
+            {
+                _inv.Add(new MST_INVENTORY
+                {
+                    Id_Kho = int.Parse(_cmd.Rows[i]["Id_Kho"].ToString()!),
+                    MaNguyenLieu = _cmd.Rows[i]["MaNguyenLieu"].ToString(),
+                    Hientai = _cmd.Rows[i]["Hientai"].ToString(),
+                    ToiThieu = _cmd.Rows[i]["ToiThieu"].ToString(),
+                    ToiDa = _cmd.Rows[i]["ToiDa"].ToString(),
+                    Group_Code = _cmd.Rows[i]["Group_Code"].ToString(),
+                    Kho = _cmd.Rows[i]["Kho"].ToString(),
+                    nvchr_note = _cmd.Rows[i]["nvchr_note"].ToString(),
+                    NVCHR_COST = _cmd.Rows[i]["NVCHR_COST"].ToString(),
+                    DTM_UPDATE = _cmd.Rows[i]["DTM_UPDATE"].ToString(),
+                    IS_SAVE_WH = _cmd.Rows[i]["IS_SAVE_WH"].ToString()
+                });
+            }
+            return _inv;
+        }
+        public static List<string> _getname_material(string group_code)
+        {
+            SQL_Connect_DB20 _context = new SQL_Connect_DB20();
+            var _cmd = _context.GET_DATA_FROM_SQL("SELECT distinct(MaNguyenLieu), Material_Name_VN FROM [COST_MANAGEMENT].[dbo].[KHO] as a left join MATERIAL as b on a.MaNguyenLieu = b.Material_Code where a.Group_Code = '" + group_code + "' and a.Hientai > 0");
+            List<string> material = new List<string>();
+            
+            for (int i = 0; i < _cmd.Rows.Count; i++)
+            {
+                material.Add(_cmd.Rows[i]["MaNguyenLieu"].ToString() + ":" + _cmd.Rows[i]["Material_Name_VN"].ToString());
+            }
+            return material;
+        }
+    }
+    public class User_Info
+    {
+        public int Id_User_Dept { get; set; }
+        public string? CHR_USERID { get; set; }
+        public string? Cost_Center { get; set; }
+        public int Id_Dept { get; set; }
+        public string? Name { get; set; }
+        public string? Name_Jp { get; set; }
+        public string? Cost_Center_Group { get; set; }
+        public string? Active { get; set; }
+        public string? AcceptRequest { get; set; }
+        public static List<User_Info> _info_adid(string us)
+        {
+            SQL_Connect_DB20 _db20 = new SQL_Connect_DB20();
+            var _cmd = _db20.GET_DATA_FROM_SQL("select * from USER_DEPT as a left join [DEPARTMENT] as b on a.Cost_Center = b.Cost_Center where a.CHR_USERID = '" + us + "'");
+            List<User_Info> us_f = new List<User_Info>();
+            for (int i = 0; i < _cmd.Rows.Count; i++)
+            {
+                us_f.Add(new User_Info
+                {
+                    Id_User_Dept = int.Parse(_cmd.Rows[i]["Id_User_Dept"].ToString()!),
+                    CHR_USERID = _cmd.Rows[i]["CHR_USERID"].ToString(),
+                    Id_Dept = int.Parse(_cmd.Rows[i]["Id_Dept"].ToString()!),
+                    Cost_Center = _cmd.Rows[i]["Cost_Center"].ToString(),
+                    Name = _cmd.Rows[i]["Name"].ToString(),
+                    Name_Jp = _cmd.Rows[i]["Name_Jp"].ToString(),
+                    Cost_Center_Group = _cmd.Rows[i]["Cost_Center_Group"].ToString(),
+                    Active = _cmd.Rows[i]["Active"].ToString(),
+                    AcceptRequest = _cmd.Rows[i]["AcceptRequest"].ToString(),
+                });
+            }
+            return us_f;
+        }
+    }
+}

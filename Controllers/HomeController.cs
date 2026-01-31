@@ -1,10 +1,10 @@
-ï»¿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using AspnetCoreMvcFull.Models;
+using PRJ_WAREHOUSE_BIVN.Models;
 
-namespace AspnetCoreMvcFull.Controllers;
+namespace PRJ_WAREHOUSE_BIVN.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseAuthController
 {
     private readonly ILogger<HomeController> _logger;
 
@@ -15,6 +15,9 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        // Có th? s? d?ng các method t? BaseAuthController
+        ViewBag.CurrentUser = GetCurrentUserFullName();
+        ViewBag.CurrentSection = GetCurrentUserSection();
         return View();
     }
 

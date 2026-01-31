@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "User";
+}
+<style>
+    .card .card-header { 
+        min-height : 0px;
+    }
+
+    .card .card-header .form-control{
+        height:42px;
+        font-size:13px;
+        border-radius : 0px;
+    }
+</style>
+    <div class="row">
+        <div class="col-9">
+        <div class="card card-primary">
+            <div class="card-header">
+                <div class="form-group" style="margin-bottom:0px ; margin-top:10px">
+                    <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text"><i class="ion ion-ios-barcode"></i></div>
+                    </div>
+                        <input type="text" class="form-control" id="us_code" placeholder="Mã nhân viên">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text"><i class="ion ion-ios-paper"></i></div>
+                    </div>
+                        <input type="text" class="form-control" id="us_dept" placeholder="Phòng ban">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="ion ion-key"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="us_adid" placeholder="ADID">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" style="border-radius :0px; height:42px; margin-left:20px" onclick="_load_user()"><i class="ion ion-ios-search-strong"></i></button>
+            </div>
+            <div class="card-body">               
+                <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary text-center">
+                            <tr>
+                                <th class="text-center">Id</th>
+                                <th>Mã nhân viên</th>
+                                <th>Tên nhân viên</th>
+                                <th>ADID</th>
+                                <th>Phòng ban</th>
+                                <th>Mail</th>   
+                                <th>Quyền</th>
+                                <th>Last Login</th>
+                                <th>Sửa</th>
+                                <th>Dừng </th>
+                            </tr>
+                        </thead>
+                        <tbody id="show_user" class="text-center"></tbody>
+                    </table>
+                  @*   <div id="pagination-controls" class="d-flex justify-content-center mt-3 gap-1"></div> *@
+                    <ul class="pagination" id="pagination-controls"></ul>                    
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="col-3 col-sm-3 ">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h4><i class="fa fa-pencil-ruler"></i> Đăng ký</h4>                       
+            </div>
+            <div class="card-body">              
+                <div class="row">
+                    <div class="form-group col-6">
+                        <label for="employee_code">Mã nhân viên</label>
+                        <input id="employee_code" type="text" class="form-control" name="frist_name" autofocus>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="employee_name">Họ tên</label>
+                        <input id="employee_name" type="text" class="form-control" name="last_name">
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="employee_adid">ADID</label>
+                        <input id="employee_adid" type="text" class="form-control" name="frist_name" autofocus>
+                    </div>
+                    <div class="form-group col-8">
+                        <label for="employee_mail">Mail</label>
+                        <input id="employee_mail" type="text" class="form-control" name="last_name">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-6">
+                        <label>Phòng ban</label>
+                        <select class="form-control selectric" id="employee_dept">
+                            <option>R&D - PE</option>
+                            <option>R&D - EE</option>
+                            <option>R&D - DE</option>
+                            <option>R&D - IT</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Quyền truy cập</label>
+                        <select class="form-control selectric" id="employee_role">
+                            <option value="5">Admin</option>
+                            <option value="4">Middle Management</option>
+                            <option value="3">Junior Management</option>
+                            <option value="2">Warehouse Management</option>
+                            <option value="1">User</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary btn-lg btn-block" onclick="_insert_user()">
+                        Register
+                    </button>
+                </div>               
+            </div>
+        </div>
+    </div>
+</div>
+<button class="btn btn-primary" id="modal-5" hidden >Login</button>
+@await Html.PartialAsync("_modal", "QA")
+<script src="~/scripts/user_process.js"></script>
+<script>
+    window.onload = function(){
+        _load_user();
+    }
+</script>

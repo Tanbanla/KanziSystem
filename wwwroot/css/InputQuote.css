@@ -1,0 +1,452 @@
+﻿/* InputQuote.css - Styling cho màn hình nhập thông tin báo giá */
+
+.input-quote-page {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.page-bg {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Header area with subtle background */
+.input-quote-header {
+    background-color: #eef6ff; /* subtle blue tint */
+    border: 1px solid #d6eafc;
+    align-items: center;
+}
+
+.input-quote-header h4 {
+    color: #0b4ea6;
+    font-weight: 600;
+    margin: 0;
+}
+
+.input-quote-header .btn {
+    box-shadow: none;
+}
+/* Button css*/
+.btn-custom {
+    background-color: #23923C;
+    color: white;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 250;
+    /* Bỏ viền */
+    border: none;
+    /* Thêm hiệu ứng chuyển đổi mượt cho nhiều thuộc tính */
+    transition: all 0.3s ease;
+    /* Hiệu ứng bóng mặc định (nhẹ) */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+    .btn-custom:hover {
+        background-color: #22B14C;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transform: translateY(-1px);
+    }
+/* Card styling */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+.card-header h6 {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.card-header i {
+    font-size: 1.1em;
+}
+
+/* Form controls - Bootstrap 4 compatible */
+.form-control-note {
+    min-width : 100%;
+    padding: 0.25rem 0.5rem;
+    min-block-size: 250px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-control-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Table styling */
+.quote-items-table {
+    font-size: 0.9rem;
+}
+
+.quote-items-table th {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    padding: 12px 8px;
+}
+
+.quote-items-table td {
+    padding: 8px;
+    vertical-align: middle;
+}
+
+.quote-item-row {
+    background-color: #fff;
+}
+
+.quote-item-row:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.quote-item-row:hover {
+    background-color: #e3f2fd;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn i {
+    margin-right: 0.25rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border: none;
+    color: #212529;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+    border: none;
+}
+
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Input number styling */
+input[type="number"] {
+    text-align: right;
+}
+
+/* Delete button styling */
+.delete-row {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.delete-row:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Price input highlights */
+.price-usd:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.price-vnd {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Modal styling */
+.modal-header {
+    border-radius: 10px 10px 0 0;
+}
+
+.modal-content {
+    border-radius: 10px;
+    border: none;
+    overflow: hidden;
+}
+
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Product side panel styles */
+.product-panel {
+    position: fixed;
+    right: -50%; /* hidden by default, match width */
+    top: 0;
+    height: 100%;
+    width: 50%;
+    background: #ffffff;
+    box-shadow: -8px 0 20px rgba(0,0,0,0.12);
+    z-index: 2000;
+    transition: right 0.28s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-panel[aria-hidden="false"] {
+    right: 0;
+}
+
+.product-panel .panel-header {
+    background: #f7f9fb;
+}
+
+.product-panel .panel-body {
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+/* Prevent body scroll when panel open */
+.no-scroll-panel {
+    overflow: hidden;
+}
+
+.product-select {
+    /* Ensure checkbox aligns naturally within table cell */
+    transform: none; /* remove scaling to avoid visual offset on scroll */
+    position: static;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* overlay behind panel */
+.product-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1990;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+}
+
+.product-panel[aria-hidden="false"] + .product-panel-overlay,
+.product-panel-overlay[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Product selection table */
+/* Keep a single definition for product-select to avoid conflicting styles */
+.product-select {
+    transform: none;
+    margin: 0;
+}
+
+/* Status badges */
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+    border-radius: 15px;
+}
+
+/* Total summary styling */
+#totalUSD, #totalVND {
+    font-size: 1.1em;
+    color: #28a745;
+}
+
+#itemCount {
+    font-size: 1.1em;
+    color: #007bff;
+}
+
+/* Required field indicator */
+.text-danger {
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .input-quote-page {
+        padding: 10px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .quote-items-table {
+        font-size: 0.8rem;
+    }
+    
+    .quote-items-table th,
+    .quote-items-table td {
+        padding: 6px 4px;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .form-control-sm {
+        font-size: 0.8rem;
+    }
+}
+
+/* Animation for adding new rows */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quote-item-row.new-row {
+    animation: slideInDown 0.5s ease-out;
+}
+
+/* Table hover effects */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Sticky table header */
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+/* Form validation states */
+.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.is-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+/* Loading state */
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn.loading::after {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom scrollbar */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+.delete-row {
+    width: 36px;
+    height: 36px;
+    display: inline-flex; /* keep inline with table cell */
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 6px;
+    line-height: 1;
+}
+
+    /* Override global .btn i margin for this small icon */
+    .delete-row > i {
+        margin: 0;
+        display: block;
+        line-height: 1;
+        font-size: 14px; /* adjust size if you want larger/smaller */
+    }

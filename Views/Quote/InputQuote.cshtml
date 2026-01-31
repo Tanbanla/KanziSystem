@@ -1,0 +1,324 @@
+﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@{
+    ViewData["Title"] = "Nhập thông tin báo giá";
+    List<ACC_NHOMVITRIDTO> nhomViTri = Model.DanhSachNhomViTri;
+    List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
+    List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
+    List<dynamic> categoryS = Model.DanhSachCategory;
+    string currentUser = Model.NguoiThaoTac;
+    List<string> madons = Model.DanhSachMaDon;
+    List<BaoGia_Request_of_QuotationDTO> listQuote = Model.DanhSachYeuCauBaoGia;
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/InputQuote.css" />
+</head>
+
+<div class="input-quote-page py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 input-quote-header p-3 rounded">
+        <h4 class="mb-0">Nhập thông tin báo giá</h4>
+        <div class="d-flex">
+            <button type="button" class="btn-custom" id="btnImportExcel">
+                <span class="text" style="margin-right: 7px">Nhập từ Excel</span>
+                <i class="fas fa-file-excel"></i>
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" style="margin-left: 5px" id="btnSaveQuote">
+                <span class="text" style="margin-right: 7px">Lưu</span>
+                <i class="fas fa-save" ></i>
+            </button>
+        </div>
+<!-- Overlay for side panel -->
+<div id="productPanelOverlay" class="product-panel-overlay" aria-hidden="true"></div>
+    </div>
+
+    <!-- Thông tin chung -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin chung</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Mã yêu cầu báo giá <span class="text-danger">*</span></label>
+                    <select id="quoteRequestCode" name="quoteRequestCode" class="form-control quoteRequestCode searchable-select">
+                        <option value="">-- Chọn mã đơn --</option>
+                        @foreach (var s in madons)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Nhà cung cấp <span class="text-danger">*</span></label>
+                    <select id="supplierSelect" name="supplierSelect" class="form-control supplierSelect searchable-select">
+                        <option value="">-- Chọn nhà cung cấp --</option>
+                        @foreach (var s in nccNews)
+                        {
+                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ngày báo giá</label>
+                    <input type="date" class="form-control" id="quoteDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Hiệu lực đến</label>
+                    <input type="date" class="form-control" id="validUntil" value="@DateTime.Today.AddDays(30).ToString("yyyy-MM-dd")">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <label for="maPhongBan" class="form-label small text-uppercase fw-semibold">Mã phòng ban</label>
+                    <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
+                        <option value="" selected>Chọn phòng ban</option>
+                        @foreach (var s in nhomViTri)
+                        {
+                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="searchMaVatTu" class="form-label">Mã nguyên vật liệu</label>
+                    <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select">
+                        <option value="" selected>Chọn mã nguyên vật liệu</option>
+                        @foreach (var s in mATERIAs)
+                        {
+                            <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                        }
+                    </select>
+                </div>
+                <!-- Nút điều khiển -->
+                <div class="mt-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary" id="btnReset">
+                        <i class="fas fa-undo"></i> Làm mới
+                    </button>
+                    <div style="min-width:12px"></div>
+                    <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> Lọc</button>
+                    <div style="min-width:12px"></div>
+                    <button type="button" class="btn btn-success" id="btnSubmitQuote">
+                        <i class="fas fa-paper-plane me-1"></i> Gửi báo giá
+                    </button>
+                    <div style="min-width:12px"></div>
+                    <button type="button" class="btn btn-warning" id="btnReturnQuote">
+                        <i class="fas fa-pen-alt"></i> Yêu cầu chỉnh sửa
+                    </button>
+                    <div style="min-width:12px"></div>
+                    <button type="button" class="btn btn-warning" id="btnSaveDraft">
+                        <i class="fas fa-save me-1"></i> Lưu nháp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách sản phẩm báo giá -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách sản phẩm báo giá</h6>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="btnAddProduct">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered quote-items-table mb-0 align-middle">
+                    <thead>
+                        <tr class="text-center">
+                            <th style="width: 40px; background : #0950B0" hidden>ID</th>
+                            <th style="width: 40px; background : #0950B0">STT</th>
+                            <th style="background : #0950B0">Mã hàng nội bộ</th>
+                            <th style="background : #0950B0">Mã nhà cung cấp</th>
+                            <th style="background : #0950B0">Mã hàng NCC</th>
+                            <th style="min-width: 230px;background : #0950B0">Tên dùng mở thử tục</th>
+                            <th style="background : #0950B0">Số lượng</th>
+                            <th style="background : #0950B0">Đơn vị</th>
+                            <th style="background : #0950B0">Đơn giá USD</th>
+                            <th style="background : #0950B0">Đơn giá VND</th>
+                            <th style="min-width: 100px;background : #0950B0">MOQ</th>
+                            <th style="min-width: 150px;background : #0950B0">Quy cách đóng gói</th>
+                            <th style="background : #0950B0">Lead time</th>
+                            <th style="background : #0950B0">Ngày giao</th>
+                            <th style="background : #0950B0">Có đối ứng Rohs</th>
+                            <th style="min-width: 120px;background : #0950B0">CO/CQ</th>
+                            <th style="background : #0950B0">Gửi MSDS kèm số CAS</th>
+                            <th style="background : #0950B0">Đối ứng tiêu chuẩn an toàn</th>
+                            <th style="background : #0950B0">Cam kết đúng yêu cầu</th>
+                            <th style="min-width: 180px;background : #0950B0">Phương thức giao</th>
+                            <th style="min-width: 150px;background : #0950B0">Điều kiện</th>
+                            <th style="min-width: 150px;background : #0950B0">File đính kèm</th>
+                            <th style="background : #0950B0">Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quoteItemsBody">
+                        <tr class="quote-item-row">
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tổng kết -->
+@*     <div class="row">
+        <div class="col-md-8">
+            <!-- Điều khoản và điều kiện -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>Điều khoản và điều kiện</h6>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control-note" id="termsConditions" rows="5" placeholder="Nhập điều khoản và điều kiện...
+                        VD: 1. Giá trên đã bao gồm VAT 10%
+                        2. Thời gian giao hàng: Theo thỏa thuận
+                        3. Bảo hành: 12 tháng kể từ ngày giao hàng
+                        4. Thanh toán: Chuyển khoản sau khi nhận hàng
+                        5. Giá trên có hiệu lực trong 30 ngày
+                    "></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <!-- Tổng tiền -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-calculator me-2"></i>Tổng kết</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-7">Tổng tiền USD:</div>
+                        <div class="col-5 text-end fw-bold" id="totalUSD">$0.00</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-7">Tổng tiền VND:</div>
+                        <div class="col-5 text-end fw-bold" id="totalVND">0 ₫</div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-7"><strong>Số lượng mục:</strong></div>
+                        <div class="col-5 text-end"><strong id="itemCount">0</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> *@
+</div>
+
+<!-- Product side panel (slide-in) -->
+<div id="productPanel" class="product-panel" aria-hidden="true">
+    <div class="panel-header d-flex justify-content-between align-items-center p-2 border-bottom">
+        <strong class="ms-2"><i class="fas fa-box-open me-2"></i>Chọn sản phẩm</strong>
+        <div>
+            <button type="button" class="btn btn-sm btn-light me-1" id="btnCloseProductPanel">Đóng</button>
+        </div>
+    </div>
+    <div class="panel-body p-3">
+        <div class="mb-2">
+            <div class="row g-2">
+                <div class="col-sm-3">
+                    <label class="form-label">Mã yêu cầu báo giá</label>
+                    <select id="modalRqCode" name="modalRqCode" class="form-control modalRqCode searchable-select">
+                        <option value="">-- Chọn mã đơn --</option>
+                        @foreach (var s in madons)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label for="modalInternalCode" class="form-label">Mã hàng nội bộ</label>
+                    <select id="modalInternalCode" name="modalInternalCode" class="form-select modalInternalCode searchable-select">
+                        <option value="" selected>Chọn mã hàng nội bộ</option>
+                        @foreach (var s in mATERIAs)
+                        {
+                            <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label class="form-label">Phòng yêu cầu</label>
+                    <select id="modalSection" name="modalSection" class="form-select searchable-select">
+                        <option value="">-- Chọn phòng --</option>
+                        @foreach (var s in nhomViTri)
+                        {
+                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label class="form-label">Nhà cung cấp</label>
+                    <select id="modalSupplier" name="modalSupplier" class="form-select searchable-select">
+                        <option value="">-- Chọn NCC --</option>
+                        @foreach (var s in nccNews)
+                        {
+                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="row g-2 mt-2">
+                <div class="col-sm-12 text-end">
+                    <button type="button" id="btnDialogSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead class="thead-light sticky-top">
+                    <tr>
+                        <th style="width:48px;">Chọn</th>
+                        <th>Mã đơn</th>
+                        <th>Mã hàng nội bộ</th>
+                        <th>Tên hàng</th>
+                        <th>Phòng yêu cầu</th>
+                        <th style="width:100px;" class="text-end">Số lượng</th>
+                        <th style="width:80px;">Đơn vị</th>
+                        <th>Nhà cung cấp</th>
+                    </tr>
+                </thead>
+                <tbody id="availableProductsBody">
+                    @foreach (var i in listQuote)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <input type="checkbox"
+                                       class="form-check-input product-select"
+                                       value="@i.ID"
+                                       data-rq="@i.CHR_MaDon"
+                                       data-internal="@i.CHR_MaHangNoiBo"
+                                       data-name="@(!string.IsNullOrWhiteSpace(i.NVCHR_NameVN) ? i.NVCHR_NameVN : i.CHR_NameEN)"
+                                       data-section="@i.CHR_SectionName"
+                                       data-qty="@i.INT_SoLuong"
+                                       data-unit="@i.NVCHR_DonVi"
+                                       data-ncc="@i.CHR_MaNCC" 
+                                       data-rohs="@i.NVCHR_Rohs"
+                                       data-antoan="@i.NVCHR_AnToan"
+                                       data-cocq="@i.NVCHR_COCQ"
+                                       data-msds="@i.NVCHR_MSDS" />
+                            </td>
+                            <td>@i.CHR_MaDon</td>
+                            <td>@i.CHR_MaHangNoiBo</td>
+                            <td>@(!string.IsNullOrWhiteSpace(i.NVCHR_NameVN) ? i.NVCHR_NameVN : i.CHR_NameEN)</td>
+                            <td>@i.CHR_SectionName</td>
+                            <td class="text-end">@i.INT_SoLuong</td>
+                            <td>@i.NVCHR_DonVi</td>
+                            <td>@i.CHR_MaNCC</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-end mt-2">
+            <button type="button" class="btn btn-primary btn-sm" id="btnConfirmAddProducts">Thêm vào báo giá</button>
+        </div>
+    </div>
+</div>
+<script>
+    window.inputQuoteData = {
+        user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser))
+    };
+</script>
+@section Scripts {
+    <script src="~/js/InputQuote.js"></script>
+}

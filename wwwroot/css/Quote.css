@@ -1,0 +1,307 @@
+﻿/* Table and inputs */
+#quote-request input.form-control-sm { font-size: .7rem; }
+#quote-request table thead th { font-size: .75rem; white-space: nowrap; text-align: center; vertical-align: middle; }
+#quote-request table tbody td { font-size: .75rem; }
+#quote-request .card-header + .card-body { border-top: 1px solid #f1f1f1; }
+#quote-request .btn-outline-secondary { --bs-btn-hover-bg: #6c757d; --bs-btn-hover-color: #fff; }
+
+@media (max-width: 1400px) { #quote-request table { font-size: .6rem; } }
+.btn_quote {
+    font-size: .75rem;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    margin-left: 12px;
+}
+/* History edit modal sizing (moderate width) */
+#editHistoryModal .modal-dialog {
+    max-width: 70vw;
+    width: 60vw;
+    margin: 1.25rem auto;
+}
+@media (max-width: 1200px) {
+    #editHistoryModal .modal-dialog { max-width: 85vw; width: 80vw; }
+}
+@media (max-width: 768px) {
+    #editHistoryModal .modal-dialog { max-width: 95vw; width: 95vw; }
+}
+#editHistoryModal {
+    z-index: 1050;
+}
+.form-select {
+    font-size: .7rem;
+    border-radius: 4px;
+    min-width: 80px;
+    max-width: 100%;
+    height: 30px;
+    margin-top: 3px;
+    padding: 6px 12px;
+    border: 1px solid #e6e9ee;
+    background: #fff;
+    color: #213449;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
+    display: inline-block;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.form-select:focus {
+    border-color: #0b63d6;
+    box-shadow: 0 6px 18px rgba(11,99,214,0.08);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+/* multi-select appearance adjustments */
+.form-select[multiple], .form-select[size]:not([size="1"]) {
+    height: auto;
+    min-height: 90px;
+    padding: 8px 10px;
+}
+
+.form-select option {
+    padding: 6px 8px;
+}
+
+/* stacked label (label above select on two lines) */
+/* remove stacked-label rules: not used in Quote.cshtml */
+
+/* Remove-row button styling (quote table) */
+.btn-remove-row {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 6px;
+    color: #e55353;
+}
+.btn-remove-row i {
+    margin: 0;
+    font-size: 14px;
+}
+.btn-remove-row:hover {
+    background: rgba(229,83,83,0.08);
+}
+
+/* Toolbar buttons smaller and tighter */
+.btn-toolbar .btn { font-size: 0.85rem; padding: 6px 10px; }
+
+/* Improve table responsiveness on smaller screens */
+@media (max-width: 992px) {
+    #quote-request .table-responsive { overflow-x: auto; }
+    #quote-request .form-select { min-width: 140px; }
+}
+.title_column {
+    vertical-align: middle;
+    background-color: #2335B7;
+    color: white;
+    min-width: 90px;
+    padding: 8px;
+    text-align: center; /* center title text */
+    font-size: 0.7rem; /* increase title text size */
+}
+.title_column_stt {
+    vertical-align: middle;
+    background-color: #2335B7;
+    color: white;
+    min-width: 40px;
+    padding: 8px;
+    text-align: center; /* center title text */
+    font-size: 0.7rem; /* increase title text size */
+}
+
+/* Searchable select / custom dropdown */
+.ms-container {
+    position: relative;
+    width: 100%;
+}
+
+.ms-btn {
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    min-height: 33px;
+    padding: .375rem .75rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+    .ms-btn:hover {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 .2rem rgba(13,110,253,.15);
+    }
+
+    .ms-btn .ms-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem;
+        max-height: 60px;
+        overflow: hidden;
+    }
+
+/* chip removed: not used by single-select UI */
+
+.ms-placeholder {
+    color: #6c757d;
+}
+
+.ms-caret {
+    margin-left: auto;
+    padding-left: .5rem;
+    color: #6c757d;
+}
+
+.ms-dropdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1055;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .5rem;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    display: none;
+    max-height: 300px;
+    overflow: hidden;
+}
+
+    .ms-dropdown.open {
+        display: block;
+    }
+
+.ms-search {
+    padding: .5rem;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+    .ms-search input {
+        width: 100%;
+        border: 1px solid #dee2e6;
+        border-radius: .375rem;
+        padding: .375rem .5rem;
+    }
+
+.ms-list {
+    max-height: 210px;
+    overflow: auto;
+}
+
+.ms-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .75rem;
+    cursor: pointer;
+}
+
+    .ms-item:hover {
+        background-color: #f8f9fa;
+    }
+
+/* selection check box removed: not used */
+
+.ms-empty {
+    padding: .75rem;
+    color: #6c757d;
+}
+
+/* Dialog styles used by Quote.js */
+.cm-dialog-overlay {
+    display: none; /* shown by JS by setting display:flex */
+    position: fixed;
+    inset: 0; /* top:0; right:0; bottom:0; left:0; */
+    align-items: center;
+    justify-content: center;
+    z-index: 4000; /* above page content */
+}
+
+.cm-dialog {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    max-width: 720px;
+    width: calc(100% - 40px);
+    z-index: 4001;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cm-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.cm-dialog-title { margin: 0; font-size: 1rem; }
+
+.cm-dialog-body {
+    padding: 14px 16px;
+    max-height: 60vh;
+    overflow: auto;
+}
+
+.cm-dialog-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.cm-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 3999;
+}
+
+.cm-btn { /* basic button used inside dialog */
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    cursor: pointer;
+}
+
+.cm-btn.cm-btn-primary {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+.cm-btn.cm-btn-outline {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+}
+/* CSS for invalid states */
+select.is-invalid {
+    border-color: #dc3545 !important;
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+    select.is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+
+/* For custom dropdown UI */
+.ms-btn.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+    .ms-btn.is-invalid .ms-caret {
+        color: #dc3545;
+    }

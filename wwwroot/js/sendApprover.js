@@ -1,0 +1,651 @@
+﻿document.addEventListener('DOMContentLoaded', () => {
+    // Elements
+    const btnSearch = document.getElementById('btnSearch');
+    const btnClear = document.getElementById('btnClear');
+    const btnAddNew = document.getElementById('btnAddNew');
+    const flowContainer = document.getElementById('flowContainer');
+    const formContainer = document.getElementById('formContainer');
+    const formTitle = document.getElementById('formTitle');
+    const approverForm = document.getElementById('approverForm');
+    const cancelFormBtn = document.getElementById('cancelForm');
+    const totalCountElement = document.getElementById('totalCount');
+    const approvalSteps = window.approvalSteps || [];
+    const modalAdidEl = document.getElementById('modalAdid');
+    const modalNameEl = document.getElementById('modalName');
+    const modalPositionEl = document.getElementById('modalPosition');
+    const modalSectionEl = document.getElementById('modalSectionCode');
+    const modalLookupStatusEl = document.getElementById('modalLookupStatus');
+
+    // helper to get value by possible keys (case-insensitive) for dynamic objects
+    function getVal(obj, keys) {
+        if (!obj) return null;
+        try {
+            const lower = Object.keys(obj).reduce((acc, k) => { acc[k.toLowerCase()] = obj[k]; return acc; }, {});
+            for (const k of keys) {
+                const v = lower[k.toLowerCase()];
+                if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+            }
+        } catch (e) {
+            return null;
+        }
+        return null;
+    }
+
+    // Event Listeners
+    if (btnSearch) btnSearch.addEventListener('click', handleSearch);
+    if (btnClear) btnClear.addEventListener('click', handleClear);
+    if (btnAddNew) btnAddNew.addEventListener('click', showAddForm);
+    if (cancelFormBtn) cancelFormBtn.addEventListener('click', hideForm);
+    if (approverForm) approverForm.addEventListener('submit', handleFormSubmit);
+    if (modalAdidEl) {
+        // Only trigger lookup when user presses Enter and input is non-empty
+        modalAdidEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const curAdid = modalAdidEl.value.trim();
+                if (curAdid) lookupEmployee(curAdid);
+            }
+        });
+    }
+
+    // Functions
+    function handleSearch() {
+        loadApprovers();
+    }
+
+    function handleClear() {
+        document.getElementById('searchAdid').value = '';
+        document.getElementById('searchSection').value = '';
+        document.getElementById('searchStep').value = '';
+        hideForm();
+        showEmptyState();
+    }
+
+    function showAddForm() {
+        clearForm();
+        formTitle.textContent = 'Thêm người phê duyệt mới';
+        formContainer.style.display = 'block';
+        formContainer.scrollIntoView({ behavior: 'smooth' });
+
+        // Pre-fill với giá trị từ bộ lọc nếu có
+        const curSection = document.getElementById('searchSection').value;
+        const curStep = document.getElementById('searchStep').value;
+        if (curSection) document.getElementById('modalSectionCode').value = curSection;
+        if (curStep) document.getElementById('modalStep').value = curStep;
+    }
+
+    function showEditForm(approver) {
+        // Support dynamic property names from server response
+        const idVal = getVal(approver, ['id', 'iD', 'ID']) || '0';
+        const adidVal = getVal(approver, ['chr_useradid', 'chR_UserAdid', 'CHr_UserAdid', 'chr_userAdid', 'adid', 'chR_UserAdId']);
+        const nameVal = getVal(approver, ['nvchr_username', 'nvchr_userName', 'nvchR_UserName', 'name', 'fullName', 'nvchr_name']);
+        const posVal = getVal(approver, ['nvchr_position', 'nvchR_Position', 'position', 'chucdanh']);
+        const secVal = getVal(approver, ['chr_code_section', 'chr_code_sec', 'chr_codeSection', 'chr_code', 'chr_code_sec']);
+        const stepVal = getVal(approver, ['id_baogia_step', 'id_baogiaStep', 'id_baoGiaStep', 'ID_BaoGiaStep', 'id_baogia_step', 'iD_BaoGiaStep']);
+
+        document.getElementById('approverId').value = idVal;
+        document.getElementById('modalAdid').value = adidVal || '';
+        document.getElementById('modalName').value = nameVal || '';
+        document.getElementById('modalPosition').value = posVal || '';
+        document.getElementById('modalSectionCode').value = secVal || '';
+        document.getElementById('modalStep').value = stepVal || '';
+
+        formTitle.textContent = 'Sửa người phê duyệt';
+        formContainer.style.display = 'block';
+        formContainer.scrollIntoView({ behavior: 'smooth' });
+        // If ADID present, try lookup to refresh data
+        const curAdid = document.getElementById('modalAdid').value.trim();
+        if (curAdid) lookupEmployee(curAdid);
+    }
+
+    function hideForm() {
+        formContainer.style.display = 'none';
+        clearForm();
+    }
+
+    function clearForm() {
+        document.getElementById('approverId').value = '0';
+        document.getElementById('modalAdid').value = '';
+        document.getElementById('modalName').value = '';
+        document.getElementById('modalPosition').value = '';
+        document.getElementById('modalSectionCode').value = '';
+        document.getElementById('modalStep').value = '';
+        if (modalLookupStatusEl) modalLookupStatusEl.textContent = '';
+
+        // Reset validation
+        if (approverForm) {
+            const inputs = approverForm.querySelectorAll('.form-control, .form-select');
+            inputs.forEach(input => {
+                input.classList.remove('is-invalid');
+            });
+        }
+    }
+
+    async function lookupEmployee(adidOrMnv) {
+        if (!adidOrMnv) {
+            if (modalLookupStatusEl) modalLookupStatusEl.textContent = '';
+            return;
+        }
+        if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Đang tìm...';
+        try {
+            // Controller action is named GetEmployeeWorkingByIdAsync in code but MVC strips the "Async" suffix
+            // so the correct route is /Master/GetEmployeeWorkingById
+            const url = '/Master/GetEmployeeWorkingById?adidOrMnv=' + encodeURIComponent(adidOrMnv);
+            const resp = await fetch(url, { method: 'GET' });
+            if (!resp.ok) {
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                return;
+            }
+            // safe parse: protect against empty body
+            const text = await resp.text();
+            if (!text) {
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                return;
+            }
+            const result = JSON.parse(text);
+            if (!result || !result.success) {
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                return;
+            }
+            const items = result.data || [];
+            if (!items || items.length === 0) {
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                return;
+            }
+            const first = items[0];
+            // helper to get value by possible keys (case-insensitive)
+            const getVal = (obj, keys) => {
+                if (!obj) return null;
+                const lower = Object.keys(obj).reduce((acc, k) => { acc[k.toLowerCase()] = obj[k]; return acc; }, {});
+                for (const k of keys) {
+                    const v = lower[k.toLowerCase()];
+                    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+                }
+                return null;
+            };
+
+            const name = getVal(first, ['CHR_EMPLOYEE_NAME']);
+            const position = getVal(first, ['CHR_POSITION_GROUP']);
+            const sectionCode = getVal(first, ['CHR_SEC_CODE']);
+            const sectionName = getVal(first, ['CHR_SEC_NAME']);
+
+            if (name && modalNameEl) modalNameEl.value = name;
+            if (position && modalPositionEl) modalPositionEl.value = position;
+            // chọn phòng (Comment vì có trường hợp khác phòng nhưng cũng duyệt)
+            //if (sectionCode && modalSectionEl) {
+            //    // try set by value
+            //    const opt = modalSectionEl.querySelector(`option[value="${sectionCode}"]`);
+            //    if (opt) {
+            //        modalSectionEl.value = sectionCode;
+            //    } else {
+            //        // try match by option text
+            //        let matched = null;
+            //        Array.from(modalSectionEl.options).forEach(o => {
+            //            if (!matched && o.text && o.text.trim().toLowerCase() === sectionCode.toLowerCase()) matched = o.value;
+            //        });
+            //        if (matched) modalSectionEl.value = matched;
+            //    }
+            //} else if (sectionName && modalSectionEl) {
+            //    // try match by option text
+            //    let matched = null;
+            //    Array.from(modalSectionEl.options).forEach(o => {
+            //        if (!matched && o.text && o.text.trim().toLowerCase() === sectionName.toLowerCase()) matched = o.value;
+            //    });
+            //    if (matched) modalSectionEl.value = matched;
+            //}
+
+            if (modalLookupStatusEl) modalLookupStatusEl.textContent = `Tìm thấy: ${name || adidOrMnv}${position ? ' - ' + position : ''}`;
+        } catch (err) {
+            console.error('Lookup employee error', err);
+            if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Lỗi khi tìm';
+        }
+    }
+
+    async function loadApprovers() {
+        const adid = document.getElementById('searchAdid').value.trim();
+        const section = document.getElementById('searchSection').value;
+        const step = document.getElementById('searchStep').value;
+
+        try {
+            const resp = await fetch('/Master/GetApprovers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    SectionCode: section,
+                    Adid: adid,
+                    IdStep: step ? parseInt(step) : null,
+                    PageIndex: 1,
+                    PageSize: 1000
+                })
+            });
+
+            const result = await resp.json();
+            if (!result.success) {
+                showError('Không thể tải dữ liệu: ' + (result.message || 'Lỗi không xác định'));
+                return;
+            }
+
+            renderFlow(result.data || []);
+            updateTotalCount(result.data?.length || 0);
+        } catch (error) {
+            console.error('Error loading approvers:', error);
+            showError('Lỗi kết nối đến server');
+        }
+    }
+
+    function renderFlow(items) {
+        flowContainer.innerHTML = '';
+
+        if (approvalSteps && approvalSteps.length) {
+            // Tạo map stepId => approvers
+            const map = new Map();
+            approvalSteps.forEach(st => map.set(st.INT_StepNumber ?? st.inT_StepNumber, []));
+
+            (items || []).forEach(item => {
+                const sid = item.iD_BaoGiaStep;
+                if (!map.has(sid)) map.set(sid, []);
+                map.get(sid).push(item);
+            });
+
+            // Render theo thứ tự steps đã sort
+            approvalSteps.forEach(st => {
+                const stepGroup = {
+                    stepId: st.INT_StepNumber ?? st.inT_StepNumber,
+                    stepName: st.CHR_StepName ?? st.name,
+                    approvers: map.get(st.INT_StepNumber ?? st.inT_StepNumber) || []
+                };
+                const stepCard = createStepCard(stepGroup);
+                stepCard.classList.add('step-card');
+                flowContainer.appendChild(stepCard);
+            });
+
+            const total = (items || []).length;
+            if (total === 0) updateTotalCount(0);
+            return;
+        }
+
+        // Fallback: không có -> gom theo dữ liệu trả về như cũ
+        if (!items || items.length === 0) {
+            showEmptyState();
+            return;
+        }
+
+        const groupedByStep = items.reduce((groups, item) => {
+            const stepId = item.ID_BaoGiaStep;
+            if (!groups[stepId]) {
+                groups[stepId] = {
+                    stepId: stepId,
+                    stepName: item.NVCHR_StepName ?? item.nvchr_stepName,
+                    approvers: []
+                };
+            }
+            groups[stepId].approvers.push(item);
+            return groups;
+        }, {});
+
+        const sortedSteps = Object.values(groupedByStep).sort((a, b) => a.stepId - b.stepId);
+        sortedSteps.forEach(stepGroup => {
+            const stepCard = createStepCard(stepGroup);
+            stepCard.classList.add('step-card');
+            flowContainer.appendChild(stepCard);
+        });
+    }
+
+    function createStepCard(stepGroup) {
+        const card = document.createElement('div');
+        card.className = 'card mb-3 border-0 shadow-sm';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'card-header bg-light text-dark d-flex justify-content-between align-items-center';
+        header.innerHTML = `
+            <div>
+                <i class="fas fa-step-forward me-2"></i>
+                <strong>${stepGroup.stepName}</strong>
+                <span class="badge bg-white text-secondary border ms-2">${stepGroup.approvers.length} người</span>
+            </div>
+            <button class="btn btn-sm btn-outline-primary btn-add-to-step" data-step="${stepGroup.stepId}">
+                <i class="fas fa-user-plus me-1"></i> Thêm vào bước này
+            </button>
+        `;
+        card.appendChild(header);
+
+        // Body với list
+        const body = document.createElement('div');
+        body.className = 'card-body p-0';
+
+        const list = document.createElement('div');
+        list.className = 'list-group list-group-flush';
+
+        stepGroup.approvers.forEach(approver => {
+            const listItem = createApproverListItem(approver);
+            list.appendChild(listItem);
+        });
+
+        body.appendChild(list);
+        card.appendChild(body);
+
+        // Thêm event listener cho nút "Thêm vào bước này" (guard nếu không tồn tại)
+        const addBtn = card.querySelector('.btn-add-to-step');
+        if (addBtn) {
+            addBtn.addEventListener('click', (e) => {
+                clearForm();
+                if (formTitle) formTitle.textContent = 'Thêm người phê duyệt mới';
+                const modalStepEl = document.getElementById('modalStep');
+                if (modalStepEl) modalStepEl.value = stepGroup.stepId;
+                if (formContainer) {
+                    formContainer.style.display = 'block';
+                    formContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+
+        return card;
+    }
+
+    function createApproverListItem(approver) {
+        const item = document.createElement('div');
+        item.className = 'list-group-item d-flex justify-content-between align-items-start';
+        item.innerHTML = `
+            <div class="flex-grow-1">
+                <div class="fw-bold"> ${approver.nvchR_UserName || 'Không có tên'}</div>
+                <div class="small text-muted">
+                    <i class="fas fa-id-card me-1"></i> ${approver.chR_UserAdid || 'N/A'}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-briefcase me-1"></i> ${approver.nvchR_Position || 'Không có chức danh'}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-building me-1"></i> ${approver.chR_NameSection || 'Không có phòng'}
+                </div>
+            </div>
+        `;
+
+        const actions = document.createElement('div');
+        actions.className = 'btn-group btn-group-sm';
+        actions.innerHTML = `
+            <button class="btn btn-outline-primary btn-edit" title="Sửa">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-outline-danger btn-delete" title="Xóa">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+
+        // Thêm event listeners (guard nếu button không tồn tại)
+        const editBtn = actions.querySelector('.btn-edit');
+        const deleteBtn = actions.querySelector('.btn-delete');
+        if (editBtn) editBtn.addEventListener('click', () => showEditForm(approver));
+        if (deleteBtn) deleteBtn.addEventListener('click', () => deleteApprover(approver.id));
+
+        item.appendChild(actions);
+        return item;
+    }
+
+    function updateTotalCount(count) {
+        totalCountElement.textContent = `${count} người phê duyệt`;
+    }
+
+    function showEmptyState() {
+        flowContainer.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>Không có dữ liệu</h5>
+                <p>Không tìm thấy người phê duyệt nào phù hợp với tiêu chí tìm kiếm</p>
+            </div>
+        `;
+        updateTotalCount(0);
+    }
+
+    function showError(message) {
+        flowContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                ${message}
+            </div>
+        `;
+        updateTotalCount(0);
+    }
+    // thêm  người phê duyệt
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+
+        // Validate form
+        if (!validateForm()) {
+            return;
+        }
+
+        const approverId = parseInt(document.getElementById('approverId').value);
+        const approverData = {
+            ID: approverId,
+            CHR_UserAdid: document.getElementById('modalAdid').value.trim(),
+            NVCHR_UserName: document.getElementById('modalName').value.trim(),
+            NVCHR_Position: document.getElementById('modalPosition').value.trim(),
+            CHR_CodeSection: document.getElementById('modalSectionCode').value,
+            CHR_NameSection: document.getElementById('modalSectionCode').options[document.getElementById('modalSectionCode').selectedIndex].text,
+            NVCHR_StepName: approvalSteps.find(st => (st.INT_StepNumber ?? st.inT_StepNumber) === parseInt(document.getElementById('modalStep').value))?.CHR_StepName || '',
+            CHR_Status: 'ON',
+            ID_BaoGiaStep: parseInt(document.getElementById('modalStep').value)
+        };
+
+        try {
+            const endpoint = approverId > 0 ? '/Master/UpdateApprover' : '/Master/SaveApprover';
+            const method = 'POST';
+
+            const resp = await fetch(endpoint, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(approverData)
+            });
+
+            const result = await resp.json();
+            if (result.success) {
+                hideForm();
+                loadApprovers();
+                showToast('success', 'Cập nhật thành công!');
+            } else {
+                showToast('error', result.message || 'Có lỗi xảy ra');
+            }
+        } catch (error) {
+            console.error('Error saving approver:', error);
+            showToast('error', 'Lỗi kết nối đến server');
+        }
+    }
+
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = ['modalAdid', 'modalName', 'modalSectionCode', 'modalStep'];
+
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        return isValid;
+    }
+
+    async function deleteApprover(id) {
+        const confirmed = await confirmDialog({
+            title: 'Xác nhận xóa',
+            message: 'Bạn có chắc chắn muốn xóa người phê duyệt này không?',
+            confirmText: 'Xóa',
+            cancelText: 'Hủy',
+            confirmType: 'danger'
+        });
+        if (!confirmed) return;
+
+        try {
+            const resp = await fetch('/Master/DeleteApprover', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: id
+                })
+            });
+            const result = await resp.json();
+            if (result.success) {
+                loadApprovers();
+                showDialog({ title: 'Thành công', message: 'Xóa thành công!', type: 'success' });
+            } else {
+                showDialog({ title: 'Lỗi', message: result.message || 'Không thể xóa', type: 'error' });
+            }
+        } catch (error) {
+            console.error('Error deleting approver:', error);
+            showDialog({ title: 'Lỗi', message: 'Lỗi kết nối đến server', type: 'error' });
+        }
+    }
+
+    // Custom dialog helpers
+    function getDialogEls() {
+        const overlay = document.getElementById('cmDialogOverlay');
+        const titleEl = document.getElementById('cmDialogTitle');
+        const bodyEl = document.getElementById('cmDialogBody');
+        const footerEl = document.getElementById('cmDialogFooter');
+        return { overlay, titleEl, bodyEl, footerEl };
+    }
+
+    function showDialog({ title = 'Thông báo', message = '', type = 'info', buttons } = {}) {
+        const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+        if (!overlay) return alert(message);
+        titleEl.textContent = title;
+        bodyEl.innerHTML = `<div class="d-flex align-items-start gap-2">
+            <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : type === 'error' ? 'fa-exclamation-circle text-danger' : 'fa-info-circle text-primary'}"></i>
+            <div>${message}</div>
+        </div>`;
+        footerEl.innerHTML = '';
+        const okBtn = document.createElement('button');
+        okBtn.className = 'cm-btn cm-btn-primary';
+        okBtn.textContent = (buttons && buttons.okText) || 'Đồng ý';
+        okBtn.addEventListener('click', () => hideDialog());
+        footerEl.appendChild(okBtn);
+        overlay.style.display = 'flex';
+        attachDialogCloseHandlers();
+    }
+
+    function hideDialog() {
+        const { overlay } = getDialogEls();
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    function attachDialogCloseHandlers() {
+        const { overlay, footerEl } = getDialogEls();
+        const closeBtn = overlay.querySelector('[data-cm-action="close"]');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                // If a confirm dialog is waiting, resolve it as false
+                if (typeof window.__cmPendingResolve === 'function') {
+                    const r = window.__cmPendingResolve;
+                    window.__cmPendingResolve = null;
+                    r(false);
+                }
+                hideDialog();
+            };
+        }
+        const overlayClick = overlay.querySelector('[data-cm-action="overlay"]');
+        if (overlayClick) overlayClick.onclick = () => {
+            if (typeof window.__cmPendingResolve === 'function') {
+                const r = window.__cmPendingResolve;
+                window.__cmPendingResolve = null;
+                r(false);
+            }
+            hideDialog();
+        };
+    }
+
+    function confirmDialog({ title = 'Xác nhận', message = '', confirmText = 'OK', cancelText = 'Hủy', confirmType = 'primary' } = {}) {
+        return new Promise(resolve => {
+            const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+            if (!overlay) return resolve(confirm(message));
+            titleEl.textContent = title;
+            bodyEl.textContent = message;
+            footerEl.innerHTML = '';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'cm-btn cm-btn-outline';
+            cancelBtn.textContent = cancelText;
+            cancelBtn.addEventListener('click', () => { hideDialog(); if (typeof window.__cmPendingResolve === 'function') { const r = window.__cmPendingResolve; window.__cmPendingResolve = null; r(false); } else { resolve(false); } });
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = `cm-btn ${confirmType === 'danger' ? 'cm-btn-danger' : 'cm-btn-primary'}`;
+            confirmBtn.textContent = confirmText;
+            confirmBtn.addEventListener('click', () => { hideDialog(); if (typeof window.__cmPendingResolve === 'function') { const r = window.__cmPendingResolve; window.__cmPendingResolve = null; r(true); } else { resolve(true); } });
+            footerEl.appendChild(cancelBtn);
+            footerEl.appendChild(confirmBtn);
+            // expose resolver so overlay/close handlers can resolve when clicked
+            window.__cmPendingResolve = resolve;
+            overlay.style.display = 'flex';
+            attachDialogCloseHandlers();
+        });
+    }
+
+    // Lightweight toast helper (fallback if global showToast is not provided)
+    function showToast(type, message, timeout = 3000) {
+        try {
+            let container = document.getElementById('cmToastContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'cmToastContainer';
+                container.style.position = 'fixed';
+                container.style.top = '1rem';
+                container.style.right = '1rem';
+                container.style.zIndex = '2000';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '0.5rem';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'cm-toast';
+            toast.style.minWidth = '200px';
+            toast.style.maxWidth = '320px';
+            toast.style.padding = '0.75rem 1rem';
+            toast.style.borderRadius = '0.375rem';
+            toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+            toast.style.color = '#fff';
+            toast.style.fontSize = '0.95rem';
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 200ms ease, transform 200ms ease';
+            toast.style.transform = 'translateY(-6px)';
+
+            if (type === 'success') {
+                toast.style.background = '#198754';
+            } else if (type === 'error' || type === 'danger') {
+                toast.style.background = '#dc3545';
+            } else if (type === 'warning') {
+                toast.style.background = '#ffc107';
+                toast.style.color = '#000';
+            } else {
+                toast.style.background = '#0d6efd';
+            }
+
+            toast.textContent = message || '';
+            container.appendChild(toast);
+
+            // force reflow then show
+            void toast.offsetWidth;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+
+            const remove = () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-6px)';
+                setTimeout(() => { try { container.removeChild(toast); } catch (e) {} }, 220);
+            };
+
+            const tId = setTimeout(remove, timeout);
+            // allow click to dismiss early
+            toast.addEventListener('click', () => {
+                clearTimeout(tId);
+                remove();
+            });
+        } catch (err) {
+            // fallback to alert if something goes wrong
+            try { console.error(err); alert(message); } catch (e) {}
+        }
+    }
+
+    // Initialize
+    hideForm();
+});
