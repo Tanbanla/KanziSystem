@@ -7,11 +7,11 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
-    public class BaoGiaDetailService: BaseService<BaoGia_Detail_of_Quotation, int, BaoGia_Detail_of_QuotationDTO>, IBaoGiaDetailService
+    public class BaoGiaDetailService : BaseService<BaoGia_Detail_of_Quotation, int, BaoGia_Detail_of_QuotationDTO>, IBaoGiaDetailService
     {
         private readonly IBaoGiaDetailRepository _repo;
         private readonly IMapper _mapper;
-        public BaoGiaDetailService(IBaoGiaDetailRepository repo, IMapper mapper): base (repo, mapper)
+        public BaoGiaDetailService(IBaoGiaDetailRepository repo, IMapper mapper) : base(repo, mapper)
         {
             _repo = repo;
             _mapper = mapper;
@@ -22,7 +22,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                var data = await _repo.SearchBaoGiaAsync(idRequest, maDon, maVatTu, maNcc, section,dayMM, PageSize, PageIndex);
+                var data = await _repo.SearchBaoGiaAsync(idRequest, maDon, maVatTu, maNcc, section, dayMM, PageSize, PageIndex);
                 result.Data = data;
                 result.Success = true;
             }
@@ -48,6 +48,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 result.Message = ex.Message;
                 result.Success = false;
+            }
+            return result;
+        }
+        // Update lua chon NCC
+        public async Task<GenericResponse<bool>> UpdateLuaChonNCCBaoGiaDetailAsync(List<dynamic> listUp, string user, string name)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var isSuccess = await _repo.UpdateLuaChonNCCBaoGiaDetailAsync(listUp, user, name);
+                result.Data = isSuccess;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+
             }
             return result;
         }

@@ -613,5 +613,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi phê duyệt báo giá: {ex.Message}");
             }
         }
+        // chon nha cung cap
+        [HttpPost]
+        public async Task<IActionResult> ChonNhaCungCapBaoGia([FromBody] List<dynamic> listUpdate)
+        {
+            var result = await _baoGiaDetailService.UpdateLuaChonNCCBaoGiaDetailAsync(listUpdate, GetCurrentUserId() , GetCurrentUserFullName());
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
     }
 }
