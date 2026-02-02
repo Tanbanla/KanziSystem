@@ -22,5 +22,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<BaoGia_Request_of_Quotation> CapNhatDonBaoGiaAsync(BaoGia_Request_of_Quotation baogia);
         // Lấy thông tin báo giá gom nhóm
         public Task<List<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize);
+        // Xuất báo giá
+        public Task<List<int>> ExportBaoGiaAsync(string? maDon);
     }
 }

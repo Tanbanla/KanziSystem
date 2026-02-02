@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -24,7 +25,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = new StringBuilder(@"SELECT d.*, r.CHR_MaHangNoiBo, r.INT_SoLuong,r.NVCHR_DonVi
               FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
               left join [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
-              on d.ID_RequestQuote = r.ID where 1 = 1 ");
+              on d.ID_RequestQuote = r.ID where 1 = 1");
             var parameters = new DynamicParameters();
             if(idRequest != 0 && idRequest != null)
             {
@@ -89,9 +90,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // lưu thông tin chọn
             foreach (var l in listUp)
             {
-                var id = l.ID;
-                var bit= l.BIT_Select;
-                var reason = l.NVCHR_ReasonPick;
+                var jsonElement = (System.Text.Json.JsonElement)l;
+                var id = int.Parse(jsonElement.GetProperty("ID").GetString());
+                var bit = jsonElement.GetProperty("BIT_Select").GetBoolean();
+                var reason = jsonElement.GetProperty("NVCHR_ReasonPick").GetString();
                 var detail = await _context.BaoGia_Detail_of_Quotations.FindAsync(id);
                 if (detail != null)
                 {
@@ -124,6 +126,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             await _context.SaveChangesAsync();
             return true;
+        }
+        // Lấy thông tin theo ID_RequestQuote
+        public async Task<BaoGia_Detail_of_Quotation> GetByIdRequestQuoteAsync(int idRequest)
+        {
+            var a = await _context.BaoGia_Detail_of_Quotations
+                .Where(b => b.ID_RequestQuote == idRequest)
+                .FirstOrDefaultAsync();
+            return a;
         }
     }
 }

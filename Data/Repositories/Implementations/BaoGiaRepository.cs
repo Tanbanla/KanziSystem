@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -147,8 +148,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             WITH rq AS (
                 SELECT r.*
                 FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] AS r
-                WHERE 1 = 1");
-
+                WHERE 1 = 1  ");
+            //and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(maDon))
@@ -209,6 +210,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             return (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+        }
+        // Xuất báo giá
+        public async Task<List<int>> ExportBaoGiaAsync(string? maDon)
+        {
+            var a = await _context.BaoGia_Request_of_Quotations
+                .Where(c => c.CHR_MaDon == maDon).Select(c => c.ID).ToListAsync();
+            return a;
         }
     }
 }

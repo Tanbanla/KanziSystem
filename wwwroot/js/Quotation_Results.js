@@ -75,6 +75,23 @@
             if (selectAll) {
                 selectAll.addEventListener('change', this.toggleSelectAll.bind(this));
             }
+
+            // Delegate: enforce only one supplier per maDon
+            document.addEventListener('change', (e) => {
+                const cb = e.target.closest('.supplier-select');
+                if (!cb) return;
+                if (!cb.checked) return;
+                // Find current supplier group and derive maDon from groupId pattern: CHR_MaDon-CHR_MaHangNoiBo
+                const row = cb.closest('tr');
+                const groupContainer = row?.closest('.supplier-group');
+                const groupId = groupContainer?.id?.replace('sup-rows-', '') || '';
+                const maDon = groupId.split('-')[0] || '';
+                if (!maDon) return;
+                // Uncheck other supplier-select in all groups matching same maDon, except current checkbox
+                document.querySelectorAll('.supplier-group[id^="sup-rows-' + maDon + '-"] .supplier-select').forEach(other => {
+                    if (other !== cb) other.checked = false;
+                });
+            });
         },
         openEditRequestModal: async function (id) {
             try {
@@ -207,6 +224,14 @@
                         const lead = d.DTM_LeadTime || '';
                         const ngayGiao = d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : '';
                         const cocq = d.VCHR_COCQ || '';
+                        const quyCach = d.NVCHR_Packing || '';
+                        const rohs = d.VCHR_Rohs || '';
+                        const msds = d.VCHR_MSDS || '';
+                        const safe = d.VCHR_AnToan || '';
+                        const camKet = d.VCHR_CamKet || '';
+                        const phuongThuc = d.NVCHR_DeliveryTerm || '';
+                        const dieuKien = d.NVCHR_PaymentTerm || '';
+                        const file = d.NVCHR_File || '';
                         return `<tr class="small text-center">
                                      <td>
                                        <div class="btn-group btn-group-sm" role="group">
@@ -220,10 +245,18 @@
                                     <td class="text-end">${vnd}</td>
                                     <td>${moq}</td>
                                     <td>${lead}</td>
+                                    <td>${quyCach}</td>
                                     <td>${ngayGiao}</td>
+                                    <td>${rohs}</td>
                                     <td>${cocq}</td>
-                                    <td><input class="form-check-input supplier-select" type="checkbox" /></td>
-                                    <td><input type="text" class="form-control" id="lydo" /></td>    
+                                    <td>${msds}</td>
+                                    <td>${safe}</td>
+                                    <td>${camKet}</td>
+                                    <td>${phuongThuc}</td>
+                                    <td>${dieuKien}</td>
+                                    <td>${file}</td>
+                                    <td><input class="form-check-input supplier-select" type="checkbox" value="${id}" data-id="${id}" /></td>
+                                    <td><input type="text" class="form-control reason-input" /></td>    
                                 </tr>`;
                     }).join('');
                     bodyEl.innerHTML = rowsHtml;
@@ -318,8 +351,16 @@
                                             <th>Đơn giá VND</th>
                                             <th>MOQ</th>
                                             <th>Lead time</th>
+                                            <th>Quy cách đóng hàng</th>
                                             <th>Ngày giao</th>
+                                            <th>Rohs</th>
                                             <th>CO/CQ</th>
+                                            <th>MSDS kèm số CAS</th>
+                                            <th>An toàn</th>
+                                            <th>Cam kết đúng yêu cầu</th>
+                                            <th>Phương thức giao</th>
+                                            <th>Điều kiện</th>
+                                            <th>File đính kèm</th>
                                             <th>Chọn</th>
                                             <th>Lý do</th>
                                         </tr>
@@ -352,7 +393,7 @@
         },
 
         getSelections: function () {
-            const items = [];
+            const result = [];
             document.querySelectorAll('.item-row').forEach(tr => {
                 if (tr.style.display === 'none') return; // Chỉ xét các item đang hiển thị
 
@@ -361,43 +402,93 @@
                 const maHang = btn?.getAttribute('data-mahang') || '';
                 const groupId = `${maDon}-${maHang}`;
 
-                const itemChecked = tr.querySelector('.item-select')?.checked;
-                const supplierGroup = document.getElementById(`sup-rows-${groupId}`);
-                const supplierChecked = supplierGroup ? Array.from(supplierGroup.querySelectorAll('.supplier-select:checked')).map(c => c.value) : [];
+                // Nếu chọn toàn bộ item, thêm một record tổng quát (không có ID NCC)
+                const itemChecked = tr.querySelector('.item-select')?.checked === true;
+                if (itemChecked) {
+                    result.push({ ID: groupId, BIT_Select: true, NVCHR_ReasonPick: '' });
+                }
 
-                if (itemChecked || supplierChecked.length) {
-                    items.push({
-                        item: groupId,
-                        suppliers: supplierChecked,
-                        itemName: tr.querySelector('td:nth-child(5)')?.textContent.trim() || ''
+                // Duyệt các NCC trong nhóm và lấy các lựa chọn + lý do
+                const supplierGroup = document.getElementById(`sup-rows-${groupId}`);
+                if (supplierGroup) {
+                    supplierGroup.querySelectorAll('tbody tr').forEach(row => {
+                        const cb = row.querySelector('.supplier-select');
+                        if (!cb) return;
+                        const isChecked = cb.checked === true;
+                        const id = cb.getAttribute('data-id') || cb.value || '';
+                        const reason = row.querySelector('.reason-input')?.value?.trim() || '';
+                        //if (isChecked) {
+                        result.push({ ID: id, BIT_Select: isChecked, NVCHR_ReasonPick: reason });
+                        //}
                     });
                 }
             });
-            return items;
+            return result;
         },
+        getSelectionsExcel: function () {
+            const result = [];
+            document.querySelectorAll('.item-row').forEach(tr => {
+                if (tr.style.display === 'none') return; // Chỉ xét các item đang hiển thị
 
-        confirmSelection: function () {
-            const data = this.getSelections();
-            if (!data.length) {
-                alert('Vui lòng chọn ít nhất một sản phẩm hoặc nhà cung cấp.');
+                const btn = tr.querySelector('.toggle-sup');
+                const maDon = btn?.getAttribute('data-madon') || '';
+                const maHang = btn?.getAttribute('data-mahang') || '';
+                const groupId = `${maDon}-${maHang}`;
+
+                // Nếu chọn toàn bộ item, thêm một record tổng quát (không có ID NCC)
+                const itemChecked = tr.querySelector('.item-select')?.checked === true;
+                if (itemChecked) {
+                    result.push({ ID: "", MaDon: maDon });
+                }
+
+                // Duyệt các NCC trong nhóm và lấy các lựa chọn + lý do
+                const supplierGroup = document.getElementById(`sup-rows-${groupId}`);
+                if (supplierGroup) {
+                    supplierGroup.querySelectorAll('tbody tr').forEach(row => {
+                        const cb = row.querySelector('.supplier-select');
+                        if (!cb) return;
+                        const isChecked = cb.checked === true;
+                        const id = cb.getAttribute('data-id') || cb.value || '';
+                        if (isChecked) {
+                            result.push({ ID: id, MaDon: "" });
+                        }
+                    });
+                }
+            });
+            return result;
+        },
+        confirmSelection: async function () {
+            const selections = this.getSelections();
+            if (!selections.length) {
+                showDialog({ title: 'Cảnh báo', message: `Vui lòng chọn ít nhất một sản phẩm hoặc nhà cung cấp.`, type: 'info' });
                 return;
             }
 
-            console.log('Xác nhận lựa chọn:', data);
-
-            let message = `Bạn đã chọn ${data.length} sản phẩm:\n`;
-            data.forEach(item => {
-                message += `- ${item.itemName} (Mã: ${item.item})`;
-                if (item.suppliers.length) {
-                    message += ` - NCC: ${item.suppliers.join(', ')}`;
-                }
-                message += '\n';
-            });
-
-            if (confirm(message + '\nXác nhận lựa chọn này?')) {
-                alert('Đã ghi nhận lựa chọn (' + data.length + ' sản phẩm).');
-                // TODO: Gửi dữ liệu đến server
+            // Warn if there are selections without reason (not mandatory)
+            const missingReasons = selections.filter(x => (!x.NVCHR_ReasonPick || x.NVCHR_ReasonPick.trim() === '')).length;
+            if (missingReasons > 0) {
+                showDialog({ title: 'Cảnh báo', message: `Có ${missingReasons} lựa chọn chưa nhập lý do.`, type: 'info' });
+                return;
             }
+            try {
+                const res = await fetch('/Quote/ChonNhaCungCapBaoGia', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(selections)
+                });
+                if (!res.ok) {
+                    showDialog({ title: 'Cảnh báo', message: `lỗi ${res}`, type: 'error' });
+                    return;
+                }
+                const data = await res.json();
+                if (!data) return showDialog({ title: 'Cảnh báo', message: `lỗi khi lưu thông tin`, type: 'error' });
+                showDialog({ title: 'Thông báo', message: `Gửi thành công`, type: 'success' });
+                
+            } catch (err) {
+                showDialog({ title: 'Cảnh báo', message: `lỗi gửi  ${err}`, type: 'error' });
+                return;
+            }
+            
         },
 
         cancelSelection: function () {
@@ -407,15 +498,37 @@
         },
 
         exportList: function () {
-            const selectedItems = this.getSelections();
-            if (!selectedItems.length) {
-                if (!confirm('Chưa có mục nào được chọn. Bạn có muốn xuất toàn bộ danh sách?')) {
-                    return;
-                }
+            const all = this.getSelectionsExcel();
+            const selected = all;
+            if (!selected.length) {
+                showDialog({ title: 'Cảnh báo', message: 'Vui lòng chọn ít nhất một nhà cung cấp hoặc sản phẩm để xuất.', type: 'info' });
+                return;
             }
-
-            alert('Đang chuẩn bị xuất danh sách...');
-            // TODO: Logic export Excel/PDF
+            fetch('/Quote/ExportSelection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(selected)
+            })
+                .then(async res => {
+                    if (!res.ok) {
+                        const txt = await res.text();
+                        throw new Error(txt || 'Export failed');
+                    }
+                    return res.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `SelectionQuote_${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => {
+                    showDialog({ title: 'Lỗi', message: (err && err.message) ? err.message : 'Không thể xuất file', type: 'error' });
+                });
         },
 
         toggleSelectAll: function (e) {

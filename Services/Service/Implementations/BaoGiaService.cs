@@ -174,5 +174,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             return result;
         }
+        // Xuất báo giá
+        public async Task<GenericResponse<List<int>>> ExportBaoGiaAsync(string? maDon)
+        {
+            var result = new GenericResponse<List<int>>();
+            try
+            {
+                result.Data = await _repo.ExportBaoGiaAsync(maDon);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return result;
+        }
     }
 }

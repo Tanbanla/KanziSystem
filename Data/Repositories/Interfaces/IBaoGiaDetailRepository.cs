@@ -12,5 +12,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> InsertListBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> listDto);
         // Update lua chon NCC
         public Task<bool> UpdateLuaChonNCCBaoGiaDetailAsync(List<dynamic> listUp, string user, string name);
+        // Lấy thông tin theo ID_RequestQuote
+        public Task<BaoGia_Detail_of_Quotation> GetByIdRequestQuoteAsync(int idRequest);
     }
 }
