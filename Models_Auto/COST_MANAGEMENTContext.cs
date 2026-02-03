@@ -647,6 +647,10 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.VCHR_MSDS).HasMaxLength(50);
             entity.Property(e => e.VCHR_AnToan).HasMaxLength(50);
             entity.Property(e => e.VCHR_CamKet).HasMaxLength(50);
+            entity.Property(e => e.NVCHR_NhaSanXuat).HasMaxLength(250);
+            entity.Property(e => e.CHR_NameEN).HasMaxLength(200);
+            entity.Property(e => e.NVCHR_DonVi).HasMaxLength(150);
+            entity.Property(e => e.INT_SoLuong).HasDefaultValue(0);
         });
 
         modelBuilder.Entity<BaoGia_History_Approver_of_Quotation>(entity =>
@@ -761,6 +765,8 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.DTM_UpdateDate).HasColumnType("datetime");
             entity.Property(e => e.NVCHAR_TenNCC).HasMaxLength(300);
+            entity.Property(e => e.NVCHR_MakeIn).HasMaxLength(255);
+            entity.Property(e => e.NVCHR_CodeByNCC).HasMaxLength(300);
         });
 
         modelBuilder.Entity<BaoGia_Request_of_Quotation>(entity =>

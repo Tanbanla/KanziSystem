@@ -76,4 +76,16 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public int pageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
     }
+    public class SelectionExportItem
+    {
+        public string? ID { get; set; }
+        public string? MaDon { get; set; }
+    }
+   // Paramater Export file
+   public class AutoRenderFile
+    {
+        public List<string> selectedItemIds { get; set; } = new List<string>();
+        public string sectionCode { get; set; } = string.Empty;
+        public string sectionName { get; set; } = string.Empty;
+    }
 }

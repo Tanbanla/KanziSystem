@@ -222,6 +222,35 @@
     <!-- Make overlay clickable to close for info dialogs -->
     <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
 </div>
+<!-- Auto Render modal -->
+<div id="arModalOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="arModalTitle">
+        <div class="cm-dialog-header">
+            <h6 id="arModalTitle" class="cm-dialog-title">Auto render xuất Excel</h6>
+            <button type="button" class="cm-btn cm-btn-outline" id="arCloseBtn" aria-label="Đóng">✕</button>
+        </div>
+        <div id="arModalBody" class="cm-dialog-body">
+            <div id="arError" class="text-danger small mb-2" style="display:none"></div>
+            <div class="mb-3">
+                <label class="form-label">Mã phòng ban</label>
+                <select id="arSection" class="form-select"></select>
+                <div id="arSectionName" class="small text-muted mt-1"></div>
+            </div>
+            <div class="mb-2 d-flex justify-content-between align-items-center">
+                <label class="form-label mb-0">Chọn mã hàng nội bộ</label>
+                <label class="mb-0" style="cursor:pointer"><input type="checkbox" id="arSelectAll" /> Chọn tất cả</label>
+            </div>
+            <input id="arSearch" type="text" class="form-control form-control-sm mb-2" placeholder="Tìm mã hoặc tên..." />
+            <div id="arMaterialList" style="max-height: 320px; overflow: auto; border: 1px solid #e0e0e0; padding: 6px; border-radius: 4px;"></div>
+        </div>
+        <div id="arModalFooter" class="cm-dialog-footer">
+            <button type="button" class="cm-btn cm-btn-outline" id="arCancelBtn">Hủy</button>
+            <button type="button" class="cm-btn cm-btn-primary" id="arExportBtn">Xuất Excel</button>
+        </div>
+    </div>
+    <div class="cm-dialog-backdrop" data-ar-action="overlay"></div>
+    
+</div>
 <script>
     window.indexQuoteData = {
         user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser))

@@ -148,8 +148,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             WITH rq AS (
                 SELECT r.*
                 FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] AS r
-                WHERE 1 = 1  ");
-            //and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5
+                WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5");
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(maDon))

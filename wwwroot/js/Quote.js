@@ -6,6 +6,7 @@
         searchMaterials: '/Quote/GetSearchMaterial'
         , getSuppliersByMaHang: '/Quote/GetNhaCungCapByMaHang'
         , uploadQuoteExcel: '/Quote/UploadQuoteExcel'
+        , exportAutoRender: '/Quote/ExportAutoRender'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -565,12 +566,18 @@
                     const getSupCode = (s) => s?.chR_MaNCC ||  (typeof s === 'string' ? s : undefined) || '';
                     // If only one supplier, set current row's supplier
                     if (suppliers.length === 1) {
-                        const supCode = getSupCode(suppliers[0]);
+                        const s = suppliers[0];
+                        const supCode = getSupCode(s);
                         const supSel = tr.querySelector('.nhaCungCapTb');
                         if (supSel) {
                             supSel.value = supCode;
-                            updateSearchableSelectDisplay(supSel);
+                            try { updateSearchableSelectDisplay(supSel); } catch (e) { }
                         }
+                        // Fill mã hàng NCC and NSX for the single supplier into the current row
+                        const codeByNccInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+                        if (codeByNccInputSingle && s.nvchR_CodeByNCC) codeByNccInputSingle.value = s.nvchR_CodeByNCC;
+                        const nsxInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+                        if (nsxInputSingle && s.nvchR_MakeIn) nsxInputSingle.value = s.nvchR_MakeIn;
                     } else if (suppliers.length > 1) {
                         // Collect current row values to replicate
                         const values = {};
@@ -580,13 +587,19 @@
                         qsa('select', tr).forEach((sel) => values[sel.className || sel.name || sel.id] = sel.value);
 
                         // For first supplier, set current row
-                        const firstCode = getSupCode(suppliers[0]);
+                        const s0 = suppliers[0];
+                        const firstCode = getSupCode(s0);
                         const supSel0 = tr.querySelector('.nhaCungCapTb');
                         if (supSel0) {
                             supSel0.value = firstCode;
                             // update visible searchable UI for this existing row
-                            updateSearchableSelectDisplay(supSel0);
+                            try { updateSearchableSelectDisplay(supSel0); } catch (e) { }
                         }
+                        // Also fill mã hàng NCC and NSX for the first supplier into the current row
+                        const codeByNccInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+                        if (codeByNccInputFirst && s0.nvchR_CodeByNCC) codeByNccInputFirst.value = s0.nvchR_CodeByNCC;
+                        const nsxInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+                        if (nsxInputFirst && s0.nvchR_MakeIn) nsxInputFirst.value = s0.nvchR_MakeIn;
 
                         // Insert additional rows for remaining suppliers
                         let insertAfter = tr;
@@ -611,9 +624,20 @@
                                 if (values.hasOwnProperty(key)) sel.value = values[key];
                                 sel.classList.remove('is-invalid');
                             });
-                            // Set supplier value for this clone
+                            // Set supplier value for this clone and update its searchable display
                             const supSel = newRow.querySelector('.nhaCungCapTb');
-                            if (supSel) supSel.value = supCode || '';
+                            if (supSel) {
+                                supSel.value = supCode || '';
+                                try { updateSearchableSelectDisplay(supSel); } catch(e) { }
+                            }
+
+                            // Fill ten hang ncc in the cloned row
+                            const codeByNccInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+                            if (codeByNccInput && s.nvchR_CodeByNCC) codeByNccInput.value = s.nvchR_CodeByNCC;
+                            // Fill san xuat in the cloned row
+                            const nsxInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+                            if (nsxInput && s.nvchR_MakeIn) nsxInput.value = s.nvchR_MakeIn;
+
 
                             // insert after last inserted
                             insertAfter.parentNode.insertBefore(newRow, insertAfter.nextSibling);
@@ -635,13 +659,186 @@
             });
         }
     }
+    async function exportAutoRender() {
+        // Hook to static Auto Render modal in Index.cshtml
+        const overlay = document.getElementById('arModalOverlay');
+        const sectionSel = document.getElementById('arSection');
+        const sectionNameEl = document.getElementById('arSectionName');
+        const lst = document.getElementById('arMaterialList');
+        const searchBox = document.getElementById('arSearch');
+        const selectAll = document.getElementById('arSelectAll');
+        const btnExport = document.getElementById('arExportBtn');
+        const btnCancel = document.getElementById('arCancelBtn');
+        const btnClose = document.getElementById('arCloseBtn');
+        const errEl = document.getElementById('arError');
+        const backdrop = overlay ? overlay.querySelector('[data-ar-action="overlay"]') : null;
+        if (!overlay || !sectionSel || !lst || !searchBox || !selectAll || !btnExport || !btnCancel || !btnClose || !errEl) {
+            alert('Không thể mở hộp thoại Auto render');
+            return;
+        }
 
+        // Helpers
+        const hideAr = () => {
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+        };
+        const showAr = () => {
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
+        };
+        const setError = (msg) => {
+            if (msg) {
+                errEl.textContent = msg;
+                errEl.style.display = '';
+            } else {
+                errEl.textContent = '';
+                errEl.style.display = 'none';
+            }
+        };
+        const setBusy = (busy) => {
+            btnExport.disabled = !!busy;
+            btnCancel.disabled = !!busy;
+            btnClose.disabled = !!busy;
+            btnExport.textContent = busy ? 'Đang xuất...' : 'Xuất Excel';
+        };
+
+        // Populate Section options
+        sectionSel.innerHTML = '';
+        const ph = document.createElement('option');
+        ph.value = '';
+       // ph.textContent = 'Chọn phòng ban';
+        sectionSel.appendChild(ph);
+        const srcDeptSel = qs('.tenPhongBanTb');
+        if (srcDeptSel) {
+            Array.from(srcDeptSel.options).forEach((o) => {
+                if (!o || !o.text) return;
+                const opt = document.createElement('option');
+                opt.value = o.value || '';
+                opt.textContent = o.text || '';
+                sectionSel.appendChild(opt);
+            });
+        }
+        const updateSectionName = () => {
+            const txt = sectionSel.options[sectionSel.selectedIndex]?.text || '';
+            const parts = txt.split(' - ');
+            sectionNameEl.textContent = parts.length > 1 ? parts.slice(1).join(' - ') : '';
+        };
+        sectionSel.onchange = updateSectionName;
+        updateSectionName();
+
+        // Populate Material list
+        lst.innerHTML = '';
+        const srcMaterialSel = qs('.maHangNoiBo');
+        const items = [];
+        if (srcMaterialSel) {
+            Array.from(srcMaterialSel.options).forEach((o) => {
+                if (!o.value) return;
+                items.push({ code: o.value, text: o.text || o.value });
+            });
+        }
+        const createItemEl = (it) => {
+            const wrap = document.createElement('label');
+            wrap.style.display = 'flex';
+            wrap.style.minWidth= '350px';
+            wrap.style.alignItems = 'center';
+            wrap.style.gap = '8px';
+            wrap.style.padding = '4px 2px';
+            wrap.style.cursor = 'pointer';
+            wrap.dataset.search = (it.code + ' ' + it.text).toLowerCase();
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = it.code;
+            const span = document.createElement('span');
+            span.textContent = it.text;
+            wrap.appendChild(cb);
+            wrap.appendChild(span);
+            return wrap;
+        };
+        items.forEach(it => lst.appendChild(createItemEl(it)));
+
+        // Search filter
+        searchBox.oninput = () => {
+            const q = (searchBox.value || '').toLowerCase();
+            Array.from(lst.children).forEach((el) => {
+                const s = el.dataset.search || '';
+                el.style.display = !q || s.includes(q) ? '' : 'none';
+            });
+        };
+
+        // Select All toggle on visible items
+        selectAll.onchange = () => {
+            const visibleItems = Array.from(lst.querySelectorAll('label')).filter(el => el.style.display !== 'none');
+            visibleItems.forEach(el => {
+                const cb = el.querySelector('input[type="checkbox"]');
+                if (cb) cb.checked = selectAll.checked;
+            });
+        };
+
+        // Button handlers (override to avoid duplicate bindings)
+        btnCancel.onclick = hideAr;
+        btnClose.onclick = hideAr;
+        if (backdrop) backdrop.onclick = hideAr;
+
+        btnExport.onclick = async () => {
+            setError('');
+            const sectionCode = sectionSel.value || '';
+            const sectionText = sectionSel.options[sectionSel.selectedIndex]?.text || '';
+            const sectionName = sectionText.split(' - ').slice(1).join(' - ');
+            const selectedCodes = Array.from(lst.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (!sectionCode) {
+                setError('Vui lòng chọn mã phòng ban');
+                return;
+            }
+            if (selectedCodes.length === 0) {
+                setError('Vui lòng chọn ít nhất một mã hàng nội bộ');
+                return;
+            }
+            const payload = { sectionCode, sectionName, selectedItemIds: selectedCodes };
+            try {
+                setBusy(true);
+                const res = await fetch(api.exportAutoRender, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const msg = await res.text().catch(() => 'Lỗi không xác định');
+                    throw new Error(msg || 'Xuất file thất bại');
+                }
+                const blob = await res.blob();
+                let fileName = 'AutoRenderQuote.xlsx';
+                const cd = res.headers.get('content-disposition');
+                if (cd) {
+                    const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/["']/g, '').trim();
+                }
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                hideAr();
+                showDialog({ title: 'Thành công', message: 'Đã xuất file Excel tự động.', type: 'success' });
+            } catch (e) {
+                setError(e.message || 'Không thể xuất file');
+            } finally {
+                setBusy(false);
+            }
+        };
+
+        // Show modal
+        showAr();
+    }
     function wireEvents() {
         const container = qs('#quote-request');
         if (!container) return;
         qs('#btnAddRow')?.addEventListener('click', addRow);
         qs('#btnReset')?.addEventListener('click', resetForm);
         qs('#btnCreate')?.addEventListener('click', submitForm);
+        qs('#btnAuto')?.addEventListener('click',exportAutoRender);
         qsa('.btn-remove-row', container).forEach((btn) => {
             btn.addEventListener('click', (e) => removeRow(e.currentTarget));
         });

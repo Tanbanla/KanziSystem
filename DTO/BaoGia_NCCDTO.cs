@@ -12,4 +12,8 @@ public partial class BaoGia_NCCDTO
     public string CHR_MaNCC { get; set; } = null!;
 
     public string NVCHAR_TenNCC { get; set; } = null!;
+
+    public string? NVCHR_CodeByNCC { get; set; }
+
+    public string? NVCHR_MakeIn { get; set; }
 }

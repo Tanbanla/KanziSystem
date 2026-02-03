@@ -84,4 +84,9 @@ public partial class BaoGia_Detail_of_Quotation
     public string? VCHR_AnToan { get; set; }
 
     public string? VCHR_CamKet { get; set; }
+
+    public string? NVCHR_NhaSanXuat { get; set; }
+    public string? NVCHR_DonVi { get; set; }
+    public string? CHR_NameEN { get; set; }
+    public int? INT_SoLuong { get; set; }
 }

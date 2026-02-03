@@ -230,9 +230,9 @@
             <td><input type="text" class="form-control form-control-sm" value="${product.internalCode}" readonly></td>
             <td><input type="text" class="form-control form-control-sm" value="${product.superlier}" readonly></td>
             <td><input type="text" class="form-control form-control-sm supplier-code" value="${product.supplierCode || ''}" placeholder="Mã NCC..."></td>
-            <td><input type="text" class="form-control form-control-sm" value="${product.name || product.productName || ''}" readonly></td>
-            <td><input type="number" class="form-control form-control-sm text-right" value="${product.quantity || 0}" readonly></td>
-            <td><input type="text" class="form-control form-control-sm text-center" value="${product.unit || 'PCS'}" readonly></td>
+            <td><input type="text" class="form-control form-control-sm productName" value="${product.name || product.productName || ''}"></td>
+            <td><input type="number" class="form-control form-control-sm text-right quantity" value="${product.quantity || 0}"></td>
+            <td><input type="text" class="form-control form-control-sm text-center unit" value="${product.unit || 'PCS'}"></td>
             <td><input type="number" class="form-control form-control-sm text-right price-usd" value="${product.priceUSD || 0}" placeholder="0"></td>
             <td><input type="number" class="form-control form-control-sm text-right price-vnd" value="${product.priceVND || 0}" placeholder="0"></td>
             <td><input type="text" class="form-control form-control-sm text-right moq" value="${product.moq || ''}" placeholder="MOQ"></td>
@@ -516,7 +516,11 @@
             VCHR_COCQ: it.cocq || '',
             VCHR_MSDS: it.msds || '',
             VCHR_AnToan: it.antoan || '',
-            VCHR_CamKet: it.camket || ''
+            VCHR_CamKet: it.camket || '',
+            NVCHR_NhaSanXuat: '',
+            NVCHR_DonVi: it.unit,
+            CHR_NameEN:'',
+            INT_SoLuong: it.quantity
         }));
 
         callApi('/Quote/InsertInputQuote', dtoList)
