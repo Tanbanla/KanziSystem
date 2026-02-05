@@ -233,7 +233,7 @@
             { selector: '.tenPhongBanTb', isSelect: true, name: 'Phòng ban' },
 
             // Mã hàng nội bộ (select)
-            { selector: '.maHangNoiBo', isSelect: true, name: 'Mã hàng nội bộ' },
+            //{ selector: '.maHangNoiBo', isSelect: true, name: 'Mã hàng nội bộ' },
 
             // Tên hàng VN (input)
             { selector: 'input[name^="tenHangVN_"]', isSelect: false, name: 'Tên hàng VN' },

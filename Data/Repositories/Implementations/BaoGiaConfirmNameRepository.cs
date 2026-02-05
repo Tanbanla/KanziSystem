@@ -20,11 +20,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context = context;
         }
         //search thông tin xác nhận tên hàng
-        public async Task<List<BaoGia_Confirm_Name_Quotation>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, int pageIndex, int pageSize)
+        public async Task<List<BaoGia_Confirm_Name_Quotation>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize)
         {
             // Xây dựng base query
             var sqlBuilder = new StringBuilder(@"
-                SELECT c.*, r.* 
+                SELECT c.*
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
                 WHERE 1 = 1
@@ -46,16 +46,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sqlBuilder.Append(" AND ISNULL(r.CHR_MaDon, '') LIKE @SoDon");
                 parameters.Add("@SoDon", $"%{md}%");
             }
-
+            if (!string.IsNullOrWhiteSpace(section))
+            {
+                var se = section.Trim();
+                sqlBuilder.Append(" AND ISNULL(r.CHR_SectionCode, '') LIKE @Section");
+                parameters.Add("@Section", $"%{se}%");
+            }
             if (!string.IsNullOrWhiteSpace(TrangThai))
             {
                 sqlBuilder.Append(" AND c.CHR_Status = @TrangThai");
                 parameters.Add("@TrangThai", TrangThai.Trim());
             }
-
-            // Đếm tổng số bản ghi
-            var countSql = $"SELECT COUNT(*) FROM ({sqlBuilder.ToString().Replace("c.*, r.*", "1")}) AS Total";
-            var total = await _conn.ExecuteScalarAsync<int>(countSql, parameters);
 
             // Phân trang
             var PageIndex = pageIndex <= 0 ? 1 : pageIndex;
@@ -70,18 +71,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             parameters.Add("@PageSize", PageSize);
 
             // Thực hiện query
-            var rows = await _conn.QueryAsync<BaoGia_Confirm_Name_Quotation, BaoGia_Request_of_Quotation, BaoGia_Confirm_Name_Quotation>(
-                sqlBuilder.ToString(),
-                (confirm, request) =>
-                {
-                    confirm.ID_RequestQuote = request.ID;
-                    return confirm;
-                },
-                parameters,
-                splitOn: "ID_RequestQuote"
-            );
-
-            return rows.ToList();
+            return (await _conn.QueryAsync<BaoGia_Confirm_Name_Quotation>(sqlBuilder.ToString(), parameters)).ToList();
         }
         // Luu thong tin
         public async Task<bool> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User)
@@ -172,6 +162,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             row.DTM_UserPUR = now;
             row.VCHR_UpdateBy = user;
             row.DTM_UpdateDate = now;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // Luu thong tin
+        public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
+        {
+            await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
             await _context.SaveChangesAsync();
             return true;
         }

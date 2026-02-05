@@ -23,11 +23,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaHistoryService _baoGiaHistoryService;
         private readonly IBaoGiaStatusService _baoGiaStatusService;
         private readonly IBaoGiaDetailService _baoGiaDetailService;
+        private readonly IBaoGiaConfirmNameService _baoGiaConfirmNameService;
         private readonly IWebHostEnvironment _env;
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService,
             INhomViTriService nhomViTriService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
-            IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IWebHostEnvironment env)
+            IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
+            IWebHostEnvironment env)
         {
             _logger = logger;
             _tmNccNewService = tmNccNewService;
@@ -39,6 +41,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaHistoryService = baoGiaHistoryService;
             _baoGiaStatusService = baoGiaStatusService;
             _baoGiaDetailService = baoGiaDetailService;
+            _baoGiaConfirmNameService = baoGiaConfirmNameService;
             _env = env;
         }
         // MARK: - Quote
@@ -181,11 +184,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> InsertDanhSachBaoGia([FromBody] List<BaoGia_Request_of_QuotationDTO> danhSachBaoGia)
         {
             var result = await _baoGiaService.NhapDanhSachBaoGiaAsync(danhSachBaoGia);
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
-
             // result.Data contains inserted DTOs with IDs
             try
             {
@@ -207,6 +205,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (histories.Any())
                 {
                     await _baoGiaHistoryService.InsertHistoryListAsync(histories);
+                }
+                // xac nhan ten
+                var MaterialsNew = insertedList.Where(l => l.CHR_MaHangNoiBo == "" || l.CHR_MaHangNoiBo == null).Select(l => l.ID).ToList();
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                // Insert xác nhận tên
+                if (MaterialsNew.Count > 0)
+                {
+                    try
+                    {
+                        var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
+                        foreach(var i in MaterialsNew)
+                        {
+                            var cf = new BaoGia_Confirm_Name_QuotationDTO();
+                            cf.ID_RequestQuote = i;
+                            cf.DTM_CreateDate = DateTime.Now;
+                            cf.VCHR_CreateBy = GetCurrentUserId();
+                            listConfirm.Add(cf);
+                        }
+                        await _baoGiaConfirmNameService.AddListAsync(listConfirm);
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(ex.Message);
+                    }
                 }
             }
             catch

@@ -152,5 +152,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var data = resp.Data ?? new List<dynamic>();
             return Json(new { success = true, data });
         }
+        // MARK: Quản lý thông tin nhà cung cấp
+        public async Task<IActionResult> SupplierMana()
+        {
+            return View();
+        }
     }
 }

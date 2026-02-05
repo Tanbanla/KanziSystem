@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -17,12 +18,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _mapper = mapper;
         }
         // search thông tin xác nhận tên hàng
-        public async Task<GenericResponse<List<BaoGia_Confirm_Name_QuotationDTO>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, int pageIndex, int pageSize)
+        public async Task<GenericResponse<List<BaoGia_Confirm_Name_QuotationDTO>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize)
         {
             var result = new GenericResponse<List<BaoGia_Confirm_Name_QuotationDTO>>();
             try
             {
-                var Data = await _repo.SearchAsync(TenHang, SoDon, TrangThai, pageIndex, pageSize);
+                var Data = await _repo.SearchAsync(TenHang, SoDon, TrangThai,section, pageIndex, pageSize);
                 result.Data = _mapper.Map<List<BaoGia_Confirm_Name_QuotationDTO>>(Data);
                 result.Success = true;
             }
@@ -89,6 +90,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             try
             {
                 result.Data = await _repo.RejectConfirmNameAsync(id, reason, rejectedBy);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Insert thong tin danh sach
+        public async Task<GenericResponse<bool>> AddListAsync(List<BaoGia_Confirm_Name_QuotationDTO> confirmNames)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var data = _mapper.Map<List<BaoGia_Confirm_Name_Quotation>>(confirmNames);
+                result.Data = await _repo.AddListAsync(data);
                 result.Success = true;
             }
             catch (Exception ex)

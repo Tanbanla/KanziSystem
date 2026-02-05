@@ -5,7 +5,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
     public interface IBaoGiaConfirmNameRepository: IBaseRepository<BaoGia_Confirm_Name_Quotation, int>
     {
         // search thông tin xác nhận tên hàng
-        public Task<List<BaoGia_Confirm_Name_Quotation>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, int pageIndex, int pageSize);
+        public Task<List<BaoGia_Confirm_Name_Quotation>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize);
         // Luu thong tin
         public Task<bool> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo,string? Role, string User);
         // Them thong tin 
@@ -14,5 +14,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> ApproveConfirmNameAsync(int id, string approvedBy);
         // Reject ConfirmName
         public Task<bool> RejectConfirmNameAsync(int id, string reason, string rejectedBy);
+
+        // Insert thong tin danh sach
+        public Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames);
     }
 }

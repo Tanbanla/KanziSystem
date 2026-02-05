@@ -1,0 +1,236 @@
+﻿@{
+    ViewData["Title"] = "Quản lý nhà cung cấp";
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+</head>
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h5 class="mb-3">Quản lý nhà cung cấp</h5>
+        </div>
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+            <div class="btn-group me-2 mb-2" role="group">
+                <button type="button" class="btn btn-outline-success" id="btnExportExcel"><i class="fas fa-file-excel"></i> Download Excel</button>
+                <button type="button" class="btn btn-outline-primary" id="btnImportExcel"><i class="fas fa-upload"></i> Upload Excel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Search Bar -->
+    <form id="supplier-search-form" class="row g-2 align-items-end mb-3">
+        <div class="col-md-3">
+            <label for="searchMa" class="form-label">Mã</label>
+            <input type="text" id="searchMa" name="ma" class="form-control" placeholder="Nhập mã nhà cung cấp">
+        </div>
+        <div class="col-md-4">
+            <label for="searchTen" class="form-label">Tên nhà cung cấp</label>
+            <input type="text" id="searchTen" name="ten" class="form-control" placeholder="Nhập tên nhà cung cấp">
+        </div>
+        <div class="col-md-5 d-flex gap-3 align-items-center">
+            <button type="button" id="btnReset" class="btn btn-secondary"><i class="fas fa-undo"></i> Làm mới</button>
+            <div style="width: 6px"></div>
+            <button type="button" id="btnSearch" class="btn btn-primary"><i class="fas fa-search"></i> Tìm kiếm</button>
+            <div style="width: 6px"></div>
+            <button type="button" id="btnAddSupplier" class="btn btn-success"><i class="fas fa-plus"></i> Thêm</button>
+        </div>
+    </form>
+
+    <!-- Suppliers Grid -->
+    <div class="table-responsive border rounded">
+        <table class="table table-sm table-hover mb-0" id="suppliersTable">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 80px">ID</th>
+                    <th style="width: 140px">Mã</th>
+                    <th>Tên</th>
+                    <th>Địa chỉ</th>
+                    <th>SĐT</th>
+                    <th>Khu vực</th>
+                    <th>Nhóm</th>
+                    <th style="width: 220px" class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows dynamically loaded via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Detail & Related Items (BaoGia_NCCDTO) -->
+    <div class="mt-4">
+        <h6>Chi tiết & Mặt hàng theo nhà cung cấp</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Thông tin nhà cung cấp</div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label class="form-label">Mã</label>
+                            <input id="detailMa" class="form-control" disabled />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Tên</label>
+                            <input id="detailTen" class="form-control" disabled />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">SĐT</label>
+                            <input id="detailSdt" class="form-control" disabled />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Khu vực</label>
+                            <input id="detailKhuvuc" class="form-control" disabled />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <span class="me-auto">Danh sách mặt hàng (BaoGia_NCC)</span>
+                        <button type="button" id="btnAddItem" class="btn btn-sm btn-success">Thêm mặt hàng</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped" id="itemsTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px">ID</th>
+                                        <th style="width: 140px">Mã hàng</th>
+                                        <th style="width: 140px">Mã NCC</th>
+                                        <th>Tên NCC</th>
+                                        <th>Code By NCC</th>
+                                        <th>Made In</th>
+                                        <th style="width: 180px" class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Item rows dynamically loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modals -->
+<div class="cm-dialog-overlay" id="supplierModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Nhà cung cấp</h6>
+                <div style="min-width: 6px"></div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="supplierForm">
+                    <input type="hidden" id="nccId" />
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Mã</label>
+                            <input id="ma" class="form-control" required />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Tên</label>
+                            <input id="ten" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Địa chỉ</label>
+                            <input id="diachi" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">SĐT</label>
+                            <input id="sodienthoai" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fax</label>
+                            <input id="fax" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Khu vực</label>
+                            <input id="khuvuc" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Nhóm</label>
+                            <input id="nhom" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Mã số thuế</label>
+                            <input id="masothue" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">NV KD</label>
+                            <input id="nhanvienkinhdoand" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">NV Kế toán</label>
+                            <input id="nhanvienketoan" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ghi chú</label>
+                            <input id="ghichu" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Hình thức mở TK</label>
+                            <input id="hinhthucmotk" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Điều kiện thanh toán</label>
+                            <input id="dieukienthanhtoan" class="form-control" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSaveSupplier" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cm-dialog-overlay" id="itemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Mặt hàng nhà cung cấp</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <input type="hidden" id="itemId" />
+                    <div class="mb-2">
+                        <label class="form-label">Mã hàng</label>
+                        <input id="CHR_MaHang" class="form-control" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Mã NCC</label>
+                        <input id="CHR_MaNCC" class="form-control" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Tên NCC</label>
+                        <input id="NVCHAR_TenNCC" class="form-control" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Code By NCC</label>
+                        <input id="NVCHR_CodeByNCC" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Made In</label>
+                        <input id="NVCHR_MakeIn" class="form-control" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSaveItem" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Excel input (hidden) -->
+<input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
+
+<script src="~/js/SupplierMana.js"></script>

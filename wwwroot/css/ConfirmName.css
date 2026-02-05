@@ -1,7 +1,23 @@
-.status-badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+﻿.status-badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; }
 .status-draft { background: #f0f0f0; color: #333; }
 .status-confirming { background: #fff4cc; color: #8a6d3b; }
 .status-confirmed { background: #d1e7dd; color: #0f5132; }
 .status-rejected { background: #f8d7da; color: #842029; }
 .table-fixed thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 1; }
 .cell-sm { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Căn giữa dialog custom */
+#cmConfirmDialog,
+#cmReasonDialog {
+    position: fixed !important;
+    top: 55% !important;
+    left: 55% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 3000;
+    display: none;
+    /* Thêm các thuộc tính khác nếu cần */
+}
+
+    #cmConfirmDialog.show,
+    #cmReasonDialog.show {
+        display: block !important;
+    }
