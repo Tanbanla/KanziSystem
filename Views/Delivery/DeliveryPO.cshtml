@@ -94,31 +94,32 @@
             color: #000;
         }
 
-    .table-responsive {
+  .table-responsive
+   {
         max-height: 400px;
         overflow-y: auto;
         border: 1px solid #ddd;
-    }
+   }
 
-    .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
-        position: relative;
-    }
+  .table-responsive {
+  max-height: 400px;
+  overflow-y: auto; 
+  position: relative;
+}
 
-        .table-responsive table thead th {
-            position: sticky;
-            top: 0;
-            background-color: #ffffff;
-            z-index: 10;
-            border-bottom: 2px solid #dee2e6;
-            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
-        }
+.table-responsive table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  z-index: 10;
+  border-bottom: 2px solid #dee2e6;
+  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
 
-        .table-responsive table tbody td {
-            position: relative;
-            z-index: 1;
-        }
+.table-responsive table tbody td {
+  position: relative;
+  z-index: 1;
+}
 </style>
 <div class="row">
     <div class="col-12">
@@ -170,7 +171,7 @@
                             <div class="input-group-text"><i class="ion ion-android-time"></i></div>
                             <div class="input-group-text">Thời gian nhận hàng : </div>
                         </div>
-                        <input type="date" class="form-control" id="idTimeDelivery" />
+                        <input type="date" class="form-control" id="idTimeDelivery"/>
                     </div>
                 </div>
 
@@ -235,77 +236,77 @@
 
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById("CommonModal");
-        const btn = document.getElementById("openModal") || document.querySelector(".btn-open");
-        const closeBtn = modal ? modal.querySelector(".close-btn") : null;
-        const closeBottom = modal ? modal.querySelector(".close-modal") : null;
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById("CommonModal");
+    const btn = document.getElementById("openModal") || document.querySelector(".btn-open");
+    const closeBtn = modal ? modal.querySelector(".close-btn") : null;
+    const closeBottom = modal ? modal.querySelector(".close-modal") : null;
 
-        async function openModal() {
-        const url = '/Delivery/GetExchangeUnit';
-        const options =
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        };
+    async function openModal() {
+    const url = '/Delivery/GetExchangeUnit';
+    const options =
+    {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    };
 
-        try
-        {
-            const response = await fetch(url, options);
-            const result = await response.json();
-            console.log('openModal Data : ', result);
-            populateConversionTable(result);
-        }
-        catch(error)
-        {
-           console.error('Error : ', error);
-        }
-        if (modal) modal.style.display = "flex";
-        }
+    try
+    {
+        const response = await fetch(url, options);
+        const result = await response.json();
+        console.log('openModal Data : ', result);
+        populateConversionTable(result);
+    }
+    catch(error)
+    {
+       console.error('Error : ', error);
+    }
+    if (modal) modal.style.display = "flex";
+    }
 
-        function closeModal() {
-            if (modal) modal.style.display = "none";
-        }
+    function closeModal() {
+        if (modal) modal.style.display = "none";
+    }
 
-        if (btn) btn.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (closeBottom) closeBottom.addEventListener('click', closeModal);
+    if (btn) btn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (closeBottom) closeBottom.addEventListener('click', closeModal);
 
-        window.addEventListener('click', function (event) {
-            if (event.target === modal) closeModal();
-        });
+    window.addEventListener('click', function (event) {
+        if (event.target === modal) closeModal();
+    });
 
-        if (typeof loadListWarehouse === 'function') loadListWarehouse();
+    if (typeof loadListWarehouse === 'function') loadListWarehouse();
 
-        function populateConversionTable(data) {
-            let body = document.getElementById('bodyModal');
-            if (!body) return;
-            let html = '<div class="table-responsive"><table class="table table-bordered"><thead style="background:blue;"><tr>' +
-                       '<th>Mã nguyên liệu</th><th>Đơn vị PO</th><th>Đơn vị quy đổi</th><th>Số lượng quy đổi</th><th>Đơn vị đang sử dụng cho phòng ban đặt hàng</th>' +
-                       '</tr></thead><tbody>';
-            if (!data || data.length === 0) {
-                html += '<tr><td colspan="5" class="text-center">Không có dữ liệu</td></tr>';
-            } else {
-                data.forEach(item => {
-                    html += '<tr>' +
-                            `<td>${escapeHtml(item.materialCode || '')}</td>` +
-                            `<td>${escapeHtml(item.poUnit || '')}</td>` +
-                            `<td>${escapeHtml(item.convertedUnit || '')}</td>` +
-                            `<td>${escapeHtml(item.conversionQty || '')}</td>` +
-                            `<td>${escapeHtml(item.deptUnit || '')}</td>` +
-                            '</tr>';
-                });
-            }
-            html += '</tbody></table></div>';
-            body.innerHTML = html;
-        }
-
-        function escapeHtml(str) {
-            return String(str).replace(/[&<>"']/g, function (m) {
-                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+    function populateConversionTable(data) {
+        let body = document.getElementById('bodyModal');
+        if (!body) return;
+        let html = '<div class="table-responsive"><table class="table table-bordered"><thead style="background:blue;"><tr>' +
+                   '<th>Mã nguyên liệu</th><th>Đơn vị PO</th><th>Đơn vị quy đổi</th><th>Số lượng quy đổi</th><th>Đơn vị đang sử dụng cho phòng ban đặt hàng</th>' +
+                   '</tr></thead><tbody>';
+        if (!data || data.length === 0) {
+            html += '<tr><td colspan="5" class="text-center">Không có dữ liệu</td></tr>';
+        } else {
+            data.forEach(item => {
+                html += '<tr>' +
+                        `<td>${escapeHtml(item.materialCode || '')}</td>` +
+                        `<td>${escapeHtml(item.poUnit || '')}</td>` +
+                        `<td>${escapeHtml(item.convertedUnit || '')}</td>` +
+                        `<td>${escapeHtml(item.conversionQty || '')}</td>` +
+                        `<td>${escapeHtml(item.deptUnit || '')}</td>` +
+                        '</tr>';
             });
         }
-    });
+        html += '</tbody></table></div>';
+        body.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, function (m) {
+            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+        });
+    }
+});
 </script>
 
 <div class="modal" id="CommonModal">
@@ -315,6 +316,7 @@
             <span class="close-btn">&times;</span>
         </div>
         <div class="modal-body" id="bodyModal">
+            
         </div>
         <div class="modal-footer">
             <button class="btn-secondary close-modal">Đóng</button>

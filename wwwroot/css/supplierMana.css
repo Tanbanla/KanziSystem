@@ -1,0 +1,29 @@
+﻿/* keep table header fixed inside scrollable container */
+#suppliersTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #f8f9fa; /* match .table-light */
+}
+/* ensure header row stays above modal/backdrop */
+#suppliersTable thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+}
+/* Căn giữa dialog custom */
+#cmConfirmDialog,
+#cmReasonDialog {
+    position: fixed !important;
+    top: 55% !important;
+    left: 55% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 3000;
+    display: none;
+    /* Thêm các thuộc tính khác nếu cần */
+}
+
+    #cmConfirmDialog.show,
+    #cmReasonDialog.show {
+        display: block !important;
+    }

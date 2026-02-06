@@ -8,26 +8,26 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
     public class SearchPoPayload
     {
-        public string PoNumber { get; set; }
-        public string Department { get; set; }
+        public string? PoNumber { get; set; }
+        public string? Department { get; set; }
     }
 
     public class ExchangeUnit
     {
-        public string materialCode { get; set; }
-        public string poUnit { get; set; }
-        public string convertedUnit { get; set; }
-        public string conversionQty { get; set; }
-        public string deptUnit { get; set; }
+        public string? materialCode { get; set; }
+        public string? poUnit { get; set; }
+        public string? convertedUnit { get; set; }
+        public string? conversionQty { get; set; }
+        public string? deptUnit { get; set; }
     }
 
     public class ConfirmImport
     {
-        public string benXacNhanTruoc { get; set; }
-        public string PO_Detail_Id { get; set; }
-        public string luongvethuctekho { get; set; }
-        public string NgayNhap { get; set; }
-        public string KhoNhan { get; set; }
+        public string? benXacNhanTruoc { get; set; }
+        public string? PO_Detail_Id { get; set; }
+        public string? luongvethuctekho { get; set; }
+        public string? NgayNhap { get; set; }
+        public string? KhoNhan { get; set; }
     }
 
     public class DeliveryController : Controller
@@ -49,11 +49,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             DataTable DanhmuchangPO = db.GET_DATA_FROM_SQL($"SELECT * FROM [IM_PO_DETAIL] WHERE [SoPO] = '{PO}'");
             foreach (DataRow r in DanhmuchangPO.Rows)
             {
-                if (r["Luongvekho"].ToString().Trim().Equals(""))
+                if (r["Luongvekho"].ToString()!.Trim().Equals(""))
                 {
                     Codong_Chuanhapkho = true;
                 }
-                else if (!r["Luongvekho"].ToString().Trim().Equals(""))
+                else if (!r["Luongvekho"].ToString()!.Trim().Equals(""))
                 {
                     Codong_Danhapkho = true;
                 }

@@ -50,6 +50,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
 
             CreateMap<BaoGia_Detail_of_Quotation, BaoGia_Detail_of_QuotationDTO>();
             CreateMap<BaoGia_Detail_of_QuotationDTO, BaoGia_Detail_of_Quotation>();
+
+            CreateMap<BaoGia_NCC_Category, BaoGia_NCC_CategoryDTO>();
+            CreateMap<BaoGia_NCC_CategoryDTO, BaoGia_NCC_Category>();
         }
     }
 }

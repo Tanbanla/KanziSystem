@@ -5,10 +5,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     public class KHO_TMP
     {
         public int ID { get; set; }
-        public string CHR_CODE_MATERIAL { get; set; }
-        public string CHR_WAREHOUSE { get; set; }
+        public string? CHR_CODE_MATERIAL { get; set; }
+        public string? CHR_WAREHOUSE { get; set; }
         public double QUANTITY { get; set; }
-        public string CHR_GROUP_CODE { get; set; }
+        public string? CHR_GROUP_CODE { get; set; }
 
         public static void InsertDataImport(KHO_TMP data)
         {

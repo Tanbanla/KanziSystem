@@ -10,9 +10,17 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
     {
         protected readonly IBaseRepository<T, TKey> _repository;
         protected readonly IMapper _mapper;
+        private ITmNccNewRepository repository;
+
         public BaseService(IBaseRepository<T, TKey> repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
+        }
+
+        public BaseService(ITmNccNewRepository repository, IMapper mapper)
+        {
+            this.repository = repository;
             _mapper = mapper;
         }
 

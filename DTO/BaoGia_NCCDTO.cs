@@ -13,6 +13,14 @@ public partial class BaoGia_NCCDTO
 
     public string NVCHAR_TenNCC { get; set; } = null!;
 
+    public string CHR_CreateBy { get; set; } = null!;
+
+    public DateTime DTM_CreateDate { get; set; }
+
+    public string? CHR_UpdateBY { get; set; }
+
+    public DateTime? DTM_UpdateDate { get; set; }
+
     public string? NVCHR_CodeByNCC { get; set; }
 
     public string? NVCHR_MakeIn { get; set; }

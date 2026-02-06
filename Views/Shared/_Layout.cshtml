@@ -86,6 +86,7 @@
                             </a>
                         </li>
                     }
+                    <span id="us" hidden>@((User.Identity?.Name?.Split('\\').Last() ?? "").ToString())!</span>
                 </ul>
             </nav>
             <div class="main-sidebar sidebar-style-2" tabindex="1" style="overflow: auto visible; outline: none;">
@@ -172,15 +173,15 @@
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> Hàng trong kho</a></li>
                                 <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> Yêu cầu xuất kho</a></li>
                                 <li><a class="nav-link" href=""><i class="fas fa-donate"></i> Tái nhập</a></li>
-                                <li><a class="nav-link" href=""><i class="fas fa-info"></i> Log nhập - xuất</a></li>  
-                                <li><a class="nav-link" href=""><i class="fas fa-info"></i> Truy xuất thông tin</a></li>
+                                <li><a class="nav-link" href="~/Import/Log"><i class="fas fa-info"></i> Log nhập - xuất</a></li>
+                                <li><a class="nav-link" href="~/Import/Xuatkho"><i class="fas fa-file-export"></i> Xuất kho</a></li>
                             </ul>
                         </li>                     
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Approval" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-android-checkmark-circle"></i> <span>Phê duyệt</span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="~/Approval/ListData"><i class="fas fa-check"></i> Phê duyệt</a></li>
-                                <li><a class="nav-link" href="~/Approval/Condition"><i class="fas fa-info-circle"></i> Trạng thái đơn</a></li>
+                                <li><a class="nav-link" href="~/Approval/Condition"><i class="fas fa-info-circle"></i> Trạng thái đơn</a></li>                            
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Master" ? "active" : "")">

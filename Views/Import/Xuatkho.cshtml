@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "Xuất kho";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <div class="form-group" style="margin : 10px 0 0 0">
+                    <div class="input-group mb-2">
+                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="Khối" />
+                        <datalist id="lst_khoi">
+                            <option>PROD</option>
+                            <option>GA</option>
+                            <option>IT</option>
+                            <option>PUR</option>
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 0">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="mnl" placeholder="Mã yêu cầu ">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+
+                        <input type="text" class="form-control" id="kho" placeholder="Tình trạng đơn">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="cost" placeholder="Cost">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <input type="date" class="form-control" id="cost" placeholder="Ngày yêu cầu">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="cost" placeholder="Người tạo">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> Tìm kiếm</button>
+
+                <button type="button" class="btn btn-success ml-3"><i class="fa fa-file-excel"></i> download excel</button>
+               
+            </div>
+            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                <div class="table-responsive card">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th></th>
+                                <th>Mã yêu cầu</th>
+                                <th>Mã hàng</th>
+                                <th>Tên hàng</th>
+                                <th>Số lượng</th>
+                                <th>Đơn vị</th>
+                                <th>Giá tiền</th>                            
+                                <th>Người yêu cầu</th>
+                                <th>Người xuất kho</th>                           
+                                <th></th>
+                            </tr>
+                         
+                        </thead>
+                        <tbody id="list_xuatkho"></tbody>
+                    </table>
+                </div>
+                <ul class="pagination" id="pagination-controls"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+<button id="modal-10" hidden >Click</button>
+@await Html.PartialAsync("_modal", "Import")
+<script src="~/scripts/xuatkho.js"></script>
+<script>
+    window.onload = function(){
+        _load_xuatkho();
+    }
+</script>

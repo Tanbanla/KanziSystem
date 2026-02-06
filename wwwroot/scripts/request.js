@@ -49,14 +49,20 @@
     var adid_dt = document.getElementById("cv_duthao").value;
     var adid_tt = document.getElementById("cv_thamtra").value;
     var adid_pd = document.getElementById("cv_pheduyet").value;
+    var adid_dy = document.getElementById("cv_dongy").value;
+    var adid_xk = document.getElementById("cv_xuatkho").value;
 
     var ten_dt = document.getElementById("ten_duthao").value;
     var ten_tt = document.getElementById("ten_thamtra").value;
     var ten_pd = document.getElementById("ten_pheduyet").value;
+    var ten_dy = document.getElementById("ten_dongy").value;
+    var ten_xk = document.getElementById("ten_xuatkho").value;
 
     var mail_dt = document.getElementById("mail_duthao").value;
     var mail_tt = document.getElementById("mail_thamtra").value;
     var mail_pd = document.getElementById("mail_pheduyet").value;
+    var mail_dy = document.getElementById("mail_dongy").value;
+    var mail_xk = document.getElementById("mail_xuatkho").value;
 
     $.ajax({
         url: '/Request/_Insert_request',
@@ -65,12 +71,13 @@
         data: {
             Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
             Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
-            adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd
+            adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, adid_dy: adid_dy, ten_dy: ten_dy,
+            mail_dy: mail_dy, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk
         },
         success: function (response)
         {
             send_mail(mail_dt, Urgent);
-          /*  document.getElementById("dong").click();*/
+         
         }
     })   
 }
@@ -144,16 +151,20 @@ async function get_mail(us) {
     }
 }
 // gửi mail
-async function send_mail(adid, Urgent) {
+async function send_mail(mail_to, Urgent) {
     $.ajax({
         url: '/Request/_send_mail',
         type: 'POST',
         dataType: 'JSON',
         data: {
-            adid: adid, Urgent: Urgent
+            mail_to: mail_to, Urgent: Urgent
         },
         success: function (response) {
-
+            alert("Đăng ký thành công !");
+            location.reload();
+            document.querySelectorAll('.close').forEach(button => button.click());
+            var us = document.getElementById("us").innerHTML;
+            _load_confirm(us);
         }
     })
 }
@@ -169,6 +180,7 @@ function _load_confirm(us) {
     })
         .then(response => response.ok ? response.json() : Promise.reject(response))
         .then(data => {
+           
             const tbody = document.getElementById('list_approve');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
@@ -179,8 +191,8 @@ function _load_confirm(us) {
                 "0": ["Đợi người dự thảo", "warning", 1],
                 "1": ["Đợi người thẩm tra", "info", 2],
                 "2": ["Đợi người phê duyệt", "info", 3],
-                "3": ["Đợi bên tiếp nhận", "secondary", 4],
-                "4": ["Đợi phụ trách kho", "warning", 5],
+                "3": ["Đợi bên tiếp nhận", "success", 4],
+                "4": ["Đợi phụ trách kho", "success", 5],
                 "5": ["Hoàn thành", "success", 6], // Vị trí 6 để tất cả 5 chấm đều success
                 "6": ["Bị từ chối", "danger", 1],
                 "7": ["Bị từ chối", "danger", 2],
@@ -203,13 +215,13 @@ function _load_confirm(us) {
                     return "<span></span>";
                 });
              
-                const urg = item.urgent == "True" ? "<b class='text-danger'>Gấp</b>" : "Thông thường";
+                const urg = item.urgent == "True" ? "<b class='text-danger'><i>* Gấp</i></b>" : "Thông thường";
                 const trangthai = `<div class="badge badge-pill badge-${config[1]} mb-1">${config[0]}</div>`;
 
                 return `
                 <tr>
                     <td><input type="checkbox" /></td>
-                    <td id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><i class="fa fa-info text-info"></i></td>
+                    <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><i class="fa fa-info text-info"></i></td>
                     <td>${urg}</td>
                     <td>${trangthai}</td>
                     <td>${item.code_Request}</td>
@@ -221,8 +233,9 @@ function _load_confirm(us) {
                     <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
                     <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
                     <td>${item.chR_TEN_NGUOIPHEDUYET} ${dots[2]}</td>
-                    <td>${dots[3]}</td>
-                    <td>${dots[4]}</td>
+                    <td>${item.chR_TEN_XACNHAN} ${dots[3]}</td>
+                    <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>
+                    <td></td>
                 </tr>`;
             }).join('');
         })
@@ -237,7 +250,6 @@ function _modal_info(cost_request, step) {
             cost_request: cost_request
         },
         success: function (response) {
-            console.log(response);
             document.getElementById("modal-7").click();
             document.getElementById("load_detail").innerHTML = "";
             document.getElementById("madonhang").innerHTML = "*" + response[0].code_Request + "*" ;
@@ -248,6 +260,7 @@ function _modal_info(cost_request, step) {
             document.getElementById("thmm").innerHTML = response[0].dealine.split(' ')[0];
             document.getElementById("khoi").innerHTML = response[0].group_Code.split(' ')[0];
             document.getElementById("id_request").innerHTML = response[0].id_Request;
+            document.getElementById("urgent").innerHTML = response[0].urgent;
             document.getElementById("step").innerHTML = step;
             if (step == "0") {
                 document.getElementById("regency").innerHTML = "NGUOIYEUCAU";
@@ -261,7 +274,9 @@ function _modal_info(cost_request, step) {
             if (step == "3") {
                 document.getElementById("regency").innerHTML = "XACNHAN";
             }
-          
+            if (step == "4") {
+                document.getElementById("regency").innerHTML = "XUATKHO";
+            }
             for (var i = 0; i < response.length; i++) {
                 var tongtien = response[i].total_exchange;
                 document.getElementById("load_detail").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount}</td><td>${response[i].unit}</td><td>${response[i].price}</td><td>${response[i].currency}</td><td>${tongtien}</td><td>${response[i].aim}</td>`;
@@ -274,11 +289,13 @@ function _update_request() {
     var id_request = document.getElementById("id_request").innerHTML;
     var regency = document.getElementById("regency").innerHTML;
     var step = document.getElementById("step").innerHTML;
+    var urgent = document.getElementById("urgent").innerHTML;
 
     const params = new URLSearchParams();
     params.append('id_request', id_request);
     params.append('regency', regency);
     params.append('step', step);
+    params.append('urgent', urgent);
 
     fetch('/Request/_update_request', {
         method: 'POST',
@@ -294,9 +311,50 @@ function _update_request() {
     })
         .then(data => {
             alert(data);
+            document.querySelectorAll('.close').forEach(button => button.click());
+            var us = document.getElementById("us").innerHTML;
+            _load_confirm(us);
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 
 }
+function _reject() {
+    var id_request = document.getElementById("id_request").innerHTML;
+    var regency = document.getElementById("regency").innerHTML;
+    var step = document.getElementById("step").innerHTML;
+    var urgent = document.getElementById("urgent").innerHTML;
+    var reason = document.getElementById("reason").value;
+
+    const params = new URLSearchParams();
+    params.append('id_request', id_request);
+    params.append('regency', regency);
+    params.append('step', step);
+    params.append('urgent', urgent);
+    params.append('reason', reason);
+
+    fetch('/Request/_reject', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then(data => {
+            alert("Từ chối đơn yêu cầu !");
+            document.querySelectorAll('.close').forEach(button => button.click());
+            var us = document.getElementById("us").innerHTML;
+            _load_confirm(us);
+           
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+

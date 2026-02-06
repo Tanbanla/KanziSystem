@@ -38,11 +38,11 @@
             for (int index = 1; index < 1000; ++index)
             {
                 var check = _context.GET_DATA_FROM_SQL("SELECT * FROM [REQUEST] WHERE Code_Request = '" + str1 + index.ToString() + "'");
-                if(check.Rows.Count > 0)
+                if (check.Rows.Count > 0)
                 {
                     str2 = str1 + index.ToString();
                     break;
-                }             
+                }
             }
             return str2;
         }

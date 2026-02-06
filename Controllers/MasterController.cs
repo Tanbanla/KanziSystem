@@ -17,16 +17,20 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly INhomViTriService _nhomViTriService;
         private readonly ITmSectionService _tmSectionService;
         private readonly IEmployeeWorkingService _employeeWorkingService;
+        private readonly ITmNccNewService _tmNccNewService;
+        private readonly IBaoGiaNCCService _baoGiaNCCService;
         private readonly ILogger<MasterController> _logger;
 
-        public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService,INhomViTriService nhomViTriService,
-            ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ILogger<MasterController> logger)
+        public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
+            ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService, IBaoGiaNCCService baoGiaNCCService, ILogger<MasterController> logger)
         {
             _approverService = approverService;
             _baoGiaStepService = baoGiaStepService;
             _tmSectionService = tmSectionService;
             _employeeWorkingService = employeeWorkingService;
             _nhomViTriService = nhomViTriService;
+            _tmNccNewService = tmNccNewService;
+            _baoGiaNCCService = baoGiaNCCService;
             _logger = logger;
         }
 
@@ -157,5 +161,55 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
+        // tìm kiếm thông tin nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> SearchSupplier([FromBody] SearchSupplierRequestDTO req)
+        {
+            var resp = await _tmNccNewService.GetNccNewPaging(req?.CodeNcc, req?.NameNcc, req?.PageIndex ?? 1, req?.PageSize ?? 10);
+            if (resp == null || !resp.Success)
+            {
+                return BadRequest(resp);
+            }
+
+            return Ok(resp);
+        }
+        // Thêm thông tin nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> AddSupplier([FromBody] IM_NCC_NEWDTO supplierDto)
+        {
+            supplierDto.nguoi_cap_nhat = GetCurrentUserId() ?? "system";
+            var result = await _tmNccNewService.AddNccNew(supplierDto);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        // Update thông tin nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> UpdateSupplier([FromBody] IM_NCC_NEWDTO supplierDto)
+        {
+            supplierDto.nguoi_cap_nhat = GetCurrentUserId() ?? "system";
+            var result = await _tmNccNewService.UpdateNccNew(supplierDto);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        // Xóa thông tin nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> DeleteSupplier([FromBody] DeleteSupplierRequestDTO req)
+        {
+            var userAction = GetCurrentUserId() ?? "system";
+            var result = await _tmNccNewService.DeleteNccNewByCode(req.Id, userAction);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        // Thông tin chi tiet nhà cung cấp 
+        
     }
 }

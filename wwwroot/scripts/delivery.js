@@ -70,7 +70,8 @@ async function ImportWarehouse() {
     const dateInput = document.getElementById('idTimeDelivery').value;
     const warehouseName = document.getElementById('IdWarehouse').value;
 
-    if (dateInput == '' || warehouseName == '--') {
+    if(dateInput == '' || warehouseName == '--')
+    {
         alert("Bạn cần nhập đầy đủ : ngày nhận và kho nhận");
         return;
     }

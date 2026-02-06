@@ -7,7 +7,7 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
-    public class TmNccNewService:  BaseService<IM_NCC_NEW, int, IM_NCC_NEWDTO>, ITmNccNewService
+    public class TmNccNewService:  BaseService<IM_NCC_NEWDTO, int, IM_NCC_NEW>, ITmNccNewService
     {
         private readonly ITmNccNewRepository _repo;
         public TmNccNewService(ITmNccNewRepository repository, IMapper mapper): base(repository, mapper)
@@ -28,7 +28,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 result.Message = ex.Message;
                 result.Success = false;
-                result.Data = null;
             }
             return result;
         }
@@ -46,18 +45,17 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 result.Message = ex.Message;
                 result.Success = false;
-                result.Data = null;
             }
             
             return result;
         }
         // Lây thông tin nhà cung cấp phân trang
-        public async Task<GenericResponse<List<IM_NCC_NEWDTO>>> GetNccNewPaging(string keyword, int pageIndex, int pageSize)
+        public async Task<GenericResponse<List<IM_NCC_NEWDTO>>> GetNccNewPaging(string? CodeNcc, string? NameNcc, int pageIndex, int pageSize)
         {
             var result = new GenericResponse<List<IM_NCC_NEWDTO>>();
             try
             {
-                var nccNews = await _repo.GetNccNewPaging(keyword, pageIndex, pageSize);
+                var nccNews = await _repo.GetNccNewPaging(CodeNcc, NameNcc, pageIndex, pageSize);
                 result.Data = _mapper.Map<List<IM_NCC_NEWDTO>>(nccNews);
                 result.Success = true;
             }
@@ -65,7 +63,59 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 result.Message = ex.Message;
                 result.Success = false;
-                result.Data = null;
+            }
+            return result;
+        }
+        // Xoa thong tin nha cung cap
+        public async Task<GenericResponse<bool>> DeleteNccNewByCode(int id, string userAction)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var isDeleted = await _repo.DeleteNccNewByCode(id, userAction);
+                result.Data = isDeleted;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Thêm thông tin nhà cung cấp 
+        public async Task<GenericResponse<bool>> AddNccNew(IM_NCC_NEWDTO nccNew)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var nccNewEntity = _mapper.Map<IM_NCC_NEW>(nccNew);
+                var isAdded = await _repo.AddNccNew(nccNewEntity);
+                result.Data = isAdded;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Update thong tin nha cung cap
+        public async Task<GenericResponse<bool>> UpdateNccNew(IM_NCC_NEWDTO nccNew)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var nccNewEntity = _mapper.Map<IM_NCC_NEW>(nccNew);
+                var isUpdated = await _repo.UpdateNccNew(nccNewEntity);
+                result.Data = isUpdated;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
             }
             return result;
         }

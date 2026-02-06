@@ -53,6 +53,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<BaoGia_Master_Approver_Send_Mail> BaoGia_Master_Approver_Send_Mails { get; set; }
 
+    public virtual DbSet<BaoGia_NCC_Category> BaoGia_NCC_Categories { get; set; }
+
     public virtual DbSet<BaoGia_NCC> BaoGia_NCCs { get; set; }
 
     public virtual DbSet<BaoGia_Request_of_Quotation> BaoGia_Request_of_Quotations { get; set; }

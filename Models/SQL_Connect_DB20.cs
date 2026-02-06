@@ -49,11 +49,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                                 return dt.Rows[0][0].ToString();
                             }
                         }
-                    }
+                    }       
                 }
             }
             catch { return ""; }
         }
-    }
+    }   
 
 }

@@ -17,7 +17,7 @@
                             <option>PROD</option>
                             <option>GA</option>
                             <option>IT</option>
-                            <option></option>
+                            <option>PUR</option>
                         </datalist>
                     </div>
                 </div>
@@ -57,7 +57,6 @@
                     <table class="table table-bordered">
                         <thead class="bg-primary">
                             <tr>
-                                <th rowspan="2"></th>
                                 <th rowspan="2">Chi tiết</th>
                                 <th rowspan="2">Tình trạng đơn</th>
                                 <th rowspan="2">Trạng thái đơn</th>
@@ -81,17 +80,192 @@
                         </thead>
                         <tbody id="list_approve"></tbody>
                     </table>
+             
                 </div>
+                <ul class="pagination" id="pagination-controls"></ul>
             </div>
         </div>
     </div>
 </div>
 <button id="modal-7" hidden></button>
-@await Html.PartialAsync("_modal", "Approval")
+@await Html.PartialAsync("_modal_condition", "Approval")
 <script src="~/scripts/request.js"></script>
 <script>
     window.onload = function()
     {
-        _load_confirm();
+       _load_request_condition();
+    }
+
+    const userPagingState = {
+        fullData: [],
+        currentPage: 1,
+        itemsPerPage: 15, // Số mục muốn hiển thị trên mỗi trang
+        totalPages: 0
+    };
+    // --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
+    function _load_request_condition() {
+
+        fetch('/Request/get_requestcondition', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            /* body: params.toString()*/
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                userPagingState.fullData = data;
+                // Tính tổng số trang
+                userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
+
+                // Khởi tạo hiển thị trang đầu tiên
+                goToPage(1);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+    // --- 3. Hàm Xử lý Chuyển Trang ---
+    function goToPage(page) {
+        if (page < 1 || page > userPagingState.totalPages) return;
+
+        userPagingState.currentPage = page;
+
+        // Tính toán chỉ số
+        const startIndex = (page - 1) * userPagingState.itemsPerPage;
+        const endIndex = page * userPagingState.itemsPerPage;
+
+        // Lấy dữ liệu trang hiện tại
+        const pageData = userPagingState.fullData.slice(startIndex, endIndex);
+
+        // Render giao diện
+        renderUserTable(pageData);
+        renderPaginationControls();
+    }
+    // --- 4. Hàm Render Bảng  ---
+    function renderUserTable(data) {
+
+        const tbody = document.getElementById('list_approve');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
+            return;
+        }
+        // Cấu hình trạng thái: [Tên hiển thị, Badge class, Vị trí bước hiện tại/từ chối]
+        const stepMap = {
+            "0": ["Đợi người dự thảo", "warning", 1],
+            "1": ["Đợi người thẩm tra", "info", 2],
+            "2": ["Đợi người phê duyệt", "info", 3],
+            "3": ["Đợi bên tiếp nhận", "success", 4],
+            "4": ["Đợi phụ trách kho", "success", 5],
+            "5": ["Hoàn thành", "success", 6], // Vị trí 6 để tất cả 5 chấm đều success
+            "6": ["Bị từ chối", "danger", 1],
+            "7": ["Bị từ chối", "danger", 2],
+            "8": ["Bị từ chối", "danger", 3],
+            "9": ["Bị từ chối", "danger", 4],
+            "10": ["Bị từ chối", "danger", 5]
+        };
+        tbody.innerHTML = data.map(item => {
+            const s = item.inT_STEP;
+            const config = stepMap[s] || ["Không xác định", "dark", 0];
+            const isReject = parseInt(s) >= 6;
+            const currentStep = config[2];
+
+            // Tạo các dấu chấm (chamtron)
+            const dots = Array.from({ length: 5 }, (_, i) => {
+                const stepIdx = i + 1;
+                if (isReject && stepIdx === currentStep) return "<span class='text-danger'><b>×</b></span>";
+                if (stepIdx < currentStep) return "<span class='text-success'><b>✓</b></span>";
+                if (stepIdx === currentStep) return `<span class='text-warning'>${s === "5" ? "✓" : "◉"}</span>`;
+                return "<span></span>";
+            });
+
+            const urg = item.urgent == "True" ? "<b class='text-danger'><i>* Gấp</i></b>" : "Thông thường";
+            const trangthai = `<div class="badge badge-pill badge-${config[1]} mb-1">${config[0]}</div>`;
+
+            return `
+                    <tr>                       
+                        <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><i class="fa fa-info text-info"></i></td>
+                        <td>${urg}</td>
+                        <td>${trangthai}</td>
+                        <td>${item.code_Request}</td>
+                        <td>${item.cost_Center}</td>
+                        <td>${item.create_Date}</td>
+                        <td>${item.dealine}</td>
+                        <td>${item.total}</td>
+                        <td>${item.user_Create}</td>
+                        <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
+                        <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
+                        <td>${item.chR_TEN_NGUOIPHEDUYET} ${dots[2]}</td>
+                        <td>${item.chR_TEN_XACNHAN} ${dots[3]}</td>
+                        <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>
+                        <td></td>
+                    </tr>`;
+        }).join(''); // Nối tất cả các chuỗi thành một chuỗi HTML lớn
+
+        // Cập nhật DOM chỉ MỘT lần
+        tbody.innerHTML = htmlContent;
+    }
+    // --- 5. Hàm Render Nút Phân trang ---
+    function renderPaginationControls() {
+
+        const container = document.getElementById("pagination-controls");
+        const { currentPage, totalPages } = userPagingState;
+        const maxButtonsToShow = 5; // Số nút tối đa (không tính Previous/Next)
+        let controlsHTML = '';
+
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // Nút Previous
+        controlsHTML += ` <li class="page-item"><a class="page-link ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">« </a></li>`;
+
+        // Tính toán phạm vi hiển thị
+        let startPage = Math.max(1, currentPage - Math.floor((maxButtonsToShow - 1) / 2));
+        let endPage = Math.min(totalPages, startPage + maxButtonsToShow - 1);
+
+        // Điều chỉnh nếu phạm vi bị thu hẹp ở cuối
+        if (endPage - startPage + 1 < maxButtonsToShow) {
+            startPage = Math.max(1, endPage - maxButtonsToShow + 1);
+        }
+
+        // 1. Nút Trang 1
+        if (startPage > 1) {
+            controlsHTML += renderButton(1, currentPage);
+            // Thêm dấu ... nếu trang 1 không sát với nút bắt đầu
+            if (startPage > 2) {
+                controlsHTML += `<span class="px-2">...</span>`;
+            }
+        }
+
+        // 2. Các nút chính giữa
+        for (let i = startPage; i <= endPage; i++) {
+            controlsHTML += renderButton(i, currentPage);
+        }
+
+        // 3. Nút Trang Cuối
+        if (endPage < totalPages) {
+            // Thêm dấu ... nếu nút cuối không sát với trang cuối
+            if (endPage < totalPages - 1) {
+                controlsHTML += `<span class="px-2">...</span>`;
+            }
+            controlsHTML += renderButton(totalPages, currentPage);
+        }
+
+        // Nút Next
+
+        controlsHTML += ` <li class="page-item"><a class="page-link  ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})"> »</a></li>`;
+        container.innerHTML = controlsHTML;
+    }
+    // Hàm trợ giúp để tạo nút
+    function renderButton(pageNumber, currentPage) {
+        const activeClass = pageNumber === currentPage ? 'btn-primary text-white' : '';
+        return ` <li class="page-item"><a class="page-link  ${activeClass}"  onclick="goToPage(${pageNumber})">${pageNumber}</a></li>`;
     }
 </script>

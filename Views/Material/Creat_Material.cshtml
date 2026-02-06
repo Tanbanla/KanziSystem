@@ -1,74 +1,151 @@
-﻿@{
+﻿@* 
+Pseudocode / Plan (detailed):
+1. Wrap all fields in a <form> with Bootstrap classes and client-side validation (novalidate + JS).
+2. Use a centered card with a subtle shadow and padding.
+3. Arrange fields in logical rows using Bootstrap grid:
+   - Row 1: Material_Code (required), Material_Name_VN (required)
+   - Row 2: Material_Name_EN, Material_Name_JP
+   - Row 3: Account_Code, Account_Name_EN
+   - Row 4: Account_Name_VN, Unit
+   - Row 5: Unit_Note, Price (input-group with currency suffix), Currency (select), Group_Code (select), GoodKind
+4. Use meaningful ids/names for accessibility and label `for` attributes.
+5. Add small helper text and placeholders; mark required fields using `required` and aria attributes.
+6. Add Submit and Cancel buttons; Submit shows spinner on click and uses Bootstrap validation.
+7. Add minimal inline script at bottom to enable Bootstrap validation behavior (prevent submit if invalid).
+8. Keep markup generic (no model-specific tag helpers) so it fits the existing project structure.
+*@
+
+@{
     ViewData["Title"] = "Create";
 }
-<div class="card">
-    <div class="card-header bg-primary">
-        <h4 class="text-white">Tạo mã nguyên vật liệu</h4>
+
+<div class="col-lg-12">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Tạo mã nguyên vật liệu</h5>
+            <small class="text-white-50">Please fill required fields</small>
+        </div>
+        <div class="card-body">
+            <form id="materialForm" class="needs-validation" novalidate>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="MaterialCode" class="font-weight-bold">Material Code <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="MaterialCode" name="MaterialCode" placeholder="e.g. MAT-0001" required aria-required="true">
+                        <div class="invalid-feedback">Material Code is required.</div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="MaterialNameVN" class="font-weight-bold">Material Name (VN) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="MaterialNameVN" name="MaterialNameVN" placeholder="Tên nguyên vật liệu" required>
+                        <div class="invalid-feedback">Vietnamese name is required.</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="MaterialNameEN">Material Name (EN)</label>
+                        <input type="text" class="form-control" id="MaterialNameEN" name="MaterialNameEN" placeholder="English name">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="MaterialNameJP">Material Name (JP)</label>
+                        <input type="text" class="form-control" id="MaterialNameJP" name="MaterialNameJP" placeholder="Japanese name">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="AccountCode">Account Code</label>
+                        <input type="text" class="form-control" id="AccountCode" name="AccountCode" placeholder="Account code">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="AccountNameEN">Account Name (EN)</label>
+                        <input type="text" class="form-control" id="AccountNameEN" name="AccountNameEN" placeholder="Account name in English">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="AccountNameVN">Account Name (VN)</label>
+                        <input type="text" class="form-control" id="AccountNameVN" name="AccountNameVN" placeholder="Account name in Vietnamese">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Unit">Unit</label>
+                        <input type="text" class="form-control" id="Unit" name="Unit" placeholder="e.g. kg, pcs">
+                    </div>
+                </div>
+
+                <div class="form-row align-items-end">
+                    <div class="form-group col-md-3">
+                        <label for="UnitNote">Unit Note</label>
+                        <input type="text" class="form-control" id="UnitNote" name="UnitNote" placeholder="Optional note">
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="Price">Price</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="Price" name="Price" placeholder="0.00" step="0.01" min="0">
+                            <div class="input-group-append">
+                                <span class="input-group-text">VND</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="Currency">Currency</label>
+                        <select id="Currency" name="Currency" class="form-control">
+                            <option value="VND" selected>VND</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GroupCode">Group Code</label>
+                        <select id="GroupCode" name="GroupCode" class="form-control">
+                            <option value="">-- Select --</option>
+                            <option value="GRP1">GRP1</option>
+                            <option value="GRP2">GRP2</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Good Kind</label>
+                        <input type="text" class="form-control" id="GoodKind" name="GoodKind" placeholder="Type">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-secondary mr-2" onclick="history.back()">Cancel</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary">
+                        <span id="btnText">Submit</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm ml-2 d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="inputEmail4">Material_Code</label>
-                <input type="email" class="form-control" id="inputEmail4">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="inputPassword4">Material_Name_VN</label>
-                <input type="text" class="form-control" id="inputPassword4">
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="inputEmail4">Material_Name_EN</label>
-                <input type="email" class="form-control" id="inputEmail4">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="inputPassword4">Material_Name_JP</label>
-                <input type="text" class="form-control" id="inputPassword4">
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="inputEmail4">Account_Code</label>
-                <input type="email" class="form-control" id="inputEmail4">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="inputPassword4">Account_Name_EN</label>
-                <input type="text" class="form-control" id="inputPassword4">
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="inputEmail4">Account_Name_VN</label>
-                <input type="email" class="form-control" id="inputEmail4">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="inputPassword4">Unit</label>
-                <input type="text" class="form-control" id="inputPassword4">
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-3">
-                <label for="inputEmail4">Unit_Note</label>
-                <input type="email" class="form-control" id="inputEmail4">
-            </div>
-            <div class="form-group col-md-2">
-                <label for="inputPassword4">Price</label> <code style="float:right"><b>VND</b></code>
-                <input type="text" class="form-control" id="inputPassword4">
-            </div>
-            <div class="form-group col-md-2">
-                <label for="inputAddress">Currency</label>
-                <input type="number" class="form-control" id="inputAddress">
-            </div>
-            <div class="form-group col-md-3">
-                <label for="inputAddress2">Group_Code</label>
-                <input type="number" class="form-control" id="inputAddress">
-            </div>
-            <div class="form-group col-md-2">
-                <label for="inputCity">GoodKind</label>
-                <input type="text" class="form-control" id="inputCity">
-            </div>
-        </div>
-     
-        <button class="btn btn-primary">Submit</button>
-    </div>
+    <small class="form-text text-muted mt-2">Fields marked with <span class="text-danger">*</span> are required.</small>
 </div>
+
+<script>
+    (function () {
+        'use strict';
+        var form = document.getElementById('materialForm');
+        var submitBtn = document.getElementById('submitBtn');
+        var btnText = document.getElementById('btnText');
+        var btnSpinner = document.getElementById('btnSpinner');
+
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // Show spinner and let form submit (or perform AJAX here)
+                btnText.textContent = 'Saving...';
+                btnSpinner.classList.remove('d-none');
+                // If you want to prevent real submit for demo, uncomment:
+                // event.preventDefault();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    })();
+</script>

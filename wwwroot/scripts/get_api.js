@@ -42,13 +42,84 @@ async function getEmployeeData() {
             loadToCombo_TBP("Dept Manager", "thamtra");
             loadToCombo_GD("Director", "pheduyet");
         }
+
+        get_block();
         return data;
 
     } catch (error) {
         console.error("Không thể lấy dữ liệu:", error);
     }
 }
+// Lấy danh sách user kho và đồng ý 
+function get_block() {
+    var group_code = document.getElementById("group_code").value;
+    const params = new URLSearchParams();
+    params.append('group_code', group_code);
 
+    fetch('/Import/_load_userinventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            document.getElementById("ten_dongy").innerHTML = "";
+            document.getElementById("ten_xuatkho").innerHTML = "";
+            document.getElementById("cv_dongy").innerHTML = "";
+            document.getElementById("cv_xuatkho").innerHTML = "";
+            document.getElementById("mail_dongy").innerHTML = "";
+            document.getElementById("mail_xuatkho").innerHTML = "";
+            // Khởi tạo biến kiểm tra 
+            var isFirstRole1 = true;
+            var isFirstRole2 = true;
+
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].role == "1") {
+                    document.getElementById("ten_xuatkho").innerHTML += `<option value="${data[i].id_User}_${data[i].user_Name}">${data[i].user_Name}</option>`;
+                    if (isFirstRole1) {
+                        document.getElementById("cv_xuatkho").value = data[i].adid;
+                        document.getElementById("mail_xuatkho").value = data[i].mail;
+                        isFirstRole1 = false;
+                    }
+                }
+
+                if (data[i].role == "2") {
+                    document.getElementById("ten_dongy").innerHTML += `<option value="${data[i].id_User}_${data[i].user_Name}">${data[i].user_Name}</option>`;
+                    if (isFirstRole2) {
+                        document.getElementById("cv_dongy").value = data[i].adid;
+                        document.getElementById("mail_dongy").value = data[i].mail;
+                        isFirstRole2 = false;
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+// Tạo sự kiện khi thay đổi user
+function get_useriv(id) {
+    
+    const params = new URLSearchParams();
+    params.append('id', id.split('_')[0]);
+
+    fetch('/Import/_getid_user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data[0].role == "1") {
+                document.getElementById("cv_xuatkho").value = data[0].adid;
+                document.getElementById("mail_xuatkho").value = data[0].mail;
+            }
+            if (data[0].role == "2") {
+                document.getElementById("cv_dongy").value = data[0].adid;
+                document.getElementById("mail_dongy").value = data[0].mail;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
 // Hàm tạo Payload (dữ liệu gửi đi)
 const createSearchData = (position) => ({
     "SearchTerm": "",

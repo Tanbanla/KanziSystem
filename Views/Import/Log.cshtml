@@ -1,0 +1,88 @@
+﻿@{
+    ViewData["Title"] = "Log Nhập - Xuất";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <div class="form-group" style="margin :0px 0 0 0px">
+                    <label>Mã nguyên liệu : </label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="manguyenlieu" placeholder="VD: A000452 ">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <label>Mã yêu cầu : </label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="madon" placeholder="VD: A004.20251004-1 ">
+                    </div>
+                </div>              
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <label>Kho : </label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="kho" placeholder="VD: F2">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <label>Loại :</label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="loai" list="lst_loai" placeholder="--- Chọn ---">
+                        <datalist id="lst_loai">
+                            <option>XUAT</option>
+                            <option>NHAP</option>
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <label>Từ ngày :</label>
+                    <div class="input-group mb-2">
+                        <input type="date" class="form-control" id="ngay_tu">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <label>Đến ngày :</label>
+                    <div class="input-group mb-2">
+                        <input type="date" class="form-control" id="ngay_den">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <label>Phòng tiếp nhận : </label>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="phong" placeholder="VD: A004">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_log()"><i class="ion ion-ios-search-strong"></i> Tìm kiếm</button>
+                <button type="button" class="btn btn-success ml-3 mt-4" id="modal-9"><i class="fa fa-file-excel"></i> download log</button>
+            </div>
+            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                <div class="table-responsive card">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary">
+                            <tr>
+                                <th>Mã nguyên liệu</th>
+                                <th>Hành động</th>
+                                <th>Số lượng</th>
+                                <th>Loại</th>
+                                <th>Ngày nhập kho</th>
+                                <th>Đảm nhiệm</th>
+                                <th>Kho</th>
+                                <th>Khối</th>                            
+                                <th>Vị trí</th>
+                                <th>Phòng tiếp nhận</th>
+                            </tr>                          
+                        </thead>
+                        <tbody id="list_log"></tbody>
+                    </table>
+                </div>
+                <ul class="pagination" id="pagination-controls"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_modal", "Import")
+<script src="~/scripts/im_log.js"></script>
+<script>
+    window.onload = function(){
+        _load_log();
+    }
+</script>

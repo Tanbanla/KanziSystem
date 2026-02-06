@@ -3,6 +3,7 @@
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/supplierMana.css" />
 </head>
 <div class="container-fluid py-3">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -36,10 +37,10 @@
     </form>
 
     <!-- Suppliers Grid -->
-    <div class="table-responsive border rounded">
-        <table class="table table-sm table-hover mb-0" id="suppliersTable">
+    <div class="table-responsive border rounded" style="max-height:550px;height:550px;overflow:auto;">
+        <table class="table table-sm table-hover table-bordered align-middle" id="suppliersTable">
             <thead class="table-light">
-                <tr>
+                <tr class="text-center align-middle">
                     <th style="width: 80px">ID</th>
                     <th style="width: 140px">Mã</th>
                     <th>Tên</th>
@@ -51,66 +52,23 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Rows dynamically loaded via JS -->
+               
             </tbody>
         </table>
     </div>
-
-    <!-- Detail & Related Items (BaoGia_NCCDTO) -->
-    <div class="mt-4">
-        <h6>Chi tiết & Mặt hàng theo nhà cung cấp</h6>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">Thông tin nhà cung cấp</div>
-                    <div class="card-body">
-                        <div class="mb-2">
-                            <label class="form-label">Mã</label>
-                            <input id="detailMa" class="form-control" disabled />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Tên</label>
-                            <input id="detailTen" class="form-control" disabled />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">SĐT</label>
-                            <input id="detailSdt" class="form-control" disabled />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Khu vực</label>
-                            <input id="detailKhuvuc" class="form-control" disabled />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center">
-                        <span class="me-auto">Danh sách mặt hàng (BaoGia_NCC)</span>
-                        <button type="button" id="btnAddItem" class="btn btn-sm btn-success">Thêm mặt hàng</button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped" id="itemsTable">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 80px">ID</th>
-                                        <th style="width: 140px">Mã hàng</th>
-                                        <th style="width: 140px">Mã NCC</th>
-                                        <th>Tên NCC</th>
-                                        <th>Code By NCC</th>
-                                        <th>Made In</th>
-                                        <th style="width: 180px" class="text-end">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Item rows dynamically loaded via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="p-2 d-flex justify-content-between align-items-center">
+        <div>
+            <label class="me-2">Số hàng mỗi trang:</label>
+            <select id="pageSizeSelect" class="form-select d-inline-block" style="width:80px">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-primary" id="btnPrevPage">&laquo; Trước</button>
+            <span id="pageInfo" class="mx-2">Trang 1</span>
+            <button class="btn btn-sm btn-outline-primary" id="btnNextPage">Tiếp &raquo;</button>
         </div>
     </div>
 </div>
@@ -120,8 +78,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title">Nhà cung cấp</h6>
-                <div style="min-width: 6px"></div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
+                    <i class="fas fa-times fa-sm"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="supplierForm">
@@ -160,7 +119,7 @@
                             <input id="masothue" class="form-control" />
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">NV KD</label>
+                            <label class="form-label">NV Kinh doanh</label>
                             <input id="nhanvienkinhdoand" class="form-control" />
                         </div>
                         <div class="col-md-3">
@@ -179,18 +138,26 @@
                             <label class="form-label">Điều kiện thanh toán</label>
                             <input id="dieukienthanhtoan" class="form-control" />
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label w-100">Thủ tục mở hải quan</label>
+                            <select id="thuTucMoHaiQuan" class="form-select d-inline-block" style="width:100px; height: 40px;">
+                                <option value="NONEED" selected>Không cần</option>
+                                <option value="NEED">Cần</option>
+                                <option value="CONFIRM">Xác nhận</option>
+                            </select>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">Đóng</button>
                 <button type="button" id="btnSaveSupplier" class="btn btn-primary">Lưu</button>
             </div>
         </div>
     </div>
 </div>
-
-<div class="cm-dialog-overlay" id="itemModal" tabindex="-1" aria-hidden="true">
+<!-- Dialogs mặt hàng nhà cung cấp -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -229,7 +196,31 @@
         </div>
     </div>
 </div>
-
+<!-- Dialogs reused from Quote -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">Thông báo</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="Đóng">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer"></div>
+    </div>
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
+<!-- Custom confirm dialog -->
+<div id="cmConfirmDialog" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmConfirmTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmConfirmTitle" class="cm-dialog-title cm-confirm-title">Xác nhận</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="cancel" aria-label="Đóng">✕</button>
+        </div>
+        <div class="cm-dialog-body cm-confirm-body">Bạn có chắc chắn?</div>
+        <div class="cm-dialog-footer">
+            <button type="button" class="cm-btn cm-btn-primary" data-cm-action="ok">Đồng ý</button>
+        </div>
+    </div>
+</div>
 <!-- Import Excel input (hidden) -->
 <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
 

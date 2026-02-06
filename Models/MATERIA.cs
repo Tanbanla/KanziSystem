@@ -25,11 +25,14 @@
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
             string code_mt = para.Material_Code!;
+            string timcode = "a.Material_Code like '%%' and";
             if ( para.Material_Code != null) { 
                 code_mt = para.Material_Code!.Split(":")[0].Length > 0 ? para.Material_Code!.Split(":")[0] : para.Material_Code!;
+                timcode = "a.Material_Code = '" + code_mt + "' and";
             }
            
-            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE a.Material_Code = '" + code_mt + "' and a.Material_Name_VN like N'%" + para.Material_Name_VN + "%' and a.Account_Name_VN like N'%" + para.Account_Name_VN + "%' and a.Group_Code = '" + para.Group_Code + "' and b.Hientai > 0");
+           
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode} a.Material_Name_VN like N'%" + para.Material_Name_VN + "%' and a.Account_Name_VN like N'%" + para.Account_Name_VN + "%' and a.Group_Code like '%" + para.Group_Code + "%' and b.Hientai > 0");
             List<PARAS> _material = new List<PARAS>();
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {

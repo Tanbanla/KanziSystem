@@ -1,13 +1,4 @@
-﻿@* <style>
-    #modal-7 .modal-dialog {
-        max-width: 90% !important;
-    }
-
-    #modal-8- .modal-dialog {
-        max-width: 10% !important;
-    }
-</style> *@
-<form class="modal-part" id="modal-detail-part">
+﻿<form class="modal-part" id="modal-detail-part">
     <div class="row">
         <table class="table table-bordered" style="text-align:center">
             <tr hidden>
@@ -16,20 +7,20 @@
                 <td>Regency : <i id="regency"></i></td>
                 <td>Urgent : <i id="urgent"></i></td>
             </tr>
-           <tr>
+            <tr>
                 <th rowspan="2" colspan="4" style="font-size:18px;background-color:#fff9e1">
                     Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                     物品依頼書（共通間材・比例間材用・消耗品）　
                 </th>
                 <th colspan="2" id="madonhang" style="background-color:#fff9e1; font-size:18px"></th>
-           </tr>
-           <tr>
-               <th>
+            </tr>
+            <tr>
+                <th>
                     Phòng tiếp nhận　受け部門：
-               </th>
+                </th>
                 <td style="background-color:#fff9e1" id="khoi"></td>
-           </tr>
-           <tr>
+            </tr>
+            <tr>
                 <td>
                     ※Mã bộ phận yêu cầu<br />
                     依頼部門 コード
@@ -54,7 +45,7 @@
                     ※Thời hạn mong muốn<br />
                     希望期限
                 </td>
-           </tr>
+            </tr>
             <tr style="height:120px; background-color : #fff9e1">
                 <td id="mbp"></td>
                 <td id="mpb_yc"></td>
@@ -99,22 +90,10 @@
             + 10,000ドル (220百万ドン)以上：中級管理職起案=>部長/副部長審査=>取締役決裁<br />
             → Tổng Giám đốc/ Giám đốc phê duyệt <br />
             - Phê duyệt xuất kho(PR1-MC): Quản lý sơ cấp/quản lý trung cấp  → Đảm nhiệm xuất kho kho Kanzai <br />
-           
+
         </div>
         <br /><br />
-      
-    </div>
-    <div class="float-right">
-        <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request()"><i class="ion ion-android-done-all" ></i> Phê duyệt</button>
-        <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
-    </div>
-</form>
 
-<form class="modal-part" id="modal-reject"> 
-    <div class="row">
-        <textarea class="form-control" id="reason"></textarea>
-        <hr />
-        <button type="button" class="btn btn-danger float-right mt-4" onclick="_reject()">Từ chối</button>
     </div>
-
+   
 </form>

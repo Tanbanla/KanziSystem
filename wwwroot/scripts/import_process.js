@@ -72,8 +72,7 @@ function renderUserTable(data) {
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(vd => {
 
-        const btn = `<td><button class=" btn btn-info"><i class="fas ion-android-cart" ></i> Xuất kho</button></td>
-                     <td><button class=" btn btn-danger"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
+        const btn = `<td><button class=" btn btn-danger"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
         return `<tr>
                     <td>${vd.maNguyenLieu}</td>
                     <td>${vd.hientai}</td>
@@ -84,11 +83,9 @@ function renderUserTable(data) {
                     <td>${vd.nvchR_COST}</td>
                     <td>${vd.nvchr_note}</td>
                     <td>${vd.dtM_UPDATE}</td>
-                    
                         ${btn}
                 </tr>`;
     }).join(''); // Nối tất cả các chuỗi thành một chuỗi HTML lớn
-
     // Cập nhật DOM chỉ MỘT lần
     tbody.innerHTML = htmlContent;
 }
@@ -155,15 +152,6 @@ function renderButton(pageNumber, currentPage) {
 
 // Biến lưu dữ liệu nạp từ server để dùng cho các dòng clone sau này
 let globalMaterialData = [];
-
-//$(document).ready(function () {
-//    // 1. Khởi tạo Select2 cho tất cả các ô hiện có (Dòng 1)
-//    initSelect2($('.select2'));
-
-//    // 2. Load dữ liệu
-//    let group_code = $("#group_code").val();
-//    _load_name_inv(group_code);
-//});
 
 // Hàm khởi tạo Select2 (Dùng chung)
 function initSelect2($element) {
