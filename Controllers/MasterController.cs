@@ -18,11 +18,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ITmSectionService _tmSectionService;
         private readonly IEmployeeWorkingService _employeeWorkingService;
         private readonly ITmNccNewService _tmNccNewService;
+        private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
         private readonly IBaoGiaNCCService _baoGiaNCCService;
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
-            ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService, IBaoGiaNCCService baoGiaNCCService, ILogger<MasterController> logger)
+            ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
+            IBaoGiaNccCategoryService baoGiaNccCategoryService, IBaoGiaNCCService baoGiaNCCService ,ILogger<MasterController> logger)
         {
             _approverService = approverService;
             _baoGiaStepService = baoGiaStepService;
@@ -31,6 +33,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _nhomViTriService = nhomViTriService;
             _tmNccNewService = tmNccNewService;
             _baoGiaNCCService = baoGiaNCCService;
+            _baoGiaNccCategoryService = baoGiaNccCategoryService;
             _logger = logger;
         }
 
@@ -209,7 +212,41 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result);
         }
-        // Thông tin chi tiet nhà cung cấp 
-        
+        // Thông tin chi tiết loại hàng nhà cung cấp 
+        [HttpGet]
+        public async Task<IActionResult> GetSupplierDetail(string codeNcc)
+        {
+            var resp = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByMaNCC(codeNcc);
+            if (resp == null || !resp.Success)
+            {
+                return BadRequest(resp);
+            }
+            return Ok(resp);
+        }
+        // thêm thông tin loại hàng nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> AddSupplierDetail([FromBody] BaoGia_NCC_CategoryDTO categoryDto)
+        {
+            categoryDto.CHR_CreateBy = GetCurrentUserId() ?? "system";
+            categoryDto.DTM_CreateBy = System.DateTime.Now;
+            var result = await _baoGiaNccCategoryService.AddBaoGiaNccCategory(categoryDto);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        } 
+        // xóa thông tin loại hàng nhà cung cấp
+        [HttpGet]
+        public async Task<IActionResult> DeleteSupplierDetail(int req)
+        {
+            var userAction = GetCurrentUserId() ?? "system";
+            var result = await _baoGiaNccCategoryService.DeleteBaoGiaNccCategory(req);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

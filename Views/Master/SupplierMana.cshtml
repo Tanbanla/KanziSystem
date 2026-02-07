@@ -78,7 +78,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title">Nhà cung cấp</h6>
-                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
+                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng">
                     <i class="fas fa-times fa-sm"></i>
                 </button>
             </div>
@@ -150,7 +150,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">Đóng</button>
+                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="Đóng">Đóng</button>
                 <button type="button" id="btnSaveSupplier" class="btn btn-primary">Lưu</button>
             </div>
         </div>
@@ -158,40 +158,51 @@
 </div>
 <!-- Dialogs mặt hàng nhà cung cấp -->
 <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xxl">
         <div class="modal-content">
             <div class="modal-header">
-                <h6 class="modal-title">Mặt hàng nhà cung cấp</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="d-flex align-items-center w-100 justify-content-between">
+                    <div>
+                        <h6 class="modal-title">Mặt hàng nhà cung cấp</h6>
+                        <small class="text-muted d-block">NCC: <span id="selectedNccCode"></span> - <span id="selectedNccName"></span></small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseItem_top" role="button" data-bs-dismiss="modal" aria-label="Đóng">
+                            <i class="fas fa-times fa-sm"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
+            @* style="max-height:300px;overflow:auto;" *@
             <div class="modal-body">
-                <form id="itemForm">
-                    <input type="hidden" id="itemId" />
-                    <div class="mb-2">
-                        <label class="form-label">Mã hàng</label>
-                        <input id="CHR_MaHang" class="form-control" required />
+                <div style="margin-bottom: 12px;">
+                    <button type="button" class="btn btn-outline-success btn-sm" id="btnImportItemsExcel"><i class="fas fa-file-excel"></i> Nhập Excel</button>
+                    <input type="file" id="itemsExcelFileInput" accept=".xlsx,.xls" style="display:none" />
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="table-responsive border rounded" >
+                            <table class="table table-sm table-hover table-bordered align-middle" id="supplierItemsTable">
+                                <thead class="table-light">
+                                    <tr class="text-center align-middle">
+                                        <th style="width:140px">Chủng loại</th>
+                                        <th>Made In</th>
+                                        <th style="width:100px">Status</th>
+                                        <th>PIC</th>
+                                        <th>Mail</th>
+                                        <th style="width:120px" class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label">Mã NCC</label>
-                        <input id="CHR_MaNCC" class="form-control" required />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Tên NCC</label>
-                        <input id="NVCHAR_TenNCC" class="form-control" required />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Code By NCC</label>
-                        <input id="NVCHR_CodeByNCC" class="form-control" />
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Made In</label>
-                        <input id="NVCHR_MakeIn" class="form-control" />
-                    </div>
-                </form>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" id="btnSaveItem" class="btn btn-primary">Lưu</button>
+                <button type="button" class="btn btn-secondary" id="btnCloseItem_bottom" role="button" data-bs-dismiss="modal" aria-label="Đóng">Đóng</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnSaveItemHeader" style="min-height:37px; min-width: 55px;"> Lưu</button>
+                <small class="text-muted ms-2">Chỉ cần nhập dữ liệu ở ô đầu tiên (Mã hàng). Các ô khác có thể bỏ trống.</small>
             </div>
         </div>
     </div>

@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', function () {
         supplierDelete: `/Master/DeleteSupplier`,
         supplierExport: '/Master/Suppliers/ExportExcel',
         supplierImport: '/Master/Suppliers/ImportExcel',
-        itemsList: (ma) => `/Master/Suppliers/${ma}/Items`,
-        itemCreate: (ma) => `/Master/Suppliers/${ma}/Items`,
-        itemUpdate: (ma, id) => `/Master/Suppliers/${ma}/Items/${id}`,
-        itemDelete: (ma, id) => `/Master/Suppliers/${ma}/Items/${id}`
+        // Supplier Category Items API (BaoGia_NCC_CategoryDTO)
+        getSupplierDetail: (codeNcc) => `/Master/GetSupplierDetail?codeNcc=${encodeURIComponent(codeNcc)}`,
+        addSupplierDetail: '/Master/AddSupplierDetail',
+        deleteSupplierDetail: (id) => `/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${r.sodienthoai ?? ''}</td>
                 <td>${r.khuvuc ?? ''}</td>
                 <td>${r.nhom ?? ''}</td>
-                <td class="text-end">
+                <td class="text-center">
                     <button class="btn btn-sm btn-primary me-1" data-action="edit">Sửa</button>
                     <button class="btn btn-sm btn-danger me-1" data-action="delete">Xóa</button>
                     <button class="btn btn-sm btn-outline-secondary" data-action="detail">Chi tiết</button>
@@ -171,9 +171,145 @@ document.addEventListener('DOMContentLoaded', function () {
         loadSuppliers();
     }
 
-    async function showDetails(r) {
+    // Supplier items (BaoGia_NCC_CategoryDTO) handling
+    let currentItemSupplier = { ma: '', ten: '' };
+    const supplierItemsTbody = document.querySelector('#supplierItemsTable tbody');
+    const btnSaveItem = document.getElementById('btnSaveItem');
+    const btnSaveItemHeader = document.getElementById('btnSaveItemHeader');
+    const btnImportItemsExcel = document.getElementById('btnImportItemsExcel');
+    const itemsExcelFileInput = document.getElementById('itemsExcelFileInput');
 
+    async function showDetails(r) {
+        currentItemSupplier = { ma: r.ma || '', ten: r.ten || '' };
+        const codeEl = document.getElementById('selectedNccCode');
+        const nameEl = document.getElementById('selectedNccName');
+        if (codeEl) codeEl.textContent = currentItemSupplier.ma;
+        if (nameEl) nameEl.textContent = currentItemSupplier.ten;
+        // preset form's MaNCC
+        const maNccInput = document.getElementById('CHR_MaNCC');
+        if (maNccInput) maNccInput.value = currentItemSupplier.ma;
+        await loadSupplierItems(currentItemSupplier.ma);
+        showEditModal('itemModal');
     }
+
+    async function loadSupplierItems(codeNcc) {
+        if (!supplierItemsTbody) return;
+        supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Đang tải...</td></tr>';
+        try {
+            const res = await fetch(api.getSupplierDetail(codeNcc), { method: 'GET' });
+            if (!res.ok) { supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Không tải được dữ liệu</td></tr>'; return; }
+            const data = await res.json();
+            const list = data.data ?? [];
+            renderSupplierItems(Array.isArray(list) ? list : []);
+        } catch (e) {
+            supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Lỗi tải dữ liệu</td></tr>';
+        }
+    }
+
+    function renderSupplierItems(items) {
+        if (!supplierItemsTbody) return;
+        supplierItemsTbody.innerHTML = '';
+        if (!items || items.length === 0) {
+            supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Không có dữ liệu</td></tr>';
+            return;
+        }
+        items.forEach(it => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center" hidden>${it.id ?? ''}</td>
+                <td class="text-center">${it.nvchR_ChungLoai ?? ''}</td>
+                <td>${it.nvchR_MakeIn ?? ''}</td>
+                <td>${it.chR_Status ?? ''}</td>
+                <td>${it.chR_PIC ?? ''}</td>
+                <td>${it.chR_Mail ?? ''}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-danger" data-action="delete-item">Xóa</button>
+                </td>
+            `;
+            const btnDel = tr.querySelector('[data-action="delete-item"]');
+            btnDel?.addEventListener('click', async () => {
+                const ok = await showConfirmDialog('Xác nhận đồng ý?', 'Bạn có chắc chắn muốn xóa loại hàng này?');
+                if (!ok) return;
+                try {
+                    const res = await fetch(api.deleteSupplierDetail(it.id), { method: 'GET' });
+                    if (!res.ok) { showDialog({ title: 'Lỗi', message: 'Xóa thất bại', type: 'error' }); return; }
+                    showDialog({ title: 'Thành công', message: 'Xóa thành công', type: 'success' });
+                    loadSupplierItems(currentItemSupplier.ma);
+                } catch {
+                    showDialog({ title: 'Lỗi', message: 'Xóa thất bại', type: 'error' });
+                }
+            });
+            supplierItemsTbody.appendChild(tr);
+        });
+    }
+
+    const saveItemHandler = async () => {
+        const payload = {
+            CHR_MaHang: document.getElementById('CHR_MaHang').value.trim(),
+            CHR_MaNCC: document.getElementById('CHR_MaNCC').value.trim() || currentItemSupplier.ma,
+            NVCHAR_TenNCC: document.getElementById('NVCHAR_TenNCC').value.trim() || currentItemSupplier.ten,
+            NVCHR_CodeByNCC: document.getElementById('NVCHR_CodeByNCC').value.trim(),
+            NVCHR_MakeIn: document.getElementById('NVCHR_MakeIn').value.trim()
+        };
+        if (!payload.CHR_MaHang || !payload.CHR_MaNCC) {
+            showDialog({ title: 'Thiếu dữ liệu', message: 'Vui lòng nhập Mã hàng và Mã NCC', type: 'error' });
+            return;
+        }
+        try {
+            const res = await fetch(api.addSupplierDetail, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!res.ok) { showDialog({ title: 'Lỗi', message: 'Thêm thất bại', type: 'error' }); return; }
+            showDialog({ title: 'Thành công', message: 'Thêm loại hàng thành công', type: 'success' });
+            // reset simple fields except MaNCC
+            document.getElementById('CHR_MaHang').value = '';
+            document.getElementById('NVCHAR_TenNCC').value = '';
+            document.getElementById('NVCHR_CodeByNCC').value = '';
+            document.getElementById('NVCHR_MakeIn').value = '';
+            await loadSupplierItems(currentItemSupplier.ma);
+        } catch {
+            showDialog({ title: 'Lỗi', message: 'Thêm thất bại', type: 'error' });
+        }
+    };
+    btnSaveItem?.addEventListener('click', saveItemHandler);
+    btnSaveItemHeader?.addEventListener('click', saveItemHandler);
+
+    btnImportItemsExcel?.addEventListener('click', () => itemsExcelFileInput?.click());
+    itemsExcelFileInput?.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        // Try parse via SheetJS if available
+        if (!window.XLSX) {
+            showDialog({ title: 'Thiếu thư viện', message: 'Không có thư viện đọc Excel trên trình duyệt. Vui lòng nhập từng dòng hoặc liên hệ quản trị.', type: 'error' });
+            e.target.value = '';
+            return;
+        }
+        try {
+            const data = await file.arrayBuffer();
+            const wb = window.XLSX.read(data, { type: 'array' });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const rows = window.XLSX.utils.sheet_to_json(ws, { defval: '' });
+            // Expect columns: CHR_MaHang, NVCHR_CodeByNCC, NVCHR_MakeIn, NVCHAR_TenNCC(optional)
+            let okCount = 0, failCount = 0;
+            for (const row of rows) {
+                const payload = {
+                    CHR_MaHang: String(row.CHR_MaHang || '').trim(),
+                    CHR_MaNCC: currentItemSupplier.ma,
+                    NVCHAR_TenNCC: String(row.NVCHAR_TenNCC || currentItemSupplier.ten || '').trim(),
+                    NVCHR_CodeByNCC: String(row.NVCHR_CodeByNCC || '').trim(),
+                    NVCHR_MakeIn: String(row.NVCHR_MakeIn || '').trim()
+                };
+                if (!payload.CHR_MaHang || !payload.CHR_MaNCC) { failCount++; continue; }
+                try {
+                    const res = await fetch(api.addSupplierDetail, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (res.ok) okCount++; else failCount++;
+                } catch { failCount++; }
+            }
+            showDialog({ title: 'Nhập Excel', message: `Thành công: ${okCount}, Thất bại: ${failCount}`, type: failCount === 0 ? 'success' : 'info' });
+            await loadSupplierItems(currentItemSupplier.ma);
+        } catch {
+            showDialog({ title: 'Lỗi', message: 'Không đọc được file Excel', type: 'error' });
+        }
+        e.target.value = '';
+    });
 
     document.getElementById('btnExportExcel')?.addEventListener('click', async () => {
         const res = await fetch(api.supplierExport, { method: 'GET' });
@@ -250,6 +386,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.getElementById('btnCloseEdit_2')?.addEventListener('click', function () {
         hideEditModal('supplierModal');
+    });
+    document.getElementById('btnCloseItem_top')?.addEventListener('click', function () {
+        hideEditModal('itemModal');
+    });
+    document.getElementById('btnCloseItem_bottom')?.addEventListener('click', function () {
+        hideEditModal('itemModal');
     });
     loadSuppliers();
     // show message dialog

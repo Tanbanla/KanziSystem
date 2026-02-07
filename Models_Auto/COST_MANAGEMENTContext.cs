@@ -770,7 +770,36 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_MakeIn).HasMaxLength(255);
             entity.Property(e => e.NVCHR_CodeByNCC).HasMaxLength(300);
         });
+        modelBuilder.Entity<BaoGia_NCC_Category>(entity => {
+            entity.HasKey(e => e.Id).HasName("PK__BaoGia_N__3214EC27FDB51D78");
 
+            entity.ToTable("BaoGia_NCC_Category");
+
+            entity.Property(e => e.CHR_CreateBy)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.CHR_MaNCC)
+                .HasMaxLength(70)
+                .IsUnicode(false);
+            entity.Property(e => e.NVCHR_TenNCC)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.NVCHR_ChungLoai)
+                .HasMaxLength(300)
+                .IsUnicode(false);
+            entity.Property(e => e.NVCHR_SanXuat)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.CHR_Status)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.DTM_CreateBy)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.CHR_CreateBy).HasMaxLength(20);
+            entity.Property(e => e.CHR_PIC).HasMaxLength(200);
+            entity.Property(e => e.CHR_Mail).HasMaxLength(200);
+        });
         modelBuilder.Entity<BaoGia_Request_of_Quotation>(entity =>
         {
             entity.HasKey(e => e.ID).HasName("PK__BaoGia_R__3214EC273E3D596D");

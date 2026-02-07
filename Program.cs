@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using PRJ_WAREHOUSE_BIVN.Extensions;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -89,6 +90,26 @@ app.UseRouting();
 // Thêm middleware cho session và authentication
 app.UseSession();
 app.UseAuthentication(); // Phải đặt trước UseAuthorization
+// Tự động xóa cookie khi hết phiên đăng nhập (session hết hạn)
+app.Use(async (context, next) =>
+{
+    if (context.User?.Identity?.IsAuthenticated == true)
+    {
+        // Kiểm tra session còn tồn tại không
+        var hasSession = !string.IsNullOrEmpty(context.Session.GetString("UserId"));
+        if (!hasSession)
+        {
+            // Xóa thông tin đăng nhập (cookie auth) khi session hết hạn
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Đưa người dùng về trang đăng nhập
+            context.Response.Redirect("/Account/Login");
+            return;
+        }
+    }
+
+    await next();
+});
 app.UseAuthorization();
 
 

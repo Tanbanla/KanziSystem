@@ -21,7 +21,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [AllowAnonymous]
         public IActionResult Login()
         {
-            // N?u ?ã ??ng nh?p r?i thì redirect v? trang ch?
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
@@ -45,7 +44,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 
                 if (loginResult.Success && loginResult.Data != null)
                 {
-                    // T?o claims cho user
+                    // Tạo claims cho user
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, loginResult.Data.FULLNAME ?? loginResult.Data.CHR_USERID),
@@ -71,13 +70,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         new ClaimsPrincipal(claimsIdentity),
                         authProperties);
 
-                    // L?u thông tin session b? sung
+                    // Lưu thông tin session bổ sung
                     HttpContext.Session.SetString("FullName", loginResult.Data.FULLNAME ?? loginResult.Data.CHR_USERID);
                     HttpContext.Session.SetString("UserId", loginResult.Data.CHR_USERID);
                     HttpContext.Session.SetInt32("UserIdInt", loginResult.Data.ID);
                     HttpContext.Session.SetString("LoginTime", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                    // Đánh dấu phiên làm việc đã khởi tạo để middleware kiểm tra
+                    HttpContext.Session.SetString("SessionActive", "true");
 
-                    // Redirect ??n trang ???c yêu c?u ho?c trang ch?
+                    // Redirect đến trang được yêu cầu hoặc trang chủ
                     var returnUrl = Request.Query["returnUrl"].FirstOrDefault();
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
@@ -107,7 +108,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // Xóa session
             HttpContext.Session.Clear();
             
-            // ??ng xu?t authentication
+            // đăng xuất authentication
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             
             return RedirectToAction("Login", "Account");
