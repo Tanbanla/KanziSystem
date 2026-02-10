@@ -119,5 +119,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // thêm danh sách nhà cung cấp
+        public async Task<GenericResponse<bool>> AddListNccNew(List<IM_NCC_NEWDTO> listNccNew)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var listNccNewEntity = _mapper.Map<List<IM_NCC_NEW>>(listNccNew);
+                var isAdded = await _repo.AddListNccNew(listNccNewEntity);
+                result.Data = isAdded;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

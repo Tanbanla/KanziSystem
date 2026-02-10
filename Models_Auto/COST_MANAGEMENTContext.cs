@@ -237,6 +237,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<TM_AUTHORITY_THEOCHUCNANG> TM_AUTHORITY_THEOCHUCNANGs { get; set; }
 
+    public virtual DbSet<TM_Category> TM_Categorys { get; set; }
+
     public virtual DbSet<TM_GOOD_TYPE> TM_GOOD_TYPEs { get; set; }
 
     public virtual DbSet<TM_KHO_MOLD> TM_KHO_MOLDs { get; set; }
@@ -785,8 +787,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.NVCHR_ChungLoai)
-                .HasMaxLength(300)
-                .IsUnicode(false);
+                .HasMaxLength(300);
             entity.Property(e => e.NVCHR_SanXuat)
                 .HasMaxLength(250)
                 .IsUnicode(false);
@@ -2597,7 +2598,18 @@ public partial class COST_MANAGEMENTContext : DbContext
 
             entity.Property(e => e.CHR_CODE_FUNCTION).HasMaxLength(50);
         });
+        modelBuilder.Entity<TM_Category>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__TM_Categ__3214EC2707B5DB3E");
 
+            entity.ToTable("TM_Category");
+
+            entity.Property(e => e.NVCHR_Category)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.DTM_CreateBy).HasColumnType("datetime");
+            entity.Property(e => e.CHR_CreateBy).HasMaxLength(20);
+        });
         modelBuilder.Entity<TM_GOOD_TYPE>(entity =>
         {
             entity.HasKey(e => e.ID_CODE_GOOD_TYPE);

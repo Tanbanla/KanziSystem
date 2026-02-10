@@ -58,6 +58,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IBaoGiaNccCategory, BaoGiaNccCategory>();
         services.AddScoped<IBaoGiaNccCategoryService, BaoGiaNccCategoryService>();
+
+        services.AddScoped<ITmCategoryRepository, TmCategoryRepository>();
+        services.AddScoped<ITmCategoryService, TmCategoryService>();
         return services;
     }
 }

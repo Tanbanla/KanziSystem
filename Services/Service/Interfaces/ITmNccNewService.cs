@@ -18,5 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<bool>> AddNccNew(IM_NCC_NEWDTO nccNew);
         // Update thong tin nha cung cap
         Task<GenericResponse<bool>> UpdateNccNew(IM_NCC_NEWDTO nccNew);
+        // thêm danh sách nhà cung cấp
+        Task<GenericResponse<bool>> AddListNccNew(List<IM_NCC_NEWDTO> listNccNew);
     }
 }

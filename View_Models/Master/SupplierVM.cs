@@ -14,4 +14,10 @@
     {
         public int Id { get; set; }
     }
+    public class InsertFileExcelSupplierRequestDTO
+    {
+        public IFormFile? FileExcel { get; set; }
+        public string? maNCC { get; set; }
+        public string? tenNCC { get; set; }
+    }
 }

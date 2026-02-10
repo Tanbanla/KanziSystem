@@ -5,12 +5,13 @@ document.addEventListener('DOMContentLoaded', function () {
         supplierCreate: '/Master/AddSupplier',
         supplierUpdate: `/Master/UpdateSupplier`,
         supplierDelete: `/Master/DeleteSupplier`,
-        supplierExport: '/Master/Suppliers/ExportExcel',
-        supplierImport: '/Master/Suppliers/ImportExcel',
+        supplierExport: '/Master/ExportExcel',
+        supplierImport: '/Master/ImportExcel',
         // Supplier Category Items API (BaoGia_NCC_CategoryDTO)
         getSupplierDetail: (codeNcc) => `/Master/GetSupplierDetail?codeNcc=${encodeURIComponent(codeNcc)}`,
         addSupplierDetail: '/Master/AddSupplierDetail',
-        deleteSupplierDetail: (id) => `/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`
+        deleteSupplierDetail: (id) => `/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
+        addListSupplierDetail: '/Master/AddListSupplierDetail'
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');
@@ -113,7 +114,20 @@ document.addEventListener('DOMContentLoaded', function () {
         showDialog({ title: 'Thành công', message: 'Gửi yêu cầu thành công', type: 'success' });
         loadSuppliers();
     }
-
+    // xuất file mẫu
+    document.getElementById('btnExportTemplateExcel')?.addEventListener('click', async () => {
+        try {
+            const url = '/template/TemplateNCC.xlsx';
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Mau_ChungLoai_NCC.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (err) {
+            console.error('Error downloading template', err);
+        }
+    });
     // initialize modals without backdrop to avoid modal-backdrop show
     const supplierModal = new bootstrap.Modal(document.getElementById('supplierModal'), { backdrop: false });
     const itemModal = new bootstrap.Modal(document.getElementById('itemModal'), { backdrop: false });
@@ -218,11 +232,11 @@ document.addEventListener('DOMContentLoaded', function () {
             tr.innerHTML = `
                 <td class="text-center" hidden>${it.id ?? ''}</td>
                 <td class="text-center">${it.nvchR_ChungLoai ?? ''}</td>
-                <td>${it.nvchR_MakeIn ?? ''}</td>
-                <td>${it.chR_Status ?? ''}</td>
+                <td>${it.nvchR_SanXuat ?? ''}</td>
+                <td class="text-center">${it.chR_Status ?? ''}</td>
                 <td>${it.chR_PIC ?? ''}</td>
                 <td>${it.chR_Mail ?? ''}</td>
-                <td class="text-end">
+                <td class="text-center">
                     <button class="btn btn-sm btn-danger" data-action="delete-item">Xóa</button>
                 </td>
             `;
@@ -276,43 +290,31 @@ document.addEventListener('DOMContentLoaded', function () {
     itemsExcelFileInput?.addEventListener('change', async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        // Try parse via SheetJS if available
-        if (!window.XLSX) {
-            showDialog({ title: 'Thiếu thư viện', message: 'Không có thư viện đọc Excel trên trình duyệt. Vui lòng nhập từng dòng hoặc liên hệ quản trị.', type: 'error' });
-            e.target.value = '';
-            return;
-        }
         try {
-            const data = await file.arrayBuffer();
-            const wb = window.XLSX.read(data, { type: 'array' });
-            const ws = wb.Sheets[wb.SheetNames[0]];
-            const rows = window.XLSX.utils.sheet_to_json(ws, { defval: '' });
-            // Expect columns: CHR_MaHang, NVCHR_CodeByNCC, NVCHR_MakeIn, NVCHAR_TenNCC(optional)
-            let okCount = 0, failCount = 0;
-            for (const row of rows) {
-                const payload = {
-                    CHR_MaHang: String(row.CHR_MaHang || '').trim(),
-                    CHR_MaNCC: currentItemSupplier.ma,
-                    NVCHAR_TenNCC: String(row.NVCHAR_TenNCC || currentItemSupplier.ten || '').trim(),
-                    NVCHR_CodeByNCC: String(row.NVCHR_CodeByNCC || '').trim(),
-                    NVCHR_MakeIn: String(row.NVCHR_MakeIn || '').trim()
-                };
-                if (!payload.CHR_MaHang || !payload.CHR_MaNCC) { failCount++; continue; }
-                try {
-                    const res = await fetch(api.addSupplierDetail, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (res.ok) okCount++; else failCount++;
-                } catch { failCount++; }
+            // property names expected by InsertFileExcelSupplierRequestDTO (multipart/form-data)
+            const fd = new FormData();
+            fd.append('FileExcel', file);
+            fd.append('maNCC', currentItemSupplier.ma || '');
+            fd.append('tenNCC', currentItemSupplier.ten || '');
+            const res = await fetch(api.addListSupplierDetail, { method: 'POST', body: fd });
+            if (!res.ok) {
+                let txt = await res.text();
+                showDialog({ title: 'Nhập Excel', message: `Nhập thất bại: ${txt || res.statusText}`, type: 'error' });
+            } else {
+                showDialog({ title: 'Nhập Excel', message: 'Nhập file thành công', type: 'success' });
+                await loadSupplierItems(currentItemSupplier.ma);
             }
-            showDialog({ title: 'Nhập Excel', message: `Thành công: ${okCount}, Thất bại: ${failCount}`, type: failCount === 0 ? 'success' : 'info' });
-            await loadSupplierItems(currentItemSupplier.ma);
-        } catch {
-            showDialog({ title: 'Lỗi', message: 'Không đọc được file Excel', type: 'error' });
+        } catch (err) {
+            showDialog({ title: 'Lỗi', message: `Không thể gửi file: ${err.message || err}`, type: 'error' });
         }
         e.target.value = '';
     });
 
     document.getElementById('btnExportExcel')?.addEventListener('click', async () => {
-        const res = await fetch(api.supplierExport, { method: 'GET' });
+        const ma = document.getElementById('searchMa').value.trim();
+        const ten = document.getElementById('searchTen').value.trim();
+        const body = { CodeNcc: ma, NameNcc: ten, PageIndex: currentPage, PageSize: pageSize };
+        const res = await fetch(api.supplierExport, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)});
         if (!res.ok) return;
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
@@ -323,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btnImportExcel')?.addEventListener('click', () => document.getElementById('excelFileInput').click());
     document.getElementById('excelFileInput')?.addEventListener('change', async (e) => {
         const file = e.target.files[0]; if (!file) return;
-        const fd = new FormData(); fd.append('file', file);
+        const fd = new FormData(); fd.append('importRequest', file);
         const res = await fetch(api.supplierImport, { method: 'POST', body: fd });
         if (res.ok) loadSuppliers();
         e.target.value = '';

@@ -101,5 +101,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+        // thêm danh sách nhà cung cấp
+        public async Task<bool> AddListNccNew(List<IM_NCC_NEW> listNccNew)
+        {
+            await _context.IM_NCC_NEWs.AddRangeAsync(listNccNew);
+            var result = await _context.SaveChangesAsync();
+            return result > 0;
+        }
     }
 }

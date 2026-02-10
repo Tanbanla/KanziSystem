@@ -53,6 +53,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
 
             CreateMap<BaoGia_NCC_Category, BaoGia_NCC_CategoryDTO>();
             CreateMap<BaoGia_NCC_CategoryDTO, BaoGia_NCC_Category>();
+
+            CreateMap<TM_Category, TM_CategoryDTO>();
+            CreateMap<TM_CategoryDTO,TM_Category>();
         }
     }
 }

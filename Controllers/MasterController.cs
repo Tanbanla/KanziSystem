@@ -20,11 +20,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ITmNccNewService _tmNccNewService;
         private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
         private readonly IBaoGiaNCCService _baoGiaNCCService;
+        private readonly ITmCategoryService _tmCategoryService;
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
             ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
-            IBaoGiaNccCategoryService baoGiaNccCategoryService, IBaoGiaNCCService baoGiaNCCService ,ILogger<MasterController> logger)
+            IBaoGiaNccCategoryService baoGiaNccCategoryService, IBaoGiaNCCService baoGiaNCCService
+            , ILogger<MasterController> logger, ITmCategoryService tmCategoryService)
         {
             _approverService = approverService;
             _baoGiaStepService = baoGiaStepService;
@@ -35,6 +37,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaNCCService = baoGiaNCCService;
             _baoGiaNccCategoryService = baoGiaNccCategoryService;
             _logger = logger;
+            _tmCategoryService = tmCategoryService;
         }
 
         public IActionResult Masters()
@@ -164,6 +167,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
+        // Lấy danh sách chủng loại hàng
+        [HttpGet]
+        public async Task<IActionResult> GetCategoryList()
+        {
+            var resp = await _tmCategoryService.GetListCategory();
+            if (resp == null || !resp.Success)
+            {
+                return BadRequest(resp);
+            }
+            return Ok(resp);
+        }
         // tìm kiếm thông tin nhà cung cấp
         [HttpPost]
         public async Task<IActionResult> SearchSupplier([FromBody] SearchSupplierRequestDTO req)
@@ -235,7 +249,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
-        } 
+        }
         // xóa thông tin loại hàng nhà cung cấp
         [HttpGet]
         public async Task<IActionResult> DeleteSupplierDetail(int req)
@@ -247,6 +261,220 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
+        }
+        // Nhập danh sách loại hàng nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> AddListSupplierDetail([FromForm] InsertFileExcelSupplierRequestDTO insertFile)
+        {
+            if (insertFile.FileExcel == null || insertFile.FileExcel.Length == 0)
+                return BadRequest("File không hợp lệ");
+
+            var items = new List<BaoGia_NCC_CategoryDTO>();
+            var user = GetCurrentUserId() ?? "system";
+            try
+            {
+                using var stream = insertFile.FileExcel.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                // Dữ liệu bắt đầu từ dòng 2
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 2).GetString() == "" || ws.Cell(r, 2).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột trong bảng ở giao diện
+                    var dto = new BaoGia_NCC_CategoryDTO
+                    {
+                        Id = 0,
+                        CHR_MaNCC = insertFile.maNCC,
+                        NVCHR_TenNCC = insertFile.tenNCC,
+                        NVCHR_ChungLoai = ws.Cell(r, 1).GetString().Trim(),
+                        NVCHR_SanXuat = ws.Cell(r, 2).GetString().Trim(),
+                        CHR_Status = "Active",
+                        CHR_CreateBy = user,
+                        DTM_CreateBy = DateTime.Now,
+                        CHR_Mail = ws.Cell(r, 3).GetString().Trim(),
+                        CHR_PIC = ws.Cell(r, 4).GetString().Trim()
+                    };
+                    items.Add(dto);
+                }
+                if (items.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                await _baoGiaNccCategoryService.AddListBaoGiaNccCategory(items);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+
+        }
+
+        // Xuất Excel theo dữ liệu đang hiển thị (theo filter / paging)
+        [HttpPost]
+        public async Task<IActionResult> ExportExcel([FromBody] SearchSupplierRequestDTO req)
+        {
+            var resp = await _tmNccNewService.GetNccNewPaging(req?.CodeNcc, req?.NameNcc, req?.PageIndex ?? 1, req?.PageSize ?? 1000);
+            if (resp == null || !resp.Success)
+            {
+                return BadRequest(resp);
+            }
+            var list = resp.Data as System.Collections.IEnumerable;
+            try
+            {
+                using var wb = new ClosedXML.Excel.XLWorkbook();
+                var ws = wb.Worksheets.Add("Suppliers");
+                // headers - export all columns from IM_NCC_NEW
+                var headers = new[] {
+                    "ID",
+                    "Mã",
+                    "Tên",
+                    "Địa chỉ",
+                    "Số điện thoại",
+                    "Fax",
+                    "Khu vực",
+                    "Ghi chú",
+                    "Hình thức thanh toán",
+                    "Điều kiện thanh toán",
+                    "Mã số thuế",
+                    "Nhân viên kinh doanh",
+                    "Nhân viên kế toán",
+                    "Cần phải xác nhận làm thủ tục hải quan",
+                    "Nhóm",
+                };
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    ws.Cell(1, i + 1).Value = headers[i];
+                    ws.Cell(1, i + 1).Style.Font.Bold = true;
+                }
+
+                int r = 2;
+                if (list != null)
+                {
+                    foreach (var item in list)
+                    {
+                        object GetProp(object src, params string[] names)
+                        {
+                            if (src == null) return null;
+                            var t = src.GetType();
+                            foreach (var n in names)
+                            {
+                                var p = t.GetProperty(n, System.Reflection.BindingFlags.IgnoreCase | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                                if (p != null) return p.GetValue(src);
+                            }
+                            return null;
+                        }
+                        var id = GetProp(item, "Ncc_Id");
+                        var ma = GetProp(item, "Ma");
+                        var ten = GetProp(item, "Ten");
+                        var diachi = GetProp(item, "Diachi");
+                        var sdt = GetProp(item, "Sodienthoai");
+                        var fax = GetProp(item, "Fax");
+                        var khuvuc = GetProp(item, "Khuvuc");
+                        var ghichu = GetProp(item, "Ghichu");
+                        var hinhthucmotk = GetProp(item, "Hinhthucmotk");
+                        var dieukien = GetProp(item, "Dieukienthanhtoan");
+                        var masothue = GetProp(item, "Masothue");
+                        var nvkd = GetProp(item, "Nhanvienkinhdoand");
+                        var nvkt = GetProp(item, "Nhanvienketoan");
+                        var canphaixacnhan = GetProp(item, "Canphaixacnhanlamthutuchaiquan");
+                        var nhom = GetProp(item, "nhom");
+
+                        ws.Cell(r, 1).Value = (id ?? string.Empty).ToString();
+                        ws.Cell(r, 2).Value = (ma ?? string.Empty).ToString();
+                        ws.Cell(r, 3).Value = (ten ?? string.Empty).ToString();
+                        ws.Cell(r, 4).Value = (diachi ?? string.Empty).ToString();
+                        ws.Cell(r, 5).Value = (sdt ?? string.Empty).ToString();
+                        ws.Cell(r, 6).Value = (fax ?? string.Empty).ToString();
+                        ws.Cell(r, 7).Value = (khuvuc ?? string.Empty).ToString();
+                        ws.Cell(r, 8).Value = (ghichu ?? string.Empty).ToString();
+                        ws.Cell(r, 9).Value = (hinhthucmotk ?? string.Empty).ToString();
+                        ws.Cell(r, 10).Value = (dieukien ?? string.Empty).ToString();
+                        ws.Cell(r, 11).Value = (masothue ?? string.Empty).ToString();
+                        ws.Cell(r, 12).Value = (nvkd ?? string.Empty).ToString();
+                        ws.Cell(r, 13).Value = (nvkt ?? string.Empty).ToString();
+                        ws.Cell(r, 14).Value = (canphaixacnhan ?? string.Empty).ToString();
+                        ws.Cell(r, 15).Value = (nhom ?? string.Empty).ToString();
+                        r++;
+                    }
+                }
+
+                ws.Columns().AdjustToContents();
+                using var ms = new System.IO.MemoryStream();
+                wb.SaveAs(ms);
+                ms.Position = 0;
+                var fileName = $"Suppliers_{System.DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+                return File(ms.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting suppliers to excel");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        // Import dữ liệu nhà cung cấp từ file excel
+        [HttpPost]
+        public async Task<IActionResult> ImportExcel([FromForm] IFormFile importRequest)
+        {
+            if (importRequest == null || importRequest.Length == 0)
+                return BadRequest("File không hợp lệ");
+            var suppliers = new List<IM_NCC_NEWDTO>();
+            var user = GetCurrentUserId() ?? "system";
+            try
+            {
+                using var stream = importRequest.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                // Dữ liệu bắt đầu từ dòng 2
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 2).GetString() == "" || ws.Cell(r, 2).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột trong bảng ở giao diện
+                    var dto = new IM_NCC_NEWDTO
+                    {
+                        Ncc_Id = 0,
+                        Ma = ws.Cell(r, 2).GetString().Trim(),
+                        Ten = ws.Cell(r, 3).GetString().Trim(),
+                        Diachi = ws.Cell(r, 4).GetString().Trim(),
+                        Sodienthoai = ws.Cell(r, 5).GetString().Trim(),
+                        Fax = ws.Cell(r, 6).GetString().Trim(),
+                        Khuvuc = ws.Cell(r, 7).GetString().Trim(),
+                        Hinhthucmotk = ws.Cell(r, 8).GetString().Trim(),
+                        Dieukienthanhtoan = ws.Cell(r, 9).GetString().Trim(),
+                        Masothue = ws.Cell(r, 10).GetString().Trim(),
+                        Nhanvienkinhdoand = ws.Cell(r, 11).GetString().Trim(),
+                        Nhanvienketoan = ws.Cell(r, 12).GetString().Trim(),
+                        Canphaixacnhanlamthutuchaiquan = ws.Cell(r, 13).GetString().Trim(),
+                        nhom = ws.Cell(r, 14).GetString().Trim(),
+                        nguoi_cap_nhat = user
+                    };
+                    suppliers.Add(dto);
+                }
+                if (suppliers.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                await _tmNccNewService.AddListNccNew(suppliers);
+                return Ok(suppliers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
         }
     }
 }

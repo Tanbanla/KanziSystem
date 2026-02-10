@@ -27,3 +27,20 @@
     #cmReasonDialog.show {
         display: block !important;
     }
+/* Căn giữa dialog custom */
+/*#itemModal {
+    position: fixed !important;
+    top: 55% !important;
+    left: 55% !important;
+    transform: translate(-55%, -55%) !important;
+    z-index: 3000;
+    display: none;*/
+    /* Thêm các thuộc tính khác nếu cần */
+/*}
+
+    #itemModal.show {
+        display: block !important;
+    }*/
+/*#supplierItemsTable {
+    min-width: 1200px;
+}*/

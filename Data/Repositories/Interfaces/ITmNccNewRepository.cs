@@ -16,5 +16,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<bool> AddNccNew(IM_NCC_NEW nccNew);
         // Update thong tin nha cung cap
         Task<bool> UpdateNccNew(IM_NCC_NEW nccNew);
+        // thêm danh sách nhà cung cấp
+        Task<bool> AddListNccNew(List<IM_NCC_NEW> listNccNew);
     }
 }
