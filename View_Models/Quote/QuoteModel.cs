@@ -13,7 +13,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         // danh sach nha cung cap
         public List<IM_NCC_NEWDTO> DanhSachNhaCungCap { get; set; } = new List<IM_NCC_NEWDTO>();
         //
-        public List<dynamic> DanhSachCategory { get; set; } = new List<dynamic>();
+        public List<string> DanhSachCategory { get; set; } = new List<string>();
         // Lich su bao gia
         public List<BaoGia_History_Request_of_QuotationDTO> LichSuBaoGia { get; set; } = new List<BaoGia_History_Request_of_QuotationDTO>();
         // Danh sach yeu cau bao gia

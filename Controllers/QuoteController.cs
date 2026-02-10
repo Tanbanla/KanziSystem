@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Models_Working;
+using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Collections.Immutable;
@@ -24,11 +25,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaStatusService _baoGiaStatusService;
         private readonly IBaoGiaDetailService _baoGiaDetailService;
         private readonly IBaoGiaConfirmNameService _baoGiaConfirmNameService;
+        private readonly ITmCategoryService _tmCategoryService;
+        private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
         private readonly IWebHostEnvironment _env;
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService,
             INhomViTriService nhomViTriService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
+            ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService,
             IWebHostEnvironment env)
         {
             _logger = logger;
@@ -41,7 +45,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaHistoryService = baoGiaHistoryService;
             _baoGiaStatusService = baoGiaStatusService;
             _baoGiaDetailService = baoGiaDetailService;
+            _tmCategoryService = tmCategoryService;
             _baoGiaConfirmNameService = baoGiaConfirmNameService;
+            _baoGiaNccCategoryService = baoGiaNccCategoryService;
             _env = env;
         }
         // MARK: - Quote
@@ -137,10 +143,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var sections = await _tmSectionService.GetAllSectionsAsync();
             return sections.Data ?? new List<TM_SECTIONDTO>();
         }
-        private async Task<List<dynamic>> LoadCategoryDataAsync()
+        private async Task<List<string>> LoadCategoryDataAsync()
         {
-            var CategoryS = await _materialService.GetListMaterial();
-            return CategoryS.Data ?? new List<dynamic>();
+            var CategoryS = await _tmCategoryService.GetListCategory();
+            return CategoryS.Data ?? new List<string>();
         }
         private async Task<List<ACC_NHOMVITRIDTO>> LoadNhomViTriDataAsync()
         {
@@ -368,6 +374,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> GetNhaCungCapByMaHang([FromBody] string maHang)
         {
             var result = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(maHang);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
+        // Lấy thông tin NCC theo loại hàng 
+        [HttpPost]
+        public async Task<IActionResult> GetNCCByCategory([FromBody] string category)
+        {
+            var result = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(category);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -801,7 +818,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
         }
 
-        // Xuất danh sách thông tin tự render theo mã mặt hàng đã chọn
+        // Xuất danh sách thông tin tự render theo mã mặt hàng đã chọn (Hàng đã có mã hàng NB)
         [HttpPost]
         public async Task<IActionResult> ExportAutoRender([FromBody] AutoRenderFile autoRenders)
         {
@@ -835,7 +852,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                     var m = materialAsync.Data;
 
-                    var supplierAs = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(item);
+                    //var supplierAs = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(item);
+                    // đổi sang dùng bảng BaoGiaNCCCategory
+                    var supplierAs = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(m.Category_VN ?? ""); ;
                     if (!supplierAs.Success ||  supplierAs.Data == null)
                     {
                         continue;
@@ -849,7 +868,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cell(row, col++).SetValue(m.LoaiHang);
                         ws.Cell(row, col++).SetValue("");
                         ws.Cell(row, col++).SetValue(m.Material_Code);
-                        ws.Cell(row, col++).SetValue(a.NVCHR_CodeByNCC);// ma hang cua NCC
+                        ws.Cell(row, col++).SetValue("");// ma hang cua NCC a.NVCHR_CodeByNCC
                         ws.Cell(row, col++).SetValue(m.TenMoThuTuc);
                         ws.Cell(row, col++).SetValue(m.Material_Name_EN);
                         ws.Cell(row, col++).SetValue(0);
@@ -866,9 +885,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cell(row, col++).SetValue("");
                         ws.Cell(row, col++).SetValue("");
                         ws.Cell(row, col++).SetValue("");
-                        ws.Cell(row, col++).SetValue(a.NVCHR_MakeIn);
+                        ws.Cell(row, col++).SetValue(a.NVCHR_SanXuat);
                         ws.Cell(row, col++).SetValue(a.CHR_MaNCC);
-                        ws.Cell(row, col++).SetValue(a.NVCHAR_TenNCC);
+                        ws.Cell(row, col++).SetValue(a.NVCHR_TenNCC);
 
                         ws.Cell(row, col+5).SetValue(GetCurrentUserId());
                         row++;
@@ -883,6 +902,85 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return File(bytes, contentType, fileName);
             }
             catch(Exception ex)
+            {
+                return BadRequest($"Lỗi xuất file: {ex.Message}");
+            }
+        }
+        // Xuất file auto render cho hàng mới
+        [HttpPost]
+        public async Task<IActionResult> ExportRenderOutSide([FromBody] AutoRenderFile autoRenders)
+        {
+            try
+            {
+                if (autoRenders == null)
+                {
+                    return BadRequest("Không có dữ liệu để xuất");
+                }
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemPlateQuote.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemPlateQuote.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+                int row = 10;
+                foreach (var item in autoRenders.selectedItemIds)
+                {
+                    var supplierAs = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(item); ;
+                    if (!supplierAs.Success || supplierAs.Data == null)
+                    {
+                        continue;
+                    }
+                    var sp = supplierAs.Data;
+                    foreach (var a in sp)
+                    {
+                        int col = 2;
+                        ws.Cell(row, col++).SetValue(autoRenders.sectionCode);
+                        ws.Cell(row, col++).SetValue(autoRenders.sectionName);
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue(0);
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue("");
+                        ws.Cell(row, col++).SetValue(a.NVCHR_SanXuat);
+                        ws.Cell(row, col++).SetValue(a.CHR_MaNCC);
+                        ws.Cell(row, col++).SetValue(a.NVCHR_TenNCC);
+
+                        ws.Cell(row, col + 5).SetValue(GetCurrentUserId());
+                        row++;
+                    }
+                }
+
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"AutoRenderQuote_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
             {
                 return BadRequest($"Lỗi xuất file: {ex.Message}");
             }

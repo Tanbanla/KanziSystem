@@ -6,7 +6,7 @@
     List<string> phanLoais = ["A","B","C","E","NO LIST"];
     List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
     List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
-    List<dynamic> categoryS = Model.DanhSachCategory;
+    List<string> categoryS = Model.DanhSachCategory;
     string currentUser = Model.NguoiThaoTac;
 }
 <head>
@@ -112,7 +112,7 @@
                                         <option value="" selected>-- Chọn chủng loại --</option>
                                         @foreach (var s in categoryS)
                                         {
-                                            <option value="@s.Category_VN">@s.Category_VN</option>
+                                            <option value="@s">@s</option>
                                         }
                                     </select>
                                 </td>
@@ -232,16 +232,39 @@
         <div id="arModalBody" class="cm-dialog-body">
             <div id="arError" class="text-danger small mb-2" style="display:none"></div>
             <div class="mb-3">
-                <label class="form-label">Mã phòng ban</label>
-                <select id="arSection" class="form-select"></select>
-                <div id="arSectionName" class="small text-muted mt-1"></div>
+                <div class="btn-group" role="group" aria-label="Tabs">
+                    <button type="button" class="cm-btn cm-btn-primary" id="arTabHasCode">Có mã hàng nội bộ</button>
+                    <button type="button" class="cm-btn cm-btn-outline" id="arTabNoCode">Chưa có mã hàng nội bộ</button>
+                </div>
             </div>
-            <div class="mb-2 d-flex justify-content-between align-items-center">
-                <label class="form-label mb-0">Chọn mã hàng nội bộ</label>
-                <label class="mb-0" style="cursor:pointer"><input type="checkbox" id="arSelectAll" /> Chọn tất cả</label>
+            <!-- Tab: Has internal material code -->
+            <div id="arTabHasCodeBody">
+                <div class="mb-3">
+                    <label class="form-label">Mã phòng ban</label>
+                    <select id="arSection" class="form-select"></select>
+                    <div id="arSectionName" class="small text-muted mt-1"></div>
+                </div>
+                <div class="mb-2 d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0">Chọn mã hàng nội bộ</label>
+                    <label class="mb-0" style="cursor:pointer"><input type="checkbox" id="arSelectAll" /> Chọn tất cả</label>
+                </div>
+                <input id="arSearch" type="text" class="form-control form-control-sm mb-2" placeholder="Tìm mã hoặc tên..." />
+                <div id="arMaterialList" style="max-height: 320px; overflow: auto; border: 1px solid #e0e0e0; padding: 6px; border-radius: 4px;"></div>
             </div>
-            <input id="arSearch" type="text" class="form-control form-control-sm mb-2" placeholder="Tìm mã hoặc tên..." />
-            <div id="arMaterialList" style="max-height: 320px; overflow: auto; border: 1px solid #e0e0e0; padding: 6px; border-radius: 4px;"></div>
+            <!-- Tab: No internal material code -->
+            <div id="arTabNoCodeBody" style="display:none">
+                <div class="mb-3">
+                    <label class="form-label">Mã phòng ban</label>
+                    <select id="arSection2" class="form-select"></select>
+                    <div id="arSectionName2" class="small text-muted mt-1"></div>
+                </div>
+                <div class="mb-2 d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0">Chọn chủng loại hàng</label>
+                    <label class="mb-0" style="cursor:pointer"><input type="checkbox" id="arSelectAll2" /> Chọn tất cả</label>
+                </div>
+                <input id="arSearch2" type="text" class="form-control form-control-sm mb-2" placeholder="Tìm chủng loại..." />
+                <div id="arCategoryList" style="max-height: 320px; overflow: auto; border: 1px solid #e0e0e0; padding: 6px; border-radius: 4px;"></div>
+            </div>
         </div>
         <div id="arModalFooter" class="cm-dialog-footer">
             <button type="button" class="cm-btn cm-btn-outline" id="arCancelBtn">Hủy</button>
@@ -249,7 +272,6 @@
         </div>
     </div>
     <div class="cm-dialog-backdrop" data-ar-action="overlay"></div>
-    
 </div>
 <script>
     window.indexQuoteData = {

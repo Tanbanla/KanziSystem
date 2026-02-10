@@ -7,6 +7,8 @@
         , getSuppliersByMaHang: '/Quote/GetNhaCungCapByMaHang'
         , uploadQuoteExcel: '/Quote/UploadQuoteExcel'
         , exportAutoRender: '/Quote/ExportAutoRender'
+        , getNCCByCategory: '/Quote/GetNCCByCategory'
+        , exportRenderOutSide: '/Quote/ExportRenderOutSide'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -505,7 +507,110 @@
             });
         }
     }
+    async function autoAddRowByCategory(selectEl) {
+        const tr = selectEl.closest('tr');
+        const code = selectEl.value;
+        // Fetch suppliers for this material and if >1 create rows per supplier
+        try {
+            const supRes = await fetch(api.getNCCByCategory, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(code)
+            });
+            if (!supRes.ok) throw new Error(await supRes.text());
+            const suppliers = await supRes.json();
+            if (Array.isArray(suppliers) && suppliers.length > 0) {
+                // Helper to extract supplier code
+                const getSupCode = (s) => s?.chR_MaNCC ||  (typeof s === 'string' ? s : undefined) || '';
+                // If only one supplier, set current row's supplier
+                if (suppliers.length === 1) {
+                    const s = suppliers[0];
+                    const supCode = getSupCode(s);
+                    const supSel = tr.querySelector('.nhaCungCapTb');
+                    if (supSel) {
+                        supSel.value = supCode;
+                        try { updateSearchableSelectDisplay(supSel); } catch (e) { }
+                    }
+                    // Fill mã hàng NCC and NSX for the single supplier into the current row
+                    const codeByNccInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+                    if (codeByNccInputSingle && s.nvchR_CodeByNCC) codeByNccInputSingle.value = s.nvchR_CodeByNCC;
+                    const nsxInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+                    if (nsxInputSingle && s.nvchR_MakeIn) nsxInputSingle.value = s.nvchR_MakeIn;
+                } else if (suppliers.length > 1) {
+                    // Collect current row values to replicate
+                    const values = {};
+                    // copy inputs
+                    qsa('input', tr).forEach((inp) => values[inp.name || inp.id || inp.placeholder || inp.type] = inp.value);
+                    // copy selects
+                    qsa('select', tr).forEach((sel) => values[sel.className || sel.name || sel.id] = sel.value);
 
+                    // For first supplier, set current row
+                    const s0 = suppliers[0];
+                    const firstCode = getSupCode(s0);
+                    const supSel0 = tr.querySelector('.nhaCungCapTb');
+                    if (supSel0) {
+                        supSel0.value = firstCode;
+                        // update visible searchable UI for this existing row
+                        try { updateSearchableSelectDisplay(supSel0); } catch (e) { }
+                    }
+                    // Also fill mã hàng NCC and NSX for the first supplier into the current row
+                    const codeByNccInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+                    if (codeByNccInputFirst && s0.nvchR_CodeByNCC) codeByNccInputFirst.value = s0.nvchR_CodeByNCC;
+                    const nsxInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+                    if (nsxInputFirst && s0.nvchR_MakeIn) nsxInputFirst.value = s0.nvchR_MakeIn;
+
+                    // Insert additional rows for remaining suppliers
+                    let insertAfter = tr;
+                    for (let i = 1; i < suppliers.length; i++) {
+                        const s = suppliers[i];
+                        const supCode = getSupCode(s);
+                        // clone the row
+                        const newRow = tr.cloneNode(true);
+                        // clean any ms-container wrappers inside clone
+                        qsa('.ms-container', newRow).forEach(w => w.remove());
+                        // restore selects display
+                        qsa('select.searchable-select', newRow).forEach(sv => sv.style.display = '');
+
+                        // set values on inputs/selects in newRow
+                        qsa('input', newRow).forEach((inp) => {
+                            const key = inp.name || inp.id || inp.placeholder || inp.type;
+                            if (values.hasOwnProperty(key)) inp.value = values[key];
+                            inp.classList.remove('is-invalid');
+                        });
+                        qsa('select', newRow).forEach((sel) => {
+                            const key = sel.className || sel.name || sel.id;
+                            if (values.hasOwnProperty(key)) sel.value = values[key];
+                            sel.classList.remove('is-invalid');
+                        });
+                        // Set supplier value for this clone and update its searchable display
+                        const supSel = newRow.querySelector('.nhaCungCapTb');
+                        if (supSel) {
+                            supSel.value = supCode || '';
+                            try { updateSearchableSelectDisplay(supSel); } catch(e) { }
+                        }
+
+                        // Fill ten hang ncc in the cloned row
+                        const codeByNccInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+                        if (codeByNccInput && s.nvchR_CodeByNCC) codeByNccInput.value = s.nvchR_CodeByNCC;
+                        // Fill san xuat in the cloned row
+                        const nsxInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+                        if (nsxInput && s.nvchR_SanXuat) nsxInput.value = s.nvchR_SanXuat;
+
+
+                        // insert after last inserted
+                        insertAfter.parentNode.insertBefore(newRow, insertAfter.nextSibling);
+                        insertAfter = newRow;
+                    }
+
+                    // re-init searchable dropdowns and ids
+                    try { buildSearchableDropdown($(document)); } catch (ex) { }
+                    renumberRows();
+                }
+            }
+        } catch (err) {
+            console.warn('Không thể lấy NCC cho mã hàng:', err);
+        }
+    }
     async function autofillFromMaterialSelect(selectEl) {
         const tr = selectEl.closest('tr');
         const code = selectEl.value;
@@ -553,105 +658,105 @@
             if (categoryInput && loaiHangValue) categoryInput.value = loaiHangValue;
 
             // Fetch suppliers for this material and if >1 create rows per supplier
-            try {
-                const supRes = await fetch(api.getSuppliersByMaHang, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(code)
-                });
-                if (!supRes.ok) throw new Error(await supRes.text());
-                const suppliers = await supRes.json();
-                if (Array.isArray(suppliers) && suppliers.length > 0) {
-                    // Helper to extract supplier code
-                    const getSupCode = (s) => s?.chR_MaNCC ||  (typeof s === 'string' ? s : undefined) || '';
-                    // If only one supplier, set current row's supplier
-                    if (suppliers.length === 1) {
-                        const s = suppliers[0];
-                        const supCode = getSupCode(s);
-                        const supSel = tr.querySelector('.nhaCungCapTb');
-                        if (supSel) {
-                            supSel.value = supCode;
-                            try { updateSearchableSelectDisplay(supSel); } catch (e) { }
-                        }
-                        // Fill mã hàng NCC and NSX for the single supplier into the current row
-                        const codeByNccInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
-                        if (codeByNccInputSingle && s.nvchR_CodeByNCC) codeByNccInputSingle.value = s.nvchR_CodeByNCC;
-                        const nsxInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
-                        if (nsxInputSingle && s.nvchR_MakeIn) nsxInputSingle.value = s.nvchR_MakeIn;
-                    } else if (suppliers.length > 1) {
-                        // Collect current row values to replicate
-                        const values = {};
-                        // copy inputs
-                        qsa('input', tr).forEach((inp) => values[inp.name || inp.id || inp.placeholder || inp.type] = inp.value);
-                        // copy selects
-                        qsa('select', tr).forEach((sel) => values[sel.className || sel.name || sel.id] = sel.value);
+            //try {
+            //    const supRes = await fetch(api.getSuppliersByMaHang, {
+            //        method: 'POST',
+            //        headers: { 'Content-Type': 'application/json' },
+            //        body: JSON.stringify(code)
+            //    });
+            //    if (!supRes.ok) throw new Error(await supRes.text());
+            //    const suppliers = await supRes.json();
+            //    if (Array.isArray(suppliers) && suppliers.length > 0) {
+            //        // Helper to extract supplier code
+            //        const getSupCode = (s) => s?.chR_MaNCC ||  (typeof s === 'string' ? s : undefined) || '';
+            //        // If only one supplier, set current row's supplier
+            //        if (suppliers.length === 1) {
+            //            const s = suppliers[0];
+            //            const supCode = getSupCode(s);
+            //            const supSel = tr.querySelector('.nhaCungCapTb');
+            //            if (supSel) {
+            //                supSel.value = supCode;
+            //                try { updateSearchableSelectDisplay(supSel); } catch (e) { }
+            //            }
+            //            // Fill mã hàng NCC and NSX for the single supplier into the current row
+            //            const codeByNccInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+            //            if (codeByNccInputSingle && s.nvchR_CodeByNCC) codeByNccInputSingle.value = s.nvchR_CodeByNCC;
+            //            const nsxInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+            //            if (nsxInputSingle && s.nvchR_MakeIn) nsxInputSingle.value = s.nvchR_MakeIn;
+            //        } else if (suppliers.length > 1) {
+            //            // Collect current row values to replicate
+            //            const values = {};
+            //            // copy inputs
+            //            qsa('input', tr).forEach((inp) => values[inp.name || inp.id || inp.placeholder || inp.type] = inp.value);
+            //            // copy selects
+            //            qsa('select', tr).forEach((sel) => values[sel.className || sel.name || sel.id] = sel.value);
 
-                        // For first supplier, set current row
-                        const s0 = suppliers[0];
-                        const firstCode = getSupCode(s0);
-                        const supSel0 = tr.querySelector('.nhaCungCapTb');
-                        if (supSel0) {
-                            supSel0.value = firstCode;
-                            // update visible searchable UI for this existing row
-                            try { updateSearchableSelectDisplay(supSel0); } catch (e) { }
-                        }
-                        // Also fill mã hàng NCC and NSX for the first supplier into the current row
-                        const codeByNccInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
-                        if (codeByNccInputFirst && s0.nvchR_CodeByNCC) codeByNccInputFirst.value = s0.nvchR_CodeByNCC;
-                        const nsxInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
-                        if (nsxInputFirst && s0.nvchR_MakeIn) nsxInputFirst.value = s0.nvchR_MakeIn;
+            //            // For first supplier, set current row
+            //            const s0 = suppliers[0];
+            //            const firstCode = getSupCode(s0);
+            //            const supSel0 = tr.querySelector('.nhaCungCapTb');
+            //            if (supSel0) {
+            //                supSel0.value = firstCode;
+            //                // update visible searchable UI for this existing row
+            //                try { updateSearchableSelectDisplay(supSel0); } catch (e) { }
+            //            }
+            //            // Also fill mã hàng NCC and NSX for the first supplier into the current row
+            //            const codeByNccInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+            //            if (codeByNccInputFirst && s0.nvchR_CodeByNCC) codeByNccInputFirst.value = s0.nvchR_CodeByNCC;
+            //            const nsxInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+            //            if (nsxInputFirst && s0.nvchR_MakeIn) nsxInputFirst.value = s0.nvchR_MakeIn;
 
-                        // Insert additional rows for remaining suppliers
-                        let insertAfter = tr;
-                        for (let i = 1; i < suppliers.length; i++) {
-                            const s = suppliers[i];
-                            const supCode = getSupCode(s);
-                            // clone the row
-                            const newRow = tr.cloneNode(true);
-                            // clean any ms-container wrappers inside clone
-                            qsa('.ms-container', newRow).forEach(w => w.remove());
-                            // restore selects display
-                            qsa('select.searchable-select', newRow).forEach(sv => sv.style.display = '');
+            //            // Insert additional rows for remaining suppliers
+            //            let insertAfter = tr;
+            //            for (let i = 1; i < suppliers.length; i++) {
+            //                const s = suppliers[i];
+            //                const supCode = getSupCode(s);
+            //                // clone the row
+            //                const newRow = tr.cloneNode(true);
+            //                // clean any ms-container wrappers inside clone
+            //                qsa('.ms-container', newRow).forEach(w => w.remove());
+            //                // restore selects display
+            //                qsa('select.searchable-select', newRow).forEach(sv => sv.style.display = '');
 
-                            // set values on inputs/selects in newRow
-                            qsa('input', newRow).forEach((inp) => {
-                                const key = inp.name || inp.id || inp.placeholder || inp.type;
-                                if (values.hasOwnProperty(key)) inp.value = values[key];
-                                inp.classList.remove('is-invalid');
-                            });
-                            qsa('select', newRow).forEach((sel) => {
-                                const key = sel.className || sel.name || sel.id;
-                                if (values.hasOwnProperty(key)) sel.value = values[key];
-                                sel.classList.remove('is-invalid');
-                            });
-                            // Set supplier value for this clone and update its searchable display
-                            const supSel = newRow.querySelector('.nhaCungCapTb');
-                            if (supSel) {
-                                supSel.value = supCode || '';
-                                try { updateSearchableSelectDisplay(supSel); } catch(e) { }
-                            }
+            //                // set values on inputs/selects in newRow
+            //                qsa('input', newRow).forEach((inp) => {
+            //                    const key = inp.name || inp.id || inp.placeholder || inp.type;
+            //                    if (values.hasOwnProperty(key)) inp.value = values[key];
+            //                    inp.classList.remove('is-invalid');
+            //                });
+            //                qsa('select', newRow).forEach((sel) => {
+            //                    const key = sel.className || sel.name || sel.id;
+            //                    if (values.hasOwnProperty(key)) sel.value = values[key];
+            //                    sel.classList.remove('is-invalid');
+            //                });
+            //                // Set supplier value for this clone and update its searchable display
+            //                const supSel = newRow.querySelector('.nhaCungCapTb');
+            //                if (supSel) {
+            //                    supSel.value = supCode || '';
+            //                    try { updateSearchableSelectDisplay(supSel); } catch(e) { }
+            //                }
 
-                            // Fill ten hang ncc in the cloned row
-                            const codeByNccInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
-                            if (codeByNccInput && s.nvchR_CodeByNCC) codeByNccInput.value = s.nvchR_CodeByNCC;
-                            // Fill san xuat in the cloned row
-                            const nsxInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
-                            if (nsxInput && s.nvchR_MakeIn) nsxInput.value = s.nvchR_MakeIn;
+            //                // Fill ten hang ncc in the cloned row
+            //                const codeByNccInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
+            //                if (codeByNccInput && s.nvchR_CodeByNCC) codeByNccInput.value = s.nvchR_CodeByNCC;
+            //                // Fill san xuat in the cloned row
+            //                const nsxInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
+            //                if (nsxInput && s.nvchR_MakeIn) nsxInput.value = s.nvchR_MakeIn;
 
 
-                            // insert after last inserted
-                            insertAfter.parentNode.insertBefore(newRow, insertAfter.nextSibling);
-                            insertAfter = newRow;
-                        }
+            //                // insert after last inserted
+            //                insertAfter.parentNode.insertBefore(newRow, insertAfter.nextSibling);
+            //                insertAfter = newRow;
+            //            }
 
-                        // re-init searchable dropdowns and ids
-                        try { buildSearchableDropdown($(document)); } catch (ex) { }
-                        renumberRows();
-                    }
-                }
-            } catch (err) {
-                console.warn('Không thể lấy NCC cho mã hàng:', err);
-            }
+            //            // re-init searchable dropdowns and ids
+            //            try { buildSearchableDropdown($(document)); } catch (ex) { }
+            //            renumberRows();
+            //        }
+            //    }
+            //} catch (err) {
+            //    console.warn('Không thể lấy NCC cho mã hàng:', err);
+            //}
         } catch (err) {
             console.warn('Không thể tự động điền thông tin vật tư:', err);
             showDialog({
@@ -663,16 +768,25 @@
         // Hook to static Auto Render modal in Index.cshtml
         const overlay = document.getElementById('arModalOverlay');
         const sectionSel = document.getElementById('arSection');
+        const sectionSel2 = document.getElementById('arSection2');
         const sectionNameEl = document.getElementById('arSectionName');
+        const sectionNameEl2 = document.getElementById('arSectionName2');
         const lst = document.getElementById('arMaterialList');
         const searchBox = document.getElementById('arSearch');
         const selectAll = document.getElementById('arSelectAll');
+        const lst2 = document.getElementById('arCategoryList');
+        const searchBox2 = document.getElementById('arSearch2');
+        const selectAll2 = document.getElementById('arSelectAll2');
         const btnExport = document.getElementById('arExportBtn');
         const btnCancel = document.getElementById('arCancelBtn');
         const btnClose = document.getElementById('arCloseBtn');
         const errEl = document.getElementById('arError');
         const backdrop = overlay ? overlay.querySelector('[data-ar-action="overlay"]') : null;
-        if (!overlay || !sectionSel || !lst || !searchBox || !selectAll || !btnExport || !btnCancel || !btnClose || !errEl) {
+        const tabHasCodeBtn = document.getElementById('arTabHasCode');
+        const tabNoCodeBtn = document.getElementById('arTabNoCode');
+        const tabHasCodeBody = document.getElementById('arTabHasCodeBody');
+        const tabNoCodeBody = document.getElementById('arTabNoCodeBody');
+        if (!overlay || !sectionSel || !lst || !searchBox || !selectAll || !btnExport || !btnCancel || !btnClose || !errEl || !tabHasCodeBtn || !tabNoCodeBtn || !tabHasCodeBody || !tabNoCodeBody || !sectionSel2 || !sectionNameEl2 || !lst2 || !searchBox2 || !selectAll2) {
             alert('Không thể mở hộp thoại Auto render');
             return;
         }
@@ -702,12 +816,40 @@
             btnExport.textContent = busy ? 'Đang xuất...' : 'Xuất Excel';
         };
 
+        // Tabs state
+        let currentTab = 'hasCode'; // 'hasCode' | 'noCode'
+        const switchTab = (tab) => {
+            currentTab = tab;
+            const activeClass = 'cm-btn cm-btn-primary';
+            const inactiveClass = 'cm-btn cm-btn-outline';
+            if (tab === 'hasCode') {
+                tabHasCodeBody.style.display = '';
+                tabNoCodeBody.style.display = 'none';
+                tabHasCodeBtn.className = activeClass;
+                tabNoCodeBtn.className = inactiveClass;
+            } else {
+                tabHasCodeBody.style.display = 'none';
+                tabNoCodeBody.style.display = '';
+                tabHasCodeBtn.className = inactiveClass;
+                tabNoCodeBtn.className = activeClass;
+            }
+            setError('');
+        };
+        tabHasCodeBtn.onclick = () => switchTab('hasCode');
+        tabNoCodeBtn.onclick = () => switchTab('noCode');
+        switchTab('hasCode');
+
         // Populate Section options
         sectionSel.innerHTML = '';
         const ph = document.createElement('option');
         ph.value = '';
        // ph.textContent = 'Chọn phòng ban';
         sectionSel.appendChild(ph);
+        // For second tab
+        sectionSel2.innerHTML = '';
+        const ph2 = document.createElement('option');
+        ph2.value = '';
+        sectionSel2.appendChild(ph2);
         const srcDeptSel = qs('.tenPhongBanTb');
         if (srcDeptSel) {
             Array.from(srcDeptSel.options).forEach((o) => {
@@ -716,6 +858,10 @@
                 opt.value = o.value || '';
                 opt.textContent = o.text || '';
                 sectionSel.appendChild(opt);
+                const opt2 = document.createElement('option');
+                opt2.value = o.value || '';
+                opt2.textContent = o.text || '';
+                sectionSel2.appendChild(opt2);
             });
         }
         const updateSectionName = () => {
@@ -723,17 +869,33 @@
             const parts = txt.split(' - ');
             sectionNameEl.textContent = parts.length > 1 ? parts.slice(1).join(' - ') : '';
         };
+        const updateSectionName2 = () => {
+            const txt = sectionSel2.options[sectionSel2.selectedIndex]?.text || '';
+            const parts = txt.split(' - ');
+            sectionNameEl2.textContent = parts.length > 1 ? parts.slice(1).join(' - ') : '';
+        };
         sectionSel.onchange = updateSectionName;
         updateSectionName();
+        sectionSel2.onchange = updateSectionName2;
+        updateSectionName2();
 
         // Populate Material list
         lst.innerHTML = '';
-        const srcMaterialSel = qs('.maHangNoiBo');
+        //const srcMaterialSel = qs('.maHangNoiBo');
+        const body = { MaHang: '', Name: '', NhomHang: '', PageIndex: 0, PageSize: 0 };
+        const res = await fetch(api.searchMaterials, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const srcMaterialSel = await res.json();
         const items = [];
         if (srcMaterialSel) {
-            Array.from(srcMaterialSel.options).forEach((o) => {
-                if (!o.value) return;
-                items.push({ code: o.value, text: o.text || o.value });
+            srcMaterialSel.forEach((o) => {
+                if (!o.material_Code) return;
+                var nd = o.material_Code+' - '+o.material_Name_VN
+                items.push({ code: o.material_Code, text: nd || o.material_Code });
             });
         }
         const createItemEl = (it) => {
@@ -774,6 +936,56 @@
             });
         };
 
+        // Populate Category list (from existing category select options)
+        lst2.innerHTML = '';
+        const srcCategorySel = qs('.chungLoaiTb');
+        const catItems = [];
+        if (srcCategorySel) {
+            Array.from(srcCategorySel.options).forEach((o) => {
+                const val = o.value || '';
+                const text = o.text || '';
+                if (!val) return;
+                catItems.push({ code: val, text: text });
+            });
+        }
+        const createCatEl = (it) => {
+            const wrap = document.createElement('label');
+            wrap.style.display = 'flex';
+            wrap.style.minWidth = '350px';
+            wrap.style.alignItems = 'center';
+            wrap.style.gap = '8px';
+            wrap.style.padding = '4px 2px';
+            wrap.style.cursor = 'pointer';
+            wrap.dataset.search = (it.code + ' ' + it.text).toLowerCase();
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = it.code;
+            const span = document.createElement('span');
+            span.textContent = it.text;
+            wrap.appendChild(cb);
+            wrap.appendChild(span);
+            return wrap;
+        };
+        catItems.forEach(it => lst2.appendChild(createCatEl(it)));
+
+        // Search filter for categories
+        searchBox2.oninput = () => {
+            const q = (searchBox2.value || '').toLowerCase();
+            Array.from(lst2.children).forEach((el) => {
+                const s = el.dataset.search || '';
+                el.style.display = !q || s.includes(q) ? '' : 'none';
+            });
+        };
+
+        // Select All toggle for categories
+        selectAll2.onchange = () => {
+            const visibleItems = Array.from(lst2.querySelectorAll('label')).filter(el => el.style.display !== 'none');
+            visibleItems.forEach(el => {
+                const cb = el.querySelector('input[type="checkbox"]');
+                if (cb) cb.checked = selectAll2.checked;
+            });
+        };
+
         // Button handlers (override to avoid duplicate bindings)
         btnCancel.onclick = hideAr;
         btnClose.onclick = hideAr;
@@ -781,22 +993,46 @@
 
         btnExport.onclick = async () => {
             setError('');
-            const sectionCode = sectionSel.value || '';
-            const sectionText = sectionSel.options[sectionSel.selectedIndex]?.text || '';
-            const sectionName = sectionText.split(' - ').slice(1).join(' - ');
-            const selectedCodes = Array.from(lst.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-            if (!sectionCode) {
-                setError('Vui lòng chọn mã phòng ban');
-                return;
-            }
-            if (selectedCodes.length === 0) {
-                setError('Vui lòng chọn ít nhất một mã hàng nội bộ');
-                return;
-            }
-            const payload = { sectionCode, sectionName, selectedItemIds: selectedCodes };
             try {
                 setBusy(true);
-                const res = await fetch(api.exportAutoRender, {
+                let sectionCode = '';
+                let sectionText = '';
+                let sectionName = '';
+                let selectedIds = [];
+                let endpoint = '';
+
+                if (currentTab === 'hasCode') {
+                    sectionCode = sectionSel.value || '';
+                    sectionText = sectionSel.options[sectionSel.selectedIndex]?.text || '';
+                    sectionName = sectionText.split(' - ').slice(1).join(' - ');
+                    selectedIds = Array.from(lst.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    endpoint = api.exportAutoRender;
+                    if (!sectionCode) {
+                        setError('Vui lòng chọn mã phòng ban');
+                        return;
+                    }
+                    if (selectedIds.length === 0) {
+                        setError('Vui lòng chọn ít nhất một mã hàng nội bộ');
+                        return;
+                    }
+                } else {
+                    sectionCode = sectionSel2.value || '';
+                    sectionText = sectionSel2.options[sectionSel2.selectedIndex]?.text || '';
+                    sectionName = sectionText.split(' - ').slice(1).join(' - ');
+                    selectedIds = Array.from(lst2.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    endpoint = api.exportRenderOutSide;
+                    if (!sectionCode) {
+                        setError('Vui lòng chọn mã phòng ban');
+                        return;
+                    }
+                    if (selectedIds.length === 0) {
+                        setError('Vui lòng chọn ít nhất một chủng loại hàng');
+                        return;
+                    }
+                }
+
+                const payload = { sectionCode, sectionName, selectedItemIds: selectedIds };
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -885,7 +1121,7 @@
             }
 
         });
-
+        // Dừng xử lý khi chọn loại hàng
         // Autofill when selecting internal material code
         qs('#quoteTableBody')?.addEventListener('change', (e) => {
             const t = e.target;
@@ -893,7 +1129,13 @@
                 autofillFromMaterialSelect(t);
             }
         });
-
+        // lấy dữ liệu tự động khi thay đổi chủng loại
+        qs('#quoteTableBody')?.addEventListener('change', (e) => {
+            const t = e.target;
+            if (t.classList && t.classList.contains('chungLoaiTb')) {
+                autoAddRowByCategory(t);
+            }
+        })
         // When category changes, reload material list from server and update material selects
         qs('#quoteTableBody')?.addEventListener('change', async (e) => {
             const t = e.target;

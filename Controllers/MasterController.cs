@@ -299,8 +299,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         CHR_Status = "Active",
                         CHR_CreateBy = user,
                         DTM_CreateBy = DateTime.Now,
-                        CHR_Mail = ws.Cell(r, 3).GetString().Trim(),
-                        CHR_PIC = ws.Cell(r, 4).GetString().Trim()
+                        CHR_Mail = ws.Cell(r, 4).GetString().Trim(),
+                        CHR_PIC = ws.Cell(r, 3).GetString().Trim()
                     };
                     items.Add(dto);
                 }

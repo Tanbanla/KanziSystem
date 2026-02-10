@@ -784,13 +784,11 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(70)
                 .IsUnicode(false);
             entity.Property(e => e.NVCHR_TenNCC)
-                .HasMaxLength(255)
-                .IsUnicode(false);
+                .HasMaxLength(255);
             entity.Property(e => e.NVCHR_ChungLoai)
                 .HasMaxLength(300);
             entity.Property(e => e.NVCHR_SanXuat)
-                .HasMaxLength(250)
-                .IsUnicode(false);
+                .HasMaxLength(250);
             entity.Property(e => e.CHR_Status)
                 .HasMaxLength(50)
                 .IsUnicode(false);
