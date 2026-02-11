@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>TÌNH TRẠNG PHÊ DUYỆT ĐƠN BÁO GIÁ</value>
+    <value>PHÊ DUYỆT ĐƠN BÁO GIÁ</value>
   </data>
   <data name="PageSubtitle" xml:space="preserve">
     <value>Trạng thái phê duyệt cho các yêu cầu báo giá</value>
@@ -130,7 +130,7 @@
     <value>Trả lại</value>
   </data>
   <data name="Filters" xml:space="preserve">
-    <value>Bộ lọc / Filters</value>
+    <value>Bộ lọc</value>
   </data>
   <data name="ApprovalStatusLabel" xml:space="preserve">
     <value>Tình trạng phê duyệt</value>

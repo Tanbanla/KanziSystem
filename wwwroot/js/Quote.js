@@ -386,7 +386,7 @@
             CHR_CreateBy: getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']) === '' ? src.user : getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']),
             // Sử dụng ISO string với múi giờ +7
             DTM_CreateDate: toVietnamISOString(createDateVN),
-            ID_StepBaoGia: 1,
+            ID_StepBaoGia: 2,
             ID_Status: 'CREATE',
             INT_SoLanUpdate: 0,
             DTM_UpdateLater: null,
@@ -1153,6 +1153,7 @@
         // When category changes, reload material list from server and update material selects
         qs('#quoteTableBody')?.addEventListener('change', async (e) => {
             const t = e.target;
+            const T18 = window.i18nQuote || {};
             if (t.classList && t.classList.contains('chungLoaiTb')) {
                 const nhomHang = (t.value || '').toString();
                 try {
@@ -1181,7 +1182,7 @@
                             sel.innerHTML = '';
                             const optDefault = document.createElement('option');
                             optDefault.value = '';
-                            optDefault.textContent = '-- Chọn mã hàng nội bộ --';
+                            optDefault.textContent = T18.SelectInternalMaterialCode;
                             sel.appendChild(optDefault);
                             if (Array.isArray(materials)) {
                                 materials.forEach((m) => {
@@ -1456,7 +1457,7 @@
     function showDialog({ title = 'Thông báo', message = '', type = 'info', buttons } = {}) {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
         if (!overlay) return alert(message);
-
+        const T = window.i18nQuote || {};
         // Ensure overlay is attached to body so fixed positioning is not clipped by parent containers
         try {
             if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
@@ -1470,7 +1471,7 @@
         footerEl.innerHTML = '';
         const okBtn = document.createElement('button');
         okBtn.className = 'cm-btn cm-btn-primary';
-        okBtn.textContent = (buttons && buttons.okText) || 'Đồng ý';
+        okBtn.textContent = T.DialogOk || 'Đồng ý';
         okBtn.addEventListener('click', () => hideDialog());
         footerEl.appendChild(okBtn);
 

@@ -279,7 +279,7 @@
     };
     window.i18nQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         DialogTitle = Localizer["Notification"].Value,
-        DialogOk = Localizer["OK"].Value,
+        DialogOk = Localizer["DialogOk"].Value,
         ErrorTitle = Localizer["Error"].Value,
         SuccessTitle = Localizer["Success"].Value,
         MsgEnterReasonReject = Localizer["MsgEnterReasonReject"].Value,
@@ -300,7 +300,8 @@
         MsgCannotExport = Localizer["MsgCannotExport"].Value,
         SearchEllipsis = Localizer["SearchEllipsis"].Value,
         NoResults = Localizer["NoResults"].Value,
-        SelectPlaceholder = Localizer["SelectPlaceholder"].Value
+        SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
+        SelectInternalMaterialCode = Localizer["SelectInternalMaterialCode"].Value,
     }));
 </script>
 @section Scripts {

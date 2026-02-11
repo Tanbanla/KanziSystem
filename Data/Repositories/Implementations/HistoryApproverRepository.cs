@@ -139,7 +139,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             try
             {
-                var sql = @"SELECT r.* FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r 
+                var sql = @"SELECT DISTINCT r.* FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r 
                   left join BaoGia_Master_Approver_Send_Mail as s  on r.ID_StepBaoGia = s.ID_BaoGiaStep and CHR_SectionCode = s.CHR_CodeSection
                   where CHR_UserAdid = @Adid and
                    (@SoDon is null or CHR_MaDon like '%' + @SoDon + '%' or @SoDon = '' ) and 

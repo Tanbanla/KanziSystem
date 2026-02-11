@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>見積依頼の承認状況</value>
+    <value>見積承認</value>
   </data>
   <data name="PageSubtitle" xml:space="preserve">
     <value>見積依頼の承認ステータス</value>
