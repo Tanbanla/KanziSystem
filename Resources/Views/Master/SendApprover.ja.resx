@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+		Microsoft ResX Schema
+
+		Version 1.3
+
+		The primary goals of this format is to allow a simple XML format 
+		that is mostly human readable. The generation and parsing of the 
+		various data types are done through the TypeConverter classes 
+		associated with the data types.
+
+		Example:
+
+		... ado.net/XML headers & schema ...
+		<resheader name="resmimetype">text/microsoft-resx</resheader>
+		<resheader name="version">1.3</resheader>
+		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+		<data name="Name1">this is my long string</data>
+		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+			[base64 mime encoded serialized .NET Framework object]
+		</data>
+		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+			[base64 mime encoded string representing a byte array form of the .NET Framework object]
+		</data>
+
+		There are any number of "resheader" rows that contain simple 
+		name/value pairs.
+
+		Each data row contains a name, and value. The row also contains a 
+		type or mimetype. Type corresponds to a .NET class that support 
+		text/value conversion through the TypeConverter architecture. 
+		Classes that don't support this are serialized and stored with the 
+		mimetype set.
+
+		The mimetype is used for serialized objects, and tells the 
+		ResXResourceReader how to depersist the object. This is currently not 
+		extensible. For a given mimetype the value must be set accordingly:
+
+		Note - application/x-microsoft.net.object.binary.base64 is the format 
+		that the ResXResourceWriter will generate, however the reader can 
+		read any of the formats listed below.
+
+		mimetype: application/x-microsoft.net.object.binary.base64
+		value   : The object must be serialized with 
+			: System.Serialization.Formatters.Binary.BinaryFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.soap.base64
+		value   : The object must be serialized with 
+			: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.bytearray.base64
+		value   : The object must be serialized into a byte array 
+			: using a System.ComponentModel.TypeConverter
+			: and then encoded with base64 encoding.
+	-->
+	
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+  <data name="PageTitle" xml:space="preserve"><value>承認フローのマスター</value></data>
+  <data name="SearchAndAddTitle" xml:space="preserve"><value>検索と追加</value></data>
+  <data name="SectionName" xml:space="preserve"><value>部門名</value></data>
+  <data name="All" xml:space="preserve"><value>-- すべて --</value></data>
+  <data name="Step" xml:space="preserve"><value>ステップ</value></data>
+  <data name="Adid" xml:space="preserve"><value>ADID</value></data>
+  <data name="EnterAdid" xml:space="preserve"><value>ADID を入力...</value></data>
+  <data name="Search" xml:space="preserve"><value>検索</value></data>
+  <data name="AddNew" xml:space="preserve"><value>新規追加</value></data>
+  <data name="ClearSearch" xml:space="preserve"><value>検索のクリア</value></data>
+  <data name="AddApproverTitle" xml:space="preserve"><value>承認者を追加</value></data>
+  <data name="ValidateEnterAdid" xml:space="preserve"><value>ADID を入力してください</value></data>
+  <data name="UserName" xml:space="preserve"><value>氏名</value></data>
+  <data name="ValidateEnterName" xml:space="preserve"><value>氏名を入力してください</value></data>
+  <data name="Position" xml:space="preserve"><value>役職</value></data>
+  <data name="Section" xml:space="preserve"><value>部門</value></data>
+  <data name="SelectSection" xml:space="preserve"><value>-- 部門を選択 --</value></data>
+  <data name="ValidateSelectSection" xml:space="preserve"><value>部門を選択してください</value></data>
+  <data name="SelectStep" xml:space="preserve"><value>-- ステップを選択 --</value></data>
+  <data name="ValidateSelectStep" xml:space="preserve"><value>ステップを選択してください</value></data>
+  <data name="Save" xml:space="preserve"><value>保存</value></data>
+  <data name="Cancel" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="ApprovalFlow" xml:space="preserve"><value>承認フロー</value></data>
+  <data name="TotalApprovers" xml:space="preserve"><value>{0} 名の承認者</value></data>
+  <data name="UseFiltersHint" xml:space="preserve"><value>左側のフィルターを使用して承認フローを検索・表示します</value></data>
+  <data name="Notification" xml:space="preserve"><value>通知</value></data>
+  <data name="Close" xml:space="preserve"><value>閉じる</value></data>
+  <!-- JS texts -->
+  <data name="LookupSearching" xml:space="preserve"><value>検索中...</value></data>
+  <data name="LookupNotFound" xml:space="preserve"><value>見つかりません</value></data>
+  <data name="LookupFound" xml:space="preserve"><value>見つかりました: {0}{1}</value></data>
+  <data name="EmptyTitle" xml:space="preserve"><value>データなし</value></data>
+  <data name="EmptyMessage" xml:space="preserve"><value>検索条件に一致する承認者が見つかりません</value></data>
+  <data name="ErrorLoading" xml:space="preserve"><value>データを読み込めません</value></data>
+  <data name="ErrorConnection" xml:space="preserve"><value>サーバー接続エラー</value></data>
+  <data name="EditApproverTitle" xml:space="preserve"><value>承認者の編集</value></data>
+  <data name="AddToThisStep" xml:space="preserve"><value>このステップに追加</value></data>
+  <data name="NoName" xml:space="preserve"><value>氏名なし</value></data>
+  <data name="NoPosition" xml:space="preserve"><value>役職なし</value></data>
+  <data name="NoSection" xml:space="preserve"><value>部門なし</value></data>
+  <data name="Edit" xml:space="preserve"><value>編集</value></data>
+  <data name="Delete" xml:space="preserve"><value>削除</value></data>
+  <data name="TotalApproverBadge" xml:space="preserve"><value>{0} 名</value></data>
+  <data name="ConfirmDeleteTitle" xml:space="preserve"><value>削除の確認</value></data>
+  <data name="ConfirmDeleteMessage" xml:space="preserve"><value>この承認者を削除しますか？</value></data>
+  <data name="ConfirmDeleteConfirm" xml:space="preserve"><value>削除</value></data>
+  <data name="ConfirmDeleteCancel" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="DeleteSuccessTitle" xml:space="preserve"><value>成功</value></data>
+  <data name="DeleteSuccessMessage" xml:space="preserve"><value>削除に成功しました！</value></data>
+  <data name="DeleteErrorTitle" xml:space="preserve"><value>エラー</value></data>
+  <data name="DeleteErrorMessage" xml:space="preserve"><value>削除できません</value></data>
+  <data name="UpdateSuccess" xml:space="preserve"><value>更新に成功しました！</value></data>
+  <data name="GenericError" xml:space="preserve"><value>エラーが発生しました</value></data>
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+</root>

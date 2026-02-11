@@ -50,8 +50,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const ten = document.getElementById('searchTen').value.trim();
         const body = { CodeNcc: ma, NameNcc: ten, PageIndex: currentPage, PageSize: pageSize };
         const res = await fetch(api.supplierSearch, { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });
+        const T = window.i18nSupplierMana || {};
         if (!res.ok) {
-            tableBody.innerHTML = '<tr><td colspan="8" class="text-center">Không tải được dữ liệu</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center">' + (T.LoadFailed || 'Không tải được dữ liệu') + '</td></tr>';
             updatePagingControls([]);
             return;
         }
@@ -65,8 +66,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function renderSuppliers(rows) {
         tableBody.innerHTML = '';
+        const T = window.i18nSupplierMana || {};
         if (!rows || rows.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="8" class="text-center">Không có dữ liệu</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center">' + (T.NoData || 'Không có dữ liệu') + '</td></tr>';
             return;
         }
         rows.forEach(r => {
@@ -80,9 +82,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${r.khuvuc ?? ''}</td>
                 <td>${r.nhom ?? ''}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-primary me-1" data-action="edit">Sửa</button>
-                    <button class="btn btn-sm btn-danger me-1" data-action="delete">Xóa</button>
-                    <button class="btn btn-sm btn-outline-secondary" data-action="detail">Chi tiết</button>
+                    <button class="btn btn-sm btn-primary me-1" data-action="edit">${T.Edit}</button>
+                    <button class="btn btn-sm btn-danger me-1" data-action="delete">${T.Delete}</button>
+                    <button class="btn btn-sm btn-outline-secondary" data-action="detail">${T.Detail}</button>
                 </td>
             `;
             tr.querySelector('[data-action="edit"]').addEventListener('click', () => openSupplierModal(r));
@@ -94,24 +96,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updatePagingControls(rows) {
         if (!pageInfo) return;
-        pageInfo.textContent = `Trang ${currentPage}`;
+        const T = window.i18nSupplierMana || {};
+        pageInfo.textContent = (T.PageIndex || 'Trang {0}').replace('{0}', currentPage);
         if (btnPrevPage) btnPrevPage.disabled = currentPage <= 1;
         if (btnNextPage) btnNextPage.disabled = lastPageReached || !rows || rows.length === 0;
     }
 
     document.getElementById('btnAddSupplier')?.addEventListener('click', () => openSupplierModal({}));
     async function deleteSupplier(r) {
-        const ok = await showConfirmDialog('Xác nhận đồng ý?', 'Bạn có chắc chắn muốn xóa nhà cung cấp này?');
+        const T = window.i18nSupplierMana || {};
+        const ok = await showConfirmDialog(T.ConfirmDeleteTitle || 'Xác nhận đồng ý?', T.ConfirmDeleteMessage || 'Bạn có chắc chắn muốn xóa nhà cung cấp này?');
         if (!ok) return;
         const payload = { Id: parseInt(r.ncc_Id) };
         const res = await fetch(api.supplierDelete, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)});
         if (!res.ok) {
+            const T = window.i18nSupplierMana || {};
             showDialog({
-                title: 'Lỗi', message: `Xảy ra lỗi ${res.message}`, type: 'error'
+                title: (T.ErrorTitle || 'Lỗi'), message: `Xảy ra lỗi ${res.message}`, type: 'error'
             });
             return;
         }
-        showDialog({ title: 'Thành công', message: 'Gửi yêu cầu thành công', type: 'success' });
+        const T2 = window.i18nSupplierMana || {};
+        showDialog({ title: (T2.SuccessTitle || 'Thành công'), message: (T2.SaveSuccessMessage || 'Gửi yêu cầu thành công'), type: 'success' });
         loadSuppliers();
     }
     // xuất file mẫu
@@ -208,23 +214,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function loadSupplierItems(codeNcc) {
         if (!supplierItemsTbody) return;
-        supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Đang tải...</td></tr>';
+        const T = window.i18nSupplierMana || {};
+        supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">' + (T.Loading || 'Đang tải...') + '</td></tr>';
         try {
             const res = await fetch(api.getSupplierDetail(codeNcc), { method: 'GET' });
-            if (!res.ok) { supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Không tải được dữ liệu</td></tr>'; return; }
+            if (!res.ok) { supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">' + (T.LoadFailed || 'Không tải được dữ liệu') + '</td></tr>'; return; }
             const data = await res.json();
             const list = data.data ?? [];
             renderSupplierItems(Array.isArray(list) ? list : []);
         } catch (e) {
-            supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Lỗi tải dữ liệu</td></tr>';
+            supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">' + (T.LoadFailed || 'Lỗi tải dữ liệu') + '</td></tr>';
         }
     }
 
     function renderSupplierItems(items) {
         if (!supplierItemsTbody) return;
         supplierItemsTbody.innerHTML = '';
+        const T = window.i18nSupplierMana || {};
         if (!items || items.length === 0) {
-            supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">Không có dữ liệu</td></tr>';
+            supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">' + (T.NoData || 'Không có dữ liệu') + '</td></tr>';
             return;
         }
         items.forEach(it => {
@@ -237,20 +245,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${it.chR_PIC ?? ''}</td>
                 <td>${it.chR_Mail ?? ''}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-danger" data-action="delete-item">Xóa</button>
+                    <button class="btn btn-sm btn-danger" data-action="delete-item">${T.Delete}</button>
                 </td>
             `;
             const btnDel = tr.querySelector('[data-action="delete-item"]');
             btnDel?.addEventListener('click', async () => {
-                const ok = await showConfirmDialog('Xác nhận đồng ý?', 'Bạn có chắc chắn muốn xóa loại hàng này?');
+                const ok = await showConfirmDialog((T.ConfirmDeleteTitle || 'Xác nhận đồng ý?'), (T.ConfirmDeleteMessage || 'Bạn có chắc chắn muốn xóa loại hàng này?'));
                 if (!ok) return;
                 try {
                     const res = await fetch(api.deleteSupplierDetail(it.id), { method: 'GET' });
-                    if (!res.ok) { showDialog({ title: 'Lỗi', message: 'Xóa thất bại', type: 'error' }); return; }
-                    showDialog({ title: 'Thành công', message: 'Xóa thành công', type: 'success' });
+                    if (!res.ok) { showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.DeleteErrorMessage || 'Xóa thất bại'), type: 'error' }); return; }
+                    showDialog({ title: (T.SuccessTitle || 'Thành công'), message: (T.DeleteSuccessMessage || 'Xóa thành công'), type: 'success' });
                     loadSupplierItems(currentItemSupplier.ma);
                 } catch {
-                    showDialog({ title: 'Lỗi', message: 'Xóa thất bại', type: 'error' });
+                    showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.DeleteErrorMessage || 'Xóa thất bại'), type: 'error' });
                 }
             });
             supplierItemsTbody.appendChild(tr);
@@ -266,13 +274,15 @@ document.addEventListener('DOMContentLoaded', function () {
             NVCHR_MakeIn: document.getElementById('NVCHR_MakeIn').value.trim()
         };
         if (!payload.CHR_MaHang || !payload.CHR_MaNCC) {
-            showDialog({ title: 'Thiếu dữ liệu', message: 'Vui lòng nhập Mã hàng và Mã NCC', type: 'error' });
+            const T = window.i18nSupplierMana || {};
+            showDialog({ title: (T.ErrorTitle || 'Thiếu dữ liệu'), message: (T.MissingItemFields || 'Vui lòng nhập Mã hàng và Mã NCC'), type: 'error' });
             return;
         }
         try {
             const res = await fetch(api.addSupplierDetail, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!res.ok) { showDialog({ title: 'Lỗi', message: 'Thêm thất bại', type: 'error' }); return; }
-            showDialog({ title: 'Thành công', message: 'Thêm loại hàng thành công', type: 'success' });
+            const T = window.i18nSupplierMana || {};
+            if (!res.ok) { showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.AddItemFailed || 'Thêm thất bại'), type: 'error' }); return; }
+            showDialog({ title: (T.SuccessTitle || 'Thành công'), message: (T.AddItemSuccess || 'Thêm loại hàng thành công'), type: 'success' });
             // reset simple fields except MaNCC
             document.getElementById('CHR_MaHang').value = '';
             document.getElementById('NVCHAR_TenNCC').value = '';
@@ -280,7 +290,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('NVCHR_MakeIn').value = '';
             await loadSupplierItems(currentItemSupplier.ma);
         } catch {
-            showDialog({ title: 'Lỗi', message: 'Thêm thất bại', type: 'error' });
+            const T = window.i18nSupplierMana || {};
+            showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.AddItemFailed || 'Thêm thất bại'), type: 'error' });
         }
     };
     btnSaveItem?.addEventListener('click', saveItemHandler);
@@ -299,13 +310,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const res = await fetch(api.addListSupplierDetail, { method: 'POST', body: fd });
             if (!res.ok) {
                 let txt = await res.text();
-                showDialog({ title: 'Nhập Excel', message: `Nhập thất bại: ${txt || res.statusText}`, type: 'error' });
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportFailed || 'Nhập thất bại') + ': ' + (txt || res.statusText), type: 'error' });
             } else {
-                showDialog({ title: 'Nhập Excel', message: 'Nhập file thành công', type: 'success' });
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportSuccess || 'Nhập file thành công'), type: 'success' });
                 await loadSupplierItems(currentItemSupplier.ma);
             }
         } catch (err) {
-            showDialog({ title: 'Lỗi', message: `Không thể gửi file: ${err.message || err}`, type: 'error' });
+            const T = window.i18nSupplierMana || {};
+            showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.CannotSendFile || 'Không thể gửi file') + ': ' + (err.message || err), type: 'error' });
         }
         e.target.value = '';
     });
@@ -404,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const footerEl = document.getElementById('cmDialogFooter');
         return { overlay, titleEl, bodyEl, footerEl };
     }
-    function showDialog({ title = 'Thông báo', message = '', type = 'info', buttons } = {}) {
+    function showDialog({ title = (window.i18nSupplierMana && window.i18nSupplierMana.Notification) || 'Thông báo', message = '', type = 'info', buttons } = {}) {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
         if (!overlay) return alert(message);
 
@@ -421,7 +435,8 @@ document.addEventListener('DOMContentLoaded', function () {
         footerEl.innerHTML = '';
         const okBtn = document.createElement('button');
         okBtn.className = 'cm-btn cm-btn-primary';
-        okBtn.textContent = (buttons && buttons.okText) || 'Đồng ý';
+        const T = window.i18nSupplierMana || {};
+        okBtn.textContent = (buttons && buttons.okText) || (T.OK || 'Đồng ý');
         okBtn.addEventListener('click', () => hideDialog());
         footerEl.appendChild(okBtn);
 
@@ -466,7 +481,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return new Promise((resolve) => {
             const el = document.getElementById('cmConfirmDialog');
             if (!el) { resolve(false); return; }
-            el.querySelector('.cm-confirm-title').textContent = title || 'Xác nhận';
+            const T = window.i18nSupplierMana || {};
+            el.querySelector('.cm-confirm-title').textContent = title || (T.Confirm || 'Xác nhận');
             el.querySelector('.cm-confirm-body').textContent = message || '';
             //const overlay = el.querySelector('.cm-dialog-backdrop');
             const btnCancel = el.querySelector('[data-cm-action="cancel"]');

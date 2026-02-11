@@ -19,11 +19,12 @@
     let state = { pageIndex: 1, pageSize: 20, total: 0 };
 
     function statusBadge(s) {
+        const T = window.i18nConfirmName || {};
         switch ((s || '').toLowerCase()) {
-            case 'confirmed': return '<span class="status-badge status-confirmed">Đã xác nhậnn</span>';
-            case 'confirming': return '<span class="status-badge status-confirming">Đang xác nhận</span>';
-            case 'rejected': return '<span class="status-badge status-rejected">Từ chối</span>';
-            default: return '<span class="status-badge status-draft">Mới</span>';
+            case 'confirmed': return '<span class="status-badge status-confirmed">' + (T.StatusConfirmed || 'Đã xác nhận') + '</span>';
+            case 'confirming': return '<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span>';
+            case 'rejected': return '<span class="status-badge status-rejected">' + (T.StatusRejected || 'Từ chối') + '</span>';
+            default: return '<span class="status-badge status-draft">' + (T.StatusDraft || 'Mới') + '</span>';
         }
     }
 
@@ -33,16 +34,18 @@
 
     function renderRows(data) {
         if (!data || data.length === 0) {
-            els.tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Không có dữ liệu</td></tr>';
+            const T = window.i18nConfirmName || {};
+            els.tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">' + (T.NoData || 'Không có dữ liệu') + '</td></tr>';
             return;
         }
         els.tbody.innerHTML = data.map((r, i) => {
             const idx = (state.pageIndex - 1) * state.pageSize + i + 1;
             const tenHQ = canEditTenHQ() ? `<input class="form-control form-control-sm js-tenhq" data-id="${r.id}" value="${r.vchR_TenHaiQuan || ''}" />` : `<div class="cell-sm">${r.vchR_TenHaiQuan || ''}</div>`;
             const maNB = canEditMaNB() ? `<input class="form-control form-control-sm js-manb" data-id="${r.id}" value="${r.vchR_MaHangNoiBo || ''}" />` : `<div>${r.vchR_MaHangNoiBo || ''}</div>`;
+            const T = window.i18nConfirmName || {};
             const actions = [
-                canApprove() ? `<button class="btn btn-sm btn-success js-approve" data-id="${r.id}">Đồng ý</button>` : '',
-                canApprove() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.id}">Từ chối</button>` : ''
+                canApprove() ? `<button class="btn btn-sm btn-success js-approve" data-id="${r.id}">${T.BtnApprove || 'Đồng ý'}</button>` : '',
+                canApprove() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.id}">${T.BtnReject || 'Từ chối'}</button>` : ''
                 //canEditTenHQ() ? `<button class="btn btn-sm btn-primary js-save" data-id="${r.id}">Lưu</button>` : '',
                 //canEditMaNB() ? `<button class="btn btn-sm btn-primary js-save" data-id="${r.id}">Lưu</button>` : ''
             ].filter(Boolean).join(' ');
@@ -53,11 +56,12 @@
                 <button type="button" class="btn btn-outline-primary" data-action="detailRQ" data-id="${r.iD_RequestQuote}"><i class="fas fa-edit"></i></button>
             </td>
             <td class="text-center">${r.iD_RequestQuote || ''}</td>
+            <td>${r.vchR_TenRecomment || ''}</td>
             <td>${tenHQ}</td>
             <td>${maNB}</td>
             <td class="text-center">${statusBadge(r.chR_Status)}</td>
             <td class="text-center">${formatDate(r.dtM_CreateDate)}</td>
-            <td class="text-center">${handler || 'Khời tạo bởi ' + r.vchR_CreateBy}</td>
+            <td class="text-center">${handler || ((T.CreatedByPrefix || 'Khởi tạo bởi ') + r.vchR_CreateBy)}</td>
             <td><div class="small text-muted">${r.nvchR_Note || ''}</div><div class="text-danger small">${r.nvchR_LyDo || ''}</div></td>
             <td class="text-center">${actions}</td>
       </tr>`;
@@ -150,12 +154,13 @@
         const res = await fetch('/Material/SearchConfirmName', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
         });
-        if (!res.ok) { console.error('Search failed'); return; }
+        if (!res.ok) { const T = window.i18nConfirmName || {}; console.error(T.MsgSearchFailed || 'Search failed'); return; }
         const data = await res.json();
         state.total = data.total || 0;
         state.pageIndex = data.pageIndex || 1;
         state.pageSize = data.pageSize || 20;
-        els.resultCount.textContent = `Tổng: ${state.total}`;
+        const T = window.i18nConfirmName || {};
+        els.resultCount.textContent = `${T.Total || 'Tổng'}: ${state.total}`;
         const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
         els.pageInfo.textContent = `${state.pageIndex}/${totalPages}`;
         renderRows(data.data || []);
@@ -164,21 +169,23 @@
     async function saveInline(id, payload) {
         const body = Object.assign({ id, role }, payload);
         const res = await fetch('/Material/SaveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        if (!res.ok) { alert('Lưu thất bại'); }
+        if (!res.ok) { const T = window.i18nConfirmName || {}; alert(T.MsgSaveFailed || 'Lưu thất bại'); }
     }
 
     async function approve(id) {
-        const ok = await showConfirmDialog('Xác nhận đồng ý?', 'Bạn có chắc chắn muốn phê duyệt yêu cầu này?');
+        const T = window.i18nConfirmName || {};
+        const ok = await showConfirmDialog(T.ConfirmApproveTitle || 'Xác nhận đồng ý?', T.ConfirmApproveMessage || 'Bạn có chắc chắn muốn phê duyệt yêu cầu này?');
         if (!ok) return;
         const res = await fetch('/Material/ApproveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-        if (res.ok) { search(); } else { alert('Thao tác thất bại'); }
+        if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
     }
 
     async function reject(id) {
-        const lyDo = await showReasonDialog('Nhập lý do từ chối', 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
+        const T = window.i18nConfirmName || {};
+        const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
         if (lyDo === null) return;
         const res = await fetch('/Material/RejectConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, lyDo }) });
-        if (res.ok) { search(); } else { alert('Thao tác thất bại'); }
+        if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
     }
 
     els.btnSearch.addEventListener('click', () => { state.pageIndex = 1; search(); });
@@ -250,7 +257,8 @@
         return new Promise((resolve) => {
             const el = document.getElementById('cmConfirmDialog');
             if (!el) { resolve(false); return; }
-            el.querySelector('.cm-confirm-title').textContent = title || 'Xác nhận';
+            const T = window.i18nConfirmName || {};
+            el.querySelector('.cm-confirm-title').textContent = title || (T.Confirm || 'Xác nhận');
             el.querySelector('.cm-confirm-body').textContent = message || '';
             //const overlay = el.querySelector('.cm-dialog-backdrop');
             const btnCancel = el.querySelector('[data-cm-action="cancel"]');
@@ -275,7 +283,8 @@
         return new Promise((resolve) => {
             const el = document.getElementById('cmReasonDialog');
             if (!el) { resolve(null); return; }
-            el.querySelector('.cm-reason-title').textContent = title || 'Nhập lý do';
+            const T = window.i18nConfirmName || {};
+            el.querySelector('.cm-reason-title').textContent = title || (T.EnterReason || 'Nhập lý do');
             el.querySelector('.cm-reason-body').textContent = message || '';
             const input = el.querySelector('#cmReasonInput');
             //const overlay = el.querySelector('.cm-dialog-backdrop');
@@ -347,7 +356,8 @@ function buildSearchableDropdown(container) {
         btn.innerHTML = '<span class="ms-values"></span><span class="ms-placeholder"></span><span class="ms-caret">▾</span>';
         const dropdown = document.createElement('div'); dropdown.className = 'ms-dropdown';
         const search = document.createElement('div'); search.className = 'ms-search';
-        search.innerHTML = '<input type="text" placeholder="Tìm..." />';
+        const T = window.i18nConfirmName || {};
+        search.innerHTML = '<input type="text" placeholder="' + (T.SearchEllipsis || 'Tìm...') + '" />';
         const list = document.createElement('div'); list.className = 'ms-list';
 
         function renderList(query) {
@@ -366,7 +376,7 @@ function buildSearchableDropdown(container) {
                 }
             });
             if (!hasItems) {
-                const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = 'Không có kết quả';
+                const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (T.NoResults || 'Không có kết quả');
                 list.appendChild(empty);
             }
         }
@@ -381,7 +391,7 @@ function buildSearchableDropdown(container) {
                 placeholderEl.textContent = '';
             } else {
                 valuesEl.textContent = '';
-                placeholderEl.textContent = '-- Chọn --';
+                placeholderEl.textContent = (T.SelectPlaceholder || '-- Chọn --');
             }
         }
 

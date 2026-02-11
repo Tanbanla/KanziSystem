@@ -213,7 +213,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     await _baoGiaHistoryService.InsertHistoryListAsync(histories);
                 }
                 // xac nhan ten
-                var MaterialsNew = insertedList.Where(l => l.CHR_MaHangNoiBo == "" || l.CHR_MaHangNoiBo == null).Select(l => l.ID).ToList();
+                var MaterialsNew = insertedList.Where(l => l.CHR_MaHangNoiBo == "" || l.CHR_MaHangNoiBo == null).Select(l => (l.ID, l.NVCHR_NameVN)).ToList();
                 if (!result.Success)
                 {
                     return BadRequest(result.Message);
@@ -227,9 +227,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         foreach(var i in MaterialsNew)
                         {
                             var cf = new BaoGia_Confirm_Name_QuotationDTO();
-                            cf.ID_RequestQuote = i;
+                            cf.ID_RequestQuote = i.ID;
                             cf.DTM_CreateDate = DateTime.Now;
                             cf.VCHR_CreateBy = GetCurrentUserId();
+                            cf.VCHR_TenRecomment = i.NVCHR_NameVN;
                             listConfirm.Add(cf);
                         }
                         await _baoGiaConfirmNameService.AddListAsync(listConfirm);

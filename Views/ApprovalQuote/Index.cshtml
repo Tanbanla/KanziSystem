@@ -1,4 +1,5 @@
 ﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Approval Quote";
     List<string> maDons = Model.listSoDon;
@@ -16,26 +17,26 @@
 <div class="container-fluid" id="approval-quote">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h4 class="mb-0 fw-bold text-primary">TÌNH TRẠNG PHÊ DUYỆT ĐƠN BÁO GIÁ</h4>
-            <small class="text-muted">Approval status for quotation requests</small>
+            <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
+            <small class="text-muted">@Localizer["PageSubtitle"]</small>
         </div>
         <div class="btn-group mb-2" role="group">
-            <button class="btn btn-success btn-sm" id="btnApprove" disabled><i class="fas fa-check"></i> Phê duyệt (<span id="approveCount">0</span>)</button>
+            <button class="btn btn-success btn-sm" id="btnApprove" disabled><i class="fas fa-check"></i> @Localizer["Approve"] (<span id="approveCount">0</span>)</button>
             <div style="min-width: 12px;"></div>
-            <button class="btn btn-danger btn-sm" id="btnReturn" disabled><i class="fas fa-undo"></i> Trả lại (<span id="returnCount">0</span>)</button>
+            <button class="btn btn-danger btn-sm" id="btnReturn" disabled><i class="fas fa-undo"></i> @Localizer["Return"] (<span id="returnCount">0</span>)</button>
         </div>
     </div>
 
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-white py-2">
-            <h6 class="mb-0 text-secondary" style="color:black !important">Bộ lọc / Filters</h6>
+            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Filters"]</h6>
         </div>
         <div class="card-body pt-3 pb-2">
             <form id="filterForm" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label for="tinhTrangPheDuyet" class="form-label small text-uppercase fw-semibold">Tình trạng phê duyệt</label>
+                    <label for="tinhTrangPheDuyet" class="form-label small text-uppercase fw-semibold">@Localizer["ApprovalStatusLabel"]</label>
                     <select id="tinhTrangPheDuyet" name="tinhTrangPheDuyet" class="form-control tinhTrangPheDuyet searchable-select">
-                        <option value="">-- Tất cả --</option>
+                        <option value="">@Localizer["AllOption"]</option>
                         @foreach (var s in listStep)
                         {
                             <option value="@s.INT_StepNumber">@s.CHR_StepName</option>
@@ -43,9 +44,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="maPhongBan" class="form-label small text-uppercase fw-semibold">Mã phòng ban</label>
+                    <label for="maPhongBan" class="form-label small text-uppercase fw-semibold">@Localizer["DepartmentCode"]</label>
                     <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
-                        <option value="" selected>Chọn phòng ban</option>
+                        <option value="" selected>@Localizer["SelectDepartment"]</option>
                         @foreach (var s in phongBans)
                         {
                             <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
@@ -53,9 +54,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="maDonBaoGia" class="form-label small text-uppercase fw-semibold">Mã đơn báo giá</label>
+                    <label for="maDonBaoGia" class="form-label small text-uppercase fw-semibold">@Localizer["QuotationCode"]</label>
                     <select id="searchmaDonBaoGia" name="searchmaDonBaoGia" class="form-select searchmaDonBaoGia searchable-select">
-                        <option value="" selected>Chọn đơn báo giá</option>
+                        <option value="" selected>@Localizer["SelectQuotation"]</option>
                         @foreach (var s in maDons)
                         {
                             <option value="@s">@s</option>
@@ -63,9 +64,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="maHang" class="form-label small text-uppercase fw-semibold">Mã hàng</label>
+                    <label for="maHang" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
                     <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select">
-                        <option value="" selected>Chọn mã nguyên vật liệu</option>
+                        <option value="" selected>@Localizer["SelectMaterial"]</option>
                         @foreach (var s in materials)
                         {
                             <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
@@ -73,9 +74,9 @@
                     </select>
                 </div>
                 <div class="col-12 d-flex gap-2 mt-2">
-                    <button type="button" id="btnSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Tìm kiếm</button>
+                    <button type="button" id="btnSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> @Localizer["Search"]</button>
                     <div style="min-width: 12px;"></div>
-                    <button type="button" id="btnClear" class="btn btn-outline-secondary btn-sm"><i class="fas fa-eraser"></i> Xóa lọc</button>
+                    <button type="button" id="btnClear" class="btn btn-outline-secondary btn-sm"><i class="fas fa-eraser"></i> @Localizer["ClearFilters"]</button>
                 </div>
             </form>
         </div>
@@ -83,23 +84,23 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 text-secondary" style="color:black !important">Danh sách yêu cầu</h6>
-            <small class="text-muted" id="summaryText">2 bản ghi</small>
+            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["RequestList"]</h6>
+            <small class="text-muted" id="summaryText">@Localizer["SummaryFormat", 0]</small>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive" style="max-height: 480px;">
                 <table class="table table-sm table-hover table-bordered align-middle mb-0" id="approvalTable">
                     <thead class="table-header-custom">
                         <tr class="text-center align-middle">
-                            <th style="width:40px"><input type="checkbox" id="selectAll" title="Chọn tất cả" /></th>
-                            <th style="min-width:120px">Tình trạng đơn</th>
-                            <th style="min-width:80px">Chi tiết</th>
-                            <th style="min-width:140px">Mã đơn</th>
-                            <th style="min-width:110px">Ngày yêu cầu<br></th>
-                            <th style="min-width:140px">Tên phòng ban<br></th>
-                            <th style="min-width:130px">PIC tạo đơn</th>
-                            <th style="min-width:150px">Ngày muốn nhận hàng<br></th>
-                            <th style="min-width:170px">Kỳ hạn lựa chọn NCC<br></th>
+                            <th style="width:40px"><input type="checkbox" id="selectAll" title="@Localizer["SelectAll"]" /></th>
+                            <th style="min-width:120px">@Localizer["OrderStatus"]</th>
+                            <th style="min-width:80px">@Localizer["Detail"]</th>
+                            <th style="min-width:140px">@Localizer["OrderCode"]</th>
+                            <th style="min-width:110px">@Localizer["RequestDate"]<br></th>
+                            <th style="min-width:140px">@Localizer["DepartmentName"]<br></th>
+                            <th style="min-width:130px">@Localizer["CreatorPIC"]</th>
+                            <th style="min-width:150px">@Localizer["DesiredReceiveDate"]<br></th>
+                            <th style="min-width:170px">@Localizer["SupplierSelectionDeadline"]<br></th>
                         </tr>
                     </thead>
                     <tbody id="approvalTableBody">
@@ -113,8 +114,9 @@
         <div class="modal-dialog modal-xxl modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="detailModalTitle">Chi tiết đơn</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="detailModalTitle">@Localizer["DetailModalTitle"]</h5>
+                    <button type="button" class="btn-close" id="arCloseBtn" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">✕</button>
+                   @*  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
                 </div>
                 <div class="modal-body p-2">
                     <div class="table-responsive">
@@ -122,38 +124,38 @@
                             <thead class="table-header-custom">
                                 <tr class="text-center align-middle">
                                     <th rowspan="2" class="title_column_stt" style="width:40px">&nbsp;</th>
-                                    <th rowspan="2" class="title_column" style="min-width: 200px">Mã phòng ban</th>
-                                    <th rowspan="2" class="title_column">Chủng loại hàng</th>
-                                    <th rowspan="2" class="title_column">Phân loại(A/B/C/E/Non list)</th>
-                                    <th rowspan="2" class="title_column">Mã thiết bị</th>
-                                    <th rowspan="2" class="title_column" style="min-width: 230px">Mã hàng nội bộ</th>
-                                    <th rowspan="2" class="title_column">Mã hàng của NCC</th>
-                                    <th rowspan="2" class="title_column">Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)</th>
-                                    <th rowspan="2" class="title_column">Tên hàng EN</th>
-                                    <th rowspan="2" class="title_column">Số lượng</th>
-                                    <th rowspan="2" class="title_column">Đơn vị</th>
-                                    <th colspan="6" class="title_column">Mô tả hàng hóa</th>
-                                    <th rowspan="2" class="title_column" style="width: 100px">Yêu cầu ROHS</th>
-                                    <th rowspan="2" class="title_column" style="width: 100px">Yêu cầu CO/CQ</th>
-                                    <th rowspan="2" class="title_column" style="min-width: 200px">Yêu cầu MSDS</th>
-                                    <th rowspan="2" class="title_column">Yêu cầu tiêu chuẩn an toàn</th>
-                                    <th rowspan="2" class="title_column">File thiết kế</th>
-                                    <th rowspan="2" class="title_column">Nhà sản xuất</th>
-                                    <th rowspan="2" class="title_column" style="min-width: 250px">Nhà cung cấp</th>
-                                    <th rowspan="2" class="title_column">Lấy báo giá</th>
-                                    <th rowspan="2" class="title_column">Lý do</th>
-                                    <th rowspan="2" class="title_column">Ngày muốn nhận hàng</th>
-                                    <th rowspan="2" class="title_column">Kỳ hạn lựa chọn NCC</th>
-                                    <th rowspan="2" class="title_column" style="width: 50px">Gấp</th>
-                                    <th rowspan="2" class="title_column">Người yêu cầu</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 200px">@Localizer["SectionCode"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Category"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Classification"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["EquipmentCode"]</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 230px">@Localizer["InternalMaterialCode"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["SupplierItemCode"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["ItemNameVN"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["ItemNameEN"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Quantity"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Unit"]</th>
+                                    <th colspan="6" class="title_column">@Localizer["ItemDescription"]</th>
+                                    <th rowspan="2" class="title_column" style="width: 100px">@Localizer["ROHSRequirement"]</th>
+                                    <th rowspan="2" class="title_column" style="width: 100px">@Localizer["COCQRequirement"]</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 200px">@Localizer["MSDSRequirement"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["SafetyStandardRequirement"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["DesignFile"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Manufacturer"]</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 250px">@Localizer["Supplier"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["GetQuotation"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Reason"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["DesiredReceiveDate"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["SupplierSelectionDeadline"]</th>
+                                    <th rowspan="2" class="title_column" style="width: 50px">@Localizer["Urgent"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Requester"]</th>
                                 </tr>
                                 <tr class="text-center align-middle">
-                                    <th class="title_column">Hình dáng</th>
-                                    <th class="title_column">Chất liệu</th>
-                                    <th class="title_column">Thành phần, hàm lượng (đối với hóa chất)</th>
-                                    <th class="title_column">Kích thước(mm) (dài/rộng/cao)</th>
-                                    <th class="title_column">Dùng cho máy/thiết bị/vị trí nào</th>
-                                    <th class="title_column">Dùng để làm gì(tính năng)</th>
+                                    <th class="title_column">@Localizer["Shape"]</th>
+                                    <th class="title_column">@Localizer["Material"]</th>
+                                    <th class="title_column">@Localizer["CompositionForChemicals"]</th>
+                                    <th class="title_column">@Localizer["DimensionsMM"]</th>
+                                    <th class="title_column">@Localizer["UsedForPosition"]</th>
+                                    <th class="title_column">@Localizer["PurposeFeature"]</th>
                                 </tr>
                             </thead>
                             <tbody id="detailModalBody"></tbody>
@@ -161,7 +163,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-close">Đóng</button>
+                    <button type="button" class="btn btn-secondary btn-close">@Localizer["Close"]</button>
                 </div>
             </div>
         </div>
@@ -171,8 +173,8 @@
 <div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
         <div class="cm-dialog-header">
-            <h6 id="cmDialogTitle" class="cm-dialog-title">Thông báo</h6>
-            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="Đóng">✕</button>
+            <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
         </div>
         <div id="cmDialogBody" class="cm-dialog-body"></div>
         <div id="cmDialogFooter" class="cm-dialog-footer">
@@ -185,6 +187,54 @@
         status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listStatus)),
         steps: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listStep))
     };
+    window.i18nApproval = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        PageTitle = Localizer["PageTitle"].Value,
+        PageSubtitle = Localizer["PageSubtitle"].Value,
+        Approve = Localizer["Approve"].Value,
+        Return = Localizer["Return"].Value,
+        Filters = Localizer["Filters"].Value,
+        ApprovalStatusLabel = Localizer["ApprovalStatusLabel"].Value,
+        AllOption = Localizer["AllOption"].Value,
+        DepartmentCode = Localizer["DepartmentCode"].Value,
+        SelectDepartment = Localizer["SelectDepartment"].Value,
+        QuotationCode = Localizer["QuotationCode"].Value,
+        SelectQuotation = Localizer["SelectQuotation"].Value,
+        MaterialCode = Localizer["MaterialCode"].Value,
+        SelectMaterial = Localizer["SelectMaterial"].Value,
+        Search = Localizer["Search"].Value,
+        ClearFilters = Localizer["ClearFilters"].Value,
+        RequestList = Localizer["RequestList"].Value,
+        SummaryFormat = Localizer["SummaryFormat", "{0}"].Value,
+        SelectAll = Localizer["SelectAll"].Value,
+        OrderStatus = Localizer["OrderStatus"].Value,
+        Detail = Localizer["Detail"].Value,
+        OrderCode = Localizer["OrderCode"].Value,
+        RequestDate = Localizer["RequestDate"].Value,
+        DepartmentName = Localizer["DepartmentName"].Value,
+        CreatorPIC = Localizer["CreatorPIC"].Value,
+        DesiredReceiveDate = Localizer["DesiredReceiveDate"].Value,
+        SupplierSelectionDeadline = Localizer["SupplierSelectionDeadline"].Value,
+        DetailButton = Localizer["Detail"].Value,
+        DetailModalTitle = Localizer["DetailModalTitle"].Value,
+        DetailModalTitleFormat = Localizer["DetailModalTitleFormat", "{0}", "{1}"].Value,
+        DialogCancel = Localizer["Cancel"].Value,
+        DialogConfirm = Localizer["Confirm"].Value,
+        InputReasonTitle = Localizer["InputReasonTitle"].Value,
+        InputReasonPlaceholder = Localizer["InputReasonPlaceholder"].Value,
+        ReasonRequired = Localizer["ReasonRequired"].Value,
+        ApproveSuccess = Localizer["ApproveSuccess"].Value,
+        ApproveFailed = Localizer["ApproveFailed", "{0}"].Value,
+        ApproveError = Localizer["ApproveError"].Value,
+        ReturnSuccess = Localizer["ReturnSuccess"].Value,
+        ReturnFailed = Localizer["ReturnFailed", "{0}"].Value,
+        ReturnError = Localizer["ReturnError"].Value,
+        Unknown = Localizer["Unknown"].Value,
+        SearchEllipsis = Localizer["SearchEllipsis"].Value,
+        NoResults = Localizer["NoResults"].Value,
+        SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
+        Notification = Localizer["Notification"].Value,
+        Close = Localizer["Close"].Value
+    }));
 </script>
 @section Scripts {
    <script src="~/js/Approval_Quote.js"></script>

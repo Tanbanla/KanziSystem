@@ -1,10 +1,11 @@
 ﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Nhập thông tin báo giá";
     List<ACC_NHOMVITRIDTO> nhomViTri = Model.DanhSachNhomViTri;
     List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
     List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
-    List<dynamic> categoryS = Model.DanhSachCategory;
+    List<string> categoryS = Model.DanhSachCategory;
     string currentUser = Model.NguoiThaoTac;
     List<string> madons = Model.DanhSachMaDon;
     List<BaoGia_Request_of_QuotationDTO> listQuote = Model.DanhSachYeuCauBaoGia;
@@ -16,14 +17,14 @@
 
 <div class="input-quote-page py-3">
     <div class="d-flex justify-content-between align-items-center mb-3 input-quote-header p-3 rounded">
-        <h4 class="mb-0">Nhập thông tin báo giá</h4>
+        <h4 class="mb-0">@Localizer["PageTitle"]</h4>
         <div class="d-flex">
             <button type="button" class="btn-custom" id="btnImportExcel">
-                <span class="text" style="margin-right: 7px">Nhập từ Excel</span>
+                <span class="text" style="margin-right: 7px">@Localizer["ImportFromExcel"]</span>
                 <i class="fas fa-file-excel"></i>
             </button>
             <button type="button" class="btn btn-primary btn-sm" style="margin-left: 5px" id="btnSaveQuote">
-                <span class="text" style="margin-right: 7px">Lưu</span>
+                <span class="text" style="margin-right: 7px">@Localizer["Save"]</span>
                 <i class="fas fa-save" ></i>
             </button>
         </div>
@@ -34,14 +35,14 @@
     <!-- Thông tin chung -->
     <div class="card mb-4 shadow-sm">
         <div class="card-header">
-            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin chung</h6>
+            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>@Localizer["GeneralInfo"]</h6>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-3">
-                    <label class="form-label">Mã yêu cầu báo giá <span class="text-danger">*</span></label>
+                    <label class="form-label">@Localizer["QuoteRequestCode"] <span class="text-danger">*</span></label>
                     <select id="quoteRequestCode" name="quoteRequestCode" class="form-control quoteRequestCode searchable-select">
-                        <option value="">-- Chọn mã đơn --</option>
+                        <option value="">@Localizer["SelectOrderCode"]</option>
                         @foreach (var s in madons)
                         {
                             <option value="@s">@s</option>
@@ -49,9 +50,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Nhà cung cấp <span class="text-danger">*</span></label>
+                    <label class="form-label">@Localizer["Supplier"] <span class="text-danger">*</span></label>
                     <select id="supplierSelect" name="supplierSelect" class="form-control supplierSelect searchable-select">
-                        <option value="">-- Chọn nhà cung cấp --</option>
+                        <option value="">@Localizer["SelectSupplier"]</option>
                         @foreach (var s in nccNews)
                         {
                             <option value="@s.Ma">@s.Ma - @s.Ten</option>
@@ -59,19 +60,19 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Ngày báo giá</label>
+                    <label class="form-label">@Localizer["QuoteDate"]</label>
                     <input type="date" class="form-control" id="quoteDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Hiệu lực đến</label>
+                    <label class="form-label">@Localizer["ValidUntil"]</label>
                     <input type="date" class="form-control" id="validUntil" value="@DateTime.Today.AddDays(30).ToString("yyyy-MM-dd")">
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col-md-3">
-                    <label for="maPhongBan" class="form-label small text-uppercase fw-semibold">Mã phòng ban</label>
+                    <label for="maPhongBan" class="form-label small text-uppercase fw-semibold">@Localizer["DepartmentCode"]</label>
                     <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
-                        <option value="" selected>Chọn phòng ban</option>
+                        <option value="" selected>@Localizer["SelectDepartment"]</option>
                         @foreach (var s in nhomViTri)
                         {
                             <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
@@ -79,9 +80,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="searchMaVatTu" class="form-label">Mã nguyên vật liệu</label>
+                    <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
                     <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select">
-                        <option value="" selected>Chọn mã nguyên vật liệu</option>
+                        <option value="" selected>@Localizer["SelectMaterialCode"]</option>
                         @foreach (var s in mATERIAs)
                         {
                             <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
@@ -91,21 +92,21 @@
                 <!-- Nút điều khiển -->
                 <div class="mt-4 d-flex justify-content-end">
                     <button type="button" class="btn btn-outline-secondary" id="btnReset">
-                        <i class="fas fa-undo"></i> Làm mới
+                        <i class="fas fa-undo"></i> @Localizer["Reset"]
                     </button>
                     <div style="min-width:12px"></div>
-                    <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> Lọc</button>
+                    <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
                     <div style="min-width:12px"></div>
                     <button type="button" class="btn btn-success" id="btnSubmitQuote">
-                        <i class="fas fa-paper-plane me-1"></i> Gửi báo giá
+                        <i class="fas fa-paper-plane me-1"></i> @Localizer["SubmitQuote"]
                     </button>
                     <div style="min-width:12px"></div>
                     <button type="button" class="btn btn-warning" id="btnReturnQuote">
-                        <i class="fas fa-pen-alt"></i> Yêu cầu chỉnh sửa
+                        <i class="fas fa-pen-alt"></i> @Localizer["RequestEdit"]
                     </button>
                     <div style="min-width:12px"></div>
                     <button type="button" class="btn btn-warning" id="btnSaveDraft">
-                        <i class="fas fa-save me-1"></i> Lưu nháp
+                        <i class="fas fa-save me-1"></i> @Localizer["SaveDraft"]
                     </button>
                 </div>
             </div>
@@ -115,7 +116,7 @@
     <!-- Danh sách sản phẩm báo giá -->
     <div class="card mb-4 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách sản phẩm báo giá</h6>
+            <h6 class="mb-0"><i class="fas fa-list me-2"></i>@Localizer["QuoteItemList"]</h6>
             <button type="button" class="btn btn-outline-primary btn-sm" id="btnAddProduct">
                 <i class="fas fa-plus"></i>
             </button>
@@ -126,28 +127,28 @@
                     <thead>
                         <tr class="text-center">
                             <th style="width: 40px; background : #0950B0" hidden>ID</th>
-                            <th style="width: 40px; background : #0950B0">STT</th>
-                            <th style="background : #0950B0">Mã hàng nội bộ</th>
-                            <th style="background : #0950B0">Mã nhà cung cấp</th>
-                            <th style="background : #0950B0">Mã hàng NCC</th>
-                            <th style="min-width: 230px;background : #0950B0">Tên dùng mở thử tục</th>
-                            <th style="background : #0950B0">Số lượng</th>
-                            <th style="background : #0950B0">Đơn vị</th>
-                            <th style="background : #0950B0">Đơn giá USD</th>
-                            <th style="background : #0950B0">Đơn giá VND</th>
-                            <th style="min-width: 100px;background : #0950B0">MOQ</th>
-                            <th style="min-width: 150px;background : #0950B0">Quy cách đóng gói</th>
-                            <th style="background : #0950B0">Lead time</th>
-                            <th style="background : #0950B0">Ngày giao</th>
-                            <th style="background : #0950B0">Có đối ứng Rohs</th>
-                            <th style="min-width: 120px;background : #0950B0">CO/CQ</th>
-                            <th style="background : #0950B0">Gửi MSDS kèm số CAS</th>
-                            <th style="background : #0950B0">Đối ứng tiêu chuẩn an toàn</th>
-                            <th style="background : #0950B0">Cam kết đúng yêu cầu</th>
-                            <th style="min-width: 180px;background : #0950B0">Phương thức giao</th>
-                            <th style="min-width: 150px;background : #0950B0">Điều kiện</th>
-                            <th style="min-width: 150px;background : #0950B0">File đính kèm</th>
-                            <th style="background : #0950B0">Xóa</th>
+                            <th style="width: 40px; background : #0950B0">@Localizer["NoLabel"]</th>
+                            <th style="background : #0950B0">@Localizer["InternalMaterialCode"]</th>
+                            <th style="background : #0950B0">@Localizer["SupplierCode"]</th>
+                            <th style="background : #0950B0">@Localizer["SupplierItemCode"]</th>
+                            <th style="min-width: 230px;background : #0950B0">@Localizer["CustomsItemName"]</th>
+                            <th style="background : #0950B0">@Localizer["Quantity"]</th>
+                            <th style="background : #0950B0">@Localizer["Unit"]</th>
+                            <th style="background : #0950B0">@Localizer["PriceUSD"]</th>
+                            <th style="background : #0950B0">@Localizer["PriceVND"]</th>
+                            <th style="min-width: 100px;background : #0950B0">@Localizer["MOQ"]</th>
+                            <th style="min-width: 150px;background : #0950B0">@Localizer["Packing"]</th>
+                            <th style="background : #0950B0">@Localizer["LeadTime"]</th>
+                            <th style="background : #0950B0">@Localizer["DeliveryDate"]</th>
+                            <th style="background : #0950B0">@Localizer["RohsResponse"]</th>
+                            <th style="min-width: 120px;background : #0950B0">@Localizer["COCQ"]</th>
+                            <th style="background : #0950B0">@Localizer["MSDSWithCAS"]</th>
+                            <th style="background : #0950B0">@Localizer["SafetyResponse"]</th>
+                            <th style="background : #0950B0">@Localizer["CommitRequirement"]</th>
+                            <th style="min-width: 180px;background : #0950B0">@Localizer["DeliveryMethod"]</th>
+                            <th style="min-width: 150px;background : #0950B0">@Localizer["Condition"]</th>
+                            <th style="min-width: 150px;background : #0950B0">@Localizer["Attachment"]</th>
+                            <th style="background : #0950B0">@Localizer["Delete"]</th>
                         </tr>
                     </thead>
                     <tbody id="quoteItemsBody">
@@ -208,18 +209,18 @@
 <!-- Product side panel (slide-in) -->
 <div id="productPanel" class="product-panel" aria-hidden="true">
     <div class="panel-header d-flex justify-content-between align-items-center p-2 border-bottom">
-        <strong class="ms-2"><i class="fas fa-box-open me-2"></i>Chọn sản phẩm</strong>
+        <strong class="ms-2"><i class="fas fa-box-open me-2"></i>@Localizer["SelectProducts"]</strong>
         <div>
-            <button type="button" class="btn btn-sm btn-light me-1" id="btnCloseProductPanel">Đóng</button>
+            <button type="button" class="btn btn-sm btn-light me-1" id="btnCloseProductPanel">@Localizer["Close"]</button>
         </div>
     </div>
     <div class="panel-body p-3">
         <div class="mb-2">
             <div class="row g-2">
                 <div class="col-sm-3">
-                    <label class="form-label">Mã yêu cầu báo giá</label>
+                    <label class="form-label">@Localizer["QuoteRequestCode"]</label>
                     <select id="modalRqCode" name="modalRqCode" class="form-control modalRqCode searchable-select">
-                        <option value="">-- Chọn mã đơn --</option>
+                        <option value="">@Localizer["SelectOrderCode"]</option>
                         @foreach (var s in madons)
                         {
                             <option value="@s">@s</option>
@@ -227,9 +228,9 @@
                     </select>
                 </div>
                 <div class="col-sm-3">
-                    <label for="modalInternalCode" class="form-label">Mã hàng nội bộ</label>
+                    <label for="modalInternalCode" class="form-label">@Localizer["InternalMaterialCode"]</label>
                     <select id="modalInternalCode" name="modalInternalCode" class="form-select modalInternalCode searchable-select">
-                        <option value="" selected>Chọn mã hàng nội bộ</option>
+                        <option value="" selected>@Localizer["SelectInternalMaterialCode"]</option>
                         @foreach (var s in mATERIAs)
                         {
                             <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
@@ -237,9 +238,9 @@
                     </select>
                 </div>
                 <div class="col-sm-3">
-                    <label class="form-label">Phòng yêu cầu</label>
+                    <label class="form-label">@Localizer["RequestSection"]</label>
                     <select id="modalSection" name="modalSection" class="form-select searchable-select">
-                        <option value="">-- Chọn phòng --</option>
+                        <option value="">@Localizer["SelectSection"]</option>
                         @foreach (var s in nhomViTri)
                         {
                             <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
@@ -247,9 +248,9 @@
                     </select>
                 </div>
                 <div class="col-sm-3">
-                    <label class="form-label">Nhà cung cấp</label>
+                    <label class="form-label">@Localizer["Supplier"]</label>
                     <select id="modalSupplier" name="modalSupplier" class="form-select searchable-select">
-                        <option value="">-- Chọn NCC --</option>
+                        <option value="">@Localizer["SelectSupplier"]</option>
                         @foreach (var s in nccNews)
                         {
                             <option value="@s.Ma">@s.Ma - @s.Ten</option>
@@ -259,7 +260,7 @@
             </div>
             <div class="row g-2 mt-2">
                 <div class="col-sm-12 text-end">
-                    <button type="button" id="btnDialogSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Tìm kiếm</button>
+                    <button type="button" id="btnDialogSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> @Localizer["Search"]</button>
                 </div>
             </div>
         </div>
@@ -267,14 +268,14 @@
             <table class="table table-sm table-hover align-middle">
                 <thead class="thead-light sticky-top">
                     <tr>
-                        <th style="width:48px;">Chọn</th>
-                        <th>Mã đơn</th>
-                        <th>Mã hàng nội bộ</th>
-                        <th>Tên hàng</th>
-                        <th>Phòng yêu cầu</th>
-                        <th style="width:100px;" class="text-end">Số lượng</th>
-                        <th style="width:80px;">Đơn vị</th>
-                        <th>Nhà cung cấp</th>
+                        <th style="width:48px;">@Localizer["Select"]</th>
+                        <th>@Localizer["OrderCode"]</th>
+                        <th>@Localizer["InternalMaterialCode"]</th>
+                        <th>@Localizer["ItemName"]</th>
+                        <th>@Localizer["RequestSection"]</th>
+                        <th style="width:100px;" class="text-end">@Localizer["Quantity"]</th>
+                        <th style="width:80px;">@Localizer["Unit"]</th>
+                        <th>@Localizer["Supplier"]</th>
                     </tr>
                 </thead>
                 <tbody id="availableProductsBody">
@@ -310,7 +311,7 @@
             </table>
         </div>
         <div class="d-flex justify-content-end mt-2">
-            <button type="button" class="btn btn-primary btn-sm" id="btnConfirmAddProducts">Thêm vào báo giá</button>
+            <button type="button" class="btn btn-primary btn-sm" id="btnConfirmAddProducts">@Localizer["AddToQuote"]</button>
         </div>
     </div>
 </div>
@@ -318,6 +319,76 @@
     window.inputQuoteData = {
         user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser))
     };
+    window.i18nInputQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        PageTitle = Localizer["PageTitle"].Value,
+        ImportFromExcel = Localizer["ImportFromExcel"].Value,
+        Save = Localizer["Save"].Value,
+        GeneralInfo = Localizer["GeneralInfo"].Value,
+        QuoteRequestCode = Localizer["QuoteRequestCode"].Value,
+        SelectOrderCode = Localizer["SelectOrderCode"].Value,
+        Supplier = Localizer["Supplier"].Value,
+        SelectSupplier = Localizer["SelectSupplier"].Value,
+        QuoteDate = Localizer["QuoteDate"].Value,
+        ValidUntil = Localizer["ValidUntil"].Value,
+        DepartmentCode = Localizer["DepartmentCode"].Value,
+        SelectDepartment = Localizer["SelectDepartment"].Value,
+        MaterialCode = Localizer["MaterialCode"].Value,
+        SelectMaterialCode = Localizer["SelectMaterialCode"].Value,
+        Reset = Localizer["Reset"].Value,
+        Filter = Localizer["Filter"].Value,
+        SubmitQuote = Localizer["SubmitQuote"].Value,
+        RequestEdit = Localizer["RequestEdit"].Value,
+        SaveDraft = Localizer["SaveDraft"].Value,
+        QuoteItemList = Localizer["QuoteItemList"].Value,
+        NoLabel = Localizer["NoLabel"].Value,
+        InternalMaterialCode = Localizer["InternalMaterialCode"].Value,
+        SupplierCode = Localizer["SupplierCode"].Value,
+        SupplierItemCode = Localizer["SupplierItemCode"].Value,
+        CustomsItemName = Localizer["CustomsItemName"].Value,
+        Quantity = Localizer["Quantity"].Value,
+        Unit = Localizer["Unit"].Value,
+        PriceUSD = Localizer["PriceUSD"].Value,
+        PriceVND = Localizer["PriceVND"].Value,
+        MOQ = Localizer["MOQ"].Value,
+        Packing = Localizer["Packing"].Value,
+        LeadTime = Localizer["LeadTime"].Value,
+        DeliveryDate = Localizer["DeliveryDate"].Value,
+        RohsResponse = Localizer["RohsResponse"].Value,
+        COCQ = Localizer["COCQ"].Value,
+        MSDSWithCAS = Localizer["MSDSWithCAS"].Value,
+        SafetyResponse = Localizer["SafetyResponse"].Value,
+        CommitRequirement = Localizer["CommitRequirement"].Value,
+        DeliveryMethod = Localizer["DeliveryMethod"].Value,
+        Condition = Localizer["Condition"].Value,
+        Attachment = Localizer["Attachment"].Value,
+        Delete = Localizer["Delete"].Value,
+        SelectProducts = Localizer["SelectProducts"].Value,
+        SelectSection = Localizer["SelectSection"].Value,
+        Search = Localizer["Search"].Value,
+        Select = Localizer["Select"].Value,
+        OrderCode = Localizer["OrderCode"].Value,
+        ItemName = Localizer["ItemName"].Value,
+        AddToQuote = Localizer["AddToQuote"].Value,
+        // JS messages
+        MsgResetSuccess = Localizer["MsgResetSuccess"].Value,
+        MsgSelectAtLeastOneProduct = Localizer["MsgSelectAtLeastOneProduct"].Value,
+        MsgAddedProducts = Localizer["MsgAddedProducts", "{0}"].Value,
+        MsgProductDuplicate = Localizer["MsgProductDuplicate"].Value,
+        MsgDeleteConfirm = Localizer["MsgDeleteConfirm"].Value,
+        MsgProcessingExcel = Localizer["MsgProcessingExcel"].Value,
+        MsgUploadFailed = Localizer["MsgUploadFailed"].Value,
+        MsgImportSuccess = Localizer["MsgImportSuccess"].Value,
+        MsgImportError = Localizer["MsgImportError", "{0}"].Value,
+        MsgSaveSuccess = Localizer["MsgSaveSuccess"].Value,
+        MsgSaveFailed = Localizer["MsgSaveFailed", "{0}"].Value,
+        MsgDraftSaved = Localizer["MsgDraftSaved"].Value,
+        MsgSubmitConfirm = Localizer["MsgSubmitConfirm"].Value,
+        MsgSubmitSuccess = Localizer["MsgSubmitSuccess"].Value,
+        MsgUnsavedChangesConfirm = Localizer["MsgUnsavedChangesConfirm"].Value,
+        SearchEllipsis = Localizer["SearchEllipsis"].Value,
+        NoResults = Localizer["NoResults"].Value,
+        SelectPlaceholder = Localizer["SelectPlaceholder"].Value
+    }));
 </script>
 @section Scripts {
     <script src="~/js/InputQuote.js"></script>

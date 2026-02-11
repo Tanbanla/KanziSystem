@@ -95,8 +95,8 @@
         if (elements.totalUSD) elements.totalUSD.textContent = '$0.00';
         if (elements.totalVND) elements.totalVND.textContent = '0 ₫';
         if (elements.itemCount) elements.itemCount.textContent = '0';
-
-        showAlert('success', 'Đã đặt lại bộ lọc và xóa các mục hiện tại');
+        const T = window.i18nInputQuote || {};
+        showAlert('success', T.MsgResetSuccess || 'Đã đặt lại bộ lọc và xóa các mục hiện tại');
     }
     // Show add product modal
     function showAddProductModal() {
@@ -149,7 +149,8 @@
         const selectedCheckboxes = document.querySelectorAll('#availableProductsBody .product-select:checked');
         
         if (selectedCheckboxes.length === 0) {
-            showAlert('warning', 'Vui lòng chọn ít nhất một sản phẩm!');
+            const T = window.i18nInputQuote || {};
+            showAlert('warning', T.MsgSelectAtLeastOneProduct || 'Vui lòng chọn ít nhất một sản phẩm!');
             return;
         }
 
@@ -194,9 +195,11 @@
             setProductPanelVisible(false);
         }
         if (!ks) {
-            showAlert('success', `Đã thêm ${selectedCheckboxes.length} sản phẩm vào báo giá!`);
+            const T = window.i18nInputQuote || {};
+            showAlert('success', (T.MsgAddedProducts || 'Đã thêm {0} sản phẩm vào báo giá!').replace('{0}', selectedCheckboxes.length));
         } else {
-            showAlert('danger', 'Sản phẩm đã tồn tại trong báo giá!');
+            const T = window.i18nInputQuote || {};
+            showAlert('danger', T.MsgProductDuplicate || 'Sản phẩm đã tồn tại trong báo giá!');
         }
     }
 
@@ -341,7 +344,8 @@
         // Delete row event
         const deleteBtn = row.querySelector('.delete-row');
         deleteBtn.addEventListener('click', function() {
-            if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+            const T = window.i18nInputQuote || {};
+            if (confirm(T.MsgDeleteConfirm || 'Bạn có chắc chắn muốn xóa sản phẩm này?')) {
                 row.remove();
                 quoteState.items.splice(index - 1, 1);
                 updateRowNumbers();
@@ -435,14 +439,15 @@
         input.onchange = function(e) {
             const file = e.target.files[0];
             if (file) {
-                showAlert('info', 'Đang xử lý file Excel...');
+                const T = window.i18nInputQuote || {};
+                showAlert('info', T.MsgProcessingExcel || 'Đang xử lý file Excel...');
                 const formData = new FormData();
                 formData.append('file', file);
                 fetch('/Quote/UploadQuoteExcel', {
                     method: 'POST',
                     body: formData
                 }).then(r => {
-                    if (!r.ok) throw new Error('Upload thất bại');
+                    if (!r.ok) throw new Error(((window.i18nInputQuote && window.i18nInputQuote.MsgUploadFailed) || 'Upload thất bại'));
                     return r.json();
                 }).then(items => {
                     // items is a list of BaoGia_Request_of_QuotationDTO; add minimal fields to rows
@@ -454,9 +459,12 @@
                             unit: it.NVCHR_DonVi || 'PCS'
                         });
                     });
-                    showAlert('success', 'Đã import thành công từ file Excel!');
+                    const T = window.i18nInputQuote || {};
+                    showAlert('success', T.MsgImportSuccess || 'Đã import thành công từ file Excel!');
                 }).catch(err => {
-                    showAlert('danger', 'Lỗi import: ' + (err && err.message ? err.message : err));
+                    const T = window.i18nInputQuote || {};
+                    const msg = (T.MsgImportError || 'Lỗi import: {0}').replace('{0}', (err && err.message ? err.message : err));
+                    showAlert('danger', msg);
                 });
             }
         };
@@ -525,12 +533,15 @@
 
         callApi('/Quote/InsertInputQuote', dtoList)
             .then(() => {
-                showAlert('success', 'Đã lưu báo giá thành công!');
+                const T = window.i18nInputQuote || {};
+                showAlert('success', T.MsgSaveSuccess || 'Đã lưu báo giá thành công!');
                 quoteState.isDirty = false;
                 resetFilters();
             })
             .catch(err => {
-                showAlert('danger', 'Lưu thất bại: ' + err);
+                const T = window.i18nInputQuote || {};
+                const msg = (T.MsgSaveFailed || 'Lưu thất bại: {0}').replace('{0}', err);
+                showAlert('danger', msg);
             })
             .finally(() => {
                 btnSave.classList.remove('loading');
@@ -550,7 +561,8 @@
         quoteData.status = 'draft';
         
         console.log('Saving draft:', quoteData);
-        showAlert('success', 'Đã lưu nháp thành công!');
+        const T = window.i18nInputQuote || {};
+        showAlert('success', T.MsgDraftSaved || 'Đã lưu nháp thành công!');
         quoteState.isDirty = false;
     }
 
@@ -560,12 +572,13 @@
         //    return;
         //}
 
-        if (confirm('Bạn có chắc chắn muốn gửi báo giá này? Sau khi gửi sẽ không thể chỉnh sửa.')) {
+        const T = window.i18nInputQuote || {};
+        if (confirm(T.MsgSubmitConfirm || 'Bạn có chắc chắn muốn gửi báo giá này? Sau khi gửi sẽ không thể chỉnh sửa.')) {
             const quoteData = collectFormData();
             quoteData.status = 'submitted';
             
             console.log('Submitting quote:', quoteData);
-            showAlert('success', 'Đã gửi báo giá thành công!');
+            showAlert('success', T.MsgSubmitSuccess || 'Đã gửi báo giá thành công!');
             quoteState.isDirty = false;
             
             // Redirect or reload page
@@ -578,7 +591,8 @@
     // Cancel quote
     function cancelQuote() {
         if (quoteState.isDirty) {
-            if (confirm('Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn hủy?')) {
+            const T = window.i18nInputQuote || {};
+            if (confirm(T.MsgUnsavedChangesConfirm || 'Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn hủy?')) {
                 window.location.href = '/Quote/Quote';
             }
         } else {
@@ -594,7 +608,8 @@
         // Check required fields
         if (!elements.quoteRequestCode || !elements.quoteRequestCode.value || !elements.quoteRequestCode.value.trim()) {
             if (elements.quoteRequestCode) markFieldInvalid(elements.quoteRequestCode);
-            errors.push('Mã yêu cầu báo giá là bắt buộc');
+            const T = window.i18nInputQuote || {};
+            errors.push(T.MsgQuoteRequestRequired || 'Mã yêu cầu báo giá là bắt buộc');
             isValid = false;
         } else {
             markFieldValid(elements.quoteRequestCode);
@@ -602,7 +617,8 @@
 
         if (!elements.supplierSelect || !elements.supplierSelect.value) {
             if (elements.supplierSelect) markFieldInvalid(elements.supplierSelect);
-            errors.push('Nhà cung cấp là bắt buộc');
+            const T = window.i18nInputQuote || {};
+            errors.push(T.MsgSupplierRequired || 'Nhà cung cấp là bắt buộc');
             isValid = false;
         } else {
             markFieldValid(elements.supplierSelect);
@@ -613,12 +629,15 @@
         const hasValidProduct = Array.from(priceInputs).some(input => parseFloat(input.value) > 0);
         
         if (!hasValidProduct) {
-            errors.push('Vui lòng nhập giá cho ít nhất một sản phẩm');
+            const T = window.i18nInputQuote || {};
+            errors.push(T.MsgEnterPriceForOne || 'Vui lòng nhập giá cho ít nhất một sản phẩm');
             isValid = false;
         }
 
         if (errors.length > 0) {
-            showAlert('danger', 'Vui lòng kiểm tra:\n' + errors.join('\n'));
+            const T = window.i18nInputQuote || {};
+            const prefix = T.MsgPleaseCheck || 'Vui lòng kiểm tra:';
+            showAlert('danger', prefix + '\n' + errors.join('\n'));
         }
 
         return isValid;
@@ -759,7 +778,8 @@
             btn.innerHTML = '<span class="ms-values"></span><span class="ms-placeholder"></span><span class="ms-caret">▾</span>';
             const dropdown = document.createElement('div'); dropdown.className = 'ms-dropdown';
             const search = document.createElement('div'); search.className = 'ms-search';
-            search.innerHTML = '<input type="text" placeholder="Tìm..." />';
+            const T = window.i18nInputQuote || {};
+            search.innerHTML = '<input type="text" placeholder="' + (T.SearchEllipsis || 'Tìm...') + '" />';
             const list = document.createElement('div'); list.className = 'ms-list';
 
             function renderList(query) {
@@ -778,7 +798,7 @@
                     }
                 });
                 if (!hasItems) {
-                    const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = 'Không có kết quả';
+                    const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (window.i18nInputQuote && window.i18nInputQuote.NoResults) || 'Không có kết quả';
                     list.appendChild(empty);
                 }
             }
@@ -793,7 +813,8 @@
                     placeholderEl.textContent = '';
                 } else {
                     valuesEl.textContent = '';
-                    placeholderEl.textContent = '-- Chọn --';
+                    const T = window.i18nInputQuote || {};
+                    placeholderEl.textContent = T.SelectPlaceholder || '-- Chọn --';
                 }
             }
 

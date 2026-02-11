@@ -1,0 +1,334 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string" />
+							<xsd:attribute name="name" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="Title" xml:space="preserve">
+    <value>REQUEST FOR QUOTATION FORM</value>
+  </data>
+	<data name="DownloadExcel" xml:space="preserve">
+    <value>Download Excel</value>
+  </data>
+	<data name="UploadExcel" xml:space="preserve">
+    <value>Upload Excel</value>
+  </data>
+	<data name="NoLabel" xml:space="preserve">
+    <value>No</value>
+  </data>
+	<data name="Operations" xml:space="preserve">
+    <value>Operations</value>
+  </data>
+	<data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+	<data name="AutoRender" xml:space="preserve">
+    <value>Auto render</value>
+  </data>
+	<data name="Submit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
+	<data name="RequestDetail" xml:space="preserve">
+    <value>Request Detail</value>
+  </data>
+	<data name="SectionCode" xml:space="preserve">
+    <value>Section Code</value>
+  </data>
+	<data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+	<data name="Classification" xml:space="preserve">
+    <value>Classification (A/B/C/E/Non list)</value>
+  </data>
+	<data name="EquipmentCode" xml:space="preserve">
+    <value>Equipment Code</value>
+  </data>
+	<data name="InternalMaterialCode" xml:space="preserve">
+    <value>Internal Material Code</value>
+  </data>
+	<data name="SupplierItemCode" xml:space="preserve">
+    <value>Supplier Item Code</value>
+  </data>
+	<data name="ItemNameVN" xml:space="preserve">
+    <value>Item name in Vietnamese for customs (draft)</value>
+  </data>
+	<data name="ItemNameEN" xml:space="preserve">
+    <value>Item name (EN)</value>
+  </data>
+	<data name="Quantity" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+	<data name="Unit" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+	<data name="ItemDescription" xml:space="preserve">
+    <value>Item Description</value>
+  </data>
+	<data name="ROHSRequirement" xml:space="preserve">
+    <value>ROHS Requirement</value>
+  </data>
+	<data name="COCQRequirement" xml:space="preserve">
+    <value>CO/CQ Requirement</value>
+  </data>
+	<data name="MSDSRequirement" xml:space="preserve">
+    <value>MSDS Requirement</value>
+  </data>
+	<data name="SafetyStandardRequirement" xml:space="preserve">
+    <value>Safety Standard Requirement</value>
+  </data>
+	<data name="DesignFile" xml:space="preserve">
+    <value>Design File</value>
+  </data>
+	<data name="Manufacturer" xml:space="preserve">
+    <value>Manufacturer</value>
+  </data>
+	<data name="Supplier" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+	<data name="GetQuotation" xml:space="preserve">
+    <value>Get Quotation</value>
+  </data>
+	<data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+	<data name="DesiredReceiveDate" xml:space="preserve">
+    <value>Desired Receive Date</value>
+  </data>
+	<data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Supplier Selection Deadline</value>
+  </data>
+	<data name="Urgent" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+	<data name="Requester" xml:space="preserve">
+    <value>Requester</value>
+  </data>
+	<data name="Shape" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+	<data name="Material" xml:space="preserve">
+    <value>Material</value>
+  </data>
+	<data name="CompositionForChemicals" xml:space="preserve">
+    <value>Composition, content (for chemicals)</value>
+  </data>
+	<data name="DimensionsMM" xml:space="preserve">
+    <value>Dimensions (mm) (L/W/H)</value>
+  </data>
+	<data name="UsedForPosition" xml:space="preserve">
+    <value>Used for which machine/equipment/position</value>
+  </data>
+	<data name="PurposeFeature" xml:space="preserve">
+    <value>Purpose (feature)</value>
+  </data>
+	<data name="SelectSection" xml:space="preserve">
+    <value>Select section</value>
+  </data>
+	<data name="SelectCategory" xml:space="preserve">
+    <value>-- Select category --</value>
+  </data>
+	<data name="SelectClassification" xml:space="preserve">
+    <value>-- Select classification --</value>
+  </data>
+	<data name="SelectInternalMaterialCode" xml:space="preserve">
+    <value>-- Select internal material code --</value>
+  </data>
+	<data name="ItemNameVNPlaceholder" xml:space="preserve">
+    <value>VN item name for customs</value>
+  </data>
+	<data name="Composition" xml:space="preserve">
+    <value>Composition, content</value>
+  </data>
+	<data name="SelectCOCQ" xml:space="preserve">
+    <value>-- Select CO/CQ --</value>
+  </data>
+	<data name="MSDSRequirementPlaceholder" xml:space="preserve">
+    <value>MSDS requirement with CAS</value>
+  </data>
+	<data name="SafetyRequirement" xml:space="preserve">
+    <value>Safety requirement</value>
+  </data>
+	<data name="SelectSupplier" xml:space="preserve">
+    <value>Select supplier</value>
+  </data>
+	<data name="RemoveRow" xml:space="preserve">
+    <value>Remove row</value>
+  </data>
+	<data name="AddOneRow" xml:space="preserve">
+    <value>Add one row</value>
+  </data>
+	<data name="RequiredFieldsNote" xml:space="preserve">
+    <value>Fields with * are required</value>
+  </data>
+	<data name="Notification" xml:space="preserve">
+    <value>Notification</value>
+  </data>
+	<data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+	<data name="AutoRenderExportExcel" xml:space="preserve">
+    <value>Auto-render Export Excel</value>
+  </data>
+	<data name="HasInternalMaterialCode" xml:space="preserve">
+    <value>Has internal material code</value>
+  </data>
+	<data name="NoInternalMaterialCode" xml:space="preserve">
+    <value>No internal material code</value>
+  </data>
+	<data name="SelectAll" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+	<data name="SearchCodeOrName" xml:space="preserve">
+    <value>Search code or name...</value>
+  </data>
+	<data name="SearchCategory" xml:space="preserve">
+    <value>Search category...</value>
+  </data>
+	<data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+	<data name="ExportExcel" xml:space="preserve">
+    <value>Export Excel</value>
+  </data>
+	<data name="ROHSNoNeed" xml:space="preserve">
+    <value>No need</value>
+  </data>
+	<data name="ROHSNeed" xml:space="preserve">
+    <value>Need</value>
+  </data>
+	<data name="ErrorTitle" xml:space="preserve"><value>Error</value></data>
+	<data name="SuccessTitle" xml:space="preserve"><value>Success</value></data>
+	<data name="DialogTitle" xml:space="preserve"><value>Notification</value></data>
+	<data name="DialogOk" xml:space="preserve"><value>OK</value></data>
+	<data name="MsgEnterReasonReject" xml:space="preserve"><value>Please enter a reason when not getting a quotation</value></data>
+	<data name="MsgFillRequired" xml:space="preserve"><value>Please fill all required (*) fields</value></data>
+	<data name="MsgSubmitSuccess" xml:space="preserve"><value>Submitted quotation request successfully</value></data>
+	<data name="MsgInvalidData" xml:space="preserve"><value>Invalid data</value></data>
+	<data name="MsgLoadedRows" xml:space="preserve"><value>Loaded {0} rows from Excel</value></data>
+	<data name="MsgCannotReadFile" xml:space="preserve"><value>Cannot read file</value></data>
+	<data name="MsgCannotOpenAutoRender" xml:space="preserve"><value>Cannot open Auto Render dialog</value></data>
+	<data name="MsgSelectSectionRequired" xml:space="preserve"><value>Please select a section</value></data>
+	<data name="MsgSelectAtLeastOneMaterial" xml:space="preserve"><value>Please select at least one internal material code</value></data>
+	<data name="MsgSelectAtLeastOneCategory" xml:space="preserve"><value>Please select at least one category</value></data>
+	<data name="Exporting" xml:space="preserve"><value>Exporting...</value></data>
+	<data name="MsgExportedExcel" xml:space="preserve"><value>Auto Excel export completed.</value></data>
+	<data name="MsgUnknownError" xml:space="preserve"><value>Unknown error</value></data>
+	<data name="MsgExportFailed" xml:space="preserve"><value>Export failed</value></data>
+	<data name="MsgCannotExport" xml:space="preserve"><value>Cannot export file</value></data>
+	<data name="SearchEllipsis" xml:space="preserve"><value>Search...</value></data>
+	<data name="NoResults" xml:space="preserve"><value>No results</value></data>
+	<data name="SelectPlaceholder" xml:space="preserve"><value>-- Select --</value></data>
+</root>

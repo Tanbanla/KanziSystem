@@ -16,7 +16,10 @@ using Microsoft.AspNetCore.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
+    .AddDataAnnotationsLocalization();
 
 var costManagerConnection = builder.Configuration.GetConnectionString("CostManagerConnection");
 var workingControlConnection = builder.Configuration.GetConnectionString("WorkingControlConnection");
@@ -86,6 +89,16 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Localization middleware
+var supportedCultures = new[] { "vi", "en", "ja" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("vi")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+localizationOptions.RequestCultureProviders.Insert(0,
+    new Microsoft.AspNetCore.Localization.QueryStringRequestCultureProvider());
+app.UseRequestLocalization(localizationOptions);
 
 // Thêm middleware cho session và authentication
 app.UseSession();

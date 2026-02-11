@@ -24,7 +24,8 @@
                 const bodyEl = overlay.querySelector('#cmDialogBody');
                 const footerEl = overlay.querySelector('#cmDialogFooter');
                 // build content
-                if (titleEl) titleEl.textContent = title || 'Input';
+                const T = window.i18nApproval || {};
+                if (titleEl) titleEl.textContent = title || T.InputReasonTitle || 'Input';
                 bodyEl.innerHTML = '';
                 const input = document.createElement('textarea');
                 input.style.width = '100%';
@@ -38,13 +39,13 @@
                 const btnCancel = document.createElement('button');
                 btnCancel.type = 'button';
                 btnCancel.className = 'btn btn-outline-secondary';
-                btnCancel.textContent = 'Hủy';
+                btnCancel.textContent = (T.DialogCancel || 'Hủy');
                 btnCancel.dataset.cmAction = 'cancel';
 
                 const btnOk = document.createElement('button');
                 btnOk.type = 'button';
                 btnOk.className = 'btn btn-primary ms-2';
-                btnOk.textContent = 'Xác nhận';
+                btnOk.textContent = (T.DialogConfirm || 'Xác nhận');
                 btnOk.dataset.cmAction = 'ok';
 
                 footerEl.appendChild(btnCancel);
@@ -145,7 +146,7 @@
                     }
                 });
                 if (!hasItems) {
-                    const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = 'Không có kết quả';
+                    const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (window.i18nApproval && window.i18nApproval.NoResults) || 'Không có kết quả';
                     list.appendChild(empty);
                 }
             }
@@ -160,7 +161,7 @@
                     placeholderEl.textContent = '';
                 } else {
                     valuesEl.textContent = '';
-                    placeholderEl.textContent = '-- Chọn --';
+                    placeholderEl.textContent = (window.i18nApproval && window.i18nApproval.SelectPlaceholder) || '-- Chọn --';
                 }
             }
 
@@ -352,7 +353,11 @@
 
     function updateSummaryAndButtons() {
         const summaryEl = document.getElementById('summaryText');
-        if (summaryEl) summaryEl.textContent = state.orderedMaDons.length + ' bản ghi';
+        if (summaryEl) {
+            const T = window.i18nApproval || {};
+            const fmt = T.SummaryFormat || '{0} bản ghi';
+            summaryEl.textContent = fmt.replace('{0}', state.orderedMaDons.length);
+        }
         const approveBtn = document.getElementById('btnApprove');
         const returnBtn = document.getElementById('btnReturn');
         const approveCountEl = document.getElementById('approveCount');
@@ -418,7 +423,7 @@
             const tdDetail = document.createElement('td');
             const btn = document.createElement('button');
             btn.className = 'btn btn-outline-primary btn-sm';
-            btn.innerHTML = '<i class="fas fa-info-circle"></i> Chi tiết';
+            btn.innerHTML = '<i class="fas fa-info-circle"></i> ' + ((window.i18nApproval && window.i18nApproval.Detail) || 'Chi tiết');
             btn.addEventListener('click', function (ev) {
                 ev.stopPropagation();
                 showDetailModal(maDon);
@@ -580,7 +585,9 @@
         if (modalEl) {
             const titleEl = document.getElementById('detailModalTitle');
             if (titleEl) {
-                titleEl.textContent = `Chi tiết đơn: ${maDon} (Số dòng: ${group.length})`;
+                const T = window.i18nApproval || {};
+                const fmt = T.DetailModalTitleFormat || 'Chi tiết đơn: {0} (Số dòng: {1})';
+                titleEl.textContent = fmt.replace('{0}', maDon).replace('{1}', group.length);
             }
             // simple show
             try { modalEl.setAttribute('aria-hidden', 'false'); } catch (e) { }
@@ -762,11 +769,12 @@
         if (btnReturn) btnReturn.addEventListener('click', function () {
             if (state.selectedMaDons.size === 0) return;
             // show custom input dialog for reason
-            showInputDialog('Lý do trả lại', 'Nhập lý do trả lại...').then(result => {
+            const T = window.i18nApproval || {};
+            showInputDialog(T.InputReasonTitle || 'Lý do trả lại', T.InputReasonPlaceholder || 'Nhập lý do trả lại...').then(result => {
                 if (!result) return;
                 if (result.action !== 'ok') return; // cancelled
                 const reason = (result.value || '').trim();
-                if (!reason) { showToast('warning', 'Lý do không được để trống.'); return; }
+                if (!reason) { showToast('warning', (T.ReasonRequired || 'Lý do không được để trống.')); return; }
                 // collect payload and set return reason
                 const payload = [];
                 Array.from(state.selectedMaDons).forEach(maDon => {

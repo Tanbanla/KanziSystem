@@ -1,0 +1,334 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>PHIẾU YÊU CẦU BÁO GIÁ</value>
+  </data>
+	<data name="DownloadExcel" xml:space="preserve">
+    <value>Tải Excel</value>
+  </data>
+	<data name="UploadExcel" xml:space="preserve">
+    <value>Tải lên Excel</value>
+  </data>
+	<data name="NoLabel" xml:space="preserve">
+    <value>STT</value>
+  </data>
+	<data name="Operations" xml:space="preserve">
+    <value>Thao tác</value>
+  </data>
+	<data name="Reset" xml:space="preserve">
+    <value>Đặt lại</value>
+  </data>
+	<data name="AutoRender" xml:space="preserve">
+    <value>Tự động hiển thị</value>
+  </data>
+	<data name="Submit" xml:space="preserve">
+    <value>Gửi</value>
+  </data>
+	<data name="RequestDetail" xml:space="preserve">
+    <value>Chi tiết yêu cầu</value>
+  </data>
+	<data name="SectionCode" xml:space="preserve">
+    <value>Mã phòng ban</value>
+  </data>
+	<data name="Category" xml:space="preserve">
+    <value>Chủng loại hàng</value>
+  </data>
+	<data name="Classification" xml:space="preserve">
+    <value>Phân loại (A/B/C/E/Non list)</value>
+  </data>
+	<data name="EquipmentCode" xml:space="preserve">
+    <value>Mã thiết bị</value>
+  </data>
+	<data name="InternalMaterialCode" xml:space="preserve">
+    <value>Mã hàng nội bộ</value>
+  </data>
+	<data name="SupplierItemCode" xml:space="preserve">
+    <value>Mã hàng của NCC</value>
+  </data>
+	<data name="ItemNameVN" xml:space="preserve">
+    <value>Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)</value>
+  </data>
+	<data name="ItemNameEN" xml:space="preserve">
+    <value>Tên hàng EN</value>
+  </data>
+	<data name="Quantity" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+	<data name="Unit" xml:space="preserve">
+    <value>Đơn vị</value>
+  </data>
+	<data name="ItemDescription" xml:space="preserve">
+    <value>Mô tả hàng hóa</value>
+  </data>
+	<data name="ROHSRequirement" xml:space="preserve">
+    <value>Yêu cầu ROHS</value>
+  </data>
+	<data name="COCQRequirement" xml:space="preserve">
+    <value>Yêu cầu CO/CQ</value>
+  </data>
+	<data name="MSDSRequirement" xml:space="preserve">
+    <value>Yêu cầu MSDS</value>
+  </data>
+	<data name="SafetyStandardRequirement" xml:space="preserve">
+    <value>Yêu cầu tiêu chuẩn an toàn</value>
+  </data>
+	<data name="DesignFile" xml:space="preserve">
+    <value>File thiết kế</value>
+  </data>
+	<data name="Manufacturer" xml:space="preserve">
+    <value>Nhà sản xuất</value>
+  </data>
+	<data name="Supplier" xml:space="preserve">
+    <value>Nhà cung cấp</value>
+  </data>
+	<data name="GetQuotation" xml:space="preserve">
+    <value>Lấy báo giá</value>
+  </data>
+	<data name="Reason" xml:space="preserve">
+    <value>Lý do</value>
+  </data>
+	<data name="DesiredReceiveDate" xml:space="preserve">
+    <value>Ngày muốn nhận hàng</value>
+  </data>
+	<data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Kỳ hạn lựa chọn NCC</value>
+  </data>
+	<data name="Urgent" xml:space="preserve">
+    <value>Gấp</value>
+  </data>
+	<data name="Requester" xml:space="preserve">
+    <value>Người yêu cầu</value>
+  </data>
+	<data name="Shape" xml:space="preserve">
+    <value>Hình dáng</value>
+  </data>
+	<data name="Material" xml:space="preserve">
+    <value>Chất liệu</value>
+  </data>
+	<data name="CompositionForChemicals" xml:space="preserve">
+    <value>Thành phần, hàm lượng (đối với hóa chất)</value>
+  </data>
+	<data name="DimensionsMM" xml:space="preserve">
+    <value>Kích thước(mm) (dài/rộng/cao)</value>
+  </data>
+	<data name="UsedForPosition" xml:space="preserve">
+    <value>Dùng cho máy/thiết bị/vị trí nào</value>
+  </data>
+	<data name="PurposeFeature" xml:space="preserve">
+    <value>Dùng để làm gì (tính năng)</value>
+  </data>
+	<data name="SelectSection" xml:space="preserve">
+    <value>Chọn phòng ban</value>
+  </data>
+	<data name="SelectCategory" xml:space="preserve">
+    <value>-- Chọn chủng loại --</value>
+  </data>
+	<data name="SelectClassification" xml:space="preserve">
+    <value>-- Chọn phân loại --</value>
+  </data>
+	<data name="SelectInternalMaterialCode" xml:space="preserve">
+    <value>-- Chọn mã hàng nội bộ --</value>
+  </data>
+	<data name="ItemNameVNPlaceholder" xml:space="preserve">
+    <value>Tên hàng VN dùng để mở thủ tục hải quan</value>
+  </data>
+	<data name="Composition" xml:space="preserve">
+    <value>Thành phần, hàm lượng</value>
+  </data>
+	<data name="SelectCOCQ" xml:space="preserve">
+    <value>-- Chọn CO/CQ --</value>
+  </data>
+	<data name="MSDSRequirementPlaceholder" xml:space="preserve">
+    <value>Yêu cầu MSDS kèm CAS</value>
+  </data>
+	<data name="SafetyRequirement" xml:space="preserve">
+    <value>Yêu cầu an toàn</value>
+  </data>
+	<data name="SelectSupplier" xml:space="preserve">
+    <value>Chọn NCC</value>
+  </data>
+	<data name="RemoveRow" xml:space="preserve">
+    <value>Xóa dòng</value>
+  </data>
+	<data name="AddOneRow" xml:space="preserve">
+    <value>Thêm 1 dòng</value>
+  </data>
+	<data name="RequiredFieldsNote" xml:space="preserve">
+    <value>Trường có dấu * là bắt buộc</value>
+  </data>
+	<data name="Notification" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+	<data name="Close" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+	<data name="AutoRenderExportExcel" xml:space="preserve">
+    <value>Tự động xuất Excel</value>
+  </data>
+	<data name="HasInternalMaterialCode" xml:space="preserve">
+    <value>Có mã hàng nội bộ</value>
+  </data>
+	<data name="NoInternalMaterialCode" xml:space="preserve">
+    <value>Chưa có mã hàng nội bộ</value>
+  </data>
+	<data name="SelectAll" xml:space="preserve">
+    <value>Chọn tất cả</value>
+  </data>
+	<data name="SearchCodeOrName" xml:space="preserve">
+    <value>Tìm mã hoặc tên...</value>
+  </data>
+	<data name="SearchCategory" xml:space="preserve">
+    <value>Tìm chủng loại...</value>
+  </data>
+	<data name="Cancel" xml:space="preserve">
+    <value>Hủy</value>
+  </data>
+	<data name="ExportExcel" xml:space="preserve">
+    <value>Xuất Excel</value>
+  </data>
+	<data name="ROHSNoNeed" xml:space="preserve">
+    <value>Không cần</value>
+  </data>
+	<data name="ROHSNeed" xml:space="preserve">
+    <value>Cần vào đây hộ tôi nhé</value>
+  </data>
+	<data name="ErrorTitle" xml:space="preserve"><value>Lỗi</value></data>
+	<data name="SuccessTitle" xml:space="preserve"><value>Thành công</value></data>
+	<data name="DialogTitle" xml:space="preserve"><value>Thông báo</value></data>
+	<data name="DialogOk" xml:space="preserve"><value>Đồng ý</value></data>
+	<data name="MsgEnterReasonReject" xml:space="preserve"><value>Vui lòng nhập lý do từ chối lấy báo giá</value></data>
+	<data name="MsgFillRequired" xml:space="preserve"><value>Vui lòng điền đầy đủ các trường bắt buộc(*)</value></data>
+	<data name="MsgSubmitSuccess" xml:space="preserve"><value>Gửi yêu cầu báo giá thành công</value></data>
+	<data name="MsgInvalidData" xml:space="preserve"><value>Dữ liệu không hợp lệ</value></data>
+	<data name="MsgLoadedRows" xml:space="preserve"><value>Đã tải {0} dòng từ Excel</value></data>
+	<data name="MsgCannotReadFile" xml:space="preserve"><value>Không thể đọc file</value></data>
+	<data name="MsgCannotOpenAutoRender" xml:space="preserve"><value>Không thể mở hộp thoại Auto render</value></data>
+	<data name="MsgSelectSectionRequired" xml:space="preserve"><value>Vui lòng chọn mã phòng ban</value></data>
+	<data name="MsgSelectAtLeastOneMaterial" xml:space="preserve"><value>Vui lòng chọn ít nhất một mã hàng nội bộ</value></data>
+	<data name="MsgSelectAtLeastOneCategory" xml:space="preserve"><value>Vui lòng chọn ít nhất một chủng loại hàng</value></data>
+	<data name="Exporting" xml:space="preserve"><value>Đang xuất...</value></data>
+	<data name="MsgExportedExcel" xml:space="preserve"><value>Đã xuất file Excel tự động.</value></data>
+	<data name="MsgUnknownError" xml:space="preserve"><value>Lỗi không xác định</value></data>
+	<data name="MsgExportFailed" xml:space="preserve"><value>Xuất file thất bại</value></data>
+	<data name="MsgCannotExport" xml:space="preserve"><value>Không thể xuất file</value></data>
+	<data name="SearchEllipsis" xml:space="preserve"><value>Tìm...</value></data>
+	<data name="NoResults" xml:space="preserve"><value>Không có kết quả</value></data>
+	<data name="SelectPlaceholder" xml:space="preserve"><value>-- Chọn --</value></data>
+</root>

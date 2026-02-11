@@ -40,4 +40,5 @@ public partial class BaoGia_Confirm_Name_Quotation
     public string? NVCHR_LyDo { get; set; }
 
     public string? NVCHR_Note { get; set; }
+    public string? VCHR_TenRecomment { get; set; }
 }

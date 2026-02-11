@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+		Microsoft ResX Schema
+
+		Version 1.3
+
+		The primary goals of this format is to allow a simple XML format 
+		that is mostly human readable. The generation and parsing of the 
+		various data types are done through the TypeConverter classes 
+		associated with the data types.
+
+		Example:
+
+		... ado.net/XML headers & schema ...
+		<resheader name="resmimetype">text/microsoft-resx</resheader>
+		<resheader name="version">1.3</resheader>
+		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+		<data name="Name1">this is my long string</data>
+		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+			[base64 mime encoded serialized .NET Framework object]
+		</data>
+		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+			[base64 mime encoded string representing a byte array form of the .NET Framework object]
+		</data>
+
+		There are any number of "resheader" rows that contain simple 
+		name/value pairs.
+
+		Each data row contains a name, and value. The row also contains a 
+		type or mimetype. Type corresponds to a .NET class that support 
+		text/value conversion through the TypeConverter architecture. 
+		Classes that don't support this are serialized and stored with the 
+		mimetype set.
+
+		The mimetype is used for serialized objects, and tells the 
+		ResXResourceReader how to depersist the object. This is currently not 
+		extensible. For a given mimetype the value must be set accordingly:
+
+		Note - application/x-microsoft.net.object.binary.base64 is the format 
+		that the ResXResourceWriter will generate, however the reader can 
+		read any of the formats listed below.
+
+		mimetype: application/x-microsoft.net.object.binary.base64
+		value   : The object must be serialized with 
+			: System.Serialization.Formatters.Binary.BinaryFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.soap.base64
+		value   : The object must be serialized with 
+			: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+			: and then encoded with base64 encoding.
+
+		mimetype: application/x-microsoft.net.object.bytearray.base64
+		value   : The object must be serialized into a byte array 
+			: using a System.ComponentModel.TypeConverter
+			: and then encoded with base64 encoding.
+	-->
+
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="PageTitle" xml:space="preserve"><value>Supplier management</value></data>
+	<data name="HeaderTitle" xml:space="preserve"><value>Supplier management</value></data>
+	<data name="DownloadExcel" xml:space="preserve"><value>Download Excel</value></data>
+	<data name="UploadExcel" xml:space="preserve"><value>Upload Excel</value></data>
+	<data name="SupplierCode" xml:space="preserve"><value>Code</value></data>
+	<data name="EnterSupplierCode" xml:space="preserve"><value>Enter supplier code</value></data>
+	<data name="SupplierName" xml:space="preserve"><value>Supplier name</value></data>
+	<data name="EnterSupplierName" xml:space="preserve"><value>Enter supplier name</value></data>
+	<data name="Refresh" xml:space="preserve"><value>Refresh</value></data>
+	<data name="Search" xml:space="preserve"><value>Search</value></data>
+	<data name="Add" xml:space="preserve"><value>Add</value></data>
+	<data name="Address" xml:space="preserve"><value>Address</value></data>
+	<data name="Phone" xml:space="preserve"><value>Phone</value></data>
+	<data name="Region" xml:space="preserve"><value>Region</value></data>
+	<data name="Group" xml:space="preserve"><value>Group</value></data>
+	<data name="Actions" xml:space="preserve"><value>Actions</value></data>
+	<data name="RowsPerPage" xml:space="preserve"><value>Rows per page:</value></data>
+	<data name="Prev" xml:space="preserve"><value>Previous</value></data>
+	<data name="Next" xml:space="preserve"><value>Next</value></data>
+	<data name="PageIndex" xml:space="preserve"><value>Page {0}</value></data>
+	<data name="SupplierModalTitle" xml:space="preserve"><value>Supplier</value></data>
+	<data name="Close" xml:space="preserve"><value>Close</value></data>
+	<data name="Fax" xml:space="preserve"><value>Fax</value></data>
+	<data name="TaxCode" xml:space="preserve"><value>Tax code</value></data>
+	<data name="SalesStaff" xml:space="preserve"><value>Sales staff</value></data>
+	<data name="AccountingStaff" xml:space="preserve"><value>Accounting staff</value></data>
+	<data name="Note" xml:space="preserve"><value>Note</value></data>
+	<data name="AccountOpenMethod" xml:space="preserve"><value>Account opening method</value></data>
+	<data name="PaymentTerms" xml:space="preserve"><value>Payment terms</value></data>
+	<data name="CustomsProcedure" xml:space="preserve"><value>Customs procedure</value></data>
+	<data name="NoNeed" xml:space="preserve"><value>No need</value></data>
+	<data name="Need" xml:space="preserve"><value>Need</value></data>
+	<data name="Confirm" xml:space="preserve"><value>Confirm</value></data>
+	<data name="Save" xml:space="preserve"><value>Save</value></data>
+	<data name="SupplierItemsTitle" xml:space="preserve"><value>Supplier items</value></data>
+	<data name="SupplierShort" xml:space="preserve"><value>Supplier</value></data>
+	<data name="ImportExcel" xml:space="preserve"><value>Import Excel</value></data>
+	<data name="TemplateFile" xml:space="preserve"><value>Template file</value></data>
+	<data name="Category" xml:space="preserve"><value>Category</value></data>
+	<data name="MadeIn" xml:space="preserve"><value>Made In</value></data>
+	<data name="Status" xml:space="preserve"><value>Status</value></data>
+	<data name="PIC" xml:space="preserve"><value>PIC</value></data>
+	<data name="Mail" xml:space="preserve"><value>Mail</value></data>
+	<data name="ItemModalHint" xml:space="preserve"><value>Only the first field (Item code) is required. Others can be left blank.</value></data>
+	<data name="Notification" xml:space="preserve"><value>Notification</value></data>
+	<data name="AreYouSure" xml:space="preserve"><value>Are you sure?</value></data>
+	<data name="OK" xml:space="preserve"><value>OK</value></data>
+	<!-- JS extra -->
+	<data name="NoData" xml:space="preserve"><value>No data</value></data>
+	<data name="Loading" xml:space="preserve"><value>Loading...</value></data>
+	<data name="LoadFailed" xml:space="preserve"><value>Cannot load data</value></data>
+	<data name="ErrorTitle" xml:space="preserve"><value>Error</value></data>
+	<data name="ErrorConnection" xml:space="preserve"><value>Server connection error</value></data>
+	<data name="SuccessTitle" xml:space="preserve"><value>Success</value></data>
+	<data name="SaveSuccessMessage" xml:space="preserve"><value>Request submitted successfully</value></data>
+	<data name="ConfirmDeleteTitle" xml:space="preserve"><value>Confirm</value></data>
+	<data name="ConfirmDeleteMessage" xml:space="preserve"><value>Are you sure you want to delete this supplier?</value></data>
+	<data name="DeleteSuccessTitle" xml:space="preserve"><value>Success</value></data>
+	<data name="DeleteSuccessMessage" xml:space="preserve"><value>Deleted successfully</value></data>
+	<data name="AddItemFailed" xml:space="preserve"><value>Add failed</value></data>
+	<data name="AddItemSuccess" xml:space="preserve"><value>Item added successfully</value></data>
+	<data name="MissingItemFields" xml:space="preserve"><value>Please enter Item code and Supplier code</value></data>
+	<data name="ImportFailed" xml:space="preserve"><value>Import failed</value></data>
+	<data name="ImportSuccess" xml:space="preserve"><value>File imported successfully</value></data>
+	<data name="CannotSendFile" xml:space="preserve"><value>Cannot send file</value></data>
+	<data name="Edit" xml:space="preserve"><value>Edit</value></data>
+	<data name="Delete" xml:space="preserve"><value>Delete</value></data>
+	<data name="Detail" xml:space="preserve"><value>Detail</value></data>
+</root>

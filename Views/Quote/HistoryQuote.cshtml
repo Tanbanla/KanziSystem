@@ -1,4 +1,5 @@
 ﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Lịch sử yêu cầu báo giá";
     List<MATERIALDTO> listMaterials = Model.DanhSachVatTu;
@@ -6,7 +7,7 @@
     List<IM_NCC_NEWDTO> listNCC = Model.DanhSachNhaCungCap;
     List<BaoGia_StatusDTO> listStatus = Model.DanhSachStatus;
     List<string> madons = Model.DanhSachMaDon;
-    List<dynamic> categoryS = Model.DanhSachCategory;
+    List<string> categoryS = Model.DanhSachCategory;
     List<string> phanLoais = ["A", "B", "C", "E", "NO LIST"];
 }
 <head>
@@ -16,26 +17,26 @@
 <div class="container-fluid" id="quote-history">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h4 class="mb-0 fw-bold text-primary">LỊCH SỬ YÊU CẦU BÁO GIÁ</h4>
-            <small class="text-muted">History of Request for Quotation</small>
+            <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
+            <small class="text-muted">@Localizer["PageSubtitle"]</small>
         </div>
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
             <div class="btn-group me-2 mb-2" role="group">
-                <button type="button" class="btn btn-outline-primary" id="btnExportHistory"><i class="fas fa-file-export"></i> Export</button>
+                <button type="button" class="btn btn-outline-primary" id="btnExportHistory"><i class="fas fa-file-export"></i> @Localizer["Export"]</button>
             </div>
         </div>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-header bg-white">
-            <h6 class="mb-0 text-secondary" style="color:black !important">Bộ lọc / Filters</h6>
+            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Filters"]</h6>
         </div>
         <div class="card-body">
             <form id="historyFilterForm" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label for="searchMaDon" class="form-label">Mã đơn</label>
+                    <label for="searchMaDon" class="form-label">@Localizer["OrderCode"]</label>
                     <select id="searchMaDon" name="searchMaDon" class="form-control searchMaDon searchable-select">
-                        <option value="">-- Chọn mã đơn --</option>
+                        <option value="">@Localizer["SelectOrderCode"]</option>
                         @foreach (var s in madons)
                         {
                             <option value="@s">@s</option>
@@ -43,9 +44,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="searchPhongBan" class="form-label">Phòng ban</label>
+                    <label for="searchPhongBan" class="form-label">@Localizer["Department"]</label>
                     <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
-                        <option value="" selected>Chọn phòng ban</option>
+                        <option value="" selected>@Localizer["SelectDepartment"]</option>
                         @foreach (var s in listPhong)
                         {
                             <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
@@ -53,13 +54,13 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="searchNguoiTao" class="form-label">Người tạo đơn</label>
-                    <input type="text" class="form-control" id="searchNguoiTao" name="searchNguoiTao" placeholder="Nhập người tạo">
+                    <label for="searchNguoiTao" class="form-label">@Localizer["Creator"]</label>
+                    <input type="text" class="form-control" id="searchNguoiTao" name="searchNguoiTao" placeholder="@Localizer["EnterCreator"]">
                 </div>
                 <div class="col-md-3">
-                    <label for="searchMaVatTu" class="form-label">Mã nguyên vật liệu</label>
+                    <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
                     <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select">
-                        <option value="" selected>Chọn mã nguyên vật liệu</option>
+                        <option value="" selected>@Localizer["SelectMaterialCode"]</option>
                         @foreach (var s in listMaterials)
                         {
                             <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
@@ -67,9 +68,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="searchNhaCungCap" class="form-label">Nhà cung cấp</label>
+                    <label for="searchNhaCungCap" class="form-label">@Localizer["Supplier"]</label>
                     <select id="searchNhaCungCap" name="searchNhaCungCap" class="form-select searchNhaCungCap searchable-select">
-                        <option value="" selected>Chọn nhà cung cấp</option>
+                        <option value="" selected>@Localizer["SelectSupplier"]</option>
                         @foreach (var s in listNCC)
                         {
                             <option value="@s.Ma">@s.Ma - @s.Ten</option>
@@ -77,9 +78,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="statusFilter" class="form-label">Trạng thái đơn</label>
+                    <label for="statusFilter" class="form-label">@Localizer["OrderStatus"]</label>
                     <select class="form-select" id="statusFilter" name="statusFilter">
-                        <option value="" selected>Tất cả</option>
+                        <option value="" selected>@Localizer["All"]</option>
                         @foreach (var s in listStatus)
                         {
                             <option value="@s.VCHR_CodeStatus">@s.NVCHR_TenStatus</option>
@@ -87,22 +88,22 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="dateRange" class="form-label">Khoảng thời gian</label>
+                    <label for="dateRange" class="form-label">@Localizer["DateRange"]</label>
                     <div class="d-flex gap-2">
                         <input type="date" class="form-control" id="dateFrom" name="dateFrom">
                         <input type="date" class="form-control" id="dateTo" name="dateTo">
                     </div>
                 </div>
                 <div class="col-md-2 d-flex gap-2">
-                    <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> Lọc</button>
+                    <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
                     <div style="min-width: 8px"></div>
-                    <button type="button" class="btn btn-outline-secondary w-100" id="btnResetFilters"><i class="fas fa-undo"></i> Reset</button>
+                    <button type="button" class="btn btn-outline-secondary w-100" id="btnResetFilters"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
                 </div>
             </form>
         </div>
         <div class="card-header bg-white border-top">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <h6 class="mb-0 text-secondary" style="color:black !important">Danh sách nhóm đơn (theo Mã đơn)</h6>
+                <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["GroupListByOrder"]</h6>
             </div>
         </div>
         <div class="card-body pt-2">
@@ -111,19 +112,19 @@
                     <thead class="table-light">
                         <tr class="text-center align-middle">
                             <th style="width: 40px">#</th>
-                            <th style="min-width: 180px">Mã đơn (Nhóm)</th>
-                            <th style="min-width: 180px">Người yêu cầu</th>
-                            <th style="min-width: 160px">Ngày tạo</th>
-                            <th style="min-width: 140px">Trạng thái hiện tại</th>
-                            <th style="min-width: 140px">Tổng số đơn</th>
-                            <th style="min-width: 160px">NCC liên quan</th>
-                            <th style="min-width: 200px">Thao tác</th>
+                            <th style="min-width: 180px">@Localizer["OrderCodeGroup"]</th>
+                            <th style="min-width: 180px">@Localizer["Requester"]</th>
+                            <th style="min-width: 160px">@Localizer["CreatedDate"]</th>
+                            <th style="min-width: 140px">@Localizer["CurrentStatus"]</th>
+                            <th style="min-width: 140px">@Localizer["TotalOrders"]</th>
+                            <th style="min-width: 160px">@Localizer["RelatedSuppliers"]</th>
+                            <th style="min-width: 200px">@Localizer["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody id="historyGroupTableBody">
                         <tr class="group-row" data-group-id="" hidden>
                             <td class="text-center">
-                                <button type="button" class="btn btn-sm btn-link text-primary px-0 btn-toggle-group" title="Mở rộng"><i class="fas fa-plus-square"></i></button>
+                                <button type="button" class="btn btn-sm btn-link text-primary px-0 btn-toggle-group" title="@Localizer["Expand"]"><i class="fas fa-plus-square"></i></button>
                             </td>
                             <td class="fw-semibold group-code"></td>
                             <td class="group-requester"></td>
@@ -133,8 +134,8 @@
                             <td class="group-suppliers"></td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử"><i class="fas fa-history"></i></button>
-                                    <button type="button" class="btn btn-outline-secondary btn-view-approvals" title="Phê duyệt"><i class="fas fa-check-double"></i></button>
+                                    <button type="button" class="btn btn-outline-info btn-view-history" title="@Localizer["ViewHistory"]"><i class="fas fa-history"></i></button>
+                                    <button type="button" class="btn btn-outline-secondary btn-view-approvals" title="@Localizer["Approval"]"><i class="fas fa-check-double"></i></button>
 @*                                     <button type="button" class="btn btn-outline-primary btn-edit-uncompleted" data-action="edit-history" title="Sửa đơn trả lại"><i class="fas fa-edit"></i></button> *@
                                 </div>
                             </td>
@@ -148,13 +149,13 @@
                                             <thead class="table-light">
                                                 <tr class="text-center align-middle">
                                                     <th style="width: 40px">No</th>
-                                                    <th style="min-width: 160px">Mã đơn</th>
-                                                    <th style="min-width: 200px">Vật tư</th>
-                                                    <th style="min-width: 160px">NCC</th>
-                                                    <th style="min-width: 140px">Số lượng</th>
-                                                    <th style="min-width: 140px">Trạng thái</th>
-                                                    <th style="min-width: 160px">Ngày cập nhật</th>
-                                                    <th style="min-width: 200px">Thao tác</th>
+                                                    <th style="min-width: 160px">@Localizer["OrderCode"]</th>
+                                                    <th style="min-width: 200px">@Localizer["Material"]</th>
+                                                    <th style="min-width: 160px">@Localizer["Supplier"]</th>
+                                                    <th style="min-width: 140px">@Localizer["Quantity"]</th>
+                                                    <th style="min-width: 140px">@Localizer["Status"]</th>
+                                                    <th style="min-width: 160px">@Localizer["UpdatedDate"]</th>
+                                                    <th style="min-width: 200px">@Localizer["Actions"]</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="group-detail-body">
@@ -171,7 +172,7 @@
 
             <!-- Pagination -->
             <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
-                <div class="small text-muted" id="historyPaginationInfo">Hiển thị 0 - 0 / 0 nhóm</div>
+                <div class="small text-muted" id="historyPaginationInfo">@Localizer["PaginationInfo", "0", "0", "0"].Value</div>
                 <nav>
                     <ul class="pagination pagination-sm mb-0" id="historyPagination">
                         <li class="page-item disabled"><button class="page-link" data-page="prev">«</button></li>
@@ -183,7 +184,7 @@
         </div>
 
         <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div class="small text-muted">Chọn nhóm CHR_MaDon để xem chi tiết các đơn trong nhóm.</div>
+            <div class="small text-muted">@Localizer["FooterHint"]</div>
         </div>
     </div>
 </div>
@@ -192,7 +193,7 @@
     <div class="modal-dialog modal-xxl modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Chỉnh sửa yêu cầu báo giá</h5>
+                <h5 class="modal-title">@Localizer["EditModalTitle"]</h5>
                 <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
                     <i class="fas fa-times fa-sm"></i>
                 </button>
@@ -203,83 +204,83 @@
                     <div class="col-12">
                         <div class="d-flex gap-3">
                             <div>
-                                <label class="form-label">Mã đơn (Nhóm)</label>
+                                <label class="form-label">@Localizer["OrderCodeGroup"]</label>
                                 <input type="text" class="form-control" id="editMaDon" readonly />
                             </div>
                             <div style="margin-left: 8px;">
-                                <label class="form-label">Người yêu cầu</label>
+                                <label class="form-label">@Localizer["Requester"]</label>
                                 <input type="text" class="form-control" id="editRequester" readonly />
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Mã phòng ban</label>
+                        <label class="form-label">@Localizer["DepartmentCode"]</label>
                         <input type="text" class="form-control" id="editSectionName" readonly />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Phân loại</label>
+                        <label class="form-label">@Localizer["Classification"]</label>
                         <input type="text" class="form-control" id="editPhanLoai" readonly />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label w-100">Chủng loại</label>
+                        <label class="form-label w-100">@Localizer["Category"]</label>
                         <input type="text" class="form-control" id="editChungLoai" readonly />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Mã hàng nội bộ</label>
+                        <label class="form-label">@Localizer["InternalMaterialCode"]</label>
                         <input type="text" class="form-control" id="editMaHangNoiBo" readonly/>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Mã thiết bị</label>
+                        <label class="form-label">@Localizer["EquipmentCode"]</label>
                         <input type="text" class="form-control" id="editMaThietBi" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Mã hàng NCC</label>
+                        <label class="form-label">@Localizer["SupplierItemCode"]</label>
                         <input type="text" class="form-control" id="editMaHangNCC" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Tên hàng VN</label>
+                        <label class="form-label">@Localizer["ItemNameVN"]</label>
                         <input type="text" class="form-control" id="editTenHangVN" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Tên hàng EN</label>
+                        <label class="form-label">@Localizer["ItemNameEN"]</label>
                         <input type="text" class="form-control" id="editTenHangEN" />
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Số lượng</label>
+                        <label class="form-label">@Localizer["Quantity"]</label>
                         <input type="number" class="form-control" id="editSoLuong" />
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Đơn vị</label>
+                        <label class="form-label">@Localizer["Unit"]</label>
                         <input type="text" class="form-control" id="editDonVi" />
                     </div>
                     <!-- Description fields -->
                     <div class="col-md-4">
-                        <label class="form-label">Hình dáng</label>
+                        <label class="form-label">@Localizer["Shape"]</label>
                         <input type="text" class="form-control" id="editHinhDang" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Chất liệu</label>
+                        <label class="form-label">@Localizer["Material"]</label>
                         <input type="text" class="form-control" id="editChatLieu" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Thành phần</label>
+                        <label class="form-label">@Localizer["Composition"]</label>
                         <input type="text" class="form-control" id="editThanhPhan" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Kích thước</label>
+                        <label class="form-label">@Localizer["Dimensions"]</label>
                         <input type="text" class="form-control" id="editKichThuoc" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Dùng cho máy</label>
+                        <label class="form-label">@Localizer["UsedForMachine"]</label>
                         <input type="text" class="form-control" id="editDongMay" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Tính năng</label>
+                        <label class="form-label">@Localizer["Feature"]</label>
                         <input type="text" class="form-control" id="editTinhNang" />
                     </div>
                     <!-- Regulatory and files -->
                     <div class="col-md-4">
-                        <label class="form-label w-100">ROHS</label>
+                        <label class="form-label w-100">@Localizer["Rohs"]</label>
 @*                         <input type="text" class="form-control" id="editRohs" /> *@
                         <select id="editRohs" name="editRohs" class="form-select editRohs" style="min-height: 40px;">
                             <option value="No Need" selected>No Need</option>
@@ -287,7 +288,7 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label w-100">CO/CQ</label>
+                        <label class="form-label w-100">@Localizer["COCQ"]</label>
 @*                         <input type="text" class="form-control" id="editCOCQ" /> *@
                         <select id="editCOCQ" name="editCOCQ" class="form-select editCOCQ" style="min-height: 40px;">
                             <option value="" selected>-- Chọn CO/CQ --</option>
@@ -297,46 +298,46 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">MSDS</label>
+                        <label class="form-label">@Localizer["MSDS"]</label>
                         <input type="text" class="form-control" id="editMSDS" />
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Tiêu chuẩn an toàn</label>
+                        <label class="form-label">@Localizer["SafetyStandard"]</label>
                         <input type="text" class="form-control" id="editAnToan" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">File thiết kế</label>
+                        <label class="form-label">@Localizer["DesignFile"]</label>
                         <input type="text" class="form-control" id="editFileThietKe" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Nhà sản xuất</label>
+                        <label class="form-label">@Localizer["Manufacturer"]</label>
                         <input type="text" class="form-control" id="editNhaSanXuat" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Nhà cung cấp</label>
+                        <label class="form-label">@Localizer["Supplier"]</label>
                         <input type="text" class="form-control" id="editNhaCungCap" readonly />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label w-100">Lấy báo giá</label>
+                        <label class="form-label w-100">@Localizer["GetQuotation"]</label>
                         <select class="form-select" id="editLayBaoGia" style="min-height: 40px;">
                             <option value="true">O</option>
                             <option value="false">X</option>
                         </select>
                     </div>
                     <div class="col-md-9">
-                        <label class="form-label">Lý do</label>
+                        <label class="form-label">@Localizer["Reason"]</label>
                         <input type="text" class="form-control lydoTb" id="editLyDo" placeholder="Lý do" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Ngày muốn nhận</label>
+                        <label class="form-label">@Localizer["DesiredReceiveDate"]</label>
                         <input type="date" class="form-control" id="editNgayMuonNhan" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Kỳ hạn lựa chọn NCC</label>
+                        <label class="form-label">@Localizer["SupplierSelectionDeadline"]</label>
                         <input type="date" class="form-control" id="editKyHan" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label w-100">Gấp</label>
+                        <label class="form-label w-100">@Localizer["Urgent"]</label>
                         <select class="form-select" id="editGap" style="min-height: 40px">
                             <option value="false">X</option>
                             <option value="true">O</option>
@@ -358,8 +359,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">Đóng</button>
-                <button type="button" class="btn btn-primary" id="btnSaveHistoryEdit">Lưu</button>
+                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="@Localizer["Close"]" aria-controls="editHistoryModal">@Localizer["Close"]</button>
+                <button type="button" class="btn btn-primary" id="btnSaveHistoryEdit">@Localizer["Save"]</button>
             </div>
         </div>
     </div>
@@ -368,8 +369,8 @@
 <div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
         <div class="cm-dialog-header">
-            <h6 id="cmDialogTitle" class="cm-dialog-title">Thông báo</h6>
-            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="Đóng">✕</button>
+            <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
         </div>
         <div id="cmDialogBody" class="cm-dialog-body"></div>
         <div id="cmDialogFooter" class="cm-dialog-footer"></div>
@@ -380,6 +381,66 @@
     window.HistoryData = {
         status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listStatus))
     };
+    window.i18nHistoryQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        PageTitle = Localizer["PageTitle"].Value,
+        PageSubtitle = Localizer["PageSubtitle"].Value,
+        Export = Localizer["Export"].Value,
+        Filters = Localizer["Filters"].Value,
+        OrderCode = Localizer["OrderCode"].Value,
+        SelectOrderCode = Localizer["SelectOrderCode"].Value,
+        Department = Localizer["Department"].Value,
+        SelectDepartment = Localizer["SelectDepartment"].Value,
+        Creator = Localizer["Creator"].Value,
+        EnterCreator = Localizer["EnterCreator"].Value,
+        MaterialCode = Localizer["MaterialCode"].Value,
+        SelectMaterialCode = Localizer["SelectMaterialCode"].Value,
+        Supplier = Localizer["Supplier"].Value,
+        SelectSupplier = Localizer["SelectSupplier"].Value,
+        OrderStatus = Localizer["OrderStatus"].Value,
+        All = Localizer["All"].Value,
+        DateRange = Localizer["DateRange"].Value,
+        Filter = Localizer["Filter"].Value,
+        Reset = Localizer["Reset"].Value,
+        GroupListByOrder = Localizer["GroupListByOrder"].Value,
+        OrderCodeGroup = Localizer["OrderCodeGroup"].Value,
+        Requester = Localizer["Requester"].Value,
+        CreatedDate = Localizer["CreatedDate"].Value,
+        CurrentStatus = Localizer["CurrentStatus"].Value,
+        TotalOrders = Localizer["TotalOrders"].Value,
+        RelatedSuppliers = Localizer["RelatedSuppliers"].Value,
+        Actions = Localizer["Actions"].Value,
+        Expand = Localizer["Expand"].Value,
+        ViewHistory = Localizer["ViewHistory"].Value,
+        Approval = Localizer["Approval"].Value,
+        Material = Localizer["Material"].Value,
+        Quantity = Localizer["Quantity"].Value,
+        Status = Localizer["Status"].Value,
+        UpdatedDate = Localizer["UpdatedDate"].Value,
+        PaginationInfo = Localizer["PaginationInfo", "{0}", "{1}", "{2}"].Value,
+        FooterHint = Localizer["FooterHint"].Value,
+        EditModalTitle = Localizer["EditModalTitle"].Value,
+        Close = Localizer["Close"].Value,
+        Save = Localizer["Save"].Value,
+        Notification = Localizer["Notification"].Value,
+        // JS messages
+        MsgSearchFailed = Localizer["MsgSearchFailed"].Value,
+        MsgLoadHistoryFailed = Localizer["MsgLoadHistoryFailed"].Value,
+        MsgNoHistory = Localizer["MsgNoHistory"].Value,
+        MsgNoDataToEdit = Localizer["MsgNoDataToEdit"].Value,
+        MsgNotFoundData = Localizer["MsgNotFoundData"].Value,
+        MsgSaveSuccess = Localizer["MsgSaveSuccess"].Value,
+        MsgSaveFailed = Localizer["MsgSaveFailed", "{0}"].Value,
+        DialogOk = Localizer["DialogOk"].Value,
+        SearchEllipsis = Localizer["SearchEllipsis"].Value,
+        NoResults = Localizer["NoResults"].Value,
+        SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
+        HistoryTime= Localizer["HistoryTime"].Value,
+        RequestNo= Localizer["RequestNo"].Value,
+        Action =Localizer["Action"].Value,
+        UpdatedBy=Localizer["UpdatedBy"].Value,
+        Reason = Localizer["Reason"].Value,
+        PageTitleHistory = Localizer["PageTitleHistory"].Value,
+    }));
 </script>
 @section Scripts {
     <script src="~/js/HistoryQuote.js"></script>

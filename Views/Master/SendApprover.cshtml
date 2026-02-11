@@ -1,5 +1,6 @@
-﻿@{
-    ViewData["Title"] = "Master luồng phê duyệt báo giá";
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["PageTitle"].Value;
     var listSteps = Model.baoGiaSteps;
     var listSections = Model.NhomViTris;
 }
@@ -10,14 +11,14 @@
         <div class="col-md-4">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Tìm kiếm & Thêm mới</h5>
+                    <h5 class="mb-0">@Localizer["SearchAndAddTitle"]</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-2">
                         <div class="col-12">
-                            <label class="form-label">Tên phòng (section)</label>
+                            <label class="form-label">@Localizer["SectionName"]</label>
                             <select id="searchSection" class="form-control form-control-sm">
-                                <option value="">-- Tất cả --</option>
+                                <option value="">@Localizer["All"]</option>
                                 @foreach (var item in listSections)
                                 {
                                     <option value="@item.Mahangmuctheovitri">@item.Tenhangmuctheovitri</option>
@@ -26,9 +27,9 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">Bước</label>
+                            <label class="form-label">@Localizer["Step"]</label>
                             <select id="searchStep" class="form-control form-control-sm">
-                                <option value="">-- Tất cả --</option>
+                                <option value="">@Localizer["All"]</option>
                                 @foreach (var item in listSteps)
                                 {
                                     <option value="@item.INT_StepNumber">@item.CHR_StepName</option>
@@ -37,20 +38,20 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">ADID</label>
-                            <input id="searchAdid" class="form-control" placeholder="Nhập ADID..." />
+                            <label class="form-label">@Localizer["Adid"]</label>
+                            <input id="searchAdid" class="form-control" placeholder="@Localizer["EnterAdid"]" />
                         </div>
 
                         <div class="col-12 mt-3">
                             <div class="d-grid gap-2">
                                 <button id="btnSearch" class="btn btn-primary">
-                                    <i class="fas fa-search me-1"></i> Tìm kiếm
+                                    <i class="fas fa-search me-1"></i> @Localizer["Search"]
                                 </button>
                                 <button id="btnAddNew" class="btn btn-success">
-                                    <i class="fas fa-plus-circle me-1"></i> Thêm mới
+                                    <i class="fas fa-plus-circle me-1"></i> @Localizer["AddNew"]
                                 </button>
                                 <button id="btnClear" class="btn btn-outline-secondary">
-                                    <i class="fas fa-broom me-1"></i> Xóa tìm kiếm
+                                    <i class="fas fa-broom me-1"></i> @Localizer["ClearSearch"]
                                 </button>
                             </div>
                         </div>
@@ -61,60 +62,60 @@
             <!-- Form Add/Edit (inline thay vì modal) -->
             <div class="card shadow-sm" id="formContainer" style="display: none;">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0" id="formTitle">Thêm người phê duyệt</h5>
+                    <h5 class="mb-0" id="formTitle">@Localizer["AddApproverTitle"]</h5>
                 </div>
                 <div class="card-body">
                     <form id="approverForm">
                         <input type="hidden" id="approverId" value="0" />
 
                         <div class="mb-3">
-                            <label class="form-label">ADID <span class="text-danger">*</span></label>
+                            <label class="form-label">@Localizer["Adid"] <span class="text-danger">*</span></label>
                             <input id="modalAdid" class="form-control" required />
                             <div id="modalLookupStatus" class="small text-muted mt-1"></div>
-                            <div class="invalid-feedback">Vui lòng nhập ADID</div>
+                            <div class="invalid-feedback">@Localizer["ValidateEnterAdid"]</div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Tên người <span class="text-danger">*</span></label>
+                            <label class="form-label">@Localizer["UserName"] <span class="text-danger">*</span></label>
                             <input id="modalName" class="form-control" required />
-                            <div class="invalid-feedback">Vui lòng nhập tên</div>
+                            <div class="invalid-feedback">@Localizer["ValidateEnterName"]</div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Chức danh</label>
+                            <label class="form-label">@Localizer["Position"]</label>
                             <input id="modalPosition" class="form-control" />
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Phòng <span class="text-danger">*</span></label>
+                            <label class="form-label">@Localizer["Section"] <span class="text-danger">*</span></label>
                             <select id="modalSectionCode" class="form-control form-control-sm" required>
-                                <option value="">-- Chọn phòng --</option>
+                                <option value="">@Localizer["SelectSection"]</option>
                                 @foreach (var s in listSections)
                                 {
                                     <option value="@s.Mahangmuctheovitri">@s.Tenhangmuctheovitri</option>
                                 }
                             </select>
-                            <div class="invalid-feedback">Vui lòng chọn phòng</div>
+                            <div class="invalid-feedback">@Localizer["ValidateSelectSection"]</div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Bước <span class="text-danger">*</span></label>
+                            <label class="form-label">@Localizer["Step"] <span class="text-danger">*</span></label>
                             <select id="modalStep" class="form-control form-control-sm" required>
-                                <option value="">-- Chọn bước --</option>
+                                <option value="">@Localizer["SelectStep"]</option>
                                 @foreach (var st in listSteps)
                                 {
                                     <option value="@st.INT_StepNumber">@st.CHR_StepName</option>
                                 }
                             </select>
-                            <div class="invalid-feedback">Vui lòng chọn bước</div>
+                            <div class="invalid-feedback">@Localizer["ValidateSelectStep"]</div>
                         </div>
 
                         <div class="d-flex gap-2">
                             <button type="submit" id="saveApprover" class="btn btn-primary flex-grow-1" style="margin-right: 8px;">
-                                <i class="fas fa-save me-1"></i> Lưu
+                                <i class="fas fa-save me-1"></i> @Localizer["Save"]
                             </button>
                             <button type="button" id="cancelForm" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-1"></i> Hủy
+                                <i class="fas fa-times me-1"></i> @Localizer["Cancel"]
                             </button>
                         </div>
                     </form>
@@ -126,15 +127,15 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-project-diagram me-2"></i>Luồng phê duyệt
+                        <i class="fas fa-project-diagram me-2"></i>@Localizer["ApprovalFlow"]
                     </h5>
-                    <span class="badge bg-light text-dark" id="totalCount">0 người phê duyệt</span>
+                    <span class="badge bg-light text-dark" id="totalCount">@Localizer["TotalApprovers", "0"].Value</span>
                 </div>
                 <div class="card-body" style="overflow-y: auto; max-height: 600px;">
                     <div id="flowContainer">
                         <div class="text-center text-muted py-5">
                             <i class="fas fa-search fa-3x mb-3"></i>
-                            <p>Sử dụng bộ lọc bên trái để tìm kiếm và hiển thị luồng phê duyệt</p>
+                            <p>@Localizer["UseFiltersHint"]</p>
                         </div>
                     </div>
                 </div>
@@ -151,8 +152,8 @@
 <div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
         <div class="cm-dialog-header">
-            <h6 id="cmDialogTitle" class="cm-dialog-title">Thông báo</h6>
-            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="Đóng">✕</button>
+            <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
         </div>
         <div id="cmDialogBody" class="cm-dialog-body"></div>
         <div id="cmDialogFooter" class="cm-dialog-footer">
@@ -164,4 +165,59 @@
 </div>
 @section Scripts {
     <script src="/js/sendApprover.js"></script>
+    <script>
+        window.i18nSendApprover = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+            SearchAndAddTitle = Localizer["SearchAndAddTitle"].Value,
+            SectionName = Localizer["SectionName"].Value,
+            All = Localizer["All"].Value,
+            Step = Localizer["Step"].Value,
+            Adid = Localizer["Adid"].Value,
+            EnterAdid = Localizer["EnterAdid"].Value,
+            Search = Localizer["Search"].Value,
+            AddNew = Localizer["AddNew"].Value,
+            ClearSearch = Localizer["ClearSearch"].Value,
+            AddApproverTitle = Localizer["AddApproverTitle"].Value,
+            ValidateEnterAdid = Localizer["ValidateEnterAdid"].Value,
+            UserName = Localizer["UserName"].Value,
+            ValidateEnterName = Localizer["ValidateEnterName"].Value,
+            Position = Localizer["Position"].Value,
+            Section = Localizer["Section"].Value,
+            SelectSection = Localizer["SelectSection"].Value,
+            ValidateSelectSection = Localizer["ValidateSelectSection"].Value,
+            SelectStep = Localizer["SelectStep"].Value,
+            ValidateSelectStep = Localizer["ValidateSelectStep"].Value,
+            Save = Localizer["Save"].Value,
+            Cancel = Localizer["Cancel"].Value,
+            ApprovalFlow = Localizer["ApprovalFlow"].Value,
+            TotalApprovers = Localizer["TotalApprovers", "{0}"].Value,
+            UseFiltersHint = Localizer["UseFiltersHint"].Value,
+            Notification = Localizer["Notification"].Value,
+            Close = Localizer["Close"].Value,
+            // JS texts
+            LookupSearching = Localizer["LookupSearching"].Value,
+            LookupNotFound = Localizer["LookupNotFound"].Value,
+            LookupFound = Localizer["LookupFound", "{0}", "{1}"].Value,
+            EmptyTitle = Localizer["EmptyTitle"].Value,
+            EmptyMessage = Localizer["EmptyMessage"].Value,
+            ErrorLoading = Localizer["ErrorLoading"].Value,
+            ErrorConnection = Localizer["ErrorConnection"].Value,
+            EditApproverTitle = Localizer["EditApproverTitle"].Value,
+            AddToThisStep = Localizer["AddToThisStep"].Value,
+            NoName = Localizer["NoName"].Value,
+            NoPosition = Localizer["NoPosition"].Value,
+            NoSection = Localizer["NoSection"].Value,
+            Edit = Localizer["Edit"].Value,
+            Delete = Localizer["Delete"].Value,
+            TotalApproverBadge = Localizer["TotalApprovers", "{0}"].Value,
+            ConfirmDeleteTitle = Localizer["ConfirmDeleteTitle"].Value,
+            ConfirmDeleteMessage = Localizer["ConfirmDeleteMessage"].Value,
+            ConfirmDeleteConfirm = Localizer["ConfirmDeleteConfirm"].Value,
+            ConfirmDeleteCancel = Localizer["ConfirmDeleteCancel"].Value,
+            DeleteSuccessTitle = Localizer["DeleteSuccessTitle"].Value,
+            DeleteSuccessMessage = Localizer["DeleteSuccessMessage"].Value,
+            DeleteErrorTitle = Localizer["DeleteErrorTitle"].Value,
+            DeleteErrorMessage = Localizer["DeleteErrorMessage"].Value,
+            DialogOk = Localizer["OK"].Value
+        }));
+    </script>
 }

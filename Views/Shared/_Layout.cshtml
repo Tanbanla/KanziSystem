@@ -43,13 +43,13 @@
                 </form>
                 <ul class="navbar-nav navbar-right">
                     <li>
-                        <a href="features-profile.html" class="m-1">
+                        <a href="#" class="m-1" title="Tiếng Việt" data-culture="vi" onclick="setAppCulture(event)">
                             <img src="~/img/viet.png" height="20" />
                         </a>
-                        <a href="features-profile.html" class="m-1">
+                        <a href="#" class="m-1" title="English" data-culture="en" onclick="setAppCulture(event)">
                             <img src="~/img/anh.png" height="20" />
                         </a>
-                        <a href="features-profile.html" class="m-1">
+                        <a href="#" class="m-1" title="日本語" data-culture="ja" onclick="setAppCulture(event)">
                             <img src="~/img/jp.svg" height="20" /> 
                         </a>
                     </li>
@@ -255,6 +255,21 @@
     }
     
     @RenderSection("Scripts", required: false)
+    <script>
+        function setAppCulture(e) {
+            e.preventDefault();
+            var culture = e.currentTarget.getAttribute('data-culture');
+            if (!culture) return;
+            // Set ASP.NET Core localization cookie for entire app
+            var cookieName = '.AspNetCore.Culture';
+            var cookieValue = 'c=' + culture + '|uic=' + culture;
+            var expires = new Date();
+            expires.setFullYear(expires.getFullYear() + 1); // 1 year
+            document.cookie = cookieName + '=' + encodeURIComponent(cookieValue) + '; expires=' + expires.toUTCString() + '; path=/';
+            // Reload current page to apply culture
+            window.location.reload();
+        }
+    </script>
  
 </body>
 </html>

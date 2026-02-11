@@ -63,7 +63,8 @@
 
     function showAddForm() {
         clearForm();
-        formTitle.textContent = 'Thêm người phê duyệt mới';
+        const T = window.i18nSendApprover || {};
+        formTitle.textContent = T.AddApproverTitle || 'Thêm người phê duyệt mới';
         formContainer.style.display = 'block';
         formContainer.scrollIntoView({ behavior: 'smooth' });
 
@@ -90,7 +91,8 @@
         document.getElementById('modalSectionCode').value = secVal || '';
         document.getElementById('modalStep').value = stepVal || '';
 
-        formTitle.textContent = 'Sửa người phê duyệt';
+        const T = window.i18nSendApprover || {};
+        formTitle.textContent = T.EditApproverTitle || 'Sửa người phê duyệt';
         formContainer.style.display = 'block';
         formContainer.scrollIntoView({ behavior: 'smooth' });
         // If ADID present, try lookup to refresh data
@@ -126,30 +128,31 @@
             if (modalLookupStatusEl) modalLookupStatusEl.textContent = '';
             return;
         }
-        if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Đang tìm...';
+        const T = window.i18nSendApprover || {};
+        if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.LookupSearching || 'Đang tìm...');
         try {
             // Controller action is named GetEmployeeWorkingByIdAsync in code but MVC strips the "Async" suffix
             // so the correct route is /Master/GetEmployeeWorkingById
             const url = '/Master/GetEmployeeWorkingById?adidOrMnv=' + encodeURIComponent(adidOrMnv);
             const resp = await fetch(url, { method: 'GET' });
             if (!resp.ok) {
-                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.LookupNotFound || 'Không tìm thấy');
                 return;
             }
             // safe parse: protect against empty body
             const text = await resp.text();
             if (!text) {
-                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.LookupNotFound || 'Không tìm thấy');
                 return;
             }
             const result = JSON.parse(text);
             if (!result || !result.success) {
-                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.LookupNotFound || 'Không tìm thấy');
                 return;
             }
             const items = result.data || [];
             if (!items || items.length === 0) {
-                if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Không tìm thấy';
+                if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.LookupNotFound || 'Không tìm thấy');
                 return;
             }
             const first = items[0];
@@ -194,10 +197,11 @@
             //    if (matched) modalSectionEl.value = matched;
             //}
 
-            if (modalLookupStatusEl) modalLookupStatusEl.textContent = `Tìm thấy: ${name || adidOrMnv}${position ? ' - ' + position : ''}`;
+            if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.LookupFound || 'Tìm thấy: {0}{1}').replace('{0}', (name || adidOrMnv)).replace('{1}', (position ? ' - ' + position : ''));
         } catch (err) {
             console.error('Lookup employee error', err);
-            if (modalLookupStatusEl) modalLookupStatusEl.textContent = 'Lỗi khi tìm';
+            const T = window.i18nSendApprover || {};
+            if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.ErrorLoading || 'Lỗi khi tìm');
         }
     }
 
@@ -221,7 +225,8 @@
 
             const result = await resp.json();
             if (!result.success) {
-                showError('Không thể tải dữ liệu: ' + (result.message || 'Lỗi không xác định'));
+                const T = window.i18nSendApprover || {};
+                showError((T.ErrorLoading || 'Không thể tải dữ liệu') + ': ' + (result.message || 'Lỗi không xác định'));
                 return;
             }
 
@@ -229,7 +234,8 @@
             updateTotalCount(result.data?.length || 0);
         } catch (error) {
             console.error('Error loading approvers:', error);
-            showError('Lỗi kết nối đến server');
+            const T = window.i18nSendApprover || {};
+            showError(T.ErrorConnection || 'Lỗi kết nối đến server');
         }
     }
 
@@ -298,14 +304,15 @@
         // Header
         const header = document.createElement('div');
         header.className = 'card-header bg-light text-dark d-flex justify-content-between align-items-center';
+        const T = window.i18nSendApprover || {};
         header.innerHTML = `
             <div>
                 <i class="fas fa-step-forward me-2"></i>
                 <strong>${stepGroup.stepName}</strong>
-                <span class="badge bg-white text-secondary border ms-2">${stepGroup.approvers.length} người</span>
+                <span class="badge bg-white text-secondary border ms-2">${(T.TotalApproverBadge || '{0} người').replace('{0}', stepGroup.approvers.length)}</span>
             </div>
             <button class="btn btn-sm btn-outline-primary btn-add-to-step" data-step="${stepGroup.stepId}">
-                <i class="fas fa-user-plus me-1"></i> Thêm vào bước này
+                <i class="fas fa-user-plus me-1"></i> ${T.AddToThisStep || 'Thêm vào bước này'}
             </button>
         `;
         card.appendChild(header);
@@ -344,17 +351,18 @@
     }
 
     function createApproverListItem(approver) {
+        const T = window.i18nSendApprover || {};
         const item = document.createElement('div');
         item.className = 'list-group-item d-flex justify-content-between align-items-start';
         item.innerHTML = `
             <div class="flex-grow-1">
-                <div class="fw-bold"> ${approver.nvchR_UserName || 'Không có tên'}</div>
+                <div class="fw-bold"> ${approver.nvchR_UserName || (T.NoName || 'Không có tên')}</div>
                 <div class="small text-muted">
                     <i class="fas fa-id-card me-1"></i> ${approver.chR_UserAdid || 'N/A'}
                     <span class="mx-2">•</span>
-                    <i class="fas fa-briefcase me-1"></i> ${approver.nvchR_Position || 'Không có chức danh'}
+                    <i class="fas fa-briefcase me-1"></i> ${approver.nvchR_Position || (T.NoPosition || 'Không có chức danh')}
                     <span class="mx-2">•</span>
-                    <i class="fas fa-building me-1"></i> ${approver.chR_NameSection || 'Không có phòng'}
+                    <i class="fas fa-building me-1"></i> ${approver.chR_NameSection || (T.NoSection || 'Không có phòng')}
                 </div>
             </div>
         `;
@@ -362,10 +370,10 @@
         const actions = document.createElement('div');
         actions.className = 'btn-group btn-group-sm';
         actions.innerHTML = `
-            <button class="btn btn-outline-primary btn-edit" title="Sửa">
+            <button class="btn btn-outline-primary btn-edit" title="${T.Edit || 'Sửa'}">
                 <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-outline-danger btn-delete" title="Xóa">
+            <button class="btn btn-outline-danger btn-delete" title="${T.Delete || 'Xóa'}">
                 <i class="fas fa-trash"></i>
             </button>
         `;
@@ -381,21 +389,24 @@
     }
 
     function updateTotalCount(count) {
-        totalCountElement.textContent = `${count} người phê duyệt`;
+        const T = window.i18nSendApprover || {};
+        totalCountElement.textContent = (T.TotalApprovers || '{0} người phê duyệt').replace('{0}', count);
     }
 
     function showEmptyState() {
+        const T = window.i18nSendApprover || {};
         flowContainer.innerHTML = `
             <div class="text-center text-muted py-5">
                 <i class="fas fa-inbox fa-3x mb-3"></i>
-                <h5>Không có dữ liệu</h5>
-                <p>Không tìm thấy người phê duyệt nào phù hợp với tiêu chí tìm kiếm</p>
+                <h5>${T.EmptyTitle || 'Không có dữ liệu'}</h5>
+                <p>${T.EmptyMessage || 'Không tìm thấy người phê duyệt nào phù hợp với tiêu chí tìm kiếm'}</p>
             </div>
         `;
         updateTotalCount(0);
     }
 
     function showError(message) {
+        const T = window.i18nSendApprover || {};
         flowContainer.innerHTML = `
             <div class="alert alert-danger">
                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -440,13 +451,16 @@
             if (result.success) {
                 hideForm();
                 loadApprovers();
-                showToast('success', 'Cập nhật thành công!');
+                const T = window.i18nSendApprover || {};
+                showToast('success', T.UpdateSuccess || 'Cập nhật thành công!');
             } else {
-                showToast('error', result.message || 'Có lỗi xảy ra');
+                const T = window.i18nSendApprover || {};
+                showToast('error', result.message || T.GenericError || 'Có lỗi xảy ra');
             }
         } catch (error) {
             console.error('Error saving approver:', error);
-            showToast('error', 'Lỗi kết nối đến server');
+            const T = window.i18nSendApprover || {};
+            showToast('error', T.ErrorConnection || 'Lỗi kết nối đến server');
         }
     }
 
@@ -468,11 +482,12 @@
     }
 
     async function deleteApprover(id) {
+        const T = window.i18nSendApprover || {};
         const confirmed = await confirmDialog({
-            title: 'Xác nhận xóa',
-            message: 'Bạn có chắc chắn muốn xóa người phê duyệt này không?',
-            confirmText: 'Xóa',
-            cancelText: 'Hủy',
+            title: T.ConfirmDeleteTitle || 'Xác nhận xóa',
+            message: T.ConfirmDeleteMessage || 'Bạn có chắc chắn muốn xóa người phê duyệt này không?',
+            confirmText: T.ConfirmDeleteConfirm || 'Xóa',
+            cancelText: T.ConfirmDeleteCancel || 'Hủy',
             confirmType: 'danger'
         });
         if (!confirmed) return;
@@ -488,13 +503,14 @@
             const result = await resp.json();
             if (result.success) {
                 loadApprovers();
-                showDialog({ title: 'Thành công', message: 'Xóa thành công!', type: 'success' });
+                showDialog({ title: (T.DeleteSuccessTitle || 'Thành công'), message: (T.DeleteSuccessMessage || 'Xóa thành công!'), type: 'success' });
             } else {
-                showDialog({ title: 'Lỗi', message: result.message || 'Không thể xóa', type: 'error' });
+                showDialog({ title: (T.DeleteErrorTitle || 'Lỗi'), message: result.message || (T.DeleteErrorMessage || 'Không thể xóa'), type: 'error' });
             }
         } catch (error) {
             console.error('Error deleting approver:', error);
-            showDialog({ title: 'Lỗi', message: 'Lỗi kết nối đến server', type: 'error' });
+            const T = window.i18nSendApprover || {};
+            showDialog({ title: (T.DeleteErrorTitle || 'Lỗi'), message: (T.ErrorConnection || 'Lỗi kết nối đến server'), type: 'error' });
         }
     }
 
@@ -507,7 +523,7 @@
         return { overlay, titleEl, bodyEl, footerEl };
     }
 
-    function showDialog({ title = 'Thông báo', message = '', type = 'info', buttons } = {}) {
+    function showDialog({ title = (window.i18nSendApprover && window.i18nSendApprover.Notification) || 'Thông báo', message = '', type = 'info', buttons } = {}) {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
         if (!overlay) return alert(message);
         titleEl.textContent = title;
@@ -518,7 +534,8 @@
         footerEl.innerHTML = '';
         const okBtn = document.createElement('button');
         okBtn.className = 'cm-btn cm-btn-primary';
-        okBtn.textContent = (buttons && buttons.okText) || 'Đồng ý';
+        const T = window.i18nSendApprover || {};
+        okBtn.textContent = (buttons && buttons.okText) || (T.DialogOk || 'Đồng ý');
         okBtn.addEventListener('click', () => hideDialog());
         footerEl.appendChild(okBtn);
         overlay.style.display = 'flex';

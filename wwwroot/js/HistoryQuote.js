@@ -38,7 +38,8 @@
             body: JSON.stringify(payload)
         })
             .then(r => {
-                if (!r.ok) throw new Error('Search failed');
+                const T = window.i18nHistoryQuote || {};
+                if (!r.ok) throw new Error(T.MsgSearchFailed || 'Search failed');
                 return r.json();
             })
             .then(data => {
@@ -78,9 +79,9 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(id)
             })
-                .then(r => { if (!r.ok) throw new Error('Load history failed'); return r.json(); })
-                .then(data => { showDialog('Lịch sử đơn', buildHistoryHtml(data)); })
-                .catch(err => { console.error(err); showDialog('Thông báo', '<div class="text-danger">Không tải được lịch sử.</div>'); });
+                .then(r => { const T = window.i18nHistoryQuote || {}; if (!r.ok) throw new Error(T.MsgLoadHistoryFailed || 'Load history failed'); return r.json(); })
+                .then(data => { const T = window.i18nHistoryQuote || {}; showDialog(T.PageTitleHistory || 'Lịch sử đơn', buildHistoryHtml(data)); })
+                .catch(err => { console.error(err); const T = window.i18nHistoryQuote || {}; showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgLoadHistoryFailed || 'Không tải được lịch sử.') + '</div>'); });
             return;
         }
         const row = e.target.closest('tr');
@@ -127,15 +128,18 @@
                 body: JSON.stringify(soDon)
             })
                 .then(r => {
-                    if (!r.ok) throw new Error('Load history failed');
+                    const T = window.i18nHistoryQuote || {};
+                    if (!r.ok) throw new Error(T.MsgLoadHistoryFailed || 'Load history failed');
                     return r.json();
                 })
                 .then(data => {
-                    showDialog('Lịch sử đơn', buildHistoryHtml(data));
+                    const T = window.i18nHistoryQuote || {};
+                    showDialog(T.PageTitleHistory || 'Lịch sử đơn', buildHistoryHtml(data));
                 })
                 .catch(err => {
                     console.error(err);
-                    showDialog('Thông báo', '<div class="text-danger">Không tải được lịch sử.</div>');
+                    const T = window.i18nHistoryQuote || {};
+                    showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgLoadHistoryFailed || 'Không tải được lịch sử.') + '</div>');
                 });
         }
         if (t.classList.contains('btn-view-approvals')) {
@@ -162,7 +166,8 @@
             btn.innerHTML = '<span class="ms-values"></span><span class="ms-placeholder"></span><span class="ms-caret">▾</span>';
             const dropdown = document.createElement('div'); dropdown.className = 'ms-dropdown';
             const search = document.createElement('div'); search.className = 'ms-search';
-            search.innerHTML = '<input type="text" placeholder="Tìm..." />';
+            const T = window.i18nHistoryQuote || {};
+            search.innerHTML = '<input type="text" placeholder="' + (T.SearchEllipsis || 'Tìm...') + '" />';
             const list = document.createElement('div'); list.className = 'ms-list';
 
             function renderList(query) {
@@ -181,7 +186,7 @@
                     }
                 });
                 if (!hasItems) {
-                    const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = 'Không có kết quả';
+                    const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (T.NoResults || 'Không có kết quả');
                     list.appendChild(empty);
                 }
             }
@@ -196,7 +201,7 @@
                     placeholderEl.textContent = '';
                 } else {
                     valuesEl.textContent = '';
-                    placeholderEl.textContent = '-- Chọn --';
+                    placeholderEl.textContent = (T.SelectPlaceholder || '-- Chọn --');
                 }
                 // reflect selected state in list items
                 list.querySelectorAll('.ms-item').forEach(function (it) {
@@ -378,6 +383,7 @@
     function renderGroups() {
         if (!tblBody) return;
         tblBody.innerHTML = '';
+        const T = window.i18nHistoryQuote || {};
         const total = currentGroups.length;
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
         if (currentPage > totalPages) currentPage = totalPages;
@@ -441,14 +447,14 @@
                                     <thead class="table-light">
                                         <tr class="text-center align-middle">
                                             <th style="width: 40px">No</th>
-                                            <th style="min-width: 160px">Mã đơn</th>
-                                            <th style="min-width: 180px">Phòng ban</th>
-                                            <th style="min-width: 200px">Vật tư</th>
-                                            <th style="min-width: 160px">NCC</th>
-                                            <th style="min-width: 140px">Số lượng</th>
-                                            <th style="min-width: 140px">Trạng thái</th>
-                                            <th style="min-width: 160px">Ngày cập nhật</th>
-                                            <th style="min-width: 200px">Thao tác</th>
+                                            <th style="min-width: 160px">${T.OrderCode}</th>
+                                            <th style="min-width: 180px">${T.Department}</th>
+                                            <th style="min-width: 200px">${T.Material}</th>
+                                            <th style="min-width: 160px">${T.Supplier}</th>
+                                            <th style="min-width: 140px">${T.Quantity}</th>
+                                            <th style="min-width: 140px">${T.Status}</th>
+                                            <th style="min-width: 160px">${T.UpdatedDate}</th>
+                                            <th style="min-width: 200px">${T.Actions}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="group-detail-body"></tbody>
@@ -467,7 +473,9 @@
         if (paginationInfoEl) {
             const showingFrom = total === 0 ? 0 : start + 1;
             const showingTo = Math.min(total, start + pageSize);
-            paginationInfoEl.textContent = `Hiển thị ${showingFrom} - ${showingTo} / ${total} nhóm`;
+            const T = window.i18nHistoryQuote || {};
+            const tpl = (T.PaginationInfo || 'Hiển thị {0} - {1} / {2} nhóm');
+            paginationInfoEl.textContent = tpl.replace('{0}', showingFrom).replace('{1}', showingTo).replace('{2}', total);
         }
         renderPagination(totalPages);
     }
@@ -476,7 +484,11 @@
         if (!tblBody) return;
         tblBody.innerHTML = '';
         renderPagination(1);
-        if (paginationInfoEl) paginationInfoEl.textContent = 'Hiển thị 0 - 0 / 0 nhóm';
+        if (paginationInfoEl) {
+            const T = window.i18nHistoryQuote || {};
+            const tpl = (T.PaginationInfo || 'Hiển thị {0} - {1} / {2} nhóm');
+            paginationInfoEl.textContent = tpl.replace('{0}', 0).replace('{1}', 0).replace('{2}', 0);
+        }
     }
 
     function renderPagination(totalPages) {
@@ -540,11 +552,12 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(parseInt(requestId))
         })
-        .then(r => { if (!r.ok) throw new Error('Load history failed'); return r.json(); })
+        .then(r => { const T = window.i18nHistoryQuote || {}; if (!r.ok) throw new Error(T.MsgLoadHistoryFailed || 'Load history failed'); return r.json(); })
         .then(result => {
             const data = result?.data || result || [];
             if (!data){
-                showDialog('Thông báo', '<div class="text-danger">Không có dữ liệu để chỉnh sửa.</div>');
+                const T = window.i18nHistoryQuote || {};
+                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgNoDataToEdit || 'Không có dữ liệu để chỉnh sửa.') + '</div>');
                 return;
             }
             fillEditFormFromDto(data);
@@ -552,7 +565,8 @@
         })
         .catch(err => {
             console.error(err);
-            showDialog('Thông báo', '<div class="text-danger">Không tìm thấy dữ liệu.</div>');
+            const T = window.i18nHistoryQuote || {};
+            showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgNotFoundData || 'Không tìm thấy dữ liệu.') + '</div>');
         });
     }
 
@@ -685,14 +699,17 @@
         })
         .then(async r => {
             const txt = await r.text();
-            if (!r.ok) throw new Error(txt || 'Lưu thất bại');
+            const T = window.i18nHistoryQuote || {};
+            if (!r.ok) throw new Error(txt || (T.MsgSaveFailed || 'Lưu thất bại'));
             hideEditModal();
-            showDialog('Thành công', '<div class="text-success">Đã lưu thành công.</div>');
+            const T2 = window.i18nHistoryQuote || {};
+            showDialog(T2.Notification || 'Thông báo', '<div class="text-success">' + (T2.MsgSaveSuccess || 'Đã lưu thành công.') + '</div>');
             applyFilters();
         })
         .catch(err => {
             console.error(err);
-            showDialog('Thông báo', `<div class="text-danger">${err.message}</div>`);
+            const T = window.i18nHistoryQuote || {};
+            showDialog(T.Notification || 'Thông báo', `<div class="text-danger">${err.message}</div>`);
         });
     });
 
@@ -749,9 +766,10 @@
         const footer = document.getElementById('cmDialogFooter');
         const titleEl = document.getElementById('cmDialogTitle');
         if (!overlay || !body || !footer || !titleEl) return;
-        titleEl.textContent = title || 'Thông báo';
+        const T = window.i18nHistoryQuote || {};
+        titleEl.textContent = title || (T.Notification || 'Thông báo');
         body.innerHTML = html || '';
-        footer.innerHTML = '<button type="button" class="cm-btn" data-cm-action="close">Đóng</button>';
+        footer.innerHTML = '<button type="button" class="cm-btn" data-cm-action="close">' + (T.Close || 'Đóng') + '</button>';
         // show overlay (CSS default is display:none)
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
@@ -793,7 +811,8 @@
     }
     function buildHistoryHtml(result) {
         const data = result?.data || result || [];
-        if (!Array.isArray(data) || data.length === 0) return '<div>Không có lịch sử.</div>';
+        const T = window.i18nHistoryQuote || {};
+        if (!Array.isArray(data) || data.length === 0) return '<div>' + (T.MsgNoHistory || 'Không có lịch sử.') + '</div>';
         const rows = data.map((h, i) => {
             const dateStr = toDateString(h.chR_Updatedate);
             const action = StatusText(h.chR_ActionType) || '';
@@ -814,11 +833,11 @@
                 <table class="table table-sm table-bordered">
                     <thead class="table-light"><tr>
                         <th style="width:60px">#</th>
-                        <th>Thời gian</th>
-                        <th>Số Request</th>
-                        <th>Hành động</th>
-                        <th>Người cập nhật</th>
-                        <th>Lý do</th>
+                        <th>${T.HistoryTime || 'Thời gian'}</th>
+                        <th>${T.RequestNo || 'Số Request'}</th>
+                        <th>${T.Action || 'Hành động'}</th>
+                        <th>${T.UpdatedBy || 'Người cập nhật'}</th>
+                        <th>${T.Reason || 'Lý do'}</th>
                     </tr></thead>
                     <tbody>${rows}</tbody>
                 </table>

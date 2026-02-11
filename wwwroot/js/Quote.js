@@ -480,14 +480,16 @@
             payload.push(collectRow(tr));
         });
         if (!rowsCheckReason) {
+            const T = window.i18nQuote || {};
             showDialog({
-                title: 'Lỗi', message: 'Vui lòng nhập lý do từ chối lấy báo giá', type: 'error'
+                title: T.ErrorTitle || 'Lỗi', message: T.MsgEnterReasonReject || 'Vui lòng nhập lý do từ chối lấy báo giá', type: 'error'
             });
             return;
         }
         if (!rowsValid) {
+            const T = window.i18nQuote || {};
             showDialog({
-                title: 'Lỗi', message: 'Vui lòng điền đầy đủ các trường bắt buộc(*)', type: 'error'
+                title: T.ErrorTitle || 'Lỗi', message: T.MsgFillRequired || 'Vui lòng điền đầy đủ các trường bắt buộc(*)', type: 'error'
             });
             return;
         }
@@ -499,11 +501,13 @@
             });
             if (!res.ok) throw new Error(await res.text());
             const data = await res.json();
-            showDialog({ title: 'Thành công', message: 'Gửi yêu cầu báo giá thành công', type: 'success' });
+            const T = window.i18nQuote || {};
+            showDialog({ title: T.SuccessTitle || 'Thành công', message: T.MsgSubmitSuccess || 'Gửi yêu cầu báo giá thành công', type: 'success' });
             resetForm();
         } catch (err) {
+            const T = window.i18nQuote || {};
             showDialog({
-                title: 'Lỗi', message: err.message, type: 'error'
+                title: T.ErrorTitle || 'Lỗi', message: err.message, type: 'error'
             });
         }
     }
@@ -787,7 +791,8 @@
         const tabHasCodeBody = document.getElementById('arTabHasCodeBody');
         const tabNoCodeBody = document.getElementById('arTabNoCodeBody');
         if (!overlay || !sectionSel || !lst || !searchBox || !selectAll || !btnExport || !btnCancel || !btnClose || !errEl || !tabHasCodeBtn || !tabNoCodeBtn || !tabHasCodeBody || !tabNoCodeBody || !sectionSel2 || !sectionNameEl2 || !lst2 || !searchBox2 || !selectAll2) {
-            alert('Không thể mở hộp thoại Auto render');
+            const T = window.i18nQuote || {};
+            alert(T.MsgCannotOpenAutoRender || 'Không thể mở hộp thoại Auto render');
             return;
         }
 
@@ -813,7 +818,8 @@
             btnExport.disabled = !!busy;
             btnCancel.disabled = !!busy;
             btnClose.disabled = !!busy;
-            btnExport.textContent = busy ? 'Đang xuất...' : 'Xuất Excel';
+            const T = window.i18nQuote || {};
+            btnExport.textContent = busy ? (T.Exporting || 'Đang xuất...') : (T.ExportExcel || 'Xuất Excel');
         };
 
         // Tabs state
@@ -843,7 +849,7 @@
         sectionSel.innerHTML = '';
         const ph = document.createElement('option');
         ph.value = '';
-       // ph.textContent = 'Chọn phòng ban';
+       // ph.textContent = (window.i18nQuote && window.i18nQuote.SelectSection) || 'Chọn phòng ban';
         sectionSel.appendChild(ph);
         // For second tab
         sectionSel2.innerHTML = '';
@@ -1008,11 +1014,13 @@
                     selectedIds = Array.from(lst.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
                     endpoint = api.exportAutoRender;
                     if (!sectionCode) {
-                        setError('Vui lòng chọn mã phòng ban');
+                        const T = window.i18nQuote || {};
+                        setError(T.MsgSelectSectionRequired || 'Vui lòng chọn mã phòng ban');
                         return;
                     }
                     if (selectedIds.length === 0) {
-                        setError('Vui lòng chọn ít nhất một mã hàng nội bộ');
+                        const T = window.i18nQuote || {};
+                        setError(T.MsgSelectAtLeastOneMaterial || 'Vui lòng chọn ít nhất một mã hàng nội bộ');
                         return;
                     }
                 } else {
@@ -1022,11 +1030,13 @@
                     selectedIds = Array.from(lst2.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
                     endpoint = api.exportRenderOutSide;
                     if (!sectionCode) {
-                        setError('Vui lòng chọn mã phòng ban');
+                        const T = window.i18nQuote || {};
+                        setError(T.MsgSelectSectionRequired || 'Vui lòng chọn mã phòng ban');
                         return;
                     }
                     if (selectedIds.length === 0) {
-                        setError('Vui lòng chọn ít nhất một chủng loại hàng');
+                        const T = window.i18nQuote || {};
+                        setError(T.MsgSelectAtLeastOneCategory || 'Vui lòng chọn ít nhất một chủng loại hàng');
                         return;
                     }
                 }
@@ -1057,9 +1067,11 @@
                 a.remove();
                 window.URL.revokeObjectURL(url);
                 hideAr();
-                showDialog({ title: 'Thành công', message: 'Đã xuất file Excel tự động.', type: 'success' });
+                const T = window.i18nQuote || {};
+                showDialog({ title: T.SuccessTitle || 'Thành công', message: T.MsgExportedExcel || 'Đã xuất file Excel tự động.', type: 'success' });
             } catch (e) {
-                setError(e.message || 'Không thể xuất file');
+                const T = window.i18nQuote || {};
+                setError(e.message || T.MsgCannotExport || 'Không thể xuất file');
             } finally {
                 setBusy(false);
             }
@@ -1097,11 +1109,13 @@
                 const res = await fetch(api.uploadQuoteExcel, { method: 'POST', body: fd });
                 if (!res.ok) throw new Error(await res.text());
                 const items = await res.json();
-                if (!Array.isArray(items)) throw new Error('Dữ liệu không hợp lệ');
+                if (!Array.isArray(items)) throw new Error((window.i18nQuote && window.i18nQuote.MsgInvalidData) || 'Dữ liệu không hợp lệ');
                 populateTableFromItems(items);
-                showDialog({ title: 'Thành công', message: `Đã tải ${items.length} dòng từ Excel`, type: 'success' });
+                const T = window.i18nQuote || {};
+                showDialog({ title: T.SuccessTitle || 'Thành công', message: (T.MsgLoadedRows || 'Đã tải {0} dòng từ Excel').replace('{0}', items.length), type: 'success' });
             } catch (err) {
-                showDialog({ title: 'Lỗi', message: err.message || 'Không thể đọc file', type: 'error' });
+                const T = window.i18nQuote || {};
+                showDialog({ title: T.ErrorTitle || 'Lỗi', message: err.message || T.MsgCannotReadFile || 'Không thể đọc file', type: 'error' });
             } finally {
                 e.target.value = '';
             }
@@ -1239,7 +1253,8 @@
                     }
                 });
                 if (!hasItems) {
-                    $list.append('<div class="ms-empty">Không có kết quả</div>');
+            const T = window.i18nQuote || {};
+            $list.append('<div class="ms-empty">' + (T.NoResults || 'Không có kết quả') + '</div>');
                 }
             }
 
@@ -1250,8 +1265,9 @@
                     $btn.find('.ms-values').text(found.text);
                     $btn.find('.ms-placeholder').text('');
                 } else {
+                    const T = window.i18nQuote || {};
                     $btn.find('.ms-values').text('');
-                    $btn.find('.ms-placeholder').text('-- Chọn --');
+                    $btn.find('.ms-placeholder').text(T.SelectPlaceholder || '-- Chọn --');
                 }
             }
 

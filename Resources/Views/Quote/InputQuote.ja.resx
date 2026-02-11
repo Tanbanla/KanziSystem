@@ -1,0 +1,342 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>見積情報の入力</value>
+  </data>
+  <data name="ImportFromExcel" xml:space="preserve">
+    <value>Excelからインポート</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="GeneralInfo" xml:space="preserve">
+    <value>一般情報</value>
+  </data>
+  <data name="QuoteRequestCode" xml:space="preserve">
+    <value>見積依頼コード</value>
+  </data>
+  <data name="SelectOrderCode" xml:space="preserve">
+    <value>-- 依頼番号を選択 --</value>
+  </data>
+  <data name="Supplier" xml:space="preserve">
+    <value>仕入先</value>
+  </data>
+  <data name="SelectSupplier" xml:space="preserve">
+    <value>-- 仕入先を選択 --</value>
+  </data>
+  <data name="QuoteDate" xml:space="preserve">
+    <value>見積日</value>
+  </data>
+  <data name="ValidUntil" xml:space="preserve">
+    <value>有効期限</value>
+  </data>
+  <data name="DepartmentCode" xml:space="preserve">
+    <value>部門コード</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>部門を選択</value>
+  </data>
+  <data name="MaterialCode" xml:space="preserve">
+    <value>品目コード</value>
+  </data>
+  <data name="SelectMaterialCode" xml:space="preserve">
+    <value>品目コードを選択</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>リセット</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>フィルター</value>
+  </data>
+  <data name="SubmitQuote" xml:space="preserve">
+    <value>見積送信</value>
+  </data>
+  <data name="RequestEdit" xml:space="preserve">
+    <value>修正依頼</value>
+  </data>
+  <data name="SaveDraft" xml:space="preserve">
+    <value>下書き保存</value>
+  </data>
+  <data name="QuoteItemList" xml:space="preserve">
+    <value>見積品目</value>
+  </data>
+  <data name="NoLabel" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="InternalMaterialCode" xml:space="preserve">
+    <value>社内品目コード</value>
+  </data>
+  <data name="SupplierCode" xml:space="preserve">
+    <value>仕入先コード</value>
+  </data>
+  <data name="SupplierItemCode" xml:space="preserve">
+    <value>仕入先品目コード</value>
+  </data>
+  <data name="CustomsItemName" xml:space="preserve">
+    <value>通関用品目名</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>単位</value>
+  </data>
+  <data name="PriceUSD" xml:space="preserve">
+    <value>単価（USD）</value>
+  </data>
+  <data name="PriceVND" xml:space="preserve">
+    <value>単価（VND）</value>
+  </data>
+  <data name="MOQ" xml:space="preserve">
+    <value>MOQ</value>
+  </data>
+  <data name="Packing" xml:space="preserve">
+    <value>包装仕様</value>
+  </data>
+  <data name="LeadTime" xml:space="preserve">
+    <value>リードタイム</value>
+  </data>
+  <data name="DeliveryDate" xml:space="preserve">
+    <value>納期</value>
+  </data>
+  <data name="RohsResponse" xml:space="preserve">
+    <value>ROHS対応</value>
+  </data>
+  <data name="COCQ" xml:space="preserve">
+    <value>CO/CQ</value>
+  </data>
+  <data name="MSDSWithCAS" xml:space="preserve">
+    <value>MSDS（CAS番号付き）</value>
+  </data>
+  <data name="SafetyResponse" xml:space="preserve">
+    <value>安全規格対応</value>
+  </data>
+  <data name="CommitRequirement" xml:space="preserve">
+    <value>要件準拠の確約</value>
+  </data>
+  <data name="DeliveryMethod" xml:space="preserve">
+    <value>配送方法</value>
+  </data>
+  <data name="Condition" xml:space="preserve">
+    <value>条件</value>
+  </data>
+  <data name="Attachment" xml:space="preserve">
+    <value>添付ファイル</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="SelectProducts" xml:space="preserve">
+    <value>製品を選択</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="SelectSection" xml:space="preserve">
+    <value>-- 部門を選択 --</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>検索</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>選択</value>
+  </data>
+  <data name="OrderCode" xml:space="preserve">
+    <value>依頼番号</value>
+  </data>
+  <data name="ItemName" xml:space="preserve">
+    <value>品目名</value>
+  </data>
+  <data name="AddToQuote" xml:space="preserve">
+    <value>見積に追加</value>
+  </data>
+  <data name="MsgResetSuccess" xml:space="preserve">
+    <value>フィルターをリセットし、現在の項目をクリアしました</value>
+  </data>
+  <data name="MsgSelectAtLeastOneProduct" xml:space="preserve">
+    <value>少なくとも1つの製品を選択してください！</value>
+  </data>
+  <data name="MsgAddedProducts" xml:space="preserve">
+    <value>{0}件の製品を見積に追加しました！</value>
+  </data>
+  <data name="MsgProductDuplicate" xml:space="preserve">
+    <value>製品は既に見積に存在します！</value>
+  </data>
+  <data name="MsgDeleteConfirm" xml:space="preserve">
+    <value>この製品を削除してもよろしいですか？</value>
+  </data>
+  <data name="MsgProcessingExcel" xml:space="preserve">
+    <value>Excelファイルを処理中...</value>
+  </data>
+  <data name="MsgUploadFailed" xml:space="preserve">
+    <value>アップロードに失敗しました</value>
+  </data>
+  <data name="MsgImportSuccess" xml:space="preserve">
+    <value>Excelから正常にインポートしました！</value>
+  </data>
+  <data name="MsgImportError" xml:space="preserve">
+    <value>インポートエラー: {0}</value>
+  </data>
+  <data name="MsgSaveSuccess" xml:space="preserve">
+    <value>見積の保存に成功しました！</value>
+  </data>
+  <data name="MsgSaveFailed" xml:space="preserve">
+    <value>保存に失敗しました: {0}</value>
+  </data>
+  <data name="MsgDraftSaved" xml:space="preserve">
+    <value>下書きの保存に成功しました！</value>
+  </data>
+  <data name="MsgSubmitConfirm" xml:space="preserve">
+    <value>この見積を送信しますか？送信後は編集できません。</value>
+  </data>
+  <data name="MsgSubmitSuccess" xml:space="preserve">
+    <value>見積の送信に成功しました！</value>
+  </data>
+  <data name="MsgUnsavedChangesConfirm" xml:space="preserve">
+    <value>未保存の変更があります。本当にキャンセルしますか？</value>
+  </data>
+  <data name="MsgQuoteRequestRequired" xml:space="preserve">
+    <value>見積依頼コードは必須です</value>
+  </data>
+  <data name="MsgSupplierRequired" xml:space="preserve">
+    <value>仕入先は必須です</value>
+  </data>
+  <data name="MsgEnterPriceForOne" xml:space="preserve">
+    <value>少なくとも1つの製品の価格を入力してください</value>
+  </data>
+  <data name="MsgPleaseCheck" xml:space="preserve">
+    <value>確認してください:</value>
+  </data>
+  <data name="SearchEllipsis" xml:space="preserve">
+    <value>検索...</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>結果なし</value>
+  </data>
+  <data name="SelectPlaceholder" xml:space="preserve">
+    <value>-- 選択 --</value>
+  </data>
+  <data name="RequestSection" xml:space="preserve">
+    <value>依頼部門</value>
+  </data>
+  <data name="SelectInternalMaterialCode" xml:space="preserve">
+    <value>社内品目コード</value>
+  </data>
+</root>

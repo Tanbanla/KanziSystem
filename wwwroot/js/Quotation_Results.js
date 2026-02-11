@@ -460,14 +460,16 @@
         confirmSelection: async function () {
             const selections = this.getSelections();
             if (!selections.length) {
-                showDialog({ title: 'Cảnh báo', message: `Vui lòng chọn ít nhất một sản phẩm hoặc nhà cung cấp.`, type: 'info' });
+                const T = window.i18nQuotationResults || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgWarnSelectOne || 'Vui lòng chọn ít nhất một sản phẩm hoặc nhà cung cấp.'), type: 'info' });
                 return;
             }
 
             // Warn if there are selections without reason (not mandatory)
             const missingReasons = selections.filter(x => (!x.NVCHR_ReasonPick || x.NVCHR_ReasonPick.trim() === '')).length;
             if (missingReasons > 0) {
-                showDialog({ title: 'Cảnh báo', message: `Có ${missingReasons} lựa chọn chưa nhập lý do.`, type: 'info' });
+                const T = window.i18nQuotationResults || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgMissingReasons || 'Có {0} lựa chọn chưa nhập lý do.').replace('{0}', missingReasons), type: 'info' });
                 return;
             }
             try {
@@ -477,22 +479,26 @@
                     body: JSON.stringify(selections)
                 });
                 if (!res.ok) {
-                    showDialog({ title: 'Cảnh báo', message: `lỗi ${res}`, type: 'error' });
+                    const T = window.i18nQuotationResults || {};
+                    showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveError || 'lỗi {0}').replace('{0}', res.status), type: 'error' });
                     return;
                 }
                 const data = await res.json();
-                if (!data) return showDialog({ title: 'Cảnh báo', message: `lỗi khi lưu thông tin`, type: 'error' });
-                showDialog({ title: 'Thông báo', message: `Gửi thành công`, type: 'success' });
+                const T = window.i18nQuotationResults || {};
+                if (!data) return showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveError || 'lỗi {0}').replace('{0}', ''), type: 'error' });
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveSuccess || 'Gửi thành công'), type: 'success' });
                 
             } catch (err) {
-                showDialog({ title: 'Cảnh báo', message: `lỗi gửi  ${err}`, type: 'error' });
+                const T = window.i18nQuotationResults || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveError || 'lỗi {0}').replace('{0}', err), type: 'error' });
                 return;
             }
             
         },
 
         cancelSelection: function () {
-            if (confirm('Bạn có chắc muốn hủy bỏ tất cả lựa chọn?')) {
+            const T = window.i18nQuotationResults || {};
+            if (confirm(T.MsgCancelConfirm || 'Bạn có chắc muốn hủy bỏ tất cả lựa chọn?')) {
                 document.querySelectorAll('.item-select, .supplier-select').forEach(c => { c.checked = false; });
             }
         },
@@ -501,7 +507,8 @@
             const all = this.getSelectionsExcel();
             const selected = all;
             if (!selected.length) {
-                showDialog({ title: 'Cảnh báo', message: 'Vui lòng chọn ít nhất một nhà cung cấp hoặc sản phẩm để xuất.', type: 'info' });
+                const T = window.i18nQuotationResults || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgExportSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp hoặc sản phẩm để xuất.'), type: 'info' });
                 return;
             }
             fetch('/Quote/ExportSelection', {
@@ -527,7 +534,8 @@
                     window.URL.revokeObjectURL(url);
                 })
                 .catch(err => {
-                    showDialog({ title: 'Lỗi', message: (err && err.message) ? err.message : 'Không thể xuất file', type: 'error' });
+                    const T = window.i18nQuotationResults || {};
+                    showDialog({ title: T.Notification || 'Thông báo', message: (err && err.message) ? err.message : (T.MsgExportError || 'Không thể xuất file'), type: 'error' });
                 });
         },
 
@@ -572,7 +580,7 @@ function getDialogEls() {
     const footerEl = document.getElementById('cmDialogFooter');
     return { overlay, titleEl, bodyEl, footerEl };
 }
-function showDialog({ title = 'Thông báo', message = '', type = 'info', buttons } = {}) {
+function showDialog({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', type = 'info', buttons } = {}) {
     const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
     if (!overlay) return alert(message);
 
@@ -589,7 +597,7 @@ function showDialog({ title = 'Thông báo', message = '', type = 'info', button
     footerEl.innerHTML = '';
     const okBtn = document.createElement('button');
     okBtn.className = 'cm-btn cm-btn-primary';
-    okBtn.textContent = (buttons && buttons.okText) || 'Đồng ý';
+    okBtn.textContent = (buttons && buttons.okText) || ((window.i18nQuotationResults && window.i18nQuotationResults.DialogOk) || 'Đồng ý');
     okBtn.addEventListener('click', () => hideDialog());
     footerEl.appendChild(okBtn);
 
@@ -702,7 +710,8 @@ function buildSearchableDropdown(container) {
         btn.innerHTML = '<span class="ms-values"></span><span class="ms-placeholder"></span><span class="ms-caret">▾</span>';
         const dropdown = document.createElement('div'); dropdown.className = 'ms-dropdown';
         const search = document.createElement('div'); search.className = 'ms-search';
-        search.innerHTML = '<input type="text" placeholder="Tìm..." />';
+        const T = window.i18nQuotationResults || {};
+        search.innerHTML = '<input type="text" placeholder="' + (T.SearchEllipsis || 'Tìm...') + '" />';
         const list = document.createElement('div'); list.className = 'ms-list';
 
         function renderList(query) {
@@ -721,7 +730,7 @@ function buildSearchableDropdown(container) {
                 }
             });
             if (!hasItems) {
-                const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = 'Không có kết quả';
+                const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.NoResults) || 'Không có kết quả';
                 list.appendChild(empty);
             }
         }
@@ -736,7 +745,7 @@ function buildSearchableDropdown(container) {
                 placeholderEl.textContent = '';
             } else {
                 valuesEl.textContent = '';
-                placeholderEl.textContent = '-- Chọn --';
+                placeholderEl.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.SelectPlaceholder) || '-- Chọn --';
             }
         }
 
