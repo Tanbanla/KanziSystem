@@ -884,6 +884,8 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.VCHR_CodeStatus)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.CHR_TenStatusEN).HasMaxLength(250);
+            entity.Property(e => e.CHR_TenStatusJP).HasMaxLength(250);
         });
 
         modelBuilder.Entity<BaoGia_Step>(entity =>
@@ -905,6 +907,8 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.DTM_CreateDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.CHR_StepNameEN).HasMaxLength(250);
+            entity.Property(e => e.CHR_StepNameJP).HasMaxLength(250);
         });
 
         modelBuilder.Entity<Baocao_ACC_KIEMKE>(entity =>

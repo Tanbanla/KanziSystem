@@ -124,7 +124,7 @@
     <value>見積依頼の承認ステータス</value>
   </data>
   <data name="Approve" xml:space="preserve">
-    <value>承認</value>
+    <value>同意</value>
   </data>
   <data name="Return" xml:space="preserve">
     <value>差し戻し</value>
@@ -317,5 +317,20 @@
   </data>
   <data name="Requester" xml:space="preserve">
     <value>依頼者</value>
+  </data>
+  <data name="MsgSusscesAprover" xml:space="preserve">
+    <value>承認に成功しました。</value>
+  </data>
+  <data name="MSGFailedApprover" xml:space="preserve">
+    <value>承認に失敗しました:</value>
+  </data>
+  <data name="MSGErrorApprover" xml:space="preserve">
+    <value>承認中にエラーが発生しました。</value>
+  </data>
+  <data name="MSGReturnFailed" xml:space="preserve">
+    <value>敗北を返す</value>
+  </data>
+  <data name="MSGReturnOK" xml:space="preserve">
+    <value>正常に返却されました</value>
   </data>
 </root>

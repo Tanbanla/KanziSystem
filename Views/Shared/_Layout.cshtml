@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+<!DOCTYPE html>
+<html lang="@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <title> @ViewData["Title"] - PRJ WAREHOUSE BIVN</title>
+    <title> @ViewData["Title"] - @Localizer["AppTitle"]</title>
     <link rel="icon" type="image/x-icon" href="~/css/img/logokho-removebg-preview.ico" asp-append-version="true">
     <!-- General CSS Files -->
     <link rel="stylesheet" href="~/modules/bootstrap/css/bootstrap.min.css" asp-append-version="true">
@@ -38,18 +39,18 @@
                 <form class="form-inline mr-auto">
                     <ul class="navbar-nav mr-3">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
-                        <li><h4 class="text-white">BIVN Warehouse Management System (BWMS)</h4></li>
+                        <li><h4 class="text-white">@Localizer["HeaderAppName"]</h4></li>
                     </ul>                  
                 </form>
                 <ul class="navbar-nav navbar-right">
                     <li>
-                        <a href="#" class="m-1" title="Tiếng Việt" data-culture="vi" onclick="setAppCulture(event)">
+                        <a href="#" class="m-1" title="@Localizer["LangVietnamese"]" data-culture="vi" onclick="setAppCulture(event)">
                             <img src="~/img/viet.png" height="20" />
                         </a>
-                        <a href="#" class="m-1" title="English" data-culture="en" onclick="setAppCulture(event)">
+                        <a href="#" class="m-1" title="@Localizer["LangEnglish"]" data-culture="en" onclick="setAppCulture(event)">
                             <img src="~/img/anh.png" height="20" />
                         </a>
-                        <a href="#" class="m-1" title="日本語" data-culture="ja" onclick="setAppCulture(event)">
+                        <a href="#" class="m-1" title="@Localizer["LangJapanese"]" data-culture="ja" onclick="setAppCulture(event)">
                             <img src="~/img/jp.svg" height="20" /> 
                         </a>
                     </li>
@@ -58,21 +59,21 @@
                         <li class="dropdown">
                             <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                                 <i class="fa fa-user"></i>
-                                Xin chào, @(User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User")!
+                                @Localizer["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User")!
                                 <div class="d-sm-none d-lg-inline-block"></div>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
                                 <div class="dropdown-title">
-                                    Đăng nhập lúc: @(Context.Session.GetString("LoginTime") ?? "N/A")
+                                    @Localizer["LoggedInAt"]: @(Context.Session.GetString("LoginTime") ?? "N/A")
                                 </div>
                                 <a href="@Url.Action("Profile", "Account")" class="dropdown-item has-icon">
-                                    <i class="far fa-user"></i> Thông tin tài khoản
+                                    <i class="far fa-user"></i> @Localizer["Profile"]
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="dropdown-item has-icon text-danger" style="background: none; border: none; width: 100%; text-align: left;">
-                                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                                        <i class="fas fa-sign-out-alt"></i> @Localizer["Logout"]
                                     </button>
                                 </form>
                             </div>
@@ -82,7 +83,7 @@
                     {
                         <li>
                             <a href="@Url.Action("Login", "Account")" class="nav-link">
-                                <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                                <i class="fas fa-sign-in-alt"></i> @Localizer["Login"]
                             </a>
                         </li>
                     }
@@ -92,106 +93,106 @@
             <div class="main-sidebar sidebar-style-2" tabindex="1" style="overflow: auto visible; outline: none;">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <a href="~/Home/Index">WAREHOUSE</a>
+                        <a href="~/Home/Index">@Localizer["BrandWarehouse"]</a>
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <a href="~/Home/Index">WH</a>
+                        <a href="~/Home/Index">@Localizer["BrandWarehouseShort"]</a>
                     </div>
                     <ul class="sidebar-menu">
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")">
-                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-home"></i> <span>Dashboard</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-home"></i> <span>@Localizer["MenuDashboard"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="~/Home/Index" class="nav-link"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
+                                <li><a href="~/Home/Index" class="nav-link"><i class="fa fa-home"></i> <span>@Localizer["MenuDashboard"]</span></a></li>
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")">
-                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-people"></i> <span>User</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-people"></i> <span>@Localizer["MenuUser"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="~/User/Index" class="nav-link"><i class="far fa-user"></i> <span>User</span></a></li>
+                                <li><a href="~/User/Index" class="nav-link"><i class="far fa-user"></i> <span>@Localizer["MenuUser"]</span></a></li>
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Quote" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown">
-                                <i class="fas fa-file-invoice-dollar"></i> <span>Báo giá</span>
+                                <i class="fas fa-file-invoice-dollar"></i> <span>@Localizer["MenuQuote"]</span>
                             </a>
                             <ul class="dropdown-menu" style="max-width: 320px;">
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Quote/Index">
                                         <i class="fas fa-file-signature me-2"></i>
-                                        <span class="small">Tạo đơn yêu cầu báo giá</span>
+                                        <span class="small">@Localizer["MenuQuoteCreate"]</span>
                                     </a>
                                 </li>
 
                                 <li>
                                     <a class="dropdown-item py-2" href="~/ApprovalQuote/Index">
                                         <i class="fas fa-user-check me-2"></i>
-                                        <span class="small">Phê duyệt đơn báo giá</span>
+                                        <span class="small">@Localizer["MenuQuoteApprove"]</span>
                                     </a>
                                 </li>
 
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Quote/InputQuote">
                                         <i class="fas fa-inbox me-2"></i>
-                                        <span class="small">Nhập báo giá</span>
+                                        <span class="small">@Localizer["MenuQuoteInput"]</span>
                                     </a>
                                 </li>
 
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Quote/Quotation_Results">
                                         <i class="fas fa-clipboard-list me-2"></i>
-                                        <span class="small">Kết quả báo giá</span>
+                                        <span class="small">@Localizer["MenuQuoteResults"]</span>
                                     </a>
                                 </li>
 
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Quote/SelectQuoteSection">
                                         <i class="fas fa-baseball-ball me-2"></i>
-                                        <span class="small">Yêu cầu hàng hóa</span>
+                                        <span class="small">@Localizer["MenuQuoteRequest"]</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Quote/HistoryQuote">
                                         <i class="fas fa-history me-2"></i>
-                                        <span class="small">Lịch sử yêu cầu</span>
+                                        <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Material" ? "active" : "")">
-                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-social-dropbox"></i> <span>Nguyên vật liệu</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-social-dropbox"></i> <span>@Localizer["MenuMaterial"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> Quản lý NVL</a></li>
-                                <li><a class="nav-link" href="~/Material/Creat_Material"><i class="fas fa-plus-square"></i> Tạo mã NVL</a></li>
-                                <li><a class="nav-link" href="~/Material/ConfirmName"><i class="fas fa-check-square"></i> Xác nhận tên NVL</a></li>
+                                <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
+                                <li><a class="nav-link" href="~/Material/Creat_Material"><i class="fas fa-plus-square"></i> @Localizer["MenuMaterialCreate"]</a></li>
+                                <li><a class="nav-link" href="~/Material/ConfirmName"><i class="fas fa-check-square"></i> @Localizer["MenuMaterialConfirmName"]</a></li>
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Import" ? "active" : "")">
-                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cloud-upload"></i> <span>Kho</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cloud-upload"></i> <span>@Localizer["MenuWarehouse"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="fas fa-truck-pickup"></i> Nhập hàng theo PO</a></li> @* Nhập hàng PO *@
-                                <li><a class="nav-link" href="~/Delivery/DeliverySection"><i class="fas fa-calendar-check"></i> Xác nhận nhập hàng</a></li> @* Nhập hàng PO *@
-                                <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> Hàng trong kho</a></li>
-                                <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> Yêu cầu xuất kho</a></li>
-                                <li><a class="nav-link" href=""><i class="fas fa-donate"></i> Tái nhập</a></li>
-                                <li><a class="nav-link" href="~/Import/Log"><i class="fas fa-info"></i> Log nhập - xuất</a></li>
-                                <li><a class="nav-link" href="~/Import/Xuatkho"><i class="fas fa-file-export"></i> Xuất kho</a></li>
+                                <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="fas fa-truck-pickup"></i> @Localizer["MenuWarehouseImportPO"]</a></li> @* Nhập hàng PO *@
+                                <li><a class="nav-link" href="~/Delivery/DeliverySection"><i class="fas fa-calendar-check"></i> @Localizer["MenuWarehouseConfirmImport"]</a></li> @* Nhập hàng PO *@
+                                <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
+                                <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExportRequest"]</a></li>
+                                <li><a class="nav-link" href=""><i class="fas fa-donate"></i> @Localizer["MenuWarehouseReimport"]</a></li>
+                                <li><a class="nav-link" href="~/Import/Log"><i class="fas fa-info"></i> @Localizer["MenuWarehouseLog"]</a></li>
+                                <li><a class="nav-link" href="~/Import/Xuatkho"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExport"]</a></li>
                             </ul>
                         </li>                     
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Approval" ? "active" : "")">
-                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-android-checkmark-circle"></i> <span>Phê duyệt</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-android-checkmark-circle"></i> <span>@Localizer["MenuApproval"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="~/Approval/ListData"><i class="fas fa-check"></i> Phê duyệt</a></li>
-                                <li><a class="nav-link" href="~/Approval/Condition"><i class="fas fa-info-circle"></i> Trạng thái đơn</a></li>                            
+                                <li><a href="~/Approval/ListData"><i class="fas fa-check"></i> @Localizer["MenuApprovalApprove"]</a></li>
+                                <li><a class="nav-link" href="~/Approval/Condition"><i class="fas fa-info-circle"></i> @Localizer["MenuApprovalStatus"]</a></li>                            
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Master" ? "active" : "")">
-                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cog"></i> <span>Master</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cog"></i> <span>@Localizer["MenuMaster"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="~/Master/Masters"><i class="ion ion-ios-home"></i> Warehouse</a></li>
-                                <li><a href="~/Master/master_vender"><i class="ion ion-social-snapchat"></i> Vender</a></li>
-                                <li><a href="~/Master/master_material"><i class="ion ion-android-options"></i> Material</a></li>
-                                <li><a href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> Master Send Mail</a></li>
-                                <li><a href="~/Master/SupplierMana"><i class="fas fa-handshake"></i> Quản lý NCC</a></li>
+                                <li><a class="dropdown-item py-2" href="~/Master/Masters"><i class="ion ion-ios-home"></i> @Localizer["MenuMasterWarehouse"]</a></li>
+                                <li><a class="dropdown-item py-2" href="~/Master/master_vender"><i class="ion ion-social-snapchat"></i> @Localizer["MenuMasterVendor"]</a></li>
+                                <li><a class="dropdown-item py-2" href="~/Master/master_material"><i class="ion ion-android-options"></i> @Localizer["MenuMasterMaterial"]</a></li>
+                                <li><a class="dropdown-item py-2" href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> @Localizer["MenuMasterSendMail"]</a></li>
+                                <li><a class="dropdown-item py-2" href="~/Master/SupplierMana"><i class="fas fa-handshake"></i> @Localizer["MenuMasterSupplierManage"]</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -201,7 +202,7 @@
                 <section class="section">
                     <div class="section-header">
                         <div class="section-header-breadcrumb" style="margin-left: 0px;">
-                            <div class="breadcrumb-item "><a href="#"><i class="ion ion-ios-home"></i> Warehouse BIVN</a></div>
+                            <div class="breadcrumb-item "><a href="#"><i class="ion ion-ios-home"></i> @Localizer["BreadcrumbHome"]</a></div>
                             <div class="breadcrumb-item active">@ViewBag.Title</div>
                         </div>
                     </div>
@@ -211,7 +212,7 @@
             </div>
             <footer class="main-footer">
                 <div class="footer-left text-primary">
-                    &copy; @DateTime.Now.Year Brother Industries (Vietnam) Ltd. All Rights Reserved
+                    &copy; @DateTime.Now.Year @Localizer["FooterCopyright"]
                 </div>
                 <div class="footer-right">
                 </div>

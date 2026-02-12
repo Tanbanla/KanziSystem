@@ -336,7 +336,12 @@
     function getStepName(stepNumber) {
         var listSteps = window.ApprovalData.steps
         const step = listSteps.find(s => s.INT_StepNumber === stepNumber);
-        return step ? step.CHR_StepName : stepNumber;
+        var lang = window.ApprovalData.uiland;
+        switch (lang) {
+            case 'en': return step ? step.CHR_StepNameEN : stepNumber;
+            case 'ja': return step ? step.CHR_StepNameJP : stepNumber;
+            default: return step ? step.CHR_StepName : stepNumber;
+        };
     }
     function getFilterValues() {
         const status = document.getElementById('tinhTrangPheDuyet')?.value || '';
@@ -717,6 +722,7 @@
         }
     }
     function attachEvents() {
+        const T = window.i18nApproval || {};
         const btnSearch = document.getElementById('btnSearch');
         if (btnSearch) btnSearch.addEventListener('click', searchAndRender);
         const btnClear = document.getElementById('btnClear');
@@ -752,14 +758,14 @@
                 body: JSON.stringify(payload)
             }).then(res => res.json()).then(json => {
                 if (json && json.success) {
-                    showToast('success', 'Phê duyệt thành công.');
+                    showToast('success', T.MsgSusscesAprover);
                     searchAndRender();
                 } else {
-                    showToast('danger', 'Phê duyệt thất bại: ' + (json && json.message ? json.message : 'Unknown'));
+                    showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
                 }
             }).catch(err => {
                 console.error('Approval error', err);
-                showToast('danger', 'Lỗi khi Phê duyệt.');
+                showToast('danger', T.MSGErrorApprover);
             }).finally(() => {
                 updateSummaryAndButtons();
             });
@@ -769,7 +775,6 @@
         if (btnReturn) btnReturn.addEventListener('click', function () {
             if (state.selectedMaDons.size === 0) return;
             // show custom input dialog for reason
-            const T = window.i18nApproval || {};
             showInputDialog(T.InputReasonTitle || 'Lý do trả lại', T.InputReasonPlaceholder || 'Nhập lý do trả lại...').then(result => {
                 if (!result) return;
                 if (result.action !== 'ok') return; // cancelled
@@ -795,14 +800,14 @@
                     body: JSON.stringify(payload)
                 }).then(res => res.json()).then(json => {
                     if (json && json.success) {
-                        showToast('success', 'Trả lại thành công.');
+                        showToast('success', T.MSGReturnOK);
                         searchAndRender();
                     } else {
-                        showToast('danger', 'Trả lại thất bại: ' + (json && json.message ? json.message : 'Unknown'));
+                        showToast('danger', T.MSGReturnFailed +': ' + (json && json.message ? json.message : 'Unknown'));
                     }
                 }).catch(err => {
                     console.error('Return error', err);
-                    showToast('danger', 'Lỗi khi trả lại.');
+                    showToast('danger', T.ReturnError);
                 }).finally(() => {
                     updateSummaryAndButtons();
                 });

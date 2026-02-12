@@ -163,7 +163,7 @@
     <value>確認済み</value>
   </data>
   <data name="StatusRejected" xml:space="preserve">
-    <value>却下</value>
+    <value>拒否</value>
   </data>
   <data name="Reset" xml:space="preserve">
     <value>リセット</value>
@@ -232,10 +232,10 @@
     <value>合計</value>
   </data>
   <data name="Approve" xml:space="preserve">
-    <value>承認</value>
+    <value>同意</value>
   </data>
   <data name="Reject" xml:space="preserve">
-    <value>却下</value>
+    <value>拒否</value>
   </data>
   <data name="CreatedByPrefix" xml:space="preserve">
     <value>作成者: </value>
@@ -292,7 +292,7 @@
     <value>履歴表示</value>
   </data>
   <data name="Approval" xml:space="preserve">
-    <value>承認</value>
+    <value>同意</value>
   </data>
   <data name="Material" xml:space="preserve">
     <value>材質</value>

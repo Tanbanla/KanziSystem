@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AppTitle" xml:space="preserve"><value>PRJ WAREHOUSE BIVN</value></data>
+  <data name="HeaderAppName" xml:space="preserve"><value>BIVN Warehouse Management System (BWMS)</value></data>
+  <data name="LangVietnamese" xml:space="preserve"><value>Vietnamese</value></data>
+  <data name="LangEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LangJapanese" xml:space="preserve"><value>Japanese</value></data>
+  <data name="Hello" xml:space="preserve"><value>Hello</value></data>
+  <data name="LoggedInAt" xml:space="preserve"><value>Logged in at</value></data>
+  <data name="Profile" xml:space="preserve"><value>Profile</value></data>
+  <data name="Logout" xml:space="preserve"><value>Logout</value></data>
+  <data name="Login" xml:space="preserve"><value>Login</value></data>
+  <data name="BrandWarehouse" xml:space="preserve"><value>WAREHOUSE</value></data>
+  <data name="BrandWarehouseShort" xml:space="preserve"><value>WH</value></data>
+  <data name="MenuDashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="MenuUser" xml:space="preserve"><value>User</value></data>
+  <data name="MenuQuote" xml:space="preserve"><value>Quote</value></data>
+  <data name="MenuQuoteCreate" xml:space="preserve"><value>Create quotation request</value></data>
+  <data name="MenuQuoteApprove" xml:space="preserve"><value>Approve quotations</value></data>
+  <data name="MenuQuoteInput" xml:space="preserve"><value>Input quotation</value></data>
+  <data name="MenuQuoteResults" xml:space="preserve"><value>Quotation results</value></data>
+  <data name="MenuQuoteRequest" xml:space="preserve"><value>Goods request</value></data>
+  <data name="MenuQuoteHistory" xml:space="preserve"><value>Request history</value></data>
+  <data name="MenuMaterial" xml:space="preserve"><value>Materials</value></data>
+  <data name="MenuMaterialManage" xml:space="preserve"><value>Manage materials</value></data>
+  <data name="MenuMaterialCreate" xml:space="preserve"><value>Create material code</value></data>
+  <data name="MenuMaterialConfirmName" xml:space="preserve"><value>Confirm material name</value></data>
+  <data name="MenuWarehouse" xml:space="preserve"><value>Warehouse</value></data>
+  <data name="MenuWarehouseImportPO" xml:space="preserve"><value>Import by PO</value></data>
+  <data name="MenuWarehouseConfirmImport" xml:space="preserve"><value>Confirm import</value></data>
+  <data name="MenuWarehouseStock" xml:space="preserve"><value>In stock</value></data>
+  <data name="MenuWarehouseExportRequest" xml:space="preserve"><value>Export request</value></data>
+  <data name="MenuWarehouseReimport" xml:space="preserve"><value>Re-import</value></data>
+  <data name="MenuWarehouseLog" xml:space="preserve"><value>Import/Export log</value></data>
+  <data name="MenuWarehouseExport" xml:space="preserve"><value>Export</value></data>
+  <data name="MenuApproval" xml:space="preserve"><value>Approval</value></data>
+  <data name="MenuApprovalApprove" xml:space="preserve"><value>Approve</value></data>
+  <data name="MenuApprovalStatus" xml:space="preserve"><value>Order status</value></data>
+  <data name="MenuMaster" xml:space="preserve"><value>Master</value></data>
+  <data name="MenuMasterWarehouse" xml:space="preserve"><value>Warehouse</value></data>
+  <data name="MenuMasterVendor" xml:space="preserve"><value>Vendor</value></data>
+  <data name="MenuMasterMaterial" xml:space="preserve"><value>Material</value></data>
+  <data name="MenuMasterSendMail" xml:space="preserve"><value>Master Send Mail</value></data>
+  <data name="MenuMasterSupplierManage" xml:space="preserve"><value>Supplier management</value></data>
+  <data name="BreadcrumbHome" xml:space="preserve"><value>Warehouse BIVN</value></data>
+  <data name="FooterCopyright" xml:space="preserve"><value>Brother Industries (Vietnam) Ltd. All Rights Reserved</value></data>
+</root>

@@ -39,6 +39,8 @@
     transition: all 0.3s ease;
     /* Hiệu ứng bóng mặc định (nhẹ) */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Đổi con trỏ thành hình bàn tay */
+    cursor: pointer;
 }
 
     .btn-custom:hover {

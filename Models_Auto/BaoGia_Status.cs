@@ -16,4 +16,7 @@ public partial class BaoGia_Status
     public string CHR_Flag { get; set; } = null!;
 
     public string? VCHR_CodeStatus { get; set; }
+
+    public string? CHR_TenStatusEN { get; set; }
+    public string? CHR_TenStatusJP { get; set; }
 }

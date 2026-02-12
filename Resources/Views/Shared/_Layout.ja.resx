@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="AppTitle" xml:space="preserve"><value>PRJ WAREHOUSE BIVN</value></data>
+	<data name="HeaderAppName" xml:space="preserve"><value>BIVN倉庫管理システム (BWMS)</value></data>
+	<data name="LangVietnamese" xml:space="preserve"><value>ベトナム語</value></data>
+	<data name="LangEnglish" xml:space="preserve"><value>英語</value></data>
+	<data name="LangJapanese" xml:space="preserve"><value>日本語</value></data>
+	<data name="Hello" xml:space="preserve"><value>こんにちは</value></data>
+	<data name="LoggedInAt" xml:space="preserve"><value>ログイン時刻</value></data>
+	<data name="Profile" xml:space="preserve"><value>プロフィール</value></data>
+	<data name="Logout" xml:space="preserve"><value>ログアウト</value></data>
+	<data name="Login" xml:space="preserve"><value>ログイン</value></data>
+	<data name="BrandWarehouse" xml:space="preserve"><value>倉庫</value></data>
+	<data name="BrandWarehouseShort" xml:space="preserve"><value>WH</value></data>
+	<data name="MenuDashboard" xml:space="preserve"><value>ダッシュボード</value></data>
+	<data name="MenuUser" xml:space="preserve"><value>ユーザー</value></data>
+	<data name="MenuQuote" xml:space="preserve"><value>見積</value></data>
+	<data name="MenuQuoteCreate" xml:space="preserve"><value>見積依頼作成</value></data>
+	<data name="MenuQuoteApprove" xml:space="preserve"><value>見積承認</value></data>
+	<data name="MenuQuoteInput" xml:space="preserve"><value>見積入力</value></data>
+	<data name="MenuQuoteResults" xml:space="preserve"><value>見積結果</value></data>
+	<data name="MenuQuoteRequest" xml:space="preserve"><value>商品依頼</value></data>
+	<data name="MenuQuoteHistory" xml:space="preserve"><value>依頼履歴</value></data>
+	<data name="MenuMaterial" xml:space="preserve"><value>材料</value></data>
+	<data name="MenuMaterialManage" xml:space="preserve"><value>材料管理</value></data>
+	<data name="MenuMaterialCreate" xml:space="preserve"><value>材料コード作成</value></data>
+	<data name="MenuMaterialConfirmName" xml:space="preserve"><value>材料名確認</value></data>
+	<data name="MenuWarehouse" xml:space="preserve"><value>倉庫</value></data>
+	<data name="MenuWarehouseImportPO" xml:space="preserve"><value>発注書による入庫</value></data>
+	<data name="MenuWarehouseConfirmImport" xml:space="preserve"><value>入庫確認</value></data>
+	<data name="MenuWarehouseStock" xml:space="preserve"><value>在庫</value></data>
+	<data name="MenuWarehouseExportRequest" xml:space="preserve"><value>出庫依頼</value></data>
+	<data name="MenuWarehouseReimport" xml:space="preserve"><value>再入庫</value></data>
+	<data name="MenuWarehouseLog" xml:space="preserve"><value>入出庫履歴</value></data>
+	<data name="MenuWarehouseExport" xml:space="preserve"><value>出庫</value></data>
+	<data name="MenuApproval" xml:space="preserve"><value>承認</value></data>
+	<data name="MenuApprovalApprove" xml:space="preserve"><value>承認</value></data>
+	<data name="MenuApprovalStatus" xml:space="preserve"><value>注文状況</value></data>
+	<data name="MenuMaster" xml:space="preserve"><value>マスタ</value></data>
+	<data name="MenuMasterWarehouse" xml:space="preserve"><value>倉庫</value></data>
+	<data name="MenuMasterVendor" xml:space="preserve"><value>ベンダー</value></data>
+	<data name="MenuMasterMaterial" xml:space="preserve"><value>材料</value></data>
+	<data name="MenuMasterSendMail" xml:space="preserve"><value>メール送信マスタ</value></data>
+	<data name="MenuMasterSupplierManage" xml:space="preserve"><value>サプライヤー管理</value></data>
+	<data name="BreadcrumbHome" xml:space="preserve"><value>BIVN倉庫</value></data>
+	<data name="FooterCopyright" xml:space="preserve"><value>ブラザー工業(ベトナム)株式会社 著作権所有</value></data>
+</root>

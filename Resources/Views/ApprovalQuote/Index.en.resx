@@ -318,4 +318,19 @@
   <data name="Requester" xml:space="preserve">
     <value>Requester</value>
   </data>
+  <data name="MsgSusscesAprover" xml:space="preserve">
+    <value>Approval successful.</value>
+  </data>
+  <data name="MSGFailedApprover" xml:space="preserve">
+    <value>Approval failed:</value>
+  </data>
+  <data name="MSGErrorApprover" xml:space="preserve">
+    <value>Error during approval.</value>
+  </data>
+  <data name="MSGReturnFailed" xml:space="preserve">
+    <value>Return the defeat</value>
+  </data>
+  <data name="MSGReturnOK" xml:space="preserve">
+    <value>Returned successfully</value>
+  </data>
 </root>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="AppTitle" xml:space="preserve"><value>PRJ WAREHOUSE BIVN</value></data>
+	<data name="HeaderAppName" xml:space="preserve"><value>Hệ thống Quản lý Kho BIVN (BWMS)</value></data>
+	<data name="LangVietnamese" xml:space="preserve"><value>Tiếng Việt</value></data>
+	<data name="LangEnglish" xml:space="preserve"><value>Tiếng Anh</value></data>
+	<data name="LangJapanese" xml:space="preserve"><value>Tiếng Nhật</value></data>
+	<data name="Hello" xml:space="preserve"><value>Xin chào</value></data>
+	<data name="LoggedInAt" xml:space="preserve"><value>Đăng nhập lúc</value></data>
+	<data name="Profile" xml:space="preserve"><value>Hồ sơ</value></data>
+	<data name="Logout" xml:space="preserve"><value>Đăng xuất</value></data>
+	<data name="Login" xml:space="preserve"><value>Đăng nhập</value></data>
+	<data name="BrandWarehouse" xml:space="preserve"><value>KHO</value></data>
+	<data name="BrandWarehouseShort" xml:space="preserve"><value>WH</value></data>
+	<data name="MenuDashboard" xml:space="preserve"><value>Bảng điều khiển</value></data>
+	<data name="MenuUser" xml:space="preserve"><value>Người dùng</value></data>
+	<data name="MenuQuote" xml:space="preserve"><value>Báo giá</value></data>
+	<data name="MenuQuoteCreate" xml:space="preserve"><value>Tạo yêu cầu báo giá</value></data>
+	<data name="MenuQuoteApprove" xml:space="preserve"><value>Phê duyệt báo giá</value></data>
+	<data name="MenuQuoteInput" xml:space="preserve"><value>Nhập báo giá</value></data>
+	<data name="MenuQuoteResults" xml:space="preserve"><value>Kết quả báo giá</value></data>
+	<data name="MenuQuoteRequest" xml:space="preserve"><value>Yêu cầu hàng hóa</value></data>
+	<data name="MenuQuoteHistory" xml:space="preserve"><value>Lịch sử yêu cầu</value></data>
+	<data name="MenuMaterial" xml:space="preserve"><value>Vật tư</value></data>
+	<data name="MenuMaterialManage" xml:space="preserve"><value>Quản lý vật tư</value></data>
+	<data name="MenuMaterialCreate" xml:space="preserve"><value>Tạo mã vật tư</value></data>
+	<data name="MenuMaterialConfirmName" xml:space="preserve"><value>Xác nhận tên vật tư</value></data>
+	<data name="MenuWarehouse" xml:space="preserve"><value>Kho</value></data>
+	<data name="MenuWarehouseImportPO" xml:space="preserve"><value>Nhập theo đơn hàng</value></data>
+	<data name="MenuWarehouseConfirmImport" xml:space="preserve"><value>Xác nhận nhập kho</value></data>
+	<data name="MenuWarehouseStock" xml:space="preserve"><value>Tồn kho</value></data>
+	<data name="MenuWarehouseExportRequest" xml:space="preserve"><value>Yêu cầu xuất kho</value></data>
+	<data name="MenuWarehouseReimport" xml:space="preserve"><value>Nhập lại</value></data>
+	<data name="MenuWarehouseLog" xml:space="preserve"><value>Nhật ký nhập/xuất</value></data>
+	<data name="MenuWarehouseExport" xml:space="preserve"><value>Xuất kho</value></data>
+	<data name="MenuApproval" xml:space="preserve"><value>Phê duyệt</value></data>
+	<data name="MenuApprovalApprove" xml:space="preserve"><value>Phê duyệt</value></data>
+	<data name="MenuApprovalStatus" xml:space="preserve"><value>Trạng thái đơn hàng</value></data>
+	<data name="MenuMaster" xml:space="preserve"><value>Danh mục</value></data>
+	<data name="MenuMasterWarehouse" xml:space="preserve"><value>Kho</value></data>
+	<data name="MenuMasterVendor" xml:space="preserve"><value>Nhà cung cấp</value></data>
+	<data name="MenuMasterMaterial" xml:space="preserve"><value>Vật tư</value></data>
+	<data name="MenuMasterSendMail" xml:space="preserve"><value>Danh mục gửi email</value></data>
+	<data name="MenuMasterSupplierManage" xml:space="preserve"><value>Quản lý nhà cung cấp</value></data>
+	<data name="BreadcrumbHome" xml:space="preserve"><value>Kho BIVN</value></data>
+	<data name="FooterCopyright" xml:space="preserve"><value>Công ty TNHH Brother Industries (Việt Nam). Bảo lưu mọi quyền.</value></data>
+</root>

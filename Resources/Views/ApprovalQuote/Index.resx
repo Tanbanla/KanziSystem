@@ -318,4 +318,19 @@
   <data name="Requester" xml:space="preserve">
     <value>Người gửi yêu cầu</value>
   </data>
+  <data name="MsgSusscesAprover" xml:space="preserve">
+    <value>Phê duyệt thành công.</value>
+  </data>
+  <data name="MSGFailedApprover" xml:space="preserve">
+    <value>Phê duyệt thất bại:</value>
+  </data>
+  <data name="MSGErrorApprover" xml:space="preserve">
+    <value>Lỗi khi Phê duyệt.</value>
+  </data>
+  <data name="MSGReturnFailed" xml:space="preserve">
+    <value>Trả lại thất bại</value>
+  </data>
+  <data name="MSGReturnOK" xml:space="preserve">
+    <value>Trả lại thành công</value>
+  </data>
 </root>

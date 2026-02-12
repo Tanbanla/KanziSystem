@@ -8,6 +8,27 @@
     List<BaoGia_Request_of_QuotationDTO> listData = Model.listBaoGia;
     List<BaoGia_StatusDTO> listStatus = Model.listStatusBaoGia;
     List<BaoGia_StepDTO> listStep = Model.listStepBaoGia;
+
+    // determine UI language and prepare localized display names for steps and status
+    var uiLang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? "vi";
+    Func<BaoGia_StepDTO, string> stepDisplay = s => uiLang == "en" ? (s.CHR_StepNameEN ?? s.CHR_StepName) : uiLang == "ja" ? (s.CHR_StepNameJP ?? s.CHR_StepName) : s.CHR_StepName;
+    Func<BaoGia_StatusDTO, string> statusDisplay = s => uiLang == "en" ? (s.CHR_TenStatusEN ?? s.NVCHR_TenStatus) : uiLang == "ja" ? (s.CHR_TenStatusJP ?? s.NVCHR_TenStatus) : s.NVCHR_TenStatus;
+
+    var localizedSteps = listStep.Select(s => new {
+        s.INT_StepNumber,
+        s.CHR_StepName,
+        s.CHR_StepNameEN,
+        s.CHR_StepNameJP,
+        DisplayName = stepDisplay(s)
+    }).ToList();
+
+    var localizedStatus = listStatus.Select(s => new {
+        s.VCHR_CodeStatus,
+        s.NVCHR_TenStatus,
+        s.CHR_TenStatusEN,
+        s.CHR_TenStatusJP,
+        DisplayName = statusDisplay(s)
+    }).ToList();
 }
 <head>
     <link rel="stylesheet" href="~/css/Approval_Quote.css" />
@@ -37,9 +58,9 @@
                     <label for="tinhTrangPheDuyet" class="form-label small text-uppercase fw-semibold">@Localizer["ApprovalStatusLabel"]</label>
                     <select id="tinhTrangPheDuyet" name="tinhTrangPheDuyet" class="form-control tinhTrangPheDuyet searchable-select">
                         <option value="">@Localizer["AllOption"]</option>
-                        @foreach (var s in listStep)
+                        @foreach (var s in localizedSteps)
                         {
-                            <option value="@s.INT_StepNumber">@s.CHR_StepName</option>
+                            <option value="@s.INT_StepNumber">@s.DisplayName</option>
                         }
                     </select>
                 </div>
@@ -184,8 +205,9 @@
 </div>
 <script>
     window.ApprovalData = {
-        status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listStatus)),
-        steps: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listStep))
+        status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(localizedStatus)),
+        steps: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(localizedSteps)),
+        uiland: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(uiLang))
     };
     window.i18nApproval = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         PageTitle = Localizer["PageTitle"].Value,
@@ -233,7 +255,12 @@
         NoResults = Localizer["NoResults"].Value,
         SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
         Notification = Localizer["Notification"].Value,
-        Close = Localizer["Close"].Value
+        Close = Localizer["Close"].Value,
+        MsgSusscesAprover = Localizer["MsgSusscesAprover"].Value,
+        MSGFailedApprover = Localizer["MSGFailedApprover"].Value,
+        MSGErrorApprover = Localizer["MSGErrorApprover"].Value,
+        MSGReturnFailed = Localizer["MSGReturnFailed"].Value,
+        MSGReturnOK = Localizer["MSGReturnOK"].Value
     }));
 </script>
 @section Scripts {

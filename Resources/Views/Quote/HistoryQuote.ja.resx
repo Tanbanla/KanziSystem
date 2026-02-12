@@ -117,7 +117,7 @@
 	<data name="DateRange" xml:space="preserve"><value>期間</value></data>
 	<data name="Filter" xml:space="preserve"><value>検索</value></data>
 	<data name="Reset" xml:space="preserve"><value>リセット</value></data>
-	<data name="GroupListByOrder" xml:space="preserve"><value>依頼番号でグループ化された一覧</value></data>
+	<data name="GroupListByOrder" xml:space="preserve"><value>依頼グループ一覧（依頼番号に基づく）</value></data>
 	<data name="OrderCodeGroup" xml:space="preserve"><value>依頼番号（グループ）</value></data>
 	<data name="Requester" xml:space="preserve"><value>依頼者</value></data>
 	<data name="CreatedDate" xml:space="preserve"><value>作成日</value></data>
@@ -127,7 +127,7 @@
 	<data name="Actions" xml:space="preserve"><value>操作</value></data>
 	<data name="Expand" xml:space="preserve"><value>展開</value></data>
 	<data name="ViewHistory" xml:space="preserve"><value>履歴を見る</value></data>
-	<data name="Approval" xml:space="preserve"><value>承認</value></data>
+	<data name="Approval" xml:space="preserve"><value>同意</value></data>
 	<data name="Material" xml:space="preserve"><value>品目</value></data>
 	<data name="Quantity" xml:space="preserve"><value>数量</value></data>
 	<data name="Status" xml:space="preserve"><value>ステータス</value></data>

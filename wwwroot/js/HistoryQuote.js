@@ -807,7 +807,7 @@
     function StatusText(statusId) {
         var listStatus = window.HistoryData.status
         const status = listStatus.find(s => s.VCHR_CodeStatus === statusId);
-        return status ? status.NVCHR_TenStatus : statusId;
+        return status ? status.DisplayName : statusId;
     }
     function buildHistoryHtml(result) {
         const data = result?.data || result || [];

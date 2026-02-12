@@ -20,7 +20,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             try
             {
-                var sql = "SELECT * FROM IM_NCC_NEW where Xoa <> 1";
+                var sql = "SELECT * FROM IM_NCC_NEW where Xoa <> 1 or Xoa is null";
                 return (await _conn.QueryAsync<IM_NCC_NEW>(sql)).ToList();
             }
             catch(Exception ex)

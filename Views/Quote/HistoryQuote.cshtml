@@ -9,6 +9,16 @@
     List<string> madons = Model.DanhSachMaDon;
     List<string> categoryS = Model.DanhSachCategory;
     List<string> phanLoais = ["A", "B", "C", "E", "NO LIST"];
+     // determine UI language and prepare localized display names for steps and status
+    var uiLang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? "vi";
+    Func<BaoGia_StatusDTO, string> statusDisplay = s => uiLang == "en" ? (s.CHR_TenStatusEN ?? s.NVCHR_TenStatus) : uiLang == "ja" ? (s.CHR_TenStatusJP ?? s.NVCHR_TenStatus) : s.NVCHR_TenStatus;
+    var localizedStatus = listStatus.Select(s => new {
+        s.VCHR_CodeStatus,
+        s.NVCHR_TenStatus,
+        s.CHR_TenStatusEN,
+        s.CHR_TenStatusJP,
+        DisplayName = statusDisplay(s)
+    }).ToList();
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
@@ -78,12 +88,12 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="statusFilter" class="form-label">@Localizer["OrderStatus"]</label>
-                    <select class="form-select" id="statusFilter" name="statusFilter">
+                    <label for="statusFilter" class="form-label small text-uppercase fw-semibold">@Localizer["OrderStatus"]</label>
+                    <select id="statusFilter" name="statusFilter" class="form-control statusFilter searchable-select">
                         <option value="" selected>@Localizer["All"]</option>
-                        @foreach (var s in listStatus)
+                        @foreach (var s in localizedStatus)
                         {
-                            <option value="@s.VCHR_CodeStatus">@s.NVCHR_TenStatus</option>
+                            <option value="@s.VCHR_CodeStatus">@s.DisplayName</option>
                         }
                     </select>
                 </div>
@@ -379,7 +389,7 @@
 </div>
 <script>
     window.HistoryData = {
-        status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listStatus))
+        status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(localizedStatus))
     };
     window.i18nHistoryQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         PageTitle = Localizer["PageTitle"].Value,

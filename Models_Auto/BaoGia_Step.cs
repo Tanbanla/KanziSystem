@@ -18,4 +18,7 @@ public partial class BaoGia_Step
     public string? CHR_Status { get; set; }
 
     public int? INT_StepNumber { get; set; }
+
+    public string? CHR_StepNameEN { get; set; }
+    public string? CHR_StepNameJP { get; set; }
 }

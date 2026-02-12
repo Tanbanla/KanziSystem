@@ -199,6 +199,7 @@
     const resetBtn = document.getElementById('btnReset');
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
+            const T = window.i18nConfirmName || {};
             // clear inputs
             els.tenHang.value = '';
             els.soDon.value = '';
@@ -213,7 +214,7 @@
                 if (wrapper && wrapper.classList.contains('ms-container')) {
                     const valuesEl = wrapper.querySelector('.ms-values');
                     const placeholderEl = wrapper.querySelector('.ms-placeholder');
-                    if (valuesEl && placeholderEl) { valuesEl.textContent = ''; placeholderEl.textContent = '-- Chọn --'; }
+                    if (valuesEl && placeholderEl) { valuesEl.textContent = ''; placeholderEl.textContent = (T.SelectPlaceholder || '-- Chọn --'); }
                 }
             }
             // reset paging

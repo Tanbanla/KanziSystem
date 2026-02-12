@@ -2,7 +2,6 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Quotation Results";
-    string[] allStatuses = new[] { "Chưa chọn NCC", "Đang chờ" };
     List<MATERIALDTO> listMaterials = Model.DanhSachVatTu;
     List<ACC_NHOMVITRIDTO> listPhong = Model.DanhSachNhomViTri;
     List<IM_NCC_NEWDTO> listNCC = Model.DanhSachNhaCungCap;
@@ -108,7 +107,12 @@
                         <td>@i.INT_SoLuong</td>
                         <td>@i.NVCHR_DonVi</td>
                         <td>@i.DTM_NgayMuonNhan.ToString("dd/MM/yyyy")</td>
-                        <td><span class="badge status-badge @GetStatusClass(@i.Status)">@i.Status</span></td>
+                        @{ 
+                            var statusCodeRaw = i.Status as string ?? (i.chR_Status as string) ?? i.Status?.ToString() ?? "";
+                            // Map only two known statuses to localized labels
+                            var statusLabel = statusCodeRaw == "Chưa chọn NCC" ? Localizer["NotSelectedSupplier"].Value : statusCodeRaw == "Đang chờ" ? Localizer["Pending"].Value : statusCodeRaw;
+                        }
+                        <td><span class="badge status-badge @GetStatusClass(statusCodeRaw)">@statusLabel</span></td>
                         <td class="text-center"><input type="checkbox" class="form-check-input item-select" value="@i" /></td>
                     </tr>
                     <tr id="sup-rows-@i.CHR_MaDon-@i.CHR_MaHangNoiBo" class="supplier-group d-none">
@@ -336,6 +340,10 @@
 @functions {
     private string GetStatusClass(string status) => status switch
     {
+        // prefer status code values (chR_Status)
+        "NOT_SELECTED" => "bg-success",
+        "PENDING" => "bg-warning text-dark",
+        // legacy Vietnamese textual values fallback
         "Chưa chọn NCC" => "bg-success",
         "Đang chờ" => "bg-warning text-dark",
         _ => "bg-secondary"

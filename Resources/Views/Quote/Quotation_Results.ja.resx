@@ -107,7 +107,7 @@
   <data name="Search" xml:space="preserve"><value>検索</value></data>
   <data name="Detail" xml:space="preserve"><value>詳細</value></data>
   <data name="Category" xml:space="preserve"><value>カテゴリ</value></data>
-  <data name="CustomsItemName" xml:space="preserve"><value>通関品目名</value></data>
+  <data name="CustomsItemName" xml:space="preserve"><value>税関品名</value></data>
   <data name="Quantity" xml:space="preserve"><value>数量</value></data>
   <data name="Unit" xml:space="preserve"><value>単位</value></data>
   <data name="DesiredReceiveDate" xml:space="preserve"><value>受け取り希望日</value></data>
