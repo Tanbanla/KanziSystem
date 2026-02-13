@@ -329,7 +329,8 @@
     const state = {
         groupsByMaDon: {},
         orderedMaDons: [],
-        selectedMaDons: new Set()
+        selectedMaDons: new Set(),
+        currentMaDonInModal: null
     };
 
     // lay ten trang thai de hien thi
@@ -516,84 +517,85 @@
 
     function showDetailModal(maDon) {
         const group = state.groupsByMaDon[maDon] || [];
-        const tbody = document.getElementById('detailModalBody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-        const frag = document.createDocumentFragment();
-        group.forEach((it, idx) => {
-            const tr = document.createElement('tr');
-            function td(text) { const c = document.createElement('td'); c.textContent = text || ''; return c; }
-            tr.appendChild(td(String(idx + 1)));
-            // Mã phòng ban
-            tr.appendChild(td(it.chR_SectionCode && it.chR_SectionName ? `${it.chR_SectionName}` : (it.chR_SectionName || it.chR_SectionCode || '')));
-            // Chủng loại hàng
-            tr.appendChild(td(it.nvchR_ChungLoai));
-            // Phân loại
-            tr.appendChild(td(it.chR_Phanloai));
-            // Mã thiết bị
-            tr.appendChild(td(it.chR_MaThietBi));
-            // Mã hàng nội bộ
-            tr.appendChild(td(it.chR_MaHangNoiBo));
-            // Mã hàng NCC
-            tr.appendChild(td(it.chR_MaHangNCC));
-            // Tên hàng VN
-            tr.appendChild(td(it.nvchR_NameVN));
-            // Tên hàng EN
-            tr.appendChild(td(it.nvchR_NameEN));
-            // Số lượng
-            tr.appendChild(td(it.inT_SoLuong != null ? String(it.inT_SoLuong) : ''));
-            // Đơn vị
-            tr.appendChild(td(it.nvchR_DonVi));
-            // Hình dáng
-            tr.appendChild(td(it.nvchR_HinhDang));
-            // Chất liệu
-            tr.appendChild(td(it.nvchR_ChatLieu));
-            // Thành phần, hàm lượng
-            tr.appendChild(td(it.nvchR_ThanhPhan));
-            // Kích thước
-            tr.appendChild(td(it.nvchR_KichThuoc));
-            // Dòng máy / vị trí sử dụng
-            tr.appendChild(td(it.nvchR_DongMay));
-            // Tính năng / dùng để làm gì
-            tr.appendChild(td(it.nvchR_TinhNang));
-            // ROHS
-            tr.appendChild(td(it.nvchR_Rohs));
-            // CO/CQ
-            tr.appendChild(td(it.nvchR_COCQ));
-            // MSDS
-            tr.appendChild(td(it.nvchR_MSDS));
-            // Yêu cầu an toàn
-            tr.appendChild(td(it.nvchR_AnToan));
-            // File thiết kế
-            tr.appendChild(td(it.nvchR_FileThietKe));
-            // NSX
-            tr.appendChild(td(it.nvchR_NhaSanXuat));
-            // Nhà cung cấp (mã - tên nếu có)
-            const ncc = (it.chR_MaNCC ? it.chR_MaNCC : '') + (it.nvchR_TenNCC ? ` - ${it.nvchR_TenNCC}` : '');
-            tr.appendChild(td(ncc.trim()));
-            // Lấy báo giá
-            tr.appendChild(td(it.biT_LayBaoGia != null ? (it.biT_LayBaoGia ? 'O' : 'X') : ''));
-            // Lý do
-            tr.appendChild(td(it.nvchR_LyDo));
-            // Ngày muốn nhận
-            tr.appendChild(td(formatDate(it.dtM_NgayMuonNhan)));
-            // Kỳ hạn lựa chọn NCC
-            tr.appendChild(td(formatDate(it.dtM_KyHan || it.dtM_Deadline)));
-            // Gấp
-            tr.appendChild(td(it.chR_Gap != null ? (String(it.chR_Gap).toLowerCase() === 'true' ? 'O' : 'X') : ''));
-            // Người yêu cầu
-            tr.appendChild(td(it.chR_CreateBy));
-            frag.appendChild(tr);
+        state.currentMaDonInModal = maDon;
+        // header info
+        const madonEl = document.getElementById('madonhang');
+        if (madonEl) {
+            const T = window.i18nApproval || {};
+            const fmt = T.DetailModalTitleFormat || '{0} ({1})';
+            madonEl.textContent = fmt.replace('{0}', maDon).replace('{1}', group.length);
+        }
+        const first = group[0] || {};
+        const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val == null ? '' : String(val); };
+        setText('khoi', first.chR_SectionName || '');
+        setText('mbp', first.chR_SectionCode || '');
+        setText('mpb_yc', first.chR_CostCenter || first.chR_SectionCode || '');
+        setText('tenphongban', first.chR_SectionName || '');
+        setText('chuyen', first.nvchR_DongMay || '');
+        setText('nyc', formatDate(first.dtM_CreateDate));
+        setText('thmm', formatDate(first.dtM_NgayMuonNhan));
+        // urgent badge
+        const urgent = group.some(it => {
+            const v = it && it.chR_Gap;
+            if (v == null) return false;
+            const s = String(v).toLowerCase();
+            return s === 'true' || s === '1' || s === 'o' || s === 'x' && false; // only true cases
         });
-        tbody.appendChild(frag);
+        const urgentBadge = document.getElementById('urgent-badge');
+        if (urgentBadge) urgentBadge.style.display = urgent ? '' : 'none';
+
+        // extra info (take the first line for summary)
+        setText('rohs_requirement', first.nvchR_Rohs || '-');
+        setText('cocq_requirement', first.nvchR_COCQ || '-');
+        setText('msds_requirement', first.nvchR_MSDS || '-');
+        setText('requester', first.chR_CreateBy || '-');
+
+        // footer info
+        setText('id_request', maDon || '');
+        setText('step', getStepName(first.iD_StepBaoGia));
+        setText('regency', first.chR_Quyen || '');
+
+        // build table body per new layout
+        const tbody = document.getElementById('detailModalBody');
+        if (tbody) {
+            tbody.innerHTML = '';
+            const frag = document.createDocumentFragment();
+            group.forEach((it, idx) => {
+                const tr = document.createElement('tr');
+                function td(text) { const c = document.createElement('td'); c.textContent = text || ''; return c; }
+                tr.appendChild(td(String(idx + 1)));
+                tr.appendChild(td(maDon)); // Mã đơn
+                tr.appendChild(td(it.chR_MaHangNoiBo)); // Mã vật tư nội bộ
+                tr.appendChild(td(it.nvchR_ChungLoai)); // Mã vật tư nội bộ
+                tr.appendChild(td(((it.nvchR_NameVN || '') + (it.nvchR_NameEN ? ' / ' + it.nvchR_NameEN : '')).trim())); // Tên hàng (VN/EN)
+                tr.appendChild(td(it.inT_SoLuong != null ? String(it.inT_SoLuong) : ''));// Số lượng
+                tr.appendChild(td(it.nvchR_DonVi)); // Đơn vị
+                tr.appendChild(td(it.nvchR_HinhDang)); // Hình dạng
+                tr.appendChild(td(it.nvchR_ChatLieu)); // Vật liệu
+                tr.appendChild(td(it.nvchR_ThanhPhan)); // Thành phần
+                tr.appendChild(td(it.nvchR_KichThuoc)); // Kích thước
+                tr.appendChild(td(it.nvchR_DongMay)); // dòng máy
+                //tr.appendChild(td(it.nvchR_DongMay)); // Vị trí sử dụng
+                tr.appendChild(td(it.nvchR_TinhNang)); // Mục đích/Tính năng
+                const ncc = (it.chR_MaNCC ? it.chR_MaNCC : '') + (it.nvchR_TenNCC ? ` - ${it.nvchR_TenNCC}` : '');
+                tr.appendChild(td(ncc.trim())); // NCC
+                tr.appendChild(td(formatDate(it.dtM_KyHan))); // Ngày nhận mong muốn
+                const gap = it.chR_Gap != null ? (String(it.chR_Gap).toLowerCase() === 'true' || String(it.chR_Gap) === '1' ? 'O' : 'X') : '';
+                tr.appendChild(td(gap)); // Khẩn
+                frag.appendChild(tr);
+            });
+            tbody.appendChild(frag);
+        }
+
         const modalEl = document.getElementById('detailModal');
         if (modalEl) {
-            const titleEl = document.getElementById('detailModalTitle');
-            if (titleEl) {
-                const T = window.i18nApproval || {};
-                const fmt = T.DetailModalTitleFormat || 'Chi tiết đơn: {0} (Số dòng: {1})';
-                titleEl.textContent = fmt.replace('{0}', maDon).replace('{1}', group.length);
-            }
+            // create backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop show';
+            backdrop.style.zIndex = '3999';
+            document.body.appendChild(backdrop);
+            modalEl._backdrop = backdrop;
+
             // simple show
             try { modalEl.setAttribute('aria-hidden', 'false'); } catch (e) { }
             try { modalEl.removeAttribute('inert'); } catch (e) { }
@@ -610,6 +612,12 @@
     function hideDetailModal() {
         const modalEl = document.getElementById('detailModal');
         if (modalEl) {
+            // remove backdrop
+            if (modalEl._backdrop) {
+                document.body.removeChild(modalEl._backdrop);
+                delete modalEl._backdrop;
+            }
+
             // move focus to a logical control outside modal before hiding
             const fallback = document.getElementById('selectAll') || document.getElementById('btnSearch') || document.body;
             try { if (fallback && typeof fallback.focus === 'function') fallback.focus(); } catch (e) { }
@@ -621,6 +629,7 @@
         }
 
         document.body.classList.remove('modal-open');
+        state.currentMaDonInModal = null;
     }
     function ReturnCode(IDStep) {
         switch (IDStep) {
@@ -826,8 +835,107 @@
                 updateSelectAllState();
             });
         }
-    }
 
+        // modal footer actions
+        const modalApprove = document.getElementById('modalApprove');
+        if (modalApprove) modalApprove.addEventListener('click', function () {
+            const maDon = state.currentMaDonInModal;
+            if (!maDon) return;
+            const group = state.groupsByMaDon[maDon] || [];
+            if (!group.length) return;
+            const payload = [];
+            group.forEach(it => {
+                it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
+                it.iD_Status = 'APPROVAL';
+                payload.push(it);
+            });
+            fetch('/ApprovalQuote/UpdateQuotationOK', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(res => res.json()).then(json => {
+                if (json && json.success) {
+                    showToast('success', T.MsgSusscesAprover);
+                    hideDetailModal();
+                    searchAndRender();
+                } else {
+                    showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
+                }
+            }).catch(err => {
+                console.error('Approval error', err);
+                showToast('danger', T.MSGErrorApprover);
+            });
+        });
+
+        const modalReject = document.getElementById('modalReject');
+        if (modalReject) modalReject.addEventListener('click', function () {
+            hideEditModal('detailModal');
+            const maDon = state.currentMaDonInModal;
+            if (!maDon) return;
+            const group = state.groupsByMaDon[maDon] || [];
+            if (!group.length) return;
+            showInputDialog(T.InputReasonTitle || 'Lý do trả lại', T.InputReasonPlaceholder || 'Nhập lý do trả lại...').then(result => {
+                if (!result || result.action !== 'ok') return;
+                const reason = (result.value || '').trim();
+                if (!reason) { showToast('warning', (T.ReasonRequired || 'Lý do không được để trống.')); return; }
+                const payload = [];
+                group.forEach(it => {
+                    it.nvchR_LyDo = reason;
+                    it.iD_Status = ReturnCode(it.iD_StepBaoGia);
+                    it.iD_StepBaoGia = 1;
+                    payload.push(it);
+                });
+                fetch('/ApprovalQuote/UpdateQuotationNG', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(res => res.json()).then(json => {
+                    if (json && json.success) {
+                        showToast('success', T.MSGReturnOK);
+                        hideDetailModal();
+                        searchAndRender();
+                    } else {
+                        showToast('danger', T.MSGReturnFailed + ': ' + (json && json.message ? json.message : 'Unknown'));
+                    }
+                }).catch(err => {
+                    console.error('Return error', err);
+                    showToast('danger', T.ReturnError);
+                });
+            });
+        });
+    }
+    function hideEditModal(modalName) {
+        const modalEl = document.getElementById(modalName);
+        if (modalEl._backdrop) {
+            document.body.removeChild(modalEl._backdrop);
+            delete modalEl._backdrop;
+        }
+        if (!modalEl) return;
+        // Accessibility: if focus is inside modal, blur and move focus before hiding (to avoid aria-hidden ancestor with focused descendant)
+        try {
+            const active = document.activeElement;
+            if (active && modalEl.contains(active)) {
+                if (typeof active.blur === 'function') active.blur();
+                const fallbackFocus = document.getElementById('btnApplyFilters') || document.body;
+                if (fallbackFocus && typeof fallbackFocus.focus === 'function') fallbackFocus.focus();
+            }
+        } catch { }
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        modalEl.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        // clean up inline sizing
+        try {
+            const dialog = modalEl.querySelector('.modal-dialog');
+            if (dialog) {
+                dialog.style.maxWidth = '';
+                dialog.style.width = '';
+                dialog.style.margin = '';
+            }
+        } catch { }
+        const backdrop = document.querySelector('.custom-modal-backdrop');
+        if (backdrop) backdrop.remove();
+    }
     // Init: attach events and auto load data once ready
     function initPage() {
         attachEvents();
@@ -835,6 +943,9 @@
         // Hook close button in modal header if exists
         function wireClose() {
             document.querySelectorAll('#detailModal .btn-close').forEach(btn => {
+                btn.addEventListener('click', hideDetailModal);
+            });
+            document.querySelectorAll('#detailModal [data-bs-dismiss="modal"]').forEach(btn => {
                 btn.addEventListener('click', hideDetailModal);
             });
         }

@@ -40,6 +40,14 @@
     margin: 1.25rem auto;
 }
 
+#detailModal {
+    z-index: 4000;
+}
+
+#detailModal .modal-backdrop {
+    z-index: 3999;
+}
+
 #detailModal .modal-content {
     border: 0;
     border-radius: 10px;
@@ -127,8 +135,28 @@ thead.table-header-custom th {
 #detailModal tbody tr:nth-child(even) { background-color: #fafbff; }
 #detailModal tbody tr:hover { background: #f2f6ff; }
 
+/* Điều chỉnh theo chiều cao header chính */
+.table-responsive-fixed {
+    max-height: 380px;
+    overflow-y: auto;
+    position: relative;
+}
+
+#detailTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #dee2e6; /* hoặc màu header bạn muốn */
+}
+#detailTable thead tr:nth-child(2) th {
+    top: 38px; 
+    z-index: 3;
+    background: #e9ecef;
+}
 /* Compact footer */
-#detailModal .modal-footer { padding: .5rem .75rem; }
+#detailModal .modal-footer {
+    padding: .5rem .75rem;
+}
 .table-header-custom {
     background-color: #2335b7 !important;
     color: white !important;

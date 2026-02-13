@@ -333,4 +333,54 @@
   <data name="MSGReturnOK" xml:space="preserve">
     <value>正常に返却されました</value>
   </data>
+  <data name="ShowMore" xml:space="preserve">
+    <value>もっと見る</value>
+  </data>
+  <data name="ShowLess" xml:space="preserve">
+    <value>表示を減らす</value>
+  </data>
+  <!-- Added keys for localized modal UI -->
+  <data name="ReceivingDepartmentLabel" xml:space="preserve"><value>受け部門：</value></data>
+  <data name="UrgentBadgeText" xml:space="preserve"><value>緊急</value></data>
+  <data name="DeptCodeLabel" xml:space="preserve"><value>※依頼部門コード</value></data>
+  <data name="DeptCostCenterLabel" xml:space="preserve"><value>※依頼部門コストセンター</value></data>
+  <data name="DeptNameLabel" xml:space="preserve"><value>※依頼部門名</value></data>
+  <data name="LineLabel" xml:space="preserve"><value>※機械ライン</value></data>
+  <data name="RequestDateLabel" xml:space="preserve"><value>※依頼日</value></data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve"><value>※希望期限</value></data>
+  <data name="GoodsDetailTitle" xml:space="preserve"><value>物品明細</value></data>
+  <data name="STT" xml:space="preserve"><value>番号</value></data>
+  <data name="SystemCode" xml:space="preserve"><value>※システムコード</value></data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve"><value>※社内材料コード</value></data>
+  <data name="ItemNameVNEN" xml:space="preserve"><value>※品名 (VN/EN)</value></data>
+  <data name="RequestGroup" xml:space="preserve"><value>依頼</value></data>
+  <data name="DescriptionGroup" xml:space="preserve"><value>物品説明</value></data>
+  <data name="SupplierShort" xml:space="preserve"><value>供給者</value></data>
+  <data name="DesiredReceiveDateShort" xml:space="preserve"><value>希望納期</value></data>
+  <data name="UrgentShort" xml:space="preserve"><value>緊急</value></data>
+  <data name="QuantityShort" xml:space="preserve"><value>数量</value></data>
+  <data name="UnitShort" xml:space="preserve"><value>単位</value></data>
+  <data name="ShapeShort" xml:space="preserve"><value>形状</value></data>
+  <data name="MaterialShort" xml:space="preserve"><value>材料</value></data>
+  <data name="CompositionShort" xml:space="preserve"><value>成分</value></data>
+  <data name="DimensionsShort" xml:space="preserve"><value>寸法</value></data>
+  <data name="UsedPositionShort" xml:space="preserve"><value>使用位置</value></data>
+  <data name="PurposeFeatureShort" xml:space="preserve"><value>目的/機能</value></data>
+  <data name="LoadingData" xml:space="preserve"><value>データを読み込み中...</value></data>
+  <data name="ApprovalFlowTitle" xml:space="preserve"><value>承認フロー</value></data>
+  <data name="ApprovalFlowLine1" xml:space="preserve"><value>• 3,000USD（6,600万VND）未満：担当者 → 中間管理職 → 部門副長。</value></data>
+  <data name="ApprovalFlowLine2" xml:space="preserve"><value>• 10,000USD（2億2千万VND）未満：担当者 → 中間管理職 → 部門長。</value></data>
+  <data name="ApprovalFlowLine3" xml:space="preserve"><value>• 10,000USD（2億2千万VND）以上：中間管理職 → 部門長/副部門長 → 総支配人/ディレクター。</value></data>
+  <data name="ApprovalFlowLine4" xml:space="preserve"><value>→ 出庫承認（PR1-MC）：初級/中級管理職 → 管財倉庫</value></data>
+  <data name="AdditionalInfoTitle" xml:space="preserve"><value>その他の依頼情報</value></data>
+  <data name="ROHSLabel" xml:space="preserve"><value>ROHS:</value></data>
+  <data name="COCQLabel" xml:space="preserve"><value>CO/CQ:</value></data>
+  <data name="MSDSLabel" xml:space="preserve"><value>MSDS:</value></data>
+  <data name="RequesterLabel" xml:space="preserve"><value>依頼者:</value></data>
+  <data name="FooterID" xml:space="preserve"><value>ID:</value></data>
+  <data name="FooterStep" xml:space="preserve"><value>ステップ:</value></data>
+  <data name="FooterRegency" xml:space="preserve"><value>権限:</value></data>
+  <data name="ApproveButton" xml:space="preserve"><value>承認</value></data>
+  <data name="RejectButton" xml:space="preserve"><value>拒否</value></data>
+  <data name="CloseButton" xml:space="preserve"><value>閉じる</value></data>
 </root>

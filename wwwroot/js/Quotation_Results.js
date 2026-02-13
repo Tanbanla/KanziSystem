@@ -199,8 +199,8 @@
                         maNcc: null,
                         section: null,
                         dayMM: ToDateTimeLocal(ngay),
-                        pageSize: 10,
-                        pageIndex: 1
+                        pageSize: 30,
+                        pageIndex: 0
                     };
                     const res = await fetch('/Quote/SearchInputQuote', {
                         method: 'POST',

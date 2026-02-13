@@ -48,7 +48,7 @@ async function SearchPoDelivery() {
 
         result.forEach((value) => {
             opt.innerHTML += `<tr><td><input type="checkbox" value="${value.pO_Detail_Id}"/></td><td>${value.pO_Detail_Id}</td><td>${value.id_Goc}</td><td>${value.benxacnhantruoc}</td><td>${value.soPO}</td><td>${value.mahang}</td><td>${value.good_Code}</td><td>${value.tentienganh}</td><td>${value.tentiengviet}</td><td>${value.soluong}</td>`
-                + `<td><input type='text' value='${value.luongvethucte}'></input></td><td>${value.luongvekho}</td><td>${value.luongvekhoNgaynhap}</td><td>${value.luongvekhoNguoinhap}</td><td>${value.dovi}</td><td>${value.dongia}</td><td>${value.dieukiengiaohang}</td>`
+                + `<td><input type='number' value='${value.luongvethucte}'></input></td><td>${value.luongvekho}</td><td>${value.luongvekhoNgaynhap}</td><td>${value.luongvekhoNguoinhap}</td><td>${value.dovi}</td><td>${value.dongia}</td><td>${value.dieukiengiaohang}</td>`
                 + `<td>${value.diadiemgiaohang}</td><td>${value.phuongthucvanchuyen}</td><td>${value.sotien}</td><td>${value.vat}</td><td>${value.maphongyeucau}</td>`
                 + `<td>${value.tenphongyeucau}</td><td>${value.ngaygiaohangdukien}</td><td>${value.noigiaodukien}</td>`
                 + `<td>${value.thoigianthanhtoan}</td><td>${value.loaitien}</td>`

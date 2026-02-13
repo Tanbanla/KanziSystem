@@ -333,4 +333,54 @@
   <data name="MSGReturnOK" xml:space="preserve">
     <value>Trả lại thành công</value>
   </data>
+  <data name="ShowMore" xml:space="preserve">
+    <value>Hiển thị thêm</value>
+  </data>
+  <data name="ShowLess" xml:space="preserve">
+    <value>Thu gọn</value>
+  </data>
+  <!-- Added keys for localized modal UI -->
+  <data name="ReceivingDepartmentLabel" xml:space="preserve"><value>Phòng tiếp nhận：</value></data>
+  <data name="UrgentBadgeText" xml:space="preserve"><value>Khẩn</value></data>
+  <data name="DeptCodeLabel" xml:space="preserve"><value>※Mã bộ phận yêu cầu</value></data>
+  <data name="DeptCostCenterLabel" xml:space="preserve"><value>※Mã phòng ban yêu cầu (Cost Center)</value></data>
+  <data name="DeptNameLabel" xml:space="preserve"><value>※Tên phòng ban</value></data>
+  <data name="LineLabel" xml:space="preserve"><value>※Dòng máy</value></data>
+  <data name="RequestDateLabel" xml:space="preserve"><value>※Ngày yêu cầu</value></data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve"><value>※Thời hạn mong muốn</value></data>
+  <data name="GoodsDetailTitle" xml:space="preserve"><value>CHI TIẾT HÀNG HÓA</value></data>
+  <data name="STT" xml:space="preserve"><value>STT</value></data>
+  <data name="SystemCode" xml:space="preserve"><value>※Mã đơn</value></data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve"><value>※Mã vật tư nội bộ</value></data>
+  <data name="ItemNameVNEN" xml:space="preserve"><value>※Tên hàng (VN/EN)</value></data>
+  <data name="RequestGroup" xml:space="preserve"><value>Yêu cầu</value></data>
+  <data name="DescriptionGroup" xml:space="preserve"><value>Mô tả hàng hóa</value></data>
+  <data name="SupplierShort" xml:space="preserve"><value>Nhà cung cấp</value></data>
+  <data name="DesiredReceiveDateShort" xml:space="preserve"><value>Ngày nhận mong muốn</value></data>
+  <data name="UrgentShort" xml:space="preserve"><value>Khẩn</value></data>
+  <data name="QuantityShort" xml:space="preserve"><value>Số lượng</value></data>
+  <data name="UnitShort" xml:space="preserve"><value>Đơn vị</value></data>
+  <data name="ShapeShort" xml:space="preserve"><value>Hình dạng</value></data>
+  <data name="MaterialShort" xml:space="preserve"><value>Vật liệu</value></data>
+  <data name="CompositionShort" xml:space="preserve"><value>Thành phần</value></data>
+  <data name="DimensionsShort" xml:space="preserve"><value>Kích thước</value></data>
+  <data name="UsedPositionShort" xml:space="preserve"><value>Vị trí sử dụng</value></data>
+  <data name="PurposeFeatureShort" xml:space="preserve"><value>Mục đích/Tính năng</value></data>
+  <data name="LoadingData" xml:space="preserve"><value>Đang tải dữ liệu...</value></data>
+  <data name="ApprovalFlowTitle" xml:space="preserve"><value>Quy trình phê duyệt</value></data>
+  <data name="ApprovalFlowLine1" xml:space="preserve"><value>• Dưới 3,000 USD (66 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Phó trưởng bộ phận.</value></data>
+  <data name="ApprovalFlowLine2" xml:space="preserve"><value>• Dưới 10,000 USD (220 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Trưởng bộ phận.</value></data>
+  <data name="ApprovalFlowLine3" xml:space="preserve"><value>• Từ 10,000 USD (220 triệu VNĐ) trở lên : Quản lý trung cấp → Trưởng bộ phận/Phó trưởng bộ phận → Tổng Giám đốc/Giám đốc.</value></data>
+  <data name="ApprovalFlowLine4" xml:space="preserve"><value>→ Phê duyệt xuất kho (PR1-MC): Quản lý sơ cấp/quản lý trung cấp → Kho Kanzai</value></data>
+  <data name="AdditionalInfoTitle" xml:space="preserve"><value>Thông tin yêu cầu khác</value></data>
+  <data name="ROHSLabel" xml:space="preserve"><value>ROHS:</value></data>
+  <data name="COCQLabel" xml:space="preserve"><value>CO/CQ:</value></data>
+  <data name="MSDSLabel" xml:space="preserve"><value>MSDS:</value></data>
+  <data name="RequesterLabel" xml:space="preserve"><value>Người yêu cầu:</value></data>
+  <data name="FooterID" xml:space="preserve"><value>ID:</value></data>
+  <data name="FooterStep" xml:space="preserve"><value>Bước:</value></data>
+  <data name="FooterRegency" xml:space="preserve"><value>Quyền:</value></data>
+  <data name="ApproveButton" xml:space="preserve"><value>Phê duyệt</value></data>
+  <data name="RejectButton" xml:space="preserve"><value>Từ chối</value></data>
+  <data name="CloseButton" xml:space="preserve"><value>Đóng</value></data>
 </root>

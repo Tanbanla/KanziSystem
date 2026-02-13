@@ -3,7 +3,11 @@
 
 .quot-table { font-size:.85rem; background:#fff; }
 .quot-table thead .main-head th { font-weight:600; }
-.main-head th { background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border-color:#1d4ed8; }
+.main-head th {
+    background-color: #2335b7 !important;
+    color: #fff !important;
+    border-color: #1a2a9a !important;
+}
 .item-row:hover { background:#fff8ef; }
 .item-row td { vertical-align:middle; }
 
