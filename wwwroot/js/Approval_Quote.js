@@ -558,12 +558,12 @@
         // build table body per new layout
         const tbody = document.getElementById('detailModalBody');
         if (tbody) {
-            tbody.innerHTML = '';
-            const frag = document.createDocumentFragment();
-            group.forEach((it, idx) => {
-                const tr = document.createElement('tr');
-                function td(text) { const c = document.createElement('td'); c.textContent = text || ''; return c; }
-                tr.appendChild(td(String(idx + 1)));
+        tbody.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        group.forEach((it, idx) => {
+            const tr = document.createElement('tr');
+            function td(text) { const c = document.createElement('td'); c.textContent = text || ''; return c; }
+            tr.appendChild(td(String(idx + 1)));
                 tr.appendChild(td(maDon)); // Mã đơn
                 tr.appendChild(td(it.chR_MaHangNoiBo)); // Mã vật tư nội bộ
                 tr.appendChild(td(it.nvchR_ChungLoai)); // Mã vật tư nội bộ
@@ -577,14 +577,14 @@
                 tr.appendChild(td(it.nvchR_DongMay)); // dòng máy
                 //tr.appendChild(td(it.nvchR_DongMay)); // Vị trí sử dụng
                 tr.appendChild(td(it.nvchR_TinhNang)); // Mục đích/Tính năng
-                const ncc = (it.chR_MaNCC ? it.chR_MaNCC : '') + (it.nvchR_TenNCC ? ` - ${it.nvchR_TenNCC}` : '');
+            const ncc = (it.chR_MaNCC ? it.chR_MaNCC : '') + (it.nvchR_TenNCC ? ` - ${it.nvchR_TenNCC}` : '');
                 tr.appendChild(td(ncc.trim())); // NCC
                 tr.appendChild(td(formatDate(it.dtM_KyHan))); // Ngày nhận mong muốn
                 const gap = it.chR_Gap != null ? (String(it.chR_Gap).toLowerCase() === 'true' || String(it.chR_Gap) === '1' ? 'O' : 'X') : '';
                 tr.appendChild(td(gap)); // Khẩn
-                frag.appendChild(tr);
-            });
-            tbody.appendChild(frag);
+            frag.appendChild(tr);
+        });
+        tbody.appendChild(frag);
         }
 
         const modalEl = document.getElementById('detailModal');
@@ -860,7 +860,7 @@
                     searchAndRender();
                 } else {
                     showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
-                }
+    }
             }).catch(err => {
                 console.error('Approval error', err);
                 showToast('danger', T.MSGErrorApprover);

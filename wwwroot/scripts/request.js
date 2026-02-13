@@ -37,12 +37,12 @@
     var Total = document.getElementById("thanhtien").value;
     var Kind = "OUT";
     var Type = document.getElementById("typee").value;
-    var Status = "WAITCONFIRM";  
+    var Status = "WAITCONFIRM";
     var Place = name_dept.split(':')[1];
     var Loaihinhtokhai = "LOAIKHAC";
     var Group_Code = document.getElementById("group_code").value;
     var Chophepin = '1';
-    var urgentValue = document.querySelector('input[name="value"]:checked').value; 
+    var urgentValue = document.querySelector('input[name="value"]:checked').value;
     var Urgent = urgentValue;
     var User_Create = document.getElementById("us").innerHTML;
 
@@ -74,12 +74,11 @@
             adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, adid_dy: adid_dy, ten_dy: ten_dy,
             mail_dy: mail_dy, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk
         },
-        success: function (response)
-        {
+        success: function (response) {
             send_mail(mail_dt, Urgent);
          
         }
-    })   
+    })
 }
 function _load_rate() {
     fetch('/Request/_get_rate', {
@@ -138,12 +137,12 @@ async function get_mail(us) {
         if (!response.ok) {
             throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
         }
-       
+
         const data = await response.json();
-     
+
         // lấy người phê duyệt theo quy trình
         let maill = data.Data[0].CHR_EMPLOYEE_MAIL;
-        
+
         return data;
 
     } catch (error) {
@@ -172,7 +171,7 @@ function _load_confirm(us) {
 
     const formData = new URLSearchParams();
     formData.append('us', us);
- 
+
     fetch('/Request/_get_confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -180,7 +179,7 @@ function _load_confirm(us) {
     })
         .then(response => response.ok ? response.json() : Promise.reject(response))
         .then(data => {
-           
+
             const tbody = document.getElementById('list_approve');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
@@ -214,13 +213,15 @@ function _load_confirm(us) {
                     if (stepIdx === currentStep) return `<span class='text-warning'>${s === "5" ? "✓" : "◉"}</span>`;
                     return "<span></span>";
                 });
-             
+
                 const urg = item.urgent == "True" ? "<b class='text-danger'><i>* Gấp</i></b>" : "Thông thường";
+
                 const trangthai = `<div class="badge badge-pill badge-${config[1]} mb-1">${config[0]}</div>`;
 
                 return `
                 <tr>
                     <td><input type="checkbox" /></td>
+
                     <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><i class="fa fa-info text-info"></i></td>
                     <td>${urg}</td>
                     <td>${trangthai}</td>
@@ -250,9 +251,10 @@ function _modal_info(cost_request, step) {
             cost_request: cost_request
         },
         success: function (response) {
+            console.log(response);
             document.getElementById("modal-7").click();
             document.getElementById("load_detail").innerHTML = "";
-            document.getElementById("madonhang").innerHTML = "*" + response[0].code_Request + "*" ;
+            document.getElementById("madonhang").innerHTML = "*" + response[0].code_Request + "*";
             document.getElementById("mbp").innerHTML = response[0].cost_Center_Group;
             document.getElementById("mpb_yc").innerHTML = response[0].cost_Center;
             document.getElementById("tenphongban").innerHTML = response[0].name_Dept;
@@ -260,6 +262,7 @@ function _modal_info(cost_request, step) {
             document.getElementById("thmm").innerHTML = response[0].dealine.split(' ')[0];
             document.getElementById("khoi").innerHTML = response[0].group_Code.split(' ')[0];
             document.getElementById("id_request").innerHTML = response[0].id_Request;
+
             document.getElementById("urgent").innerHTML = response[0].urgent;
             document.getElementById("step").innerHTML = step;
             if (step == "0") {
@@ -351,7 +354,7 @@ function _reject() {
             document.querySelectorAll('.close').forEach(button => button.click());
             var us = document.getElementById("us").innerHTML;
             _load_confirm(us);
-           
+
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);

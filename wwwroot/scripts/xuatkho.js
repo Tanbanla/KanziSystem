@@ -58,9 +58,10 @@ function goToPage(page) {
 function renderUserTable(data) {
     const tbody = document.getElementById("list_xuatkho");
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
-        const htmlContent = data.map(user => {           
-            return `<tr>
+    const htmlContent = data.map(user => {
+        return `<tr>
                 <td class="text-center"><input type="checkbox" /></td>
+             
                 <td>${user.code_Request}</td>
                 <td>${user.material_Code}</td>
                 <td>${user.material_Name}</td>
@@ -71,8 +72,8 @@ function renderUserTable(data) {
                 <td>${user.chR_ADID_XUATKHO}</td>        
                 <td><button class="btn btn-danger" onclick="_load_tonkhotheonhamay('${user.material_Code}','${user.amount}','${user.id_RequestDetail}','${user.unit}')"><i class="fa ion-ios-cart"></i>&nbsp; XK</button></td>
             </tr>`;
-        }).join(''); // Thêm .join('') để biến mảng thành một chuỗi HTML lớn 
-        tbody.innerHTML = htmlContent;
+    }).join(''); // Thêm .join('') để biến mảng thành một chuỗi HTML lớn 
+    tbody.innerHTML = htmlContent;
 }
 
 // --- 5. Hàm Render Nút Phân trang ---
@@ -189,9 +190,9 @@ function _soluongtontainhamay(kho) {
             }
             return response.json();
         })
-        .then(data => {         
+        .then(data => {
             document.getElementById("sl_ton").value = data;
-          
+
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
@@ -204,8 +205,8 @@ function caculator() {
     var tonKho = parseFloat(document.getElementById("sl_ton").value);
     var canxuat = parseFloat(document.getElementById("sl_canxuat").innerHTML);
     // Nếu nhập nhiều hơn tồn kho
-  
-    if (currentVal > canxuat ) {
+
+    if (currentVal > canxuat) {
         alert("Số lượng xuất không được vượt quá số lượng yêu cầu : " + canxuat + "");
         document.getElementById("sl_xuat").value = canxuat; // Tự động đưa về giá trị Max (tồn kho)   
     }
@@ -213,7 +214,7 @@ function caculator() {
         alert("Số lượng xuất vượt quá tồn kho : " + tonKho + "");
         document.getElementById("sl_xuat").value = tonKho;
     }
-  
+
 }
 
 function _xuatkho() {

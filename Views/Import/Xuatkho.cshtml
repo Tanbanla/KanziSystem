@@ -1,13 +1,49 @@
-﻿@{
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
     ViewData["Title"] = "Xuất kho";
 }
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f4f4f4;
+    }
+    /* Xóa dấu mũi tên mặc định của summary nếu muốn */
+    summary {
+        cursor: pointer;
+        list-style: none;
+        font-weight: bold;
+        color: #007bff;
+    }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+    .detail-content {
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-top: 1px dashed #ccc;
+        margin-top: 5px;
+    }
+</style>
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
             <div class="card-header">
                 <div class="form-group" style="margin : 10px 0 0 0">
                     <div class="input-group mb-2">
-                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="Khối" />
+                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="@Languages.Khoi" />
                         <datalist id="lst_khoi">
                             <option>PROD</option>
                             <option>GA</option>
@@ -18,13 +54,13 @@
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 0">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" placeholder="Mã yêu cầu ">
+                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.mayeucau ">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
 
-                        <input type="text" class="form-control" id="kho" placeholder="Tình trạng đơn">
+                        <input type="text" class="form-control" id="kho" placeholder="@Languages.Tinhtrangdon">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
@@ -34,18 +70,18 @@
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="cost" placeholder="Ngày yêu cầu">
+                        <input type="date" class="form-control" id="cost" placeholder="@Languages.Ngayyeucau">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="cost" placeholder="Người tạo">
+                        <input type="text" class="form-control" id="cost" placeholder="@Languages.nguoitao">
                     </div>
                 </div>
-                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> Tìm kiếm</button>
+                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
 
                 <button type="button" class="btn btn-success ml-3"><i class="fa fa-file-excel"></i> download excel</button>
-               
+
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
@@ -53,17 +89,17 @@
                         <thead class="bg-primary">
                             <tr>
                                 <th></th>
-                                <th>Mã yêu cầu</th>
-                                <th>Mã hàng</th>
-                                <th>Tên hàng</th>
-                                <th>Số lượng</th>
-                                <th>Đơn vị</th>
-                                <th>Giá tiền</th>                            
-                                <th>Người yêu cầu</th>
-                                <th>Người xuất kho</th>                           
+                                <th>@Languages.mayeucau</th>
+                                <th>@Languages.loaihang</th>
+                                <th>@Languages.TenNVL</th>
+                                <th>@Languages.soluong</th>
+                                <th>@Languages.Donvi</th>
+                                <th>@Languages.Giatien</th>
+                                <th>@Languages.nguoitao</th>
+                                <th>@Languages.nguoixuatkho</th>
                                 <th></th>
                             </tr>
-                         
+
                         </thead>
                         <tbody id="list_xuatkho"></tbody>
                     </table>
@@ -73,7 +109,7 @@
         </div>
     </div>
 </div>
-<button id="modal-10" hidden >Click</button>
+<button id="modal-10" hidden>Click</button>
 @await Html.PartialAsync("_modal", "Import")
 <script src="~/scripts/xuatkho.js"></script>
 <script>

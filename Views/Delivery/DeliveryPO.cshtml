@@ -1,5 +1,5 @@
-﻿@{
-    ViewData["Title"] = "Nhận hàng theo PO";
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
 }
 
 
@@ -159,7 +159,7 @@
                         <div class="input-group-prepend">
                             <div class="input-group-text"><i class="ion ion-android-contact"></i></div>
                         </div>
-                        <input type="text" class="form-control" id="poNumber" placeholder="Nhập PO number">
+                        <input type="text" class="form-control" id="poNumber" placeholder="@Languages.NhapPO">
                     </div>
                 </div>
 
@@ -167,7 +167,7 @@
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
                             <div class="input-group-text"><i class="ion ion-code-working"></i></div>
-                            <div class="input-group-text">Khối : </div>
+                            <div class="input-group-text">@Languages.Khoi : </div>
                         </div>
                         <select class="form-control" id="IdDept">
                             <option value="GA">GA</option>
@@ -178,15 +178,15 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary" style="margin-left:20px;" onclick="SearchPoDelivery()"> <i class="ion ion-search" style="align-content:center; margin:5px;vertical-align:middle;"></i>Tìm kiếm</button>
-                <button id="openModal" class="btn btn-danger btn-open" style="margin-left:20px;"> <i class="ion ion-cash" style="align-content:center; margin:5px;vertical-align:middle;"></i>Đơn vị quy đổi</button>
+                <button class="btn btn-primary" style="margin-left:20px;" onclick="SearchPoDelivery()"> <i class="ion ion-search" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.timkiem</button>
+                <button id="openModal" class="btn btn-danger btn-open" style="margin-left:20px;"> <i class="ion ion-cash" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.donviquydoi</button>
                 <button class="btn btn-info" style="margin-left:20px;"> <i class="ion ion-ios-refresh" style="align-content:center; margin:5px;vertical-align:middle;"></i>Reset</button>
 
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
                             <div class="input-group-text"><i class="ion ion-home"></i></div>
-                            <div class="input-group-text">Kho nhận hàng : </div>
+                            <div class="input-group-text">@Languages.khonhapve : </div>
                         </div>
                         <select class="form-control" id="IdWarehouse">
                             <option>--</option>
@@ -198,13 +198,13 @@
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
                             <div class="input-group-text"><i class="ion ion-android-time"></i></div>
-                            <div class="input-group-text">Thời gian nhận hàng : </div>
+                            <div class="input-group-text">@Languages.thoigiannhanve : </div>
                         </div>
                         <input type="date" class="form-control" id="idTimeDelivery"/>
                     </div>
                 </div>
 
-                <button class="btn btn-success" style="margin-left:20px;" onclick="ImportWarehouse()"> <i class="ion ion-pull-request" style="align-content:center; margin:5px;vertical-align:middle;"></i>Nhập kho</button>
+                <button class="btn btn-success" style="margin-left:20px;" onclick="ImportWarehouse()"> <i class="ion ion-pull-request" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.Kho</button>
 
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer" id="table-1_wrapper">
@@ -214,43 +214,43 @@
                             <table class="table table-bordered">
                                 <thead class="bg-primary">
                                     <tr>
-                                        <th>Chọn</th>
-                                        <th>Mã hệ thống</th>
-                                        <th>Được tách từ</th>
-                                        <th>Bên nhập trước</th>
-                                        <th>Số PO</th>
-                                        <th>Mã Hàng</th>
-                                        <th>Mã sản phẩm</th>
-                                        <th>Tên hàng bằng tiếng Anh/Nhật</th>
-                                        <th>Tên hàng bằng tiếng Việt </th>
-                                        <th>Số lượng Order</th>
-                                        <th>Lượng thực tế về kho</th>
-                                        <th>Lượng hàng làm thủ tục hải quan</th>
-                                        <th>Ngày nhập kho</th>
-                                        <th>Người nhập kho</th>
-                                        <th>Đơn vị</th>
-                                        <th>Đơn giá ước tính</th>
-                                        <th>Điều kiện giao hàng</th>
-                                        <th>Địa điêm giao hàng</th>
-                                        <th>Phương thức vận chuyển</th>
-                                        <th>Số tiền</th>
-                                        <th>VAT(%)</th>
-                                        <th>Phòng ban yêu cầu</th>
-                                        <th>Tên phòng yêu cầu</th>
-                                        <th>Ngày giao hàng dự kiến</th>
-                                        <th>Nơi giao hàng dự kiến</th>
-                                        <th>Thời hạn thanh toán</th>
-                                        <th>Loại tiền</th>
-                                        <th>Tỷ giá</th>
-                                        <th>Đổi sang USD</th>
-                                        <th>Danh mục</th>
-                                        <th>Thuộc đơn yêu cầu</th>
-                                        <th>Tình trạng tờ khai</th>
-                                        <th>Nhà cung cấp</th>
-                                        <th>ID Lịch sử nhập</th>
-                                        <th>Lượng về kho đã nhập</th>
+                                        <th>@Languages.chon</th>
+                                        <th>@Languages.Mahethong</th>
+                                        <th>@Languages.Duoctachtu</th>
+                                        <th>@Languages.Bennhaptruoc</th>
+                                        <th>@Languages.Sopo</th>
+                                        <th>@Languages.Mahang</th>
+                                        <th>@Languages.Masanpham</th>
+                                        <th>@Languages.TenhangTA</th>
+                                        <th>@Languages.TenhangTV </th>
+                                        <th>@Languages.dathang</th>
+                                        <th>@Languages.luongvekho</th>
+                                        <th>@Languages.Luonglamthutuc</th>
+                                        <th>@Languages.Ngaynhapkho</th>
+                                        <th>@Languages.Nguoinhapkho</th>
+                                        <th>@Languages.Donvi</th>
+                                        <th>@Languages.Dongiauoctinh</th>
+                                        <th>@Languages.Dieukiengiaohang</th>
+                                        <th>@Languages.Diadiemgiaohang</th>
+                                        <th>@Languages.Phuongthucvanchuyen</th>
+                                        <th>@Languages.Phuongthucvanchuyen</th>
+                                        <th>@Languages.vat</th>
+                                        <th>@Languages.phongbanyeucau</th>
+                                        <th>@Languages.tenphongyeucau</th>
+                                        <th>@Languages.ngaygiaohangdukien</th>
+                                        <th>@Languages.noigiaohangdukien</th>
+                                        <th>@Languages.thoihanthanhtoan</th>
+                                        <th>@Languages.loaitien</th>
+                                        <th>@Languages.tygia</th>
+                                        <th>@Languages.doisangusd</th>
+                                        <th>@Languages.danhmuc</th>
+                                        <th>@Languages.thuocdonyeucau</th>
+                                        <th>@Languages.tinhtranghaiquan</th>
+                                        <th>@Languages.nhacungcap</th>
+                                        <th>@Languages.Idlichsu</th>
+                                        <th>@Languages.luongvekho</th>
                                         <th>Invoice</th>
-                                        <th>Tình trạng hải quan</th>
+                                        <th>@Languages.tinhtranghaiquan</th>
                                     </tr>
                                 </thead>
                                 <tbody id="show_kho" style="color:black;"></tbody>

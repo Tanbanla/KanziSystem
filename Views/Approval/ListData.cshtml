@@ -1,4 +1,5 @@
-﻿@{
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
     ViewData["Title"] = "Phê duyệt đơn";
 }
 <style>
@@ -12,7 +13,7 @@
             <div class="card-header">
                 <div class="form-group" style="margin : 10px 0 0 0">
                     <div class="input-group mb-2">
-                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="Khối" />
+                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="@Languages.Khoi" />
                         <datalist id="lst_khoi">
                             <option>PROD</option>
                             <option>GA</option>
@@ -23,13 +24,13 @@
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 0">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" placeholder="Mã yêu cầu ">
+                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.Sopo ">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                      
-                        <input type="text" class="form-control" id="kho" placeholder="Tình trạng đơn">
+                        <input type="text" class="form-control" id="kho" placeholder="@Languages.Tinhtrangdon">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
@@ -39,18 +40,18 @@
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="cost" placeholder="Ngày yêu cầu">
+                        <input type="date" class="form-control" id="ngayyc" placeholder="@Languages.Ngayyeucau">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="cost" placeholder="Người tạo">
+                        <input type="text" class="form-control" id="cost" placeholder="@Languages.nguoitao">
                     </div>
                 </div>
-                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> Tìm kiếm</button>
+                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
 
                 <button type="button" class="btn btn-success ml-3"><i class="fa fa-file-excel"></i> download excel</button>
-                <span class="text-success ml-4">✓ : Đã duyệt </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : Đang đợi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : Từ chối</span>
+                <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
@@ -58,25 +59,25 @@
                         <thead class="bg-primary">
                             <tr>
                                 <th rowspan="2"></th>
-                                <th rowspan="2">Chi tiết</th>                                         
-                                <th rowspan="2">Tình trạng đơn</th>
-                                <th rowspan="2">Trạng thái đơn</th>
-                                <th rowspan="2">Mã yêu cầu</th>
+                                <th rowspan="2">@Languages.chitiet</th>                                         
+                                <th rowspan="2">@Languages.Tinhtrangdon</th>
+                                <th rowspan="2">@Languages.Trangthaidon</th>
+                                <th rowspan="2">@Languages.Sopo</th>
                                 <th rowspan="2">Cost Center</th>
-                                <th rowspan="2">Ngày yêu cầu</th>
-                                <th rowspan="2">Thời hạn mong muốn</th>
-                                <th rowspan="2">Tổng tiền</th>
-                                <th rowspan="2">Người tạo</th>
-                                <th colspan="3">Phòng yêu cầu</th>
-                                <th colspan="2">Phòng tiếp nhận</th>
-                                <th rowspan="2">Người nhận</th>
+                                <th rowspan="2">@Languages.Ngayyeucau</th>
+                                <th rowspan="2">@Languages.thoihanmuonnhan</th>
+                                <th rowspan="2">@Languages.tongdon</th>
+                                <th rowspan="2">@Languages.nguoitao</th>
+                                <th colspan="3">@Languages.phongbanyeucau</th>
+                                <th colspan="2">@Languages.phongtiepnhan</th>
+                                <th rowspan="2">@Languages.nguoinhan</th>
                             </tr>
                             <tr>
-                                <th>Người dự thảo</th>
-                                <th>Người thẩm tra</th>
-                                <th>Người phê duyệt</th>
-                                <th>Đồng ý bởi</th>
-                                <th>Người xuất kho</th>
+                                <th>@Languages.nguoiduthao</th>
+                                <th>@Languages.nguoithamtra</th>
+                                <th>@Languages.nguoipheduyet</th>
+                                <th>@Languages.dongyboi</th>
+                                <th>@Languages.nguoixuatkho</th>
                             </tr>
                         </thead>
                         <tbody id="list_approve"></tbody>

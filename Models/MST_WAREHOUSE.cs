@@ -3,7 +3,7 @@
     public class MST_WAREHOUSE
     {
         public int ID { get; set; }
-        public required string? CHR_WAREHOUSE { get; set; }  
+        public required string? CHR_WAREHOUSE { get; set; }
         public required string? CHR_DEPT_USE { get; set; }
         public required string? CHR_FACTORY { get; set; }
         public required string? DTM_UPDATE { get; set; }
@@ -45,6 +45,12 @@
                 }
             }
             return str2;
+        }
+        public string Insert_warehouse(MST_WAREHOUSE para)
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            var insert = _db.GET_DATA_FROM_SQL($"Insert into [MST_WAREHOUSE] (CHR_WAREHOUSE,CHR_DEPT_USE,CHR_FACTORY,DTM_UPDATE,CHR_USER) values (N'{para.CHR_WAREHOUSE}', N'{para.CHR_DEPT_USE}', '{para.CHR_FACTORY}','{DateTime.Now}','{para.CHR_USER}', N'{para.CHR_NOTE}')");
+            return "OK";
         }
     }
 }

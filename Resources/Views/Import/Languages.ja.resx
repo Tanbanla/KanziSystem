@@ -1,0 +1,474 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Bennhaptruoc" xml:space="preserve">
+    <value>パーティーが先に入場</value>
+  </data>
+  <data name="chitiet" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="chuyenkho" xml:space="preserve">
+    <value>倉庫転送</value>
+  </data>
+  <data name="Dangky" xml:space="preserve">
+    <value>登録する</value>
+  </data>
+  <data name="danhmuc" xml:space="preserve">
+    <value>カテゴリ</value>
+  </data>
+  <data name="dasudung" xml:space="preserve">
+    <value>使用済み</value>
+  </data>
+  <data name="Diadiemgiaohang" xml:space="preserve">
+    <value>配達場所</value>
+  </data>
+  <data name="Dieukiengiaohang" xml:space="preserve">
+    <value>配送条件</value>
+  </data>
+  <data name="doisangusd" xml:space="preserve">
+    <value>米ドルに変更</value>
+  </data>
+  <data name="Dongiauoctinh" xml:space="preserve">
+    <value>推定単価</value>
+  </data>
+  <data name="dongyboi" xml:space="preserve">
+    <value>同意する</value>
+  </data>
+  <data name="Donvi" xml:space="preserve">
+    <value>ユニット</value>
+  </data>
+  <data name="donviquydoi" xml:space="preserve">
+    <value>変換ユニット</value>
+  </data>
+  <data name="Dung" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Duoctachtu" xml:space="preserve">
+    <value>から分離</value>
+  </data>
+  <data name="Giatien" xml:space="preserve">
+    <value>価値</value>
+  </data>
+  <data name="guiyeucau" xml:space="preserve">
+    <value>リクエストの送信</value>
+  </data>
+  <data name="hangngoaidanhmuc" xml:space="preserve">
+    <value>リスト外の商品</value>
+  </data>
+  <data name="hangtrongdanhmuc" xml:space="preserve">
+    <value>カタログ掲載品</value>
+  </data>
+  <data name="hanhdong" xml:space="preserve">
+    <value>活動</value>
+  </data>
+  <data name="Idlichsu" xml:space="preserve">
+    <value>インポート履歴ID</value>
+  </data>
+  <data name="Khoi" xml:space="preserve">
+    <value>ブロック</value>
+  </data>
+  <data name="loaichiphi" xml:space="preserve">
+    <value>経費の種類</value>
+  </data>
+  <data name="loaihang" xml:space="preserve">
+    <value>製品タイプ</value>
+  </data>
+  <data name="loaihinhtokhai" xml:space="preserve">
+    <value>宣言の種類</value>
+  </data>
+  <data name="loaiphieu" xml:space="preserve">
+    <value>バウチャーの種類</value>
+  </data>
+  <data name="loaitien" xml:space="preserve">
+    <value>通貨の種類</value>
+  </data>
+  <data name="log" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="Luonglamthutuc" xml:space="preserve">
+    <value>通関中の貨物の量</value>
+  </data>
+  <data name="Luongthucte" xml:space="preserve">
+    <value>実際の在庫レベル</value>
+  </data>
+  <data name="luongvekho" xml:space="preserve">
+    <value>倉庫に入荷した数量</value>
+  </data>
+  <data name="Mahethong" xml:space="preserve">
+    <value>システムコード</value>
+  </data>
+  <data name="Mail" xml:space="preserve">
+    <value>郵便</value>
+  </data>
+  <data name="Maketoan" xml:space="preserve">
+    <value>会計コード</value>
+  </data>
+  <data name="Manhanvien" xml:space="preserve">
+    <value>社員コード</value>
+  </data>
+  <data name="MaNVL" xml:space="preserve">
+    <value>材質コード</value>
+  </data>
+  <data name="Masanpham" xml:space="preserve">
+    <value>製品コード</value>
+  </data>
+  <data name="moi" xml:space="preserve">
+    <value>新しい</value>
+  </data>
+  <data name="ngaygiaohangdukien" xml:space="preserve">
+    <value>お届け予定日</value>
+  </data>
+  <data name="Ngaynhapkho" xml:space="preserve">
+    <value>入庫日</value>
+  </data>
+  <data name="Ngoaite" xml:space="preserve">
+    <value>外貨</value>
+  </data>
+  <data name="nguoiduthao" xml:space="preserve">
+    <value>製図者</value>
+  </data>
+  <data name="Nguoinhapkho" xml:space="preserve">
+    <value>倉庫担当者</value>
+  </data>
+  <data name="nguoipheduyet" xml:space="preserve">
+    <value>承認者</value>
+  </data>
+  <data name="nguoithamtra" xml:space="preserve">
+    <value>試験官</value>
+  </data>
+  <data name="nguoixuatkho" xml:space="preserve">
+    <value>倉庫リリース担当者</value>
+  </data>
+  <data name="nhacungcap" xml:space="preserve">
+    <value>サプライヤー</value>
+  </data>
+  <data name="noigiaohangdukien" xml:space="preserve">
+    <value>配達予定場所</value>
+  </data>
+  <data name="Phongban" xml:space="preserve">
+    <value>部門</value>
+  </data>
+  <data name="phongbanyeucau" xml:space="preserve">
+    <value>部門からのリクエスト</value>
+  </data>
+  <data name="phongtiepnhan" xml:space="preserve">
+    <value>応接室</value>
+  </data>
+  <data name="Phuongthucvanchuyen" xml:space="preserve">
+    <value>配送方法</value>
+  </data>
+  <data name="QuanlyNVL" xml:space="preserve">
+    <value>資材管理</value>
+  </data>
+  <data name="Quyen" xml:space="preserve">
+    <value>権利</value>
+  </data>
+  <data name="soluongdathang" xml:space="preserve">
+    <value>注文数</value>
+  </data>
+  <data name="Sopo" xml:space="preserve">
+    <value>PO番号</value>
+  </data>
+  <data name="Sotien" xml:space="preserve">
+    <value>額</value>
+  </data>
+  <data name="Sua" xml:space="preserve">
+    <value>修理</value>
+  </data>
+  <data name="TenhangTA" xml:space="preserve">
+    <value>製品名（英語/日本語）</value>
+  </data>
+  <data name="TenhangTV" xml:space="preserve">
+    <value>ベトナム語での商品名</value>
+  </data>
+  <data name="TenMaketoan" xml:space="preserve">
+    <value>会計コード名</value>
+  </data>
+  <data name="Tennhanvien" xml:space="preserve">
+    <value>社員名</value>
+  </data>
+  <data name="TenNVL" xml:space="preserve">
+    <value>原材料名</value>
+  </data>
+  <data name="tenphongyeucau" xml:space="preserve">
+    <value>リクエストされた部屋の名前</value>
+  </data>
+  <data name="thanhtien" xml:space="preserve">
+    <value>お金を稼ぐ</value>
+  </data>
+  <data name="themdongmoi" xml:space="preserve">
+    <value>新しい行を追加</value>
+  </data>
+  <data name="thoihanmuonnhan" xml:space="preserve">
+    <value>受け取り期限</value>
+  </data>
+  <data name="thoihanthanhtoan" xml:space="preserve">
+    <value>支払い期間</value>
+  </data>
+  <data name="thuocdonyeucau" xml:space="preserve">
+    <value>リクエストに属する</value>
+  </data>
+  <data name="tinhtranghaiquan" xml:space="preserve">
+    <value>税関状況</value>
+  </data>
+  <data name="tinhtrangtokhai" xml:space="preserve">
+    <value>申告状況</value>
+  </data>
+  <data name="tongdon" xml:space="preserve">
+    <value>合計注文数</value>
+  </data>
+  <data name="Truycap" xml:space="preserve">
+    <value>最終アクセス日</value>
+  </data>
+  <data name="tygia" xml:space="preserve">
+    <value>為替レート</value>
+  </data>
+  <data name="vat" xml:space="preserve">
+    <value>バット（％）</value>
+  </data>
+  <data name="vitri" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="dathang" xml:space="preserve">
+    <value>注文</value>
+  </data>
+  <data name="Bophan" xml:space="preserve">
+    <value>一部</value>
+  </data>
+  <data name="Thongthuong" xml:space="preserve">
+    <value>通常</value>
+  </data>
+  <data name="Gap" xml:space="preserve">
+    <value>緊急</value>
+  </data>
+  <data name="cpbiendoitheosanluong" xml:space="preserve">
+    <value>コストは出力に応じて異なります。</value>
+  </data>
+  <data name="chiphicodinh" xml:space="preserve">
+    <value>固定費</value>
+  </data>
+  <data name="taisancodinh" xml:space="preserve">
+    <value>Tài sản cố định</value>
+  </data>
+  <data name="Donvichitiet" xml:space="preserve">
+    <value>詳細な単位</value>
+  </data>
+  <data name="Chiphichung" xml:space="preserve">
+    <value>一般経費</value>
+  </data>
+  <data name="Ngayyeucau" xml:space="preserve">
+    <value>リクエスト日</value>
+  </data>
+  <data name="Kho" xml:space="preserve">
+    <value>倉庫</value>
+  </data>
+  <data name="tonkho" xml:space="preserve">
+    <value>在庫</value>
+  </data>
+  <data name="Mucdich" xml:space="preserve">
+    <value>目的</value>
+  </data>
+  <data name="phongchiuphi" xml:space="preserve">
+    <value>室料有料</value>
+  </data>
+  <data name="Ghichu" xml:space="preserve">
+    <value>注記</value>
+  </data>
+  <data name="phieunhanhang" xml:space="preserve">
+    <value>配達受領書（PO）</value>
+  </data>
+  <data name="NhapPO" xml:space="preserve">
+    <value>PO番号</value>
+  </data>
+  <data name="timkiem" xml:space="preserve">
+    <value>検索</value>
+  </data>
+  <data name="khonhapve" xml:space="preserve">
+    <value>輸入倉庫</value>
+  </data>
+  <data name="thoigiannhanve" xml:space="preserve">
+    <value>受信時間</value>
+  </data>
+  <data name="Nhapkho" xml:space="preserve">
+    <value>倉庫</value>
+  </data>
+  <data name="chon" xml:space="preserve">
+    <value>選択する</value>
+  </data>
+  <data name="Mahang" xml:space="preserve">
+    <value>プロダクトコード</value>
+  </data>
+  <data name="nhanhangtheoPO" xml:space="preserve">
+    <value>受け取る (PO)</value>
+  </data>
+  <data name="xacnhannhapkho" xml:space="preserve">
+    <value>倉庫受領書の確認</value>
+  </data>
+  <data name="soluong" xml:space="preserve">
+    <value>量</value>
+  </data>
+  <data name="Toithieu" xml:space="preserve">
+    <value>最小</value>
+  </data>
+  <data name="Toida" xml:space="preserve">
+    <value>最大</value>
+  </data>
+  <data name="Nhom" xml:space="preserve">
+    <value>グループ</value>
+  </data>
+  <data name="Tinhtrangdon" xml:space="preserve">
+    <value>単一状態</value>
+  </data>
+  <data name="nguoitao" xml:space="preserve">
+    <value>クリエイター</value>
+  </data>
+  <data name="daduyet" xml:space="preserve">
+    <value>承認された</value>
+  </data>
+  <data name="dangdoi" xml:space="preserve">
+    <value>待っている</value>
+  </data>
+  <data name="Tuchoi" xml:space="preserve">
+    <value>拒否する</value>
+  </data>
+  <data name="Trangthaidon" xml:space="preserve">
+    <value>単一状態</value>
+  </data>
+  <data name="nguoinhan" xml:space="preserve">
+    <value>受信機</value>
+  </data>
+  <data name="mayeucau" xml:space="preserve">
+    <value>リクエストコード</value>
+  </data>
+  <data name="Loai" xml:space="preserve">
+    <value>タイプ</value>
+  </data>
+  <data name="Tungay" xml:space="preserve">
+    <value>日付から</value>
+  </data>
+  <data name="denngay" xml:space="preserve">
+    <value>現在まで</value>
+  </data>
+  <data name="Noidung" xml:space="preserve">
+    <value>コンテンツ</value>
+  </data>
+  <data name="Damnhiem" xml:space="preserve">
+    <value>引き受ける</value>
+  </data>
+</root>

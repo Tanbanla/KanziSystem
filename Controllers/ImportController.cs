@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
-   
+
     public class ImportController : Controller
     {
         public IActionResult Import_material()
@@ -50,12 +50,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //string us = User.Identity?.Name?.Contains("\\") == true ? User.Identity.Name.Split('\\')[1] : (User.Identity?.Name ?? "Unknown");
 
             string us = "loandt";
+            //string us = User.FindFirst("UserId")?.Value ?? "User";
             List<User_Info> lst_cost = User_Info._info_adid(us);
             return Json(lst_cost);
         }
         public JsonResult _load_dept(string dept)
         {
             string us = "loandt";
+            //string us = User.FindFirst("UserId")?.Value ?? "User";
             string cost = dept.Split(':')[0];
             string ss = dept.Split(':')[1];
             List<User_Info> lst_cost = User_Info._info_adid(us);
@@ -63,13 +65,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(sec);
         }
         public JsonResult _info_material(PARAS para)
-        { 
+        {
             List<PARAS> mst = MATERIA.material_process(para);
             return Json(mst);
         }
         public JsonResult _load_userinventory(string group_code)
         {
-            List<PE_USERNAME> _ifor = REQUEST_PROCESS._load_userinventory(group_code,"");
+            List<PE_USERNAME> _ifor = REQUEST_PROCESS._load_userinventory(group_code, "");
             return Json(_ifor);
 
         }
@@ -80,7 +82,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai, string phong)
         {
-            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den , kho, manguyenlieu, loai, phong);
+            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai, phong);
             return Json(lst);
         }
         private readonly IWebHostEnvironment _env;
@@ -122,7 +124,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             excelWorksheets.Cells[i, 1].Value = i - 1;
                             excelWorksheets.Cells[i, 2].Value = item.MaNguyenLieu;
-                            excelWorksheets.Cells[i, 3].Value = item.Hanhdong;                            
+                            excelWorksheets.Cells[i, 3].Value = item.Hanhdong;
                             excelWorksheets.Cells[i, 4].Value = item.Soluong;
                             excelWorksheets.Cells[i, 5].Value = item.Loai;
                             excelWorksheets.Cells[i, 6].Value = item.Ngaynhaokho;
@@ -156,7 +158,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 lst_kho.Add(Kho.Rows[a]["Kho"].ToString()!);
             }
             string soluong = Kho.Rows[0]["Hientai"].ToString()!;
-            return Json(new { lst_kho , soluong });
+            return Json(new { lst_kho, soluong });
         }
         public JsonResult _chonnhamay(string mahang, string kho)
         {
@@ -165,9 +167,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string soluong = Kho.Rows[0]["Hientai"].ToString()!;
             return Json(soluong);
         }
-        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string manguyenlieu, string soluong, string donvi, string kho, string nguoinhan, string request, string khoi,string phong, string vitri)
+        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string manguyenlieu, string soluong, string donvi, string kho, string nguoinhan, string request, string khoi, string phong, string vitri)
         {
-            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, manguyenlieu, soluong, donvi, kho, nguoinhan);
+            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, manguyenlieu, soluong, donvi, kho, nguoinhan, khoi, phong, vitri, request);
             return Json(check);
         }
     }

@@ -3,7 +3,7 @@
 const userPagingState = {
     fullData: [],
     currentPage: 1,
-    itemsPerPage: 18, // Số mục muốn hiển thị trên mỗi trang
+    itemsPerPage: 12, // Số mục muốn hiển thị trên mỗi trang
     totalPages: 0
 };
 
@@ -12,13 +12,14 @@ function _load_inv() {
     var mnl = document.getElementById("mnl").value;
     var kho = document.getElementById("kho").value;
     var cost = document.getElementById("cost").value;
-    var luukho = document.getElementById("luukho").value;
+    var Group_Code = document.getElementById("group_code").value;
 
     const params = new URLSearchParams();
     params.append('MaNguyenLieu', mnl);
     params.append('Kho', kho);
     params.append('NVCHR_COST', cost);
-    params.append('IS_SAVE_WH', luukho);
+    params.append('IS_SAVE_WH', '0');
+    params.append('Group_Code', Group_Code);
 
 
     fetch('/Import/_load_inv', {
@@ -38,9 +39,14 @@ function _load_inv() {
             userPagingState.fullData = data;
             // Tính tổng số trang
             userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
-
-            // Khởi tạo hiển thị trang đầu tiên
-            goToPage(1);
+            if (data.length == 0) {
+                document.getElementById("show_kho").innerHTML = "<tr><td>&nbsp; Không có dữ liệu </td></tr>";
+                document.getElementById("pagination-controls").innerHTML = "";
+            }
+            else {
+                // Khởi tạo hiển thị trang đầu tiên
+                goToPage(1);
+            }
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
@@ -71,10 +77,10 @@ function renderUserTable(data) {
     console.log(data);
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(vd => {
-
-        const btn = `<td><button class=" btn btn-danger"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
+        const btn = `<td><button class=" btn btn-outline-success" onclick="_modal11('${vd.maNguyenLieu}','${vd.kho}','${vd.hientai}','${vd.material_Name}')"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
         return `<tr>
                     <td>${vd.maNguyenLieu}</td>
+                    <td>${vd.material_Name}</td>
                     <td>${vd.hientai}</td>
                     <td>${vd.toiThieu}</td>
                     <td>${vd.toiDa}</td>
@@ -229,7 +235,7 @@ function _load_dept(dept) {
 }
 
 function _load_material(Material_Code, id) {
-  
+
     let idd = id.split('_')[1];
     var groupcode = document.getElementById("group_code").value;
     const params = new URLSearchParams();
@@ -267,9 +273,16 @@ function _load_material(Material_Code, id) {
             document.getElementById("nt_" + idd).value = data[0].currency;
             if (document.getElementById("sl_" + idd).value != "") {
                 document.getElementById("tcp_" + idd).value = parseFloat(data[0].price) * parseFloat(document.getElementById("sl_" + idd).value);
-            }    
+            }
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+}
+
+function _modal11(ma, kho, soluon, ten) {
+    document.getElementById("modal-11").click();
+    document.getElementById("ma_ck").innerHTML = ma + " -  " + ten;
+    document.getElementById("kho_hientai").value = kho;
+    document.getElementById("tonkho").value = soluon;
 }

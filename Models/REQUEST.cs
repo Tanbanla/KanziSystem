@@ -477,16 +477,20 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return ctxk;
         }
-        public static string _xuatkho(string code_request, string adid_nx, string manguyenlieu, string soluong, string donvi, string kho, string us)
+        public static string _xuatkho(string code_request, string adid_nx, string manguyenlieu, string soluong, string donvi, string kho, string us, string khoi, string phong, string vitri, string donhang)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             var ins = _db.GET_DATA_FROM_SQL($"Insert into [PE_REQUEST_INFORMATION] (NCHR_REQUEST_CODE,NCHR_EMPLOYEE_ADID,NCHR_MATERIAL_CODE,QTY_NEED,NCHR_UNIT,NCHR_WAREHOUSE_NAME,DTM_UPDATE,NCHAR_USER) " +
                 $"values ('{code_request}','{adid_nx}', '{manguyenlieu}','{soluong}',N'{donvi}', '{kho}','{DateTime.Now}', N'{us}')");
             _db.GET_DATA_FROM_SQL("Update PE_REQUEST_CONFIRM set INT_STEP = '5' where ID_REQUEST = '" + code_request + "'");
 
-            _db.GET_DATA_FROM_SQL($"Insert into (MaNguyenLieu,Hanhdong,Soluong,Loai,Ngaynhaokho,Thoigian,Nguoicapnhat,Kho,Khoi,Phong,Vitri) " +
-                $"values ('{manguyenlieu}', 'Xuất kho {kho} cho request')");
+            _db.GET_DATA_FROM_SQL($"Insert into [KHO_NHAPXUAT] (MaNguyenLieu,Hanhdong,Soluong,Loai,Ngaynhaokho,Thoigian,Nguoicapnhat,Kho,Khoi,Phong,Vitri) " +
+                $"values ('{manguyenlieu}', N'Xuất kho {kho} cho request {donhang}','{soluong}','XUAT','{DateTime.Now}','{DateTime.Now}','{adid_nx}','{kho}','{khoi}','{phong}','{vitri}')");
+
+            _db.GET_DATA_FROM_SQL($"Update [KHO] set [Hientai] = Hientai - {soluong} where MaNguyenLieu = '{manguyenlieu}' and Kho = '{kho}'");
+
             return "Thêm thành công !";
         }
+
     }
 }

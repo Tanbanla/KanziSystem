@@ -1,4 +1,5 @@
-﻿@{
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
     ViewData["Title"] = "Xác nhận hàng về kho phòng ban";
 }
 
@@ -130,43 +131,43 @@
                             <table class="table table-bordered">
                                 <thead class="bg-primary">
                                     <tr>
-                                        <th>Xác nhận nhập kho</th>
-                                        <th>Mã hệ thống</th>
-                                        <th>Được tách từ</th>
-                                        <th>Bên nhập trước</th>
-                                        <th>Số PO</th>
-                                        <th>Mã Hàng</th>
-                                        <th>Mã sản phẩm</th>
-                                        <th>Tên hàng bằng tiếng Anh/Nhật</th>
-                                        <th>Tên hàng bằng tiếng Việt </th>
-                                        <th>Số lượng Order</th>
-                                        <th>Lượng thực tế về kho</th>
-                                        <th>Lượng hàng làm thủ tục hải quan</th>
-                                        <th>Ngày nhập kho</th>
-                                        <th>Người nhập kho</th>
-                                        <th>Đơn vị</th>
-                                        <th>Đơn giá ước tính</th>
-                                        <th>Điều kiện giao hàng</th>
-                                        <th>Địa điêm giao hàng</th>
-                                        <th>Phương thức vận chuyển</th>
-                                        <th>Số tiền</th>
-                                        <th>VAT(%)</th>
-                                        <th>Phòng ban yêu cầu</th>
-                                        <th>Tên phòng yêu cầu</th>
-                                        <th>Ngày giao hàng dự kiến</th>
-                                        <th>Nơi giao hàng dự kiến</th>
-                                        <th>Thời hạn thanh toán</th>
-                                        <th>Loại tiền</th>
-                                        <th>Tỷ giá</th>
-                                        <th>Đổi sang USD</th>
-                                        <th>Danh mục</th>
-                                        <th>Thuộc đơn yêu cầu</th>
-                                        <th>Tình trạng tờ khai</th>
-                                        <th>Nhà cung cấp</th>
-                                        <th>ID Lịch sử nhập</th>
-                                        <th>Lượng về kho đã nhập</th>
+                                        <th>@Languages.xacnhannhapkho</th>
+                                        <th>@Languages.Mahethong</th>
+                                        <th>@Languages.Duoctachtu</th>
+                                        <th>@Languages.Bennhaptruoc</th>
+                                        <th>@Languages.Sopo</th>
+                                        <th>@Languages.Mahang</th>
+                                        <th>@Languages.Mahang</th>
+                                        <th>@Languages.TenhangTA</th>
+                                        <th>@Languages.TenhangTV </th>
+                                        <th>@Languages.soluongdathang</th>
+                                        <th>@Languages.Luongthucte</th>
+                                        <th>@Languages.Luonglamthutuc</th>
+                                        <th>@Languages.Ngaynhapkho</th>
+                                        <th>@Languages.Nguoinhapkho</th>
+                                        <th>@Languages.Donvi</th>
+                                        <th>@Languages.Dongiauoctinh</th>
+                                        <th>@Languages.Dieukiengiaohang</th>
+                                        <th>@Languages.Diadiemgiaohang</th>
+                                        <th>@Languages.Phuongthucvanchuyen</th>
+                                        <th>@Languages.Sotien</th>
+                                        <th>@Languages.vat</th>
+                                        <th>@Languages.phongbanyeucau</th>
+                                        <th>@Languages.tenphongyeucau</th>
+                                        <th>@Languages.ngaygiaohangdukien</th>
+                                        <th>@Languages.noigiaohangdukien</th>
+                                        <th>@Languages.thoihanthanhtoan</th>
+                                        <th>@Languages.loaitien</th>
+                                        <th>@Languages.tygia</th>
+                                        <th>@Languages.doisangusd</th>
+                                        <th>@Languages.danhmuc</th>
+                                        <th>@Languages.thuocdonyeucau</th>
+                                        <th>@Languages.tinhtrangtokhai</th>
+                                        <th>@Languages.nhacungcap</th>
+                                        <th>@Languages.Idlichsu</th>
+                                        <th>@Languages.luongvekho</th>
                                         <th>Invoice</th>
-                                        <th>Tình trạng hải quan</th>
+                                        <th>@Languages.tinhtranghaiquan</th>
                                     </tr>
                                 </thead>
                                 <tbody id="show_apply" style="color:black;"></tbody>

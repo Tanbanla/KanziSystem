@@ -11,11 +11,13 @@ function _load_material() {
     var Material_Code = document.getElementById("Material_Code").value;
     var Material_Name_VN = document.getElementById("Material_Name_VN").value;
     var Account_Name_VN = document.getElementById("Account_Name_VN").value;
+    var Group_Code = document.getElementById("lst_gc").value;
 
     const params = new URLSearchParams();
     params.append('Material_Code', Material_Code);
     params.append('Material_Name_VN', Material_Name_VN);
     params.append('Account_Name_VN', Account_Name_VN);
+    params.append('Group_Code', Group_Code);
 
 
     fetch('/Material/load_material', {
@@ -35,9 +37,15 @@ function _load_material() {
             userPagingState.fullData = data;
             // Tính tổng số trang
             userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
+            if (data.length == 0) {
+                document.getElementById("show_material").innerHTML = "<tr><p> &nbsp; Không có dữ liệu !</p></tr>";
+                document.getElementById("pagination-controls").innerHTML = "";
+            }
+            else {
+                // Khởi tạo hiển thị trang đầu tiên
+                goToPage(1);
+            }
 
-            // Khởi tạo hiển thị trang đầu tiên
-            goToPage(1);
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
@@ -70,8 +78,7 @@ function renderUserTable(data) {
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(mtr => {
 
-        const btn = `<td><a class="text-primary" data-toggle="tooltip" title="Edit" onclick="editUser('${mtr.id_Material}')"><i class="fas fa-pencil-alt"></i></a></td>
-                     <td><a class="text-danger" onclick="deactivateUser('${mtr.id_Material}')"> <i class="fa fa-trash"></i></a></td>`;
+
         return `<tr>
                   
                     <td>${mtr.material_Code}</td>
@@ -87,7 +94,7 @@ function renderUserTable(data) {
                     <td>${mtr.currency}</td>
                     <td>${mtr.group_Code}</td>
                     <td>${mtr.goodKind}</td>
-                        ${btn}
+                      
                 </tr>`;
     }).join(''); // Nối tất cả các chuỗi thành một chuỗi HTML lớn
 

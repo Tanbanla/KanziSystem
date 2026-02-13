@@ -132,176 +132,59 @@
     </div>
     <!-- Modal for detail -->
     <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+        <div class="modal-dialog modal-xxl modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content">
-                <!-- Header với thiết kế giống phiếu yêu cầu -->
-                <div class="modal-header" style="background-color: #fff9e1; border-bottom: 2px solid #dee2e6; color: #000;">
-                    <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h4 class="modal-title fw-bold" id="detailModalTitle" style="color: #000;">
-                                @Localizer["DetailModalTitle"] - <span id="madonhang" class="text-primary"></span>
-                            </h4>
-                            <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
-                                <i class="fas fa-times fa-lg"></i>
-                            </button>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <span class="fw-bold" style="color: #000;">@Localizer["ReceivingDepartmentLabel"]</span>
-                                <span id="khoi" class="bg-white px-3 py-1 rounded border" style="color: #000;"></span>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <span class="badge bg-warning text-dark p-2" id="urgent-badge" style="display:none;">
-                                    <i class="ion ion-alert-circled"></i> @Localizer["UrgentBadgeText"]
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalTitle">@Localizer["DetailModalTitle"]</h5>
+                    <button type="button" class="btn-close" id="arCloseBtn" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">✕</button>
+                   @*  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
                 </div>
-
-                <!-- Body với thông tin chi tiết -->
-                <div class="modal-body p-3" style="background-color: #fff; color: #000;">
-                    <!-- Thông tin yêu cầu -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-sm mb-0" style="background-color: #fff; color: #000;">
-                                    <tr>
-                                        @* <td class="fw-bold bg-light" style="width: 15%;">@Localizer["DeptCodeLabel"]</td> *@
-                                        @* <td style="width: 18%; background-color: #fff9e1;" id="mbp"></td> *@
-                                        <td class="fw-bold bg-light" style="width: 15%;">@Localizer["DeptCostCenterLabel"]</td>
-                                        <td style="width: 18%; background-color: #fff9e1;" id="mpb_yc"></td>
-                                        <td class="fw-bold bg-light" style="width: 15%;">@Localizer["DeptNameLabel"]</td>
-                                        <td style="width: 19%; background-color: #fff9e1;" id="tenphongban"></td>
-                                    </tr>
-                                    <tr>
-                                        @* <td class="fw-bold bg-light">@Localizer["LineLabel"]</td> *@
-                                        @* <td style="background-color: #fff9e1;" id="chuyen"></td> *@
-                                        <td class="fw-bold bg-light">@Localizer["RequestDateLabel"]</td>
-                                        <td style="background-color: #fff9e1;" id="nyc"></td>
-                                        <td class="fw-bold bg-light">@Localizer["DesiredDeadlineLabel"]</td>
-                                        <td style="background-color: #fff9e1;" id="thmm"></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tiêu đề chi tiết hàng hóa -->
-                    <div class="row mb-2">
-                        <div class="col-12">
-                            <h5 class="fw-bold" style="color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 5px;">
-                                <i class="ion ion-clipboard"></i> @Localizer["GoodsDetailTitle"]
-                            </h5>
-                        </div>
-                    </div>
-
-                    <!-- Bảng chi tiết -->
-                    <div class="table-responsive-fixed">
-                        <table class="table table-bordered table-hover align-middle" id="detailTable" style="font-size: 13px; background-color:#fff; color:#000;">
-                            <thead>
-                                <!-- Header chính -->
-                                <tr class="text-center align-middle" style="background-color: #e9ecef; color:#000;">
-                                    <th rowspan="2" style="width: 40px; background-color: #dee2e6; color:#000;">@Localizer["STT"]</th>
-                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["SystemCode"]</th>
-                                    <th rowspan="2" style="min-width: 150px; background-color: #dee2e6; color:#000;">@Localizer["InternalMaterialCodeShort"]</th>
-                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["Category"]</th>
-                                    <th rowspan="2" style="min-width: 200px; background-color: #dee2e6; color:#000;">@Localizer["ItemNameVNEN"]</th>
-                                    <th colspan="8" style="background-color: #d3d9e5; color:#000;">@Localizer["DescriptionGroup"]</th>
-                                    <th rowspan="2" style="min-width: 150px; background-color: #dee2e6; color:#000;">@Localizer["SupplierShort"]</th>
-                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["SupplierSelectionDeadline"]</th>
-                                    <th rowspan="2" style="width: 60px; background-color: #dee2e6; color:#000;">@Localizer["UrgentShort"]</th>
+                <div class="modal-body p-2">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover table-bordered align-middle mb-0" id="detailTable">
+                            <thead class="table-header-custom">
+                                <tr class="text-center align-middle">
+                                    <th rowspan="2" class="title_column_stt" style="width:40px">&nbsp;</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 200px">@Localizer["SectionCode"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Category"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Classification"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["EquipmentCode"]</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 230px">@Localizer["InternalMaterialCode"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["SupplierItemCode"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["ItemNameVN"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["ItemNameEN"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Quantity"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Unit"]</th>
+                                    <th colspan="6" class="title_column">@Localizer["ItemDescription"]</th>
+                                    <th rowspan="2" class="title_column" style="width: 100px">@Localizer["ROHSRequirement"]</th>
+                                    <th rowspan="2" class="title_column" style="width: 100px">@Localizer["COCQRequirement"]</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 200px">@Localizer["MSDSRequirement"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["SafetyStandardRequirement"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["DesignFile"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Manufacturer"]</th>
+                                    <th rowspan="2" class="title_column" style="min-width: 250px">@Localizer["Supplier"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["GetQuotation"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Reason"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["DesiredReceiveDate"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["SupplierSelectionDeadline"]</th>
+                                    <th rowspan="2" class="title_column" style="width: 50px">@Localizer["Urgent"]</th>
+                                    <th rowspan="2" class="title_column">@Localizer["Requester"]</th>
                                 </tr>
-                                <!-- Header phụ -->
-                                <tr class="text-center align-middle" style="background-color: #e9ecef; color:#000;">
-                                    <th style="min-width: 80px; color:#000;">@Localizer["QuantityShort"]</th>
-                                    <th style="min-width: 70px; color:#000;">@Localizer["UnitShort"]</th>
-                                    <th style="min-width: 80px; color:#000;">@Localizer["ShapeShort"]</th>
-                                    <th style="min-width: 80px; color:#000;">@Localizer["MaterialShort"]</th>
-                                    <th style="min-width: 100px; color:#000;">@Localizer["CompositionShort"]</th>
-                                    <th style="min-width: 100px; color:#000;">@Localizer["DimensionsShort"]</th>
-                                    @* <th style="min-width: 100px; color:#000;">@Localizer["LineLabel"]</th> *@
-                                    <th style="min-width: 120px; color:#000;">@Localizer["UsedPositionShort"]</th>
-                                    <th style="min-width: 150px; color:#000;">@Localizer["PurposeFeatureShort"]</th>
+                                <tr class="text-center align-middle">
+                                    <th class="title_column">@Localizer["Shape"]</th>
+                                    <th class="title_column">@Localizer["Material"]</th>
+                                    <th class="title_column">@Localizer["CompositionForChemicals"]</th>
+                                    <th class="title_column">@Localizer["DimensionsMM"]</th>
+                                    <th class="title_column">@Localizer["UsedForPosition"]</th>
+                                    <th class="title_column">@Localizer["PurposeFeature"]</th>
                                 </tr>
                             </thead>
-                            <tbody id="detailModalBody">
-                                <tr class="text-center">
-                                    <td colspan="20" class="text-muted py-4" style="color:#000; background-color:#fff;">
-                                        <i class="ion ion-load-c ion-spin"></i> @Localizer["LoadingData"]
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="detailModalBody"></tbody>
                         </table>
                     </div>
-
-                    <!-- Thông tin bổ sung -->
-                    <div class="row mt-4">
-                        <div class="col-md-8">
-                            <div class="card border" style="background-color:#fff; color:#000;">
-                                <div class="card-header bg-light py-2">
-                                    <strong>@Localizer["ApprovalFlowTitle"]</strong>
-                                </div>
-                                <div class="card-body p-2" style="font-size: 11px; background-color: #f8f9fa; color:#000;">
-                                    <p class="mb-1">@Localizer["ApprovalFlowLine1"]</p>
-                                    <p class="mb-1">@Localizer["ApprovalFlowLine2"]</p>
-                                    <p class="mb-1">@Localizer["ApprovalFlowLine3"]</p>
-                                    <p class="mb-0 text-primary">@Localizer["ApprovalFlowLine4"]</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card border" style="background-color:#fff; color:#000;">
-                                <div class="card-header bg-light py-2">
-                                    <strong>@Localizer["AdditionalInfoTitle"]</strong>
-                                </div>
-                                <div class="card-body p-2">
-                                    <table class="table table-sm table-borderless mb-0">
-                                        <tr>
-                                            <td class="fw-bold p-1">@Localizer["ROHSLabel"]</td>
-                                            <td class="p-1" id="rohs_requirement">-</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-bold p-1">@Localizer["COCQLabel"]</td>
-                                            <td class="p-1" id="cocq_requirement">-</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-bold p-1">@Localizer["MSDSLabel"]</td>
-                                            <td class="p-1" id="msds_requirement">-</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-bold p-1">@Localizer["RequesterLabel"]</td>
-                                            <td class="p-1" id="requester">-</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
-                <!-- Footer với buttons -->
-                <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; color:#000;">
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <div>
-                            <span class="text-muted" id="request-info" style="color:#000;">
-                                <i class="ion ion-document-text"></i> @Localizer["FooterID"] <span id="id_request"></span> |
-                                @Localizer["FooterStep"] <span id="step"></span> |
-                                @Localizer["FooterRegency"] <span id="regency"></span>
-                            </span>
-                        </div>
-                        <div>
-                            <button type="button" class="btn btn-success" id="modalApprove">
-                                <i class="ion ion-android-done-all"></i> @Localizer["ApproveButton"]
-                            </button>
-                            <button type="button" class="btn btn-danger" id="modalReject">
-                                <i class="ion ion-android-close"></i> @Localizer["RejectButton"]
-                            </button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="ion ion-android-close"></i> @Localizer["CloseButton"]
-                            </button>
-                        </div>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-close">@Localizer["Close"]</button>
                 </div>
             </div>
         </div>

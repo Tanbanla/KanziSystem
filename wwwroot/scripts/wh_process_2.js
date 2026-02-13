@@ -7,21 +7,13 @@ const userPagingState = {
 };
 // --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
 function _load_warehouse() {
-    //var vd_code = document.getElementById("vd_code").value;
-    //var vd_name = document.getElementById("vd_name").value;
-    //var vd_group = document.getElementById("vd_group").value;
-
-    //const params = new URLSearchParams();
-    //params.append('Ma', vd_code);
-    //params.append('Ten', vd_name);
-    //params.append('nhom', vd_group);
 
     fetch('/Master/load_warehouse', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-       /* body: params.toString()*/
+        /* body: params.toString()*/
     })
         .then(response => {
             if (!response.ok) {

@@ -26,7 +26,8 @@
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
             string code_mt = para.Material_Code!;
             string timcode = "a.Material_Code like '%%' and";
-            if ( para.Material_Code != null) { 
+            if (para.Material_Code != null)
+            {
                 code_mt = para.Material_Code!.Split(":")[0].Length > 0 ? para.Material_Code!.Split(":")[0] : para.Material_Code!;
                 timcode = "a.Material_Code = '" + code_mt + "' and";
             }

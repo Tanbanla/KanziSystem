@@ -54,7 +54,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (dayMM != null)
             {
-                sql.Append(" AND CONVERT(DATE, r.DTM_NgayMuonNhan) = CONVERT(DATE, @Day)");
+                sql.Append(" AND r.DTM_NgayMuonNhan = @Day");
                 parameters.Add("Day", dayMM);
             }
             sql.Append(" ORDER BY d.ID DESC");

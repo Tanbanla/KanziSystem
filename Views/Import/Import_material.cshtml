@@ -1,4 +1,5 @@
-﻿@{
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
     ViewData["Title"] = "Import";
 }
 <style>
@@ -17,15 +18,21 @@
                         <div class="input-group-prepend">
                             <div class="input-group-text"><i class="ion ion-social-codepen-outline"></i></div>
                         </div>
-                        <input type="text" class="form-control" id="mnl" placeholder="Mã nguyên liệu">
+                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.Mahang">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-ios-home"></i></div>
+                            <div class="input-group-text">@Languages.Kho :</div>
                         </div>
-                        <input type="text" class="form-control" id="kho" placeholder="Kho">
+                        <select class="form-control" id="kho" onchange="_load_inv()">
+                            <option value=""></option>
+                            <option value="F2">F2</option>
+                            <option value="F4">F4</option>
+                            <option value="F5">F5</option>
+                            <option value="F6">F6</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">
@@ -39,11 +46,14 @@
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-ios-unlocked"></i></div>
+                            <div class="input-group-text">@Languages.Khoi :</div>
                         </div>
-                        <select class="form-control" id="luukho">
-                            <option value="0">Không lưu kho</option>
-                            <option value="1">Có lưu kho</option>
+                        <select class="form-control" id="group_code" onchange="_load_inv()">
+                            <option value=""></option>
+                            <option value="PROD">PROD</option>
+                            <option value="GA">GA</option>
+                            <option value="IT">IT</option>
+                            <option value="PUR">PUR</option>
                         </select>
                     </div>
                 </div>
@@ -56,16 +66,17 @@
                             <table class="table table-bordered">
                                 <thead class="bg-primary">
                                     <tr>
-                                        <th>Mã nguyên liệu</th>
-                                        <th>Số lượng</th>
-                                        <th>Tối thiểu</th>
-                                        <th>Tối đa</th>
-                                        <th>Nhóm </th>
-                                        <th>Kho</th>
+                                        <th>@Languages.MaNVL</th>
+                                        <th>@Languages.TenNVL</th>
+                                        <th>@Languages.soluong</th>
+                                        <th>@Languages.Toithieu</th>
+                                        <th>@Languages.Toida</th>
+                                        <th>@Languages.Nhom </th>
+                                        <th>@Languages.Kho</th>
                                         <th>Cost</th>
-                                        <th width="20%">Ghi chú</th>
-                                        <th>Thời gian </th>
-                                        <th width="80px" class="text-center"></th>                                  
+                                        <th width="20%">@Languages.Ghichu</th>
+                                        <th>@Languages.thoigiannhanve </th>
+                                        <th width="50px" class="text-center"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="show_kho">
@@ -81,6 +92,8 @@
     </div>
    
 </div>
+@await Html.PartialAsync("_modal", "Import")
+<button id="modal-11" hidden>chuyển kho</button>
 <script src="~/scripts/import_process.js"></script>
 <script>
     window.onload = function(){
