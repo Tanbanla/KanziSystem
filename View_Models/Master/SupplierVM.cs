@@ -20,4 +20,8 @@
         public string? maNCC { get; set; }
         public string? tenNCC { get; set; }
     }
+    public class ImportSupplierDetailDTO
+    {
+        public IFormFile? FileExcel { get; set; }
+    }
 }

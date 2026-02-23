@@ -262,6 +262,72 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result);
         }
+        // nhập thông tin loại hàng nhà cung cấp từ file excel
+        [HttpPost]
+        public async Task<IActionResult> ImportSupplierDetail([FromForm] ImportSupplierDetailDTO insertFile)
+        {
+            if (insertFile.FileExcel == null || insertFile.FileExcel.Length == 0)
+            {
+                return BadRequest("File không hợp lệ");
+            }
+
+            var items = new List<BaoGia_NCC_CategoryDTO>();
+            var user = GetCurrentUserId() ?? "system";
+            try
+            {
+                using var stream = insertFile.FileExcel.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                // lấy dữ liệu từ dòng 3
+                int startRow = 3;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 2).GetString() == "" || ws.Cell(r, 2).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột trong bảng ở giao diện
+                    var dto = new BaoGia_NCC_CategoryDTO
+                    {
+                        Id = 0,
+                        CHR_MaNCC = ws.Cell(r, 4).GetString().Trim(),
+                        NVCHR_TenNCC = ws.Cell(r, 6).GetString().Trim(),
+                        NVCHR_ChungLoai = ws.Cell(r, 2).GetString().Trim(),
+                        NVCHR_SanXuat = ws.Cell(r, 3).GetString().Trim(),
+                        CHR_Status = "Active",
+                        CHR_CreateBy = user,
+                        DTM_CreateBy = DateTime.Now,
+                        CHR_Mail = ws.Cell(r, 8).GetString().Trim(),
+                        CHR_PIC = ws.Cell(r, 10).GetString().Trim()
+                    };
+                    // Lọc trùng dữ liệu trong file excel trước khi thêm vào danh sách, tránh trường hợp file có nhiều
+                    if (items.Where(x => x.CHR_MaNCC == dto.CHR_MaNCC && x.NVCHR_ChungLoai == dto.NVCHR_ChungLoai && x.NVCHR_SanXuat == dto.NVCHR_SanXuat).Any())
+                    {
+                        //break;
+                    }
+                    else
+                    {
+                        items.Add(dto);
+                    }
+                }
+                if (items.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                await _baoGiaNccCategoryService.AddListBaoGiaNccCategory(items);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+
+        }
+
         // Nhập danh sách loại hàng nhà cung cấp
         [HttpPost]
         public async Task<IActionResult> AddListSupplierDetail([FromForm] InsertFileExcelSupplierRequestDTO insertFile)

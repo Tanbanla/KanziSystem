@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
         getSupplierDetail: (codeNcc) => `/Master/GetSupplierDetail?codeNcc=${encodeURIComponent(codeNcc)}`,
         addSupplierDetail: '/Master/AddSupplierDetail',
         deleteSupplierDetail: (id) => `/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
-        addListSupplierDetail: '/Master/AddListSupplierDetail'
+        addListSupplierDetail: '/Master/AddListSupplierDetail',
+        ImportSupplierDetail: '/Master/ImportSupplierDetail'
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');
@@ -198,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnSaveItemHeader = document.getElementById('btnSaveItemHeader');
     const btnImportItemsExcel = document.getElementById('btnImportItemsExcel');
     const itemsExcelFileInput = document.getElementById('itemsExcelFileInput');
+    const btnImportExcelFirst = document.getElementById('btnImportExcelFirst');
 
     async function showDetails(r) {
         currentItemSupplier = { ma: r.ma || '', ten: r.ten || '' };
@@ -308,6 +310,31 @@ document.addEventListener('DOMContentLoaded', function () {
             fd.append('maNCC', currentItemSupplier.ma || '');
             fd.append('tenNCC', currentItemSupplier.ten || '');
             const res = await fetch(api.addListSupplierDetail, { method: 'POST', body: fd });
+            if (!res.ok) {
+                let txt = await res.text();
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportFailed || 'Nhập thất bại') + ': ' + (txt || res.statusText), type: 'error' });
+            } else {
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportSuccess || 'Nhập file thành công'), type: 'success' });
+                await loadSupplierItems(currentItemSupplier.ma);
+            }
+        } catch (err) {
+            const T = window.i18nSupplierMana || {};
+            showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.CannotSendFile || 'Không thể gửi file') + ': ' + (err.message || err), type: 'error' });
+        }
+        e.target.value = '';
+    });
+
+    btnImportExcelFirst?.addEventListener('click', () => itemsExcelFileInput?.click());
+    itemsExcelFileInput?.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+            // property names expected by InsertFileExcelSupplierRequestDTO (multipart/form-data)
+            const fd = new FormData();
+            fd.append('FileExcel', file);
+            const res = await fetch(api.ImportSupplierDetail, { method: 'POST', body: fd });
             if (!res.ok) {
                 let txt = await res.text();
                 const T = window.i18nSupplierMana || {};

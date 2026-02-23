@@ -111,9 +111,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View(vm);
         }
         // MARK: - Select Quote Section
-        public IActionResult SelectQuoteSection()
+        public async  Task<IActionResult> SelectQuoteSection()
         {
-            return View();
+            var nhomViTri = await LoadNhomViTriDataAsync();
+            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            var nccNews = await LoadNhaCungCapDataAsync();
+            var madons = await LoadMadonAsync();
+            var vm = new QuoteModel
+            {
+                DanhSachNhomViTri = nhomViTri,
+                DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
+                DanhSachNhaCungCap = nccNews,
+                DanhSachMaDon = madons,
+                NguoiThaoTac = GetCurrentUserId() ?? ""
+            };
+            return View(vm);
         }
         // MARK: - HistoryQuote
         public async Task<IActionResult> HistoryQuote()
