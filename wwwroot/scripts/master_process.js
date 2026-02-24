@@ -76,7 +76,7 @@ function renderUserTable(data) {
                     <td id="role_${vd.ncc_Id}">${vd.khuvuc}</td>
                      <td id="mail_${vd.ncc_Id}">${vd.ghichu}</td>
                     <td>${vd.canphaixacnhanlamthutuchaiquan}</td>
-                        ${btn}
+                   
                 </tr>`;
     }).join(''); // Nối tất cả các chuỗi thành một chuỗi HTML lớn
 
@@ -141,4 +141,3 @@ function renderButton(pageNumber, currentPage) {
     const activeClass = pageNumber === currentPage ? 'btn-primary text-white' : '';
     return ` <li class="page-item"><a class="page-link  ${activeClass}"  onclick="goToPage(${pageNumber})">${pageNumber}</a></li>`;
 }
-

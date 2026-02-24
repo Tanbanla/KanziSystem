@@ -189,10 +189,10 @@ function _load_confirm(us) {
             const stepMap = {
                 "0": ["Đợi người dự thảo", "warning", 1],
                 "1": ["Đợi người thẩm tra", "info", 2],
-                "2": ["Đợi người phê duyệt", "info", 3],
+                "2": ["Đợi người phê duyệt", "pink", 3],
                 "3": ["Đợi bên tiếp nhận", "success", 4],
-                "4": ["Đợi phụ trách kho", "success", 5],
-                "5": ["Hoàn thành", "success", 6], // Vị trí 6 để tất cả 5 chấm đều success
+                "4": ["Đợi phụ trách kho", "light", 5],
+                "5": ["Hoàn thành", "secondary", 6], // Vị trí 6 để tất cả 5 chấm đều success
                 "6": ["Bị từ chối", "danger", 1],
                 "7": ["Bị từ chối", "danger", 2],
                 "8": ["Bị từ chối", "danger", 3],
@@ -222,7 +222,7 @@ function _load_confirm(us) {
                 <tr>
                     <td><input type="checkbox" /></td>
 
-                    <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><i class="fa fa-info text-info"></i></td>
+                    <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info text-primary"></i></button></td>
                     <td>${urg}</td>
                     <td>${trangthai}</td>
                     <td>${item.code_Request}</td>
@@ -262,7 +262,6 @@ function _modal_info(cost_request, step) {
             document.getElementById("thmm").innerHTML = response[0].dealine.split(' ')[0];
             document.getElementById("khoi").innerHTML = response[0].group_Code.split(' ')[0];
             document.getElementById("id_request").innerHTML = response[0].id_Request;
-
             document.getElementById("urgent").innerHTML = response[0].urgent;
             document.getElementById("step").innerHTML = step;
             if (step == "0") {

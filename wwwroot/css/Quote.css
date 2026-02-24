@@ -305,3 +305,44 @@ select.is-invalid {
     .ms-btn.is-invalid .ms-caret {
         color: #dc3545;
     }
+/* Global loading overlay for Quote page */
+#globalLoading {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 5000;
+    align-items: center;
+    justify-content: center;
+}
+
+    #globalLoading .loader-box {
+        background: #fff;
+        padding: 18px 22px;
+        border-radius: 8px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        min-width: 220px;
+    }
+
+    #globalLoading .spinner {
+        width: 28px;
+        height: 28px;
+        border: 4px solid #e6e6e6;
+        border-top-color: #0d6efd;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    #globalLoading .loader-msg {
+        color: #333;
+        font-weight: 500;
+    }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

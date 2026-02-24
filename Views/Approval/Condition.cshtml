@@ -11,9 +11,9 @@
     <div class="col-12">
         <div class="card card-primary">
             <div class="card-header">
-                <div class="form-group" style="margin : 10px 0 0 0">
+                <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="@Languages.Khoi" />
+                        <input type="text" list="lst_khoi" class="form-control" placeholder="@Languages.Khoi" id="khoi" />
                         <datalist id="lst_khoi">
                             <option>PROD</option>
                             <option>GA</option>
@@ -22,34 +22,38 @@
                         </datalist>
                     </div>
                 </div>
-                <div class="form-group" style="margin : 10px 0 0 0">
+                <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.Sopo ">
+                        <input type="text" class="form-control" id="tinhtrangdon" placeholder="@Languages.Trangthaidon">
                     </div>
                 </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
+                <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-
-                        <input type="text" class="form-control" id="kho" placeholder="@Languages.Tinhtrangdon">
+                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.mayeucau ">
                     </div>
                 </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
+              
+                <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
                         <input type="text" class="form-control" id="cost" placeholder="Cost">
                     </div>
                 </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
+                <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
                         <input type="date" class="form-control" id="ngayyc" placeholder="@Languages.Ngayyeucau">
                     </div>
                 </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
+                <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="cost" placeholder="@Languages.nguoitao">
+                        <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- Đơn giá ---" />
+                        <datalist id="donh">
+                            <option>Dưới 3000</option>
+                            <option>Dưới 10,000</option>
+                            <option>Trên 10,000</option>
+                        </datalist>
                     </div>
                 </div>
                 <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-
                 <button type="button" class="btn btn-success ml-3"><i class="fa fa-file-excel"></i> download excel</button>
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
             </div>
@@ -58,11 +62,11 @@
                     <table class="table table-bordered">
                         <thead class="bg-primary">
                             <tr>
-                                <th rowspan="2"></th>
+                               
                                 <th rowspan="2">@Languages.chitiet</th>
                                 <th rowspan="2">@Languages.Tinhtrangdon</th>
                                 <th rowspan="2">@Languages.Trangthaidon</th>
-                                <th rowspan="2">@Languages.Sopo</th>
+                                <th rowspan="2">@Languages.mayeucau</th>
                                 <th rowspan="2">Cost Center</th>
                                 <th rowspan="2">@Languages.Ngayyeucau</th>
                                 <th rowspan="2">@Languages.thoihanmuonnhan</th>
@@ -107,12 +111,27 @@
     // --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
     function _load_request_condition() {
 
+        var Group_Code = document.getElementById("khoi").value;
+        var Code_Request = document.getElementById("mnl").value;
+        var INT_STEP = document.getElementById("tinhtrangdon").value;
+        var Cost_Center = document.getElementById("cost").value;
+        var Request_Date = document.getElementById("ngayyc").value;
+        var Total = document.getElementById("giadonhang").value;
+        
+        const params = new URLSearchParams();
+            params.append('Group_Code', Group_Code);
+            params.append('Code_Request', Code_Request);
+            params.append('INT_STEP', INT_STEP);
+            params.append('Cost_Center', Cost_Center);
+            params.append('Request_Date', Request_Date);
+            params.append('Total', Total.split(' ')[1]);
+
         fetch('/Request/get_requestcondition', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            /* body: params.toString()*/
+            body: params.toString()
         })
             .then(response => {
                 if (!response.ok) {
@@ -161,10 +180,10 @@
         const stepMap = {
             "0": ["Đợi người dự thảo", "warning", 1],
             "1": ["Đợi người thẩm tra", "info", 2],
-            "2": ["Đợi người phê duyệt", "info", 3],
+            "2": ["Đợi người phê duyệt", "pink", 3],
             "3": ["Đợi bên tiếp nhận", "success", 4],
-            "4": ["Đợi phụ trách kho", "success", 5],
-            "5": ["Hoàn thành", "success", 6], // Vị trí 6 để tất cả 5 chấm đều success
+            "4": ["Đợi phụ trách kho", "light", 5],
+            "5": ["Hoàn thành", "secondary", 6], // Vị trí 6 để tất cả 5 chấm đều success
             "6": ["Bị từ chối", "danger", 1],
             "7": ["Bị từ chối", "danger", 2],
             "8": ["Bị từ chối", "danger", 3],
@@ -191,7 +210,7 @@
 
             return `
                     <tr>                       
-                        <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><i class="fa fa-info text-info"></i></td>
+                        <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info text-primary"></i></button></td>
                         <td>${urg}</td>
                         <td>${trangthai}</td>
                         <td>${item.code_Request}</td>

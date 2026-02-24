@@ -9,6 +9,7 @@
         , exportAutoRender: '/Quote/ExportAutoRender'
         , getNCCByCategory: '/Quote/GetNCCByCategory'
         , exportRenderOutSide: '/Quote/ExportRenderOutSide'
+        , exportTable: '/Quote/ExportTable'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -20,6 +21,27 @@
             if (noCell) noCell.textContent = String(idx + 1);
         });
     assignRowIds();
+    }
+    // Loading overlay helpers
+    function showLoading(message) {
+        try {
+            const el = document.getElementById('globalLoading');
+            if (!el) return;
+            const msgEl = el.querySelector('.loader-msg');
+            if (msgEl && message) msgEl.textContent = message;
+            el.style.display = 'flex';
+            el.setAttribute('aria-hidden', 'false');
+        } catch (e) { }
+    }
+    function hideLoading() {
+        try {
+            const el = document.getElementById('globalLoading');
+            if (!el) return;
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+            const msgEl = el.querySelector('.loader-msg');
+            if (msgEl) msgEl.textContent = 'Đang xử lý...';
+        } catch (e) { }
     }
 
     function updateSearchableSelectDisplay(sel) {
@@ -494,6 +516,7 @@
             return;
         }
         try {
+            showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xử lý...');
             const res = await fetch(api.insertListBaoGia, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -509,6 +532,9 @@
             showDialog({
                 title: T.ErrorTitle || 'Lỗi', message: err.message, type: 'error'
             });
+        }
+        finally {
+            hideLoading();
         }
     }
     async function autoAddRowByCategory(selectEl) {
@@ -1001,6 +1027,7 @@
             setError('');
             try {
                 setBusy(true);
+                showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xuất...');
                 let sectionCode = '';
                 let sectionText = '';
                 let sectionName = '';
@@ -1087,9 +1114,52 @@
         qs('#btnReset')?.addEventListener('click', resetForm);
         qs('#btnCreate')?.addEventListener('click', submitForm);
         qs('#btnAuto')?.addEventListener('click',exportAutoRender);
+        qs('#btnDownExcelTable')?.addEventListener('click', exportTable);
         qsa('.btn-remove-row', container).forEach((btn) => {
             btn.addEventListener('click', (e) => removeRow(e.currentTarget));
         });
+        
+        async function exportTable() {
+            try {
+                showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xuất...');
+                const rows = qsa('#quoteTableBody tr');
+                const payload = [];
+                rows.forEach(tr => {
+                    // use existing collectRow to build DTO-like object
+                    const obj = collectRow(tr);
+                    payload.push(obj);
+                });
+
+                const res = await fetch(api.exportTable, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const msg = await res.text().catch(() => 'Lỗi không xác định');
+                    throw new Error(msg || 'Xuất file thất bại');
+                }
+                const blob = await res.blob();
+                let fileName = 'TableQuote.xlsx';
+                const cd = res.headers.get('content-disposition');
+                if (cd) {
+                    const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                }
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                showDialog({ title: (window.i18nQuote && window.i18nQuote.ErrorTitle) || 'Lỗi', message: err.message || 'Không thể xuất file', type: 'error' });
+            } finally {
+                hideLoading();
+            }
+        }
         // Delegate for future rows
         qs('#quoteTableBody')?.addEventListener('click', (e) => {
             const t = e.target;
@@ -1104,6 +1174,7 @@
             const file = e.target.files?.[0];
             if (!file) return;
             try {
+                showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xử lý...');
                 const fd = new FormData();
                 fd.append('file', file);
                 const res = await fetch(api.uploadQuoteExcel, { method: 'POST', body: fd });
@@ -1117,6 +1188,7 @@
                 const T = window.i18nQuote || {};
                 showDialog({ title: T.ErrorTitle || 'Lỗi', message: err.message || T.MsgCannotReadFile || 'Không thể đọc file', type: 'error' });
             } finally {
+                hideLoading();
                 e.target.value = '';
             }
         });
@@ -1389,7 +1461,7 @@
         setSelectValueByText(tr.querySelector('.maHangNoiBo'), dto.chR_MaHangNoiBo);
         setInput('input[placeholder*="Mã hàng NCC"]', dto.chR_MaHangNCC);
         setInput('input[placeholder*="thủ tục hải quan"]', dto.nvchR_NameVN);
-        setInput('input[placeholder*="tên hàng en"]', dto.chR_NameEN);
+        setInput('input[placeholder*="Tên hàng EN"]', dto.chR_NameEN);
         setInput('input[type="number"]', dto.inT_SoLuong);
         setInput('input[placeholder*="Đơn vị"]', dto.nvchR_DonVi);
         setInput('input[placeholder*="Hình dáng"]', dto.nvchR_HinhDang);

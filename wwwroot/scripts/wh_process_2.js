@@ -53,12 +53,10 @@ function goToPage(page) {
 // --- 4. Hàm Render Bảng  ---
 function renderUserTable(data) {
     const tbody = document.getElementById("show_wh");
-    console.log(data);
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(vd => {
-
-        const btn = `<td><a class="text-primary"><i class="fas fa-pencil-alt" onclick="_get_modal('${vd.id}')"></i></a></td>
-                     <td><a class="text-danger"> <i class="fa fa-trash"></i></a></td>`;
+        const btn = `
+                     <td><a class="text-danger" onclick ="del_wh('${vd.id}', '${vd.chR_WAREHOUSE}')"> <i class="fa fa-trash"></i></a></td>`;
         return `<tr>                 
                     <td id="wh_${vd.id}" >${vd.chR_WAREHOUSE}</td>
                     <td id="pb_${vd.id}">${vd.chR_DEPT_USE}</td>
@@ -131,3 +129,98 @@ function renderButton(pageNumber, currentPage) {
     const activeClass = pageNumber === currentPage ? 'btn-primary text-white' : '';
     return ` <li class="page-item"><a class="page-link  ${activeClass}"  onclick="goToPage(${pageNumber})">${pageNumber}</a></li>`;
 }
+
+function add_wh() {
+
+    var CHR_WAREHOUSE = document.getElementById("CHR_WAREHOUSE").value;
+    var CHR_DEPT_USE = document.getElementById("CHR_DEPT_USE").value;
+    var CHR_FACTORY = document.getElementById("CHR_FACTORY").value;
+    var CHR_NOTE = document.getElementById("CHR_NOTE").value;
+    var CHR_USER = document.getElementById("us").innerHTML;
+    const params = new URLSearchParams();
+    params.append('CHR_WAREHOUSE', CHR_WAREHOUSE);
+    params.append('CHR_DEPT_USE', CHR_DEPT_USE);
+    params.append('CHR_FACTORY', CHR_FACTORY);
+    params.append('CHR_NOTE', CHR_NOTE);
+    params.append('CHR_USER', CHR_USER);
+
+    fetch('/Master/insert_warehouse', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            _load_warehouse();
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    
+}
+
+function del_wh(id, tenkho) {
+
+    var x = confirm("Bạn có muốn xóa kho này ?")
+    if (x) {
+        const params = new URLSearchParams();
+        params.append('id', id);
+        params.append('tenkho', tenkho);
+
+        fetch('/Master/del_warehouse', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data);
+                document.querySelectorAll('.close').forEach(button => button.click());
+                _load_warehouse();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+
+    }   
+}
+
+function load_section() {
+
+    fetch('/Master/load_section', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById("CHR_DEPT_USE").innerHTML = "";
+            for (var i = 0; i < data.length; i++) {
+                document.getElementById("CHR_DEPT_USE").innerHTML += `<option>${data[i]}</option>`;
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+

@@ -31,7 +31,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 string body = "Xin chào <br />" +
                   "Đơn yêu cầu đã được gửi đến bên xin phê duyệt <br /><br />" +
                   "Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />" +
-                  "<a href=''> Link </a> <br />" +
+                  "<a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />" +
                   "※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />" +
                   "※このメールは自動的に送付されたので、返事をしないでください。 ";
                 string subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
@@ -43,7 +43,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 string body = "Xin chào <br />" +
                     "Đơn yêu cầu đã được gửi đến bên xin phê duyệt <br /><br />" +
                     "Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />" +
-                    "<a href=''> Link </a> <br />" +
+                    "<a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />" +
                     "※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />" +
                     "※このメールは自動的に送付されたので、返事をしないでください。 ";
                 string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
@@ -69,7 +69,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = @"Xin chào <br />
                Đơn yêu cầu đã được gửi đến bên xin phê duyệt <br /><br />
                Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href=''> Link </a> <br />
+               <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
                ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                ※このメールは自動的に送付されたので、返事をしないでください。 ";
               string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
@@ -100,11 +100,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (buoc == 5)
             {
                 body = @"Xin chào <br />
-             Đơn yêu cầu của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-             Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-             <a href=''> Link </a> <br />
-             ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-             ※このメールは自動的に送付されたので, 返事をしないでください。";
+                     Đơn yêu cầu của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
 
             // Gửi mail 
@@ -115,15 +115,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         public JsonResult _reject(string id_request, string reason, string regency, string step, string urgent)
         {
-            string subject = "Từ chối phê duyệt đơn yêu cầu hàng hóa";
+            string subject = "Từ chối phê duyệt đơn yêu cầu hàng hóa ";
             if(urgent == "True")
             {
                 subject = "[GẤP] Từ chối phê duyệt đơn yêu cầu hàng hóa";
             }
             string body = @"Xin chào <br />
-              Đơn yêu cầu của bạn ở trạng thái TỪ CHỐI phê duyệt <br /><br />
+              Đơn yêu cầu : " + id_request + @" của bạn ở trạng thái TỪ CHỐI phê duyệt <br /><br />
               Lý do : " + reason + @"<br /><br />
-              <a href=''> Link </a> <br />
+              <a href='http://172.26.248.62:8057/Approval/Condition'> Link </a> <br />
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
             var stepMap = new Dictionary<string, string>
@@ -140,9 +140,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             REQUEST_PROCESS._sendmail(body, mail_nguoidat, subject);
             return Json("Hoàn thành !");
         }
-        public JsonResult get_requestcondition()
+        public JsonResult get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total)
         {
-            var cf = REQUEST_PROCESS.get_requestcondition();
+            var cf = REQUEST_PROCESS.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, Total);
             return Json(cf);
         }
     }

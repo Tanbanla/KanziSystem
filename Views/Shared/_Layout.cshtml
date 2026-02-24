@@ -87,7 +87,8 @@
                             </a>
                         </li>
                     }
-                    <li><span id="us" hidden>@(User.FindFirst("UserId")?.Value ?? "User")</span></li>
+                    @* <li><span id="us" hidden>@(User.FindFirst("UserId")?.Value ?? "User")</span></li> *@
+                    <li><span id="us" hidden>loandt</span></li>
                 </ul>
             </nav>
             <div class="main-sidebar sidebar-style-2" tabindex="1" style="overflow: auto visible; outline: none;">
@@ -246,11 +247,12 @@
     <!-- Page Specific JS File -->
     @* <script src="~/js/page/index.js"></script> *@
     <script src="~/js/page/bootstrap-modal.js"></script>
+
     <!-- Template JS File -->
     <script src="~/js/scripts.js"></script>
     <script src="~/js/custom.js"></script>
-    <script src="~/wwwroot/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script>
-    <script src="~/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script>
+   @*  <script src="~/wwwroot/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script> *@
+ @*    <script src="~/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script> *@
     <!-- or use CDN -->
   
     @if (User.Identity.IsAuthenticated)

@@ -324,11 +324,29 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return pe_;
         }
-        public static List<PE_REQUEST_CONFIRM> get_requestcondition()
+        public static List<PE_REQUEST_CONFIRM> get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
-            var list = _db.GET_DATA_FROM_SQL("select top (1000) * from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center");
+            string gia = "";
+            if(Total < 3000)
+            {
+                gia = "b.Total < '3000'";
+            }
+            if (Total >= 3000 && Total < 10000)
+            {
+                gia = "b.Total >= '3000' and b.Total < '10000'";
+            }
+            if (Total >= 10000)
+            {
+                gia = "b.Total >= '10000'";
+            }
+            var list = _db.GET_DATA_FROM_SQL($@"select top (1000) * from [PE_REQUEST_CONFIRM] as a 
+                        left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
+                        left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
+                        WHERE b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and {gia}  
+                        order by ID desc");
+
             for (int i = 0; i < list.Rows.Count; i++)
             {
                 pe_.Add(new PE_REQUEST_CONFIRM
@@ -347,7 +365,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     INT_STEP = list.Rows[i]["INT_STEP"].ToString()!,
                     Code_Request = list.Rows[i]["Code_Request"].ToString()!,
                     Cost_Center = list.Rows[i]["Cost_Center"].ToString()!,
-                    Dealine = list.Rows[i]["Dealine"].ToString()!,
+                    Dealine = list.Rows[i]["Dealine"].ToString()!.Split(" ")[0],
                     Total = decimal.Parse(list.Rows[i]["Total"].ToString()!),
                     User_Create = list.Rows[i]["User_Create"].ToString()!,
                     Create_Date = list.Rows[i]["Create_Date"].ToString()!,
@@ -385,7 +403,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Account_Name = get_if.Rows[i]["Account_Name"].ToString(),
                     Unit = get_if.Rows[i]["Unit"].ToString(),
                     Amount = decimal.Parse(get_if.Rows[i]["Amount"].ToString()!),
-                    Price = decimal.Parse(get_if.Rows[i]["Price"].ToString()!),
+                    Price = Math.Round(decimal.Parse(get_if.Rows[i]["Price"].ToString()!),2),
                     Total_exchange = decimal.Parse(get_if.Rows[i]["Total_exchange"].ToString()!),
                     Currency = get_if.Rows[i]["Currency"].ToString(),
                     Cost_Center_Group = get_if.Rows[i]["Cost_Center_Group"].ToString(),
@@ -403,7 +421,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public static string _update_request(string id_request, string regency, string step)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '" + step + "' , CONFIRM_" + regency + " = '1', DTM_" + regency + " = '" + DateTime.Now + "' where ID_REQUEST = '" + id_request + "'");
+            _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '" + step + "' , CONFIRM_" + regency + " = '1', DTM_" + regency + " = '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' where ID_REQUEST = '" + id_request + "'");
             return "Xác nhận thành công !";
         }
         public static List<PE_USERNAME> _load_userinventory(string group_code, string id)
@@ -444,7 +462,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             return "Gửi mail thành công !";
         }
         public static List<CHITIET_XUATKHO> ct_xk()
-        {
+        { 
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             var lst = _db.GET_DATA_FROM_SQL(@"SELECT TOP (2000) * FROM PE_REQUEST_CONFIRM AS a
                         LEFT JOIN REQUEST_DETAIL AS b ON a.ID_REQUEST = b.Id_Request

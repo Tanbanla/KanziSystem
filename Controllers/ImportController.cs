@@ -45,18 +45,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(material);
         }
         // lấy thông tin adid để đọc ra các mã cost, phòng ban
-        public JsonResult _load_user_info()
+        public JsonResult _load_user_info(string us)
         {
             //string us = User.Identity?.Name?.Contains("\\") == true ? User.Identity.Name.Split('\\')[1] : (User.Identity?.Name ?? "Unknown");
 
-            string us = "loandt";
+            //string us = "loandt";
             //string us = User.FindFirst("UserId")?.Value ?? "User";
             List<User_Info> lst_cost = User_Info._info_adid(us);
             return Json(lst_cost);
         }
-        public JsonResult _load_dept(string dept)
+        public JsonResult _load_dept(string dept, string us)
         {
-            string us = "loandt";
+            //string us = "loandt";
             //string us = User.FindFirst("UserId")?.Value ?? "User";
             string cost = dept.Split(':')[0];
             string ss = dept.Split(':')[1];
@@ -86,12 +86,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(lst);
         }
         private readonly IWebHostEnvironment _env;
-
         public ImportController(IWebHostEnvironment env) // Inject Environment
         {
             _env = env;
         }
-
         [HttpPost("download_log")]
         public IActionResult download_log([FromForm] string date_to, [FromForm] string date_from)
         {

@@ -15,7 +15,7 @@
     }
 </style>
 <div class="row">
-    <div class="col-9">
+    <div class="col-12">
         <div class="card">
             <div class="input-group mt-2 mb-2">
                 <div class="col-2 input-group">
@@ -61,34 +61,7 @@
             </div>
         </div>
     </div>
-    <div class="col-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="form-group">
-                    <label class="d-block">Upload dữ liệu master kho &nbsp;&nbsp;<i class="fas fa-file-excel text-primary"></i> File mẫu</label>
-                    <a class="btn btn-primary daterange-btn icon-left btn-icon float-right text-white" id="modal-vd-add">
-                        <i class="ion ion-ios-plus-outline"></i> Đăng ký tay
-                    </a>
-                </div>
-                <div class="form-group">
-                    <label>Chọn file master : </label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <i class="ion ion-paperclip"></i>
-                            </div>
-                        </div>
-                        <input type="file" class="form-control timepicker">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Ghi chú :</label>
-                    <textarea class="summernote-simple"></textarea>
-                </div>
-                <button class="btn btn-success"><i class="ion ion-upload"></i> Upload </button>
-            </div>
-        </div>
-    </div>
+ 
 </div>
 @await Html.PartialAsync("_modal", "Master")
 <script src="~/scripts/master_process.js"></script>

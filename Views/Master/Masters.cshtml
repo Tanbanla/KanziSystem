@@ -16,89 +16,72 @@
         max-width : 800px;
     }
 </style>
+
 <div class="row">
-    <div class="col-8">
+    <div class="col-12">
         <div class="card">
-            <div class="card-body">
-                <div class="card-body p-0">
-                    <div class="input-group mb-2" style="padding-left: 0px;">
-                        <div class="col-4 input-group mb-2">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text"><i class="ion ion-ios-paper"></i></div>
-                            </div>
-                            <input type="text" class="form-control" id="vd_name" placeholder="Phòng ban">
+            <div class="card-body p-0">
+                @* Toolbar (merged) - keep IDs/classes so existing JS continues to work *@
+                <div class="input-group mb-2" style="padding-left: 0px;">
+                    <div class="col-4 input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="ion ion-ios-paper"></i></div>
                         </div>
-                        <div class="col-2 input-group mb-2">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text"><i class="ion ion-home"></i></div>
-                            </div>
-                            <select class="form-control">
-                                <option value="">ALL</option>
-                                <option value="F1">F1</option>
-                                <option value="F2">F2</option>
-                                <option value="F3">F3</option>
-                                <option value="F4">F4</option>
-                                <option value="F5">F5</option>
-                                <option value="TTF">TTF</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-primary" style="border-radius :0px; height:42px; margin-left:20px" onclick="_load_vender()"><i class="ion ion-ios-search-strong"></i></button>
+                        <input type="text" class="form-control" id="vd_name" placeholder="Phòng ban" aria-label="Phòng ban" />
                     </div>
-                    <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
-                        <table class="table table-bordered">
+
+                    <div class="col-2 input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="ion ion-home"></i></div>
+                        </div>
+                        <select class="form-control" aria-label="Nhà máy">
+                            <option value="">ALL</option>
+                            <option value="F1">F1</option>
+                            <option value="F2">F2</option>
+                            <option value="F3">F3</option>
+                            <option value="F4">F4</option>
+                            <option value="F5">F5</option>
+                            <option value="TTF">TTF</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" style="border-radius:0; height:42px; margin-left:20px" onclick="_load_vender()" title="Tìm kiếm">
+                        <i class="ion ion-ios-search-strong"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-success" style="border-radius:0; height:42px; margin-left:20px" title="Thêm mới" id="modal-12" onclick="load_section()">+ Thêm</button>
+                </div>
+
+                @* Table card (merged) - preserve IDs so JS populates rows and paging *@
+                <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" aria-label="Warehouse table">
                             <thead class="bg-primary">
                                 <tr>
-                                    <th>Kho</th>
-                                    <th>Phòng ban sử dụng</th>
-                                    <th>Nhà máy</th>
-                                    <th>Thời gian cập nhật</th>
-                                    <th>Người cập nhật</th>
-                                    <th colspan="2"></th>
+                                    <th scope="col">Kho</th>
+                                    <th scope="col">Phòng ban sử dụng</th>
+                                    <th scope="col">Nhà máy</th>
+                                    <th scope="col">Thời gian cập nhật</th>
+                                    <th scope="col">Người cập nhật</th>
+                                    <th scope="col" colspan="2"></th>
                                 </tr>
                             </thead>
                             <tbody id="show_wh">
                             </tbody>
                         </table>
-                        @*   <div id="pagination-controls" class="d-flex justify-content-center mt-3 gap-1"></div> *@
-                        <ul class="pagination" id="pagination-controls"></ul>
-                    </div>                  
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-4">
-        <div class="card">
-            <div class="card-body">
-                <div class="form-group">
-                    <label class="d-block">Upload dữ liệu master linh kiện &nbsp;&nbsp;<i class="fas fa-file-excel text-primary"></i> File mẫu</label>
-                    <a href="" class="btn btn-danger daterange-btn icon-left btn-icon float-right">
-                        <i class="ion ion-ios-plus-outline"></i> Đăng ký tay
-                    </a>
-                </div>
-                <div class="form-group">
-                    <label>Chọn file master : </label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <i class="ion ion-paperclip"></i>
-                            </div>
-                        </div>
-                        <input type="file" class="form-control timepicker">
                     </div>
+
+                    @* Keep pagination container id so existing JS can render controls *@
+                    <ul class="pagination" id="pagination-controls"></ul>
                 </div>
-                <div class="form-group">
-                    <label>Ghi chú :</label>
-                    <textarea class="summernote-simple"></textarea>
-                </div>
-                <button class="btn btn-success"><i class="ion ion-upload"></i> Upload </button>
             </div>
         </div>
     </div>
 </div>
+@await Html.PartialAsync("_modal", "Master")
 <script src="~/scripts/wh_process_2.js"></script>
 <script>
     window.onload = function(){
         _load_warehouse();
     }
 </script>
-     

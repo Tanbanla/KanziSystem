@@ -1083,8 +1083,9 @@ table tr:hover .table-links {
     color: #fff; }
   .badge.badge-primary {
     background-color: #2335b7; }
-  .badge.badge-secondary {
-    background-color: #34395e; }
+    .badge.badge-secondary {
+        background-color: #dddddd;
+    }
   .badge.badge-success {
     background-color: #63ed7a; }
   .badge.badge-info {
@@ -1099,7 +1100,9 @@ table tr:hover .table-links {
     color: #191d21; }
   .badge.badge-dark {
     background-color: #191d21; }
-
+    .badge.badge-pink {
+        background-color: #df91f0;
+    }
 h1 .badge {
   font-size: 24px;
   padding: 16px 21px; }
@@ -1748,7 +1751,7 @@ h6 .badge {
   .dropdown-menu.show {
     display: block !important; }
   .dropdown-menu a {
-    font-size: 13px; }
+    font-size: 11px; }
   .dropdown-menu .dropdown-title {
     text-transform: uppercase;
     font-size: 10px;

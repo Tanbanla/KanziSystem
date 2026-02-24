@@ -164,40 +164,46 @@ function _insert_user() {
     params.append('dept', employee_dept);
     params.append('role', employee_role);
     params.append('mail', employee_mail);
+    if (employee_code != "" && employee_name != "" && employee_adid != "" && employee_mail != "" && employee_dept != "" && employee_role != "") {
+        fetch('/User/Insert_Edit_User', {
 
-    fetch('/User/Insert_Edit_User', {
-      
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString()
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Yêu cầu thất bại với mã trạng thái: ${response.status}`);
-            }
-            return response.json();
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
         })
-        .then(data => {
-            alert(data);
-        })
-        .catch(error => {
-            console.error('Lỗi phán định:', error);
-            alert("Phán định thất bại: " + error.message);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data);
+            })
+            .catch(error => {
+                console.error('Lỗi phán định:', error);
+                alert("Phán định thất bại: " + error.message);
+            });
+    }
+    else {
+        alert("Không được để trống !");
+    }
+  
 }
 function _get_modal(id) {
     document.getElementById("ed_employee_code").value = document.getElementById("staffCode_" + id).innerHTML;
     document.getElementById("ed_employee_name").value = document.getElementById("name_" + id).innerHTML;
     document.getElementById("ed_employee_adid").value = document.getElementById("adid_" + id).innerHTML;
-    document.getElementById("ed_employee_mail").value = document.getElementById("dept_" + id).innerHTML;
-    document.getElementById("ed_employee_dept").value = document.getElementById("mail_" + id).innerHTML;
+    document.getElementById("ed_employee_mail").value = document.getElementById("mail_" + id).innerHTML;
+    document.getElementById("ed_employee_dept").value = document.getElementById("dept_" + id).textContent;
     document.getElementById("ed_employee_role").value = document.getElementById("role_" + id).innerHTML;
     document.getElementById("modal-5").click();
 }
 function _update_user() {
 
+   
     var employee_code = document.getElementById("ed_employee_code").value;
     var employee_name = document.getElementById("ed_employee_name").value;
     var employee_adid = document.getElementById("ed_employee_adid").value;
@@ -212,26 +218,31 @@ function _update_user() {
     params.append('dept', employee_dept);
     params.append('role', employee_role);
     params.append('mail', employee_mail);
+    if (employee_name != "" && employee_adid != "" && employee_code != "" && employee_dept != "" && employee_role != "" && employee_mail != "") {
+        fetch('/User/Insert_Edit_User', {
 
-    fetch('/User/Insert_Edit_User', {
-
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString()
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Yêu cầu thất bại với mã trạng thái: ${response.status}`);
-            }
-            return response.json();
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
         })
-        .then(data => {
-            alert(data);
-        })
-        .catch(error => {
-            console.error('Lỗi phán định:', error);
-            alert("Phán định thất bại: " + error.message);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data);
+            })
+            .catch(error => {
+                console.error('Lỗi phán định:', error);
+                alert("Phán định thất bại: " + error.message);
+            });
+    }
+    else {
+        alert("Hãy nhập đủ thông tin !");
+    }
+ 
 }

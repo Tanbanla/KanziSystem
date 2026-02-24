@@ -40,3 +40,36 @@
         </div>
     </div>
 </form>
+
+<form class="modal-part" id="modal-wh-add">
+    <div class="row">
+        <div class="form-group col-6">
+            <label>Nhà máy</label>
+            <select class="form-control" id="CHR_FACTORY">
+                <option>F1</option>
+                <option>F2</option>
+                <option>F3</option>
+                <option>F4</option>
+                <option>F5</option>
+                <option>TTF</option>
+            </select>           
+        </div>
+        <div class="form-group col-6">
+            <label>Phòng ban sử dụng</label>          
+            <select id="CHR_DEPT_USE" class="form-control"></select>
+        </div>
+        <div class="form-group col-6">
+            <label>Tên Kho</label>
+            <input id="CHR_WAREHOUSE" type="text" class="form-control" required>
+        </div>
+        <div class="form-group col-6">
+            <label>Ghi chú</label>
+            <input id="CHR_NOTE" type="text" class="form-control" required>
+        </div>
+        <div class="form-group col-6">
+            <button class="btn btn-outline-success" onclick="add_wh()">+ Thêm</button>
+        </div>
+      
+    </div>
+  
+</form>

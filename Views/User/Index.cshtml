@@ -68,7 +68,8 @@
         </div>
     </div>
         <div class="col-3 col-sm-3 ">
-        <div class="card card-primary">
+            <form>
+            <div class="card card-primary">
             <div class="card-header">
                 <h4><i class="fa fa-pencil-ruler"></i> Đăng ký</h4>                       
             </div>
@@ -76,19 +77,19 @@
                 <div class="row">
                     <div class="form-group col-6">
                         <label for="employee_code">Mã nhân viên</label>
-                        <input id="employee_code" type="text" class="form-control" name="frist_name" autofocus>
+                        <input id="employee_code" type="text" class="form-control" required>
                     </div>
                     <div class="form-group col-6">
                         <label for="employee_name">Họ tên</label>
-                        <input id="employee_name" type="text" class="form-control" name="last_name">
+                        <input id="employee_name" type="text" class="form-control" required>
                     </div>
                     <div class="form-group col-4">
                         <label for="employee_adid">ADID</label>
-                        <input id="employee_adid" type="text" class="form-control" name="frist_name" autofocus>
+                        <input id="employee_adid" type="text" class="form-control" required>
                     </div>
                     <div class="form-group col-8">
                         <label for="employee_mail">Mail</label>
-                        <input id="employee_mail" type="text" class="form-control" name="last_name">
+                        <input id="employee_mail" type="text" class="form-control" required>
                     </div>
                 </div>
                 <div class="row">
@@ -113,12 +114,13 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg btn-block" onclick="_insert_user()">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="_insert_user()">
                         Register
                     </button>
                 </div>               
             </div>
         </div>
+        </form>
     </div>
 </div>
 <button class="btn btn-primary" id="modal-5" hidden >Login</button>

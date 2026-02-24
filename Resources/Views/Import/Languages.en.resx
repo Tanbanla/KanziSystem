@@ -118,229 +118,229 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Bennhaptruoc" xml:space="preserve">
-    <value>??????????</value>
+    <value>Importer</value>
   </data>
   <data name="chitiet" xml:space="preserve">
-    <value>??</value>
+    <value>Detail</value>
   </data>
   <data name="chuyenkho" xml:space="preserve">
-    <value>????</value>
+    <value>Transfer warehouse</value>
   </data>
   <data name="Dangky" xml:space="preserve">
-    <value>????</value>
+    <value>Register</value>
   </data>
   <data name="danhmuc" xml:space="preserve">
-    <value>????</value>
+    <value>Category</value>
   </data>
   <data name="dasudung" xml:space="preserve">
-    <value>????</value>
+    <value>Reuse</value>
   </data>
   <data name="Diadiemgiaohang" xml:space="preserve">
-    <value>????</value>
+    <value>Delivery location</value>
   </data>
   <data name="Dieukiengiaohang" xml:space="preserve">
-    <value>????</value>
+    <value>Delivery conditions</value>
   </data>
   <data name="doisangusd" xml:space="preserve">
-    <value>??????</value>
+    <value>Convert to USD</value>
   </data>
   <data name="Dongiauoctinh" xml:space="preserve">
-    <value>????</value>
+    <value>Estimated unit price</value>
   </data>
   <data name="dongyboi" xml:space="preserve">
-    <value>????</value>
+    <value>Agreed by</value>
   </data>
   <data name="Donvi" xml:space="preserve">
-    <value>????</value>
+    <value>Unit</value>
   </data>
   <data name="donviquydoi" xml:space="preserve">
-    <value>??????</value>
+    <value>Unit of conversion</value>
   </data>
   <data name="Dung" xml:space="preserve">
-    <value>??</value>
+    <value>Stop</value>
   </data>
   <data name="Duoctachtu" xml:space="preserve">
-    <value>????</value>
+    <value>Separated from</value>
   </data>
   <data name="Giatien" xml:space="preserve">
-    <value>??</value>
+    <value>Price</value>
   </data>
   <data name="guiyeucau" xml:space="preserve">
-    <value>????????</value>
+    <value>Send request</value>
   </data>
   <data name="hangngoaidanhmuc" xml:space="preserve">
-    <value>???????</value>
+    <value>Items not on the list</value>
   </data>
   <data name="hangtrongdanhmuc" xml:space="preserve">
-    <value>???????</value>
+    <value>Items in the category</value>
   </data>
   <data name="hanhdong" xml:space="preserve">
-    <value>??</value>
+    <value>Action</value>
   </data>
   <data name="Idlichsu" xml:space="preserve">
-    <value>???????ID</value>
+    <value>Import History ID</value>
   </data>
   <data name="Khoi" xml:space="preserve">
-    <value>????</value>
+    <value>Block</value>
   </data>
   <data name="loaichiphi" xml:space="preserve">
-    <value>?????</value>
+    <value>Type of cost</value>
   </data>
   <data name="loaihang" xml:space="preserve">
-    <value>?????</value>
+    <value>Category</value>
   </data>
   <data name="loaihinhtokhai" xml:space="preserve">
-    <value>?????</value>
+    <value>Type of declaration</value>
   </data>
   <data name="loaiphieu" xml:space="preserve">
-    <value>????????</value>
+    <value>Type of voucher</value>
   </data>
   <data name="loaitien" xml:space="preserve">
-    <value>?????</value>
+    <value>Currency</value>
   </data>
   <data name="log" xml:space="preserve">
     <value>Log</value>
   </data>
   <data name="Luonglamthutuc" xml:space="preserve">
-    <value>????????</value>
+    <value>Customs Declared Quantity</value>
   </data>
   <data name="Luongthucte" xml:space="preserve">
-    <value>????????</value>
+    <value>Actual Received Quantity</value>
   </data>
   <data name="luongvekho" xml:space="preserve">
-    <value>?????????</value>
+    <value>Received Quantity</value>
   </data>
   <data name="Mahethong" xml:space="preserve">
-    <value>???????</value>
+    <value>System Code</value>
   </data>
   <data name="Mail" xml:space="preserve">
-    <value>??</value>
+    <value>Mail</value>
   </data>
   <data name="Maketoan" xml:space="preserve">
-    <value>?????</value>
+    <value>Account Code</value>
   </data>
   <data name="Manhanvien" xml:space="preserve">
-    <value>?????</value>
+    <value>Employee ID</value>
   </data>
   <data name="MaNVL" xml:space="preserve">
-    <value>?????</value>
+    <value>Material Code</value>
   </data>
   <data name="Masanpham" xml:space="preserve">
-    <value>?????</value>
+    <value>Product Code</value>
   </data>
   <data name="moi" xml:space="preserve">
-    <value>???</value>
+    <value>New</value>
   </data>
   <data name="ngaygiaohangdukien" xml:space="preserve">
-    <value>??????</value>
+    <value>Estimated Delivery Date</value>
   </data>
   <data name="Ngaynhapkho" xml:space="preserve">
-    <value>???</value>
+    <value>Received Date</value>
   </data>
   <data name="Ngoaite" xml:space="preserve">
-    <value>??</value>
+    <value>Foreign Currency</value>
   </data>
   <data name="nguoiduthao" xml:space="preserve">
-    <value>???</value>
+    <value>Drafter</value>
   </data>
   <data name="Nguoinhapkho" xml:space="preserve">
-    <value>?????</value>
+    <value>Receiving Clerk</value>
   </data>
   <data name="nguoipheduyet" xml:space="preserve">
-    <value>???</value>
+    <value>Approver</value>
   </data>
   <data name="nguoithamtra" xml:space="preserve">
-    <value>???</value>
+    <value>Verifier</value>
   </data>
   <data name="nguoixuatkho" xml:space="preserve">
-    <value>?????????</value>
+    <value>Stock Clerk</value>
   </data>
   <data name="nhacungcap" xml:space="preserve">
-    <value>??????</value>
+    <value>Vendor</value>
   </data>
   <data name="noigiaohangdukien" xml:space="preserve">
-    <value>??????</value>
+    <value>Delivery location</value>
   </data>
   <data name="Phongban" xml:space="preserve">
-    <value>??</value>
+    <value>Department</value>
   </data>
   <data name="phongbanyeucau" xml:space="preserve">
-    <value>??????????</value>
+    <value>Department request</value>
   </data>
   <data name="phongtiepnhan" xml:space="preserve">
-    <value>???</value>
+    <value>Reception department</value>
   </data>
   <data name="Phuongthucvanchuyen" xml:space="preserve">
-    <value>????</value>
+    <value>Transportation</value>
   </data>
   <data name="QuanlyNVL" xml:space="preserve">
-    <value>????</value>
+    <value>Materials management</value>
   </data>
   <data name="Quyen" xml:space="preserve">
-    <value>??</value>
+    <value>Role</value>
   </data>
   <data name="soluongdathang" xml:space="preserve">
-    <value>???</value>
+    <value>Number Order</value>
   </data>
   <data name="Sopo" xml:space="preserve">
     <value>PO??</value>
   </data>
   <data name="Sotien" xml:space="preserve">
-    <value>?</value>
+    <value>Money</value>
   </data>
   <data name="Sua" xml:space="preserve">
-    <value>??</value>
+    <value>Edit</value>
   </data>
   <data name="TenhangTA" xml:space="preserve">
-    <value>??????/????</value>
+    <value>Material name Eng/Jap</value>
   </data>
   <data name="TenhangTV" xml:space="preserve">
-    <value>??????????</value>
+    <value>Material name VN</value>
   </data>
   <data name="TenMaketoan" xml:space="preserve">
-    <value>??????</value>
+    <value>Account name</value>
   </data>
   <data name="Tennhanvien" xml:space="preserve">
-    <value>???</value>
+    <value>Employee name</value>
   </data>
   <data name="TenNVL" xml:space="preserve">
-    <value>????</value>
+    <value>Material name</value>
   </data>
   <data name="tenphongyeucau" xml:space="preserve">
-    <value>?????????????</value>
+    <value>Request department</value>
   </data>
   <data name="thanhtien" xml:space="preserve">
-    <value>?????</value>
+    <value>Money</value>
   </data>
   <data name="themdongmoi" xml:space="preserve">
-    <value>???????</value>
+    <value>Add new row</value>
   </data>
   <data name="thoihanmuonnhan" xml:space="preserve">
-    <value>??????</value>
+    <value>Deadline to receive</value>
   </data>
   <data name="thoihanthanhtoan" xml:space="preserve">
-    <value>?????</value>
+    <value>Payment term</value>
   </data>
   <data name="thuocdonyeucau" xml:space="preserve">
-    <value>?????????</value>
+    <value>Request</value>
   </data>
   <data name="tinhtranghaiquan" xml:space="preserve">
-    <value>????</value>
+    <value>Customs status</value>
   </data>
   <data name="tinhtrangtokhai" xml:space="preserve">
-    <value>????</value>
+    <value>Status of declaration</value>
   </data>
   <data name="tongdon" xml:space="preserve">
-    <value>?????</value>
+    <value>Sum</value>
   </data>
   <data name="Truycap" xml:space="preserve">
-    <value>???????</value>
+    <value>Last Login</value>
   </data>
   <data name="tygia" xml:space="preserve">
-    <value>?????</value>
+    <value>Exchange rate</value>
   </data>
   <data name="vat" xml:space="preserve">
-    <value>??????</value>
+    <value>VAT(%)</value>
   </data>
   <data name="vitri" xml:space="preserve">
     <value>Location</value>
@@ -367,7 +367,7 @@
     <value>Fixed assets</value>
   </data>
   <data name="Donvichitiet" xml:space="preserve">
-    <value>?????</value>
+    <value>Detailed unit</value>
   </data>
   <data name="Chiphichung" xml:space="preserve">
     <value>General expenses</value>
@@ -379,7 +379,7 @@
     <value>Warehouse</value>
   </data>
   <data name="tonkho" xml:space="preserve">
-    <value>inventory</value>
+    <value>Inventory</value>
   </data>
   <data name="Mucdich" xml:space="preserve">
     <value>Purpose</value>
@@ -436,7 +436,7 @@
     <value>Status</value>
   </data>
   <data name="nguoitao" xml:space="preserve">
-    <value>User creat</value>
+    <value>Creator</value>
   </data>
   <data name="daduyet" xml:space="preserve">
     <value>Approved</value>

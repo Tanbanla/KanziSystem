@@ -415,7 +415,81 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result.Data);
         }
+        // Download file dữ liệu đang có trong bảng 
+        [HttpPost]
+        public async Task<IActionResult> ExportTable([FromBody] List<BaoGia_Request_of_QuotationDTO> items)
+        {
+            try
+            {
+                if (items == null || !items.Any())
+                {
+                    return BadRequest("Không có dữ liệu để xuất");
+                }
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemPlateQuote.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemPlateQuote.xlsx");
+                }
 
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+
+                int row = 10;
+                foreach (var rq in items)
+                {
+                    // Map fields into template columns similar to ExportSelection
+                    ws.Cell(row, 1).SetValue(row - 9); // status placeholder
+                    ws.Cell(row, 2).SetValue(rq?.CHR_SectionCode ??  string.Empty);
+                    ws.Cell(row, 4).SetValue(rq?.CHR_Phanloai ?? string.Empty);
+                    ws.Cell(row, 5).SetValue(rq?.CHR_MaThietBi ?? string.Empty);
+                    ws.Cell(row, 6).SetValue(rq?.CHR_MaHangNoiBo ?? string.Empty);
+                    ws.Cell(row, 7).SetValue(rq?.CHR_MaHangNCC ?? string.Empty);
+                    ws.Cell(row, 8).SetValue(rq?.NVCHR_NameVN ?? string.Empty);
+                    ws.Cell(row, 9).SetValue(rq?.CHR_NameEN ?? string.Empty);
+                    ws.Cell(row, 10).SetValue(rq?.INT_SoLuong.HasValue == true ? rq.INT_SoLuong.Value : 0);
+                    ws.Cell(row, 11).SetValue(rq?.NVCHR_DonVi ?? string.Empty);
+                    ws.Cell(row, 12).SetValue(rq?.NVCHR_ChungLoai ?? string.Empty);
+                    ws.Cell(row, 13).SetValue(rq?.NVCHR_HinhDang ?? string.Empty);
+                    ws.Cell(row, 14).SetValue(rq?.NVCHR_ChatLieu ?? string.Empty);
+                    ws.Cell(row, 15).SetValue(rq?.NVCHR_ThanhPhan ?? string.Empty);
+                    ws.Cell(row, 16).SetValue(rq?.NVCHR_KichThuoc ?? string.Empty);
+                    ws.Cell(row, 17).SetValue(rq?.NVCHR_DongMay ?? string.Empty);
+                    ws.Cell(row, 18).SetValue(rq?.NVCHR_TinhNang ?? string.Empty);
+                    ws.Cell(row, 19).SetValue(rq?.NVCHR_Rohs ?? string.Empty);
+                    ws.Cell(row, 20).SetValue(rq?.NVCHR_COCQ ?? string.Empty);
+                    ws.Cell(row, 21).SetValue(rq?.NVCHR_MSDS ?? string.Empty);
+                    ws.Cell(row, 22).SetValue(rq?.NVCHR_AnToan ?? string.Empty);
+                    ws.Cell(row, 23).SetValue(rq?.NVCHR_FileThietKe ?? string.Empty);
+                    ws.Cell(row, 24).SetValue(rq?.NVCHR_NhaSanXuat ?? string.Empty);
+                    ws.Cell(row, 25).SetValue(rq?.CHR_MaNCC ?? string.Empty);
+                    ws.Cell(row, 26).SetValue(rq?.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(row, 27).SetValue(rq?.BIT_LayBaoGia == false ? "X" : "O");
+                    ws.Cell(row, 28).SetValue(rq?.NVCHR_LyDo ?? string.Empty);
+                    ws.Cell(row, 29).SetValue(rq?.DTM_NgayMuonNhan.HasValue == true ? rq.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(row, 30).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(row, 31).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
+                    ws.Cell(row, 32).SetValue(rq?.CHR_CreateBy ?? string.Empty);
+                    row++;
+                }
+
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"TableQuote_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xuất file: {ex.Message}");
+            }
+        }
         // Upload Excel để nhập danh sách yêu cầu báo giá
         [HttpPost]
         [RequestSizeLimit(20_000_000)]
@@ -450,7 +524,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         // lấy thông tin theo mã hàng nội bộ đã có sẵn
                         var inforMateial = await _materialService.GetByMaHangAsync(ws.Cell(r, 6).GetString());
 
-                        if (inforMateial.Success && inforMateial.Data !=  null)
+                        if (inforMateial.Success && inforMateial.Data != null)
                         {
                             var infor = inforMateial.Data;
                             // Map theo thứ tự cột trong bảng ở giao diện
@@ -458,7 +532,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             {
                                 CHR_SectionCode = ws.Cell(r, 2).GetString(), // Mã phòng ban (value)
                                 CHR_SectionName = ws.Cell(r, 3).GetString(), // hiển thị có thể giống mã
-                                CHR_Phanloai =  infor.LoaiHang,
+                                CHR_Phanloai = infor.LoaiHang,
                                 CHR_MaHangNoiBo = infor.Material_Code,
                                 NVCHR_NameVN = infor.TenMoThuTuc,
                                 CHR_NameEN = infor.Material_Name_EN,
@@ -579,7 +653,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
         }
-
         private static double? ParseDouble(string s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
@@ -939,7 +1012,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     //var supplierAs = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(item);
                     // đổi sang dùng bảng BaoGiaNCCCategory
-                    var supplierAs = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(m.Category_VN ?? "");
+                    var supplierAs = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(m.Category_VN ?? ""); ;
                     if (!supplierAs.Success ||  supplierAs.Data == null)
                     {
                         continue;
@@ -1018,7 +1091,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 int row = 10;
                 foreach (var item in autoRenders.selectedItemIds)
                 {
-                    var supplierAs = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(item);
+                    var supplierAs = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(item); ;
                     if (!supplierAs.Success || supplierAs.Data == null)
                     {
                         continue;

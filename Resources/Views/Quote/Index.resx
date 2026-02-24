@@ -352,7 +352,7 @@
     <value>Vui lòng chọn ít nhất một chủng loại hàng</value>
   </data>
   <data name="Exporting" xml:space="preserve">
-    <value>Đang xuất...</value>
+    <value>Đang xử lý...</value>
   </data>
   <data name="MsgExportedExcel" xml:space="preserve">
     <value>Đã xuất file Excel tự động.</value>
@@ -374,5 +374,11 @@
   </data>
   <data name="SelectPlaceholder" xml:space="preserve">
     <value>-- Chọn --</value>
+  </data>
+  <data name="DownloadExcelTemplate" xml:space="preserve">
+    <value>Tải file Excel mẫu</value>
+  </data>
+  <data name="DownloadExcelTable" xml:space="preserve">
+    <value>Tải dữ liệu của bảng</value>
   </data>
 </root>

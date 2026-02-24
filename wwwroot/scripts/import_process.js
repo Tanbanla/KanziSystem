@@ -197,11 +197,16 @@ function fillDataToSelect($el, data) {
 }
 
 function _load_info_adid() {
-   
+
+    var us = document.getElementById("us").innerHTML;
+
+    const params = new URLSearchParams();
+    params.append('us', us);
 
     fetch('/Import/_load_user_info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
     })
         .then(response => response.json())
         .then(data => {
@@ -215,9 +220,11 @@ function _load_info_adid() {
 }
 
 function _load_dept(dept) {
+    var us = document.getElementById("us").innerHTML;
 
     const params = new URLSearchParams();
     params.append('dept', dept);
+    params.append('us', us);
 
     fetch('/Import/_load_dept', {
         method: 'POST',
@@ -285,4 +292,87 @@ function _modal11(ma, kho, soluon, ten) {
     document.getElementById("ma_ck").innerHTML = ma + " -  " + ten;
     document.getElementById("kho_hientai").value = kho;
     document.getElementById("tonkho").value = soluon;
+    _Fac()
+}
+
+function _Fac() {
+
+    fetch('/Master/load_warehouse', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        /* body: params.toString()*/
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById("nhamay_chuyen").innerHTML = "<option></option>";
+            for (var i = 0; i < data.length; i++) {
+                document.getElementById("nhamay_chuyen").innerHTML += `<option value="${data[i].chR_FACTORY}">${data[i].chR_FACTORY}</option>`
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+function _SEC(fac) {
+
+    const params = new URLSearchParams({ fac: fac });
+        fetch('/Master/load_sec', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+             body: params.toString()
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById("phongban_chuyen").innerHTML = "<option></option>";
+            for (var i = 0; i < data.length; i++) {
+                document.getElementById("phongban_chuyen").innerHTML += `<option>${data[i].chR_DEPT_USE}</option>`
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+function _WH() {
+
+    var fac = document.getElementById("nhamay_chuyen").value;
+    var sec = document.getElementById("phongban_chuyen").value;
+
+    const params = new URLSearchParams({ fac: fac, sec : sec });
+    fetch('/Master/load_wh', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            document.getElementById("den_kho").innerHTML = "<option></option>";
+            for (var i = 0; i < data.length; i++) {
+                document.getElementById("den_kho").innerHTML += `<option>${data[i].chR_WAREHOUSE}</option>`
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }

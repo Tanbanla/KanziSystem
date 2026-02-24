@@ -352,7 +352,7 @@
     <value>少なくとも1つのカテゴリを選択してください</value>
   </data>
   <data name="Exporting" xml:space="preserve">
-    <value>出力中...</value>
+    <value>処理中...</value>
   </data>
   <data name="MsgExportedExcel" xml:space="preserve">
     <value>自動Excel出力が完了しました。</value>
@@ -374,5 +374,11 @@
   </data>
   <data name="SelectPlaceholder" xml:space="preserve">
     <value>-- 選択 --</value>
+  </data>
+  <data name="DownloadExcelTemplate" xml:space="preserve">
+    <value>Excel 雛形 ダウンロード</value>
+  </data>
+  <data name="DownloadExcelTable" xml:space="preserve">
+    <value>表データ ダウンロード</value>
   </data>
 </root>

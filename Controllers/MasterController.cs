@@ -44,10 +44,38 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
+        public IActionResult master_vender()
+        {
+            return View();
+        }
+        public IActionResult master_material()
+        {
+            return View();
+        }
         [HttpPost]
         public JsonResult load_vender(VENDER vder)
         {
             List<VENDER> dt = Vender_process._listVender(vder);
+            return Json(dt);
+        }
+        [HttpPost]
+        public JsonResult load_warehouse()
+        {
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
+            return Json(dt);
+        }
+        [HttpPost]
+        public JsonResult load_sec(string fac)
+        {
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
+            dt = dt.Where(x => x.CHR_FACTORY == fac).ToList();
+            return Json(dt);
+        }
+        [HttpPost]
+        public JsonResult load_wh(string fac, string sec)
+        {
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
+            dt = dt.Where(x => x.CHR_FACTORY == fac && x.CHR_DEPT_USE == sec).ToList();
             return Json(dt);
         }
         public PartialViewResult _modal()
@@ -541,6 +569,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
+        }
+        public JsonResult insert_warehouse(string CHR_WAREHOUSE, string CHR_DEPT_USE, string CHR_FACTORY, string CHR_NOTE, string CHR_USER)
+        {
+            var ins = Models.MST_WAREHOUSE.Insert_warehouse(CHR_WAREHOUSE, CHR_DEPT_USE, CHR_FACTORY, CHR_NOTE, CHR_USER);
+            return Json(ins);
+        }
+        public JsonResult del_warehouse(string id, string tenkho)
+        {
+            var del = Models.MST_WAREHOUSE.delete_wh(id, tenkho);
+            return Json(del);
+        }
+        public JsonResult load_section()
+        {
+            List<string> sec = Models.SECTION._load_sec();
+            return Json(sec);
         }
     }
 }

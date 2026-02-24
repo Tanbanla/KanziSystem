@@ -1,25 +1,26 @@
-﻿<form class="modal-part" id="modal-login-part">
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+<form class="modal-part" id="modal-login-part">
     <div class="row">
         <div class="form-group col-6">
-            <label for="employee_code">Mã nhân viên</label>
-            <input id="ed_employee_code" type="text" class="form-control" name="frist_name" autofocus>
+            <label for="employee_code">@Languages.Manhanvien</label>
+            <input id="ed_employee_code" type="text" class="form-control" required>
         </div>
         <div class="form-group col-6">
-            <label for="employee_name">Họ tên</label>
-            <input id="ed_employee_name" type="text" class="form-control" name="last_name">
+            <label for="employee_name">@Languages.Tennhanvien</label>
+            <input id="ed_employee_name" type="text" class="form-control" required>
         </div>
         <div class="form-group col-4">
             <label for="employee_adid">ADID</label>
-            <input id="ed_employee_adid" type="text" class="form-control" name="frist_name" autofocus>
+            <input id="ed_employee_adid" type="text" class="form-control" required >
         </div>
         <div class="form-group col-8">
             <label for="employee_mail">Mail</label>
-            <input id="ed_employee_mail" type="text" class="form-control" name="last_name">
+            <input id="ed_employee_mail" type="text" class="form-control" required >
         </div>
     </div>
     <div class="row">
         <div class="form-group col-6">
-            <label>Phòng ban</label>
+            <label>@Languages.Phongban</label>
             <input type="text" list="dept_dt" class="form-control" id="ed_employee_dept" />
             <datalist class="form-control selectric" id="dept_dt" hidden>
                 <option>R&D - PE</option>
@@ -29,7 +30,7 @@
             </datalist>
         </div>
         <div class="form-group col-6">
-            <label>Quyền truy cập</label>
+            <label>Role :</label>
             <input type="text" list="role_dt" class="form-control" id="ed_employee_role" />
             <datalist class="form-control selectric" id="role_dt" hidden>
                 <option value="5">Admin</option>
@@ -39,5 +40,6 @@
                 <option value="1">User</option>
             </datalist>
         </div>
+        <button type="button" class="btn btn-success" onclick="_update_user()"><i class="fa fa-save"></i> Lưu</button>
     </div>
 </form>

@@ -65,16 +65,7 @@ $("#modal-5").fireModal({
     shown: function (modal, form) {
         console.log(form)
     },
-    buttons: [
-        {
-            text: 'Save',
-            onclick: '_update_user()',
-            submit: true,
-            class: 'btn btn-primary btn-shadow',
-            handler: function (modal) {
-            }
-        }
-    ]
+ 
 });
 $("#modal-6").fireModal({
     title: '',
@@ -159,12 +150,12 @@ $("#modal-8").fireModal({
     },
 });
 $("#modal-9").fireModal({
-    title: 'Log :',
+    title: '',
     body: $("#modal-download"),
     footerClass: 'bg-whitesmoke',
     autoFocus: false,
     created: function (modal) {
-        modal.find('.modal-dialog').css('max-width', '480px');
+        modal.find('.modal-dialog').css('max-width', '500px');
         modal.find('.modal-dialog').css('padding-top', '300px');
         modal.find('.modal-content').css({
             'border': '1',
@@ -192,6 +183,68 @@ $("#modal-9").fireModal({
 $("#modal-10").fireModal({
     title: 'Xuất kho ',
     body: $("#modal-xuatkho"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '600px');
+        modal.find('.modal-dialog').css('padding-top', '200px');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+        // Form Data
+        let form_data = $(e.target).serialize();
+        console.log(form_data)
+
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+            modal.find('.modal-body').prepend('<div class="alert alert-info">Please check your browser console</div>')
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
+$("#modal-11").fireModal({
+    title: '',
+    body: $("#modal-chuyenkho"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '600px');
+        modal.find('.modal-dialog').css('padding-top', '200px');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+        // Form Data
+        let form_data = $(e.target).serialize();
+        console.log(form_data)
+
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+            modal.find('.modal-body').prepend('<div class="alert alert-info">Please check your browser console</div>')
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
+$("#modal-12").fireModal({
+    title: '',
+    body: $("#modal-wh-add"),
     footerClass: 'bg-whitesmoke',
     autoFocus: false,
     created: function (modal) {

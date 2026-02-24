@@ -34,6 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult load_material (PARAS para)
         {
             List<PARAS> dt = MATERIA.material_process(para);
+            dt = dt.GroupBy(x => x.Material_Code).Select(g => g.First()).ToList();
             return Json(dt);
         }
         // MARk: Màn hình xác nhận tên

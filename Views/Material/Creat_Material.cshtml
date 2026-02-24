@@ -1,20 +1,4 @@
-﻿@* 
-Pseudocode / Plan (detailed):
-1. Wrap all fields in a <form> with Bootstrap classes and client-side validation (novalidate + JS).
-2. Use a centered card with a subtle shadow and padding.
-3. Arrange fields in logical rows using Bootstrap grid:
-   - Row 1: Material_Code (required), Material_Name_VN (required)
-   - Row 2: Material_Name_EN, Material_Name_JP
-   - Row 3: Account_Code, Account_Name_EN
-   - Row 4: Account_Name_VN, Unit
-   - Row 5: Unit_Note, Price (input-group with currency suffix), Currency (select), Group_Code (select), GoodKind
-4. Use meaningful ids/names for accessibility and label `for` attributes.
-5. Add small helper text and placeholders; mark required fields using `required` and aria attributes.
-6. Add Submit and Cancel buttons; Submit shows spinner on click and uses Bootstrap validation.
-7. Add minimal inline script at bottom to enable Bootstrap validation behavior (prevent submit if invalid).
-8. Keep markup generic (no model-specific tag helpers) so it fits the existing project structure.
-*@
-
+﻿
 @{
     ViewData["Title"] = "Create";
 }
@@ -148,4 +132,6 @@ Pseudocode / Plan (detailed):
             form.classList.add('was-validated');
         }, false);
     })();
+
+
 </script>

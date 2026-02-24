@@ -19,10 +19,10 @@
         public static List<MST_INVENTORY> inventory_process(MST_INVENTORY para)
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
-            para.MaNguyenLieu = para.MaNguyenLieu is null ? "NULL" : para.MaNguyenLieu!.ToString().Length > 0 ? $"N'{para.MaNguyenLieu}'" : "NULL";
-            para.Kho = para.Kho is null ? "NULL" : para.Kho!.ToString().Length > 0 ? $"N'{para.Kho}'" : "NULL";
-            para.NVCHR_COST = para.NVCHR_COST is null ? "NULL" : para.NVCHR_COST!.ToString().Length > 0 ? $"N'{para.NVCHR_COST}'" : "NULL";
-            para.IS_SAVE_WH = para.IS_SAVE_WH is null ? "NULL" : para.IS_SAVE_WH!.ToString().Length > 0 ? $"N'{para.IS_SAVE_WH}'" : "NULL";
+            //para.MaNguyenLieu = para.MaNguyenLieu is null ? "NULL" : para.MaNguyenLieu!.ToString().Length > 0 ? $"N'{para.MaNguyenLieu}'" : "NULL";
+            //para.Kho = para.Kho is null ? "NULL" : para.Kho!.ToString().Length > 0 ? $"N'{para.Kho}'" : "NULL";
+            //para.NVCHR_COST = para.NVCHR_COST is null ? "NULL" : para.NVCHR_COST!.ToString().Length > 0 ? $"N'{para.NVCHR_COST}'" : "NULL";
+            //para.IS_SAVE_WH = para.IS_SAVE_WH is null ? "NULL" : para.IS_SAVE_WH!.ToString().Length > 0 ? $"N'{para.IS_SAVE_WH}'" : "NULL";
 
             var _cmd = _context.GET_DATA_FROM_SQL($"  select * from KHO as a left join MATERIAL as b on a.MaNguyenLieu =  b.Material_Code where MaNguyenLieu like '%{para.MaNguyenLieu}%' and a.Group_Code like '%{para.Group_Code}%' and Kho like '%{para.Kho}%' and a.Hientai > 0");
             List<MST_INVENTORY> _inv = new List<MST_INVENTORY>();
