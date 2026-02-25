@@ -179,6 +179,7 @@ function _load_name_inv(group_code) {
     })
         .then(res => res.json())
         .then(data => {
+           
             globalMaterialData = data; // Lưu lại để dùng sau
             const $allSelects = $('.select2');
 
@@ -274,7 +275,7 @@ function _load_material(Material_Code, id) {
                 document.getElementById("dv_" + idd).value = data[0].unit;
             }
             else {
-                document.getElementById("dv_" + idd).value = data[0].unit_Note;
+                document.getElementById("dv_" + idd).value = data[0].unit + "(" + data[0].unit_Note + ")";
             }
             document.getElementById("dg_" + idd).value = data[0].price;
             document.getElementById("nt_" + idd).value = data[0].currency;

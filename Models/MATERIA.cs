@@ -12,7 +12,7 @@
         public string? Account_Name_VN { get; set; }
         public string? Unit { get; set; }
         public string? Unit_Note { get; set; }
-        public string? Price { get; set; }
+        public decimal? Price { get; set; }
         public string? Currency { get; set; }
         public string? Group_Code { get; set; }
         public string? GoodKind { get; set; }
@@ -49,7 +49,7 @@
                     Account_Name_VN = _cmd.Rows[i]["Account_Name_VN"].ToString(),
                     Unit = _cmd.Rows[i]["Unit"].ToString(),
                     Unit_Note = _cmd.Rows[i]["Unit_Note"].ToString(),
-                    Price = _cmd.Rows[i]["Price"].ToString(),
+                    Price = Math.Round(decimal.Parse(_cmd.Rows[i]["Price"].ToString()!),2),
                     Currency = _cmd.Rows[i]["Currency"].ToString(),
                     Group_Code = _cmd.Rows[i]["Group_Code"].ToString(),
                     GoodKind = _cmd.Rows[i]["GoodKind"].ToString(),

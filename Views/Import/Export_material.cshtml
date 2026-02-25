@@ -160,11 +160,11 @@
                                 <tr class="bg-primary text-white text-center">
                                     <th style="width: 50px;">No.</th>
                                     <th width="380px">@Languages.TenNVL</th>
-                                    <th width="200px">@Languages.Maketoan</th>
+                                    <th width="150px">@Languages.Maketoan</th>
                                     <th width="60">@Languages.Kho</th>
                                     <th width="80">@Languages.tonkho</th>
                                     <th width="80">@Languages.soluong</th>
-                                    <th width="100px">@Languages.Donvi</th>
+                                    <th width="150px">@Languages.Donvi</th>
                                     <th>@Languages.tygia</th>
                                     <th width="70px">@Languages.Ngoaite</th>
                                     <th>@Languages.tongdon</th>
@@ -263,10 +263,10 @@
         "use strict";
         document.getElementById('btn-add-row').addEventListener('click', function() {
             const tbody = document.querySelector('#dynamic-table tbody');
-            const firstRow = tbody.querySelector('.input-row');
+             const firstRow = tbody.querySelector('.input-row');
 
-            // Clone dòng đầu tiên
-            const newRow = firstRow.cloneNode(true);
+            // // Clone dòng đầu tiên
+             const newRow = firstRow.cloneNode(true);
 
             // --- BƯỚC 1: Reset dữ liệu sạch sẽ ---
             const inputs = newRow.querySelectorAll('input, select, textarea');
@@ -342,7 +342,7 @@
         // Nếu nhập nhiều hơn tồn kho
         if (currentVal > tonKho) {
             alert("Số lượng xuất không được vượt quá tồn kho (" + tonKho + ")");
-            document.getElementById("sl_" + idd).value = tonKho; // Tự động đưa về giá trị Max (tồn kho)
+            //document.getElementById("sl_" + idd).value = tonKho; // Tự động đưa về giá trị Max (tồn kho)
         }
         // Gọi hàm tính tổng tất cả các dòng
         tinhTongTatCa();
@@ -361,7 +361,7 @@
         // Cập nhật vào ô tổng thành tiền phía dưới (đảm bảo ID này tồn tại)
         const displayTotal = document.getElementById("thanhtien");
         if (displayTotal) {
-            displayTotal.value = tongMoi;
+            displayTotal.value = Math.round(tongMoi,3);
         }
     }
 </script>

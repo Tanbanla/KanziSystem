@@ -381,4 +381,100 @@
   <data name="DownloadExcelTable" xml:space="preserve">
     <value>Download Excel Table</value>
   </data>
+  <data name="FilterNo" xml:space="preserve">
+    <value>Filter No</value>
+  </data>
+  <data name="FilterSection" xml:space="preserve">
+    <value>Filter Section</value>
+  </data>
+  <data name="FilterCategory" xml:space="preserve">
+    <value>Filter Category</value>
+  </data>
+  <data name="FilterClassification" xml:space="preserve">
+    <value>Filter Classification</value>
+  </data>
+  <data name="FilterEquipment" xml:space="preserve">
+    <value>Filter Equipment</value>
+  </data>
+  <data name="FilterMaterialCode" xml:space="preserve">
+    <value>Filter Material Code</value>
+  </data>
+  <data name="FilterENName" xml:space="preserve">
+    <value>Filter EN Name</value>
+  </data>
+  <data name="FilterQuantity" xml:space="preserve">
+    <value>Filter Quantity</value>
+  </data>
+  <data name="FilterShape" xml:space="preserve">
+    <value>Filter Shape</value>
+  </data>
+  <data name="FilterMaterial" xml:space="preserve">
+    <value>Filter Material</value>
+  </data>
+  <data name="FilterComposition" xml:space="preserve">
+    <value>Filter Composition</value>
+  </data>
+  <data name="FilterDimensions" xml:space="preserve">
+    <value>Filter Dimensions</value>
+  </data>
+  <data name="FilterPurpose" xml:space="preserve">
+    <value>Filter Purpose</value>
+  </data>
+  <data name="FilterROHS" xml:space="preserve">
+    <value>Filter ROHS</value>
+  </data>
+  <data name="FilterCOCQ" xml:space="preserve">
+    <value>Filter COCQ</value>
+  </data>
+  <data name="FilterMSDS" xml:space="preserve">
+    <value>Filter MSDS</value>
+  </data>
+  <data name="FilterSafety" xml:space="preserve">
+    <value>Filter Safety</value>
+  </data>
+  <data name="FilterDesignFile" xml:space="preserve">
+    <value>Filter Design File</value>
+  </data>
+  <data name="FilterManufacturer" xml:space="preserve">
+    <value>Filter Manufacturer</value>
+  </data>
+  <data name="FilterGetQuote" xml:space="preserve">
+    <value>Filter Get Quote</value>
+  </data>
+  <data name="FilterReason" xml:space="preserve">
+    <value>Filter Reason</value>
+  </data>
+  <data name="FilterDate" xml:space="preserve">
+    <value>Filter Date</value>
+  </data>
+  <data name="FilterDeadline" xml:space="preserve">
+    <value>Filter Deadline</value>
+  </data>
+  <data name="FilterRequester" xml:space="preserve">
+    <value>Filter Requester</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next </value>
+  </data>
+  <data name="FilterSupplierCode" xml:space="preserve">
+    <value>Filter Supplier Code</value>
+  </data>
+  <data name="FilterVNName" xml:space="preserve">
+    <value>Filter VN Name</value>
+  </data>
+  <data name="FilterUnit" xml:space="preserve">
+    <value>Filter Unit</value>
+  </data>
+  <data name="FilterUsedFor" xml:space="preserve">
+    <value>Filter Used For</value>
+  </data>
+  <data name="FilterSupplier" xml:space="preserve">
+    <value>Filter Supplier</value>
+  </data>
+  <data name="FilterUrgent" xml:space="preserve">
+    <value>Filter Urgent</value>
+  </data>
 </root>

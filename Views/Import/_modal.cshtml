@@ -5,7 +5,7 @@
 
 </style>
 <form class="modal-part" id="modal-warehouse-part">
-    <div class="row">
+    <div class="row  m-1">
        <div class="form-group col-12">
             <table class="table table-bordered">
                 <tr>
@@ -78,38 +78,39 @@
 </div>
 
 <div class="modal-part" id="modal-xuatkho">
-    <div class="row">
+    <div class="row m-1">
+        <div class="form-group col-12">
+            <table class="table table-bordered">
+                <tr hidden>
+                    <td id="madon"></td>
+                    <td id="donvi"></td>
+                </tr>
+                <tr>
+                    <th width="180px">Mã hàng :</th>
+                    <td colspan="3"><b class="text-danger" id="mahagg"></b></td>
+                </tr>
+                <tr>
+                    <th>Chọn Kho :</th>
+                    <td><select class="form-control" id="_lskho" onchange="_soluongtontainhamay(this.value)"></select></td>
+                    <th>Tồn kho :</th>
+                    <td><input type="text" class="form-control" id="sl_ton" readonly /></td>
+                </tr>
+                <tr>
+                    <th>Cần xuất : </th>
+                    <th colspan="3" class="text-danger" id="sl_canxuat"></th>
 
-        <table class="table table-bordered">
-            <tr hidden>
-                <td id="madon"></td>
-                <td id="donvi"></td>
-            </tr>
-            <tr>
-                <th width="180px">Mã hàng :</th>
-                <td colspan="3"><b class="text-danger" id="mahagg"></b></td>
-            </tr>
-            <tr>
-                <th>Chọn Kho :</th>
-                <td><select class="form-control" id="_lskho" onchange="_soluongtontainhamay(this.value)"></select></td>
-                <th>Tồn kho :</th>
-                <td><input type="text" class="form-control" id="sl_ton" readonly /></td>
-            </tr>
-            <tr>
-                <th>Cần xuất : </th>
-                <th colspan="3" class="text-danger" id="sl_canxuat"></th>
+                </tr>
+                <tr>
+                    <th class="bg-info-subtle">Thực tế xuất :</th>
+                    <td><input type="number" class="form-control" id="sl_xuat" required onblur="caculator()" /></td>
+                    <th width="120px">Người nhận :</th>
+                    <td><input type="text" id="nguoinhan" class="form-control" required /></td>
+                </tr>
+            </table>
+            <br />
+            <button type="submit" class="btn btn-success float-right" onclick="_xuatkho()"> <i class="fa fa-cart-plus"></i> Xuất kho</button>
 
-            </tr>
-            <tr>
-                <th class="bg-info-subtle">Thực tế xuất :</th>
-                <td><input type="number" class="form-control" id="sl_xuat" required onblur="caculator()" /></td>
-                <th width="120px">Người nhận :</th>
-                <td><input type="text" id="nguoinhan" class="form-control" required /></td>
-            </tr>
-        </table>
-        <br />
-        <button type="submit" class="btn btn-success float-right" onclick="_xuatkho()"> <i class="fa fa-cart-plus"></i> Xuất kho</button>
-
+        </div>
     </div>
 
 </div>

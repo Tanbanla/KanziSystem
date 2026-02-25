@@ -15,12 +15,17 @@
     const qs = (sel, root = document) => root.querySelector(sel);
     const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let filteredRows = [];
+
     function renumberRows() {
         qsa('#quoteTableBody tr').forEach((tr, idx) => {
             const noCell = tr.children[0];
             if (noCell) noCell.textContent = String(idx + 1);
         });
-    assignRowIds();
+        assignRowIds();
+        applyFiltersAndPagination();
     }
     // Loading overlay helpers
     function showLoading(message) {
@@ -63,30 +68,113 @@
         } catch (e) { /* ignore */ }
     }
 
-  function assignRowIds() {
-    // Ensure each row's fields have unique ids matching the pattern used in the server view
-    qsa('#quoteTableBody tr').forEach((tr, idx) => {
-      const i = idx + 1;
-      const setId = (sel, idBase) => {
-        const el = tr.querySelector(sel);
-        if (el) el.id = `${idBase}_${i}`;
-      };
-      setId('.tenPhongBanTb', 'tenPhongBanTb');
-      setId('.tenPhanLoaiTb', 'tenPhanLoaiTb');
-      setId('.maHangNoiBo', 'maHangNoiBo');
-      setId('input[placeholder*="Mã thiết bị"]', 'maThietBi');
-      setId('input[placeholder*="Mã hàng NCC"]', 'maHangNCC');
-      setId('input[placeholder*="Tên hàng VN"]', 'tenHangVN');
-      setId('input[placeholder*="Tên hàng"]', 'tenHangEN');
-      setId('input[type="number"]', 'soLuong');
-      setId('input[placeholder*="Đơn vị"]', 'donVi');
-      setId('.rohsTb', 'rohsTb');
-      setId('.nhaCungCapTb', 'nhaCungCapTb');
-      setId('.laybaogiaTb', 'laybaogiaTb');
-      setId('input[type="date"]', 'ngayMuonNhan');
-      setId('input[placeholder*="Người yêu cầu"]', 'nguoiYeuCauRow');
-    });
-  }
+    function assignRowIds() {
+        // Ensure each row's fields have unique ids matching the pattern used in the server view
+        qsa('#quoteTableBody tr').forEach((tr, idx) => {
+            const i = idx + 1;
+            const setId = (sel, idBase) => {
+                const el = tr.querySelector(sel);
+                if (el) el.id = `${idBase}_${i}`;
+            };
+            setId('.tenPhongBanTb', 'tenPhongBanTb');
+            setId('.chungLoaiTb', 'chungLoai');
+            setId('.tenPhanLoaiTb', 'tenPhanLoaiTb');
+            setId('.maHangNoiBo', 'maHangNoiBo');
+            setId('maThietBi', 'maThietBi');
+            setId('maHangNCC', 'maHangNCC');
+            setId('tenHangVN', 'tenHangVN');
+            setId('tenHangEN', 'tenHangEN');
+            setId('soLuong', 'soLuong');
+            setId('donVi', 'donVi');
+            setId('hinhDang', 'hinhDang');
+            setId('chatLieu', 'chatLieu');
+            setId('thanhPhan', 'thanhPhan');
+            setId('kichThuoc', 'kichThuoc');
+            setId('viTriSuDung', 'viTriSuDung');
+            setId('tinhNang', 'tinhNang');
+            setId('.rohsTb', 'rohsTb');
+            setId('.CoCqTb', 'CoCqTb');
+            setId('msds', 'msds');
+            setId('tieuChuanAnToan', 'tieuChuanAnToan');
+            setId('fileThietKe', 'fileThietKe');
+            setId('nsx', 'nsx');
+            setId('.nhaCungCapTb', 'nhaCungCapTb');
+            setId('.laybaogiaTb', 'laybaogiaTb');
+            setId('input[placeholder*="Lý do"]', 'lyDo');
+            setId('.gapTb', 'gapTb');
+            setId('nguoiYeuCauRow', 'nguoiYeuCauRow');
+
+            // Set ID cho các date inputs
+            const dateInputs = qsa('input[type="date"]', tr);
+            if (dateInputs.length >= 1) dateInputs[0].id = `ngayMuonNhan_${i}`;
+            if (dateInputs.length >= 2) dateInputs[1].id = `kyHanChonNCC_${i}`;
+        });
+    }
+
+    function applyFiltersAndPagination() {
+        const tbody = qs('#quoteTableBody');
+        const allRows = Array.from(tbody.querySelectorAll('tr'));
+        const filters = Array.from(document.querySelectorAll('.filter-input')).map(inp => inp.value.toLowerCase().trim());
+
+        function getCellText(td) {
+            const select = td.querySelector('select');
+            if (select) {
+                const opt = select.options[select.selectedIndex];
+                return opt ? opt.text : '';
+            }
+            const input = td.querySelector('input');
+            if (input && input.type !== 'date') {
+                return input.value || '';
+            }
+            return td.textContent.trim();
+        }
+
+        filteredRows = allRows.filter(tr => {
+            const tds = Array.from(tr.querySelectorAll('td'));
+            return filters.every((filter, idx) => {
+                if (!filter) return true;
+                const td = tds[idx];
+                if (!td) return true;
+                const text = getCellText(td);
+                return text.toLowerCase().includes(filter);
+            });
+        });
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const visibleRows = filteredRows.slice(start, end);
+
+        allRows.forEach(tr => tr.style.display = 'none');
+        visibleRows.forEach(tr => tr.style.display = '');
+
+        const pagination = qs('#paginationControls');
+        const prev = qs('#prevPage');
+        const next = qs('#nextPage');
+        if (totalPages > 1) {
+            pagination.style.display = '';
+            prev.classList.toggle('disabled', currentPage === 1);
+            next.classList.toggle('disabled', currentPage === totalPages);
+        } else {
+            pagination.style.display = 'none';
+        }
+
+        // Update pagination info
+        const startEntry = (currentPage - 1) * rowsPerPage + 1;
+        const endEntry = Math.min(currentPage * rowsPerPage, filteredRows.length);
+        const totalEntries = filteredRows.length;
+        const pageInfoText = `Showing ${startEntry} to ${endEntry} of ${totalEntries} entries`;
+        qs('#pageInfo').textContent = pageInfoText;
+        const pageNumberText = `Page ${currentPage} of ${totalPages}`;
+        qs('#pageNumberInfo').textContent = pageNumberText;
+        qs('#paginationInfo').style.display = totalPages > 1 ? '' : 'none';
+
+        visibleRows.forEach((tr, idx) => {
+            const noCell = tr.children[0];
+            if (noCell) noCell.textContent = String(start + idx + 1);
+        });
+    }
 
     function addRow() {
         const tbody = qs('#quoteTableBody');
@@ -551,7 +639,7 @@
             const suppliers = await supRes.json();
             if (Array.isArray(suppliers) && suppliers.length > 0) {
                 // Helper to extract supplier code
-                const getSupCode = (s) => s?.chR_MaNCC ||  (typeof s === 'string' ? s : undefined) || '';
+                const getSupCode = (s) => s?.chR_MaNCC || (typeof s === 'string' ? s : undefined) || '';
                 // If only one supplier, set current row's supplier
                 if (suppliers.length === 1) {
                     const s = suppliers[0];
@@ -616,7 +704,7 @@
                         const supSel = newRow.querySelector('.nhaCungCapTb');
                         if (supSel) {
                             supSel.value = supCode || '';
-                            try { updateSearchableSelectDisplay(supSel); } catch(e) { }
+                            try { updateSearchableSelectDisplay(supSel); } catch (e) { }
                         }
 
                         // Fill ten hang ncc in the cloned row
@@ -875,7 +963,7 @@
         sectionSel.innerHTML = '';
         const ph = document.createElement('option');
         ph.value = '';
-       // ph.textContent = (window.i18nQuote && window.i18nQuote.SelectSection) || 'Chọn phòng ban';
+        // ph.textContent = (window.i18nQuote && window.i18nQuote.SelectSection) || 'Chọn phòng ban';
         sectionSel.appendChild(ph);
         // For second tab
         sectionSel2.innerHTML = '';
@@ -926,14 +1014,14 @@
         if (srcMaterialSel) {
             srcMaterialSel.forEach((o) => {
                 if (!o.material_Code) return;
-                var nd = o.material_Code+' - '+o.material_Name_VN
+                var nd = o.material_Code + ' - ' + o.material_Name_VN
                 items.push({ code: o.material_Code, text: nd || o.material_Code });
             });
         }
         const createItemEl = (it) => {
             const wrap = document.createElement('label');
             wrap.style.display = 'flex';
-            wrap.style.minWidth= '350px';
+            wrap.style.minWidth = '350px';
             wrap.style.alignItems = 'center';
             wrap.style.gap = '8px';
             wrap.style.padding = '4px 2px';
@@ -1113,12 +1201,18 @@
         qs('#btnAddRow')?.addEventListener('click', addRow);
         qs('#btnReset')?.addEventListener('click', resetForm);
         qs('#btnCreate')?.addEventListener('click', submitForm);
-        qs('#btnAuto')?.addEventListener('click',exportAutoRender);
+        qs('#btnAuto')?.addEventListener('click', exportAutoRender);
         qs('#btnDownExcelTable')?.addEventListener('click', exportTable);
+        qs('#btnClearFilters')?.addEventListener('click', () => {
+            qsa('.filter-input').forEach(inp => inp.value = '');
+            currentPage = 1;
+            applyFiltersAndPagination();
+        });
+
         qsa('.btn-remove-row', container).forEach((btn) => {
             btn.addEventListener('click', (e) => removeRow(e.currentTarget));
         });
-        
+
         async function exportTable() {
             try {
                 showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xuất...');
@@ -1290,6 +1384,29 @@
                 }
             }
         });
+
+        // Filter and pagination events
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('filter-input')) {
+                currentPage = 1;
+                applyFiltersAndPagination();
+            }
+        });
+        qs('#prevPage')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                applyFiltersAndPagination();
+            }
+        });
+        qs('#nextPage')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                applyFiltersAndPagination();
+            }
+        });
     }
 
     // Tìm kiếm 
@@ -1326,8 +1443,8 @@
                     }
                 });
                 if (!hasItems) {
-            const T = window.i18nQuote || {};
-            $list.append('<div class="ms-empty">' + (T.NoResults || 'Không có kết quả') + '</div>');
+                    const T = window.i18nQuote || {};
+                    $list.append('<div class="ms-empty">' + (T.NoResults || 'Không có kết quả') + '</div>');
                 }
             }
 
@@ -1363,7 +1480,8 @@
                     if ($other.hasClass('open')) {
                         $other.removeClass('open');
                         if ($other.data('detached')) {
-                            $other.appendTo($other.data('wrapper')).css({ position: '', top: '', left: '', width: '', zIndex: '' }).data('detached', false);
+                            const $wrapper = $other.data('wrapper');
+                            if ($wrapper && $wrapper.length) $other.appendTo($wrapper).css({ position: '', top: '', left: '', width: '', zIndex: '' }).data('detached', false);
                         }
                     }
                 });
@@ -1406,7 +1524,7 @@
                 // set value via jQuery
                 $select.val(value);
                 // trigger both jQuery and native change so listeners attached via addEventListener are invoked
-                try { $select.trigger('change'); } catch(e) { }
+                try { $select.trigger('change'); } catch (e) { }
                 try {
                     const sel = $select[0];
                     if (sel && typeof sel.dispatchEvent === 'function') {
@@ -1447,46 +1565,127 @@
         }
     }
 
-    function populateRowFromDto(tr, dto) {
-        // Phòng ban
-        setSelectValueByText(tr.querySelector('.tenPhongBanTb'), dto.chR_SectionCode || dto.chR_SectionName);
-        // Chủng loại
-        setSelectValueByText(tr.querySelector('.chungLoaiTb'), dto.nvchR_ChungLoai);
-        // Phân loại
-        setSelectValueByText(tr.querySelector('.tenPhanLoaiTb'), dto.chR_Phanloai);
-        // Inputs
-        const setInput = (sel, val) => { const el = tr.querySelector(sel); if (el) el.value = val ?? ''; };
-        setInput('input[placeholder*="Mã thiết bị"]', dto.chR_MaThietBi);
-        // Mã hàng nội bộ select
-        setSelectValueByText(tr.querySelector('.maHangNoiBo'), dto.chR_MaHangNoiBo);
-        setInput('input[placeholder*="Mã hàng NCC"]', dto.chR_MaHangNCC);
-        setInput('input[placeholder*="thủ tục hải quan"]', dto.nvchR_NameVN);
-        setInput('input[placeholder*="Tên hàng EN"]', dto.chR_NameEN);
-        setInput('input[type="number"]', dto.inT_SoLuong);
-        setInput('input[placeholder*="Đơn vị"]', dto.nvchR_DonVi);
-        setInput('input[placeholder*="Hình dáng"]', dto.nvchR_HinhDang);
-        setInput('input[placeholder*="Chất liệu"]', dto.nvchR_ChatLieu);
-        setInput('input[placeholder*="Thành phần"]', dto.nvchR_ThanhPhan);
-        setInput('input[placeholder*="Kích thước"]', dto.nvchR_KichThuoc);
-        setInput('input[placeholder*="Dùng cho máy"]', dto.nvchR_DongMay);
-        setInput('input[placeholder*="Dùng để làm gì"]', dto.nvchR_TinhNang);
-        setSelectValueByText(tr.querySelector('.rohsTb'), dto.nvchR_Rohs);
-        setSelectValueByText(tr.querySelector('.CoCqTb'), dto.nvchR_COCQ);
-        setInput('input[placeholder*="MSDS"]', dto.nvchR_MSDS);
-        setInput('input[placeholder*="an toàn"]', dto.nvchR_AnToan);
-        setInput('input[placeholder*="File thiết kế"]', dto.nvchR_FileThietKe);
-        setInput('input[placeholder*="NSX"]', dto.nvchR_NhaSanXuat);
-        // NCC
-        setSelectValueByText(tr.querySelector('.nhaCungCapTb'), dto.chR_MaNCC || dto.nvchR_TenNCC);
-        setSelectValueByText(tr.querySelector('.laybaogiaTb'), (dto.biT_LayBaoGia === true ? 'true' : dto.biT_LayBaoGia === false ? 'false' : ''));
-        setInput('input[placeholder*="Lý do"]', dto.nvchR_LyDo);
-        const dateVN = (d) => {
-            try { if (!d) return ''; const dt = new Date(d); return dt.toISOString().slice(0,10); } catch { return ''; }
+    function populateRowFromDto(tr, dto, rowIndex = 1) {
+        // Lấy số hàng từ phần tử No hoặc từ tham số
+        const noCell = tr.querySelector('td:first-child');
+        const rowNumber = noCell ? noCell.textContent.trim() : rowIndex;
+
+        // Helper function để set giá trị cho select theo ID
+        const setSelectById = (idPattern, value) => {
+            const element = tr.querySelector(`#${idPattern}_${rowNumber}`);
+            if (element) {
+                setSelectValueByText(element, value);
+            }
         };
-        const ngayMuon = tr.querySelector('input[id^="ngayMuonNhan_"]'); if (ngayMuon) ngayMuon.value = dateVN(dto.dtM_NgayMuonNhan);
-        const kyHan = tr.querySelector('input[id^="kyHanChonNCC_"]'); if (kyHan) kyHan.value = dateVN(dto.dtM_KyHan);
-        setSelectValueByText(tr.querySelector('.gapTb'), dto.chR_Gap);
-        const nguoi = tr.querySelector('input[placeholder*="Người yêu cầu"]'); if (nguoi) nguoi.value = dto.chR_CreateBy || (window.indexQuoteData && window.indexQuoteData.user) || '';
+
+        // Helper function để set giá trị cho input theo ID
+        const setInputById = (idPattern, value) => {
+            const element = tr.querySelector(`#${idPattern}_${rowNumber}`);
+            if (element) {
+                element.value = value ?? '';
+            }
+        };
+
+        // Điền dữ liệu theo ID pattern của từng field
+
+        // Phòng ban
+        setSelectById('tenPhongBanTb', dto.chR_SectionCode || dto.chR_SectionName);
+
+        // Chủng loại
+        setSelectById('chungLoai', dto.nvchR_ChungLoai);
+
+        // Phân loại
+        setSelectById('tenPhanLoaiTb', dto.chR_Phanloai);
+
+        // Mã thiết bị
+        setInputById('maThietBi', dto.chR_MaThietBi);
+
+        // Mã hàng nội bộ (select)
+        setSelectById('maHangNoiBo', dto.chR_MaHangNoiBo);
+
+        // Mã hàng NCC
+        setInputById('maHangNCC', dto.chR_MaHangNCC);
+
+        // Tên hàng VN
+        setInputById('tenHangVN', dto.nvchR_NameVN);
+
+        // Tên hàng EN
+        setInputById('tenHangEN', dto.chR_NameEN);
+
+        // Số lượng
+        setInputById('soLuong', dto.inT_SoLuong);
+
+        // Đơn vị
+        setInputById('donVi', dto.nvchR_DonVi);
+
+        // Hình dáng
+        setInputById('hinhDang', dto.nvchR_HinhDang);
+
+        // Chất liệu
+        setInputById('chatLieu', dto.nvchR_ChatLieu);
+
+        // Thành phần
+        setInputById('thanhPhan', dto.nvchR_ThanhPhan);
+
+        // Kích thước
+        setInputById('kichThuoc', dto.nvchR_KichThuoc);
+
+        // Vị trí sử dụng
+        setInputById('viTriSuDung', dto.nvchR_DongMay);
+
+        // Tính năng
+        setInputById('tinhNang', dto.nvchR_TinhNang);
+
+        // ROHS
+        setSelectById('rohsTb', dto.nvchR_Rohs);
+
+        // CO/CQ
+        setSelectById('CoCqTb', dto.nvchR_COCQ);
+
+        // MSDS
+        setInputById('msds', dto.nvchR_MSDS);
+
+        // Tiêu chuẩn an toàn
+        setInputById('tieuChuanAnToan', dto.nvchR_AnToan);
+
+        // File thiết kế
+        setInputById('fileThietKe', dto.nvchR_FileThietKe);
+
+        // Nhà sản xuất
+        setInputById('nsx', dto.nvchR_NhaSanXuat);
+
+        // Nhà cung cấp (select)
+        setSelectById('nhaCungCapTb', dto.chR_MaNCC || dto.nvchR_TenNCC);
+
+        // Lấy báo giá
+        const layBaoGiaValue = dto.biT_LayBaoGia === true ? 'true' : dto.biT_LayBaoGia === false ? 'false' : '';
+        setSelectById('laybaogiaTb', layBaoGiaValue);
+
+        // Lý do
+        setInputById('lyDo', dto.nvchR_LyDo);
+
+        // Helper function để format ngày
+        const dateVN = (d) => {
+            try {
+                if (!d) return '';
+                const dt = new Date(d);
+                return dt.toISOString().slice(0, 10);
+            } catch {
+                return '';
+            }
+        };
+
+        // Ngày muốn nhận
+        setInputById('ngayMuonNhan', dateVN(dto.dtM_NgayMuonNhan));
+
+        // Kỳ hạn chọn NCC
+        setInputById('kyHanChonNCC', dateVN(dto.dtM_KyHan));
+
+        // Gấp
+        setSelectById('gapTb', dto.chR_Gap);
+
+        // Người yêu cầu
+        setInputById('nguoiYeuCauRow', dto.chR_CreateBy || (window.indexQuoteData && window.indexQuoteData.user) || '');
     }
 
     async function populateTableFromItems(items) {
@@ -1511,11 +1710,11 @@
             qsa('input', row).forEach(inp => { inp.value = ''; inp.classList.remove('is-invalid'); });
             qsa('select', row).forEach(sel => { sel.value = ''; sel.classList.remove('is-invalid'); });
 
-            // populate
-            populateRowFromDto(row, dto);
+            // populate với row index (i + 1)
+            populateRowFromDto(row, dto, i + 1);
             tbody.appendChild(row);
         }
-        try { buildSearchableDropdown($(tbody)); } catch {}
+        try { buildSearchableDropdown($(tbody)); } catch { }
         renumberRows();
     }
     // show message dialog
@@ -1587,5 +1786,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         wireEvents();
         renumberRows();
+        applyFiltersAndPagination();
     });
 })();

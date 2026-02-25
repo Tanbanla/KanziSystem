@@ -52,8 +52,34 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public static string Insert_warehouse(string CHR_WAREHOUSE, string CHR_DEPT_USE, string CHR_FACTORY, string CHR_NOTE,string CHR_USER)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            var insert = _db.GET_DATA_FROM_SQL($"Insert into [MST_WAREHOUSE] (CHR_WAREHOUSE,CHR_DEPT_USE,CHR_FACTORY,DTM_UPDATE,CHR_USER,CHR_NOTE) values (N'{CHR_WAREHOUSE}', N'{CHR_DEPT_USE}', '{CHR_FACTORY}','{DateTime.Now}','{CHR_USER}', N'{CHR_NOTE}')");
-            return "OK";
+            var sql = $@"
+                        IF NOT EXISTS (
+                            SELECT 1 FROM [MST_WAREHOUSE] 
+                            WHERE CHR_WAREHOUSE = N'{CHR_WAREHOUSE}' 
+                              AND CHR_DEPT_USE = N'{CHR_DEPT_USE}' 
+                              AND CHR_FACTORY = '{CHR_FACTORY}'
+                        )
+                        BEGIN 
+                            INSERT INTO [MST_WAREHOUSE] (CHR_WAREHOUSE, CHR_DEPT_USE, CHR_FACTORY, DTM_UPDATE, CHR_USER, CHR_NOTE)
+                            VALUES (N'{CHR_WAREHOUSE}', N'{CHR_DEPT_USE}', '{CHR_FACTORY}', GETDATE(), '{CHR_USER}', N'{CHR_NOTE}');
+        
+                            SELECT 'OK' AS Status;
+                        END 
+                        ELSE 
+                        BEGIN 
+                            SELECT 'DUPLICATED' AS Status;
+                        END";
+
+            var insert = _db.GET_DATA_FROM_SQL(sql);
+            if (insert.Rows[0][0].ToString() == "DUPLICATED")
+            {
+                return "Mã kho đã tồn tại";
+            }
+            else
+            {
+                return "Thêm kho thành công";
+            }
+            
         }
         public static string delete_wh(string id, string tenkho)
         {

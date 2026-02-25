@@ -570,11 +570,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
         }
-        public JsonResult insert_warehouse(string CHR_WAREHOUSE, string CHR_DEPT_USE, string CHR_FACTORY, string CHR_NOTE, string CHR_USER)
-        {
-            var ins = Models.MST_WAREHOUSE.Insert_warehouse(CHR_WAREHOUSE, CHR_DEPT_USE, CHR_FACTORY, CHR_NOTE, CHR_USER);
-            return Json(ins);
-        }
+     
         public JsonResult del_warehouse(string id, string tenkho)
         {
             var del = Models.MST_WAREHOUSE.delete_wh(id, tenkho);
@@ -584,6 +580,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             List<string> sec = Models.SECTION._load_sec();
             return Json(sec);
+        }
+        public JsonResult insert_wh(string CHR_WAREHOUSE, string CHR_DEPT_USE, string CHR_FACTORY, string CHR_NOTE, string CHR_USER)
+        {
+            var ins = Models.MST_WAREHOUSE.Insert_warehouse(CHR_WAREHOUSE, CHR_DEPT_USE, CHR_FACTORY, CHR_NOTE, CHR_USER);
+            return Json(ins);
         }
     }
 }

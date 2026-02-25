@@ -594,7 +594,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             CHR_SectionCode = ws.Cell(r, 2).GetString(), // Mã phòng ban (value)
                             CHR_SectionName = ws.Cell(r, 3).GetString(), // hiển thị có thể giống mã
-                            CHR_Phanloai = ws.Cell(r, 4).GetString(),
+                            CHR_Phanloai = ParsePhanloai(ws.Cell(r, 4).GetString()),
                             CHR_MaThietBi = ws.Cell(r, 5).GetString(),
                             CHR_MaHangNoiBo = ws.Cell(r, 6).GetString(),
                             CHR_MaHangNCC = ws.Cell(r, 7).GetString(),
@@ -653,6 +653,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
         }
+        private static string? ParsePhanloai(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return "No list";
+            if (s != "A" && s != "B" && s != "C" && s != "E") return "No list";
+            return s;
+        }
         private static double? ParseDouble(string s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
@@ -669,7 +675,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
             var v = s.Trim().ToLowerInvariant();
-            return v == "O" || v == "true" || v == "1" ? true : v == "X" || v == "false" || v == "0" ? false : null;
+            return v == "O" ? true : false;
         }
         private static BaoGia_Request_of_QuotationDTO CloneDto(BaoGia_Request_of_QuotationDTO src)
         {

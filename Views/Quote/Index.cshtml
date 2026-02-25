@@ -100,6 +100,39 @@
                                 @Localizer["PurposeFeature"]<br />
                             </th>
                         </tr>
+                        <tr id="filterRow" class="filter-row">
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="0" placeholder="@Localizer["FilterNo"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="1" placeholder="@Localizer["FilterSection"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="2" placeholder="@Localizer["FilterCategory"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="3" placeholder="@Localizer["FilterClassification"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="4" placeholder="@Localizer["FilterEquipment"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="5" placeholder="@Localizer["FilterMaterialCode"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="6" placeholder="@Localizer["FilterSupplierCode"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="7" placeholder="@Localizer["FilterVNName"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="8" placeholder="@Localizer["FilterENName"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="9" placeholder="@Localizer["FilterQuantity"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="10" placeholder="@Localizer["FilterUnit"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="11" placeholder="@Localizer["FilterShape"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="12" placeholder="@Localizer["FilterMaterial"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="13" placeholder="@Localizer["FilterComposition"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="14" placeholder="@Localizer["FilterDimensions"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="15" placeholder="@Localizer["FilterUsedFor"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="16" placeholder="@Localizer["FilterPurpose"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="17" placeholder="@Localizer["FilterROHS"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="18" placeholder="@Localizer["FilterCOCQ"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="19" placeholder="@Localizer["FilterMSDS"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="20" placeholder="@Localizer["FilterSafety"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="21" placeholder="@Localizer["FilterDesignFile"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="22" placeholder="@Localizer["FilterManufacturer"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="23" placeholder="@Localizer["FilterSupplier"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="24" placeholder="@Localizer["FilterGetQuote"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="25" placeholder="@Localizer["FilterReason"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="26" placeholder="@Localizer["FilterDate"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="27" placeholder="@Localizer["FilterDeadline"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="28" placeholder="@Localizer["FilterUrgent"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="29" placeholder="@Localizer["FilterRequester"]" /></th>
+                            <th></th>
+                        </tr>
                     </thead>
                     <tbody id="quoteTableBody">
                         @for (var i = 1; i <= 5; i++)
@@ -203,8 +236,22 @@
                     </tbody>
                 </table>
             </div>
+            <div id="paginationInfo" class="d-flex justify-content-between align-items-center mt-2" style="display:none;">
+                <div id="pageInfo">Showing 1 to 10 of 50 entries</div>
+                 <div id="paginationControls" class="d-flex justify-content-center mt-3" style="display:none;">
+                <nav aria-label="Table pagination">
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item" id="prevPage"><a class="page-link" href="#" aria-label="@Localizer["Previous"]"><span aria-hidden="true">&laquo;</span></a></li>
+                        <li class="page-item" id="nextPage"><a class="page-link" href="#" aria-label="@Localizer["Next"]"><span aria-hidden="true">&raquo;</span></a></li>
+                    </ul>
+                </nav>
+            </div>
+                <div id="pageNumberInfo">Page 1 of 5</div>
+            </div>
             <div class="d-flex align-items-center gap-2 mt-2">
                 <button type="button" id="btnAddRow" class="btn btn-sm btn-outline-secondary"><i class="fas fa-plus"></i> @Localizer["AddOneRow"]</button>
+                <div style="margin-left: 8px;"></div>
+                <button type="button" id="btnClearFilters" class="btn btn-sm btn-outline-secondary"><i class="fas fa-eraser"></i> @Localizer["ClearFilters"]</button>
             </div>
         </div>
 

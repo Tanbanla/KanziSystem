@@ -144,7 +144,7 @@ function add_wh() {
     params.append('CHR_NOTE', CHR_NOTE);
     params.append('CHR_USER', CHR_USER);
 
-    fetch('/Master/insert_warehouse', {
+    fetch('/Master/insert_wh', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -158,6 +158,8 @@ function add_wh() {
             return response.json();
         })
         .then(data => {
+            alert(data);
+            document.querySelectorAll('.close').forEach(button => button.click());
             _load_warehouse();
         })
         .catch(error => {

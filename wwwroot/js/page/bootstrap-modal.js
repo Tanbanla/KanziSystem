@@ -181,12 +181,12 @@ $("#modal-9").fireModal({
     },
 });
 $("#modal-10").fireModal({
-    title: 'Xuất kho ',
+    title: ' ',
     body: $("#modal-xuatkho"),
     footerClass: 'bg-whitesmoke',
     autoFocus: false,
     created: function (modal) {
-        modal.find('.modal-dialog').css('max-width', '600px');
+        modal.find('.modal-dialog').css('max-width', '800px');
         modal.find('.modal-dialog').css('padding-top', '200px');
         modal.find('.modal-content').css({
             'border': '1',
@@ -262,8 +262,7 @@ $("#modal-12").fireModal({
         // DO AJAX HERE
         let fake_ajax = setTimeout(function () {
             form.stopProgress();
-            modal.find('.modal-body').prepend('<div class="alert alert-info">Please check your browser console</div>')
-
+         
             clearInterval(fake_ajax);
         }, 1500);
 

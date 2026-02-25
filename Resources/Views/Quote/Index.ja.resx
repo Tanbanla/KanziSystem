@@ -381,4 +381,100 @@
   <data name="DownloadExcelTable" xml:space="preserve">
     <value>表データ ダウンロード</value>
   </data>
+	<data name="FilterNo" xml:space="preserve">
+    <value>フィルター番号</value>
+  </data>
+	<data name="FilterSection" xml:space="preserve">
+    <value>フィルター部門</value>
+  </data>
+	<data name="FilterCategory" xml:space="preserve">
+    <value>フィルターカテゴリ</value>
+  </data>
+	<data name="FilterClassification" xml:space="preserve">
+    <value>フィルター分類</value>
+  </data>
+	<data name="FilterEquipment" xml:space="preserve">
+    <value>フィルター設備</value>
+  </data>
+	<data name="FilterMaterialCode" xml:space="preserve">
+    <value>フィルター材料コード</value>
+  </data>
+	<data name="FilterENName" xml:space="preserve">
+    <value>フィルター英語名</value>
+  </data>
+	<data name="FilterQuantity" xml:space="preserve">
+    <value>フィルター数量</value>
+  </data>
+	<data name="FilterShape" xml:space="preserve">
+    <value>フィルター形状</value>
+  </data>
+	<data name="FilterMaterial" xml:space="preserve">
+    <value>フィルター材料</value>
+  </data>
+	<data name="FilterComposition" xml:space="preserve">
+    <value>フィルター構成</value>
+  </data>
+	<data name="FilterDimensions" xml:space="preserve">
+    <value>フィルター寸法</value>
+  </data>
+	<data name="FilterPurpose" xml:space="preserve">
+    <value>フィルター目的</value>
+  </data>
+	<data name="FilterROHS" xml:space="preserve">
+    <value>フィルターRoHS</value>
+  </data>
+	<data name="FilterCOCQ" xml:space="preserve">
+    <value>フィルターCOCQ</value>
+  </data>
+	<data name="FilterMSDS" xml:space="preserve">
+    <value>フィルターMSDS</value>
+  </data>
+	<data name="FilterSafety" xml:space="preserve">
+    <value>フィルター安全</value>
+  </data>
+	<data name="FilterDesignFile" xml:space="preserve">
+    <value>フィルター設計ファイル</value>
+  </data>
+	<data name="FilterManufacturer" xml:space="preserve">
+    <value>フィルターメーカー</value>
+  </data>
+	<data name="FilterGetQuote" xml:space="preserve">
+    <value>フィルター見積取得</value>
+  </data>
+	<data name="FilterReason" xml:space="preserve">
+    <value>フィルター理由</value>
+  </data>
+	<data name="FilterDate" xml:space="preserve">
+    <value>フィルター日付</value>
+  </data>
+	<data name="FilterDeadline" xml:space="preserve">
+    <value>フィルター期限</value>
+  </data>
+	<data name="FilterRequester" xml:space="preserve">
+    <value>フィルター要求者</value>
+  </data>
+	<data name="Previous" xml:space="preserve">
+    <value>前へ</value>
+  </data>
+	<data name="Next" xml:space="preserve">
+    <value>次へ</value>
+  </data>
+	<data name="FilterSupplierCode" xml:space="preserve">
+    <value>フィルター供給者コード</value>
+  </data>
+	<data name="FilterVNName" xml:space="preserve">
+    <value>フィルターベトナム語名</value>
+  </data>
+	<data name="FilterUnit" xml:space="preserve">
+    <value>フィルター単位</value>
+  </data>
+	<data name="FilterUsedFor" xml:space="preserve">
+    <value>フィルター用途</value>
+  </data>
+	<data name="FilterSupplier" xml:space="preserve">
+    <value>フィルター供給者</value>
+  </data>
+	<data name="FilterUrgent" xml:space="preserve">
+    <value>フィルター緊急</value>
+  </data>
 </root>

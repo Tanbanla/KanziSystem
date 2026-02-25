@@ -346,3 +346,14 @@ select.is-invalid {
         transform: rotate(360deg);
     }
 }
+.filter-row th {
+    background-color: #f8f9fa;
+    background: #2335B7;
+    padding: 4px;
+}
+.filter-input {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    padding: 2px 4px;
+}
