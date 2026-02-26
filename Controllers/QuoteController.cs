@@ -551,6 +551,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 NVCHR_AnToan = ws.Cell(r, 22).GetString(),
                                 NVCHR_FileThietKe = ws.Cell(r, 23).GetString(),
                                 NVCHR_NhaSanXuat = ws.Cell(r, 24).GetString(),
+
+                                CHR_MaNCC = ws.Cell(r, 25).GetString(),
+                                NVCHR_TenNCC = ws.Cell(r, 26).GetString(),
+
                                 BIT_LayBaoGia = ParseBool(ws.Cell(r, 27).GetString()),
                                 NVCHR_LyDo = ws.Cell(r, 28).GetString(),
                                 DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
@@ -560,8 +564,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 DTM_CreateDate = DateTime.Now,
                                 ID_Status = "CREATE"
                             };
-
-
+                            // Đã có thông tin nhà cung cấp 
+                            if (dto.NVCHR_TenNCC != null && dto.CHR_MaNCC != null)
+                            {
+                                items.Add(dto);
+                                continue;
+                            }
                             // Nếu có mã hàng nội bộ, tự check nhà cung cấp và nhân bản theo NCC
                             var suppliersResp = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(dto.CHR_MaHangNoiBo ?? string.Empty);
                             if (suppliersResp.Success && suppliersResp.Data != null && suppliersResp.Data.Count > 0)
@@ -614,6 +622,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             NVCHR_MSDS = ws.Cell(r, 21).GetString(),
                             NVCHR_AnToan = ws.Cell(r, 22).GetString(),
                             NVCHR_FileThietKe = ws.Cell(r, 23).GetString(),
+
+                            NVCHR_NhaSanXuat = ws.Cell(r, 24).GetString(),
+                            CHR_MaNCC = ws.Cell(r, 25).GetString(),
+                            NVCHR_TenNCC = ws.Cell(r, 26).GetString(),
+
                             BIT_LayBaoGia = ParseBool(ws.Cell(r, 27).GetString()),
                             NVCHR_LyDo = ws.Cell(r, 28).GetString(),
                             DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
@@ -623,6 +636,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             DTM_CreateDate = DateTime.Now,
                             ID_Status = "CREATE"
                         };
+
+                        // Đã có thông tin nhà cung cấp 
+                        if (dto.NVCHR_TenNCC != null && dto.CHR_MaNCC != null)
+                        {
+                            items.Add(dto);
+                            continue;
+                        }
                         // lấy thông tin nhà cung cấp theo chủng loại hàng  _baoGiaNccCategoryService 
                         var suppliersResp = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(ws.Cell(r, 12).GetString() ?? "");
                         if (suppliersResp.Success && suppliersResp.Data != null && suppliersResp.Data.Count > 0)
@@ -675,7 +695,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
             var v = s.Trim().ToLowerInvariant();
-            return v == "O" ? true : false;
+            return v.ToUpper().Contains("O")  ? true : false;
         }
         private static BaoGia_Request_of_QuotationDTO CloneDto(BaoGia_Request_of_QuotationDTO src)
         {

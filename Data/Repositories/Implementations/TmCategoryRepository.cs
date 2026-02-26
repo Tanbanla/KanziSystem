@@ -20,5 +20,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = "SELECT Distinct NVCHR_Category FROM TM_Category";
             return (await _conn.QueryAsync<string>(sql)).ToList();
         }
+        // Tìm kiếm chủng loại theo tên
+        public async Task<List<TM_Category>> SearchCategoryByName(string name)
+        {
+            var sql = "SELECT * FROM TM_Category WHERE (@Name = null or @Name = '') or NVCHR_Category LIKE @Name";
+            return (await _conn.QueryAsync<TM_Category>(sql, new { Name = $"%{name}%" })).ToList();
+        }
     }
 }

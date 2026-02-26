@@ -480,4 +480,16 @@
   <data name="ClearFilters" xml:space="preserve">
     <value>Xóa bộ lọc</value>
   </data>
+  <data name="RowIndex" xml:space="preserve">
+    <value>Số dòng</value>
+  </data>
+  <data name="Showing" xml:space="preserve">
+    <value>Hiển thị</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>đến</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>của</value>
+  </data>
 </root>

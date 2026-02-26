@@ -51,13 +51,13 @@
             </div>
         </div>
         <div class="card-body pt-2">
-            <div class="table-responsive">
+            <div class="table-responsive fixed-header">
                 <table class="table table-sm table-hover table-bordered align-middle" id="quoteTable">
-                    <thead class="table-light">
+                    <thead class="table-light" style="position: sticky; top: 0; background-color: white; z-index: 10;">
                         <tr class="text-center align-middle">
                             <th rowspan="2" class="title_column_stt">No</th>
                             <th rowspan="2" class="title_column" style="min-width: 200px">@Localizer["SectionCode"]<span class="text-danger">*</span></th>
-                            <th rowspan="2" class="title_column">@Localizer["Category"]<br /></th>
+                            <th rowspan="2" class="title_column" style="min-width: 230px">@Localizer["Category"]<br /></th>
                             <th rowspan="2" class="title_column">@Localizer["Classification"]<br /> </th>
                             <th rowspan="2" class="title_column">@Localizer["EquipmentCode"]<br /></th>
                             <th rowspan="2" class="title_column" style="min-width: 230px">@Localizer["InternalMaterialCode"]<span class="text-danger">*</span></th>
@@ -81,7 +81,7 @@
                             <th rowspan="2" class="title_column">@Localizer["DesiredReceiveDate"]<span class="text-danger">*</span></th>
                             <th rowspan="2" class="title_column">@Localizer["SupplierSelectionDeadline"]<br /></th>
                             <th rowspan="2" class="title_column" style="width: 50px">@Localizer["Urgent"]<br /></th>
-                            <th rowspan="2" class="title_column">@Localizer["Requester"]<br /></th>
+                            <th rowspan="2" class="title_column" style="min-width: 150px">@Localizer["Requester"]<br /></th>
                             <th rowspan="2" class="title_column_stt">#</th>
                         </tr>
                         <tr class="text-center align-middle">
@@ -149,7 +149,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <select id="chungLoai_@i" name="chungLoai_@i" class="form-select chungLoaiTb">
+                                    <select id="chungLoai_@i" name="chungLoai_@i" class="form-select chungLoaiTb searchable-select">
                                         <option value="" selected>@Localizer["SelectCategory"]</option>
                                         @foreach (var s in categoryS)
                                         {
@@ -158,7 +158,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <select id="tenPhanLoaiTb_@i" name="tenPhanLoaiTb_@i" class="form-select tenPhanLoaiTb">
+                                    <select id="tenPhanLoaiTb_@i" name="tenPhanLoaiTb_@i" style="min-width: 230px" class="form-select tenPhanLoaiTb">
                                         <option value="" selected>@Localizer["SelectClassification"]</option>
                                         @foreach (var s in phanLoais)
                                         {
@@ -237,16 +237,27 @@
                 </table>
             </div>
             <div id="paginationInfo" class="d-flex justify-content-between align-items-center mt-2" style="display:none;">
-                <div id="pageInfo">Showing 1 to 10 of 50 entries</div>
-                 <div id="paginationControls" class="d-flex justify-content-center mt-3" style="display:none;">
-                <nav aria-label="Table pagination">
-                    <ul class="pagination pagination-sm">
-                        <li class="page-item" id="prevPage"><a class="page-link" href="#" aria-label="@Localizer["Previous"]"><span aria-hidden="true">&laquo;</span></a></li>
-                        <li class="page-item" id="nextPage"><a class="page-link" href="#" aria-label="@Localizer["Next"]"><span aria-hidden="true">&raquo;</span></a></li>
-                    </ul>
-                </nav>
-            </div>
-                <div id="pageNumberInfo">Page 1 of 5</div>
+               <div class="d-flex align-items-center gap-2">
+                    <label for="rowsPerPageSelect" class="form-label mb-0" style="margin-right: 4px;">@Localizer["RowIndex"] </label>
+                    <select id="rowsPerPageSelect" class="form-select form-select-sm" style="width: auto;">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+               </div>
+               <div id="pageInfo"></div>
+                    <div id="paginationControls" class="d-flex justify-content-center mt-3" style="display:none;">
+                    <nav aria-label="Table pagination">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item" id="prevPage"><a class="page-link" href="#" aria-label="@Localizer["Previous"]"><span aria-hidden="true">&laquo;</span></a></li>
+                            <li>
+                                 <div id="pageNumberInfo">1/5</div>
+                            </li>
+                            <li class="page-item" id="nextPage"><a class="page-link" href="#" aria-label="@Localizer["Next"]"><span aria-hidden="true">&raquo;</span></a></li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
             <div class="d-flex align-items-center gap-2 mt-2">
                 <button type="button" id="btnAddRow" class="btn btn-sm btn-outline-secondary"><i class="fas fa-plus"></i> @Localizer["AddOneRow"]</button>
@@ -357,6 +368,9 @@
         NoResults = Localizer["NoResults"].Value,
         SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
         SelectInternalMaterialCode = Localizer["SelectInternalMaterialCode"].Value,
+        Showing = Localizer["Showing"].Value,
+        To = Localizer["To"].Value,
+        Of = Localizer["Of"].Value
     }));
 </script>
 @section Scripts {

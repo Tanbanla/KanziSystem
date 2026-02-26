@@ -6,5 +6,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
     {
         // lấy danh sách chủng loại
         public Task<List<string>> GetListCategory();
+        // Tìm kiếm chủng loại theo tên
+        public Task<List<TM_Category>> SearchCategoryByName(string name);
     }
 }

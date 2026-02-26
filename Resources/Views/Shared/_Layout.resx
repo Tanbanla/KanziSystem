@@ -44,4 +44,5 @@
 	<data name="MenuMasterSupplierManage" xml:space="preserve"><value>Quản lý nhà cung cấp</value></data>
 	<data name="BreadcrumbHome" xml:space="preserve"><value>Kho BIVN</value></data>
 	<data name="FooterCopyright" xml:space="preserve"><value>Công ty TNHH Brother Industries (Việt Nam). Bảo lưu mọi quyền.</value></data>
+	<data name="MenuMasterCategory" xml:space="preserve"><value>Danh mục hàng hóa</value></data>
 </root>

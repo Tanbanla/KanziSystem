@@ -570,7 +570,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
         }
-     
+
         public JsonResult del_warehouse(string id, string tenkho)
         {
             var del = Models.MST_WAREHOUSE.delete_wh(id, tenkho);
@@ -585,6 +585,99 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var ins = Models.MST_WAREHOUSE.Insert_warehouse(CHR_WAREHOUSE, CHR_DEPT_USE, CHR_FACTORY, CHR_NOTE, CHR_USER);
             return Json(ins);
+        }
+
+        // MARK: Màn hình quản lý chủng loại hàng
+        public async Task<IActionResult> Category()
+        {
+
+            return View();
+        }
+        // API tìm kiếm chủng loại hàng theo tên
+        [HttpPost]
+        public async Task<JsonResult> SearchCategoryByName([FromBody] string? req)
+        {
+            var resp = await _tmCategoryService.SearchCategoryByName(req ?? "");
+            if (resp == null || !resp.Success)
+            {
+                return Json(new { success = false, message = resp?.Message ?? "Error" });
+            }
+            var data = resp.Data ?? new List<TM_CategoryDTO>();
+            return Json(new { success = true, data });
+        }
+        // API thêm mới chủng loại hàng
+        [HttpPost]
+        public async Task<JsonResult> AddCategory([FromBody] TM_CategoryDTO req)
+        {
+            // Kiểm tra dữ liệu đầu vào
+            if (req == null || string.IsNullOrEmpty(req.NVCHR_Category))
+            {
+                return Json(new { success = false, message = "Invalid data" });
+            }
+            req.CHR_CreateBy = GetCurrentUserId() ?? "system";
+            req.DTM_CreateBy = System.DateTime.Now;
+            var resp = await _tmCategoryService.AddCategory(req);
+            return Json(new { success = resp.Success, message = resp.Message, data = resp.Data });
+        }
+        // API xoa thong tin chung loai hang
+        [HttpPost]
+        public async Task<JsonResult> DeleteCategory([FromBody] int id)
+        {
+            if (id == 0)
+            {
+                return Json(new { success = false, message = "Invalid id" });
+            }
+            var resp = await _tmCategoryService.DeleteCategory(id);
+            return Json(new { success = resp.Success, message = resp.Message });
+        }
+        // Import dữ liệu chủng loại hàng từ file excel
+        [HttpPost]
+        public async Task<IActionResult> ImportCategory([FromForm] IFormFile importRequest)
+        {
+            if (importRequest == null || importRequest.Length == 0)
+                return BadRequest("File không hợp lệ");
+            var categories = new List<TM_CategoryDTO>();
+            var user = GetCurrentUserId() ?? "system";
+            try
+            {
+                using var stream = importRequest.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                // Dữ liệu bắt đầu từ dòng 2
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 1).GetString() == "" || ws.Cell(r, 1).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột
+                    var dto = new TM_CategoryDTO
+                    {
+                        CHR_CreateBy = user,
+                        DTM_CreateBy = System.DateTime.Now,
+                        NVCHR_Category = ws.Cell(r, 1).GetString().Trim()
+                    };
+                    categories.Add(dto);
+                }
+                if (categories.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                // Giả sử service có AddListCategory
+                var result = await _tmCategoryService.AddListCategory(categories);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
         }
     }
 }

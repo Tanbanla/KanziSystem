@@ -399,11 +399,20 @@
   <data name="FilterMaterialCode" xml:space="preserve">
     <value>Filter Material Code</value>
   </data>
+  <data name="FilterSupplierCode" xml:space="preserve">
+    <value>Filter Supplier Code</value>
+  </data>
+  <data name="FilterVNName" xml:space="preserve">
+    <value>Filter VN Name</value>
+  </data>
   <data name="FilterENName" xml:space="preserve">
     <value>Filter EN Name</value>
   </data>
   <data name="FilterQuantity" xml:space="preserve">
     <value>Filter Quantity</value>
+  </data>
+  <data name="FilterUnit" xml:space="preserve">
+    <value>Filter Unit</value>
   </data>
   <data name="FilterShape" xml:space="preserve">
     <value>Filter Shape</value>
@@ -416,6 +425,9 @@
   </data>
   <data name="FilterDimensions" xml:space="preserve">
     <value>Filter Dimensions</value>
+  </data>
+  <data name="FilterUsedFor" xml:space="preserve">
+    <value>Filter Used For</value>
   </data>
   <data name="FilterPurpose" xml:space="preserve">
     <value>Filter Purpose</value>
@@ -438,6 +450,9 @@
   <data name="FilterManufacturer" xml:space="preserve">
     <value>Filter Manufacturer</value>
   </data>
+  <data name="FilterSupplier" xml:space="preserve">
+    <value>Filter Supplier</value>
+  </data>
   <data name="FilterGetQuote" xml:space="preserve">
     <value>Filter Get Quote</value>
   </data>
@@ -450,6 +465,9 @@
   <data name="FilterDeadline" xml:space="preserve">
     <value>Filter Deadline</value>
   </data>
+  <data name="FilterUrgent" xml:space="preserve">
+    <value>Filter Urgent</value>
+  </data>
   <data name="FilterRequester" xml:space="preserve">
     <value>Filter Requester</value>
   </data>
@@ -459,22 +477,19 @@
   <data name="Next" xml:space="preserve">
     <value>Next </value>
   </data>
-  <data name="FilterSupplierCode" xml:space="preserve">
-    <value>Filter Supplier Code</value>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>Clear Filters</value>
   </data>
-  <data name="FilterVNName" xml:space="preserve">
-    <value>Filter VN Name</value>
+  <data name="RowIndex" xml:space="preserve">
+    <value>Show</value>
   </data>
-  <data name="FilterUnit" xml:space="preserve">
-    <value>Filter Unit</value>
+  <data name="Showing" xml:space="preserve">
+    <value>Showing</value>
   </data>
-  <data name="FilterUsedFor" xml:space="preserve">
-    <value>Filter Used For</value>
+  <data name="To" xml:space="preserve">
+    <value>to</value>
   </data>
-  <data name="FilterSupplier" xml:space="preserve">
-    <value>Filter Supplier</value>
-  </data>
-  <data name="FilterUrgent" xml:space="preserve">
-    <value>Filter Urgent</value>
+  <data name="Of" xml:space="preserve">
+    <value>of</value>
   </data>
 </root>

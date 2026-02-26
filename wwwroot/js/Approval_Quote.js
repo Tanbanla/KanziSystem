@@ -754,7 +754,11 @@
                 const group = state.groupsByMaDon[maDon] || [];
                 group.forEach(it => {
                     it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
-                    it.iD_Status = 'APPROVAL';
+                    if (it.iD_StepBaoGia == 6) {
+                        it.iD_Status = 'WAIT_SEND_MAIL';
+                    } else {
+                        it.iD_Status = 'APPROVAL';
+                    }
                     payload.push(it);
                 });
             });

@@ -16,7 +16,7 @@
     const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
     let currentPage = 1;
-    const rowsPerPage = 10;
+    let rowsPerPage = 10;
     let filteredRows = [];
 
     function renumberRows() {
@@ -26,6 +26,28 @@
         });
         assignRowIds();
         applyFiltersAndPagination();
+    }
+    // Determine if a row is completely empty (no user-entered text/number/date and no meaningful select)
+    function isRowEmpty(tr) {
+        if (!tr) return true;
+        // Check inputs (text, number, date, textarea)
+        const inputs = Array.from(tr.querySelectorAll('input, textarea'));
+        for (const inp of inputs) {
+            // ignore hidden, file inputs
+            if (inp.type === 'hidden' || inp.type === 'file' || inp.type === 'checkbox' || inp.type === 'radio') continue;
+            const v = (inp.value || '').toString().trim();
+            if (v !== '') return false;
+        }
+
+        // Check selects: ignore selects that have default values like 'true','false','No Need'
+        const selects = Array.from(tr.querySelectorAll('select'));
+        const ignoreVals = new Set(['', 'true', 'false', 'No Need']);
+        for (const sel of selects) {
+            const v = (sel.value || '').toString().trim();
+            if (!ignoreVals.has(v)) return false;
+        }
+
+        return true;
     }
     // Loading overlay helpers
     function showLoading(message) {
@@ -115,6 +137,7 @@
         const tbody = qs('#quoteTableBody');
         const allRows = Array.from(tbody.querySelectorAll('tr'));
         const filters = Array.from(document.querySelectorAll('.filter-input')).map(inp => inp.value.toLowerCase().trim());
+        const T = window.i18nQuote || {};
 
         function getCellText(td) {
             const select = td.querySelector('select');
@@ -164,9 +187,9 @@
         const startEntry = (currentPage - 1) * rowsPerPage + 1;
         const endEntry = Math.min(currentPage * rowsPerPage, filteredRows.length);
         const totalEntries = filteredRows.length;
-        const pageInfoText = `Showing ${startEntry} to ${endEntry} of ${totalEntries} entries`;
+        const pageInfoText = `${T.Showing} ${startEntry} ~ ${endEntry} ${T.Of} ${totalEntries}`;
         qs('#pageInfo').textContent = pageInfoText;
-        const pageNumberText = `Page ${currentPage} of ${totalPages}`;
+        const pageNumberText = `${currentPage}/${totalPages}`;
         qs('#pageNumberInfo').textContent = pageNumberText;
         qs('#paginationInfo').style.display = totalPages > 1 ? '' : 'none';
 
@@ -584,11 +607,19 @@
         let rowsValid = true;
         let rowsCheckReason = true;
         const payload = [];
+        // Only validate and collect rows that contain user-entered data
         rows.forEach((tr) => {
+            if (isRowEmpty(tr)) return; // skip empty rows
             if (!validateRow(tr)) rowsValid = false;
             if (!CheckLyDoTuChoi(tr)) rowsCheckReason = false;
             payload.push(collectRow(tr));
         });
+        // If no rows to submit, inform user and abort
+        if (payload.length === 0) {
+            const T = window.i18nQuote || {};
+            showDialog({ title: T.ErrorTitle || 'Lỗi', message: T.MsgInvalidData || 'Không có dữ liệu để gửi', type: 'error' });
+            return;
+        }
         if (!rowsCheckReason) {
             const T = window.i18nQuote || {};
             showDialog({
@@ -1208,6 +1239,20 @@
             currentPage = 1;
             applyFiltersAndPagination();
         });
+        // Rows per page selector (if present in DOM)
+        const rowsPerPageSelect = qs('#rowsPerPageSelect');
+        if (rowsPerPageSelect) {
+            // initialize select value
+            rowsPerPage = parseInt(rowsPerPageSelect.value) || rowsPerPage;
+            rowsPerPageSelect.addEventListener('change', (e) => {
+                const v = parseInt(e.target.value);
+                if (Number.isFinite(v) && v > 0) {
+                    rowsPerPage = v;
+                    currentPage = 1;
+                    applyFiltersAndPagination();
+                }
+            });
+        }
 
         qsa('.btn-remove-row', container).forEach((btn) => {
             btn.addEventListener('click', (e) => removeRow(e.currentTarget));

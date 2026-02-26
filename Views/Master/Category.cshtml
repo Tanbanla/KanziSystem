@@ -1,0 +1,140 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["PageTitle"].Value;
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+</head>
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h5 class="mb-3">@Localizer["HeaderTitle"]</h5>
+        </div>
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+            <div class="btn-group me-2 mb-2" role="group">
+                <button type="button" class="btn btn-outline-primary" id="btnImportExcel"><i class="fas fa-upload"></i> @Localizer["ImportExcel"]</button>
+                <button type="button" class="btn btn-outline-success" id="btnAddCategory"><i class="fas fa-plus"></i> @Localizer["Add"]</button>
+            </div>
+        </div>
+    </div>
+    <!-- Search Bar -->
+    <form id="category-search-form" class="row g-2 align-items-end mb-3">
+        <div class="col-md-6">
+            <label for="searchName" class="form-label">@Localizer["CategoryName"]</label>
+            <input type="text" id="searchName" name="name" class="form-control" placeholder="@Localizer["EnterCategoryName"]">
+        </div>
+        <div class="col-md-6 d-flex gap-3 align-items-center">
+            <button type="button" id="btnReset" class="btn btn-secondary"><i class="fas fa-undo"></i> @Localizer["Refresh"]</button>
+            <div style="width: 6px"></div>
+            <button type="button" id="btnSearch" class="btn btn-primary"><i class="fas fa-search"></i> @Localizer["Search"]</button>
+        </div>
+    </form>
+
+    <!-- Categories Grid -->
+    <div class="table-responsive border rounded" style="max-height:550px;height:550px;overflow:auto;">
+        <table class="table table-sm table-hover table-bordered align-middle" id="categoriesTable">
+            <thead class="table-light">
+                <tr class="text-center align-middle">
+                    <th style="width: 100px">@Localizer["ID"]</th>
+                    <th>@Localizer["CategoryName"]</th>
+                    <th style="width: 150px" class="text-end">@Localizer["Actions"]</th>
+                </tr>
+            </thead>
+            <tbody>
+               
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Modal for Add Category -->
+<div class="cm-dialog-overlay" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">@Localizer["Add"] @Localizer["CategoryName"]</h6>
+                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="@Localizer["Close"]" id="btnCloseEdit" role="button" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                    <i class="fas fa-times fa-sm"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">@Localizer["CategoryName"]</label>
+                            <input id="categoryName" class="form-control" required />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCloseModal" role="button" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">@Localizer["Close"]</button>
+                <button type="button" id="btnSaveCategory" class="btn btn-primary">@Localizer["Save"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Dialogs reused from Quote -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer"></div>
+    </div>
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
+<!-- Custom confirm dialog -->
+<div id="cmConfirmDialog" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmConfirmTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmConfirmTitle" class="cm-dialog-title cm-confirm-title">@Localizer["Confirm"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="cancel" aria-label="@Localizer["Close"]">✕</button>
+        </div>
+        <div class="cm-dialog-body cm-confirm-body">@Localizer["AreYouSure"]</div>
+        <div class="cm-dialog-footer">
+            <button type="button" class="cm-btn cm-btn-primary" data-cm-action="ok">@Localizer["OK"]</button>
+        </div>
+    </div>
+</div>
+<!-- Import Excel input (hidden) -->
+<input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
+
+<script src="~/js/Category.js"></script>
+<script>
+    window.i18nCategory = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        Search = Localizer["Search"].Value,
+        Add = Localizer["Add"].Value,
+        Refresh = Localizer["Refresh"].Value,
+        ImportExcel = Localizer["ImportExcel"].Value,
+        Actions = Localizer["Actions"].Value,
+        NoData = Localizer["NoData"].Value,
+        Loading = Localizer["Loading"].Value,
+        LoadFailed = Localizer["LoadFailed"].Value,
+        Delete = Localizer["Delete"].Value,
+        ConfirmDeleteTitle = Localizer["ConfirmDeleteTitle"].Value,
+        ConfirmDeleteMessage = Localizer["ConfirmDeleteMessage"].Value,
+        DeleteSuccessTitle = Localizer["DeleteSuccessTitle"].Value,
+        DeleteSuccessMessage = Localizer["DeleteSuccessMessage"].Value,
+        ErrorTitle = Localizer["ErrorTitle"].Value,
+        ErrorConnection = Localizer["ErrorConnection"].Value,
+        SuccessTitle = Localizer["SuccessTitle"].Value,
+        SaveSuccessMessage = Localizer["SaveSuccessMessage"].Value,
+        OK = Localizer["OK"].Value,
+        Notification = Localizer["Notification"].Value,
+        Close = Localizer["Close"].Value,
+        Save = Localizer["Save"].Value
+    }));
+</script>
+@* - màn hình xử lý trường hợp k điền
+- phê duyệt thêm k lấy báo giá 
+- chỉnh lại giao diện theo đơn
+- mail sửa lại
+- lead time là số ngày, cam kết bắt buộc phải điền, sửa tiêu đề cột điều điện 
+- file đính kèm cần lưu (bắt buộc)
+- điều kiện đơn giá k âm
+- tổng hợp theo số đơn yêu cầu, lưu lịch sử báo giá.
+- màn hình lịch sử xác nhận lại thông tin
+- màn hình xác nhận tên sửa lại hiển thông tin để xác nhận tên, tổng hợp theo mã tên mới, thêm chức năng nhập xuất bằng excel
+- xử lý excel màn hình nhập báo giá, xử lý loading và updata file đã xử lý *@

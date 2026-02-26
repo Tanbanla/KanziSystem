@@ -44,4 +44,5 @@
 	<data name="MenuMasterSupplierManage" xml:space="preserve"><value>サプライヤー管理</value></data>
 	<data name="BreadcrumbHome" xml:space="preserve"><value>BIVN倉庫</value></data>
 	<data name="FooterCopyright" xml:space="preserve"><value>ブラザー工業(ベトナム)株式会社 著作権所有</value></data>
+	<data name="MenuMasterCategory" xml:space="preserve"><value>商品カテゴリ</value></data>
 </root>

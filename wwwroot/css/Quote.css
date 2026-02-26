@@ -90,7 +90,7 @@
 .btn-toolbar .btn { font-size: 0.85rem; padding: 6px 10px; }
 
 /* Improve table responsiveness on smaller screens */
-@media (max-width: 992px) {
+@media (max-width: 1100px) {
     #quote-request .table-responsive { overflow-x: auto; }
     #quote-request .form-select { min-width: 140px; }
 }
@@ -98,7 +98,7 @@
     vertical-align: middle;
     background-color: #2335B7;
     color: white;
-    min-width: 90px;
+    min-width: 100px;
     padding: 8px;
     text-align: center; /* center title text */
     font-size: 0.7rem; /* increase title text size */
@@ -348,7 +348,7 @@ select.is-invalid {
 }
 .filter-row th {
     background-color: #f8f9fa;
-    background: #2335B7;
+    background: hsla(233, 68%, 43%, 0.2); /* 0.4 = 40% độ trong suốt */
     padding: 4px;
 }
 .filter-input {
@@ -357,3 +357,27 @@ select.is-invalid {
     font-size: 0.75rem;
     padding: 2px 4px;
 }
+
+/* Fixed header table: make thead cells sticky and limit table height */
+.table-responsive.fixed-header {
+    --thead-row-height: 44px; /* height of the first header row */
+    --thead-subrow-height: 40px; /* height of the second header row */
+    max-height: 520px; /* adjust as needed */
+    overflow: auto;
+}
+
+.table-responsive.fixed-header table {
+    margin-bottom: 0; /* avoid extra gap under table when scrolling */
+}
+
+/* Top header row */
+.table-responsive.fixed-header thead tr:first-child th,
+.table-responsive.fixed-header thead tr:first-child td {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: #2335B7; /* match header background */
+    color: #fff;
+}
+/* Ensure table body rows have white background when scrolling under header */
+.table-responsive.fixed-header tbody td { background: #fff; }

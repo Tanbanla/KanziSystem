@@ -44,4 +44,5 @@
   <data name="MenuMasterSupplierManage" xml:space="preserve"><value>Supplier management</value></data>
   <data name="BreadcrumbHome" xml:space="preserve"><value>Warehouse BIVN</value></data>
   <data name="FooterCopyright" xml:space="preserve"><value>Brother Industries (Vietnam) Ltd. All Rights Reserved</value></data>
+	<data name="MenuMasterCategory" xml:space="preserve"><value>Product Categories</value></data>
 </root>
