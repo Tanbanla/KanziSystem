@@ -45,7 +45,7 @@ async function SearchPoDelivery() {
         const result = await response.json();
         console.log('SearchPoDelivery Data : ', result);
         const opt = document.getElementById('show_kho');
-
+        opt.value = "";
         result.forEach((value) => {
             opt.innerHTML += `<tr><td><input type="checkbox" value="${value.pO_Detail_Id}"/></td><td>${value.pO_Detail_Id}</td><td>${value.id_Goc}</td><td>${value.benxacnhantruoc}</td><td>${value.soPO}</td><td>${value.mahang}</td><td>${value.good_Code}</td><td>${value.tentienganh}</td><td>${value.tentiengviet}</td><td>${value.soluong}</td>`
                 + `<td><input type='number' value='${value.luongvethucte}'></input></td><td>${value.luongvekho}</td><td>${value.luongvekhoNgaynhap}</td><td>${value.luongvekhoNguoinhap}</td><td>${value.dovi}</td><td>${value.dongia}</td><td>${value.dieukiengiaohang}</td>`

@@ -111,7 +111,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View(vm);
         }
         // MARK: - Select Quote Section
-        public async  Task<IActionResult> SelectQuoteSection()
+        public async Task<IActionResult> SelectQuoteSection()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
             var materials = await _materialService.SearchAsync("", "", "", 0, 0);
@@ -236,7 +236,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     try
                     {
                         var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
-                        foreach(var i in MaterialsNew)
+                        foreach (var i in MaterialsNew)
                         {
                             var cf = new BaoGia_Confirm_Name_QuotationDTO();
                             cf.ID_RequestQuote = i.ID;
@@ -445,7 +445,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     // Map fields into template columns similar to ExportSelection
                     ws.Cell(row, 1).SetValue(row - 9); // status placeholder
-                    ws.Cell(row, 2).SetValue(rq?.CHR_SectionCode ??  string.Empty);
+                    ws.Cell(row, 2).SetValue(rq?.CHR_SectionCode ?? string.Empty);
                     ws.Cell(row, 4).SetValue(rq?.CHR_Phanloai ?? string.Empty);
                     ws.Cell(row, 5).SetValue(rq?.CHR_MaThietBi ?? string.Empty);
                     ws.Cell(row, 6).SetValue(rq?.CHR_MaHangNoiBo ?? string.Empty);
@@ -695,7 +695,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
             var v = s.Trim().ToLowerInvariant();
-            return v.ToUpper().Contains("O")  ? true : false;
+            return v.ToUpper().Contains("O") ? true : false;
         }
         private static BaoGia_Request_of_QuotationDTO CloneDto(BaoGia_Request_of_QuotationDTO src)
         {
@@ -775,6 +775,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
                 searchModel.maVatTu, searchModel.maNcc, searchModel.section, searchModel.dayMM, searchModel.pageSize, searchModel.pageIndex);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
+        // Tìm kiếm hiển thị danh sách nhập báo giá theo số đơn hàng
+        [HttpPost]
+        public async Task<IActionResult> SearchInputQuoteBySoDon([FromBody] ThongTinBaoGiaGomNhomModel mod)
+        {
+            var result = await _baoGiaService.SearchThongTinNhapBaoGiaAsync(mod.maDon, mod.section, mod.maHang, mod.pageIndex, mod.pageSize);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1039,7 +1050,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     //var supplierAs = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(item);
                     // đổi sang dùng bảng BaoGiaNCCCategory
                     var supplierAs = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(m.Category_VN ?? ""); ;
-                    if (!supplierAs.Success ||  supplierAs.Data == null)
+                    if (!supplierAs.Success || supplierAs.Data == null)
                     {
                         continue;
                     }
@@ -1073,7 +1084,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cell(row, col++).SetValue(a.CHR_MaNCC);
                         ws.Cell(row, col++).SetValue(a.NVCHR_TenNCC);
 
-                        ws.Cell(row, col+5).SetValue(GetCurrentUserId());
+                        ws.Cell(row, col + 5).SetValue(GetCurrentUserId());
                         row++;
                     }
                 }
@@ -1085,7 +1096,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 return File(bytes, contentType, fileName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"Lỗi xuất file: {ex.Message}");
             }
@@ -1168,6 +1179,34 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest($"Lỗi xuất file: {ex.Message}");
             }
+        }
+        // MARK: Màn hình nhập thông tin chi tiêts
+        public async Task<IActionResult> InputQuoteDetail(string maDon)
+        {
+            // Load data for the detail page
+            var request = await _baoGiaService.GetByMaBaoGiaAsync(maDon);
+            if (!request.Success || request.Data == null)
+            {
+                return NotFound("Request not found");
+            }
+
+            var nhomViTri = await LoadNhomViTriDataAsync();
+            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            var nccs = await LoadNhaCungCapDataAsync();
+            var categorys = await LoadCategoryDataAsync();
+
+            var vm = new QuoteModel
+            {
+                DanhSachNhomViTri = nhomViTri,
+                DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
+                DanhSachNhaCungCap = nccs,
+                DanhSachCategory = categorys,
+                NguoiThaoTac = GetCurrentUserId() ?? "",
+                MaDonHienTai = maDon,
+                // Add the specific request data
+                CurrentRequest = request.Data
+            };
+            return View(vm);
         }
     }
 }

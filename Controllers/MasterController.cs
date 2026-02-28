@@ -69,7 +69,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
             dt = dt.Where(x => x.CHR_FACTORY == fac).ToList();
-            return Json(dt);
+            var dup = dt.Select(x => x.CHR_FACTORY).Distinct();
+            return Json(dup);
         }
         [HttpPost]
         public JsonResult load_wh(string fac, string sec)

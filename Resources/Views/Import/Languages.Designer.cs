@@ -241,6 +241,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Đồng ý.
+        /// </summary>
+        public static string Dongy {
+            get {
+                return ResourceManager.GetString("Dongy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Đồng ý bởi.
         /// </summary>
         public static string dongyboi {
@@ -1119,6 +1128,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string xacnhannhapkho {
             get {
                 return ResourceManager.GetString("xacnhannhapkho", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Xem.
+        /// </summary>
+        public static string Xem {
+            get {
+                return ResourceManager.GetString("Xem", resourceCulture);
             }
         }
     }

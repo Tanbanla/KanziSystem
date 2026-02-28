@@ -471,4 +471,10 @@
   <data name="Damnhiem" xml:space="preserve">
     <value>Đảm nhiệm</value>
   </data>
+  <data name="Dongy" xml:space="preserve">
+    <value>Đồng ý</value>
+  </data>
+  <data name="Xem" xml:space="preserve">
+    <value>Xem</value>
+  </data>
 </root>

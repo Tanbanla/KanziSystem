@@ -13,6 +13,15 @@
             <div class="card-header">
                 <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
+                        <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon">
+                        <datalist id="tt">
+                            <option>Gấp</option>
+                            <option>Thông thường</option>
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 10px">
+                    <div class="input-group mb-2">
                         <input type="text" list="lst_khoi" class="form-control" placeholder="@Languages.Khoi" id="khoi" />
                         <datalist id="lst_khoi">
                             <option>PROD</option>
@@ -33,7 +42,7 @@
                     </div>
                 </div>
               
-                <div class="form-group" style="margin : 10px 0 0 10px">
+                <div class="form-group" style="margin : 10px 0 0 10px" hidden>
                     <div class="input-group mb-2">
                         <input type="text" class="form-control" id="cost" placeholder="Cost">
                     </div>
@@ -53,8 +62,7 @@
                         </datalist>
                     </div>
                 </div>
-                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-                <button type="button" class="btn btn-success ml-3"><i class="fa fa-file-excel"></i> download excel</button>
+                <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
@@ -117,6 +125,7 @@
         var Cost_Center = document.getElementById("cost").value;
         var Request_Date = document.getElementById("ngayyc").value;
         var Total = document.getElementById("giadonhang").value;
+        var Urgent = document.getElementById("trangthaidon").value;
         
         const params = new URLSearchParams();
             params.append('Group_Code', Group_Code);
@@ -124,7 +133,8 @@
             params.append('INT_STEP', INT_STEP);
             params.append('Cost_Center', Cost_Center);
             params.append('Request_Date', Request_Date);
-            params.append('Total', Total.split(' ')[1]);
+            params.append('Total', Total);
+            params.append('Urgent', Urgent);
 
         fetch('/Request/get_requestcondition', {
             method: 'POST',
@@ -140,12 +150,19 @@
                 return response.json();
             })
             .then(data => {
-                userPagingState.fullData = data;
+                 userPagingState.fullData = data;
                 // Tính tổng số trang
                 userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
 
+                if(data.length == 0){
+                    document.getElementById('list_approve').innerHTML = `<tr><td colspan="15" style="text-align:center">Không có dữ liệu !</td></tr>`;
+                }
+                else{
+                     
                 // Khởi tạo hiển thị trang đầu tiên
                 goToPage(1);
+                }
+              
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
@@ -210,7 +227,7 @@
 
             return `
                     <tr>                       
-                        <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info text-primary"></i></button></td>
+                        <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info"></i></button></td>
                         <td>${urg}</td>
                         <td>${trangthai}</td>
                         <td>${item.code_Request}</td>

@@ -120,8 +120,8 @@
   <data name="PageTitle" xml:space="preserve">
     <value>Enter quotation information</value>
   </data>
-  <data name="ImportFromExcel" xml:space="preserve">
-    <value>Import from Excel</value>
+  <data name="ExportImportFromExcel" xml:space="preserve">
+    <value>Download sample Excel file</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
@@ -338,5 +338,167 @@
   </data>
   <data name="SelectInternalMaterialCode" xml:space="preserve">
     <value>Internal Material Code</value>
+  </data>
+  <data name="SaveAll" xml:space="preserve">
+    <value>Save All</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="QuotationCode" xml:space="preserve">
+    <value>Quotation Code</value>
+  </data>
+  <data name="SelectQuotation" xml:space="preserve">
+    <value>Select Quotation</value>
+  </data>
+  <data name="RequestList" xml:space="preserve">
+    <value>Request List</value>
+  </data>
+  <data name="SummaryFormat" xml:space="preserve">
+    <value>Total: {0}</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Detail</value>
+  </data>
+  <data name="RequestDate" xml:space="preserve">
+    <value>Request Date</value>
+  </data>
+  <data name="DepartmentName" xml:space="preserve">
+    <value>Department Name</value>
+  </data>
+  <data name="CreatorPIC" xml:space="preserve">
+    <value>Creator</value>
+  </data>
+  <data name="DesiredReceiveDate" xml:space="preserve">
+    <value>Desired Receive Date</value>
+  </data>
+  <data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Related suppliers</value>
+  </data>
+  <data name="InputQuoteTitle" xml:space="preserve">
+    <value>Input Quote</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>Receiving Department</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>Department Code</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>Department Name</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>Request Date</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>Desired Deadline</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>Goods Detail</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>STT</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>System Code</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>Internal Code</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>Item Name VN/EN</value>
+  </data>
+  <data name="DescriptionGroup" xml:space="preserve">
+    <value>Description Group</value>
+  </data>
+  <data name="SupplierShort" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="GetQuotation" xml:space="preserve">
+    <value>Get Quotation</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>Composition</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>Used Position</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>Purpose/Feature</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Loading Data</value>
+  </data>
+  <data name="QuoteInputTitle" xml:space="preserve">
+    <value>Quote Input</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="FooterID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="FooterStep" xml:space="preserve">
+    <value>Step</value>
+  </data>
+  <data name="FooterRegency" xml:space="preserve">
+    <value>Regency</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>Clear Filters</value>
+  </data>
+  <data name="SelectMaterial" xml:space="preserve">
+    <value>Select Material</value>
+  </data>
+  <data name="NumberMaterial" xml:space="preserve">
+    <value>Total order for materials</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="DataFilteredSuccessfully" xml:space="preserve">
+    <value>Data filtered successfully</value>
+  </data>
+  <data name="FilterFailed" xml:space="preserve">
+    <value>Filter failed: {0}</value>
+  </data>
+  <data name="RowIndex" xml:space="preserve">
+    <value>Show</value>
   </data>
 </root>

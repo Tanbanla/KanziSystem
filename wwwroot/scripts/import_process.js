@@ -36,6 +36,7 @@ function _load_inv() {
             return response.json();
         })
         .then(data => {
+            
             userPagingState.fullData = data;
             // Tính tổng số trang
             userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
@@ -252,7 +253,6 @@ function _load_material(Material_Code, id) {
     params.append('Account_Name_VN', '');
     params.append('Group_Code', groupcode);
 
-
     fetch('/Import/_info_material', {
         method: 'POST',
         headers: {
@@ -267,7 +267,6 @@ function _load_material(Material_Code, id) {
             return response.json();
         })
         .then(data => {
-            console.log(data);
             document.getElementById("stk_" + idd).value = data[0].account_Code + ":" + data[0].account_Name_EN;
             document.getElementById("tk_" + idd).value = data[0].num_Inventory;
             document.getElementById("kho_" + idd).value = data[0].inventory;
@@ -340,7 +339,7 @@ function _SEC(fac) {
         .then(data => {
             document.getElementById("phongban_chuyen").innerHTML = "<option></option>";
             for (var i = 0; i < data.length; i++) {
-                document.getElementById("phongban_chuyen").innerHTML += `<option>${data[i].chR_DEPT_USE}</option>`
+                document.getElementById("phongban_chuyen").innerHTML += `<option>${data[i]}</option>`
             }
         })
         .catch(error => {

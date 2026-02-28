@@ -1,0 +1,240 @@
+﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = "Input Quote Detail";
+    List<ACC_NHOMVITRIDTO> nhomViTri = Model.DanhSachNhomViTri;
+    List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
+    List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
+    List<string> categoryS = Model.DanhSachCategory;
+    string currentUser = Model.NguoiThaoTac;
+    List<BaoGia_Request_of_QuotationDTO> listRequest = Model.CurrentRequest;
+    var currentRequest = listRequest.First();
+    string madon = Model.MaDonHienTai;
+}
+<head>
+    <link rel="stylesheet" href="~/css/Approval_Quote.css" />
+    <link rel="stylesheet" href="~/css/Quote.css" />
+</head>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="card mb-3" style="background-color: #fff9e1; border: 2px solid #dee2e6;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h4 class="fw-bold" style="color: #000;">
+                    Nhập báo giá - <span id="pageMaDon" class="text-primary">@currentRequest?.CHR_MaDon</span>
+                </h4>
+                <button type="button" class="btn btn-link p-1" onclick="goBack()">
+                    <i class="fas fa-times fa-lg"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <span class="fw-bold" style="color: #000;">Phòng ban:</span>
+                    <span id="pageKhoi" class="bg-white px-3 py-1 rounded border" style="color: #000;">@currentRequest?.CHR_SectionName</span>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="badge bg-warning text-dark p-2" id="pageUrgentBadge" style="display:@(currentRequest?.CHR_Gap == "true" ? "inline" : "none");">
+                        <i class="ion ion-alert-circled"></i> Khẩn cấp
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- General Info -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm mb-0">
+                    <tr>
+                        <td class="fw-bold bg-light" style="width: 15%;">Mã phòng ban</td>
+                        <td style="width: 18%; background-color: #fff9e1;" id="pageMpbyc">@currentRequest?.CHR_SectionCode</td>
+                        <td class="fw-bold bg-light" style="width: 15%;">Tên phòng ban</td>
+                        <td style="width: 19%; background-color: #fff9e1;" id="pageTenphongban">@currentRequest?.CHR_SectionName</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold bg-light">Ngày yêu cầu</td>
+                        <td style="background-color: #fff9e1;" id="pageNyc">@currentRequest?.DTM_CreateDate.ToString("dd/MM/yyyy")</td>
+                        <td class="fw-bold bg-light">Hạn chót</td>
+                        <td style="background-color: #fff9e1;" id="pageThmm">@currentRequest?.DTM_KyHan?.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Selection -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row align-items-end mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Nhà cung cấp <span class="text-danger">*</span></label>
+                    <select id="pageSupplierSelect" class="form-control searchable-select">
+                        <option value="">Chọn nhà cung cấp</option>
+                        @foreach (var s in nccNews)
+                        {
+                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Mã hàng nội bộ <span class="text-danger">*</span></label>
+                    <select id="pageInternalItemCodeSelect" class="form-control searchable-select">
+                        <option value="">Chọn mã hàng nội bộ</option>
+                        @foreach (var s in mATERIAs)
+                        {
+                            <option value="@s.Material_Code">@s.Material_Code- @s.Material_Name_VN</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-secondary w-100" id="pageSearch">
+                        <i class="fas fa-search"></i> Lọc
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-primary w-100" id="pageSendMail">
+                        <i class="fas fa-paper-plane"></i> Gửi mail xin báo giá
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goods Detail -->
+    <div class="card mb-2">
+        <div class="card-header">
+            <h5 class="fw-bold" style="color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 5px;">
+                <i class="ion ion-clipboard"></i> Chi tiết hàng hóa
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Table for items -->
+            <div class="table-responsive-fixed">
+                <table class="table table-bordered table-hover align-middle" id="pageDetailTable" style="font-size: 13px;">
+                    <thead>
+                        <tr class="text-center align-middle" style="background-color: #e9ecef;">
+                            <th rowspan="2" style="width: 40px; background-color: #dee2e6;">STT</th>
+                            <th rowspan="2" style="min-width: 120px; background-color: #dee2e6;">Mã nhà cung cấp</th>
+                            <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;">Mã hàng nội bộ</th>
+                            <th rowspan="2" style="min-width: 120px; background-color: #dee2e6;">Loại hàng</th>
+                            <th rowspan="2" style="min-width: 200px; background-color: #dee2e6;">Tên hàng thủ tục hải quan</th>
+                            <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;">Tên tiếng Anh</th>
+                            <th colspan="8" style="background-color: #d3d9e5;">Mô tả</th>
+                            <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;">File thiết kế</th>
+                            <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;">Nhà cung cấp</th>
+                            <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;">Hạn chót chọn NCC</th>
+                            <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;">Khẩn cấp</th>
+                            <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;">Lấy báo giá</th>
+                            <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;">Lý do</th>
+                        </tr>
+                        <tr class="text-center align-middle" style="background-color: #e9ecef;">
+                            <th style="min-width: 80px;">Số lượng</th>
+                            <th style="min-width: 70px;">Đơn vị</th>
+                            <th style="min-width: 80px;">Hình dạng</th>
+                            <th style="min-width: 80px;">Chất liệu</th>
+                            <th style="min-width: 100px;">Thành phần</th>
+                            <th style="min-width: 100px;">Kích thước</th>
+                            <th style="min-width: 120px;">Vị trí sử dụng</th>
+                            <th style="min-width: 150px;">Mục đích/tính năng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pageDetailBody">
+                        <tr class="text-center">
+                            <td colspan="20" class="text-muted py-4">
+                                <i class="ion ion-load-c ion-spin"></i> Đang tải dữ liệu...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quote Input Table -->
+    <div class="card mb-2">
+        <div class="card-header">
+            <h5 class="fw-bold" style="color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 5px;">
+                <i class="fas fa-edit"></i> Nhập báo giá
+            </h5>
+            <div style="margin-left: 16px;"></div>
+            <div class="btn-group mb-2" role="group">
+                <button class="btn btn-success btn-sm" id="btnSampleExcel"><i class="fas fa-file-excel"></i> Nhập bằng Excel</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle" id="quoteInputTable" style="font-size: 13px;">
+                    <thead>
+                        <tr class="text-center">
+                            <th>STT</th>
+                            <th>Mã hàng nội bộ</th>
+                            <th>Mã hàng NCC</th>
+                            <th>Tên hàng HQ</th>
+                            <th>Số lượng</th>
+                            <th>Giá USD</th>
+                            <th>Giá VND</th>
+                            <th>MOQ</th>
+                            <th>Lead Time</th>
+                            <th>Ngày giao hàng</th>
+                            <th>ROHS</th>
+                            <th>CO/CQ</th>
+                            <th>MSDS</th>
+                            <th>An toàn</th>
+                            <th>Cam kết</th>
+                            <th>Phương thức giao</th>
+                            <th>Điều kiện</th>
+                            <th>File đính kèm</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quoteInputBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="card">
+        <div class="card-body" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <div>
+                    <span class="text-muted">
+                        <i class="ion ion-document-text"></i> ID: <span id="pageIdRequest">@currentRequest?.ID</span> |
+                        Bước: <span id="pageStep">Input</span> |
+                        Người tạo: <span id="pageRegency">@currentRequest?.CHR_CreateBy</span>
+                    </span>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-success" id="pageSave">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-times"></i> Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.inputQuoteDetailData = {
+        user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser)),
+        maDon: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(madon)), // Not needed here
+        nhomViTri: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(nhomViTri)),
+        materials: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(mATERIAs)),
+        nccNews: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(nccNews)),
+        listRequest: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(listRequest))
+    };
+</script>
+@section Scripts {
+    <script src="~/js/InputQuoteDetail.js"></script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+}

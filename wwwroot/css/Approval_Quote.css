@@ -5,6 +5,7 @@
 
 #approval-quote table thead th {
     font-size: .75rem; 
+    color : black;
     white-space: nowrap;
 }
 
@@ -176,3 +177,60 @@ thead.table-header-custom th {
         background-color: #1a2a9a !important;
         color: white !important;
     }
+
+/* Styles for InputQuoteDetail tables: black text, white background, black cell borders */
+#pageDetailTable, #quoteInputTable {
+    color: #000 !important;
+    background-color: #fff !important;
+    border-collapse: collapse;
+}
+
+#pageDetailTable thead th, #pageDetailTable tbody td,
+#quoteInputTable thead th, #quoteInputTable tbody td {
+    border: 1px solid #000 !important;
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+/* Ensure responsive containers preserve white background for cells */
+.table-responsive-fixed .table, .table-responsive .table {
+    background-color: #fff !important;
+}
+
+/* make header readable but keep black borders */
+#pageDetailTable thead th, #quoteInputTable thead th {
+    background-color: #f8f9fa !important;
+    color: #000 !important;
+    font-weight: 600;
+}
+
+/* Make headers sticky so they remain visible when scrolling
+   - For pageDetailTable there are two header rows; adjust top offsets so second row sits below first
+   - For quoteInputTable single header row is fixed to top of its scroll container / viewport
+*/
+#pageDetailTable thead th {
+    position: sticky;
+    top: 0; /* first header row sticks at top of scroll container */
+    z-index: 6;
+}
+#pageDetailTable thead tr:nth-child(2) th {
+    position: sticky;
+    top: 38px; /* adjust to height of first header row */
+    z-index: 7;
+}
+
+/* If table sits inside a scrollable container (.table-responsive-fixed), sticky will be relative to that container */
+.table-responsive-fixed #pageDetailTable thead th {
+    top: 0;
+}
+
+#quoteInputTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+}
+
+/* Ensure sticky headers have solid background so content underneath does not show through */
+#pageDetailTable thead th, #quoteInputTable thead th {
+    background-color: #f8f9fa !important;
+}

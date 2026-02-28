@@ -259,51 +259,56 @@
         });
     }
          // Đảm bảo dùng jQuery chính xác
-       (function($) {
+        (function($) {
         "use strict";
+
         document.getElementById('btn-add-row').addEventListener('click', function() {
             const tbody = document.querySelector('#dynamic-table tbody');
-             const firstRow = tbody.querySelector('.input-row');
+            const firstRow = tbody.querySelector('.input-row');
 
-            // // Clone dòng đầu tiên
-             const newRow = firstRow.cloneNode(true);
+            // 1. Clone dòng đầu tiên
+            const newRow = firstRow.cloneNode(true);
 
-            // --- BƯỚC 1: Reset dữ liệu sạch sẽ ---
-            const inputs = newRow.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.value = ''; // Xóa giá trị
-                // Nếu là select2, giá trị cần về rỗng trước khi khởi tạo lại
-                if (input.classList.contains('select2')) {
-                    $(input).val(null).trigger('change');
+            // Xóa bỏ container giao diện của Select2 đã bị clone theo
+            $(newRow).find('.select2-container').remove();
+
+            // Tìm tất cả select và input trong dòng mới
+            const $elements = $(newRow).find('select, input, textarea');
+
+            $elements.each(function() {
+                const $el = $(this);
+
+                // Xóa giá trị cũ
+                $el.val('');
+
+                // Loại bỏ hoàn toàn các class và thuộc tính mà Select2 đã thêm vào trước đó
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.removeClass('select2-hidden-accessible')
+                       .removeAttr('data-select2-id')
+                       .removeAttr('aria-hidden')
+                       .removeAttr('tabindex')
+                       .find('option').removeAttr('data-select2-id');
                 }
             });
 
-            // --- BƯỚC 2: Xử lý nút xóa ---
+            // 3. Hiển thị nút xóa cho dòng mới
             const removeBtn = newRow.querySelector('.btn-remove');
             if (removeBtn) {
                 removeBtn.style.display = 'inline-block';
             }
 
-            // --- BƯỚC 3: Dọn dẹp Select2 cũ (Bắt buộc) ---
-            $(newRow).find('.select2-container').remove();
-            const $selects = $(newRow).find('.select2, .pcp');
-
-            $selects.each(function() {
-                $(this).removeClass('select2-hidden-accessible')
-                       .removeAttr('data-select2-id')
-                       .find('option').removeAttr('data-select2-id');
-            });
-
-            // --- BƯỚC 4: Thêm vào bảng ---
+            // 4. Thêm dòng mới vào bảng
             tbody.appendChild(newRow);
 
-            // --- BƯỚC 5: Khởi tạo lại Select2 cho dòng mới ---
-            if ($.fn.select2) {
-                $selects.select2({ width: '100%', placeholder: "" });
-            }
-
-            // --- BƯỚC 6: Cập nhật lại toàn bộ ID và hàm sự kiện ---
+            // 5. Cập nhật STT và ID trước (để Select2 nhận diện ID mới duy nhất)
             updateRowNumbers();
+
+            // 6. Khởi tạo lại Select2 RIÊNG cho dòng vừa mới thêm
+            if ($.fn.select2) {
+                $(newRow).find('.select2, .pcp').select2({
+                    width: '100%',
+                });
+            }
         });
 
     })(jQuery);
@@ -324,7 +329,6 @@
        function caculator(id) {
         // Lấy số thứ tự dòng từ ID (ví dụ: sl_1 -> 1)
         var idd = id.split('_')[1];
-
 
         // Lấy giá trị đơn giá và số lượng
         var pricee = document.getElementById("dg_" + idd).value || 0;

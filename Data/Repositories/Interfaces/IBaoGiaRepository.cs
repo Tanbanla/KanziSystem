@@ -5,7 +5,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
     public interface IBaoGiaRepository: IBaseRepository<BaoGia_Request_of_Quotation , int>
     {
         // Lấy thông tin báo giá theo mã báo giá
-        public Task<BaoGia_Request_of_Quotation> GetByMaBaoGiaAsync(string maBaoGia);
+        public Task<List<BaoGia_Request_of_Quotation>> GetByMaBaoGiaAsync(string maBaoGia);
         // Tìm kiếm thông tin báo giá và phân trang 
         public Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date);
         // Nhap bao gia
@@ -24,5 +24,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<List<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize);
         // Xuất báo giá
         public Task<List<int>> ExportBaoGiaAsync(string? maDon);
+        // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
+        public Task<List<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize);
     }
 }

@@ -24,8 +24,12 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public List<string> DanhSachMaDon { get; set; } = new List<string>();
         // Người thao tác 
         public string? NguoiThaoTac { get; set; }
+        // Mã đơn hiện tại
+        public string? MaDonHienTai { get; set; }
         // Danh sách báo giá gom nhóm
         public List<dynamic> DanhSachBaoGiaGomNhom { get; set; } = new List<dynamic>();
+        // Current request for detail page
+        public List<BaoGia_Request_of_QuotationDTO>? CurrentRequest { get; set; }
     }
     public class SearchBaoGiaViewModel
     {

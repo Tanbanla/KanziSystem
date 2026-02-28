@@ -218,8 +218,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                         [Kind], [Type], [Status], [Create_Date], [User_Create],[Place], [Loaihinhtokhai], [Group_Code],  [Chophepin], [Urgent] 
                     ) 
                     VALUES (
-                        @NewCode, '{Cost_Center}', '{DateTime.Now}', N'{Declaration}', '{Dealine}', ROUND({Total_exchange},2), '{Exchange_rate}', '{Currency}', ROUND({Total},2),  
-                        '{Kind}', '{Type}', '{Status}','{DateTime.Now}', '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
+                        @NewCode, '{Cost_Center}', '{DateTime.Now.ToString("yyyy-MM-dd HH:ss:mm")}', N'{Declaration}', '{Dealine}', ROUND({Total_exchange},2), '{Exchange_rate}', '{Currency}', ROUND({Total},2),  
+                        '{Kind}', '{Type}', '{Status}','{DateTime.Now.ToString("yyyy-MM-dd HH:ss:mm")}', '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
                     );
 
                     SELECT @NewCode AS NextCode, SCOPE_IDENTITY() AS NewID;";
@@ -280,7 +280,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             _db.GET_DATA_FROM_SQL("insert into [PE_REQUEST_CONFIRM] (ID_REQUEST,CHR_ADID_NGUOIYEUCAU,CHR_ADID_NGUOITHAMTRA,CHR_ADID_NGUOIPHEDUYET,CHR_ADID_XACNHAN, DTM_XACNHAN, INT_STEP,CHR_MAIL_NGUOIYEUCAU,CHR_MAIL_NGUOITHAMTRA,CHR_MAIL_NGUOIPHEDUYET,CHR_TEN_NGUOIYEUCAU,CHR_TEN_NGUOITHAMTRA,CHR_TEN_NGUOIPHEDUYET,CHR_ADID_XUATKHO,CHR_MAIL_XUATKHO,CHR_TEN_XUATKHO,CHR_TEN_XACNHAN,CHR_MAIL_XACNHAN,CONFIRM_NGUOIYEUCAU,CONFIRM_NGUOITHAMTRA,CONFIRM_NGUOIPHEDUYET,CONFIRM_XACNHAN) " +
-                "VALUES ('" + id_request + "','" + adid_dt + "','" + adid_tt + "','" + adid_pheduyet + "','" + adid_dy + "','" + DateTime.Now + "','0','" + mail_dt + "','" + mail_tt + "','" + mail_pd + "',N'" + ten_dt + "',N'" + ten_tt + "',N'" + ten_pd + "','" + adid_xk + "','" + mail_xk + "',N'" + ten_xk + "',N'" + ten_dy + "','" + mail_dy + "','0','0','0','0')");
+                "VALUES ('" + id_request + "','" + adid_dt + "','" + adid_tt + "','" + adid_pheduyet + "','" + adid_dy + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','0','" + mail_dt + "','" + mail_tt + "','" + mail_pd + "',N'" + ten_dt + "',N'" + ten_tt + "',N'" + ten_pd + "','" + adid_xk + "','" + mail_xk + "',N'" + ten_xk + "',N'" + ten_dy + "','" + mail_dy + "','0','0','0','0')");
             return "OK";
         }
         public static List<PE_REQUEST_CONFIRM> get_requestconfirm( string us)
@@ -324,27 +324,27 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return pe_;
         }
-        public static List<PE_REQUEST_CONFIRM> get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total)
+        public static List<PE_REQUEST_CONFIRM> get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
             string gia = "";
-            if(Total < 3000)
+            if(Total > 0 && Total < 3000)
             {
-                gia = "b.Total < '3000'";
+                gia = "and b.Total < '3000'";
             }
             if (Total >= 3000 && Total < 10000)
             {
-                gia = "b.Total >= '3000' and b.Total < '10000'";
+                gia = "and b.Total >= '3000' and b.Total < '10000'";
             }
             if (Total >= 10000)
             {
-                gia = "b.Total >= '10000'";
+                gia = "and b.Total >= '10000'";
             }
             var list = _db.GET_DATA_FROM_SQL($@"select top (1000) * from [PE_REQUEST_CONFIRM] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
-                        WHERE b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and {gia}  
+                        WHERE b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and Urgent like '%{Urgent}%' {gia}  
                         order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)

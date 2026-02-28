@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -120,8 +120,8 @@
   <data name="PageTitle" xml:space="preserve">
     <value>見積情報の入力</value>
   </data>
-  <data name="ImportFromExcel" xml:space="preserve">
-    <value>Excelからインポート</value>
+  <data name="ExportImportFromExcel" xml:space="preserve">
+    <value>サンプルExcel</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>保存</value>
@@ -338,5 +338,167 @@
   </data>
   <data name="SelectInternalMaterialCode" xml:space="preserve">
     <value>社内品目コード</value>
+  </data>
+  <data name="SaveAll" xml:space="preserve">
+    <value>すべて保存</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>フィルター</value>
+  </data>
+  <data name="QuotationCode" xml:space="preserve">
+    <value>見積コード</value>
+  </data>
+  <data name="SelectQuotation" xml:space="preserve">
+    <value>見積を選択</value>
+  </data>
+  <data name="RequestList" xml:space="preserve">
+    <value>依頼リスト</value>
+  </data>
+  <data name="SummaryFormat" xml:space="preserve">
+    <value>合計: {0}</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>すべて選択</value>
+  </data>
+  <data name="Detail" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="RequestDate" xml:space="preserve">
+    <value>依頼日</value>
+  </data>
+  <data name="DepartmentName" xml:space="preserve">
+    <value>部門名</value>
+  </data>
+  <data name="CreatorPIC" xml:space="preserve">
+    <value>作成者</value>
+  </data>
+  <data name="DesiredReceiveDate" xml:space="preserve">
+    <value>希望受領日</value>
+  </data>
+  <data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>関連サプライヤー</value>
+  </data>
+  <data name="InputQuoteTitle" xml:space="preserve">
+    <value>見積入力</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>受領部門</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>緊急</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>部門コード</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>部門名</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>依頼日</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>希望期限</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>商品詳細</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>STT</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>システムコード</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>社内コード</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>カテゴリ</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>品目名VN/EN</value>
+  </data>
+  <data name="DescriptionGroup" xml:space="preserve">
+    <value>説明グループ</value>
+  </data>
+  <data name="SupplierShort" xml:space="preserve">
+    <value>仕入先</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>緊急</value>
+  </data>
+  <data name="GetQuotation" xml:space="preserve">
+    <value>見積取得</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>理由</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>単位</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>形状</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>材料</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>組成</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>寸法</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>使用位置</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>目的/機能</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>データを読み込み中</value>
+  </data>
+  <data name="QuoteInputTitle" xml:space="preserve">
+    <value>見積入力</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="FooterID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="FooterStep" xml:space="preserve">
+    <value>ステップ</value>
+  </data>
+  <data name="FooterRegency" xml:space="preserve">
+    <value>権限</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>フィルター解除</value>
+  </data>
+  <data name="SelectMaterial" xml:space="preserve">
+    <value>品目コードを選択</value>
+  </data>
+  <data name="NumberMaterial" xml:space="preserve">
+    <value>材料の総注文</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>ステータス</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>確認する</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>終わり</value>
+  </data>
+  <data name="DataFilteredSuccessfully" xml:space="preserve">
+    <value>データが正常にフィルタリングされました</value>
+  </data>
+  <data name="FilterFailed" xml:space="preserve">
+    <value>フィルタに失敗しました: {0}</value>
+  </data>
+  <data name="RowIndex" xml:space="preserve">
+    <value>行番号</value>
   </data>
 </root>

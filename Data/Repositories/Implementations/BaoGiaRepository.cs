@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +21,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
 
         // Lấy thông tin báo giá theo mã báo giá
-        public async Task<BaoGia_Request_of_Quotation> GetByMaBaoGiaAsync(string maBaoGia)
+        public async Task<List<BaoGia_Request_of_Quotation>> GetByMaBaoGiaAsync(string maBaoGia)
         {
-            var sql = "SELECT * FROM BaoGia_Request_of_Quotation WHERE Ma_Bao_Gia = @MaBaoGia";
+            var sql = "SELECT * FROM BaoGia_Request_of_Quotation WHERE CHR_MaDon = @MaBaoGia";
             var parameters = new { MaBaoGia = maBaoGia };
-            return await _conn.QueryFirstOrDefaultAsync<BaoGia_Request_of_Quotation>(sql, parameters);
+            return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Tìm kiếm thông tin báo giá và phân trang
         public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step,int pageIndex, int pageSize, DateTime? date)
@@ -216,6 +217,91 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var a = await _context.BaoGia_Request_of_Quotations
                 .Where(c => c.CHR_MaDon == maDon).Select(c => c.ID).ToListAsync();
             return a;
+        }
+        // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
+        public async Task<List<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
+        {
+            var sql = new StringBuilder(@"
+            WITH BangTongHop AS (
+                SELECT 
+                    r.CHR_MaDon, 
+                    CONVERT(DATE, r.DTM_CreateDate) AS DTM_CreateDate, 
+                    r.CHR_SectionName, 
+                    r.CHR_CreateBy,
+                    r.CHR_MaHangNoiBo,
+                    r.CHR_MaNCC,
+                    r.ID_StepBaoGia
+                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] r
+                WHERE 1 = 1 
+                    AND r.ID_StepBaoGia > 5 ");
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", maDon);
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+                parameters.Add("MaHang", maHang);
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                sql.Append(" AND r.CHR_SectionCode = @Section");
+                parameters.Add("Section", section);
+            }
+
+            sql.Append(@"
+            )
+            SELECT DISTINCT 
+                t1.CHR_MaDon, 
+                t1.DTM_CreateDate, 
+                t1.CHR_SectionName, 
+                t1.CHR_CreateBy,
+    
+                -- Số lượng linh kiện
+                (
+                    SELECT COUNT(DISTINCT t2.CHR_MaHangNoiBo)
+                    FROM BangTongHop t2
+                    WHERE t2.CHR_MaDon = t1.CHR_MaDon
+                ) AS SoLuongLinhKien,
+    
+                -- Danh sách nhà cung cấp
+                STUFF((
+                    SELECT DISTINCT ', ' + t2.CHR_MaNCC
+                    FROM BangTongHop t2
+                    WHERE t2.CHR_MaDon = t1.CHR_MaDon 
+                        AND t2.CHR_MaNCC IS NOT NULL 
+                        AND t2.CHR_MaNCC != ''
+                    FOR XML PATH('')
+                ), 1, 2, '') AS DanhSachNCC,
+    
+                -- Trạng thái
+                CASE 
+                    WHEN NOT EXISTS (
+                        SELECT 1 
+                        FROM BangTongHop t3
+                        WHERE t3.CHR_MaDon = t1.CHR_MaDon 
+                            AND t3.ID_StepBaoGia != 6
+                    ) THEN 'Confirm'
+                    ELSE 'Done'
+                END AS TrangThai
+
+            FROM BangTongHop t1");
+
+            if (pageSize > 0 && pageIndex > 0)
+            {
+                sql.Append(" ORDER BY TrangThai,t1.DTM_CreateDate DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                parameters.Add("Offset", (pageIndex - 1) * pageSize);
+                parameters.Add("PageSize", pageSize);
+            }
+            else
+            {
+                sql.Append(" ORDER BY TrangThai,t1.DTM_CreateDate DESC");
+            }
+
+            return (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
         }
     }
 }

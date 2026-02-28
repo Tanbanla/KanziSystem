@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -17,12 +18,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _mapper = mapper;
         }
         // Lấy thông tin báo giá theo mã báo giá
-        public async Task<GenericResponse<BaoGia_Request_of_QuotationDTO>> GetByMaBaoGiaAsync(string maBaoGia)
+        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> GetByMaBaoGiaAsync(string maBaoGia)
         {
-            var result = new GenericResponse<BaoGia_Request_of_QuotationDTO>();
+            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
             try
             {
-                result.Data = _mapper.Map<BaoGia_Request_of_QuotationDTO>(await _repo.GetByMaBaoGiaAsync(maBaoGia));
+                result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(await _repo.GetByMaBaoGiaAsync(maBaoGia));
                 result.Success = true;
             }
             catch (Exception ex)
@@ -189,6 +190,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = false;
             }
 
+            return result;
+        }
+        // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
+        public async Task<GenericResponse<List<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
+        {
+           var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.SearchThongTinNhapBaoGiaAsync(maDon, section, maHang, pageIndex, pageSize);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
             return result;
         }
     }

@@ -6,63 +6,64 @@
     .form-control, .input-group-text, .custom-select, .custom-file-label {
         border-color: #6e75c4;
     }
+ 
 </style>
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
-            <div class="card-header">
-                <div class="form-group" style="margin : 10px 0 0 0">
+            <div class="card-header" style="padding-left: 0px;">
+                <div class="form-group" style="margin : 10px 0 0 5px">
                     <div class="input-group mb-2">
-                        <input type="text" list="lst_khoi" class="form-control mr-4" placeholder="@Languages.Khoi" />
-                        <datalist id="lst_khoi">
-                            <option>PROD</option>
-                            <option>GA</option>
-                            <option>IT</option>
-                            <option></option>
+                        <button class="btn btn-outline-success" style="border-radius : 0px;"><i class="fa fa-check"></i> @Languages.Dongy</button>
+                        <button class="btn btn-outline-danger ml-1" style="border-radius : 0px;">× @Languages.Tuchoi</button>
+                        <button class="btn btn-outline-info ml-1" style="border-radius : 0px;"><i class="fa fa-eye-dropper"></i> @Languages.Xem</button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 50px">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon">
+                        <datalist id="tt">
+                            <option>Gấp</option>
+                            <option>Thông thường</option>
+                        </datalist>
+                    </div>
+                </div>             
+                <div class="form-group" style="margin : 10px 0 0 10px">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="tinhtrangdon" placeholder="@Languages.Trangthaidon">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 10px">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.mayeucau ">
+                    </div>
+                </div>                    
+                <div class="form-group" style="margin : 10px 0 0 10px">
+                    <div class="input-group mb-2">
+                        <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- @Languages.Giatien ---" />
+                        <datalist id="donh">
+                            <option>Dưới 3000</option>
+                            <option>Dưới 10,000</option>
+                            <option>Trên 10,000</option>
                         </datalist>
                     </div>
                 </div>
-                <div class="form-group" style="margin : 10px 0 0 0">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.Sopo ">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                     
-                        <input type="text" class="form-control" id="kho" placeholder="@Languages.Tinhtrangdon">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">                     
-                        <input type="text" class="form-control" id="cost" placeholder="Cost">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="ngayyc" placeholder="@Languages.Ngayyeucau">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="cost" placeholder="@Languages.nguoitao">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-
-                <button type="button" class="btn btn-success ml-3"><i class="fa fa-file-excel"></i> download excel</button>
+                <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
             </div>
+          
+           
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
                     <table class="table table-bordered">
                         <thead class="bg-primary">
+                        
                             <tr>
-                                <th rowspan="2"></th>
+                                <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" class="idd" /></th>
                                 <th rowspan="2">@Languages.chitiet</th>                                         
                                 <th rowspan="2">@Languages.Tinhtrangdon</th>
                                 <th rowspan="2">@Languages.Trangthaidon</th>
-                                <th rowspan="2">@Languages.Sopo</th>
+                                <th rowspan="2">@Languages.mayeucau</th>
                                 <th rowspan="2">Cost Center</th>
                                 <th rowspan="2">@Languages.Ngayyeucau</th>
                                 <th rowspan="2">@Languages.thoihanmuonnhan</th>
@@ -70,7 +71,7 @@
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
                                 <th colspan="2">@Languages.phongtiepnhan</th>
-                                <th rowspan="2">@Languages.nguoinhan</th>
+                                @* <th rowspan="2">@Languages.nguoinhan</th> *@
                             </tr>
                             <tr>
                                 <th>@Languages.nguoiduthao</th>

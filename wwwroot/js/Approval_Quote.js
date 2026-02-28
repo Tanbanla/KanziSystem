@@ -577,11 +577,14 @@
                 tr.appendChild(td(it.nvchR_DongMay)); // dòng máy
                 //tr.appendChild(td(it.nvchR_DongMay)); // Vị trí sử dụng
                 tr.appendChild(td(it.nvchR_TinhNang)); // Mục đích/Tính năng
-            const ncc = (it.chR_MaNCC ? it.chR_MaNCC : '') + (it.nvchR_TenNCC ? ` - ${it.nvchR_TenNCC}` : '');
+                const ncc = (it.chR_MaNCC ? it.chR_MaNCC : '') + (it.nvchR_TenNCC ? ` - ${it.nvchR_TenNCC}` : '');
                 tr.appendChild(td(ncc.trim())); // NCC
                 tr.appendChild(td(formatDate(it.dtM_KyHan))); // Ngày nhận mong muốn
                 const gap = it.chR_Gap != null ? (String(it.chR_Gap).toLowerCase() === 'true' || String(it.chR_Gap) === '1' ? 'O' : 'X') : '';
                 tr.appendChild(td(gap)); // Khẩn
+                const layBaogia = it.biT_LayBaoGia != null ? (String(it.biT_LayBaoGia).toLowerCase() === 'true' || String(it.biT_LayBaoGia) === '1' ? 'O' : 'X') : '';
+                tr.appendChild(td(layBaogia)); // Lấy báo giá
+                tr.appendChild(td(it.nvchR_LyDo)); // Lý do
             frag.appendChild(tr);
         });
         tbody.appendChild(frag);

@@ -120,8 +120,8 @@
   <data name="PageTitle" xml:space="preserve">
     <value>Nhập thông tin báo giá</value>
   </data>
-  <data name="ImportFromExcel" xml:space="preserve">
-    <value>Nhập từ Excel</value>
+  <data name="ExportImportFromExcel" xml:space="preserve">
+    <value>Tải file Excel mẫu</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Lưu</value>
@@ -338,5 +338,167 @@
   </data>
   <data name="SelectInternalMaterialCode" xml:space="preserve">
     <value>Mã hàng nội bộ</value>
+  </data>
+  <data name="SaveAll" xml:space="preserve">
+    <value>Lưu tất cả</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Bộ lọc</value>
+  </data>
+  <data name="QuotationCode" xml:space="preserve">
+    <value>Mã báo giá</value>
+  </data>
+  <data name="SelectQuotation" xml:space="preserve">
+    <value>Chọn báo giá</value>
+  </data>
+  <data name="RequestList" xml:space="preserve">
+    <value>Danh sách yêu cầu</value>
+  </data>
+  <data name="SummaryFormat" xml:space="preserve">
+    <value>Tổng: {0}</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Chọn tất cả</value>
+  </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Chi tiết</value>
+  </data>
+  <data name="RequestDate" xml:space="preserve">
+    <value>Ngày yêu cầu</value>
+  </data>
+  <data name="DepartmentName" xml:space="preserve">
+    <value>Tên phòng ban</value>
+  </data>
+  <data name="CreatorPIC" xml:space="preserve">
+    <value>Người tạo</value>
+  </data>
+  <data name="DesiredReceiveDate" xml:space="preserve">
+    <value>Ngày muốn nhận</value>
+  </data>
+  <data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Các nhà cung cấp liên quan</value>
+  </data>
+  <data name="InputQuoteTitle" xml:space="preserve">
+    <value>Nhập báo giá</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>Phòng nhận</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>Khẩn cấp</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>Mã phòng ban</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>Tên phòng ban</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>Ngày yêu cầu</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>Hạn chót mong muốn</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>Chi tiết hàng hóa</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>STT</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>Mã hệ thống</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>Mã hàng NB</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Chủng loại</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>Tên hàng VN/EN</value>
+  </data>
+  <data name="DescriptionGroup" xml:space="preserve">
+    <value>Nhóm mô tả</value>
+  </data>
+  <data name="SupplierShort" xml:space="preserve">
+    <value>NCC</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>Khẩn</value>
+  </data>
+  <data name="GetQuotation" xml:space="preserve">
+    <value>Lấy báo giá</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Lý do</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>SL</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>ĐV</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>Hình dạng</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>Chất liệu</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>Thành phần</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>Kích thước</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>Vị trí sử dụng</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>Mục đích/tính năng</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Đang tải dữ liệu</value>
+  </data>
+  <data name="QuoteInputTitle" xml:space="preserve">
+    <value>Nhập báo giá</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="FooterID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="FooterStep" xml:space="preserve">
+    <value>Bước</value>
+  </data>
+  <data name="FooterRegency" xml:space="preserve">
+    <value>Quyền</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>Bỏ lọc</value>
+  </data>
+  <data name="SelectMaterial" xml:space="preserve">
+    <value>Chọn mã hàng nội bộ</value>
+  </data>
+  <data name="NumberMaterial" xml:space="preserve">
+    <value>Số loại linh kiện muốn đặt</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Hoàn thành</value>
+  </data>
+  <data name="DataFilteredSuccessfully" xml:space="preserve">
+    <value>Đã lọc dữ liệu báo giá</value>
+  </data>
+  <data name="FilterFailed" xml:space="preserve">
+    <value>Lọc thất bại: {0}</value>
+  </data>
+  <data name="RowIndex" xml:space="preserve">
+    <value>Số dòng</value>
   </data>
 </root>

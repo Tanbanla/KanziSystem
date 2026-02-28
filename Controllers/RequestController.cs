@@ -140,9 +140,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             REQUEST_PROCESS._sendmail(body, mail_nguoidat, subject);
             return Json("Hoàn thành !");
         }
-        public JsonResult get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total)
+        public JsonResult get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent)
         {
-            var cf = REQUEST_PROCESS.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, Total);
+            Urgent = (Urgent == "Gấp") ? "1" : (Urgent == "Thông thường" ? "0" : Urgent);
+            var a =  (Total == "Dưới 3000") ? "2999"                  
+                   : (Total == "Dưới 10,000") ? "3000"
+                   : (Total == "Trên 10,000") ? "10000"
+                   : "0";
+            var cf = REQUEST_PROCESS.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, double.Parse(a), Urgent);
             return Json(cf);
         }
     }

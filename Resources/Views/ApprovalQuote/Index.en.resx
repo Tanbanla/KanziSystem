@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>QUOTATION APPROVAL</value>
+    <value>APPROVAL OF REQUEST FOR QUOTATION</value>
   </data>
   <data name="PageSubtitle" xml:space="preserve">
     <value>Approval status for quotation requests</value>
@@ -339,48 +339,133 @@
   <data name="ShowLess" xml:space="preserve">
     <value>Show less</value>
   </data>
-  <!-- Added keys for localized modal UI -->
-  <data name="ReceivingDepartmentLabel" xml:space="preserve"><value>Receiving department：</value></data>
-  <data name="UrgentBadgeText" xml:space="preserve"><value>Urgent</value></data>
-  <data name="DeptCodeLabel" xml:space="preserve"><value>※Request dept. code</value></data>
-  <data name="DeptCostCenterLabel" xml:space="preserve"><value>※Request dept. cost center</value></data>
-  <data name="DeptNameLabel" xml:space="preserve"><value>※Department name</value></data>
-  <data name="LineLabel" xml:space="preserve"><value>※Machine line</value></data>
-  <data name="RequestDateLabel" xml:space="preserve"><value>※Request date</value></data>
-  <data name="DesiredDeadlineLabel" xml:space="preserve"><value>※Desired deadline</value></data>
-  <data name="GoodsDetailTitle" xml:space="preserve"><value>GOODS DETAIL</value></data>
-  <data name="STT" xml:space="preserve"><value>No.</value></data>
-  <data name="SystemCode" xml:space="preserve"><value>※System code</value></data>
-  <data name="InternalMaterialCodeShort" xml:space="preserve"><value>※Internal material code</value></data>
-  <data name="ItemNameVNEN" xml:space="preserve"><value>※Item name (VN/EN)</value></data>
-  <data name="RequestGroup" xml:space="preserve"><value>Request</value></data>
-  <data name="DescriptionGroup" xml:space="preserve"><value>Item description</value></data>
-  <data name="SupplierShort" xml:space="preserve"><value>Supplier</value></data>
-  <data name="DesiredReceiveDateShort" xml:space="preserve"><value>Desired receive date</value></data>
-  <data name="UrgentShort" xml:space="preserve"><value>Urgent</value></data>
-  <data name="QuantityShort" xml:space="preserve"><value>Quantity</value></data>
-  <data name="UnitShort" xml:space="preserve"><value>Unit</value></data>
-  <data name="ShapeShort" xml:space="preserve"><value>Shape</value></data>
-  <data name="MaterialShort" xml:space="preserve"><value>Material</value></data>
-  <data name="CompositionShort" xml:space="preserve"><value>Composition</value></data>
-  <data name="DimensionsShort" xml:space="preserve"><value>Dimensions</value></data>
-  <data name="UsedPositionShort" xml:space="preserve"><value>Used position</value></data>
-  <data name="PurposeFeatureShort" xml:space="preserve"><value>Purpose/Feature</value></data>
-  <data name="LoadingData" xml:space="preserve"><value>Loading data...</value></data>
-  <data name="ApprovalFlowTitle" xml:space="preserve"><value>Approval flow</value></data>
-  <data name="ApprovalFlowLine1" xml:space="preserve"><value>• Under 3,000 USD (66M VND): PIC → Middle manager → Deputy section manager.</value></data>
-  <data name="ApprovalFlowLine2" xml:space="preserve"><value>• Under 10,000 USD (220M VND): PIC → Middle manager → Section manager.</value></data>
-  <data name="ApprovalFlowLine3" xml:space="preserve"><value>• From 10,000 USD (220M VND) and above: Middle manager → Section/Deputy manager → General Director/Director.</value></data>
-  <data name="ApprovalFlowLine4" xml:space="preserve"><value>→ Warehouse issue approval (PR1-MC): Junior/Middle manager → Kanzai warehouse</value></data>
-  <data name="AdditionalInfoTitle" xml:space="preserve"><value>Other request information</value></data>
-  <data name="ROHSLabel" xml:space="preserve"><value>ROHS:</value></data>
-  <data name="COCQLabel" xml:space="preserve"><value>CO/CQ:</value></data>
-  <data name="MSDSLabel" xml:space="preserve"><value>MSDS:</value></data>
-  <data name="RequesterLabel" xml:space="preserve"><value>Requester:</value></data>
-  <data name="FooterID" xml:space="preserve"><value>ID:</value></data>
-  <data name="FooterStep" xml:space="preserve"><value>Step:</value></data>
-  <data name="FooterRegency" xml:space="preserve"><value>Regency:</value></data>
-  <data name="ApproveButton" xml:space="preserve"><value>Approve</value></data>
-  <data name="RejectButton" xml:space="preserve"><value>Reject</value></data>
-  <data name="CloseButton" xml:space="preserve"><value>Close</value></data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>Receiving department：</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="DeptCodeLabel" xml:space="preserve">
+    <value>※Request dept. code</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>※Request dept. cost center</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>※Department name</value>
+  </data>
+  <data name="LineLabel" xml:space="preserve">
+    <value>※Machine line</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>※Request date</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>※Desired deadline</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>GOODS DETAIL</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>※System code</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>※Internal material code</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>※Item name (VN/EN)</value>
+  </data>
+  <data name="RequestGroup" xml:space="preserve">
+    <value>Request</value>
+  </data>
+  <data name="DescriptionGroup" xml:space="preserve">
+    <value>Item description</value>
+  </data>
+  <data name="SupplierShort" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="DesiredReceiveDateShort" xml:space="preserve">
+    <value>Desired receive date</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>Composition</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>Used position</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>Purpose/Feature</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Loading data...</value>
+  </data>
+  <data name="ApprovalFlowTitle" xml:space="preserve">
+    <value>Approval flow</value>
+  </data>
+  <data name="ApprovalFlowLine1" xml:space="preserve">
+    <value>• Under 3,000 USD (66M VND): PIC → Middle manager → Deputy section manager.</value>
+  </data>
+  <data name="ApprovalFlowLine2" xml:space="preserve">
+    <value>• Under 10,000 USD (220M VND): PIC → Middle manager → Section manager.</value>
+  </data>
+  <data name="ApprovalFlowLine3" xml:space="preserve">
+    <value>• From 10,000 USD (220M VND) and above: Middle manager → Section/Deputy manager → General Director/Director.</value>
+  </data>
+  <data name="ApprovalFlowLine4" xml:space="preserve">
+    <value>→ Warehouse issue approval (PR1-MC): Junior/Middle manager → Kanzai warehouse</value>
+  </data>
+  <data name="AdditionalInfoTitle" xml:space="preserve">
+    <value>Other request information</value>
+  </data>
+  <data name="ROHSLabel" xml:space="preserve">
+    <value>ROHS:</value>
+  </data>
+  <data name="COCQLabel" xml:space="preserve">
+    <value>CO/CQ:</value>
+  </data>
+  <data name="MSDSLabel" xml:space="preserve">
+    <value>MSDS:</value>
+  </data>
+  <data name="RequesterLabel" xml:space="preserve">
+    <value>Requester:</value>
+  </data>
+  <data name="FooterID" xml:space="preserve">
+    <value>ID:</value>
+  </data>
+  <data name="FooterStep" xml:space="preserve">
+    <value>Step:</value>
+  </data>
+  <data name="FooterRegency" xml:space="preserve">
+    <value>Regency:</value>
+  </data>
+  <data name="ApproveButton" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="RejectButton" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
 </root>

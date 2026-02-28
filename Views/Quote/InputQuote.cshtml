@@ -1,7 +1,7 @@
 ﻿@using PRJ_WAREHOUSE_BIVN.DTO
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Nhập thông tin báo giá";
+    ViewData["Title"] = @Localizer["PageTitle"];
     List<ACC_NHOMVITRIDTO> nhomViTri = Model.DanhSachNhomViTri;
     List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
     List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
@@ -11,66 +11,38 @@
     List<BaoGia_Request_of_QuotationDTO> listQuote = Model.DanhSachYeuCauBaoGia;
 }
 <head>
+    <link rel="stylesheet" href="~/css/Approval_Quote.css" />
     <link rel="stylesheet" href="~/css/Quote.css" />
-    <link rel="stylesheet" href="~/css/InputQuote.css" />
 </head>
 
-<div class="input-quote-page py-3">
-    <div class="d-flex justify-content-between align-items-center mb-3 input-quote-header p-3 rounded">
-        <h4 class="mb-0">@Localizer["PageTitle"]</h4>
-        <div class="d-flex">
-            <button type="button" class="btn-custom" id="btnImportExcel">
-                <span class="text" style="margin-right: 7px">@Localizer["ImportFromExcel"]</span>
-                <i class="fas fa-file-excel"></i>
-            </button>
-            <button type="button" class="btn btn-primary btn-sm" style="margin-left: 5px" id="btnSaveQuote">
-                <span class="text" style="margin-right: 7px">@Localizer["Save"]</span>
-                <i class="fas fa-save" ></i>
-            </button>
+<div class="container-fluid" id="input-quote">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
         </div>
-<!-- Overlay for side panel -->
-<div id="productPanelOverlay" class="product-panel-overlay" aria-hidden="true"></div>
+        <div class="btn-group mb-2" role="group">
+            <button class="btn btn-success btn-sm" id="btnSampleExcel" ><i class="fas fa-file-excel"></i> @Localizer["ExportImportFromExcel"]</button>
+        </div>
     </div>
 
-    <!-- Thông tin chung -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header">
-            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>@Localizer["GeneralInfo"]</h6>
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white py-2">
+            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Filters"]</h6>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">@Localizer["QuoteRequestCode"] <span class="text-danger">*</span></label>
-                    <select id="quoteRequestCode" name="quoteRequestCode" class="form-control quoteRequestCode searchable-select">
-                        <option value="">@Localizer["SelectOrderCode"]</option>
+        <div class="card-body pt-3 pb-2">
+            <form id="filterForm" class="row g-4 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label for="searchMaDon" class="form-label small text-uppercase fw-semibold">@Localizer["QuotationCode"]</label>
+                    <select id="searchMaDon" name="searchMaDon" class="form-select searchMaDon searchable-select">
+                        <option value="" selected>@Localizer["SelectQuotation"]</option>
                         @foreach (var s in madons)
                         {
                             <option value="@s">@s</option>
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">@Localizer["Supplier"] <span class="text-danger">*</span></label>
-                    <select id="supplierSelect" name="supplierSelect" class="form-control supplierSelect searchable-select">
-                        <option value="">@Localizer["SelectSupplier"]</option>
-                        @foreach (var s in nccNews)
-                        {
-                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">@Localizer["QuoteDate"]</label>
-                    <input type="date" class="form-control" id="quoteDate" value="@DateTime.Today.ToString("yyyy-MM-dd")">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">@Localizer["ValidUntil"]</label>
-                    <input type="date" class="form-control" id="validUntil" value="@DateTime.Today.AddDays(30).ToString("yyyy-MM-dd")">
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col-md-3">
-                    <label for="maPhongBan" class="form-label small text-uppercase fw-semibold">@Localizer["DepartmentCode"]</label>
+                <div class="col-12 col-md-3">
+                    <label for="searchPhongBan" class="form-label small text-uppercase fw-semibold">@Localizer["DepartmentCode"]</label>
                     <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
                         <option value="" selected>@Localizer["SelectDepartment"]</option>
                         @foreach (var s in nhomViTri)
@@ -79,278 +51,151 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
-                    <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select">
-                        <option value="" selected>@Localizer["SelectMaterialCode"]</option>
+                <div class="col-12 col-md-3">
+                    <label for="searchMaterial" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
+                    <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select">
+                        <option value="" selected>@Localizer["SelectMaterial"]</option>
                         @foreach (var s in mATERIAs)
                         {
                             <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
                         }
                     </select>
                 </div>
-                <!-- Nút điều khiển -->
-                <div class="mt-4 d-flex justify-content-end">
-                    <button type="button" class="btn btn-outline-secondary" id="btnReset">
-                        <i class="fas fa-undo"></i> @Localizer["Reset"]
-                    </button>
-                    <div style="min-width:12px"></div>
-                    <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
-                    <div style="min-width:12px"></div>
-                    <button type="button" class="btn btn-success" id="btnSubmitQuote">
-                        <i class="fas fa-paper-plane me-1"></i> @Localizer["SubmitQuote"]
-                    </button>
-                    <div style="min-width:12px"></div>
-                    <button type="button" class="btn btn-warning" id="btnReturnQuote">
-                        <i class="fas fa-pen-alt"></i> @Localizer["RequestEdit"]
-                    </button>
-                    <div style="min-width:12px"></div>
-                    <button type="button" class="btn btn-warning" id="btnSaveDraft">
-                        <i class="fas fa-save me-1"></i> @Localizer["SaveDraft"]
-                    </button>
+                 <div class="col-12 col-md-3">
+                    <label for="searchStatus" class="form-label small text-uppercase fw-semibold">@Localizer["Status"]</label>
+                    <select id="searchStatus" name="searchStatus" class="form-select searchStatus searchable-select">
+                        <option value="1" selected>@Localizer["SelectAll"]</option>
+                        <option value="2">@Localizer["Confirm"]</option>
+                        <option value="3">@Localizer["Done"]</option>
+                    </select>
                 </div>
-            </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="button" id="btnSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> @Localizer["Search"]</button>
+                    <div style="min-width: 12px;"></div>
+                    <button type="button" id="btnClear" class="btn btn-outline-secondary btn-sm"><i class="fas fa-eraser"></i> @Localizer["ClearFilters"]</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Danh sách sản phẩm báo giá -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0"><i class="fas fa-list me-2"></i>@Localizer["QuoteItemList"]</h6>
-            <button type="button" class="btn btn-outline-primary btn-sm" id="btnAddProduct">
-                <i class="fas fa-plus"></i>
-            </button>
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["RequestList"]</h6>
+            <small class="text-muted" id="summaryText">@Localizer["SummaryFormat", 0]</small>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered quote-items-table mb-0 align-middle">
-                    <thead>
-                        <tr class="text-center">
-                            <th style="width: 40px; background : #0950B0" hidden>ID</th>
-                            <th style="width: 40px; background : #0950B0">@Localizer["NoLabel"]</th>
-                            <th style="background : #0950B0">@Localizer["InternalMaterialCode"]</th>
-                            <th style="background : #0950B0">@Localizer["SupplierCode"]</th>
-                            <th style="background : #0950B0">@Localizer["SupplierItemCode"]</th>
-                            <th style="min-width: 230px;background : #0950B0">@Localizer["CustomsItemName"]</th>
-                            <th style="background : #0950B0">@Localizer["Quantity"]</th>
-                            <th style="background : #0950B0">@Localizer["Unit"]</th>
-                            <th style="background : #0950B0">@Localizer["PriceUSD"]</th>
-                            <th style="background : #0950B0">@Localizer["PriceVND"]</th>
-                            <th style="min-width: 100px;background : #0950B0">@Localizer["MOQ"]</th>
-                            <th style="min-width: 150px;background : #0950B0">@Localizer["Packing"]</th>
-                            <th style="background : #0950B0">@Localizer["LeadTime"]</th>
-                            <th style="background : #0950B0">@Localizer["DeliveryDate"]</th>
-                            <th style="background : #0950B0">@Localizer["RohsResponse"]</th>
-                            <th style="min-width: 120px;background : #0950B0">@Localizer["COCQ"]</th>
-                            <th style="background : #0950B0">@Localizer["MSDSWithCAS"]</th>
-                            <th style="background : #0950B0">@Localizer["SafetyResponse"]</th>
-                            <th style="background : #0950B0">@Localizer["CommitRequirement"]</th>
-                            <th style="min-width: 180px;background : #0950B0">@Localizer["DeliveryMethod"]</th>
-                            <th style="min-width: 150px;background : #0950B0">@Localizer["Condition"]</th>
-                            <th style="min-width: 150px;background : #0950B0">@Localizer["Attachment"]</th>
-                            <th style="background : #0950B0">@Localizer["Delete"]</th>
+            <div class="table-responsive" style="max-height: 480px;">
+                <table class="table table-sm table-hover table-bordered align-middle mb-0" id="inputQuoteTable">
+                    <thead class="table-header-custom">
+                        <tr class="text-center align-middle">
+                            <th style="width:40px"><input type="checkbox" id="selectAll" title="@Localizer["SelectAll"]" /></th>
+                            <th style="min-width:80px">@Localizer["Detail"]</th>
+                            <th style="min-width:140px">@Localizer["OrderCode"]</th>
+                            <th style="min-width:110px">@Localizer["RequestDate"]<br></th>
+                            <th style="min-width:140px">@Localizer["DepartmentName"]<br></th>
+                            <th style="min-width:130px">@Localizer["CreatorPIC"]</th>
+                            <th style="min-width:150px">@Localizer["NumberMaterial"]<br></th>
+                            <th style="min-width:170px">@Localizer["SupplierSelectionDeadline"]<br></th>
+                            <th style="min-width:70px">@Localizer["Status"]<br></th>
                         </tr>
                     </thead>
-                    <tbody id="quoteItemsBody">
-                        <tr class="quote-item-row">
-
-                        </tr>
+                    <tbody id="inputQuoteTableBody">
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    <!-- Pagination controls -->
+    <div class="d-flex justify-content-between align-items-center p-2 mt-2">
+        <div class="d-flex align-items-center gap-2">
+            <label class="small mb-0" style="margin-right:4px;">@Localizer["RowIndex"].Value</label>
+            <select id="pageSizeSelect" class="form-select form-select-sm" style="width:90px;">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
 
-    <!-- Tổng kết -->
-@*     <div class="row">
-        <div class="col-md-8">
-            <!-- Điều khoản và điều kiện -->
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-file-contract me-2"></i>Điều khoản và điều kiện</h6>
-                </div>
-                <div class="card-body">
-                    <textarea class="form-control-note" id="termsConditions" rows="5" placeholder="Nhập điều khoản và điều kiện...
-                        VD: 1. Giá trên đã bao gồm VAT 10%
-                        2. Thời gian giao hàng: Theo thỏa thuận
-                        3. Bảo hành: 12 tháng kể từ ngày giao hàng
-                        4. Thanh toán: Chuyển khoản sau khi nhận hàng
-                        5. Giá trên có hiệu lực trong 30 ngày
-                    "></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <!-- Tổng tiền -->
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-calculator me-2"></i>Tổng kết</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col-7">Tổng tiền USD:</div>
-                        <div class="col-5 text-end fw-bold" id="totalUSD">$0.00</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-7">Tổng tiền VND:</div>
-                        <div class="col-5 text-end fw-bold" id="totalVND">0 ₫</div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-7"><strong>Số lượng mục:</strong></div>
-                        <div class="col-5 text-end"><strong id="itemCount">0</strong></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> *@
-</div>
-
-<!-- Product side panel (slide-in) -->
-<div id="productPanel" class="product-panel" aria-hidden="true">
-    <div class="panel-header d-flex justify-content-between align-items-center p-2 border-bottom">
-        <strong class="ms-2"><i class="fas fa-box-open me-2"></i>@Localizer["SelectProducts"]</strong>
-        <div>
-            <button type="button" class="btn btn-sm btn-light me-1" id="btnCloseProductPanel">@Localizer["Close"]</button>
-        </div>
-    </div>
-    <div class="panel-body p-3">
-        <div class="mb-2">
-            <div class="row g-2">
-                <div class="col-sm-3">
-                    <label class="form-label">@Localizer["QuoteRequestCode"]</label>
-                    <select id="modalRqCode" name="modalRqCode" class="form-control modalRqCode searchable-select">
-                        <option value="">@Localizer["SelectOrderCode"]</option>
-                        @foreach (var s in madons)
-                        {
-                            <option value="@s">@s</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <label for="modalInternalCode" class="form-label">@Localizer["InternalMaterialCode"]</label>
-                    <select id="modalInternalCode" name="modalInternalCode" class="form-select modalInternalCode searchable-select">
-                        <option value="" selected>@Localizer["SelectInternalMaterialCode"]</option>
-                        @foreach (var s in mATERIAs)
-                        {
-                            <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">@Localizer["RequestSection"]</label>
-                    <select id="modalSection" name="modalSection" class="form-select searchable-select">
-                        <option value="">@Localizer["SelectSection"]</option>
-                        @foreach (var s in nhomViTri)
-                        {
-                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">@Localizer["Supplier"]</label>
-                    <select id="modalSupplier" name="modalSupplier" class="form-select searchable-select">
-                        <option value="">@Localizer["SelectSupplier"]</option>
-                        @foreach (var s in nccNews)
-                        {
-                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
-                        }
-                    </select>
-                </div>
-            </div>
-            <div class="row g-2 mt-2">
-                <div class="col-sm-12 text-end">
-                    <button type="button" id="btnDialogSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> @Localizer["Search"]</button>
-                </div>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-sm table-hover align-middle">
-                <thead class="thead-light sticky-top">
-                    <tr>
-                        <th style="width:48px;">@Localizer["Select"]</th>
-                        <th>@Localizer["OrderCode"]</th>
-                        <th>@Localizer["InternalMaterialCode"]</th>
-                        <th>@Localizer["ItemName"]</th>
-                        <th>@Localizer["RequestSection"]</th>
-                        <th style="width:100px;" class="text-end">@Localizer["Quantity"]</th>
-                        <th style="width:80px;">@Localizer["Unit"]</th>
-                        <th>@Localizer["Supplier"]</th>
-                    </tr>
-                </thead>
-                <tbody id="availableProductsBody">
-                    @foreach (var i in listQuote)
-                    {
-                        <tr>
-                            <td class="text-center">
-                                <input type="checkbox"
-                                       class="form-check-input product-select"
-                                       value="@i.ID"
-                                       data-rq="@i.CHR_MaDon"
-                                       data-internal="@i.CHR_MaHangNoiBo"
-                                       data-name="@(!string.IsNullOrWhiteSpace(i.NVCHR_NameVN) ? i.NVCHR_NameVN : i.CHR_NameEN)"
-                                       data-section="@i.CHR_SectionName"
-                                       data-qty="@i.INT_SoLuong"
-                                       data-unit="@i.NVCHR_DonVi"
-                                       data-ncc="@i.CHR_MaNCC" 
-                                       data-rohs="@i.NVCHR_Rohs"
-                                       data-antoan="@i.NVCHR_AnToan"
-                                       data-cocq="@i.NVCHR_COCQ"
-                                       data-msds="@i.NVCHR_MSDS" />
-                            </td>
-                            <td>@i.CHR_MaDon</td>
-                            <td>@i.CHR_MaHangNoiBo</td>
-                            <td>@(!string.IsNullOrWhiteSpace(i.NVCHR_NameVN) ? i.NVCHR_NameVN : i.CHR_NameEN)</td>
-                            <td>@i.CHR_SectionName</td>
-                            <td class="text-end">@i.INT_SoLuong</td>
-                            <td>@i.NVCHR_DonVi</td>
-                            <td>@i.CHR_MaNCC</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="d-flex justify-content-end mt-2">
-            <button type="button" class="btn btn-primary btn-sm" id="btnConfirmAddProducts">@Localizer["AddToQuote"]</button>
+        <div class="d-flex align-items-center gap-2">
+            <div id="paginationControls" class="btn-group" role="group"></div>
+            <div style="margin-right: 4px;"></div>
+            <small class="text-muted" id="pagingInfo">&nbsp;</small>
         </div>
     </div>
 </div>
+
 <script>
     window.inputQuoteData = {
-        user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser))
+        user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser)),
+        maDons: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(madons)),
+        nhomViTri: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(nhomViTri)),
+        materials: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(mATERIAs)),
+        nccNews: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(nccNews))
     };
     window.i18nInputQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         PageTitle = Localizer["PageTitle"].Value,
         ImportFromExcel = Localizer["ImportFromExcel"].Value,
-        Save = Localizer["Save"].Value,
-        GeneralInfo = Localizer["GeneralInfo"].Value,
-        QuoteRequestCode = Localizer["QuoteRequestCode"].Value,
-        SelectOrderCode = Localizer["SelectOrderCode"].Value,
+        SaveAll = Localizer["SaveAll"].Value,
+        Filters = Localizer["Filters"].Value,
+        QuotationCode = Localizer["QuotationCode"].Value,
+        SelectQuotation = Localizer["SelectQuotation"].Value,
+        DepartmentCode = Localizer["DepartmentCode"].Value,
+        SelectDepartment = Localizer["SelectDepartment"].Value,
+        MaterialCode = Localizer["MaterialCode"].Value,
+        SelectMaterial = Localizer["SelectMaterial"].Value,
+        Search = Localizer["Search"].Value,
+        ClearFilters = Localizer["ClearFilters"].Value,
+        RequestList = Localizer["RequestList"].Value,
+        SummaryFormat = Localizer["SummaryFormat", "{0}"].Value,
+        SelectAll = Localizer["SelectAll"].Value,
+        Detail = Localizer["Detail"].Value,
+        OrderCode = Localizer["OrderCode"].Value,
+        RequestDate = Localizer["RequestDate"].Value,
+        DepartmentName = Localizer["DepartmentName"].Value,
+        CreatorPIC = Localizer["CreatorPIC"].Value,
+        DesiredReceiveDate = Localizer["DesiredReceiveDate"].Value,
+        SupplierSelectionDeadline = Localizer["SupplierSelectionDeadline"].Value,
+        InputQuoteTitle = Localizer["InputQuoteTitle"].Value,
+        ReceivingDepartmentLabel = Localizer["ReceivingDepartmentLabel"].Value,
+        UrgentBadgeText = Localizer["UrgentBadgeText"].Value,
+        DeptCostCenterLabel = Localizer["DeptCostCenterLabel"].Value,
+        DeptNameLabel = Localizer["DeptNameLabel"].Value,
+        RequestDateLabel = Localizer["RequestDateLabel"].Value,
+        DesiredDeadlineLabel = Localizer["DesiredDeadlineLabel"].Value,
         Supplier = Localizer["Supplier"].Value,
         SelectSupplier = Localizer["SelectSupplier"].Value,
         QuoteDate = Localizer["QuoteDate"].Value,
         ValidUntil = Localizer["ValidUntil"].Value,
-        DepartmentCode = Localizer["DepartmentCode"].Value,
-        SelectDepartment = Localizer["SelectDepartment"].Value,
-        MaterialCode = Localizer["MaterialCode"].Value,
-        SelectMaterialCode = Localizer["SelectMaterialCode"].Value,
-        Reset = Localizer["Reset"].Value,
-        Filter = Localizer["Filter"].Value,
-        SubmitQuote = Localizer["SubmitQuote"].Value,
-        RequestEdit = Localizer["RequestEdit"].Value,
-        SaveDraft = Localizer["SaveDraft"].Value,
-        QuoteItemList = Localizer["QuoteItemList"].Value,
+        GoodsDetailTitle = Localizer["GoodsDetailTitle"].Value,
+        STT = Localizer["STT"].Value,
+        SystemCode = Localizer["SystemCode"].Value,
+        InternalMaterialCodeShort = Localizer["InternalMaterialCodeShort"].Value,
+        Category = Localizer["Category"].Value,
+        ItemNameVNEN = Localizer["ItemNameVNEN"].Value,
+        DescriptionGroup = Localizer["DescriptionGroup"].Value,
+        SupplierShort = Localizer["SupplierShort"].Value,
+        UrgentShort = Localizer["UrgentShort"].Value,
+        GetQuotation = Localizer["GetQuotation"].Value,
+        Reason = Localizer["Reason"].Value,
+        QuantityShort = Localizer["QuantityShort"].Value,
+        UnitShort = Localizer["UnitShort"].Value,
+        ShapeShort = Localizer["ShapeShort"].Value,
+        MaterialShort = Localizer["MaterialShort"].Value,
+        CompositionShort = Localizer["CompositionShort"].Value,
+        DimensionsShort = Localizer["DimensionsShort"].Value,
+        UsedPositionShort = Localizer["UsedPositionShort"].Value,
+        PurposeFeatureShort = Localizer["PurposeFeatureShort"].Value,
+        LoadingData = Localizer["LoadingData"].Value,
+        QuoteInputTitle = Localizer["QuoteInputTitle"].Value,
         NoLabel = Localizer["NoLabel"].Value,
         InternalMaterialCode = Localizer["InternalMaterialCode"].Value,
-        SupplierCode = Localizer["SupplierCode"].Value,
         SupplierItemCode = Localizer["SupplierItemCode"].Value,
         CustomsItemName = Localizer["CustomsItemName"].Value,
         Quantity = Localizer["Quantity"].Value,
-        Unit = Localizer["Unit"].Value,
         PriceUSD = Localizer["PriceUSD"].Value,
         PriceVND = Localizer["PriceVND"].Value,
         MOQ = Localizer["MOQ"].Value,
-        Packing = Localizer["Packing"].Value,
         LeadTime = Localizer["LeadTime"].Value,
         DeliveryDate = Localizer["DeliveryDate"].Value,
         RohsResponse = Localizer["RohsResponse"].Value,
@@ -361,48 +206,20 @@
         DeliveryMethod = Localizer["DeliveryMethod"].Value,
         Condition = Localizer["Condition"].Value,
         Attachment = Localizer["Attachment"].Value,
-        Delete = Localizer["Delete"].Value,
-        SelectProducts = Localizer["SelectProducts"].Value,
-        SelectSection = Localizer["SelectSection"].Value,
-        Search = Localizer["Search"].Value,
-        Select = Localizer["Select"].Value,
-        OrderCode = Localizer["OrderCode"].Value,
-        ItemName = Localizer["ItemName"].Value,
-        AddToQuote = Localizer["AddToQuote"].Value,
-        // JS messages
-        MsgResetSuccess = Localizer["MsgResetSuccess"].Value,
-        MsgSelectAtLeastOneProduct = Localizer["MsgSelectAtLeastOneProduct"].Value,
-        MsgAddedProducts = Localizer["MsgAddedProducts", "{0}"].Value,
-        MsgProductDuplicate = Localizer["MsgProductDuplicate"].Value,
-        MsgDeleteConfirm = Localizer["MsgDeleteConfirm"].Value,
-        MsgProcessingExcel = Localizer["MsgProcessingExcel"].Value,
-        MsgUploadFailed = Localizer["MsgUploadFailed"].Value,
-        MsgImportSuccess = Localizer["MsgImportSuccess"].Value,
-        MsgImportError = Localizer["MsgImportError", "{0}"].Value,
-        MsgSaveSuccess = Localizer["MsgSaveSuccess"].Value,
-        MsgSaveFailed = Localizer["MsgSaveFailed", "{0}"].Value,
-        MsgDraftSaved = Localizer["MsgDraftSaved"].Value,
-        MsgSubmitConfirm = Localizer["MsgSubmitConfirm"].Value,
-        MsgSubmitSuccess = Localizer["MsgSubmitSuccess"].Value,
-        MsgUnsavedChangesConfirm = Localizer["MsgUnsavedChangesConfirm"].Value,
-        SearchEllipsis = Localizer["SearchEllipsis"].Value,
-        NoResults = Localizer["NoResults"].Value,
-        SelectPlaceholder = Localizer["SelectPlaceholder"].Value
+        FooterID = Localizer["FooterID"].Value,
+        FooterStep = Localizer["FooterStep"].Value,
+        FooterRegency = Localizer["FooterRegency"].Value,
+        Save = Localizer["Save"].Value,
+        RowsPerPage = Localizer["RowsPerPage"].Value,
+        SubmitQuote = Localizer["SubmitQuote"].Value,
+        CloseButton = Localizer["CloseButton"].Value,
+        Close = Localizer["Close"].Value,
+        Confirm= Localizer["Confirm"].Value,
+        Done = Localizer["Done"].Value,
+        DataFilteredSuccessfully = Localizer["DataFilteredSuccessfully"].Value,
+        FilterFailed = Localizer["FilterFailed"].Value
     }));
 </script>
 @section Scripts {
     <script src="~/js/InputQuote.js"></script>
-    <script>
-        (function() {
-            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
-            var panel = document.getElementById('productPanel');
-            var overlay = document.getElementById('productPanelOverlay');
-            if (panel && panel.parentElement !== document.body) {
-                document.body.appendChild(panel);
-            }
-            if (overlay && overlay.parentElement !== document.body) {
-                document.body.appendChild(overlay);
-            }
-        })();
-    </script>
 }

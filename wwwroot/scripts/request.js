@@ -222,7 +222,7 @@ function _load_confirm(us) {
                 <tr>
                     <td><input type="checkbox" /></td>
 
-                    <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info text-primary"></i></button></td>
+                    <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info"></i></button></td>
                     <td>${urg}</td>
                     <td>${trangthai}</td>
                     <td>${item.code_Request}</td>
@@ -236,7 +236,7 @@ function _load_confirm(us) {
                     <td>${item.chR_TEN_NGUOIPHEDUYET} ${dots[2]}</td>
                     <td>${item.chR_TEN_XACNHAN} ${dots[3]}</td>
                     <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>
-                    <td></td>
+                  
                 </tr>`;
             }).join('');
         })
