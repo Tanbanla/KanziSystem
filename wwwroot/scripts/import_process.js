@@ -8,7 +8,7 @@ const userPagingState = {
 };
 
 // --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
-function _load_inv() {
+async function _load_inv() {
     var mnl = document.getElementById("mnl").value;
     var kho = document.getElementById("kho").value;
     var cost = document.getElementById("cost").value;
@@ -78,7 +78,7 @@ function renderUserTable(data) {
     console.log(data);
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(vd => {
-        const btn = `<td><button class=" btn btn-outline-success" onclick="_modal11('${vd.maNguyenLieu}','${vd.kho}','${vd.hientai}','${vd.material_Name}')"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
+        const btn = `<td><button class=" btn btn-outline-success" onclick="_modal11('${vd.maNguyenLieu}','${vd.kho}','${vd.hientai}','${vd.material_Name}','${vd.group_Code}')"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
         return `<tr>
                     <td>${vd.maNguyenLieu}</td>
                     <td>${vd.material_Name}</td>
@@ -172,7 +172,7 @@ function initSelect2($element) {
 }
 
 // Cập nhật lại hàm load trong import_process.js hoặc tại đây
-function _load_name_inv(group_code) {
+async function _load_name_inv(group_code) {
     const params = new URLSearchParams({ group_code: group_code });
     fetch('/Import/_load_material', {
         method: 'POST',
@@ -198,7 +198,7 @@ function fillDataToSelect($el, data) {
     $el.trigger('change');
 }
 
-function _load_info_adid() {
+async function _load_info_adid() {
 
     var us = document.getElementById("us").innerHTML;
 
@@ -221,7 +221,7 @@ function _load_info_adid() {
         .catch(error => console.error('Error:', error));
 }
 
-function _load_dept(dept) {
+async function _load_dept(dept) {
     var us = document.getElementById("us").innerHTML;
 
     const params = new URLSearchParams();
@@ -243,7 +243,7 @@ function _load_dept(dept) {
         .catch(error => console.error('Error:', error));
 }
 
-function _load_material(Material_Code, id) {
+async function _load_material(Material_Code, id) {
 
     let idd = id.split('_')[1];
     var groupcode = document.getElementById("group_code").value;
@@ -286,18 +286,17 @@ function _load_material(Material_Code, id) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-
-function _modal11(ma, kho, soluon, ten) {
+function _modal11(ma, kho, soluon, ten, khoi) {
     document.getElementById("modal-11").click();
-    document.getElementById("ma_ck").innerHTML = ma + " -  " + ten;
+    document.getElementById("ma_ck").innerHTML = ma + " - " + ten;
     document.getElementById("kho_hientai").value = kho;
     document.getElementById("tonkho").value = soluon;
+    document.getElementById("khoi").value = khoi;
     _Fac()
 }
+async function _Fac() {
 
-function _Fac() {
-
-    fetch('/Master/load_warehouse', {
+    fetch('/Master/load_fac', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -313,14 +312,14 @@ function _Fac() {
         .then(data => {
             document.getElementById("nhamay_chuyen").innerHTML = "<option></option>";
             for (var i = 0; i < data.length; i++) {
-                document.getElementById("nhamay_chuyen").innerHTML += `<option value="${data[i].chR_FACTORY}">${data[i].chR_FACTORY}</option>`
+                document.getElementById("nhamay_chuyen").innerHTML += `<option value="${data[i]}">${data[i]}</option>`
             }
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-function _SEC(fac) {
+async function _SEC(fac) {
 
     const params = new URLSearchParams({ fac: fac });
         fetch('/Master/load_sec', {
@@ -346,7 +345,7 @@ function _SEC(fac) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-function _WH() {
+async function _WH() {
 
     var fac = document.getElementById("nhamay_chuyen").value;
     var sec = document.getElementById("phongban_chuyen").value;

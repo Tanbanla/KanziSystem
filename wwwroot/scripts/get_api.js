@@ -50,8 +50,8 @@ async function getEmployeeData() {
         console.error("Không thể lấy dữ liệu:", error);
     }
 }
-// Lấy danh sách user kho và đồng ý 
-function get_block() {
+// Lấy danh sách user kho và đồng ý
+async function get_block() {
     var group_code = document.getElementById("group_code").value;
     const params = new URLSearchParams();
     params.append('group_code', group_code);
@@ -97,7 +97,7 @@ function get_block() {
         .catch(error => console.error('Error:', error));
 }
 // Tạo sự kiện khi thay đổi user
-function get_useriv(id) {
+async function get_useriv(id) {
     
     const params = new URLSearchParams();
     params.append('id', id.split('_')[0]);

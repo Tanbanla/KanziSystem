@@ -72,4 +72,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="PRJ_WAREHOUSE_BIVN\Common\" />
+  </ItemGroup>
+
 </Project>

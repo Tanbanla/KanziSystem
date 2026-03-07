@@ -7,7 +7,7 @@ const userPagingState = {
 };
 
 // --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
-function _load_material() {
+async function _load_material() {
     var Material_Code = document.getElementById("Material_Code").value;
     var Material_Name_VN = document.getElementById("Material_Name_VN").value;
     var Account_Name_VN = document.getElementById("Account_Name_VN").value;

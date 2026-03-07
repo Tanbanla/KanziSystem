@@ -80,7 +80,7 @@
         }
     })
 }
-function _load_rate() {
+async function _load_rate() {
     fetch('/Request/_get_rate', {
         method: 'POST',
         headers: {
@@ -100,7 +100,7 @@ function _load_rate() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-function _load_phongchiuphi() {
+async function _load_phongchiuphi() {
     fetch('/Request/_get_phongchiuphi', {
         method: 'POST',
         headers: {
@@ -167,7 +167,8 @@ async function send_mail(mail_to, Urgent) {
         }
     })
 }
-function _load_confirm(us) {
+
+async function _load_confirm(us) {
 
     const formData = new URLSearchParams();
     formData.append('us', us);

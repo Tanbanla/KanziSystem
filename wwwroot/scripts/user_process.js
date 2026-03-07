@@ -203,7 +203,6 @@ function _get_modal(id) {
 }
 function _update_user() {
 
-   
     var employee_code = document.getElementById("ed_employee_code").value;
     var employee_name = document.getElementById("ed_employee_name").value;
     var employee_adid = document.getElementById("ed_employee_adid").value;

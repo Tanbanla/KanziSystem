@@ -6,7 +6,7 @@ const userPagingState = {
     totalPages: 0
 };
 // --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
-function _load_vender() {
+async function _load_vender() {
     var vd_code = document.getElementById("vd_code").value;
     var vd_name = document.getElementById("vd_name").value;
     var vd_group = document.getElementById("vd_group").value;
