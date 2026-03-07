@@ -213,7 +213,7 @@
                         return;
                     }
                     const data = await res.json();
-                    const rowsHtml = (data || []).map(d => {
+                    const rowsHtml = (data.data || []).map(d => {
                         const id = d.ID || 0;
                         const nameNCC = d.NVCHR_NameNCC || '';
                         const maHS = d.CHR_MaHangNCC || '';

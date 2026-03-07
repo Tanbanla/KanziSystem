@@ -21,7 +21,7 @@ public partial class BaoGia_NCC
 
     public DateTime? DTM_UpdateDate { get; set; }
 
-    public string? NVCHR_CodeByNCC { get; set; }
-
     public string? NVCHR_MakeIn { get; set; }
+
+    public string? NVCHR_CodeByNCC { get; set; }
 }

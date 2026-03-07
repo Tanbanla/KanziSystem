@@ -34,12 +34,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Tìm kiếm thông tin báo giá và phân trang
-        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date)
+        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
             var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
             try
             {
-                var data = await _repo.SearchAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, pageIndex, pageSize,  date);
+                var data = await _repo.SearchAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, pageIndex, pageSize,  date, chungLoai);
                 result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(data);
                 result.Success = true;
             }
@@ -193,9 +193,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public async Task<GenericResponse<List<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
         {
-           var result = new GenericResponse<List<dynamic>>();
+           var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
                 result.Data = await _repo.SearchThongTinNhapBaoGiaAsync(maDon, section, maHang, pageIndex, pageSize);

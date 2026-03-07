@@ -15,7 +15,11 @@
         public string? DTM_UPDATE { get; set; }
         public string? IS_SAVE_WH { get; set; }
         public string? Material_Name { get; set; }
-
+        public double? QTY_NEW { get; set; }
+        public double? QTY_RE_IMPORT { get; set; }
+        public string? GIA_TAI_NHAP { get; set; }
+        public string? Unit { get; set; }
+        public string? Unit_Note { get; set; }
         public static List<MST_INVENTORY> inventory_process(MST_INVENTORY para)
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
@@ -24,7 +28,7 @@
             //para.NVCHR_COST = para.NVCHR_COST is null ? "NULL" : para.NVCHR_COST!.ToString().Length > 0 ? $"N'{para.NVCHR_COST}'" : "NULL";
             //para.IS_SAVE_WH = para.IS_SAVE_WH is null ? "NULL" : para.IS_SAVE_WH!.ToString().Length > 0 ? $"N'{para.IS_SAVE_WH}'" : "NULL";
 
-            var _cmd = _context.GET_DATA_FROM_SQL($"  select * from KHO as a left join MATERIAL as b on a.MaNguyenLieu =  b.Material_Code where MaNguyenLieu like '%{para.MaNguyenLieu}%' and a.Group_Code like '%{para.Group_Code}%' and Kho like '%{para.Kho}%' and a.Hientai > 0");
+            var _cmd = _context.GET_DATA_FROM_SQL($" select * from KHO as a left join MATERIAL as b on a.MaNguyenLieu =  b.Material_Code where MaNguyenLieu like '%{para.MaNguyenLieu}%' and a.Group_Code like '%{para.Group_Code}%' and Kho like '%{para.Kho}%' and a.QTY_NEW > 0");
             List<MST_INVENTORY> _inv = new List<MST_INVENTORY>();
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {
@@ -42,6 +46,11 @@
                     DTM_UPDATE = _cmd.Rows[i]["DTM_UPDATE"].ToString(),
                     IS_SAVE_WH = _cmd.Rows[i]["IS_SAVE_WH"].ToString(),
                     Material_Name = _cmd.Rows[i]["Material_Name_VN"].ToString(),
+                    QTY_NEW = double.Parse(_cmd.Rows[i]["QTY_NEW"].ToString()!),
+                    QTY_RE_IMPORT = double.Parse(_cmd.Rows[i]["QTY_RE_IMPORT"].ToString()!),
+                    GIA_TAI_NHAP =_cmd.Rows[i]["GIA_TAI_NHAP"].ToString(),
+                    Unit = _cmd.Rows[i]["Unit"].ToString(),
+                    Unit_Note = _cmd.Rows[i]["Unit_Note"].ToString(),
                 });
             }
             return _inv;

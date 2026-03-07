@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -20,12 +21,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         : base(context, options, configuration) {
             _context = context;
         }
-        public async Task<List<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM,int? PageSize, int? PageIndex)
+        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM,int? PageSize, int? PageIndex)
         {
-            var sql = new StringBuilder(@"SELECT d.*, r.CHR_MaHangNoiBo, r.INT_SoLuong,r.NVCHR_DonVi
-              FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
-              left join [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
-              on d.ID_RequestQuote = r.ID where 1 = 1");
+            var sql = new StringBuilder(@"SELECT d.*, 
+                    r.CHR_MaHangNoiBo, 
+                    r.CHR_MaDon,
+                    CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
+                    CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
+                    CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
+                    CAST(CASE WHEN r.INT_SoLuong = d.INT_SoLuong THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
+                    CAST(CASE WHEN r.NVCHR_DonVi = d.NVCHR_DonVi THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
+                    CAST(CASE WHEN r.NVCHR_Rohs = d.VCHR_Rohs THEN 1 ELSE 0 END AS BIT) AS IsMatch_Rohs,
+                    CAST(CASE WHEN r.NVCHR_COCQ = d.VCHR_COCQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_COCQ,
+                    CAST(CASE WHEN r.NVCHR_MSDS = d.VCHR_MSDS THEN 1 ELSE 0 END AS BIT) AS IsMatch_MSDS,
+                    CAST(CASE WHEN r.NVCHR_AnToan = d.VCHR_AnToan THEN 1 ELSE 0 END AS BIT) AS IsMatch_AnToan,
+                    CAST(CASE WHEN r.DTM_NgayMuonNhan = d.DTM_ShipTime THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay
+            FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
+            LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+                ON d.ID_RequestQuote = r.ID 
+            WHERE 1 = 1");
             var parameters = new DynamicParameters();
             if(idRequest != 0 && idRequest != null)
             {
@@ -65,7 +79,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("Offset", offset);
                 parameters.Add("PageSize", PageSize);
             }
-            return (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+            var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
+            var totalCountSql = _context.BaoGia_Detail_of_Quotations.Count();
+            return new ListRequest<dynamic>
+            {
+                Data = result.ToList(),
+                TotalCount = totalCountSql,
+            };
         }
         public async Task<bool> InsertListBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> listDto)
         {
@@ -134,6 +154,101 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .Where(b => b.ID_RequestQuote == idRequest)
                 .FirstOrDefaultAsync();
             return a;
+        }
+        // Update infor input bao gia
+        public async Task<bool> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_Quotation> listDto)
+        {
+            if (listDto == null || listDto.Count == 0)
+            {
+                return false;
+            }
+            // lưu lịch sử thay đổi
+            var historyList = new List<BaoGia_History_Detail_Request>();
+            foreach (var item in listDto)
+            {
+                var detail = _context.BaoGia_Detail_of_Quotations.Find(item.ID);
+                if (detail != null)
+                {
+                    // luu lịch sử thay đổi
+                    var history = new BaoGia_History_Detail_Request
+                    {
+                        ID = 0,
+                        ID_RQ_Detail = detail.ID,
+                        NVCHR_dataOld = System.Text.Json.JsonSerializer.Serialize(detail),
+                        NVCHR_dataNew = System.Text.Json.JsonSerializer.Serialize(item),
+                        CHR_CreateBy = item.CHR_UpdateBy,
+                        DTM_CreateBy = DateTime.Now
+                    };
+                    historyList.Add(history);
+
+                    detail.CHR_MaHangNCC = item.CHR_MaHangNCC;
+                    detail.NVCHR_TenHangHQ = item.NVCHR_TenHangHQ;
+                    detail.FL_USD = item.FL_USD;
+                    detail.FL_VND = item.FL_VND;
+                    detail.DTM_EndDate = item.DTM_EndDate;
+                    detail.NVCHR_MOQ = item.NVCHR_MOQ;
+                    detail.DTM_LeadTime = item.DTM_LeadTime;
+                    detail.DTM_ShipTime = item.DTM_ShipTime;
+                    detail.NVCHR_Packing = item.NVCHR_Packing;
+                    detail.NVCHR_Note = item.NVCHR_Note;
+                    detail.NVCHR_File = item.NVCHR_File;
+                    detail.FL_ExchangeRate = item.FL_ExchangeRate;
+                    detail.FL_TaxRate = item.FL_TaxRate;
+                    detail.FL_TaxAmount = item.FL_TaxAmount;
+                    detail.FL_TotalAfterTax = item.FL_TotalAfterTax;
+                    detail.NVCHR_PaymentTerm = item.NVCHR_PaymentTerm;
+                    detail.NVCHR_Warranty = item.NVCHR_Warranty;
+                    detail.NVCHR_DeliveryTerm = item.NVCHR_DeliveryTerm;
+                    detail.CHR_UpdateBy = item.CHR_UpdateBy;
+                    detail.DTM_UpdateDate = DateTime.Now;
+                    detail.INT_NumberEdit = detail.INT_NumberEdit != null ? detail.INT_NumberEdit + 1 : 1;
+                    detail.INT_SoLuong = item.INT_SoLuong;
+                    detail.FL_Sum = (item.FL_VND != null && item.INT_SoLuong != null) ? item.FL_VND * item.INT_SoLuong : null;
+                    detail.VCHR_Rohs = item.VCHR_Rohs;
+                    detail.VCHR_COCQ = item.VCHR_COCQ;
+                    detail.VCHR_MSDS = item.VCHR_MSDS;
+                    detail.VCHR_AnToan = item.VCHR_AnToan;
+                    detail.VCHR_CamKet = item.VCHR_CamKet;
+                    detail.NVCHR_DonVi = item.NVCHR_DonVi;
+                }
+            }
+            await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // lấy id của đơn báo giá
+        public async Task<int?> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNcc, string NameHQ)
+        {
+            var sql = new StringBuilder(@"SELECT d.*
+              FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
+              left join [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+              on d.ID_RequestQuote = r.ID where 1 = 1");
+            var parameters = new DynamicParameters();
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @Madon");
+                parameters.Add("Madon", maDon);
+            }
+            if (!string.IsNullOrEmpty(maVatTu))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo = @MaVatTu");
+                parameters.Add("MaVatTu", maVatTu);
+            }
+            if (!string.IsNullOrEmpty(maNcc))
+            {
+                sql.Append(" AND CHR_CodeNCC = @MaNcc");
+                parameters.Add("MaNcc", maNcc);
+            }
+            if (!string.IsNullOrEmpty(NameHQ))
+            {
+                sql.Append(" AND d.NVCHR_TenHangHQ = @NameHQ");
+                parameters.Add("NameHQ", NameHQ);
+            }
+            var data = (await _conn.QueryAsync<BaoGia_Detail_of_Quotation>(sql.ToString(), parameters)).ToList();
+
+            var result = data
+                .Select(b => b.ID).FirstOrDefault();
+            return result;
         }
     }
 }

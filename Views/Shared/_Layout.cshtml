@@ -88,6 +88,7 @@
                         </li>
                     }
                     <li><span id="us" hidden>@(User.FindFirst("UserId")?.Value ?? "User")</span></li>
+                    <li><span id="dept_us" hidden >@(User.FindFirst("Department")?.Value ?? "Chưa xác định")</span></li>
                     @*  <li><span id="us" hidden>loandt</span></li>  *@
                  
                 </ul>
@@ -175,7 +176,7 @@
                                 <li><a class="nav-link" href="~/Delivery/DeliverySection"><i class="fas fa-calendar-check"></i> @Localizer["MenuWarehouseConfirmImport"]</a></li> @* Nhập hàng PO *@
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExportRequest"]</a></li>
-                                <li><a class="nav-link" href=""><i class="fas fa-donate"></i> @Localizer["MenuWarehouseReimport"]</a></li>
+                                <li><a class="nav-link" href="~/Import/Tainhap"><i class="fas fa-donate"></i> @Localizer["MenuWarehouseReimport"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Log"><i class="fas fa-info"></i> @Localizer["MenuWarehouseLog"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Xuatkho"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExport"]</a></li>
                             </ul>

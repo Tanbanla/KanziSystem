@@ -139,7 +139,7 @@
     <value>Supplier</value>
   </data>
   <data name="SelectSupplier" xml:space="preserve">
-    <value>-- Select supplier --</value>
+    <value>Select supplier</value>
   </data>
   <data name="QuoteDate" xml:space="preserve">
     <value>Quotation date</value>
@@ -500,5 +500,71 @@
   </data>
   <data name="RowIndex" xml:space="preserve">
     <value>Show</value>
+  </data>
+  <data name="SupplierInputTab" xml:space="preserve">
+    <value>Supplier Quote Input</value>
+  </data>
+  <data name="SupplierSearchTitle" xml:space="preserve">
+    <value>Search Supplier Quotes</value>
+  </data>
+  <data name="SupplierListTitle" xml:space="preserve">
+    <value>Supplier Quote List</value>
+  </data>
+  <data name="RowsPerPage" xml:space="preserve">
+    <value>Rows per page</value>
+  </data>
+  <data name="SupplierDataLoadError" xml:space="preserve">
+    <value>Error loading supplier data: </value>
+  </data>
+  <data name="NoData" xml:space="preserve">
+    <value>No data</value>
+  </data>
+  <data name="TotalPrefix" xml:space="preserve">
+    <value>Total: </value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Only Excel files (.xlsx, .xls) are accepted</value>
+  </data>
+  <data name="FileHasErrorsDownloaded" xml:space="preserve">
+    <value>File has errors. Error file downloaded for review.</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>Data updated successfully</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Error: </value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="ImportExcel" xml:space="preserve">
+    <value>Import Excel</value>
+  </data>
+  <data name="OrderNumber" xml:space="preserve">
+    <value>Order Number</value>
+  </data>
+  <data name="SupplierCodeShort" xml:space="preserve">
+    <value>Supplier Code</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>Supplier Name</value>
+  </data>
+  <data name="ItemNameHQ" xml:space="preserve">
+    <value>VN item name for customs</value>
+  </data>
+  <data name="Rohs" xml:space="preserve">
+    <value>ROHS</value>
+  </data>
+  <data name="Safety" xml:space="preserve">
+    <value>Safety</value>
+  </data>
+  <data name="Commitment" xml:space="preserve">
+    <value>Commitment</value>
+  </data>
+  <data name="PaymentTerms" xml:space="preserve">
+    <value>Payment Terms</value>
+  </data>
+  <data name="InputTime" xml:space="preserve">
+    <value>Input Time</value>
   </data>
 </root>

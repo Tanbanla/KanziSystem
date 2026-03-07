@@ -95,7 +95,73 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
           
         }
-       
+        public static string Chuyenkho(string mahang, string khohientai, string tonkho, string phongban, string denkho, string soluong, string nguoichuyen, string khoi)
+        {
+            SQL_Connect_DB20 _sql = new SQL_Connect_DB20();
+            var chuyenkho = _sql.GET_DATA_FROM_SQL($"" +
+                // trừ xuất kho
+                $"UPDATE KHO SET Hientai = Hientai - {soluong} " +
+                $"WHERE MaNguyenLieu = N'{mahang}' AND Kho = '{khohientai}'; " +
+               // Nhập vào kho mới
+                $"IF EXISTS (SELECT 1 FROM KHO WHERE MaNguyenLieu = '{mahang}' AND Kho = '{denkho}') " +
+                $"BEGIN " +
+                $"UPDATE KHO SET Hientai = Hientai + {soluong} " +
+                $"WHERE MaNguyenLieu = '{mahang}' AND Kho = '{denkho}'; " +
+                $"END ELSE BEGIN " +
+                $"INSERT INTO KHO (MaNguyenLieu, Kho, Hientai, Group_Code) VALUES ('{mahang}', '{denkho}', '{soluong}','{khoi}'); END " +
+                // ghi log
+                $"INSERT INTO [KHO_NHAPXUAT] ([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Ngaynhaokho],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Phong]) " +
+                $"VALUES ('{mahang}',N'Chuyển kho: {khohientai} -> {denkho} : {mahang}', '{soluong}','CHUYENKHO','{DateTime.Now.ToString("yyyy-MM-dd")}','{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{nguoichuyen}','{khohientai}','{khoi}', N'{phongban}')");
+            return "Chuyển kho thành công";
+        }
+        public static string TaiNhapkho(string malinhkien, string soluong, string kho, string vitri, string thoigian, string giatien, string ghichu, string khoi, string nguoichuyen, string phongban)
+        {
+            SQL_Connect_DB20 _db =  new SQL_Connect_DB20();
+            string update = $@"IF EXISTS (SELECT 1 FROM [COST_MANAGEMENT].[dbo].[KHO] WHERE [MaNguyenLieu] = '{malinhkien}' AND [Kho] = '{kho}')
+                                BEGIN
+                                    UPDATE [COST_MANAGEMENT].[dbo].[KHO]
+                                    SET [QTY_RE_IMPORT] = '{soluong}',
+                                        [GIA_TAI_NHAP] = '{giatien}',
+                                        [QTY_NEW] = [Hientai] + {soluong},
+                                        [DTM_UPDATE] = GETDATE()
+                                    WHERE [MaNguyenLieu] = '{malinhkien}' AND [Kho] = '{kho}';   
+                                    PRINT N'Đã cập nhật dữ liệu cho mã: ' + '{malinhkien}';
+                                END ELSE
+                                BEGIN
+                                    INSERT INTO [COST_MANAGEMENT].[dbo].[KHO] 
+                                        ([MaNguyenLieu], [Kho],[Hientai],[QTY_RE_IMPORT],[Group_Code],[nvchr_note], [GIA_TAI_NHAP], [DTM_UPDATE],[IS_SAVE_WH],[QTY_NEW])
+                                    VALUES 
+                                        ('{malinhkien}', '{kho}','0', '{soluong}', '{khoi}', N'{ghichu}', '{giatien}', GETDATE(),'0', '{soluong}');
+                                    PRINT N'Đã thêm mới mã nguyên liệu: ' + '';
+                                END";
+            var _cmd = _db.GET_DATA_FROM_SQL(update);
+            _db.GET_DATA_FROM_SQL($"INSERT INTO [KHO_NHAPXUAT] ([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Ngaynhaokho],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Phong],[Vitri]) " +
+                $"VALUES ('{malinhkien}',N'Tái nhập: {malinhkien}', '{soluong}','TAINHAP','{DateTime.Now.ToString("yyyy-MM-dd")}','{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{nguoichuyen}','{kho}','{khoi}', N'{phongban}','{vitri}')");
+            return "Tái nhập thành công !"; 
+        }
+        public static List<string> Get_location()
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20() ;
+            List<string> _locations = new List<string>() ;
+            var get = _db.GET_DATA_FROM_SQL("SELECT MaCost,MaChuyen FROM DEPARTMENT_VITRI ORDER BY [MaCost],[MaChuyen] ");
+            for (int i = 0; i < get.Rows.Count; i++)
+            {
+                _locations.Add(get.Rows[i][0].ToString()! +":" + get.Rows[i][1].ToString()!);
+            }
+            return _locations;
+        }
+        public static string Del_Tainhap(string id)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            db.GET_DATA_FROM_SQL("  update [KHO] set QTY_NEW = QTY_NEW - QTY_RE_IMPORT, QTY_RE_IMPORT = '0', GIA_TAI_NHAP = '0' where Id_Kho = '" + id + "'");
+            return "Xóa tái nhập thành công !";
+        }
+        public static string edit_tainhap(string id, string soluong, string donvi, string giatien, string kho)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            db.GET_DATA_FROM_SQL($"update [KHO] set QTY_NEW = (QTY_NEW - QTY_RE_IMPORT) + {soluong}, GIA_TAI_NHAP = '{giatien}',QTY_RE_IMPORT = '{soluong}' where Id_Kho = '{id}'");
+            return "Sửa thành công !";
+        }
     }
     public class SECTION
     {

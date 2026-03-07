@@ -20,5 +20,6 @@ public partial class BaoGia_Step
     public int? INT_StepNumber { get; set; }
 
     public string? CHR_StepNameEN { get; set; }
+
     public string? CHR_StepNameJP { get; set; }
 }

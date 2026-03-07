@@ -118,6 +118,4 @@ public partial class IM_PO_DETAIL
     public string? chr_USER_UPDATE_TSCD { get; set; }
 
     public DateTime? DTM_UPDATE_TSCD { get; set; }
-
-    public virtual IM_PO SoPONavigation { get; set; } = null!;
 }

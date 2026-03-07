@@ -98,4 +98,13 @@ namespace PRJ_WAREHOUSE_BIVN.Common
             Data = new List<T>();
         }
     }
+    public class ListRequest<T>
+    {
+        public List<T> Data { get; set; }
+        public long TotalCount { get; set; }
+        public ListRequest()
+        {
+            Data = new List<T>();
+        }
+    }
 }

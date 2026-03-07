@@ -223,6 +223,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Danh sách các mục tái nhập sẽ hiển thị bên dưới.
+        /// </summary>
+        public static string DMMH {
+            get {
+                return ResourceManager.GetString("DMMH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Đổi sang USD.
         /// </summary>
         public static string doisangusd {
@@ -399,6 +408,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string khonhapve {
             get {
                 return ResourceManager.GetString("khonhapve", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Làm mới.
+        /// </summary>
+        public static string Lammoi {
+            get {
+                return ResourceManager.GetString("Lammoi", resourceCulture);
             }
         }
         
@@ -835,6 +853,24 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Số lượng hàng mới.
+        /// </summary>
+        public static string Soluonghangmoi {
+            get {
+                return ResourceManager.GetString("Soluonghangmoi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Số lượng hàng tái nhập.
+        /// </summary>
+        public static string Soluonghangtainhap {
+            get {
+                return ResourceManager.GetString("Soluonghangtainhap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Số PO.
         /// </summary>
         public static string Sopo {
@@ -858,6 +894,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string Sua {
             get {
                 return ResourceManager.GetString("Sua", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tái nhập.
+        /// </summary>
+        public static string Tainhap {
+            get {
+                return ResourceManager.GetString("Tainhap", resourceCulture);
             }
         }
         
@@ -934,11 +979,29 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Thêm.
+        /// </summary>
+        public static string Them {
+            get {
+                return ResourceManager.GetString("Them", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Thêm dòng mới.
         /// </summary>
         public static string themdongmoi {
             get {
                 return ResourceManager.GetString("themdongmoi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thời gian.
+        /// </summary>
+        public static string Thoigian {
+            get {
+                return ResourceManager.GetString("Thoigian", resourceCulture);
             }
         }
         

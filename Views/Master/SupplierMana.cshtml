@@ -237,8 +237,22 @@
 </div>
 <!-- Import Excel input (hidden) -->
 <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
-
-<script src="~/js/SupplierMana.js"></script>
+@section Scripts {
+   <script src="~/js/SupplierMana.js"></script>
+    <script>
+        (function() {
+            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
+            var panel = document.getElementById('supplierModal');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+            var panel1 = document.getElementById('itemModal');
+            if (panel1 && panel1.parentElement !== document.body) {
+                document.body.appendChild(panel1);
+            }
+        })();
+    </script>
+}
 <script>
     window.i18nSupplierMana = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         DownloadExcel = Localizer["DownloadExcel"].Value,

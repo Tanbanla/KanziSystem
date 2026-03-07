@@ -1,0 +1,125 @@
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
+    ViewData["Title"] = Languages.Tainhap;
+}
+<style>
+    /* Vertical scroll wrapper for tables with many rows */
+    .table-responsive-vertical {
+        max-height: 500px; /* adjust as needed */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    /* Remove extra bottom margin so scrollbar aligns with table */
+    .table-responsive-vertical .table {
+        margin-bottom: 0;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <h3 class="ml-4 mt-2 text-primary">Tái nhập hàng</h3>
+
+            <form id="tainhapForm" class="row g-3 needs-validation m-3" novalidate>
+                <div class="col-md-1">
+                        <label class="form-label text-primary">@Languages.Khoi <span class="text-danger"> *</span> :</label>
+                        <select class="form-control" id="khoi" onchange="_load_name_inv()">
+                        <option value="PROD">PROD</option>
+                        <option value="GA">GA</option>
+                        <option value="IT">IT</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-primary">@Languages.Mahang - @Languages.TenNVL <span class="text-danger"> *</span> :</label>
+                        <input type="text" class="form-control" id="MaLinhKien" list="list_mlk" onchange="_load_material(this.value)" required />
+                    <datalist id="list_mlk"> </datalist>
+                </div>
+               
+                    <div class="col-md-2">
+                        <label class="form-label text-primary">@Languages.Donvi <span class="text-danger"> *</span>  :</label>
+                        <select class="form-control" id="donvi">
+
+                        </select>
+                    </div>
+                <div class="col-md-2">
+                        <label class="form-label text-primary">@Languages.soluong <span class="text-danger"> *</span> :</label>
+                    <input type="number" class="form-control" id="SoLuong" min="1" value="1" required />
+                </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-primary">@Languages.Giatien <span class="text-danger"> *</span> :</label>
+                        <input type="number" class="form-control" id="GiaTien" step="0.01" min="0" placeholder="0.00" required />
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label text-primary">@Languages.Kho <span class="text-danger"> *</span> :</label>            
+                        <select id="Kho" class="form-control" required></select>
+                </div>
+               
+                <div class="col-md-3 mt-2">
+                    <label class="form-label text-primary">@Languages.Ghichu :</label>
+                    <input type="text" class="form-control" id="ghichu" required />
+               
+                </div>
+
+                <div class="col-12 mt-3">
+                    <button type="submit" class="btn btn-success" onclick="_Tainhap()"><i class="ion ion-plus-circled"></i> @Languages.Them</button>
+                    <button type="button" class="btn btn-info"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button>
+                    <small class="text-muted ms-3">@Languages.DMMH</small>
+                </div>
+            </form>
+            <form>
+                <div class="table-responsive table-responsive-vertical p-3">
+                    <table class="table table-bordered table-sm " id="entriesTable">
+                        <thead class="table table-bordered">
+                            <tr>
+                                <th><select class="form-control" id="khoi_tk">
+                                        <option value="">@Languages.chon</option>
+                                        <option value="PROD">PROD</option>
+                                        <option value="GA">GA</option>
+                                        <option value="IT">IT</option>
+                                    </select>
+                                </th>
+                                <th><input type="text" class="form-control" id="manvl" placeholder="@Languages.MaNVL" /></th>
+                                <th><input type="text" class="form-control" id="tennvl" placeholder="@Languages.TenNVL" /></th>
+                                <th>
+                                    <select class="form-control" id="khoo"></select>    
+                                </th>
+                                <th><button type="button" class="btn btn-success" onclick="_load_tainhap()"><i class="fa fa-search"></i> @Languages.timkiem</button></th>
+                                <th><button type="button" class="btn btn-info" onclick="_ref() "><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button></th>
+                            </tr>
+                            <tr class="bg-primary text-white">
+                                <th>@Languages.Khoi</th>
+                                <th>@Languages.MaNVL</th>
+                                <th>@Languages.TenNVL</th>
+                                <th>@Languages.Kho</th>
+                                <th>@Languages.Soluonghangmoi</th>
+                                <th>@Languages.Soluonghangtainhap</th>
+                                <th>@Languages.Donvi</th>
+                                <th>@Languages.Sotien</th>
+                                <th>@Languages.soluong</th>                           
+                                <th>@Languages.Thoigian</th>
+                                <th colspan="2"></th>
+      
+                            </tr>
+                        </thead>
+                        <tbody id="entriesBody">
+                            <!-- rows appended here -->
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/scripts/tainhap.js"></script>
+<button id="modal-13" hidden>Click</button>
+@await Html.PartialAsync("_modal", "Import")
+<script>
+  window.onload = function ()
+  {
+     _load_name_inv();
+     _load_warehouse();
+     _get_location();
+     _load_tainhap();
+  }
+  
+</script>

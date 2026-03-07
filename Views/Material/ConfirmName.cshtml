@@ -8,14 +8,21 @@
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
     <link rel="stylesheet" href="~/css/ConfirmName.css" />
-
 </head>
 
 <div class="container-fluid" id="confirm-name" data-role="@role">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h4 class="mb-0 fw-bold text-primary">@Localizer["HeaderTitle"]</h4>
-            <small class="text-muted">@Localizer["HeaderSubtitle"]</small>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-success" id="btnImportExcel">
+                <i class="fas fa-upload me-1"></i> @Localizer["ImportExcel"]
+            </button>
+            <div style="margin-left: 6px;"></div>
+            <button type="button" class="btn btn-outline-primary" id="btnExportTemplate">
+                <i class="fas fa-download me-1"></i> @Localizer["ExportTemplate"]
+            </button>
         </div>
     </div>
 
@@ -76,25 +83,10 @@
             <div class="small text-muted">@Localizer["Role"]: <b>@role</b></div>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 70vh;">
-                <table class="table table-sm table-hover table-bordered align-middle table-fixed mb-0" id="confirmTable">
-                    <thead class="table-light">
-                        <tr class="text-center align-middle">
-                            <th style="width:60px">#</th>
-                            <th style="width:60px">@Localizer["Detail"]</th>
-                            <th style="min-width:100px">@Localizer["OrderCode"]</th>
-                            <th style="min-height:260px;">@Localizer["CustomsNameSuggestion"]</th>
-                            <th style="min-width:240px">@Localizer["CustomsItemName"]</th>
-                            <th style="min-width:180px">@Localizer["InternalMaterialCode"]</th>
-                            <th style="min-width:120px">@Localizer["Status"]</th>
-                            <th style="min-width:160px">@Localizer["CreatedAt"]</th>
-                            <th style="min-width:220px">@Localizer["Handler"]</th>
-                            <th style="min-width:220px">@Localizer["Note"]</th>
-                            <th style="min-width:220px">@Localizer["Actions"]</th>
-                        </tr>
-                    </thead>
+            <div class="table-responsive" style="max-height: 80vh;">
+                <table class="table table-sm table-hover table-bordered align-middle mb-0" id="confirmTable">
                     <tbody id="confirmTableBody">
-                        <tr><td colspan="9" class="text-center text-muted">@Localizer["NoData"]</td></tr>
+                        <tr><td colspan="1" class="text-center text-muted">@Localizer["NoData"]</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -111,172 +103,7 @@
         </div>
     </div>
 </div>
-<!-- Edit modal for uncompleted orders -->
-<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" style="min-width: 50%">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">@Localizer["DetailModalTitle"]</h5>
-                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="@Localizer["Close"]" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="@Localizer["Close"]" aria-controls="editHistoryModal">
-                    <i class="fas fa-times fa-sm"></i>
-                </button>
-            </div>
-            <div class="modal-body" style="max-height: 620px; overflow-y: auto">
-                <form id="editHistoryForm" class="row g-3">
-                    <input type="hidden" id="editRequestId" />
-                    <div class="col-12">
-                        <div class="d-flex gap-3">
-                            <div>
-                                <label class="form-label">@Localizer["OrderCodeGroup"]</label>
-                                <input type="text" class="form-control" id="editMaDon" readonly />
-                            </div>
-                            <div style="margin-left: 8px;">
-                                <label class="form-label">@Localizer["Requester"]</label>
-                                <input type="text" class="form-control" id="editRequester" readonly />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["DepartmentCode"]</label>
-                        <input type="text" class="form-control" id="editSectionName" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["Classification"]</label>
-                        <input type="text" class="form-control" id="editPhanLoai" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label w-100">@Localizer["Category"]</label>
-                        <input type="text" class="form-control" id="editChungLoai" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["InternalMaterialCode"]</label>
-                        <input type="text" class="form-control" id="editMaHangNoiBo" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["EquipmentCode"]</label>
-                        <input type="text" class="form-control" id="editMaThietBi" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["SupplierItemCode"]</label>
-                        <input type="text" class="form-control" id="editMaHangNCC" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">@Localizer["ItemNameVN"]</label>
-                        <input type="text" class="form-control" id="editTenHangVN" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">@Localizer["ItemNameEN"]</label>
-                        <input type="text" class="form-control" id="editTenHangEN" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">@Localizer["Quantity"]</label>
-                        <input type="number" class="form-control" id="editSoLuong" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">@Localizer["Unit"]</label>
-                        <input type="text" class="form-control" id="editDonVi" readonly />
-                    </div>
-                    <!-- Description fields -->
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["Shape"]</label>
-                        <input type="text" class="form-control" id="editHinhDang" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["Material"]</label>
-                        <input type="text" class="form-control" id="editChatLieu" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["Composition"]</label>
-                        <input type="text" class="form-control" id="editThanhPhan" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["Dimensions"]</label>
-                        <input type="text" class="form-control" id="editKichThuoc" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["UsedForMachine"]</label>
-                        <input type="text" class="form-control" id="editDongMay" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">@Localizer["Feature"]</label>
-                        <input type="text" class="form-control" id="editTinhNang" readonly />
-                    </div>
-                    <!-- Regulatory and files -->
-                    <div class="col-md-4">
-                        <label class="form-label w-100">@Localizer["Rohs"]</label>
-                        <input type="text" class="form-control" id="editRohs" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label w-100">@Localizer["COCQ"]</label>
-                        <input type="text" class="form-control" id="editCOCQ" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">@Localizer["MSDS"]</label>
-                        <input type="text" class="form-control" id="editMSDS" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">@Localizer["SafetyStandard"]</label>
-                        <input type="text" class="form-control" id="editAnToan" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">@Localizer["DesignFile"]</label>
-                        <input type="text" class="form-control" id="editFileThietKe" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">@Localizer["Manufacturer"]</label>
-                        <input type="text" class="form-control" id="editNhaSanXuat" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">@Localizer["Supplier"]</label>
-                        <input type="text" class="form-control" id="editNhaCungCap" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label w-100">@Localizer["GetQuotation"]</label>
-                        <select class="form-select" id="editLayBaoGia" style="min-height: 40px;">
-                            <option value="true">O</option>
-                            <option value="false">X</option>
-                        </select>
-                    </div>
-                    <div class="col-md-9">
-                        <label class="form-label">@Localizer["Reason"]</label>
-                        <input type="text" class="form-control lydoTb" id="editLyDo" placeholder="Lý do" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">@Localizer["DesiredReceiveDate"]</label>
-                        <input type="date" class="form-control" id="editNgayMuonNhan" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">@Localizer["SupplierSelectionDeadline"]</label>
-                        <input type="date" class="form-control" id="editKyHan" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label w-100">@Localizer["Urgent"]</label>
-                        <select class="form-select" id="editGap" style="min-height: 40px">
-                            <option value="false">X</option>
-                            <option value="true">O</option>
-                        </select>
-                    </div>
-                    @* Cac thuoc tinh khac *@
-                    <div class="col-md-6" hidden>
-                        <input type="date" class="form-control" id="editDaycreate" hidden />
-                        <input type="text" class="form-control" id="editStatus" hidden />
-                        <input type="text" class="form-control" id="editStep" hidden />
-                        <input type="hidden" id="editSectionCode" />
-                        <input type="hidden" id="editTenNCC" />
-                        <input type="number" class="form-control" id="editSoLanUpdate" hidden />
-                        <input type="date" class="form-control" id="editUpdateLater" hidden />
-                        <input type="date" class="form-control" id="editDeadline" hidden />
-                        <input type="hidden" id="editIsTemplate" />
-                        <input type="hidden" id="editSectionCode" />
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="@Localizer["Close"]" aria-controls="editHistoryModal">@Localizer["Close"]</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 <!-- Custom confirm dialog -->
 <div id="cmConfirmDialog" class="cm-dialog-overlay" aria-hidden="true">
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmConfirmTitle">

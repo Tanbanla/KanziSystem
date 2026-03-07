@@ -283,7 +283,7 @@
     <value>Number Order</value>
   </data>
   <data name="Sopo" xml:space="preserve">
-    <value>PO??</value>
+    <value>PO number</value>
   </data>
   <data name="Sotien" xml:space="preserve">
     <value>Money</value>
@@ -476,5 +476,26 @@
   </data>
   <data name="Xem" xml:space="preserve">
     <value>View</value>
+  </data>
+  <data name="Thoigian" xml:space="preserve">
+    <value>Datetime</value>
+  </data>
+  <data name="Them" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Lammoi" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="DMMH" xml:space="preserve">
+    <value>The list of re-import items will be shown below.</value>
+  </data>
+  <data name="Soluonghangmoi" xml:space="preserve">
+    <value>New stock quantity</value>
+  </data>
+  <data name="Soluonghangtainhap" xml:space="preserve">
+    <value>Re-import quantity</value>
+  </data>
+  <data name="Tainhap" xml:space="preserve">
+    <value>Re-import</value>
   </data>
 </root>

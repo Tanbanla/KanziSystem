@@ -32,6 +32,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
+        public IActionResult Tainhap()
+        {
+            return View();
+        }
         [HttpPost]
         public JsonResult _load_inv(MST_INVENTORY para)
         {

@@ -7,6 +7,7 @@
         pageIndex: 1, // 1-based index for server API
         pageSize: 10,
         returnedCount: 0,
+        totalCount: 0,
         lastPage: false
     };
 
@@ -62,13 +63,15 @@
             pageSize: quoteState.pageSize,
             pageIndex: quoteState.pageIndex
         };
+
         callApi('/Quote/SearchInputQuoteBySoDon', body)
-            .then(data => {
-                // data is expected to be an array for the requested page
-                if (!data) return;
-                const items = Array.isArray(data) ? data : [];
+            .then(res => {
+                if (!res) return;
+                const items = Array.isArray(res.data) ? res.data : [];
+                const total = typeof res.totalCount === 'number' ? res.totalCount : items.length;
                 quoteState.returnedCount = items.length;
-                quoteState.lastPage = items.length < quoteState.pageSize;
+                quoteState.totalCount = total;
+                quoteState.lastPage = (quoteState.pageIndex * quoteState.pageSize) >= total;
                 renderQuoteList(items);
                 showAlert('success', window.i18nInputQuote.DataFilteredSuccessfully);
             })
@@ -91,7 +94,7 @@
                     </button>
                 </td>
                 <td class="text-center">${item.CHR_MaDon}</td>
-                <td class="text-center">${formatDate(item.DTM_CreateDate)}</td>
+                <td class="text-center">${formatDateDs(item.DTM_CreateDate)}</td>
                 <td class="text-center">${item.CHR_SectionName}</td>
                 <td class="text-center">${item.CHR_CreateBy}</td>
                 <td class="text-center">${item.SoLuongLinhKien}</td>
@@ -105,8 +108,10 @@
             if (btn) btn.addEventListener('click', () => openDetailPage(item));
         });
 
-        // summary shows returned items count for current query
-        elements.summaryText.textContent = window.i18nInputQuote.SummaryFormat.replace('{0}', quoteState.returnedCount);
+        // summary shows returned items count for current page and total
+        const startOne = quoteState.returnedCount === 0 ? 0 : ((quoteState.pageIndex - 1) * quoteState.pageSize + 1);
+        const endOne = quoteState.returnedCount === 0 ? 0 : ((quoteState.pageIndex - 1) * quoteState.pageSize + quoteState.returnedCount);
+        elements.summaryText.textContent = (window.i18nInputQuote.SummaryFormat || '{0}').replace('{0}', `${startOne}-${endOne} / ${quoteState.totalCount}`);
         renderPaginationControls();
     }
 
@@ -114,33 +119,49 @@
         const container = elements.paginationControls;
         if (!container) return;
         container.innerHTML = '';
+        // Create prev button
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'btn btn-sm btn-outline-secondary';
+        prevBtn.textContent = '‹';
+        prevBtn.disabled = quoteState.pageIndex <= 1;
+        prevBtn.addEventListener('click', () => { if (quoteState.pageIndex > 1) goToPage(quoteState.pageIndex - 1); });
+        container.appendChild(prevBtn);
 
-        const createButton = (text, cls, disabled, handler) => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'btn btn-sm ' + cls;
-            b.textContent = text;
-            if (disabled) b.disabled = true;
-            if (handler) b.addEventListener('click', handler);
-            return b;
-        };
-        // Prev
-        container.appendChild(createButton('‹', 'btn-outline-secondary', quoteState.pageIndex <= 1, () => { goToPage(quoteState.pageIndex - 1); }));
+        // Render a small range of page buttons around current page
+        const range = 2; // pages before/after
+        const totalPages = quoteState.totalCount ? Math.ceil(quoteState.totalCount / quoteState.pageSize) : 1;
+        const start = Math.max(1, Math.min(quoteState.pageIndex - range, Math.max(1, totalPages - (range * 2))));
+        const pages = [];
+        for (let i = start; i <= Math.min(totalPages, start + (range * 2)); i++) {
+            pages.push(i);
+        }
 
-        // current page indicator
-        const pageIndicator = document.createElement('span');
-        pageIndicator.className = 'btn btn-sm btn-outline-secondary disabled';
-        pageIndicator.textContent = `${quoteState.pageIndex}`;
-        container.appendChild(pageIndicator);
+        pages.forEach(p => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-sm ' + (p === quoteState.pageIndex ? 'btn-primary' : 'btn-outline-secondary');
+            btn.textContent = p;
+            // disable future pages if we know we're on last page and p > current
+            if (p > totalPages) btn.disabled = true;
+            btn.addEventListener('click', () => { if (p !== quoteState.pageIndex) goToPage(p); });
+            container.appendChild(btn);
+        });
 
-        // Next
-        container.appendChild(createButton('›', 'btn-outline-secondary', quoteState.lastPage || quoteState.returnedCount === 0, () => { goToPage(quoteState.pageIndex + 1); }));
+        // Create next button
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'btn btn-sm btn-outline-secondary';
+        nextBtn.textContent = '›';
+        nextBtn.disabled = quoteState.pageIndex >= totalPages || quoteState.returnedCount === 0;
+        nextBtn.addEventListener('click', () => { if (!nextBtn.disabled) goToPage(quoteState.pageIndex + 1); });
+        container.appendChild(nextBtn);
 
         // paging info (start-end)
         if (elements.pagingInfo) {
             const startOne = quoteState.returnedCount === 0 ? 0 : ((quoteState.pageIndex - 1) * quoteState.pageSize + 1);
             const endOne = quoteState.returnedCount === 0 ? 0 : ((quoteState.pageIndex - 1) * quoteState.pageSize + quoteState.returnedCount);
-            elements.pagingInfo.textContent = `${startOne}-${endOne}`;
+            elements.pagingInfo.textContent = `${startOne}-${endOne} / ${quoteState.totalCount}`;
         }
     }
 
@@ -194,10 +215,14 @@
     }
 
     // Utility functions
-    function formatDate(dateStr) {
+    function formatDateDs(dateStr) {
         if (!dateStr) return '';
         const date = new Date(dateStr);
-        return date.toLocaleDateString('vi-VN');
+        return date.toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
     }
 
     function showAlert(type, message) {
@@ -207,21 +232,6 @@
         alertDiv.innerHTML = `${message}`;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 5000);
-    }
-
-    // Initialize
-    function init() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(init, 100);
-                return;
-            });
-        }
-        
-        initializeElements();
-        initializeEventListeners();
-        
-        console.log('InputQuote module initialized');
     }
 
     if (document.readyState === 'loading') {
@@ -431,17 +441,411 @@
             return r.json();
         });
     }
+    // tab nhập theo nhà cung cấp
+    // Supplier Quote Tab State
+    let supplierState = {
+        currentPage: 1,
+        pageSize: 10,
+        totalPages: 0,
+        totalCount: 0,
+        searchParams: {
+            idRequestQuote: 0,
+            maDon: '',
+            maVatTu: '',
+            maNcc: '',
+            section: '',
+            dayMM: null
+        }
+    };
+
+    // Initialize supplier elements
+    function initializeSupplierElements() {
+        // Elements are already in the DOM
+    }
+
+    // Initialize supplier event listeners
+    function initializeSupplierEventListeners() {
+        // Tab change event
+        // document.getElementById('supplier-input-tab')?.addEventListener('shown.bs.tab', function (e) {
+        //     loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+        // });
+
+        // Search button
+        document.getElementById('supplierSearchBtn')?.addEventListener('click', function() {
+            supplierState.searchParams = {
+                idRequestQuote: 0,
+                maDon: document.getElementById('supplierSearchMaDon')?.value || '',
+                maVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
+                maNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
+                section: document.getElementById('supplierSearchSection')?.value || '',
+                dayMM: document.getElementById('supplierSearchDayMM')?.value || null
+            };
+            supplierState.currentPage = 1;
+            loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+        });
+
+        // Import Excel button
+        document.getElementById('supplierImportExcelBtn')?.addEventListener('click', function() {
+            // Tạo input file ẩn
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.xlsx, .xls';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
+            fileInput.addEventListener('change', function() {
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                // Kiểm tra loại file
+                const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+                if (!allowedTypes.includes(file.type)) {
+                    showAlert('danger', window.i18nInputQuote.InvalidFileType || 'Chỉ chấp nhận file Excel (.xlsx, .xls)');
+                    document.body.removeChild(fileInput);
+                    return;
+                }
+
+                // Tạo FormData
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Gửi request
+                fetch('/Quote/ImportExcelInputQuote', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                    }
+
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                        // Trả về file lỗi
+                        return response.blob().then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                            showAlert('warning', window.i18nInputQuote.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.');
+                        });
+                    } else {
+                        // Thành công
+                        return response.json().then(data => {
+                            showAlert('success', window.i18nInputQuote.DataUpdatedSuccessfully || 'Dữ liệu đã được cập nhật thành công');
+                        });
+                    }
+                })
+                .catch(error => {
+                    showAlert('danger', (window.i18nInputQuote.ErrorPrefix || 'Lỗi: ') + error.message);
+                })
+                .finally(() => {
+                    document.body.removeChild(fileInput);
+                });
+            });
+
+            // Trigger click để mở file picker
+            fileInput.click();
+        });
+
+        // Page size change
+        document.getElementById('supplierPageSizeSelect')?.addEventListener('change', function() {
+            supplierState.pageSize = parseInt(this.value) || 10;
+            supplierState.currentPage = 1;
+            loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+        });
+    }
+
+    // Load supplier quotes
+    async function loadSupplierQuotes(searchParams, pageIndex, pageSize) {
+        const body = {
+            ...searchParams,
+            pageSize: pageSize,
+            pageIndex: pageIndex
+        };
+
+        callApi('/Quote/SearchInputQuote', body)
+            .then(res => {
+                if (!res) {
+                    renderSupplierTable([]);
+                    renderSupplierPagination(0, 1);
+                    document.getElementById('supplierSummaryText').textContent = (window.i18nInputQuote.TotalPrefix || 'Tổng: ') + 0;
+                    return;
+                }
+                const items = Array.isArray(res.data) ? res.data : [];
+                const total = typeof res.totalCount === 'number' ? res.totalCount : items.length;
+                supplierState.totalCount = total;
+                supplierState.totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
+                renderSupplierTable(items);
+                renderSupplierPagination(supplierState.totalPages, pageIndex);
+                document.getElementById('supplierSummaryText').textContent = (window.i18nInputQuote.TotalPrefix || 'Tổng: ') + total;
+        })
+            .catch(err => {
+                showAlert('danger', (window.i18nInputQuote.SupplierDataLoadError || 'Lỗi tải dữ liệu nhà cung cấp: ') + err);
+                renderSupplierTable([]);
+                renderSupplierPagination(0, 1);
+            });
+    }
+
+    // Render supplier table
+    function renderSupplierTable(data) {
+        const tbody = document.getElementById('supplierQuoteBody');
+        tbody.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="22" class="text-center text-muted py-4">${window.i18nInputQuote.NoData || 'Không có dữ liệu'}</td>`;
+            tbody.appendChild(row);
+            return;
+        }
+
+        function isFalseFlag(v) {
+            return v === false || v === 0;
+        }
+
+        data.forEach((item, index) => {
+            const row = document.createElement('tr');
+
+            // helper to create td with optional classes and text
+            function td(text, className) {
+                const c = document.createElement('td');
+                if (className) c.className = className;
+                c.textContent = text != null ? text : '';
+                return c;
+            }
+
+            // 1 - STT
+            row.appendChild(td(((supplierState.currentPage - 1) * supplierState.pageSize) + index + 1, 'text-center'));
+
+            // 2 - Order number
+            row.appendChild(td(item.CHR_MaDon || '', 'text-center'));
+
+            // 3 - Supplier code
+            row.appendChild(td(item.CHR_CodeNCC || ''));
+
+            // 4 - Supplier name
+            row.appendChild(td(item.NVCHR_NameNCC || ''));
+
+            // 5 - Supplier item code -> IsMatch_MaHangNCC
+            const maHangCell = td(item.CHR_MaHangNCC || '');
+            if (isFalseFlag(item.IsMatch_MaHangNCC)) maHangCell.classList.add('mismatch');
+            row.appendChild(maHangCell);
+
+            // 6 - Item name HQ -> IsMatch_NameVN
+            const nameVNCell = td(item.NVCHR_TenHangHQ || '');
+            if (isFalseFlag(item.IsMatch_NameVN)) nameVNCell.classList.add('mismatch');
+            row.appendChild(nameVNCell);
+
+            // 7 - Quantity -> IsMatch_SoLuong
+            const qtyCell = td(item.INT_SoLuong || '', 'text-center');
+            if (isFalseFlag(item.IsMatch_SoLuong)) qtyCell.classList.add('mismatch');
+            row.appendChild(qtyCell);
+
+            // 8 - Unit -> IsMatch_DonVi
+            const unitCell = td(item.NVCHR_DonVi || '', 'text-center');
+            if (isFalseFlag(item.IsMatch_DonVi)) unitCell.classList.add('mismatch');
+            row.appendChild(unitCell);
+
+            // 9 - Price USD
+            row.appendChild(td(item.FL_USD ? item.FL_USD.toFixed(2) : '', 'text-end'));
+
+            // 10 - Price VND
+            row.appendChild(td(item.FL_VND ? item.FL_VND.toFixed(2) : '', 'text-end'));
+
+            // 11 - MOQ
+            row.appendChild(td(item.NVCHR_MOQ || ''));
+
+            // 12 - LeadTime
+            row.appendChild(td(item.DTM_LeadTime || ''));
+
+            // 13 - Delivery date -> IsMatch_Ngay
+            const deliveryCell = td(item.DTM_ShipTime ? new Date(item.DTM_ShipTime).toLocaleDateString('vi-VN') : '');
+            if (isFalseFlag(item.IsMatch_Ngay)) deliveryCell.classList.add('mismatch');
+            row.appendChild(deliveryCell);
+
+            // 14 - Rohs -> IsMatch_Rohs
+            const rohsCell = td(item.VCHR_Rohs || '');
+            if (isFalseFlag(item.IsMatch_Rohs)) rohsCell.classList.add('mismatch');
+            row.appendChild(rohsCell);
+
+            // 15 - COCQ -> IsMatch_COCQ
+            const cocqCell = td(item.VCHR_COCQ || '');
+            if (isFalseFlag(item.IsMatch_COCQ)) cocqCell.classList.add('mismatch');
+            row.appendChild(cocqCell);
+
+            // 16 - MSDS -> IsMatch_MSDS
+            const msdsCell = td(item.VCHR_MSDS || '');
+            if (isFalseFlag(item.IsMatch_MSDS)) msdsCell.classList.add('mismatch');
+            row.appendChild(msdsCell);
+
+            // 17 - Safety -> IsMatch_AnToan
+            const safetyCell = td(item.VCHR_AnToan || '');
+            if (isFalseFlag(item.IsMatch_AnToan)) safetyCell.classList.add('mismatch');
+            row.appendChild(safetyCell);
+
+            // 18 - Commitment
+            row.appendChild(td(item.VCHR_CamKet || ''));
+
+            // 19 - Delivery term
+            row.appendChild(td(item.NVCHR_DeliveryTerm || ''));
+
+            // 20 - Payment term
+            row.appendChild(td(item.NVCHR_PaymentTerm || ''));
+
+            // 21 - Attachment
+            row.appendChild(td(item.NVCHR_File || ''));
+
+            // 22 - Input time
+            row.appendChild(td(formatDate(item.DTM_UpdateDate) || ''));
+
+            tbody.appendChild(row);
+        });
+    }
+
+    // Render supplier pagination
+    function renderSupplierPagination(totalPages, currentPage) {
+        const pagination = document.getElementById('supplierPaginationControls');
+        pagination.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        // Previous button
+        const prevLi = document.createElement('button');
+        prevLi.className = `btn btn-sm btn-outline-secondary ${currentPage <= 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `‹`;
+        prevLi.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                supplierState.currentPage = currentPage - 1;
+                loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+            }
+        });
+        pagination.appendChild(prevLi);
+
+        // Page numbers (1-based)
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            const btn = document.createElement('button');
+            btn.className = `btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-outline-secondary'}`;
+            btn.textContent = i;
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                supplierState.currentPage = i;
+                loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+            });
+            pagination.appendChild(btn);
+        }
+
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = `btn btn-sm btn-outline-secondary ${currentPage >= totalPages ? 'disabled' : ''}`;
+        nextBtn.innerHTML = `›`;
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                supplierState.currentPage = currentPage + 1;
+                loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+            }
+        });
+        pagination.appendChild(nextBtn);
+
+        // paging info
+        const pagingInfo = document.getElementById('supplierPagingInfo');
+        if (pagingInfo) {
+            const start = (currentPage - 1) * supplierState.pageSize + 1;
+            const end = Math.min(currentPage * supplierState.pageSize, supplierState.totalCount || totalPages * supplierState.pageSize);
+            pagingInfo.textContent = `${start}-${end} / ${supplierState.totalCount || ''}`;
+        }
+    }
+    function formatDate(d) {
+        if (window.cmMomentFormat) { return window.cmMomentFormat(d); }
+        if (!d) return '';
+        const dt = new Date(d);
+        if (isNaN(dt.getTime())) return '';
+        const pad = n => n.toString().padStart(2, '0');
+        return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()} - ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    }
+    // Initialize
+    function init() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(init, 100);
+                return;
+            });
+        }
+        
+        initializeElements();
+        initializeEventListeners();
+        initializeSupplierElements();
+        initializeSupplierEventListeners();
+        initializeTabSwitch();
+
+        console.log('InputQuote module initialized');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        setTimeout(init, 100);
+    }
+    
+    // Fallback tab switch handler in case Bootstrap's JS is not available
+    function initializeTabSwitch() {
+        const tabs = [
+            { btnId: 'request-list-tab', paneId: 'request-list' },
+            { btnId: 'supplier-input-tab', paneId: 'supplier-input' }
+        ];
+
+        function activate(tabBtn, paneId) {
+            // nav links
+            document.querySelectorAll('#inputQuoteTabs .nav-link').forEach(n => {
+                n.classList.remove('active');
+                n.setAttribute('aria-selected', 'false');
+            });
+            // panes
+            document.querySelectorAll('#inputQuoteTabsContent .tab-pane').forEach(p => {
+                p.classList.remove('show', 'active');
+            });
+
+            const btn = document.getElementById(tabBtn);
+            const pane = document.getElementById(paneId);
+            if (btn) {
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+            }
+            if (pane) {
+                pane.classList.add('show', 'active');
+            }
+            // If supplier tab activated, load its data automatically
+            if (paneId === 'supplier-input') {
+                supplierState.searchParams = {
+                    idRequestQuote: 0,
+                    maDon: document.getElementById('supplierSearchMaDon')?.value || '',
+                    maVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
+                    maNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
+                    section: document.getElementById('supplierSearchSection')?.value || '',
+                    dayMM: document.getElementById('supplierSearchDayMM')?.value || null
+                };
+                supplierState.currentPage = 1;
+                loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+            }
+        }
+
+        tabs.forEach(t => {
+            const el = document.getElementById(t.btnId);
+            if (!el) return;
+            // ensure click toggles tab even if bootstrap is missing
+            el.addEventListener('click', function (e) {
+                // let bootstrap handle if present (no preventDefault)
+                // but also activate manually after tiny delay to avoid race
+                setTimeout(() => activate(t.btnId, t.paneId), 0);
+            });
+        });
+    }
 })();
-// - màn hình xử lý trường hợp k điền
-
-// - phê duyệt thêm k lấy báo giá 
-
-// - chỉnh lại giao diện theo đơn
-// - mail sửa lại
-// - lead time là số ngày, cam kết bắt buộc phải điền, sửa tiêu đề cột điều điện 
-// - file đính kèm cần lưu (bắt buộc)
-// - điều kiện đơn giá k âm
-// - tổng hợp theo số đơn yêu cầu, lưu lịch sử báo giá.
-// - màn hình lịch sử xác nhận lại thông tin
-// - màn hình xác nhận tên sửa lại hiển thông tin để xác nhận tên, tổng hợp theo mã tên mới, thêm chức năng nhập xuất bằng excel
-// - xử lý excel màn hình nhập báo giá, xử lý loading và updata file đã xử lý

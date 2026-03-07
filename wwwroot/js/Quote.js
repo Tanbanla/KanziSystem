@@ -16,7 +16,7 @@
     const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
     let currentPage = 1;
-    let rowsPerPage = 10;
+    let rowsPerPage = 5;
     let filteredRows = [];
 
     function renumberRows() {
@@ -800,7 +800,19 @@
             if (functionInput && material.purpose) functionInput.value = material.purpose;
             // Chủng loại hàng
             const categorySelect = tr.querySelector('.chungLoaiTb');
-            if (categorySelect && material.category_VN) categorySelect.value = material.category_VN;
+            if (categorySelect && material.category_VN) {
+                try {
+                    // nếu select đang rỗng, thử set bằng value hoặc bằng text (setSelectValueByText sẽ tìm theo value trước)
+                    //if (!categorySelect.value || categorySelect.value === '') {
+                        setSelectValueByText(categorySelect, material.category_VN);
+                        // nếu select được enhance thành searchable, cập nhật hiển thị
+                        updateSearchableSelectDisplay(categorySelect);
+                        autoAddRowByCategory(categorySelect);
+                    //}
+                } catch (e) {
+                    console.warn('Error setting category select:', e);
+                }
+            }
             // Optionally set PHAN LOẠI 
             const categoryInput = tr.querySelector('.tenPhanLoaiTb');
             const loaiHangValue = material.loaiHang || material.LoaiHang || (typeof material.GetLoaiHang === 'function' ? material.GetLoaiHang() : null);

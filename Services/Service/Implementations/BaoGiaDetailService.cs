@@ -17,9 +17,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _mapper = mapper;
         }
         // Tìm kiếm thông tin liên quan đến báo giá
-        public async Task<GenericResponse<List<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM, int? PageSize, int? PageIndex)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM, int? PageSize, int? PageIndex)
         {
-            var result = new GenericResponse<List<dynamic>>();
+            var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
                 var data = await _repo.SearchBaoGiaAsync(idRequest, maDon, maVatTu, maNcc, section,dayMM, PageSize, PageIndex);
@@ -77,6 +77,39 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 var data = await _repo.GetByIdRequestQuoteAsync(idRequest);
                 result.Data = _mapper.Map<BaoGia_Detail_of_QuotationDTO>(data);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Update list thông tin ghi nhập báo giá
+        public async Task<GenericResponse<bool>> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_QuotationDTO> listDto)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var listModel = _mapper.Map<List<BaoGia_Detail_of_Quotation>>(listDto);
+                result.Data = await _repo.UpdateListThongTinNhapBaoGiaAsync(listModel);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // lấy id của đơn báo giá
+        public async Task<GenericResponse<int?>> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNcc, string NameHQ)
+        {
+            var result = new GenericResponse<int?>();
+            try
+            {
+                result.Data = await _repo.GetIdOfQuotationAsync(maDon, maVatTu, maNcc, NameHQ);
                 result.Success = true;
             }
             catch (Exception ex)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
 

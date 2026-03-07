@@ -477,4 +477,25 @@
   <data name="Xem" xml:space="preserve">
     <value>Xem</value>
   </data>
+  <data name="Thoigian" xml:space="preserve">
+    <value>Thời gian</value>
+  </data>
+  <data name="Them" xml:space="preserve">
+    <value>Thêm</value>
+  </data>
+  <data name="Lammoi" xml:space="preserve">
+    <value>Làm mới</value>
+  </data>
+  <data name="DMMH" xml:space="preserve">
+    <value>Danh sách các mục tái nhập sẽ hiển thị bên dưới</value>
+  </data>
+  <data name="Soluonghangmoi" xml:space="preserve">
+    <value>Số lượng hàng mới</value>
+  </data>
+  <data name="Soluonghangtainhap" xml:space="preserve">
+    <value>Số lượng hàng tái nhập</value>
+  </data>
+  <data name="Tainhap" xml:space="preserve">
+    <value>Tái nhập</value>
+  </data>
 </root>

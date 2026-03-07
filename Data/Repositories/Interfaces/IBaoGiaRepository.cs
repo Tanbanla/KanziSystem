@@ -1,4 +1,5 @@
-﻿using PRJ_WAREHOUSE_BIVN.Models_Auto;
+﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -7,7 +8,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Lấy thông tin báo giá theo mã báo giá
         public Task<List<BaoGia_Request_of_Quotation>> GetByMaBaoGiaAsync(string maBaoGia);
         // Tìm kiếm thông tin báo giá và phân trang 
-        public Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date);
+        public Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
         // Nhap bao gia
         public Task<bool> NhapBaoGiaAsync(BaoGia_Request_of_Quotation baoGia);
         // Nhap danh sach bao gia - trả về danh sách entity đã được gán ID
@@ -25,6 +26,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Xuất báo giá
         public Task<List<int>> ExportBaoGiaAsync(string? maDon);
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public Task<List<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize);
+        public Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize);
     }
 }

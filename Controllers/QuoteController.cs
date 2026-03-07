@@ -7,6 +7,7 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Collections.Immutable;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 
@@ -28,12 +29,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
         private readonly IWebHostEnvironment _env;
+        private readonly ISendMailService _sendMailService;
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService,
             INhomViTriService nhomViTriService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env, ISendMailService sendMailService)
         {
             _logger = logger;
             _tmNccNewService = tmNccNewService;
@@ -48,6 +50,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _tmCategoryService = tmCategoryService;
             _baoGiaConfirmNameService = baoGiaConfirmNameService;
             _baoGiaNccCategoryService = baoGiaNccCategoryService;
+            _sendMailService = sendMailService;
             _env = env;
         }
         // MARK: - Quote
@@ -97,7 +100,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
-            var danhSach = await _baoGiaService.SearchAsync("", "", "", "", "", "", 6, 0, 0, null);
+            var danhSach = await _baoGiaService.SearchAsync("", "", "", "", "", "", 6, 0, 0, null, "");
             var vm = new QuoteModel
             {
                 DanhSachNhomViTri = nhomViTri,
@@ -364,7 +367,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 searchModel.Step,
                 searchModel.PageIndex,
                 searchModel.PageSize,
-                searchModel.Date
+                searchModel.Date,
+                searchModel.ChungLoai
                 );
             if (!result.Success)
             {
@@ -685,6 +689,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (double.TryParse(s.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var d)) return d;
             return null;
         }
+        private static int? ParseInt(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            if (int.TryParse(s.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var d)) return d;
+            return null;
+        }
         private static DateTime? ParseDate(string s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
@@ -793,14 +803,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Ok(result.Data);
         }
         [HttpPost]
-        public async Task<IActionResult> InsertInputQuote([FromBody] List<dynamic> baoGiaDetail)
+        public async Task<IActionResult> InsertInputQuote([FromBody] InsertInputQuoteModel model)
         {
             try
             {
                 // Convert List<dynamic> to List<BaoGia_Detail_of_QuotationDTO>
                 var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var dtoList = new List<BaoGia_Detail_of_QuotationDTO>();
-                foreach (var item in baoGiaDetail)
+                foreach (var item in model.baoGiaDetail)
                 {
                     // Serialize dynamic to JSON then deserialize to DTO
                     var json = System.Text.Json.JsonSerializer.Serialize(item);
@@ -814,6 +824,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest(result.Message);
                 }
+                // gửi mail thông báo có báo giá mới cho người yêu cầu báo giá
+                var sendMail = await _sendMailService.SendMailToSupplierByRequestCodeAsync(model.MaDon);
                 return Ok(result.Data);
             }
             catch (Exception ex)
@@ -1185,28 +1197,242 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             // Load data for the detail page
             var request = await _baoGiaService.GetByMaBaoGiaAsync(maDon);
-            if (!request.Success || request.Data == null)
+            if (!request.Success || request.Data == null || !request.Data.Any())
             {
                 return NotFound("Request not found");
             }
 
-            var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            // Load supporting reference data
+            var materialsResp = await _materialService.SearchAsync("", "", "", 0, 0);
             var nccs = await LoadNhaCungCapDataAsync();
-            var categorys = await LoadCategoryDataAsync();
+            var categoriesAll = await LoadCategoryDataAsync();
+
+            // Build distinct lists from the request data
+            var listMaterial = request.Data.Select(d => d.CHR_MaHangNoiBo)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .ToList();
+
+            var listCategory = request.Data.Select(d => d.NVCHR_ChungLoai)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .ToList();
+
+            // Build list of suppliers present in the request (group by code)
+            var listNcc = request.Data
+                .Where(d => !string.IsNullOrWhiteSpace(d.CHR_MaNCC) || !string.IsNullOrWhiteSpace(d.NVCHR_TenNCC))
+                .GroupBy(d => d.CHR_MaNCC ?? d.NVCHR_TenNCC)
+                .Select(g => new { MaNcc = g.Key, Ten = g.First().NVCHR_TenNCC })
+                .ToList<dynamic>();
 
             var vm = new QuoteModel
             {
-                DanhSachNhomViTri = nhomViTri,
-                DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
-                DanhSachNhaCungCap = nccs,
-                DanhSachCategory = categorys,
+               // per-request distilled lists
+                listCategory = listCategory,
+                listNcc = listNcc,
+                listMaterial = listMaterial,
+
                 NguoiThaoTac = GetCurrentUserId() ?? "",
                 MaDonHienTai = maDon,
                 // Add the specific request data
                 CurrentRequest = request.Data
             };
             return View(vm);
+        }
+        // Update thông tin chi tiết báo giá
+        [HttpPost]
+        public async Task<IActionResult> UpdateQuoteDetail([FromBody] List<BaoGia_Detail_of_QuotationDTO> details)
+        {
+            try
+            {
+                var result = await _baoGiaDetailService.UpdateListThongTinNhapBaoGiaAsync(details);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi chuyển đổi dữ liệu: {ex.Message}");
+            }
+        }
+        // Nhap file excel
+        [HttpPost]
+        public async Task<IActionResult> ImportExcelInputQuote([FromForm] IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest("Không có file được tải lên");
+                }
+                var items = new List<BaoGia_Detail_of_QuotationDTO>();
+                var hasErrors = false;
+                ClosedXML.Excel.XLWorkbook workbook = null;
+                var fileBytes = new byte[file.Length];
+                using (var stream = file.OpenReadStream())
+                {
+                    await stream.ReadAsync(fileBytes, 0, (int)file.Length);
+                }
+                using (var memoryStream = new MemoryStream(fileBytes))
+                {
+                    workbook = new ClosedXML.Excel.XLWorkbook(memoryStream);
+                    var ws = workbook.Worksheets.FirstOrDefault();
+                    if (ws == null)
+                    {
+                        return BadRequest("Không tìm thấy worksheet trong file");
+                    }
+                    int lastRow = ws.LastRowUsed()?.RowNumber() ?? 15;
+                    // Bắt đầu đọc từ dòng 15
+                    for (int r = 15; r <= lastRow; r++)
+                    {
+                    var errors = new List<string>();
+
+                    // Kiểm tra các cột bắt buộc (17,18,19)
+                    if (string.IsNullOrWhiteSpace(ws.Cell(r, 17).GetString())) errors.Add("Cột 17 (VCHR_CamKet) bắt buộc");
+                    if (string.IsNullOrWhiteSpace(ws.Cell(r, 18).GetString())) errors.Add("Cột 18 (NVCHR_DeliveryTerm) bắt buộc");
+                    if (string.IsNullOrWhiteSpace(ws.Cell(r, 19).GetString())) errors.Add("Cột 19 (NVCHR_PaymentTerm) bắt buộc");
+
+                    // So sánh tên mở thủ tục hải quan (cột 3 vs 24) và tên tiếng Anh (4 vs 25)
+                    if (!string.Equals(ws.Cell(r, 3).GetString(), ws.Cell(r, 24).GetString(), StringComparison.Ordinal)) errors.Add("Tên mở thủ tục hải quan khác nhau (cột 3 vs 24)");
+                    if (!string.Equals(ws.Cell(r, 4).GetString(), ws.Cell(r, 25).GetString(), StringComparison.Ordinal)) errors.Add("Tên tiếng Anh khác nhau (cột 4 vs 25)");
+
+                    // So sánh số lượng (5 vs 26)
+                    var qty1 = ParseInt(ws.Cell(r, 5).GetString());
+                    var qty2 = ParseInt(ws.Cell(r, 26).GetString());
+                    if (qty1 == null || qty2 == null)
+                    {
+                        if (qty1 == null) errors.Add("Cột 5 không phải số hợp lệ");
+                        if (qty2 == null) errors.Add("Cột 26 không phải số hợp lệ");
+                    }
+                    else if (qty1 != qty2) errors.Add("Số lượng khác nhau giữa cột 5 và 26");
+
+                    // So sánh đơn vị (6 vs 27)
+                    if (!string.Equals(ws.Cell(r, 6).GetString(), ws.Cell(r, 27).GetString(), StringComparison.Ordinal)) errors.Add("Đơn vị khác nhau (cột 6 vs 27)");
+
+                    // Ngày giao hàng (cột 12) so sánh với yêu cầu (cột 36)
+                    var ship = ParseDate(ws.Cell(r, 12).GetString());
+                    var reqDate = ParseDate(ws.Cell(r, 36).GetString());
+                    if (ship == null) errors.Add("Cột 12 (DTM_ShipTime) không phải ngày hợp lệ");
+                    if (reqDate == null) errors.Add("Cột 36 (DTM_NgayMuonNhan yêu cầu) không phải ngày hợp lệ");
+                    if (ship != null && reqDate != null && ship > reqDate) errors.Add("Thời gian giao hàng muộn hơn yêu cầu (cột 12 > cột 36)");
+
+                    // MOQ (cột 9) <= Số lượng (cột 5)
+                    var moq = ParseInt(ws.Cell(r, 9).GetString());
+                    if (moq != null && qty1 != null && moq > qty1) errors.Add("MOQ (cột 9) lớn hơn Số lượng (cột 5)");
+
+                    // Kiểm tra các điều kiện Rohs/COCQ/MSDS/AnToan: nếu expected yêu cầu nhưng value thiếu -> lỗi
+                    if (CheckNotRequired(ws.Cell(r, 13).GetString())) errors.Add("Rohs không thỏa mãn (cột 13)");
+                    if (CheckNotRequired(ws.Cell(r, 14).GetString())) errors.Add("CO/CQ không thỏa mãn (cột 14)");
+                    if (CheckNotRequired(ws.Cell(r, 15).GetString())) errors.Add("MSDS không thỏa mãn (cột 15)");
+                    if (CheckNotRequired(ws.Cell(r, 16).GetString())) errors.Add("An toàn không thỏa mãn (cột 16)");
+
+                    if (errors.Any())
+                    {
+                        ws.Cell(r, 38).SetValue(string.Join("; ", errors));
+                        hasErrors = true;
+                        continue;
+                    }
+                        // lấy Id của đơn lưu trong csdl
+                        var checkRQ = await _baoGiaDetailService.GetIdOfQuotationAsync(ws.Cell(r, 20).GetString(),
+                            ws.Cell(r, 21).GetString(), ws.Cell(r, 34).GetString(), ws.Cell(r, 24).GetString());
+                        if (!checkRQ.Success || checkRQ.Data == null)
+                        {
+                            ws.Cell(r, 38).SetValue("Không tìm thấy đơn hàng tương ứng trong hệ thống");
+                            hasErrors = true;
+                            continue;
+                        }
+                        var idRequestQuote = checkRQ.Data.Value;
+                        // Nếu không có lỗi, tạo DTO và thêm vào danh sách
+                        var dto = new BaoGia_Detail_of_QuotationDTO
+                        {
+                            ID = idRequestQuote,
+                            CHR_MaHangNCC = ws.Cell(r, 2).GetString(),
+                            NVCHR_TenHangHQ = ws.Cell(r, 3).GetString(),
+                            CHR_NameEN = ws.Cell(r, 4).GetString(),
+                            INT_SoLuong = (int?)ParseDouble(ws.Cell(r, 5).GetString()),
+                            NVCHR_DonVi = ws.Cell(r, 6).GetString(),
+                            FL_USD = ParseDouble(ws.Cell(r, 7).GetString()), 
+                            FL_VND = ParseDouble(ws.Cell(r, 8).GetString()), 
+                            NVCHR_MOQ = ws.Cell(r, 9).GetString(),
+                            NVCHR_Packing = ws.Cell(r, 10).GetString(),
+                            DTM_LeadTime = ws.Cell(r, 11).GetString(),
+                            DTM_ShipTime = ParseDate(ws.Cell(r, 12).GetString()),
+                            VCHR_Rohs = ws.Cell(r, 13).GetString(),
+                            VCHR_COCQ = ws.Cell(r, 14).GetString(),
+                            VCHR_MSDS = ws.Cell(r, 15).GetString(),
+                            VCHR_AnToan = ws.Cell(r, 16).GetString(),
+                            VCHR_CamKet = ws.Cell(r, 17).GetString(), 
+                            NVCHR_DeliveryTerm = ws.Cell(r, 18).GetString(),
+                            NVCHR_PaymentTerm = ws.Cell(r, 19).GetString(), 
+                            CHR_UpdateBy = GetCurrentUserId(),
+                            NVCHR_File = "", 
+                        };
+                        items.Add(dto);
+                    }
+
+                    if (hasErrors)
+                    {
+                        // Trả về file Excel với lỗi
+                        using var outStream = new MemoryStream();
+                        workbook.SaveAs(outStream);
+                        var bytes = outStream.ToArray();
+                        var fileName = $"ImportErrors_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                        const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                        return File(bytes, contentType, fileName);
+                    }
+                }
+
+                // Cập nhật dữ liệu nếu không có lỗi
+                var result = await _baoGiaDetailService.UpdateListThongTinNhapBaoGiaAsync(items);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        // check điều kiện k nhap
+        private static bool CheckNotRequired(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return true;
+            }
+            return false;
+        }
+        // check điều kiện của Rohs, MSDS, an toàn, cam kết
+        private static bool CheckCondition(string value, string expected)
+        {
+            if (string.IsNullOrWhiteSpace(expected))
+            {
+                return true;
+            }
+
+            var v = (value ?? string.Empty).Trim().ToLowerInvariant();
+            var e = expected.Trim().ToLowerInvariant();
+            if (e.Contains("need") && !e.Contains("no need") && !e.Contains("non-need") )
+            {
+                if (string.IsNullOrWhiteSpace(v)) return false;
+                if (v.Contains("ok") || v == "ok") return true;
+                if (v.Contains("ng") || v.Contains("no") || v.Contains("not")) return false;
+                return false;
+            }
+            if (e.Contains("no need") || e.Contains("not need") || e.Contains("not required") || e.Contains("none"))
+            {
+                return true;
+            }
+            // Fallback: nếu expected chứa OK thì require OK
+            if (e.Contains("ok"))
+            {
+                return v.Contains("ok");
+            }
+            return !string.IsNullOrWhiteSpace(v);
         }
     }
 }

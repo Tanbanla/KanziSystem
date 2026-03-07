@@ -139,7 +139,7 @@
     <value>仕入先</value>
   </data>
   <data name="SelectSupplier" xml:space="preserve">
-    <value>-- 仕入先を選択 --</value>
+    <value>仕入先を選択</value>
   </data>
   <data name="QuoteDate" xml:space="preserve">
     <value>見積日</value>
@@ -500,5 +500,71 @@
   </data>
   <data name="RowIndex" xml:space="preserve">
     <value>行番号</value>
+  </data>
+  <data name="SupplierInputTab" xml:space="preserve">
+    <value>仕入先見積入力</value>
+  </data>
+  <data name="SupplierSearchTitle" xml:space="preserve">
+    <value>仕入先見積検索</value>
+  </data>
+  <data name="SupplierListTitle" xml:space="preserve">
+    <value>仕入先見積リスト</value>
+  </data>
+  <data name="RowsPerPage" xml:space="preserve">
+    <value>ページあたりの行数</value>
+  </data>
+  <data name="SupplierDataLoadError" xml:space="preserve">
+    <value>仕入先データの読み込みエラー: </value>
+  </data>
+  <data name="NoData" xml:space="preserve">
+    <value>データなし</value>
+  </data>
+  <data name="TotalPrefix" xml:space="preserve">
+    <value>合計: </value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Excelファイルのみ受け付けます (.xlsx, .xls)</value>
+  </data>
+  <data name="FileHasErrorsDownloaded" xml:space="preserve">
+    <value>ファイルにエラーがあります。確認のためにエラーファイルをダウンロードしました。</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>データが正常に更新されました</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>エラー: </value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>日付</value>
+  </data>
+  <data name="ImportExcel" xml:space="preserve">
+    <value>Excelインポート</value>
+  </data>
+  <data name="OrderNumber" xml:space="preserve">
+    <value>注文番号</value>
+  </data>
+  <data name="SupplierCodeShort" xml:space="preserve">
+    <value>仕入先コード</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>仕入先名</value>
+  </data>
+  <data name="ItemNameHQ" xml:space="preserve">
+    <value>税関手続き用ベトナム語品名</value>
+  </data>
+  <data name="Rohs" xml:space="preserve">
+    <value>ROHS</value>
+  </data>
+  <data name="Safety" xml:space="preserve">
+    <value>安全</value>
+  </data>
+  <data name="Commitment" xml:space="preserve">
+    <value>コミットメント</value>
+  </data>
+  <data name="PaymentTerms" xml:space="preserve">
+    <value>支払条件</value>
+  </data>
+  <data name="InputTime" xml:space="preserve">
+    <value>入力時間</value>
   </data>
 </root>

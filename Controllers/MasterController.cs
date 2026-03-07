@@ -6,6 +6,7 @@ using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Master;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -65,11 +66,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(dt);
         }
         [HttpPost]
+        public JsonResult load_fac()
+        {
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();       
+            var dup = dt.Select(x => x.CHR_FACTORY).Distinct();
+            return Json(dup);
+        }
+        [HttpPost]
         public JsonResult load_sec(string fac)
         {
             List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
             dt = dt.Where(x => x.CHR_FACTORY == fac).ToList();
-            var dup = dt.Select(x => x.CHR_FACTORY).Distinct();
+            var dup = dt.Select(x => x.CHR_DEPT_USE).Distinct();
             return Json(dup);
         }
         [HttpPost]
@@ -679,6 +687,55 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
+        }
+        public JsonResult chuyenkho(string mahang, string khohientai, string tonkho, string phongban, string denkho, string soluong, string nguoichuyen, string khoi)
+        {
+            string manguyenlieu = mahang.Split('-')[0].Trim();
+            var ck = Models.MST_WAREHOUSE.Chuyenkho(manguyenlieu, khohientai, tonkho, phongban, denkho, soluong, nguoichuyen, khoi);
+            return Json(ck);
+        }
+        public JsonResult Tainhap(string malinhkien, string soluong, string kho, string vitri, string thoigian, string giatien, string ghichu, string khoi, string nguoichuyen, string phongban)
+        {
+            var tainhaphang = Models.MST_WAREHOUSE.TaiNhapkho(malinhkien.Split(':')[0], soluong, kho, vitri, thoigian, giatien, ghichu, khoi,nguoichuyen, phongban);
+            return Json(tainhaphang);
+        }
+        public JsonResult Get_location()
+        {
+            var get = Models.MST_WAREHOUSE.Get_location();
+            return Json(get);
+        }
+        [HttpPost]
+        public JsonResult Load_tainhap(MST_INVENTORY para)
+        {
+            List<MST_INVENTORY> dt = MST_INVENTORY.inventory_process(para);
+            dt = dt.Where(x => x.QTY_RE_IMPORT > 0).ToList();
+            if (para.Group_Code != null)
+            {
+                dt = dt.Where(x => x.Group_Code == para.Group_Code).ToList();
+            }
+            if (para.MaNguyenLieu != null)
+            {
+                dt = dt.Where(x => x.MaNguyenLieu == para.MaNguyenLieu).ToList();
+            }
+            if (para.Material_Name != null)
+            {
+                dt = dt.Where(x => x.MaNguyenLieu!.Contains(para.MaNguyenLieu!)).ToList();
+            }
+            if (para.Kho != null)
+            {
+                dt = dt.Where(x => x.Kho == para.Kho).ToList();
+            }
+            return Json(dt);
+        }
+        public JsonResult del_tainhap(string id)
+        {
+            var Del_Tainhap = Models.MST_WAREHOUSE.Del_Tainhap(id);
+            return Json(Del_Tainhap);
+        }
+        public JsonResult edit_tainhap(string id, string soluong, string donvi, string giatien, string kho)
+        {
+            var edit = Models.MST_WAREHOUSE.edit_tainhap(id, soluong, donvi, giatien, kho);
+            return Json(edit);
         }
     }
 }

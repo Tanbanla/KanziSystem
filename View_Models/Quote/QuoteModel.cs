@@ -22,6 +22,13 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public List<BaoGia_StatusDTO> DanhSachStatus { get; set; } = new List<BaoGia_StatusDTO>();
         // Danh sach mã đơn 
         public List<string> DanhSachMaDon { get; set; } = new List<string>();
+        // Danh sách chủng loại hàng theo đơn
+        public List<string> listCategory { get; set; }
+        // Danh sách nhà cung cấp theo đơn 
+        public List<dynamic> listNcc { get; set; }
+        // Danh sách mặt hàng theo đơn
+        public List<string> listMaterial { get; set; }
+
         // Người thao tác 
         public string? NguoiThaoTac { get; set; }
         // Mã đơn hiện tại
@@ -43,6 +50,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public DateTime? Date { get; set; }
+        public string? ChungLoai { get; set; }
 
     }
     public class MaterialSearch
@@ -91,5 +99,19 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public List<string> selectedItemIds { get; set; } = new List<string>();
         public string sectionCode { get; set; } = string.Empty;
         public string sectionName { get; set; } = string.Empty;
+    }
+    // Send mail model
+    public class SendMailModel
+    {
+        public string? To { get; set; }
+        public string? Subject { get; set; }
+        public string? Body { get; set; }
+        public List<string>? Attachments { get; set; }
+    }
+    // Send Mail
+    public class InsertInputQuoteModel
+    {
+        public string MaDon { get; set; } = string.Empty;
+        public List<dynamic> baoGiaDetail { get; set; }  = new List<dynamic>();
     }
 }

@@ -234,3 +234,8 @@ thead.table-header-custom th {
 #pageDetailTable thead th, #quoteInputTable thead th {
     background-color: #f8f9fa !important;
 }
+
+.highlight-yellow {
+    background-color: #ffff99 !important; /* Light yellow background */
+    border: 1px solid #ffcc00 !important; /* Optional border for emphasis */
+}

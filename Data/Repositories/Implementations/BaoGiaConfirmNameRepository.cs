@@ -20,11 +20,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context = context;
         }
         //search thông tin xác nhận tên hàng
-        public async Task<List<BaoGia_Confirm_Name_Quotation>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize)
         {
             // Xây dựng base query
             var sqlBuilder = new StringBuilder(@"
-                SELECT c.*
+                SELECT c.* ,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.INT_SoLuong,
+				r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
                 WHERE 1 = 1
@@ -71,7 +72,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             parameters.Add("@PageSize", PageSize);
 
             // Thực hiện query
-            return (await _conn.QueryAsync<BaoGia_Confirm_Name_Quotation>(sqlBuilder.ToString(), parameters)).ToList();
+            var data = await _conn.QueryAsync<dynamic>(sqlBuilder.ToString(), parameters);
+
+            var result = new ListRequest<dynamic>
+            {
+                Data = data.ToList(),
+                TotalCount = await _conn.ExecuteScalarAsync<long>(@"
+                    SELECT COUNT(1)
+                    FROM BaoGia_Confirm_Name_Quotation c
+                    INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
+                    WHERE 1 = 1
+                    " + sqlBuilder.ToString().Split("ORDER BY")[0], parameters)
+            };
+            return result;
         }
         // Luu thong tin
         public async Task<bool> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User)

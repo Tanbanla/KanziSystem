@@ -60,6 +60,4 @@ public partial class IM_PO
     public DateTime? Thoigianxacnhan { get; set; }
 
     public bool? NNCNEW { get; set; }
-
-    public virtual ICollection<IM_PO_DETAIL> IM_PO_DETAILs { get; set; } = new List<IM_PO_DETAIL>();
 }

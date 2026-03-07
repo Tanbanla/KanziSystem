@@ -6,7 +6,10 @@
     .form-control, .input-group-text, .custom-select, .custom-file-label {
         border-color: #6e75c4;
     }
- 
+    .card .card-header .btn:not(.note-btn) {
+        border-radius: 3px;
+        height: 41px;
+    }
 </style>
 <div class="row">
     <div class="col-12">
@@ -40,24 +43,22 @@
                 </div>                    
                 <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-                        <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- @Languages.Giatien ---" />
-                        <datalist id="donh">
-                            <option>Dưới 3000</option>
-                            <option>Dưới 10,000</option>
-                            <option>Trên 10,000</option>
-                        </datalist>
+                      @*   <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- @Languages.Giatien ---" /> *@
+                        <select class="form-control" id="giadonhang">
+                            <option value="">---  @Languages.Giatien  ---</option>
+                            <option value="Dưới 3000">Dưới 3000</option>
+                            <option value="Dưới 10,000">Dưới 10,000</option>
+                            <option value="Trên 10,000">Trên 10,000</option>
+                        </select>
                     </div>
                 </div>
                 <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
-            </div>
-          
-           
+            </div>                    
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
                     <table class="table table-bordered">
-                        <thead class="bg-primary">
-                        
+                        <thead class="bg-primary">                       
                             <tr>
                                 <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" class="idd" /></th>
                                 <th rowspan="2">@Languages.chitiet</th>                                         

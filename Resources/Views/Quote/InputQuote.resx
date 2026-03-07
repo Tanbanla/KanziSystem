@@ -139,7 +139,7 @@
     <value>Nhà cung cấp</value>
   </data>
   <data name="SelectSupplier" xml:space="preserve">
-    <value>-- Chọn nhà cung cấp --</value>
+    <value>Chọn nhà cung cấp</value>
   </data>
   <data name="QuoteDate" xml:space="preserve">
     <value>Ngày báo giá</value>
@@ -500,5 +500,71 @@
   </data>
   <data name="RowIndex" xml:space="preserve">
     <value>Số dòng</value>
+  </data>
+  <data name="SupplierInputTab" xml:space="preserve">
+    <value>Nhập báo giá nhà cung cấp</value>
+  </data>
+  <data name="SupplierSearchTitle" xml:space="preserve">
+    <value>Tìm kiếm báo giá nhà cung cấp</value>
+  </data>
+  <data name="SupplierListTitle" xml:space="preserve">
+    <value>Danh sách báo giá nhà cung cấp</value>
+  </data>
+  <data name="RowsPerPage" xml:space="preserve">
+    <value>Số dòng mỗi trang</value>
+  </data>
+  <data name="SupplierDataLoadError" xml:space="preserve">
+    <value>Lỗi tải dữ liệu nhà cung cấp: </value>
+  </data>
+  <data name="NoData" xml:space="preserve">
+    <value>Không có dữ liệu</value>
+  </data>
+  <data name="TotalPrefix" xml:space="preserve">
+    <value>Tổng: </value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Chỉ chấp nhận file Excel (.xlsx, .xls)</value>
+  </data>
+  <data name="FileHasErrorsDownloaded" xml:space="preserve">
+    <value>File có lỗi. Đã tải xuống file lỗi để kiểm tra.</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>Dữ liệu đã được cập nhật thành công</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Lỗi: </value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Ngày tháng</value>
+  </data>
+  <data name="ImportExcel" xml:space="preserve">
+    <value>Nhập Excel</value>
+  </data>
+  <data name="OrderNumber" xml:space="preserve">
+    <value>Số đơn</value>
+  </data>
+  <data name="SupplierCodeShort" xml:space="preserve">
+    <value>Mã NCC</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>Tên NCC</value>
+  </data>
+  <data name="ItemNameHQ" xml:space="preserve">
+    <value>Tên hàng HQ</value>
+  </data>
+  <data name="Rohs" xml:space="preserve">
+    <value>ROHS</value>
+  </data>
+  <data name="Safety" xml:space="preserve">
+    <value>An toàn</value>
+  </data>
+  <data name="Commitment" xml:space="preserve">
+    <value>Cam kết</value>
+  </data>
+  <data name="PaymentTerms" xml:space="preserve">
+    <value>Điều kiện thanh toán</value>
+  </data>
+  <data name="InputTime" xml:space="preserve">
+    <value>Thời gian nhập</value>
   </data>
 </root>

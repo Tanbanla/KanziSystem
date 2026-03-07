@@ -6,39 +6,54 @@
     .form-control, .input-group-text, .custom-select, .custom-file-label {
         border-color: #6e75c4;
     }
+
 </style>
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
-            <div class="card-header">
-                <div class="form-group" style="margin : 10px 0 0 10px">
+            <div class="card-header ml-0">
+                <div class="form-group" style="margin : 10px 0 0 0">
+                    <label>@Languages.Khoi :</label> <br />
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon">
-                        <datalist id="tt">
-                            <option>Gấp</option>
-                            <option>Thông thường</option>
-                        </datalist>
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <div class="input-group mb-2">
-                        <input type="text" list="lst_khoi" class="form-control" placeholder="@Languages.Khoi" id="khoi" />
-                        <datalist id="lst_khoi">
+                        <select class="form-control" id="khoi">
                             <option>PROD</option>
                             <option>GA</option>
                             <option>IT</option>
                             <option>PUR</option>
-                        </datalist>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>@Languages.Tinhtrangdon :</label> <br />
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="tinhtrangdon" placeholder="@Languages.Trangthaidon">
+                        <select id="trangthaidon" class="form-control">
+                            <option value=""> ---  Chọn ---</option>
+                            <option value="1">Gấp</option>
+                            <option value="0">Thông thường</option>
+                        </select>
+                    </div>
+                </div>
+               
+                <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>@Languages.Trangthaidon :</label> <br />
+                    <div class="input-group mb-2">
+                       
+                        <select class="form-control" id="tinhtrangdon">
+                            <option value=""> ---  Chọn ---</option>
+                            <option value="0">Đợi người dự thảo</option>
+                            <option value="1">Đợi người thẩm tra</option>
+                            <option value="2">Đợi người phê duyệt</option>
+                            <option value="3">Đợi quản lý phòng tiếp nhận</option>
+                            <option value="4">Đợi người xuất kho</option>
+                            <option value="5">Hoàn thành</option>
+                            <option value="6">Bị từ chối</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>@Languages.mayeucau :</label> <br />
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.mayeucau ">
+                        <input type="text" class="form-control" id="mnl" >
                     </div>
                 </div>
               
@@ -48,22 +63,28 @@
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>@Languages.Ngayyeucau :</label> <br />
                     <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="ngayyc" placeholder="@Languages.Ngayyeucau">
+                        <input type="date" class="form-control" id="ngayyc">
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>@Languages.Giatien :</label> <br />
                     <div class="input-group mb-2">
-                        <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- Đơn giá ---" />
-                        <datalist id="donh">
-                            <option>Dưới 3000</option>
-                            <option>Dưới 10,000</option>
-                            <option>Trên 10,000</option>
-                        </datalist>
+                   
+                        <select id="giadonhang" class="form-control">
+                            <option value="0"> ---  Chọn ---</option>
+                            <option value="2999">Dưới 3000</option>
+                            <option value="3000">Dưới 10,000</option>
+                            <option value="10000" >Trên 10,000</option>
+                        </select>
                     </div>
                 </div>
-                <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-                <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
+                <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-refresh"></i> Refresh </button>
+                <div class="form-group float-right mt-5" >
+                    <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
+                </div>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
@@ -306,4 +327,6 @@
         const activeClass = pageNumber === currentPage ? 'btn-primary text-white' : '';
         return ` <li class="page-item"><a class="page-link  ${activeClass}"  onclick="goToPage(${pageNumber})">${pageNumber}</a></li>`;
     }
+
+   
 </script>

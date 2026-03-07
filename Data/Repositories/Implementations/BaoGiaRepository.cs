@@ -28,13 +28,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Tìm kiếm thông tin báo giá và phân trang
-        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step,int pageIndex, int pageSize, DateTime? date)
+        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step,int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
             var sql = @"
                 SELECT *
                 FROM BaoGia_Request_of_Quotation
                 WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
+                  AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
                   AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
                   AND (@NguoiYeuCau IS NULL OR CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
                   AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
@@ -67,7 +68,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Step = step,
                 Offset = (pageIndex - 1) * pageSize,
                 PageSize = pageSize,
-                Date = date
+                Date = date,
+                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai
             };
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
@@ -219,7 +221,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return a;
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public async Task<List<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
         {
             var sql = new StringBuilder(@"
             WITH BangTongHop AS (
@@ -300,8 +302,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(" ORDER BY TrangThai,t1.DTM_CreateDate DESC");
             }
-
-            return (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+            var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
+            var totalCountSql = "SELECT COUNT(DISTINCT CONCAT(CHR_MaDon, '|', CONVERT(DATE, DTM_CreateDate), '|', " +
+                "CHR_SectionName, '|', CHR_CreateBy)) FROM BaoGia_Request_of_Quotation";
+            var total = await _conn.ExecuteScalarAsync<int>(totalCountSql);
+            return new ListRequest<dynamic>
+            {
+                Data = result.ToList(),
+                TotalCount = total,
+            };
         }
     }
 }

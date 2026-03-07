@@ -56,6 +56,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
 
             CreateMap<TM_Category, TM_CategoryDTO>();
             CreateMap<TM_CategoryDTO,TM_Category>();
+
+            CreateMap<TM_MASTER_MAILDTO, TM_MASTER_MAIL>();
+            CreateMap<TM_MASTER_MAIL, TM_MASTER_MAILDTO>();
         }
     }
 }

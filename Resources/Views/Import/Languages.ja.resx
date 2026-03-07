@@ -477,4 +477,25 @@
   <data name="Xem" xml:space="preserve">
     <value>ビュー</value>
   </data>
+  <data name="Thoigian" xml:space="preserve">
+    <value>時間</value>
+  </data>
+  <data name="Them" xml:space="preserve">
+    <value>作成する</value>
+  </data>
+  <data name="Lammoi" xml:space="preserve">
+    <value>リフレッシュ</value>
+  </data>
+  <data name="DMMH" xml:space="preserve">
+    <value>再輸入リストは以下に表示されます。</value>
+  </data>
+  <data name="Soluonghangmoi" xml:space="preserve">
+    <value>新着商品の数量</value>
+  </data>
+  <data name="Soluonghangtainhap" xml:space="preserve">
+    <value>再入庫数</value>
+  </data>
+  <data name="Tainhap" xml:space="preserve">
+    <value>逆輸入</value>
+  </data>
 </root>

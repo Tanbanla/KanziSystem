@@ -49,13 +49,15 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<BaoGia_History_Approver_of_Quotation> BaoGia_History_Approver_of_Quotations { get; set; }
 
+    public virtual DbSet<BaoGia_History_Detail_Request> BaoGia_History_Detail_Requests { get; set; }
+
     public virtual DbSet<BaoGia_History_Request_of_Quotation> BaoGia_History_Request_of_Quotations { get; set; }
 
     public virtual DbSet<BaoGia_Master_Approver_Send_Mail> BaoGia_Master_Approver_Send_Mails { get; set; }
 
-    public virtual DbSet<BaoGia_NCC_Category> BaoGia_NCC_Categories { get; set; }
-
     public virtual DbSet<BaoGia_NCC> BaoGia_NCCs { get; set; }
+
+    public virtual DbSet<BaoGia_NCC_Category> BaoGia_NCC_Categories { get; set; }
 
     public virtual DbSet<BaoGia_Request_of_Quotation> BaoGia_Request_of_Quotations { get; set; }
 
@@ -151,6 +153,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<KHO_NHAPXUAT> KHO_NHAPXUATs { get; set; }
 
+    public virtual DbSet<KHO_TMP> KHO_TMPs { get; set; }
+
     public virtual DbSet<KHO_XOA> KHO_XOAs { get; set; }
 
     public virtual DbSet<LOG> LOGs { get; set; }
@@ -195,6 +199,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<PE_REQUEST_INFORMATION> PE_REQUEST_INFORMATIONs { get; set; }
 
+    public virtual DbSet<PE_USERNAME> PE_USERNAMEs { get; set; }
+
     public virtual DbSet<PE_lichsu_thaydoinhacungcap> PE_lichsu_thaydoinhacungcaps { get; set; }
 
     public virtual DbSet<PE_lichsu_thaydoiuser> PE_lichsu_thaydoiusers { get; set; }
@@ -223,6 +229,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<SPLIT> SPLITs { get; set; }
 
+    public virtual DbSet<Section> Sections { get; set; }
+
     public virtual DbSet<TEM> TEMs { get; set; }
 
     public virtual DbSet<TEM_LUONGSUDUNG> TEM_LUONGSUDUNGs { get; set; }
@@ -237,7 +245,7 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<TM_AUTHORITY_THEOCHUCNANG> TM_AUTHORITY_THEOCHUCNANGs { get; set; }
 
-    public virtual DbSet<TM_Category> TM_Categorys { get; set; }
+    public virtual DbSet<TM_Category> TM_Categories { get; set; }
 
     public virtual DbSet<TM_GOOD_TYPE> TM_GOOD_TYPEs { get; set; }
 
@@ -280,8 +288,6 @@ public partial class COST_MANAGEMENTContext : DbContext
     public virtual DbSet<TM_USER_TEST> TM_USER_TESTs { get; set; }
 
     public virtual DbSet<TONTRENLINE> TONTRENLINEs { get; set; }
-
-    public virtual DbSet<TOTAL_WAREHOUSE> TOTAL_WAREHOUSEs { get; set; }
 
     public virtual DbSet<USER> USERs { get; set; }
 
@@ -592,6 +598,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.VCHR_TenHaiQuan).HasMaxLength(500);
+            entity.Property(e => e.VCHR_TenRecomment).HasMaxLength(500);
             entity.Property(e => e.VCHR_UpdateBy)
                 .HasMaxLength(20)
                 .IsUnicode(false);
@@ -604,7 +611,6 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.VCHR_UserShip)
                 .HasMaxLength(20)
                 .IsUnicode(false);
-            entity.Property(e => e.VCHR_TenRecomment).HasMaxLength(500);
         });
 
         modelBuilder.Entity<BaoGia_Detail_of_Quotation>(entity =>
@@ -624,6 +630,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_MaHangNCC)
                 .HasMaxLength(250)
                 .IsUnicode(false);
+            entity.Property(e => e.CHR_NameEN).HasMaxLength(200);
             entity.Property(e => e.CHR_Status).HasMaxLength(150);
             entity.Property(e => e.CHR_UpdateBy)
                 .HasMaxLength(50)
@@ -632,30 +639,40 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.DTM_EndDate).HasColumnType("datetime");
-            entity.Property(e => e.DTM_LeadTime).HasMaxLength(50);
+            entity.Property(e => e.DTM_LeadTime)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.DTM_ShipTime).HasColumnType("datetime");
             entity.Property(e => e.DTM_UpdateDate).HasColumnType("datetime");
             entity.Property(e => e.FL_TaxRate).HasDefaultValue(0.0);
             entity.Property(e => e.INT_NumberEdit).HasDefaultValue(0);
             entity.Property(e => e.NVCHR_DeliveryTerm).HasMaxLength(500);
+            entity.Property(e => e.NVCHR_DonVi).HasMaxLength(150);
             entity.Property(e => e.NVCHR_File).HasMaxLength(500);
             entity.Property(e => e.NVCHR_MOQ).HasMaxLength(350);
             entity.Property(e => e.NVCHR_NameNCC).HasMaxLength(250);
+            entity.Property(e => e.NVCHR_NhaSanXuat).HasMaxLength(250);
             entity.Property(e => e.NVCHR_Note).HasMaxLength(550);
             entity.Property(e => e.NVCHR_Packing).HasMaxLength(350);
             entity.Property(e => e.NVCHR_PaymentTerm).HasMaxLength(500);
             entity.Property(e => e.NVCHR_ReasonPick).HasMaxLength(500);
             entity.Property(e => e.NVCHR_TenHangHQ).HasMaxLength(450);
             entity.Property(e => e.NVCHR_Warranty).HasMaxLength(500);
-            entity.Property(e => e.VCHR_Rohs).HasMaxLength(50);
-            entity.Property(e => e.VCHR_COCQ).HasMaxLength(50);
-            entity.Property(e => e.VCHR_MSDS).HasMaxLength(50);
-            entity.Property(e => e.VCHR_AnToan).HasMaxLength(50);
-            entity.Property(e => e.VCHR_CamKet).HasMaxLength(50);
-            entity.Property(e => e.NVCHR_NhaSanXuat).HasMaxLength(250);
-            entity.Property(e => e.CHR_NameEN).HasMaxLength(200);
-            entity.Property(e => e.NVCHR_DonVi).HasMaxLength(150);
-            entity.Property(e => e.INT_SoLuong).HasDefaultValue(0);
+            entity.Property(e => e.VCHR_AnToan)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.VCHR_COCQ)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.VCHR_CamKet)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.VCHR_MSDS)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.VCHR_Rohs)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<BaoGia_History_Approver_of_Quotation>(entity =>
@@ -670,12 +687,8 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_SectionCodeSend)
                 .HasMaxLength(100)
                 .IsUnicode(false);
-            entity.Property(e => e.CHR_SectionNameApprover)
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.CHR_SectionNameSend)
-                .HasMaxLength(100)
-                .IsUnicode(false);
+            entity.Property(e => e.CHR_SectionNameApprover).HasMaxLength(150);
+            entity.Property(e => e.CHR_SectionNameSend).HasMaxLength(150);
             entity.Property(e => e.CHR_StatusFlag)
                 .HasMaxLength(100)
                 .IsUnicode(false);
@@ -690,6 +703,18 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.NVCHR_ReturnReason).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<BaoGia_History_Detail_Request>(entity =>
+        {
+            entity.HasKey(e => e.ID).HasName("PK__BaoGia_H__3214EC27C47456E3");
+
+            entity.ToTable("BaoGia_History_Detail_Request");
+
+            entity.Property(e => e.CHR_CreateBy)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.DTM_CreateBy).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<BaoGia_History_Request_of_Quotation>(entity =>
@@ -770,13 +795,21 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.DTM_UpdateDate).HasColumnType("datetime");
             entity.Property(e => e.NVCHAR_TenNCC).HasMaxLength(300);
-            entity.Property(e => e.NVCHR_MakeIn).HasMaxLength(255);
             entity.Property(e => e.NVCHR_CodeByNCC).HasMaxLength(300);
+            entity.Property(e => e.NVCHR_MakeIn).HasMaxLength(255);
         });
-        modelBuilder.Entity<BaoGia_NCC_Category>(entity => {
-            entity.HasKey(e => e.Id).HasName("PK__BaoGia_N__3214EC27FDB51D78");
+
+        modelBuilder.Entity<BaoGia_NCC_Category>(entity =>
+        {
+            entity.HasKey(e => e.ID).HasName("PK__BaoGia_N__3214EC27FDB51D78");
 
             entity.ToTable("BaoGia_NCC_Category");
+
+            entity.HasIndex(e => e.CHR_MaNCC, "IX_CHR_MaNCC");
+
+            entity.HasIndex(e => e.CHR_Status, "IX_CHR_Status");
+
+            entity.HasIndex(e => e.DTM_CreateBy, "IX_DTM_CreateBy");
 
             entity.Property(e => e.CHR_CreateBy)
                 .HasMaxLength(20)
@@ -784,22 +817,20 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_MaNCC)
                 .HasMaxLength(70)
                 .IsUnicode(false);
-            entity.Property(e => e.NVCHR_TenNCC)
-                .HasMaxLength(255);
-            entity.Property(e => e.NVCHR_ChungLoai)
-                .HasMaxLength(300);
-            entity.Property(e => e.NVCHR_SanXuat)
-                .HasMaxLength(250);
+            entity.Property(e => e.CHR_Mail).HasMaxLength(200);
+            entity.Property(e => e.CHR_PIC).HasMaxLength(200);
             entity.Property(e => e.CHR_Status)
                 .HasMaxLength(50)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasDefaultValue("Active");
             entity.Property(e => e.DTM_CreateBy)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.CHR_CreateBy).HasMaxLength(20);
-            entity.Property(e => e.CHR_PIC).HasMaxLength(200);
-            entity.Property(e => e.CHR_Mail).HasMaxLength(200);
+            entity.Property(e => e.NVCHR_ChungLoai).HasMaxLength(300);
+            entity.Property(e => e.NVCHR_SanXuat).HasMaxLength(250);
+            entity.Property(e => e.NVCHR_TenNCC).HasMaxLength(255);
         });
+
         modelBuilder.Entity<BaoGia_Request_of_Quotation>(entity =>
         {
             entity.HasKey(e => e.ID).HasName("PK__BaoGia_R__3214EC273E3D596D");
@@ -877,6 +908,8 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_Flag)
                 .HasMaxLength(25)
                 .IsUnicode(false);
+            entity.Property(e => e.CHR_TenStatusEN).HasMaxLength(277);
+            entity.Property(e => e.CHR_TenStatusJP).HasMaxLength(277);
             entity.Property(e => e.DTM_CreateDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -884,8 +917,6 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.VCHR_CodeStatus)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.CHR_TenStatusEN).HasMaxLength(250);
-            entity.Property(e => e.CHR_TenStatusJP).HasMaxLength(250);
         });
 
         modelBuilder.Entity<BaoGia_Step>(entity =>
@@ -904,11 +935,11 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.CHR_StepName).HasMaxLength(250);
+            entity.Property(e => e.CHR_StepNameEN).HasMaxLength(277);
+            entity.Property(e => e.CHR_StepNameJP).HasMaxLength(277);
             entity.Property(e => e.DTM_CreateDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.CHR_StepNameEN).HasMaxLength(250);
-            entity.Property(e => e.CHR_StepNameJP).HasMaxLength(250);
         });
 
         modelBuilder.Entity<Baocao_ACC_KIEMKE>(entity =>
@@ -1557,10 +1588,6 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Tinhtrangtokhai).HasMaxLength(50);
             entity.Property(e => e.Tygia).HasColumnType("money");
             entity.Property(e => e.chr_USER_UPDATE_TSCD).HasMaxLength(50);
-
-            entity.HasOne(d => d.SoPONavigation).WithMany(p => p.IM_PO_DETAILs)
-                .HasForeignKey(d => d.SoPO)
-                .HasConstraintName("FK_IM_PO_DETAIL_IM_PO");
         });
 
         modelBuilder.Entity<IM_PO_DETAIL_AUTO>(entity =>
@@ -1726,6 +1753,18 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Sotaikhoan).HasMaxLength(50);
             entity.Property(e => e.Thoigian).HasColumnType("datetime");
             entity.Property(e => e.Vitri).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<KHO_TMP>(entity =>
+        {
+            entity.ToTable("KHO_TMP");
+
+            entity.Property(e => e.CHR_CODE_MATERIAL).HasMaxLength(50);
+            entity.Property(e => e.CHR_GROUP_CODE).HasMaxLength(50);
+            entity.Property(e => e.CHR_WAREHOUSE).HasMaxLength(50);
+            entity.Property(e => e.DTM_TIMEIMPORT)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
         });
 
         modelBuilder.Entity<KHO_XOA>(entity =>
@@ -1894,12 +1933,15 @@ public partial class COST_MANAGEMENTContext : DbContext
 
         modelBuilder.Entity<MST_WAREHOUSE>(entity =>
         {
-            entity.HasKey(e => e.ID).HasName("PK__MST_WARE__3214EC27FFDC1F10");
+            entity.HasKey(e => e.CHR_WAREHOUSE).HasName("PK__MST_WARE__3214EC27FFDC1F10");
 
             entity.ToTable("MST_WAREHOUSE", tb => tb.HasComment("Quản lý danh sách kho tại BIVN Được quản lý bởi từng phòng ban."));
 
             entity.HasIndex(e => e.ID, "UQ__MST_WARE__3214EC26C0C291D2").IsUnique();
 
+            entity.Property(e => e.CHR_WAREHOUSE)
+                .HasMaxLength(255)
+                .HasComment("Tên kho Thực hiện lưu theo format : [Nhà máy]_[Phòng ban]_[Số thứ tự]");
             entity.Property(e => e.CHR_DEPT_USE)
                 .HasMaxLength(20)
                 .HasComment("Phòng quản lý kho ( Đối với kho sử dụng cho nhiều phòng thì cần 1 phòng đại diện quản lý)");
@@ -1912,13 +1954,11 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_USER)
                 .HasMaxLength(20)
                 .HasComment("Người thêm mới hoặc chỉnh sửa gần nhất");
-            entity.Property(e => e.CHR_WAREHOUSE)
-                .HasMaxLength(255)
-                .HasComment("Tên kho Thực hiện lưu theo format : [Nhà máy]_[Phòng ban]_[Số thứ tự]");
             entity.Property(e => e.DTM_UPDATE)
                 .HasDefaultValueSql("(getdate())")
                 .HasComment("Thời gian thay đổi hoặc thêm mới")
                 .HasColumnType("datetime");
+            entity.Property(e => e.ID).ValueGeneratedOnAdd();
         });
 
         modelBuilder.Entity<Master_RECEIVE_EMAIL_PRICE>(entity =>
@@ -2123,9 +2163,22 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_ADID_NGUOITHAMTRA).HasMaxLength(20);
             entity.Property(e => e.CHR_ADID_NGUOIYEUCAU).HasMaxLength(20);
             entity.Property(e => e.CHR_ADID_XACNHAN).HasMaxLength(20);
+            entity.Property(e => e.CHR_ADID_XUATKHO).HasMaxLength(20);
+            entity.Property(e => e.CHR_MAIL_NGUOIPHEDUYET).HasMaxLength(80);
+            entity.Property(e => e.CHR_MAIL_NGUOITHAMTRA).HasMaxLength(80);
+            entity.Property(e => e.CHR_MAIL_NGUOIYEUCAU).HasMaxLength(80);
+            entity.Property(e => e.CHR_MAIL_XACNHAN).HasMaxLength(80);
+            entity.Property(e => e.CHR_MAIL_XUATKHO).HasMaxLength(80);
+            entity.Property(e => e.CHR_TEN_NGUOIPHEDUYET).HasMaxLength(80);
+            entity.Property(e => e.CHR_TEN_NGUOITHAMTRA).HasMaxLength(80);
+            entity.Property(e => e.CHR_TEN_NGUOIYEUCAU).HasMaxLength(80);
+            entity.Property(e => e.CHR_TEN_XACNHAN).HasMaxLength(80);
+            entity.Property(e => e.CHR_TEN_XUATKHO).HasMaxLength(80);
             entity.Property(e => e.DTM_NGUOIPHEDUYET).HasColumnType("datetime");
             entity.Property(e => e.DTM_NGUOITHAMTRA).HasColumnType("datetime");
+            entity.Property(e => e.DTM_NGUOIYEUCAU).HasColumnType("datetime");
             entity.Property(e => e.DTM_XACNHAN).HasColumnType("datetime");
+            entity.Property(e => e.DTM_XUATKHO).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<PE_REQUEST_INFORMATION>(entity =>
@@ -2141,6 +2194,18 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NCHR_REQUEST_CODE).HasMaxLength(60);
             entity.Property(e => e.NCHR_UNIT).HasMaxLength(20);
             entity.Property(e => e.NCHR_WAREHOUSE_NAME).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<PE_USERNAME>(entity =>
+        {
+            entity.HasKey(e => e.Id_User);
+
+            entity.ToTable("PE_USERNAME");
+
+            entity.Property(e => e.Adid).HasMaxLength(10);
+            entity.Property(e => e.Group_Code).HasMaxLength(10);
+            entity.Property(e => e.Mail).HasMaxLength(50);
+            entity.Property(e => e.User_Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<PE_lichsu_thaydoinhacungcap>(entity =>
@@ -2491,6 +2556,15 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
+        modelBuilder.Entity<Section>(entity =>
+        {
+            entity.ToTable("Section");
+
+            entity.Property(e => e.CHR_CODE).HasMaxLength(20);
+            entity.Property(e => e.CHR_NAME).HasMaxLength(20);
+            entity.Property(e => e.CHR_SECTION_NAME).HasMaxLength(20);
+        });
+
         modelBuilder.Entity<TEM>(entity =>
         {
             entity
@@ -2601,18 +2675,20 @@ public partial class COST_MANAGEMENTContext : DbContext
 
             entity.Property(e => e.CHR_CODE_FUNCTION).HasMaxLength(50);
         });
+
         modelBuilder.Entity<TM_Category>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TM_Categ__3214EC2707B5DB3E");
+            entity.HasKey(e => e.ID).HasName("PK__TM_Categ__3214EC2707B5DB3E");
 
             entity.ToTable("TM_Category");
 
-            entity.Property(e => e.NVCHR_Category)
-                .HasMaxLength(200)
+            entity.Property(e => e.CHR_CreateBy)
+                .HasMaxLength(20)
                 .IsUnicode(false);
             entity.Property(e => e.DTM_CreateBy).HasColumnType("datetime");
-            entity.Property(e => e.CHR_CreateBy).HasMaxLength(20);
+            entity.Property(e => e.NVCHR_Category).HasMaxLength(200);
         });
+
         modelBuilder.Entity<TM_GOOD_TYPE>(entity =>
         {
             entity.HasKey(e => e.ID_CODE_GOOD_TYPE);
@@ -2976,35 +3052,6 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Khoi).HasMaxLength(50);
             entity.Property(e => e.NgayCapnhat).HasColumnType("datetime");
             entity.Property(e => e.UserCapnhat).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<TOTAL_WAREHOUSE>(entity =>
-        {
-            entity.HasKey(e => e.ID).HasName("PK__TOTAL_WA__3214EC27E8B39D8C");
-
-            entity.ToTable("TOTAL_WAREHOUSE", tb => tb.HasComment("Quản lý tổng chung toàn bộ linh kiện trong nhà máy"));
-
-            entity.HasIndex(e => e.ID, "UQ__TOTAL_WA__3214EC26BAD54916").IsUnique();
-
-            entity.Property(e => e.CHR_COST)
-                .HasMaxLength(50)
-                .HasComment("Mã cost chi phí phòng ban ( bao gồm cả các cost dự án)");
-            entity.Property(e => e.CHR_DESCRIPTION)
-                .HasMaxLength(255)
-                .HasComment("Các giải thích thêm, chú thích về linh kiện)");
-            entity.Property(e => e.CHR_LOCATION)
-                .HasMaxLength(70)
-                .HasComment("Vị trí lưu trữ ( vị trí trong kho theo giá, vị trí được phân biệt)");
-            entity.Property(e => e.CHR_MATERIAL_CODE)
-                .HasMaxLength(100)
-                .HasComment("Mã linh kiện đang được quản lý");
-            entity.Property(e => e.DTM_UPDATED).HasColumnType("datetime");
-            entity.Property(e => e.ID_UNIT).HasComment("ID của tên Unit (lấy từ bảng MST_UNIT)");
-            entity.Property(e => e.ID_WAREHOUSE).HasComment("ID của kho đã được khai báo quản lý trong bảng MST_WAREHOUSE");
-            entity.Property(e => e.IS_SAVE_WH).HasComment("Cho phép lưu trữ True : Cho phép lưu trữ tại kho False : Không cho phép lưu trữ");
-            entity.Property(e => e.QTY).HasComment("Số lượng linh kiện còn lại trong kho đang được quản lý");
-            entity.Property(e => e.QTY_MAXIMUM).HasComment("Số lượng nhiều nhất được cho phép lưu kho");
-            entity.Property(e => e.QTY_MINIMUM).HasComment("Số lượng linh kiện ít nhất cần lưu kho ( đối với kho của phòng ban)");
         });
 
         modelBuilder.Entity<USER>(entity =>

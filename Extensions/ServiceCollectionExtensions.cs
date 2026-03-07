@@ -61,6 +61,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ITmCategoryRepository, TmCategoryRepository>();
         services.AddScoped<ITmCategoryService, TmCategoryService>();
+
+        services.AddScoped<ISendMailRepository, SendMailRepository>();
+        services.AddScoped<ISendMailService, SendMailService>();
         return services;
     }
 }

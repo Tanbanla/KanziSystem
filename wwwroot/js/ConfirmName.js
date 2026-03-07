@@ -22,7 +22,7 @@
         const T = window.i18nConfirmName || {};
         switch ((s || '').toLowerCase()) {
             case 'confirmed': return '<span class="status-badge status-confirmed">' + (T.StatusConfirmed || 'Đã xác nhận') + '</span>';
-            case 'confirming': return '<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span>';
+            case 'confirming': return '<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span';
             case 'rejected': return '<span class="status-badge status-rejected">' + (T.StatusRejected || 'Từ chối') + '</span>';
             default: return '<span class="status-badge status-draft">' + (T.StatusDraft || 'Mới') + '</span>';
         }
@@ -33,41 +33,147 @@
     function canApprove() { return role === 'UserPUR'; }
 
     function renderRows(data) {
+        const T = window.i18nConfirmName || {};
+        const fields = [
+            { key: 'ID_RequestQuote', label: 'Số đơn yêu cầu báo giá', editable: false },
+            { key: 'CHR_SectionName', label: 'Phòng ban', editable: false },
+            { key: 'CHR_Phanloai', label: 'Phân loại thiết bị', editable: false },
+            { key: 'CHR_MaThietBi', label: 'Mã thiết bị', editable: false },
+            { key: 'CHR_MaHangNCC', label: 'Mã hàng của NCC', editable: false },
+            { key: 'VCHR_TenRecomment', label: 'Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)', editable: false },
+            { key: 'CHR_NameEN', label: 'Tên hàng tiếng anh(*)', editable: false },
+            { key: 'INT_SoLuong', label: 'Số lượng(*)', editable: false },
+            { key: 'NVCHR_DonVi', label: 'Đơn vị(*)', editable: false },
+            { key: 'NVCHR_ChungLoai', label: 'Chủng loại hàng', editable: false },
+            { key: 'NVCHR_HinhDang', label: 'Hình dáng', editable: false },
+            { key: 'NVCHR_ChatLieu', label: 'Chất liệu', editable: false },
+            { key: 'NVCHR_ThanhPhan', label: 'Thành phần, hàm lượng (đối với hóa chất)', editable: false },
+            { key: 'NVCHR_KichThuoc', label: 'Kích thước(mm) (dài/rộng/cao)', editable: false },
+            { key: 'NVCHR_DongMay', label: 'Dùng cho máy/thiết bị/vị trí nào', editable: false },
+            { key: 'NVCHR_TinhNang', label: 'Dùng để làm gì (tính năng)', editable: false },
+            { key: 'tenHQ', label: 'Xác nhận tên', editable: canEditTenHQ() },
+            { key: 'maNB', label: 'Xác nhận mã', editable: canEditMaNB() },
+            { key: 'status', label: 'Trạng thái', editable: false },
+            { key: 'dtM_CreateDate', label: 'Ngày tạo', editable: false },
+            { key: 'handler', label: 'Người xử lý', editable: false },
+            { key: 'note', label: 'Ghi chú', editable: false },
+            { key: 'actions', label: 'Hành động', editable: false }
+        ];
+
+        // Đánh dấu 5 hàng cuối là cố định (sticky bottom)
+        fields.slice(-7).forEach(f => f.isFixed = true);
+
+        // Xóa thead cũ nếu có
+        const existingThead = els.tbody.previousElementSibling;
+        if (existingThead && existingThead.tagName === 'THEAD') {
+            existingThead.remove();
+        }
+
         if (!data || data.length === 0) {
-            const T = window.i18nConfirmName || {};
-            els.tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">' + (T.NoData || 'Không có dữ liệu') + '</td></tr>';
+            els.tbody.innerHTML = '<tr><td colspan="1" class="text-center text-muted">' + (T.NoData || 'Không có dữ liệu') + '</td></tr>';
             return;
         }
-        els.tbody.innerHTML = data.map((r, i) => {
-            const idx = (state.pageIndex - 1) * state.pageSize + i + 1;
-            const tenHQ = canEditTenHQ() ? `<input class="form-control form-control-sm js-tenhq" data-id="${r.id}" value="${r.vchR_TenHaiQuan || ''}" />` : `<div class="cell-sm">${r.vchR_TenHaiQuan || ''}</div>`;
-            const maNB = canEditMaNB() ? `<input class="form-control form-control-sm js-manb" data-id="${r.id}" value="${r.vchR_MaHangNoiBo || ''}" />` : `<div>${r.vchR_MaHangNoiBo || ''}</div>`;
-            const T = window.i18nConfirmName || {};
-            const actions = [
-                canApprove() ? `<button class="btn btn-sm btn-success js-approve" data-id="${r.id}">${T.BtnApprove || 'Đồng ý'}</button>` : '',
-                canApprove() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.id}">${T.BtnReject || 'Từ chối'}</button>` : ''
-                //canEditTenHQ() ? `<button class="btn btn-sm btn-primary js-save" data-id="${r.id}">Lưu</button>` : '',
-                //canEditMaNB() ? `<button class="btn btn-sm btn-primary js-save" data-id="${r.id}">Lưu</button>` : ''
-            ].filter(Boolean).join(' ');
-            const handler = [r.vchR_UserShip && `Ship: ${r.vchR_UserShip} (${formatDate(r.dtM_UserShip)})`, r.vchR_UserAcc && `Acc: ${r.vchR_UserAcc} (${formatDate(r.dtM_UserAcc)})`, r.vchR_UserPUR && `PUR: ${r.vchR_UserPUR} (${formatDate(r.dtM_UserPUR)})`].filter(Boolean).join('<br/>');
-            return `<tr>
-            <td class="text-center">${idx}</td>
-            <td class="text-center">
-                <button type="button" class="btn btn-outline-primary" data-action="detailRQ" data-id="${r.iD_RequestQuote}"><i class="fas fa-edit"></i></button>
-            </td>
-            <td class="text-center">${r.iD_RequestQuote || ''}</td>
-            <td>${r.vchR_TenRecomment || ''}</td>
-            <td>${tenHQ}</td>
-            <td>${maNB}</td>
-            <td class="text-center">${statusBadge(r.chR_Status)}</td>
-            <td class="text-center">${formatDate(r.dtM_CreateDate)}</td>
-            <td class="text-center">${handler || ((T.CreatedByPrefix || 'Khởi tạo bởi ') + r.vchR_CreateBy)}</td>
-            <td><div class="small text-muted">${r.nvchR_Note || ''}</div><div class="text-danger small">${r.nvchR_LyDo || ''}</div></td>
-            <td class="text-center">${actions}</td>
-      </tr>`;
-        }).join('');
 
-        // attach events
+        // Tạo thead động
+        const thead = document.createElement('thead');
+        thead.className = 'table-light';
+        thead.style.position = 'sticky';
+        thead.style.top = '0';
+        thead.style.zIndex = '20';
+        thead.style.backgroundColor = 'white';
+        thead.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = '<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; left: 0; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">Thuộc tính</th>' +
+            data.map((r, i) => `<th style="min-width: 200px; text-align: center; background-color: #e0e0e0;">Bản ghi ${(state.pageIndex - 1) * state.pageSize + i + 1}</th>`).join('');
+        thead.appendChild(headerRow);
+        els.tbody.parentNode.insertBefore(thead, els.tbody);
+
+        // Cấu hình bảng
+        const table = els.tbody.closest('table');
+        if (table) {
+            table.style.overflowX = 'auto';
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.boxShadow = '0 0 8px rgba(0,0,0,0.05)';
+        }
+
+        // Render tbody
+        els.tbody.innerHTML = '';
+        fields.forEach(field => {
+            const tr = document.createElement('tr');
+            if (field.isFixed) tr.classList.add('fixed-row');
+
+            const th = document.createElement('th');
+            th.innerHTML = field.label;
+            th.style.fontWeight = 'bold';
+            th.style.backgroundColor = '#2335B7';
+            th.style.color = '#FFFF';
+            th.style.position = 'sticky';
+            th.style.left = '0';
+            th.style.zIndex = '15';
+            th.style.minWidth = '250px';
+            th.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
+            th.style.padding = '8px 12px';
+            // If this field is one of the last 7 (marked fixed), make header green
+            if (field.isFixed) {
+                th.style.backgroundColor = '#28a745';
+                th.style.color = '#ffffff';
+            }
+            tr.appendChild(th);
+
+            data.forEach(r => {
+                const td = document.createElement('td');
+                td.style.padding = '8px 12px';
+                td.style.verticalAlign = 'middle';
+                // highlight fixed rows with green background
+                //if (field.isFixed) {
+                //    td.style.backgroundColor = '#d4edda';
+                //}
+
+                if (field.key === 'status') {
+                    td.innerHTML = statusBadge(r.CHR_Status);
+                    td.style.textAlign = 'center';
+                } else if (field.key === 'tenHQ') {
+                    if (field.editable) {
+                        td.innerHTML = `<input class="form-control form-control-sm js-tenhq" data-id="${r.ID}" value="${r.VCHR_TenHaiQuan || ''}" />`;
+                    } else {
+                        td.innerHTML = `<div class="cell-sm">${r.VCHR_TenHaiQuan || ''}</div>`;
+                    }
+                } else if (field.key === 'maNB') {
+                    if (canEditMaNB()) {
+                        td.innerHTML = `<input class="form-control form-control-sm js-manb" data-id="${r.ID}" value="${r.VCHR_MaHangNoiBo || ''}" />`;
+                    } else {
+                        td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
+                    }
+                } else if (field.key === 'actions') {
+                    const actions = [
+                        canApprove() ? `<button class="btn btn-sm btn-success js-approve" data-id="${r.ID}">${T.BtnApprove || 'Đồng ý'}</button>` : '',
+                        canApprove() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.ID}">${T.BtnReject || 'Từ chối'}</button>` : ''
+                    ].filter(Boolean).join(' ');
+                    td.innerHTML = actions;
+                    td.style.textAlign = 'center';
+                } else if (field.key === 'dtM_CreateDate') {
+                    td.textContent = formatDate(r[field.key]);
+                    td.style.textAlign = 'center';
+                } else if (field.key === 'handler') {
+                    const handler = [
+                        r.VCHR_UserShip && `Ship: ${r.VCHR_UserShip} (${formatDate(r.DTM_UserShip)})`,
+                        r.VCHR_UserAcc && `Acc: ${r.VCHR_UserAcc} (${formatDate(r.DTM_UserAcc)})`,
+                        r.VCHR_UserPUR && `PUR: ${r.VCHR_UserPUR} (${formatDate(r.DTM_UserPUR)})`
+                    ].filter(Boolean).join('<br/>');
+                    td.innerHTML = handler || ((T.CreatedByPrefix || 'Khởi tạo bởi ') + r.VCHR_CreateBy);
+                    td.style.textAlign = 'center';
+                } else if (field.key === 'note') {
+                    td.innerHTML = `<div class="small text-muted">${r.NVCHR_Note || ''}</div><div class="text-danger small">${r.NVCHR_LyDo || ''}</div>`;
+                } else {
+                    td.textContent = r[field.key] || '';
+                }
+                tr.appendChild(td);
+            });
+            els.tbody.appendChild(tr);
+        });
+
+        // Gán sự kiện cho các input/button
         els.tbody.querySelectorAll('.js-tenhq').forEach(el => {
             el.addEventListener('change', () => saveInline(parseInt(el.getAttribute('data-id')), { tenHaiQuan: el.value }));
         });
@@ -76,16 +182,34 @@
         });
         els.tbody.querySelectorAll('.js-approve').forEach(btn => btn.addEventListener('click', () => approve(parseInt(btn.getAttribute('data-id')))));
         els.tbody.querySelectorAll('.js-reject').forEach(btn => btn.addEventListener('click', () => reject(parseInt(btn.getAttribute('data-id')))));
-        //els.tbody.querySelectorAll('.js-save').forEach(btn => btn.addEventListener('click', () => save(parseInt(btn.getAttribute('data-id')))));
-        // detail buttons
-        els.tbody.querySelectorAll('[data-action="detailRQ"]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.getAttribute('data-id'));
-                if (!isNaN(id)) loadRequestDetail(id);
-            });
-        });
-    }
 
+        // Xử lý sticky bottom cho 5 hàng cố định (dùng chiều cao thực tế)
+        const fixedTrs = els.tbody.querySelectorAll('.fixed-row');
+        if (fixedTrs.length > 0) {
+            // Áp dụng style chung trước khi đo
+            fixedTrs.forEach(tr => {
+                tr.style.position = 'sticky';
+                tr.style.backgroundColor = '#f9f9f9';
+                tr.style.zIndex = '16';
+                tr.style.boxShadow = '0 -2px 4px rgba(0,0,0,0.1)';
+                tr.style.borderTop = '1px solid #ddd';
+                // Không fix height, để tự động theo nội dung
+            });
+
+            // Đo chiều cao thực tế
+            const heights = Array.from(fixedTrs).map(tr => tr.offsetHeight);
+
+            // Tính bottom cho từng hàng (hàng cuối bottom = 0, hàng trên bottom = tổng chiều cao các hàng bên dưới)
+            fixedTrs.forEach((tr, i) => {
+                let bottomOffset = 0;
+                for (let j = i + 1; j < fixedTrs.length; j++) {
+                    bottomOffset += heights[j];
+                }
+                tr.style.bottom = bottomOffset + 'px';
+            });
+        }
+    }
+    
     function formatDate(d) {
         if (window.cmMomentFormat) { return window.cmMomentFormat(d); }
         if (!d) return '';
@@ -94,54 +218,6 @@
         const pad = n => n.toString().padStart(2, '0');
         return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
     }
-    async function loadRequestDetail(id) {
-        try {
-            const res = await fetch('/Material/SearchID', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(id) });
-            if (!res.ok) { alert('Không tải được chi tiết'); return; }
-            const r = await res.json();
-            // populate modal fields safely
-            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
-            setVal('editRequestId', r.id ?? '');
-            setVal('editMaDon', r.chR_MaDon ?? '');
-            setVal('editRequester', r.vchR_CreateBy ?? '');
-            setVal('editSectionName', r.chR_SectionName ?? '');
-            setVal('editPhanLoai', r.chR_Phanloai ?? '');
-            setVal('editChungLoai', r.nvchR_ChungLoai ?? '');
-            setVal('editMaHangNoiBo', r.vchR_MaHangNoiBo ?? '');
-            setVal('editMaThietBi', r.chR_MaThietBi ?? '');
-            setVal('editMaHangNCC', r.chR_MaHangNCC ?? '');
-            setVal('editTenHangVN', r.nvchR_NameVN ?? '');
-            setVal('editTenHangEN', r.chR_NameEN ?? '');
-            setVal('editSoLuong', r.inT_SoLuong ?? '');
-            setVal('editDonVi', r.nvchR_DonVi ?? '');
-            setVal('editHinhDang', r.nvchR_HinhDang ?? '');
-            setVal('editChatLieu', r.nvchR_ChatLieu ?? '');
-            setVal('editThanhPhan', r.nvchR_ThanhPhan ?? '');
-            setVal('editKichThuoc', r.nvchR_KichThuoc ?? '');
-            setVal('editDongMay', r.nvchR_DongMay ?? '');
-            setVal('editTinhNang', r.nvchR_TinhNang ?? '');
-            setVal('editRohs', r.nvchR_Rohs ?? '');
-            setVal('editCOCQ', r.nvchR_COCQ ?? '');
-            setVal('editMSDS', r.nvchR_MSDS ?? '');
-            setVal('editAnToan', r.nvchR_AnToan ?? '');
-            setVal('editFileThietKe', r.nvchR_FileThietKe ?? '');
-            setVal('editNhaSanXuat', r.nvchR_NhaSanXuat ?? '');
-            setVal('editNhaCungCap', r.nvchR_TenNCC ?? '');
-            // selects
-            const layBaoGiaEl = document.getElementById('editLayBaoGia'); if (layBaoGiaEl) layBaoGiaEl.value = String(r.biT_LayBaoGia ?? 'false');
-            setVal('editLyDo', r.lyDo ?? r.nvchR_LyDo ?? '');
-            setVal('editNgayMuonNhan', (r.dtM_NgayMuonNhan ?? '').toString().substring(0, 10));
-            setVal('editKyHan', (r.dtM_KyHan ?? '').toString().substring(0, 10));
-            const gapEl = document.getElementById('editGap'); if (gapEl) gapEl.value = String(r.chR_Gap ?? 'false');
-
-            // show modal
-            showModal();
-        } catch (e) {
-            console.error('Load detail error', e);
-            alert('Có lỗi khi tải dữ liệu chi tiết');
-        }
-    }
-
     async function search() {
         const body = {
             tenHang: els.tenHang.value.trim(),
@@ -156,14 +232,14 @@
         });
         if (!res.ok) { const T = window.i18nConfirmName || {}; console.error(T.MsgSearchFailed || 'Search failed'); return; }
         const data = await res.json();
-        state.total = data.total || 0;
+        state.total = data.data.totalCount || 0;
         state.pageIndex = data.pageIndex || 1;
         state.pageSize = data.pageSize || 20;
         const T = window.i18nConfirmName || {};
         els.resultCount.textContent = `${T.Total || 'Tổng'}: ${state.total}`;
         const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
         els.pageInfo.textContent = `${state.pageIndex}/${totalPages}`;
-        renderRows(data.data || []);
+        renderRows(data.data.data || []);
     }
 
     async function saveInline(id, payload) {
@@ -189,12 +265,12 @@
     }
 
     els.btnSearch.addEventListener('click', () => { state.pageIndex = 1; search(); });
-    document.getElementById('btnCloseEdit_1').addEventListener('click', function () {
-        hideEditModal();
-    });
-    document.getElementById('btnCloseEdit_2').addEventListener('click', function () {
-        hideEditModal();
-    });
+    //document.getElementById('btnCloseEdit_1').addEventListener('click', function () {
+    //    hideEditModal();
+    //});
+    //document.getElementById('btnCloseEdit_2').addEventListener('click', function () {
+    //    hideEditModal();
+    //});
     // Reset button
     const resetBtn = document.getElementById('btnReset');
     if (resetBtn) {
@@ -225,30 +301,6 @@
     }
     els.prev.addEventListener('click', () => { if (state.pageIndex > 1) { state.pageIndex--; search(); } });
     els.next.addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize)); if (state.pageIndex < totalPages) { state.pageIndex++; search(); } });
-    function showModal() {
-        const modalEl = document.getElementById('detailModal');
-        if (!modalEl) return;
-        try {
-            const bs = window.bootstrap;
-            if (bs && bs.Modal) {
-                const m = bs.Modal.getOrCreateInstance(modalEl);
-                m.show();
-            } else {
-                // Fallback: manually show modal
-                modalEl.style.display = 'block';
-                modalEl.classList.add('show');
-                modalEl.setAttribute('aria-hidden', 'false');
-                // prevent body scroll
-                document.body.classList.add('modal-open');
-            }
-        } catch {
-            // Fallback: manually show modal
-            modalEl.style.display = 'block';
-            modalEl.classList.add('show');
-            modalEl.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('modal-open');
-        }
-    }
     // enhance searchable selects inside the page
     try {
         buildSearchableDropdown(document.getElementById('confirm-name'));
