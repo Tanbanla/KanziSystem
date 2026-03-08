@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models;
@@ -15,11 +16,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaConfirmNameService _confirmNameService;
         private readonly INhomViTriService _nhomViTriService;
         private readonly IBaoGiaService _baoGiaService;
-        public MaterialController(IBaoGiaConfirmNameService confirmNameService, INhomViTriService nhomViTriService, IBaoGiaService baoGiaService)
+        private readonly IWebHostEnvironment _env;
+        public MaterialController(IBaoGiaConfirmNameService confirmNameService, INhomViTriService nhomViTriService, IBaoGiaService baoGiaService, IWebHostEnvironment env)
         {
             _confirmNameService = confirmNameService;
             _nhomViTriService = nhomViTriService;
             _baoGiaService = baoGiaService;
+            _env = env;
         }
         // MARK: Confirm Name actions use EF context directly
         public IActionResult Material()
@@ -31,7 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View();
         }
         [HttpPost]
-        public JsonResult load_material (PARAS para)
+        public JsonResult load_material(PARAS para)
         {
             List<PARAS> dt = MATERIA.material_process(para);
             dt = dt.GroupBy(x => x.Material_Code).Select(g => g.First()).ToList();
@@ -42,7 +45,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             // Determine role from query or default to UserPUR
             var role = (Request.Query["role"].ToString() ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(role)) role = "UserPUR"; // UserShip | UserAcc | UserPUR
+            if (string.IsNullOrWhiteSpace(role)) role = "UserShip"; // UserShip | UserAcc | UserPUR
             ViewBag.Role = role;
             var vitris = await LoadNhomViTriDataAsync();
             var vm = new MaterialVM
@@ -73,7 +76,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> SaveConfirmName([FromBody] ConfirmNameSaveRequest req)
         {
             var result = await _confirmNameService.SaveConfirmNameAsync(req.Id, req.TenHaiQuan, req.MaHangNoiBo, req.Role, GetCurrentUserId());
-            if(!result.Success)
+            if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
@@ -96,7 +99,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> RejectConfirmName([FromBody] ConfirmNameRejectRequest req)
         {
-            var result = await _confirmNameService.RejectConfirmNameAsync(req.Id, req.LyDo ,GetCurrentUserId());
+            var result = await _confirmNameService.RejectConfirmNameAsync(req.Id, req.LyDo ?? "", GetCurrentUserId());
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -114,6 +117,211 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result.Data);
         }
-    }
+        // Nhap bang excel
+        [HttpPost]
+        public async Task<IActionResult> ImportFromExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File không hợp lệ");
 
+            var role = "UserPUR";//(Request.Query["role"].ToString() ?? string.Empty).Trim();
+            var item = new List<BaoGia_Confirm_Name_Quotation>();
+            var hasErrors = false;
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                // Dữ liệu bắt đầu từ dòng 4
+                int startRow = 4;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 3).GetString() == "")
+                    {
+                        ws.Cell(r, 25).SetValue("Số đơn yêu cầu không được để trống");
+                        hasErrors = true;
+                        continue;
+                    }
+                    var a = int.Parse(ws.Cell(r, 3).GetString());
+                    switch (role)
+                    {
+                        case "UserShip":
+                            var tenHaiQuan = ws.Cell(r, 22).GetString();
+                            if (string.IsNullOrWhiteSpace(tenHaiQuan))
+                            {
+                                ws.Cell(r, 25).SetValue("Tên hải quan không được để trống");
+                                hasErrors = true;
+                                continue;
+                            }
+                            item.Add(new BaoGia_Confirm_Name_Quotation
+                            {
+                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                VCHR_TenHaiQuan = tenHaiQuan,
+                                VCHR_UserShip = GetCurrentUserId(),
+                                DTM_UserShip = DateTime.Now
+                            });
+                            break;
+                        case "UserAcc":
+                            var mahang = ws.Cell(r, 9).GetString();
+                            if (string.IsNullOrWhiteSpace(mahang))
+                            {
+                                ws.Cell(r, 25).SetValue("Tên hải quan không được để trống");
+                                hasErrors = true;
+                                continue;
+                            }
+                            item.Add(new BaoGia_Confirm_Name_Quotation
+                            {
+                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                VCHR_MaHangNoiBo = mahang,
+                                VCHR_UserAcc = GetCurrentUserId(),
+                                DTM_UserAcc = DateTime.Now
+                            });
+                            break;
+                        case "UserPUR":
+                            var tenHaiQuanPUR = ws.Cell(r, 22).GetString();
+                            var mahangPUR = ws.Cell(r, 9).GetString();
+                            if (string.IsNullOrWhiteSpace(tenHaiQuanPUR) || string.IsNullOrWhiteSpace(mahangPUR))
+                            {
+                                ws.Cell(r, 25).SetValue("Tên hải quan và mã hàng nội bộ không được để trống");
+                                hasErrors = true;
+                                continue;
+                            }
+                            item.Add(new BaoGia_Confirm_Name_Quotation
+                            {
+                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                VCHR_TenHaiQuan = tenHaiQuanPUR,
+                                VCHR_MaHangNoiBo = mahangPUR,
+                                VCHR_UserPUR = GetCurrentUserId(),
+                                DTM_UserPUR = DateTime.Now
+                            });
+                            break;
+                        default:
+                            ws.Cell(r, 25).SetValue("Bạn không có quyền update file");
+                            break;
+                    }
+
+                }
+                if (hasErrors)
+                {
+                    // Trả về file Excel với lỗi
+                    using var outStream = new MemoryStream();
+                    workbook.SaveAs(outStream);
+                    var bytes = outStream.ToArray();
+                    var fileName = $"ImportErrors_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                    const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    return File(bytes, contentType, fileName);
+                }
+                if(item.Any() || item == null)
+                {
+                    return BadRequest("Không có dữ liệu hợp lệ để lưu");
+                }
+                await _confirmNameService.SaveFromFileAsync(item, GetCurrentUserId(), role);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+
+            return Ok(item);
+        }
+        // Xuất file Excel table
+        [HttpPost]
+        public async Task<IActionResult> ExportToExcel([FromBody] System.Text.Json.JsonElement data)
+        {
+            try
+            {
+                if (data.ValueKind != System.Text.Json.JsonValueKind.Array)
+                {
+                    return BadRequest("Không có dữ liệu để xuất");
+                }
+
+                var items = data.EnumerateArray().ToArray();
+                if (items.Length == 0) return BadRequest("Không có dữ liệu để xuất");
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemplateCofirmName.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemplateCofirmName.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+
+                // helper to read properties from JsonElement safely
+                static string GetString(System.Text.Json.JsonElement el, string prop)
+                {
+                    if (el.ValueKind != System.Text.Json.JsonValueKind.Object) return string.Empty;
+                    if (el.TryGetProperty(prop, out var p))
+                    {
+                        if (p.ValueKind == System.Text.Json.JsonValueKind.String) return p.GetString() ?? string.Empty;
+                        // For numbers or other types, use ToString
+                        return p.ToString();
+                    }
+                    return string.Empty;
+                }
+                static int GetInt(System.Text.Json.JsonElement el, string prop)
+                {
+                    if (el.ValueKind != System.Text.Json.JsonValueKind.Object) return 0;
+                    if (el.TryGetProperty(prop, out var p))
+                    {
+                        if (p.ValueKind == System.Text.Json.JsonValueKind.Number && p.TryGetInt32(out var v)) return v;
+                        if (p.ValueKind == System.Text.Json.JsonValueKind.String && int.TryParse(p.GetString(), out var v2)) return v2;
+                    }
+                    return 0;
+                }
+
+                int row = 4;
+                int idx = 1;
+                foreach (var rq in items)
+                {
+                    // Map fields into template columns similar to ExportSelection
+                    ws.Cell(row, 2).SetValue(GetString(rq, "CHR_Status"));
+                    ws.Cell(row, 3).SetValue(GetString(rq, "ID") == string.Empty ? GetString(rq, "ID_RequestQuote") : GetString(rq, "ID"));
+                    ws.Cell(row, 4).SetValue(idx);
+                    ws.Cell(row, 5).SetValue(GetString(rq, "CHR_SectionCode"));
+                    ws.Cell(row, 6).SetValue(GetString(rq, "CHR_SectionName"));
+                    ws.Cell(row, 7).SetValue(GetString(rq, "CHR_Phanloai"));
+                    ws.Cell(row, 8).SetValue(GetString(rq, "CHR_MaThietBi"));
+                    ws.Cell(row, 9).SetValue(GetString(rq, "VCHR_MaHangNoiBo"));
+                    ws.Cell(row, 10).SetValue(GetString(rq, "CHR_MaHangNCC"));
+                    ws.Cell(row, 11).SetValue(GetString(rq, "VCHR_TenRecomment"));
+                    ws.Cell(row, 12).SetValue(GetString(rq, "CHR_NameEN"));
+                    ws.Cell(row, 13).SetValue(GetInt(rq, "INT_SoLuong"));
+                    ws.Cell(row, 14).SetValue(GetString(rq, "NVCHR_DonVi"));
+                    ws.Cell(row, 15).SetValue(GetString(rq, "NVCHR_ChungLoai"));
+                    ws.Cell(row, 16).SetValue(GetString(rq, "NVCHR_HinhDang"));
+                    ws.Cell(row, 17).SetValue(GetString(rq, "NVCHR_ChatLieu"));
+                    ws.Cell(row, 18).SetValue(GetString(rq, "NVCHR_ThanhPhan"));
+                    ws.Cell(row, 19).SetValue(GetString(rq, "NVCHR_KichThuoc"));
+                    ws.Cell(row, 20).SetValue(GetString(rq, "NVCHR_DongMay"));
+                    ws.Cell(row, 21).SetValue(GetString(rq, "NVCHR_TinhNang"));
+                    ws.Cell(row, 22).SetValue(GetString(rq, "VCHR_TenHaiQuan"));
+                    ws.Cell(row, 23).SetValue(GetString(rq, "VCHR_UserShip"));
+                    ws.Cell(row, 24).SetValue(GetString(rq, "VCHR_UserAcc"));
+                    row++;
+                    idx++;
+                }
+
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"TableConfirmName_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xuất file: {ex.Message}");
+            }
+        }
+    }
 }

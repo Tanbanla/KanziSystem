@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -24,7 +25,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             // Xây dựng base query
             var sqlBuilder = new StringBuilder(@"
-                SELECT c.* ,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.INT_SoLuong,
+                SELECT c.* ,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.CHR_MaHangNCC,r.INT_SoLuong,
 				r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
@@ -182,6 +183,49 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
         {
             await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // luu thong tin nhap file
+        public async Task<bool> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role)
+        {
+            var role = string.IsNullOrWhiteSpace(Role) ? "UserPUR" : Role.Trim();
+            if (confirmNames == null) return false;
+
+            var now = DateTime.Now;
+            foreach (var i in confirmNames)
+            {
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == i.ID);
+                if (row == null) continue;
+                // Role enforcement
+                if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
+                {
+                    row.VCHR_TenHaiQuan = i.VCHR_TenHaiQuan;
+                    row.VCHR_UserShip = user;
+                    row.DTM_UserShip = now;
+                }
+                else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
+                {
+                    row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
+                    row.VCHR_UserAcc = user;
+                    row.DTM_UserAcc = now;
+                }
+                //else // UserPUR
+                //{
+                //    row.NVCHR_LyDo = i.NVCHR_LyDo;
+                //    row.NVCHR_Note = i.NVCHR_Note;
+                //    row.VCHR_UserPUR = user;
+                //    row.DTM_UserPUR = now;
+                //}
+
+                if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+                {
+                    row.CHR_Status = "Confirming"; // đang xác nhận
+                }
+                row.DTM_UpdateDate = now;
+                row.VCHR_UpdateBy = user;
+            }
             await _context.SaveChangesAsync();
             return true;
         }

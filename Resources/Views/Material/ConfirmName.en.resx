@@ -390,4 +390,7 @@
   <data name="Confirm" xml:space="preserve">
     <value>Confirm</value>
   </data>
+  <data name="ImportExcel" xml:space="preserve">
+    <value>Import Excel</value>
+  </data>
 </root>

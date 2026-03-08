@@ -11,6 +11,13 @@
 </head>
 
 <div class="container-fluid" id="confirm-name" data-role="@role">
+    <!-- Global loading overlay -->
+    <div id="globalLoading" aria-hidden="true">
+        <div class="loader-box">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="loader-msg">Đang xử lý...</div>
+        </div>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h4 class="mb-0 fw-bold text-primary">@Localizer["HeaderTitle"]</h4>
@@ -19,9 +26,14 @@
             <button type="button" class="btn btn-outline-success" id="btnImportExcel">
                 <i class="fas fa-upload me-1"></i> @Localizer["ImportExcel"]
             </button>
+            <input type="file" id="itemsExcelFileInput" accept=".xlsx,.xls" style="display:none" />
             <div style="margin-left: 6px;"></div>
             <button type="button" class="btn btn-outline-primary" id="btnExportTemplate">
                 <i class="fas fa-download me-1"></i> @Localizer["ExportTemplate"]
+            </button>
+            <div style="margin-left: 6px;"></div>
+            <button type="button" class="btn btn-outline-warning" id="btnExportTable">
+                <i class="fas fa-download me-1"></i> @Localizer["ExportTable"]
             </button>
         </div>
     </div>
@@ -83,7 +95,7 @@
             <div class="small text-muted">@Localizer["Role"]: <b>@role</b></div>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 80vh;">
+            <div class="table-responsive" style="max-height: 70vh;">
                 <table class="table table-sm table-hover table-bordered align-middle mb-0" id="confirmTable">
                     <tbody id="confirmTableBody">
                         <tr><td colspan="1" class="text-center text-muted">@Localizer["NoData"]</td></tr>
