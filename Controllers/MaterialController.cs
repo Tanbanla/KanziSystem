@@ -47,7 +47,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             // Determine role from query or default to UserPUR
             var role = (Request.Query["role"].ToString() ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(role)) role = "UserShip"; // UserShip | UserAcc | UserPUR
+            if (string.IsNullOrWhiteSpace(role)) role = "UserPUR"; // UserShip | UserAcc | UserPUR
             ViewBag.Role = role;
             var vitris = await LoadNhomViTriDataAsync();
             var vm = new MaterialVM
@@ -86,7 +86,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result.Success);
         }
-
+        // Save in select row
+        [HttpPost]
+        public async Task<IActionResult> SaveSelectedConfirmName([FromBody] List<ConfirmNameDTO> reqs)
+        {
+            var role = (Request.Query["role"].ToString() ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(role)) role = "UserShip"; // UserShip | UserAcc | UserPUR
+            var result = await _confirmNameService.SaveConfirmNameListAsync(reqs, GetCurrentUserId(), role);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Success);
+        }
         // Approve (agree) and update base request
         [HttpPost]
         public async Task<IActionResult> ApproveConfirmName([FromBody] ConfirmNameActionRequest req)

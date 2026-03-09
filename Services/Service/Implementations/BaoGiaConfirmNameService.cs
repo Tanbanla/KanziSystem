@@ -132,6 +132,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // luu thong tin 
+        public async Task<GenericResponse<bool>> SaveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.SaveConfirmNameListAsync(saveConfirms, user, Role);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
 
+            }
+            return result;
+        }
     }
 }

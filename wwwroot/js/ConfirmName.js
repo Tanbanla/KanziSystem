@@ -88,21 +88,21 @@
         thead.style.backgroundColor = 'white';
         thead.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
         const headerRow = document.createElement('tr');
-        const selectAllCheckbox = document.createElement('input');
-        selectAllCheckbox.type = 'checkbox';
-        selectAllCheckbox.className = 'js-select-all';
-        const selectTh = document.createElement('th');
-        selectTh.style.minWidth = '50px';
-        selectTh.style.textAlign = 'center';
-        selectTh.style.backgroundColor = '#2335B7';
-        selectTh.style.color = '#FFFF';
-        selectTh.style.position = 'sticky';
-        selectTh.style.left = '0';
-        selectTh.style.zIndex = '21';
-        selectTh.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
-        selectTh.appendChild(selectAllCheckbox);
-        headerRow.appendChild(selectTh);
-        headerRow.innerHTML += `<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; left: 50px; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">${T.Datafield}</th>` +
+        //const selectAllCheckbox = document.createElement('input');
+        //selectAllCheckbox.type = 'checkbox';
+        //selectAllCheckbox.className = 'js-select-all';
+        //const selectTh = document.createElement('th');
+        //selectTh.style.minWidth = '50px';
+        //selectTh.style.textAlign = 'center';
+        //selectTh.style.backgroundColor = '#2335B7';
+        //selectTh.style.color = '#FFFF';
+        //selectTh.style.position = 'sticky';
+        //selectTh.style.left = '0';
+        //selectTh.style.zIndex = '21';
+        //selectTh.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
+        // selectTh.appendChild(selectAllCheckbox);
+        //headerRow.appendChild(selectTh);
+        headerRow.innerHTML += `<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">${T.Datafield}</th>` +
             data.map((r, i) => `<th style="min-width: 200px; text-align: center; background-color: #e0e0e0;">${T.Record} ${(state.pageIndex - 1) * state.pageSize + i + 1}</th>`).join('');
         thead.appendChild(headerRow);
         els.tbody.parentNode.insertBefore(thead, els.tbody);
@@ -186,10 +186,10 @@
         });
 
         // Gán sự kiện cho select all
-        selectAllCheckbox.addEventListener('change', () => {
-            const checkboxes = els.tbody.querySelectorAll('.js-select-row');
-            checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
-        });
+        //selectAllCheckbox.addEventListener('change', () => {
+        //    const checkboxes = els.tbody.querySelectorAll('.js-select-row');
+        //    checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        //});
 
         // Bỏ event listener cho input change và nút actions, vì bây giờ lưu hàng loạt
     }
@@ -228,9 +228,12 @@
     async function saveInline(id, payload) {
         const body = Object.assign({ id, role }, payload);
         const res = await fetch('/Material/SaveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        if (!res.ok) { const T = window.i18nConfirmName || {}; alert(T.MsgSaveFailed || 'Lưu thất bại'); }
+        if (!res.ok) { const T = window.i18nConfirmName || {}; showDialog({ title: T.Error || 'Lỗi', message: err.message || 'Không thể Save', type: 'error' }); }
     }
-
+    async function saveSeclections(listSelect) {
+        const res = await fetch('/Material/SaveSelectedConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(listSelect) });
+        if (!res.ok) { const T = window.i18nConfirmName || {}; showDialog({ title: T.Error || 'Lỗi', message: res.message || 'Không thể Save', type: 'error' }); }
+    }
     async function approve(id, skipConfirm = false) {
         const T = window.i18nConfirmName || {};
         if (!skipConfirm) {
@@ -238,7 +241,7 @@
             if (!ok) return;
         }
         const res = await fetch('/Material/ApproveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-        if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
+        if (res.ok) { search(); } else { showDialog({ title: T.Error || 'Lỗi', message: T.MsgGenericError || 'Thao tác thất bại', type: 'error' }); }
     }
 
     async function reject(id, lyDo) {
@@ -248,7 +251,7 @@
             if (lyDo === null) return;
         }
         const res = await fetch('/Material/RejectConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, lyDo }) });
-        if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
+        if (res.ok) { search(); } else { showDialog({ title: T.Error || 'Lỗi', message: T.MsgGenericError || 'Thao tác thất bại', type: 'error' }); }
     }
 
     els.btnSearch.addEventListener('click', () => { state.pageIndex = 1; search(); });
@@ -368,27 +371,29 @@
             const selectedRows = Array.from(els.tbody.querySelectorAll('.js-select-row:checked'));
             if (selectedRows.length === 0) {
                 const T = window.i18nConfirmName || {};
-                alert(T.NoSelection || 'Vui lòng chọn ít nhất một hàng');
+                showDialog({ title: T.Warning || 'Cảnh báo', message: T.NoSelection || 'Vui lòng chọn ít nhất một hàng', type: 'info' });
                 return;
             }
             const T = window.i18nConfirmName || {};
             showLoading(T.Processing || 'Đang xử lý...');
             try {
+                const dataToSave = [];
                 for (const cb of selectedRows) {
                     const id = parseInt(cb.getAttribute('data-id'));
-                    const tenHQInput = els.tbody.querySelector(`.js-tenhq[data-id="${id}"]`);
-                    const maNBInput = els.tbody.querySelector(`.js-manb[data-id="${id}"]`);
-                    const dataToSave = {};
-                    if (tenHQInput) dataToSave.tenHaiQuan = tenHQInput.value;
-                    if (maNBInput) dataToSave.maHangNoiBo = maNBInput.value;
-                    if (Object.keys(dataToSave).length > 0) {
-                        await saveInline(id, dataToSave);
-                    }
+                    const TenHaiQuan = els.tbody.querySelector(`.js-tenhq[data-id="${id}"]`);
+                    const MaHangNoiBo = els.tbody.querySelector(`.js-manb[data-id="${id}"]`);
+                    var item = { id };
+                    if (TenHaiQuan) item.tenHaiQuan = TenHaiQuan.value;
+                    if (MaHangNoiBo) item.maHangNoiBo = MaHangNoiBo.value;
+                    dataToSave.push(item);
+                }
+                if (Object.keys(dataToSave).length > 0) {
+                    await saveSeclections(dataToSave);
                 }
                 search(); // Refresh data
             } catch (err) {
                 console.error('Bulk save failed', err);
-                alert(T.MsgSaveFailed || 'Lưu thất bại');
+                showDialog({ title: T.Error || 'Lỗi', message: T.MsgSaveFailed || 'Lưu thất bại', type: 'error' });
             } finally {
                 hideLoading();
             }
@@ -403,7 +408,7 @@
             const selectedRows = Array.from(els.tbody.querySelectorAll('.js-select-row:checked'));
             if (selectedRows.length === 0) {
                 const T = window.i18nConfirmName || {};
-                alert(T.NoSelection || 'Vui lòng chọn ít nhất một hàng');
+                showDialog({ title: T.Warning || 'Cảnh báo', message: T.NoSelection || 'Vui lòng chọn ít nhất một hàng', type: 'info' });
                 return;
             }
             const T = window.i18nConfirmName || {};
@@ -424,7 +429,7 @@
                 search(); // Refresh data
             } catch (err) {
                 console.error('Bulk approve failed', err);
-                alert(T.MsgGenericError || 'Thao tác thất bại');
+                showDialog({ title: T.Error || 'Lỗi', message: T.MsgGenericError || 'Thao tác thất bại', type: 'error' });
             } finally {
                 hideLoading();
             }

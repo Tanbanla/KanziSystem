@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Controllers;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
+using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Text;
 
@@ -217,6 +218,51 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
                     row.NVCHR_LyDo = i.NVCHR_LyDo;
                     row.NVCHR_Note = i.NVCHR_Note;
+                    row.VCHR_UserPUR = user;
+                    row.DTM_UserPUR = now;
+                }
+
+                if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+                {
+                    row.CHR_Status = "Confirming"; // đang xác nhận
+                }
+                row.DTM_UpdateDate = now;
+                row.VCHR_UpdateBy = user;
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> SaveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        {
+
+            var role = string.IsNullOrWhiteSpace(Role) ? "UserPUR" : Role.Trim();
+            if (saveConfirms == null || !saveConfirms.Any()) return false;
+
+            foreach (var item in saveConfirms)
+            {
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
+                if (row == null) return false;
+
+                var now = DateTime.Now;
+
+                // Role enforcement
+                if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
+                {
+                    row.VCHR_TenHaiQuan = item.TenHaiQuan ?? row.VCHR_TenHaiQuan;
+                    row.VCHR_UserShip = user;
+                    row.DTM_UserShip = now;
+                }
+                else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
+                {
+                    row.VCHR_MaHangNoiBo = item.MaHangNoiBo ?? row.VCHR_MaHangNoiBo;
+                    row.VCHR_UserAcc = user;
+                    row.DTM_UserAcc = now;
+                }
+                else // UserPUR
+                {
+                    if (item.TenHaiQuan != null) row.VCHR_TenHaiQuan = item.TenHaiQuan;
+                    if (item.MaHangNoiBo != null) row.VCHR_MaHangNoiBo = item.MaHangNoiBo;
                     row.VCHR_UserPUR = user;
                     row.DTM_UserPUR = now;
                 }
