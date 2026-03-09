@@ -23,7 +23,49 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
         public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM,int? PageSize, int? PageIndex)
         {
-            var sql = new StringBuilder(@"SELECT d.*, 
+            var baseFrom = new StringBuilder();
+            baseFrom.Append(@"FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
+            LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+                ON d.ID_RequestQuote = r.ID
+            WHERE 1 = 1");
+
+            var whereBuilder = new StringBuilder();
+            var parameters = new DynamicParameters();
+
+            if(idRequest != 0 && idRequest != null)
+            {
+                whereBuilder.Append(" AND r.ID = @IdRequest");
+                parameters.Add("IdRequest", idRequest);
+            }
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                whereBuilder.Append(" AND r.CHR_MaDon = @Madon");
+                parameters.Add("Madon",maDon);
+            }
+            if (!string.IsNullOrEmpty(maVatTu))
+            {
+                whereBuilder.Append(" AND r.CHR_MaHangNoiBo = @MaVatTu");
+                parameters.Add("MaVatTu", maVatTu);
+            }
+            if (!string.IsNullOrEmpty(maNcc))
+            {
+                whereBuilder.Append(" AND CHR_CodeNCC = @MaNcc");
+                parameters.Add("MaNcc", maNcc);
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                whereBuilder.Append(" AND r.CHR_SectionCode = @Section");
+                parameters.Add("Section", section);
+            }
+            if (dayMM != null)
+            {
+                whereBuilder.Append(" AND CONVERT(DATE, r.DTM_NgayMuonNhan) = CONVERT(DATE, @Day)");
+                parameters.Add("Day", dayMM);
+            }
+
+            // Build select SQL
+            var selectSql = new StringBuilder();
+            selectSql.Append(@"SELECT d.*, 
                     r.CHR_MaHangNoiBo, 
                     r.CHR_MaDon,
                     CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
@@ -36,55 +78,33 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     CAST(CASE WHEN r.NVCHR_MSDS = d.VCHR_MSDS THEN 1 ELSE 0 END AS BIT) AS IsMatch_MSDS,
                     CAST(CASE WHEN r.NVCHR_AnToan = d.VCHR_AnToan THEN 1 ELSE 0 END AS BIT) AS IsMatch_AnToan,
                     CAST(CASE WHEN r.DTM_NgayMuonNhan = d.DTM_ShipTime THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay
-            FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
-            LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
-                ON d.ID_RequestQuote = r.ID 
-            WHERE 1 = 1");
-            var parameters = new DynamicParameters();
-            if(idRequest != 0 && idRequest != null)
-            {
-                sql.Append(" AND r.ID = @IdRequest");
-                parameters.Add("IdRequest", idRequest);
-            }
-            if (!string.IsNullOrEmpty(maDon))
-            {
-                sql.Append(" AND r.CHR_MaDon = @Madon");
-                parameters.Add("Madon",maDon);
-            }
-            if (!string.IsNullOrEmpty(maVatTu))
-            {
-                sql.Append(" AND r.CHR_MaHangNoiBo = @MaVatTu");
-                parameters.Add("MaVatTu", maVatTu);
-            }
-            if (!string.IsNullOrEmpty(maNcc))
-            {
-                sql.Append(" AND CHR_CodeNCC = @MaNcc");
-                parameters.Add("MaNcc", maNcc);
-            }
-            if (!string.IsNullOrEmpty(section))
-            {
-                sql.Append(" AND r.CHR_SectionCode = @Section");
-                parameters.Add("Section", section);
-            }
-            if (dayMM != null)
-            {
-                sql.Append(" AND CONVERT(DATE, r.DTM_NgayMuonNhan) = CONVERT(DATE, @Day)");
-                parameters.Add("Day", dayMM);
-            }
-            sql.Append(" ORDER BY d.ID DESC");
+            ");
+            selectSql.Append(baseFrom.ToString());
+            selectSql.Append(whereBuilder.ToString());
+            selectSql.Append(" ORDER BY d.ID DESC");
+
             if (PageSize > 0 && PageIndex > 0)
             {
-                sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                selectSql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
                 var offset = (PageIndex - 1) * PageSize;
                 parameters.Add("Offset", offset);
                 parameters.Add("PageSize", PageSize);
             }
-            var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
-            var totalCountSql = _context.BaoGia_Detail_of_Quotations.Count();
+
+            var result = await _conn.QueryAsync<dynamic>(selectSql.ToString(), parameters);
+
+            // Build count SQL using same FROM/WHERE so total respects filters
+            var countSql = new StringBuilder();
+            countSql.Append("SELECT COUNT(1) ");
+            countSql.Append(baseFrom.ToString());
+            countSql.Append(whereBuilder.ToString());
+
+            var totalCount = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);
+
             return new ListRequest<dynamic>
             {
                 Data = result.ToList(),
-                TotalCount = totalCountSql,
+                TotalCount = totalCount,
             };
         }
         public async Task<bool> InsertListBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> listDto)

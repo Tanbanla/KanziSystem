@@ -1,6 +1,6 @@
 ﻿@using PRJ_WAREHOUSE_BIVN.Language
 @{
-    ViewData["Title"] = "Phê duyệt đơn";
+    ViewData["Title"] = Languages.Pheduyetdon;
 }
 <style>
     .form-control, .input-group-text, .custom-select, .custom-file-label {
@@ -10,6 +10,55 @@
         border-radius: 3px;
         height: 41px;
     }
+
+    .swiper {
+        padding-bottom: 60px; /* Tạo khoảng trống phía dưới để đặt nút */
+    }
+
+    /* 2. Tạo vùng chứa các nút điều hướng ở dưới */
+    .custom-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 80px; /* Khoảng cách giữa nút Prev và Next */
+        margin-top: 20px;
+        position: relative;
+        height: 50px;
+    }
+
+    /* 3. Định dạng lại nút Next và Prev */
+    .swiper-button-next,
+    .swiper-button-prev {
+        position: static !important; /* Bỏ chế độ tuyệt đối (absolute) */
+        width: 40px !important;
+        height: 40px !important;
+        margin: 0 !important;
+        background-color: #f8f9fa; /* Màu nền nút */
+        color: #28a745 !important; /* Màu mũi tên xanh lá */
+        float:right;
+    }
+
+        /* Chỉnh kích thước mũi tên nhỏ lại cho cân đối */
+        .swiper-button-next:after,
+        .swiper-button-prev:after {
+            font-size: 15px !important;
+            font-weight: bold;
+        }
+
+    /* 4. Đưa dấu chấm phân trang vào giữa 2 nút */
+    .swiper-pagination {
+        position: static !important;
+        width: auto !important;
+        padding: 0 10px;
+    }
+
+    /* Hiệu ứng khi di chuột qua nút */
+    .swiper-button-next:hover,
+    .swiper-button-prev:hover {
+        background-color: #28a745;
+        color: white !important;
+    }
+
 </style>
 <div class="row">
     <div class="col-12">
@@ -19,21 +68,31 @@
                     <div class="input-group mb-2">
                         <button class="btn btn-outline-success" style="border-radius : 0px;"><i class="fa fa-check"></i> @Languages.Dongy</button>
                         <button class="btn btn-outline-danger ml-1" style="border-radius : 0px;">× @Languages.Tuchoi</button>
-                        <button class="btn btn-outline-info ml-1" style="border-radius : 0px;"><i class="fa fa-eye-dropper"></i> @Languages.Xem</button>
+                        <button class="btn btn-outline-info ml-1" style="border-radius : 0px;" id="modal-15" onclick="_list_view()"><i class="fa fa-eye-dropper"></i> @Languages.Xem</button>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 50px">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon">
-                        <datalist id="tt">
-                            <option>Gấp</option>
-                            <option>Thông thường</option>
-                        </datalist>
+                       @*  <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon"> *@
+                        <select class="form-control" id="trangthaidon">
+                            <option value=""> -- @Languages.Tinhtrangdon --</option>
+                            <option value="1">Gấp</option>
+                            <option value="0">Thông thường</option>
+                        </select>
                     </div>
                 </div>             
                 <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="tinhtrangdon" placeholder="@Languages.Trangthaidon">
+                        <select class="form-control" id="tinhtrangdon">
+                            <option value=""> ---  @Languages.Trangthaidon ---</option>
+                            <option value="0">Đợi người dự thảo</option>
+                            <option value="1">Đợi người thẩm tra</option>
+                            <option value="2">Đợi người phê duyệt</option>
+                            <option value="3">Đợi quản lý phòng tiếp nhận</option>
+                            <option value="4">Đợi người xuất kho</option>
+                            <option value="5">Hoàn thành</option>
+                            <option value="6">Bị từ chối</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
@@ -46,13 +105,15 @@
                       @*   <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- @Languages.Giatien ---" /> *@
                         <select class="form-control" id="giadonhang">
                             <option value="">---  @Languages.Giatien  ---</option>
-                            <option value="Dưới 3000">Dưới 3000</option>
-                            <option value="Dưới 10,000">Dưới 10,000</option>
-                            <option value="Trên 10,000">Trên 10,000</option>
+                            <option value="2999">Dưới 3000</option>
+                            <option value="3000">Dưới 10,000</option>
+                            <option value="10000">Trên 10,000</option>
                         </select>
                     </div>
                 </div>
-                <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                <button type="button" class="btn btn-success ml-3" onclick="_load_confirm()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                <button type="button" class="btn btn-info ml-3" onclick="_reset()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button>
+
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
             </div>                    
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
@@ -60,7 +121,7 @@
                     <table class="table table-bordered">
                         <thead class="bg-primary">                       
                             <tr>
-                                <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" class="idd" /></th>
+                                <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" id="idd" /></th>
                                 <th rowspan="2">@Languages.chitiet</th>                                         
                                 <th rowspan="2">@Languages.Tinhtrangdon</th>
                                 <th rowspan="2">@Languages.Trangthaidon</th>
@@ -89,6 +150,7 @@
         </div>
     </div>
 </div>
+
 <button id="modal-7" hidden></button>
 @await Html.PartialAsync("_modal", "Approval")
 <script src="~/scripts/request.js"></script>
@@ -97,5 +159,166 @@
     {
         var us = document.getElementById("us").innerHTML;
         _load_confirm(us);
+    }
+    let lst = [];
+    const checkAll = document.getElementById('idd');
+    document.addEventListener('change', function(e) {
+        lst = [];
+        if (e.target && e.target.id === 'idd') {
+            const checkboxes = document.querySelectorAll('.item');
+            checkboxes.forEach(cb => {
+                cb.checked = e.target.checked;
+                lst.push(cb.value);
+            });
+        }
+        if (e.target && e.target.classList.contains('item')) {
+            const allItems = document.querySelectorAll('.item');
+            const checkedItems = document.querySelectorAll('.item:checked');
+
+            // Nếu số lượng checkbox đang chọn bằng tổng số checkbox -> Check nút đầu bảng
+            checkAll.checked = (allItems.length === checkedItems.length);
+
+            // Trạng thái lửng lơ (Gạch ngang) nếu chỉ chọn một vài ô
+            checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
+        }
+    });
+    function _list_view(){
+        document.getElementById('slider').innerHTML = "";
+        for(let i = 0; i < lst.length; i++){
+            var mayeucau = lst[i].split('_')[0];
+            var buoc = lst[i].split('_')[1];
+           
+            // tạo giao diện 
+
+            document.getElementById('slider').innerHTML += `
+            <div class="swiper-slide p-3">
+                <table class="table table-bordered" style="text-align:center">
+                    <tr hidden>
+                        <td>Id_request : <i id="id_request${i}"></i></td>
+                        <td>Bước : <i id="step${i}"></i></td>
+                        <td>Regency : <i id="regency${i}"></i></td>
+                        <td>Urgent : <i id="urgent${i}"></i></td>
+                    </tr>
+                    <tr>
+                        <th rowspan="2" colspan="4" style="font-size:18px;background-color:#fff9e1">
+                            Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
+                            物品依頼書（共通間材・比例間材用・消耗品）　
+                        </th>
+                        <th colspan="2" id="madonhang${i}" style="background-color:#fff9e1; font-size:18px"></th>
+                    </tr>
+                    <tr>
+                        <th>
+                            Phòng tiếp nhận　受け部門：
+                        </th>
+                        <td style="background-color:#fff9e1" id="khoi${i}"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            ※Mã bộ phận yêu cầu<br />
+                            依頼部門 コード
+                        </td>
+                        <td>
+                            ※ Mã phòng ban yêu cầu<br />
+                            依頼部門コストセンター
+                        </td>
+                        <td>
+                            ※ Tên phòng ban<br />
+                            依頼部門名
+                        </td>
+                        <td>
+                            ※Chuyền<br />
+                            ライン
+                        </td>
+                        <td>
+                            ※Ngày yêu cầu<br />
+                            依頼日
+                        </td>
+                        <td>
+                            ※Thời hạn mong muốn<br />
+                            希望期限
+                        </td>
+                    </tr>
+                    <tr style="height:120px; background-color : #fff9e1">
+                        <td id="mbp${i}"></td>
+                        <td id="mpb_yc${i}"></td>
+                        <td id="tenphongban${i}"></td>
+                        <td id="chuyen${i}"></td>
+                        <td id="nyc${i}"></td>
+                        <td id="thmm${i}"></td>
+                    </tr>
+                </table>
+                <table class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
+                            <td rowspan="2">No</td>
+                            <td rowspan="2">※ Mã đơn <br />システムコード</td>
+                            <td rowspan="2">※ Tên hàng <br />品名</td>
+                            <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
+                            <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
+                            <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
+                            <td colspan="2">Yêu cầu <br />依頼</td>
+                            <td colspan="2">Già thành<br />単価</td>
+                            <td rowspan="2">Tổng chi phí <br />金額合計</td>
+                            <td rowspan="2">※ Mục đích <br />目的</td>
+                            <td rowspan="2">※ Ghi chú <br />備考</td>
+                        </tr>
+                        <tr>
+                            <td>※ Số lượng <br />数量</td>
+                            <td>Đơn vị<br />単位</td>
+                            <td>Đơn giá<br />単価</td>
+                            <td>Đơn vị tiền tệ <br />通貨単位</td>
+                        </tr>
+                    </thead>
+                    <tbody id="load_detail${i}"></tbody>
+                </table>
+                <div class="float-right" id="cls_${i}">
+                    <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_all('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
+                    <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
+                </div>
+            </div>`
+            $.ajax({
+            url: '/Request/_get_request',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                cost_request: mayeucau
+            },
+            success: function (response) {       
+                document.getElementById("load_detail" + i).innerHTML = "";
+                document.getElementById("madonhang" + i).innerHTML = "*" + response[0].code_Request + "*";
+                document.getElementById("mbp" + i).innerHTML = response[0].cost_Center_Group;
+                document.getElementById("mpb_yc" + i).innerHTML = response[0].cost_Center;
+                document.getElementById("tenphongban" + i).innerHTML = response[0].name_Dept;
+                document.getElementById("nyc" + i).innerHTML = response[0].creat_Date.split(' ')[0];
+                document.getElementById("thmm" + i).innerHTML = response[0].dealine.split(' ')[0];
+                document.getElementById("khoi" + i).innerHTML = response[0].group_Code.split(' ')[0];
+                document.getElementById("id_request" + i).innerHTML = response[0].id_Request;
+                document.getElementById("urgent" + i).innerHTML = response[0].urgent;
+                document.getElementById("step" + i
+                
+                ).innerHTML = buoc;
+                if (buoc == "0") {
+                    document.getElementById("regency" + i).innerHTML = "NGUOIYEUCAU";
+                }
+                if (buoc == "1") {
+                    document.getElementById("regency" + i).innerHTML = "NGUOITHAMTRA";
+                }
+                if (buoc == "2") {
+                    document.getElementById("regency"+ i).innerHTML = "NGUOIPHEDUYET";
+                }
+                if (buoc == "3") {
+                    document.getElementById("regency"+ i).innerHTML = "XACNHAN";
+                }
+                if (buoc == "4") {
+                    document.getElementById("regency"+ i).innerHTML = "XUATKHO";
+                }
+                for (var a = 0; a < response.length; a++) {
+                    var tongtien = response[a].total_exchange;
+                    document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount}</td><td>${response[a].unit}</td><td>${response[a].price}</td><td>${response[a].currency}</td><td>${tongtien}</td><td>${response[a].aim}</td><td></td>`;
+                }
+            }
+            })
+      
+        }
     }
 </script>

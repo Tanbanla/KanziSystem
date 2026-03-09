@@ -223,7 +223,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
         public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
         {
-            var sql = new StringBuilder(@"
+            var cteBuilder = new StringBuilder();
+            cteBuilder.Append(@"
             WITH BangTongHop AS (
                 SELECT 
                     r.CHR_MaDon, 
@@ -236,24 +237,28 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] r
                 WHERE 1 = 1 
                     AND r.ID_StepBaoGia > 5 ");
+
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(maDon))
             {
-                sql.Append(" AND r.CHR_MaDon = @MaDon");
+                cteBuilder.Append(" AND r.CHR_MaDon = @MaDon");
                 parameters.Add("MaDon", maDon);
             }
             if (!string.IsNullOrEmpty(maHang))
             {
-                sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+                cteBuilder.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
                 parameters.Add("MaHang", maHang);
             }
             if (!string.IsNullOrEmpty(section))
             {
-                sql.Append(" AND r.CHR_SectionCode = @Section");
+                cteBuilder.Append(" AND r.CHR_SectionCode = @Section");
                 parameters.Add("Section", section);
             }
 
+            // Build main select using the CTE
+            var sql = new StringBuilder();
+            sql.Append(cteBuilder.ToString());
             sql.Append(@"
             )
             SELECT DISTINCT 
@@ -302,10 +307,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(" ORDER BY TrangThai,t1.DTM_CreateDate DESC");
             }
+
             var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
-            var totalCountSql = "SELECT COUNT(DISTINCT CONCAT(CHR_MaDon, '|', CONVERT(DATE, DTM_CreateDate), '|', " +
-                "CHR_SectionName, '|', CHR_CreateBy)) FROM BaoGia_Request_of_Quotation";
-            var total = await _conn.ExecuteScalarAsync<int>(totalCountSql);
+
+            // Build count sql using same CTE and filters so total respects search
+            var countSql = new StringBuilder();
+            countSql.Append(cteBuilder.ToString());
+            countSql.Append(@"
+            )
+            SELECT COUNT(DISTINCT CONCAT(CHR_MaDon, '|', CONVERT(DATE, DTM_CreateDate), '|', CHR_SectionName, '|', CHR_CreateBy)) FROM BangTongHop");
+
+            var total = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);
+
             return new ListRequest<dynamic>
             {
                 Data = result.ToList(),

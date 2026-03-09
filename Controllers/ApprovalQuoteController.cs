@@ -17,10 +17,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaHistoryService _baoGiaHistoryService;
         private readonly IBaoGiaStatusService _baoGiaStatusService;
         private readonly IBaoGiaStepService _baoGiaStepService;
+        private readonly ISendMailService _sendMailService;
         public ApprovalQuoteController(ILogger<ApprovalQuoteController> logger,
             IHistoryApproverServive historyApproverServive, INhomViTriService nhomViTriService, IMaterialService materialService,
             IBaoGiaService baoGiaService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStatusService baoGiaStatusService
-            , IBaoGiaStepService baoGiaStepService)
+            , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService)
         {
             _logger = logger;
             _historyApproverServive = historyApproverServive;
@@ -30,6 +31,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaHistoryService = baoGiaHistoryService;
             _baoGiaStatusService = baoGiaStatusService;
             _baoGiaStepService = baoGiaStepService;
+            _sendMailService = sendMailService;
         }
         public async Task<IActionResult> Index()
         {
@@ -275,6 +277,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                        await _baoGiaHistoryService.InsertHistoryListAsync(histories);
                     }
+                    // Gui mail thông báo trả về người tạo báo giá
+
                     return Json(new { success = true, message = result.Message });
                 }
                 else

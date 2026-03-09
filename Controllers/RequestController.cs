@@ -53,9 +53,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }             
         }
         [HttpPost]
-        public JsonResult _get_confirm( string us)
+        public JsonResult _get_confirm( string us, string Urgent, double Total, string Code_Request, string INT_STEP)
         {
-            var cf = REQUEST_PROCESS.get_requestconfirm(us);
+            var cf = REQUEST_PROCESS.get_requestconfirm(us, Urgent, Total, Code_Request, INT_STEP);
             return Json(cf);
         }
         public JsonResult _get_request(string cost_request)

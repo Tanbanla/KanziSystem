@@ -390,7 +390,64 @@
   <data name="Confirm" xml:space="preserve">
     <value>確認</value>
   </data>
+  <data name="LoadingMessage" xml:space="preserve">
+    <value>処理中...</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="ImportSuccess" xml:space="preserve">
+    <value>ファイルからのインポートに成功しました</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>ファイルのエクスポートに失敗しました</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>エクスポート中...</value>
+  </data>
+  <data name="BtnSave" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="RequestQuoteNumber" xml:space="preserve">
+    <value>見積依頼番号</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>部門</value>
+  </data>
+  <data name="EquipmentClassification" xml:space="preserve">
+    <value>設備分類</value>
+  </data>
+  <data name="VietnameseItemNameDraft" xml:space="preserve">
+    <value>税関手続き用ベトナム語品名（下書き）（*）</value>
+  </data>
+  <data name="EnglishItemName" xml:space="preserve">
+    <value>英語品名（*）</value>
+  </data>
+  <data name="ItemCategory" xml:space="preserve">
+    <value>品目カテゴリ</value>
+  </data>
+  <data name="ConfirmName" xml:space="preserve">
+    <value>名前確認</value>
+  </data>
+  <data name="ConfirmCode" xml:space="preserve">
+    <value>コード確認</value>
+  </data>
   <data name="ImportExcel" xml:space="preserve">
     <value>Excelをインポート</value>
+  </data>
+  <data name="ExportTemplate" xml:space="preserve">
+    <value>テンプレート Excel</value>
+  </data>
+  <data name="ExportTable" xml:space="preserve">
+    <value>Export table data</value>
+  </data>
+  <data name="Record" xml:space="preserve">
+    <value>記録</value>
+  </data>
+  <data name="Datafield" xml:space="preserve">
+    <value>データフィールド</value>
   </data>
 </root>

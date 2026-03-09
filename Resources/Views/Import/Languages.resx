@@ -498,4 +498,7 @@
   <data name="Tainhap" xml:space="preserve">
     <value>Tái nhập</value>
   </data>
+  <data name="Pheduyetdon" xml:space="preserve">
+    <value>Phê duyệt đơn</value>
+  </data>
 </root>

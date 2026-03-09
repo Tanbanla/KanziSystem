@@ -390,7 +390,64 @@
   <data name="Confirm" xml:space="preserve">
     <value>Xác nhận</value>
   </data>
+  <data name="LoadingMessage" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Thành công</value>
+  </data>
+  <data name="ImportSuccess" xml:space="preserve">
+    <value>Nhập bằng file thành công</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Lỗi</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Xuất file thất bại</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Đang xuất...</value>
+  </data>
+  <data name="BtnSave" xml:space="preserve">
+    <value>Lưu</value>
+  </data>
+  <data name="RequestQuoteNumber" xml:space="preserve">
+    <value>Số đơn yêu cầu báo giá</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Phòng ban</value>
+  </data>
+  <data name="EquipmentClassification" xml:space="preserve">
+    <value>Phân loại thiết bị</value>
+  </data>
+  <data name="VietnameseItemNameDraft" xml:space="preserve">
+    <value>Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)</value>
+  </data>
+  <data name="EnglishItemName" xml:space="preserve">
+    <value>Tên hàng tiếng anh(*)</value>
+  </data>
+  <data name="ItemCategory" xml:space="preserve">
+    <value>Chủng loại hàng</value>
+  </data>
+  <data name="ConfirmName" xml:space="preserve">
+    <value>Xác nhận tên</value>
+  </data>
+  <data name="ConfirmCode" xml:space="preserve">
+    <value>Xác nhận mã</value>
+  </data>
   <data name="ImportExcel" xml:space="preserve">
-    <value>Nhập Excel</value>
+    <value>Nhập file Excel</value>
+  </data>
+  <data name="ExportTemplate" xml:space="preserve">
+    <value>Mẫu Excel</value>
+  </data>
+  <data name="ExportTable" xml:space="preserve">
+    <value>Xuất dữ liệu bảng</value>
+  </data>
+  <data name="Record" xml:space="preserve">
+    <value>Bản ghi</value>
+  </data>
+  <data name="Datafield" xml:space="preserve">
+    <value>Trường dữ liệu</value>
   </data>
 </root>

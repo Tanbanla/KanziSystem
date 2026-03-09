@@ -433,7 +433,7 @@
     <value>Group</value>
   </data>
   <data name="Tinhtrangdon" xml:space="preserve">
-    <value>Status</value>
+    <value>State</value>
   </data>
   <data name="nguoitao" xml:space="preserve">
     <value>Creator</value>
@@ -497,5 +497,8 @@
   </data>
   <data name="Tainhap" xml:space="preserve">
     <value>Re-import</value>
+  </data>
+  <data name="Pheduyetdon" xml:space="preserve">
+    <value>Request Approval</value>
   </data>
 </root>

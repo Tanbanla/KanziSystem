@@ -12,5 +12,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<List<MATERIAL>> GetMaterialsByNameOrCodeAsync(string keyword);
         // danh sach chung loai
         public Task<List<dynamic>> GetListMaterial();
+
+        // update danh sách linh kiện
+        public Task<bool> UpdateMaterialAsync(List<MATERIAL> materials);
     }
 }

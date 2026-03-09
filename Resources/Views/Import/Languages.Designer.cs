@@ -763,6 +763,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Phê duyệt đơn.
+        /// </summary>
+        public static string Pheduyetdon {
+            get {
+                return ResourceManager.GetString("Pheduyetdon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Phiếu nhận hàng theo PO.
         /// </summary>
         public static string phieunhanhang {

@@ -498,4 +498,7 @@
   <data name="Tainhap" xml:space="preserve">
     <value>逆輸入</value>
   </data>
+  <data name="Pheduyetdon" xml:space="preserve">
+    <value>申請承認</value>
+  </data>
 </root>

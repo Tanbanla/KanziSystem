@@ -20,7 +20,7 @@
         itemsExcelFileInput: document.getElementById('itemsExcelFileInput')
     };
 
-    let state = { pageIndex: 1, pageSize: 20, total: 0 ,listData: []};
+    let state = { pageIndex: 1, pageSize: 20, total: 0, listData: [] };
 
     function statusBadge(s) {
         const T = window.i18nConfirmName || {};
@@ -36,208 +36,33 @@
     function canEditMaNB() { return role === 'UserAcc' || role === 'UserPUR'; }
     function canApprove() { return role === 'UserPUR'; }
 
-    //function renderRows(data) {
-    //    const T = window.i18nConfirmName || {};
-    //    const fields = [
-    //        { key: 'ID_RequestQuote', label: 'Số đơn yêu cầu báo giá', editable: false },
-    //        { key: 'CHR_SectionName', label: 'Phòng ban', editable: false },
-    //        { key: 'CHR_Phanloai', label: 'Phân loại thiết bị', editable: false },
-    //        { key: 'CHR_MaThietBi', label: 'Mã thiết bị', editable: false },
-    //        { key: 'CHR_MaHangNCC', label: 'Mã hàng của NCC', editable: false },
-    //        { key: 'VCHR_TenRecomment', label: 'Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)', editable: false },
-    //        { key: 'CHR_NameEN', label: 'Tên hàng tiếng anh(*)', editable: false },
-    //        { key: 'INT_SoLuong', label: 'Số lượng(*)', editable: false },
-    //        { key: 'NVCHR_DonVi', label: 'Đơn vị(*)', editable: false },
-    //        { key: 'NVCHR_ChungLoai', label: 'Chủng loại hàng', editable: false },
-    //        { key: 'NVCHR_HinhDang', label: 'Hình dáng', editable: false },
-    //        { key: 'NVCHR_ChatLieu', label: 'Chất liệu', editable: false },
-    //        { key: 'NVCHR_ThanhPhan', label: 'Thành phần, hàm lượng (đối với hóa chất)', editable: false },
-    //        { key: 'NVCHR_KichThuoc', label: 'Kích thước(mm) (dài/rộng/cao)', editable: false },
-    //        { key: 'NVCHR_DongMay', label: 'Dùng cho máy/thiết bị/vị trí nào', editable: false },
-    //        { key: 'NVCHR_TinhNang', label: 'Dùng để làm gì (tính năng)', editable: false },
-    //        { key: 'tenHQ', label: 'Xác nhận tên', editable: canEditTenHQ() },
-    //        { key: 'maNB', label: 'Xác nhận mã', editable: canEditMaNB() },
-    //        { key: 'status', label: 'Trạng thái', editable: false },
-    //        { key: 'dtM_CreateDate', label: 'Ngày tạo', editable: false },
-    //        { key: 'handler', label: 'Người xử lý', editable: false },
-    //        { key: 'note', label: 'Ghi chú', editable: false },
-    //        { key: 'actions', label: 'Hành động', editable: false }
-    //    ];
 
-    //    // Đánh dấu 7 hàng cuối là cố định (sticky bottom)
-    //    fields.slice(-7).forEach(f => f.isFixed = true);
-
-    //    // Xóa thead cũ nếu có
-    //    const existingThead = els.tbody.previousElementSibling;
-    //    if (existingThead && existingThead.tagName === 'THEAD') {
-    //        existingThead.remove();
-    //    }
-
-    //    if (!data || data.length === 0) {
-    //        els.tbody.innerHTML = '<tr><td colspan="1" class="text-center text-muted">' + (T.NoData || 'Không có dữ liệu') + '</td></tr>';
-    //        return;
-    //    }
-
-    //    // Tạo thead động
-    //    const thead = document.createElement('thead');
-    //    thead.className = 'table-light';
-    //    thead.style.position = 'sticky';
-    //    thead.style.top = '0';
-    //    thead.style.zIndex = '20';
-    //    thead.style.backgroundColor = 'white';
-    //    thead.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-    //    const headerRow = document.createElement('tr');
-    //    headerRow.innerHTML = '<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; left: 0; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">Thuộc tính</th>' +
-    //        data.map((r, i) => `<th style="min-width: 200px; text-align: center; background-color: #e0e0e0;">Bản ghi ${(state.pageIndex - 1) * state.pageSize + i + 1}</th>`).join('');
-    //    thead.appendChild(headerRow);
-    //    els.tbody.parentNode.insertBefore(thead, els.tbody);
-
-    //    // Cấu hình bảng
-    //    const table = els.tbody.closest('table');
-    //    if (table) {
-    //        table.style.overflowX = 'auto';
-    //        table.style.width = '100%';
-    //        table.style.borderCollapse = 'collapse';
-    //        table.style.boxShadow = '0 0 8px rgba(0,0,0,0.05)';
-    //    }
-
-    //    // Render tbody
-    //    els.tbody.innerHTML = '';
-    //    fields.forEach(field => {
-    //        const tr = document.createElement('tr');
-    //        if (field.isFixed) tr.classList.add('fixed-row');
-
-    //        const th = document.createElement('th');
-    //        th.innerHTML = field.label;
-    //        th.style.fontWeight = 'bold';
-    //        th.style.backgroundColor = '#2335B7';
-    //        th.style.color = '#FFFF';
-    //        th.style.position = 'sticky';
-    //        th.style.left = '0';
-    //        th.style.zIndex = '15';
-    //        th.style.minWidth = '250px';
-    //        th.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
-    //        th.style.padding = '8px 12px';
-    //        // If this field is one of the last 7 (marked fixed), make header green
-    //        if (field.isFixed) {
-    //            th.style.backgroundColor = '#28a745';
-    //            th.style.color = '#ffffff';
-    //        }
-    //        tr.appendChild(th);
-
-    //        data.forEach(r => {
-    //            const td = document.createElement('td');
-    //            td.style.padding = '8px 12px';
-    //            td.style.verticalAlign = 'middle';
-    //            // highlight fixed rows with green background
-    //            //if (field.isFixed) {
-    //            //    td.style.backgroundColor = '#d4edda';
-    //            //}
-
-    //            if (field.key === 'status') {
-    //                td.innerHTML = statusBadge(r.CHR_Status);
-    //                td.style.textAlign = 'center';
-    //            } else if (field.key === 'tenHQ') {
-    //                if (field.editable) {
-    //                    td.innerHTML = `<input class="form-control form-control-sm js-tenhq" data-id="${r.ID}" value="${r.VCHR_TenHaiQuan || ''}" />`;
-    //                } else {
-    //                    td.innerHTML = `<div class="cell-sm">${r.VCHR_TenHaiQuan || ''}</div>`;
-    //                }
-    //            } else if (field.key === 'maNB') {
-    //                if (canEditMaNB()) {
-    //                    td.innerHTML = `<input class="form-control form-control-sm js-manb" data-id="${r.ID}" value="${r.VCHR_MaHangNoiBo || ''}" />`;
-    //                } else {
-    //                    td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
-    //                }
-    //            } else if (field.key === 'actions') {
-    //                const actions = [
-    //                    canApprove() ? `<button class="btn btn-sm btn-success js-approve" data-id="${r.ID}">${T.BtnApprove || 'Đồng ý'}</button>` : '',
-    //                    canApprove() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.ID}">${T.BtnReject || 'Từ chối'}</button>` : ''
-    //                ].filter(Boolean).join(' ');
-    //                td.innerHTML = actions;
-    //                td.style.textAlign = 'center';
-    //            } else if (field.key === 'dtM_CreateDate') {
-    //                td.textContent = formatDate(r[field.key]);
-    //                td.style.textAlign = 'center';
-    //            } else if (field.key === 'handler') {
-    //                const handler = [
-    //                    r.VCHR_UserShip && `Ship: ${r.VCHR_UserShip} (${formatDate(r.DTM_UserShip)})`,
-    //                    r.VCHR_UserAcc && `Acc: ${r.VCHR_UserAcc} (${formatDate(r.DTM_UserAcc)})`,
-    //                    r.VCHR_UserPUR && `PUR: ${r.VCHR_UserPUR} (${formatDate(r.DTM_UserPUR)})`
-    //                ].filter(Boolean).join('<br/>');
-    //                td.innerHTML = handler || ((T.CreatedByPrefix || 'Khởi tạo bởi ') + r.VCHR_CreateBy);
-    //                td.style.textAlign = 'center';
-    //            } else if (field.key === 'note') {
-    //                td.innerHTML = `<div class="small text-muted">${r.NVCHR_Note || ''}</div><div class="text-danger small">${r.NVCHR_LyDo || ''}</div>`;
-    //            } else {
-    //                td.textContent = r[field.key] || '';
-    //            }
-    //            tr.appendChild(td);
-    //        });
-    //        els.tbody.appendChild(tr);
-    //    });
-
-    //    // Gán sự kiện cho các input/button
-    //    els.tbody.querySelectorAll('.js-tenhq').forEach(el => {
-    //        el.addEventListener('change', () => saveInline(parseInt(el.getAttribute('data-id')), { tenHaiQuan: el.value }));
-    //    });
-    //    els.tbody.querySelectorAll('.js-manb').forEach(el => {
-    //        el.addEventListener('change', () => saveInline(parseInt(el.getAttribute('data-id')), { maHangNoiBo: el.value }));
-    //    });
-    //    els.tbody.querySelectorAll('.js-approve').forEach(btn => btn.addEventListener('click', () => approve(parseInt(btn.getAttribute('data-id')))));
-    //    els.tbody.querySelectorAll('.js-reject').forEach(btn => btn.addEventListener('click', () => reject(parseInt(btn.getAttribute('data-id')))));
-
-    //    // Xử lý sticky bottom cho 7 hàng cố định (dùng chiều cao thực tế)
-    //    const fixedTrs = els.tbody.querySelectorAll('.fixed-row');
-    //    if (fixedTrs.length > 0) {
-    //        // Áp dụng style chung trước khi đo
-    //        fixedTrs.forEach(tr => {
-    //            tr.style.position = 'sticky';
-    //            tr.style.backgroundColor = '#f9f9f9';
-    //            tr.style.zIndex = '16';
-    //            tr.style.boxShadow = '0 -2px 4px rgba(0,0,0,0.1)';
-    //            tr.style.borderTop = '1px solid #ddd';
-    //        });
-
-    //        // Đo chiều cao thực tế
-    //        const heights = Array.from(fixedTrs).map(tr => tr.offsetHeight);
-
-    //        // Tính bottom cho từng hàng (hàng cuối bottom = 0, hàng trên bottom = tổng chiều cao các hàng bên dưới)
-    //        fixedTrs.forEach((tr, i) => {
-    //            let bottomOffset = 0;
-    //            for (let j = i + 1; j < fixedTrs.length; j++) {
-    //                bottomOffset += heights[j];
-    //            }
-    //            tr.style.bottom = bottomOffset + 'px';
-    //        });
-    //    }
-    //}
     function renderRows(data) {
         const T = window.i18nConfirmName || {};
         const fields = [
-            { key: 'ID_RequestQuote', label: 'Số đơn yêu cầu báo giá', editable: false },
-            { key: 'CHR_SectionName', label: 'Phòng ban', editable: false },
-            { key: 'CHR_Phanloai', label: 'Phân loại thiết bị', editable: false },
-            { key: 'CHR_MaThietBi', label: 'Mã thiết bị', editable: false },
-            { key: 'CHR_MaHangNCC', label: 'Mã hàng của NCC', editable: false },
-            { key: 'VCHR_TenRecomment', label: 'Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)', editable: false },
-            { key: 'CHR_NameEN', label: 'Tên hàng tiếng anh(*)', editable: false },
-            { key: 'INT_SoLuong', label: 'Số lượng(*)', editable: false },
-            { key: 'NVCHR_DonVi', label: 'Đơn vị(*)', editable: false },
-            { key: 'NVCHR_ChungLoai', label: 'Chủng loại hàng', editable: false },
-            { key: 'NVCHR_HinhDang', label: 'Hình dáng', editable: false },
-            { key: 'NVCHR_ChatLieu', label: 'Chất liệu', editable: false },
-            { key: 'NVCHR_ThanhPhan', label: 'Thành phần, hàm lượng (đối với hóa chất)', editable: false },
-            { key: 'NVCHR_KichThuoc', label: 'Kích thước(mm) (dài/rộng/cao)', editable: false },
-            { key: 'NVCHR_DongMay', label: 'Dùng cho máy/thiết bị/vị trí nào', editable: false },
-            { key: 'NVCHR_TinhNang', label: 'Dùng để làm gì (tính năng)', editable: false },
-            { key: 'tenHQ', label: 'Xác nhận tên', editable: canEditTenHQ() },
-            { key: 'maNB', label: 'Xác nhận mã', editable: canEditMaNB() },
-            { key: 'status', label: 'Trạng thái', editable: false },
-            { key: 'DTM_CreateDate', label: 'Ngày tạo', editable: false },
-            { key: 'handler', label: 'Người xử lý', editable: false },
-            { key: 'note', label: 'Ghi chú', editable: false },
-            { key: 'actions', label: 'Hành động', editable: false }
+            { key: 'select', label: T.Select || 'Chọn', editable: false },
+            { key: 'ID_RequestQuote', label: T.RequestQuoteNumber || 'ID Yêu cầu báo giá', editable: false },
+            { key: 'CHR_SectionName', label: T.Department || 'Phòng ban', editable: false },
+            { key: 'CHR_Phanloai', label: T.EquipmentClassification || 'Phân loại thiết bị', editable: false },
+            { key: 'CHR_MaThietBi', label: T.EquipmentCode || 'Mã thiết bị', editable: false },
+            { key: 'CHR_MaHangNCC', label: T.SupplierItemCode || 'Mã hàng của NCC', editable: false },
+            { key: 'VCHR_TenRecomment', label: T.VietnameseItemNameDraft || 'Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)', editable: false },
+            { key: 'CHR_NameEN', label: T.EnglishItemName || 'Tên hàng tiếng anh(*)', editable: false },
+            { key: 'INT_SoLuong', label: T.Quantity || 'Số lượng(*)', editable: false },
+            { key: 'NVCHR_DonVi', label: T.Unit || 'Đơn vị(*)', editable: false },
+            { key: 'NVCHR_ChungLoai', label: T.ItemCategory || 'Chủng loại hàng', editable: false },
+            { key: 'NVCHR_HinhDang', label: T.Shape || 'Hình dáng', editable: false },
+            { key: 'NVCHR_ChatLieu', label: T.Material || 'Chất liệu', editable: false },
+            { key: 'NVCHR_ThanhPhan', label: T.Composition || 'Thành phần, hàm lượng (đối với hóa chất)', editable: false },
+            { key: 'NVCHR_KichThuoc', label: T.Dimensions || 'Kích thước(mm) (dài/rộng/cao)', editable: false },
+            { key: 'NVCHR_DongMay', label: T.UsedForMachine || 'Dùng cho máy/thiết bị/vị trí nào', editable: false },
+            { key: 'NVCHR_TinhNang', label: T.Feature || 'Dùng để làm gì (tính năng)', editable: false },
+            { key: 'tenHQ', label: T.ConfirmName || 'Xác nhận tên', editable: canEditTenHQ() },
+            { key: 'maNB', label: T.ConfirmCode || 'Xác nhận mã', editable: canEditMaNB() },
+            { key: 'status', label: T.Status || 'Trạng thái', editable: false },
+            { key: 'DTM_CreateDate', label: T.CreatedDate || 'Ngày tạo', editable: false },
+            { key: 'handler', label: T.Handler || 'Người xử lý', editable: false },
+            { key: 'note', label: T.Note || 'Ghi chú', editable: false }
         ];
 
         // Đánh dấu 7 hàng cuối (giữ màu xanh nhưng không cố định)
@@ -263,8 +88,22 @@
         thead.style.backgroundColor = 'white';
         thead.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
         const headerRow = document.createElement('tr');
-        headerRow.innerHTML = '<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; left: 0; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">Thuộc tính</th>' +
-            data.map((r, i) => `<th style="min-width: 200px; text-align: center; background-color: #e0e0e0;">Bản ghi ${(state.pageIndex - 1) * state.pageSize + i + 1}</th>`).join('');
+        const selectAllCheckbox = document.createElement('input');
+        selectAllCheckbox.type = 'checkbox';
+        selectAllCheckbox.className = 'js-select-all';
+        const selectTh = document.createElement('th');
+        selectTh.style.minWidth = '50px';
+        selectTh.style.textAlign = 'center';
+        selectTh.style.backgroundColor = '#2335B7';
+        selectTh.style.color = '#FFFF';
+        selectTh.style.position = 'sticky';
+        selectTh.style.left = '0';
+        selectTh.style.zIndex = '21';
+        selectTh.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
+        selectTh.appendChild(selectAllCheckbox);
+        headerRow.appendChild(selectTh);
+        headerRow.innerHTML += `<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; left: 50px; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">${T.Datafield}</th>` +
+            data.map((r, i) => `<th style="min-width: 200px; text-align: center; background-color: #e0e0e0;">${T.Record} ${(state.pageIndex - 1) * state.pageSize + i + 1}</th>`).join('');
         thead.appendChild(headerRow);
         els.tbody.parentNode.insertBefore(thead, els.tbody);
 
@@ -292,6 +131,7 @@
             th.style.left = '0';
             th.style.zIndex = '15';
             th.style.minWidth = '250px';
+            th.style.maxWidth = '250px';
             th.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
             th.style.padding = '8px 12px';
             // Giữ màu xanh cho 7 hàng cuối
@@ -306,7 +146,10 @@
                 td.style.padding = '8px 12px';
                 td.style.verticalAlign = 'middle';
 
-                if (field.key === 'status') {
+                if (field.key === 'select') {
+                    td.innerHTML = `<input type="checkbox" class="js-select-row" data-id="${r.ID}" />`;
+                    td.style.textAlign = 'center';
+                } else if (field.key === 'status') {
                     td.innerHTML = statusBadge(r.CHR_Status);
                     td.style.textAlign = 'center';
                 } else if (field.key === 'tenHQ') {
@@ -321,15 +164,7 @@
                     } else {
                         td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
                     }
-                } else if (field.key === 'actions') {
-                    const actions = [
-                        canApprove() ? `<button class="btn btn-sm btn-success js-approve" data-id="${r.ID}">${T.BtnApprove || 'Đồng ý'}</button>` : '',
-                        canApprove() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.ID}">${T.BtnReject || 'Từ chối'}</button>` : 
-                            `<button class="btn btn-sm btn-primary js-save" data-id="${r.ID}">${T.BtnSave || 'Lưu'}</button>` 
-                    ].filter(Boolean).join(' ');
-                    td.innerHTML = actions;
-                    td.style.textAlign = 'center';
-                } else if (field.key === 'dtM_CreateDate') {
+                } else if (field.key === 'DTM_CreateDate') {
                     td.textContent = formatDate(r[field.key]);
                     td.style.textAlign = 'center';
                 } else if (field.key === 'handler') {
@@ -350,36 +185,13 @@
             els.tbody.appendChild(tr);
         });
 
-        // Gán sự kiện cho các input/button
-        els.tbody.querySelectorAll('.js-approve').forEach(btn => btn.addEventListener('click', () => approve(parseInt(btn.getAttribute('data-id')))));
-        els.tbody.querySelectorAll('.js-reject').forEach(btn => btn.addEventListener('click', () => reject(parseInt(btn.getAttribute('data-id')))));
-
-        // Gán sự kiện cho các nút Lưu (xóa sự kiện change của input)
-        els.tbody.querySelectorAll('.js-save').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const id = parseInt(this.getAttribute('data-id'));
-
-                // Tìm các input trong toàn bộ tbody dựa trên data-id
-                const tenHQInput = els.tbody.querySelector(`.js-tenhq[data-id="${id}"]`);
-                const maNBInput = els.tbody.querySelector(`.js-manb[data-id="${id}"]`);
-
-                const dataToSave = {};
-
-                if (tenHQInput) {
-                    dataToSave.tenHaiQuan = tenHQInput.value;
-                }
-
-                if (maNBInput) {
-                    dataToSave.maHangNoiBo = maNBInput.value;
-                }
-
-                // Gọi hàm saveInline với dữ liệu từ cả hai input
-                if (Object.keys(dataToSave).length > 0) {
-                    saveInline(id, dataToSave);
-                }
-            });
+        // Gán sự kiện cho select all
+        selectAllCheckbox.addEventListener('change', () => {
+            const checkboxes = els.tbody.querySelectorAll('.js-select-row');
+            checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
         });
 
+        // Bỏ event listener cho input change và nút actions, vì bây giờ lưu hàng loạt
     }
     function formatDate(d) {
         if (window.cmMomentFormat) { return window.cmMomentFormat(d); }
@@ -404,8 +216,6 @@
         if (!res.ok) { const T = window.i18nConfirmName || {}; console.error(T.MsgSearchFailed || 'Search failed'); return; }
         const data = await res.json();
         state.total = data.data.totalCount || 0;
-        state.pageIndex = data.pageIndex || 1;
-        state.pageSize = data.pageSize || 20;
         const T = window.i18nConfirmName || {};
         els.resultCount.textContent = `${T.Total || 'Tổng'}: ${state.total}`;
         const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
@@ -421,18 +231,22 @@
         if (!res.ok) { const T = window.i18nConfirmName || {}; alert(T.MsgSaveFailed || 'Lưu thất bại'); }
     }
 
-    async function approve(id) {
+    async function approve(id, skipConfirm = false) {
         const T = window.i18nConfirmName || {};
-        const ok = await showConfirmDialog(T.ConfirmApproveTitle || 'Xác nhận đồng ý?', T.ConfirmApproveMessage || 'Bạn có chắc chắn muốn phê duyệt yêu cầu này?');
-        if (!ok) return;
+        if (!skipConfirm) {
+            const ok = await showConfirmDialog(T.ConfirmApproveTitle || 'Xác nhận đồng ý?', T.ConfirmApproveMessage || 'Bạn có chắc chắn muốn phê duyệt yêu cầu này?');
+            if (!ok) return;
+        }
         const res = await fetch('/Material/ApproveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
         if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
     }
 
-    async function reject(id) {
+    async function reject(id, lyDo) {
         const T = window.i18nConfirmName || {};
-        const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
-        if (lyDo === null) return;
+        if (!lyDo) {
+            lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
+            if (lyDo === null) return;
+        }
         const res = await fetch('/Material/RejectConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, lyDo }) });
         if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
     }
@@ -440,7 +254,7 @@
     els.btnSearch.addEventListener('click', () => { state.pageIndex = 1; search(); });
 
     // các button excel
-    els.btnExportTemplate.addEventListener('click', () => { exportTemplate();});
+    els.btnExportTemplate.addEventListener('click', () => { exportTemplate(); });
     els.btnExportTable.addEventListener('click', () => { exportTable(); });
     els.btnImportExcel.addEventListener('click', () => itemsExcelFileInput?.click());
     els.itemsExcelFileInput.addEventListener('change', async (e) => { importExcel(e); });
@@ -462,25 +276,28 @@
     async function importExcel(e) {
         const file = e.target.files?.[0];
         if (!file) return;
+        const T = window.i18nConfirmName || {};
         try {
-            showLoading('Đang xử lý...');
+            showLoading(T.LoadingMessage || 'Đang xử lý...');
             const fd = new FormData();
             fd.append('file', file);
             const res = await fetch('/Material/ImportFromExcel', { method: 'POST', body: fd });
             if (!res.ok) throw new Error(await res.text());
             const items = await res.json();
             if (!Array.isArray(items)) throw new Error('Dữ liệu không hợp lệ');
-            showDialog({ title: 'Thành công', message: ('Đã tải {0} dòng từ Excel').replace('{0}', items.length), type: 'success' });
+            showDialog({ title: T.Success || 'Thành công', message: T.ImportSuccess || 'Nhập bằng file thành công', type: 'success' });
+            search();
         } catch (err) {
-            showDialog({ title: 'Lỗi', message: err.message || 'Không thể đọc file', type: 'error' });
+            showDialog({ title: T.Error || 'Lỗi', message: err.message || 'Không thể đọc file', type: 'error' });
         } finally {
             hideLoading();
             e.target.value = '';
         }
     }
     async function exportTable() {
+        const T = window.i18nConfirmName || {};
         try {
-            showLoading('Đang xuất...');
+            showLoading(T.Processing || 'Đang xuất...');
 
             const res = await fetch('/Material/ExportToExcel', {
                 method: 'POST',
@@ -489,7 +306,7 @@
             });
             if (!res.ok) {
                 const msg = await res.text().catch(() => 'Lỗi không xác định');
-                throw new Error(msg || 'Xuất file thất bại');
+                throw new Error(msg || (T.ExportError || 'Xuất file thất bại'));
             }
             const blob = await res.blob();
             let fileName = 'TableConfirmName.xlsx';
@@ -543,6 +360,76 @@
     }
     els.prev.addEventListener('click', () => { if (state.pageIndex > 1) { state.pageIndex--; search(); } });
     els.next.addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize)); if (state.pageIndex < totalPages) { state.pageIndex++; search(); } });
+
+    // Bulk save button
+    const btnBulkSave = document.getElementById('btnBulkSave');
+    if (btnBulkSave) {
+        btnBulkSave.addEventListener('click', async () => {
+            const selectedRows = Array.from(els.tbody.querySelectorAll('.js-select-row:checked'));
+            if (selectedRows.length === 0) {
+                const T = window.i18nConfirmName || {};
+                alert(T.NoSelection || 'Vui lòng chọn ít nhất một hàng');
+                return;
+            }
+            const T = window.i18nConfirmName || {};
+            showLoading(T.Processing || 'Đang xử lý...');
+            try {
+                for (const cb of selectedRows) {
+                    const id = parseInt(cb.getAttribute('data-id'));
+                    const tenHQInput = els.tbody.querySelector(`.js-tenhq[data-id="${id}"]`);
+                    const maNBInput = els.tbody.querySelector(`.js-manb[data-id="${id}"]`);
+                    const dataToSave = {};
+                    if (tenHQInput) dataToSave.tenHaiQuan = tenHQInput.value;
+                    if (maNBInput) dataToSave.maHangNoiBo = maNBInput.value;
+                    if (Object.keys(dataToSave).length > 0) {
+                        await saveInline(id, dataToSave);
+                    }
+                }
+                search(); // Refresh data
+            } catch (err) {
+                console.error('Bulk save failed', err);
+                alert(T.MsgSaveFailed || 'Lưu thất bại');
+            } finally {
+                hideLoading();
+            }
+        });
+    }
+
+    // Bulk approve button
+    const btnBulkApprove = document.getElementById('btnBulkApprove');
+    if (btnBulkApprove) {
+        btnBulkApprove.addEventListener('click', async () => {
+            if (!canApprove()) return;
+            const selectedRows = Array.from(els.tbody.querySelectorAll('.js-select-row:checked'));
+            if (selectedRows.length === 0) {
+                const T = window.i18nConfirmName || {};
+                alert(T.NoSelection || 'Vui lòng chọn ít nhất một hàng');
+                return;
+            }
+            const T = window.i18nConfirmName || {};
+            const action = await showActionDialog(T.BulkApproveTitle || 'Chọn hành động phê duyệt', T.BulkApproveMessage || 'Chọn Đồng ý hoặc Từ chối cho các hàng đã chọn:');
+            if (!action) return;
+            showLoading(T.Processing || 'Đang xử lý...');
+            try {
+                for (const cb of selectedRows) {
+                    const id = parseInt(cb.getAttribute('data-id'));
+                    if (action === 'approve') {
+                        await approve(id, true);
+                    } else if (action === 'reject') {
+                        const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
+                        if (lyDo === null) continue;
+                        await reject(id, lyDo);
+                    }
+                }
+                search(); // Refresh data
+            } catch (err) {
+                console.error('Bulk approve failed', err);
+                alert(T.MsgGenericError || 'Thao tác thất bại');
+            } finally {
+                hideLoading();
+            }
+        });
+    }
     // enhance searchable selects inside the page
     try {
         buildSearchableDropdown(document.getElementById('confirm-name'));
@@ -587,7 +474,7 @@
             const btnOk = el.querySelector('[data-cm-action="ok"]');
             input.value = '';
             const close = () => { el.setAttribute('aria-hidden', 'true'); el.classList.remove('show'); el.style.display = 'none'; document.body.classList.remove('modal-open'); cleanup(); };
-           const open = () => { el.style.display = 'block'; el.style.zIndex = '3000'; el.setAttribute('aria-hidden', 'false'); el.classList.add('show'); document.body.classList.add('modal-open'); input && input.focus(); };
+            const open = () => { el.style.display = 'block'; el.style.zIndex = '3000'; el.setAttribute('aria-hidden', 'false'); el.classList.add('show'); document.body.classList.add('modal-open'); input && input.focus(); };
             const onCancel = () => { close(); resolve(null); };
             const onOk = () => { const v = (input.value || '').trim(); close(); resolve(v); };
             const cleanup = () => {
@@ -609,7 +496,7 @@
         const footerEl = document.getElementById('cmDialogFooter');
         return { overlay, titleEl, bodyEl, footerEl };
     }
-    function showDialog({ title = (window.i18nSupplierMana && window.i18nSupplierMana.Notification) || 'Thông báo', message = '', type = 'info', buttons } = {}) {
+    function showDialog({ title = (window.i18nConfirmName && window.i18nConfirmName.Notification) || 'Thông báo', message = '', type = 'info', buttons } = {}) {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
         if (!overlay) return alert(message);
 
@@ -626,7 +513,7 @@
         footerEl.innerHTML = '';
         const okBtn = document.createElement('button');
         okBtn.className = 'cm-btn cm-btn-primary';
-        const T = window.i18nSupplierMana || {};
+        const T = window.i18nConfirmName || {};
         okBtn.textContent = (buttons && buttons.okText) || (T.OK || 'Đồng ý');
         okBtn.addEventListener('click', () => hideDialog());
         footerEl.appendChild(okBtn);
@@ -893,5 +780,32 @@ function buildSearchableDropdown(container) {
 
         // Mark enhanced
         select.dataset.searchDropdown = 'true';
+    });
+}
+
+function showActionDialog(title, message) {
+    return new Promise((resolve) => {
+        const el = document.getElementById('cmActionDialog');
+        if (!el) { resolve(null); return; }
+        const T = window.i18nConfirmName || {};
+        el.querySelector('.cm-action-title').textContent = title || (T.SelectAction || 'Chọn hành động');
+        el.querySelector('.cm-action-body').textContent = message || '';
+        const btnApprove = el.querySelector('[data-cm-action="approve"]');
+        const btnReject = el.querySelector('[data-cm-action="reject"]');
+        const btnCancel = el.querySelector('[data-cm-action="cancel"]');
+        const close = () => { el.setAttribute('aria-hidden', 'true'); el.classList.remove('show'); el.style.display = 'none'; document.body.classList.remove('modal-open'); cleanup(); };
+        const open = () => { el.style.display = 'block'; el.style.zIndex = '3000'; el.setAttribute('aria-hidden', 'false'); el.classList.add('show'); document.body.classList.add('modal-open'); };
+        const onApprove = () => { close(); resolve('approve'); };
+        const onReject = () => { close(); resolve('reject'); };
+        const onCancel = () => { close(); resolve(null); };
+        const cleanup = () => {
+            btnApprove && btnApprove.removeEventListener('click', onApprove);
+            btnReject && btnReject.removeEventListener('click', onReject);
+            btnCancel && btnCancel.removeEventListener('click', onCancel);
+        };
+        btnApprove && btnApprove.addEventListener('click', onApprove);
+        btnReject && btnReject.addEventListener('click', onReject);
+        btnCancel && btnCancel.addEventListener('click', onCancel);
+        open();
     });
 }

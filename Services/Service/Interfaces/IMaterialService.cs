@@ -13,5 +13,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Lấy danh sách hàng hóa
         public Task<GenericResponse<List<MATERIALDTO>>> GetMaterialsByNameOrCodeAsync(string keyword);
         public Task<GenericResponse<List<dynamic>>> GetListMaterial();
+        // update danh sách linh kiện
+        public Task<GenericResponse<bool>> UpdateMaterialAsync(List<MATERIALDTO> materials);
     }
 }

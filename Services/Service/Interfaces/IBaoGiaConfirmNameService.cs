@@ -4,10 +4,10 @@ using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
 {
-    public interface IBaoGiaConfirmNameService: IBaseService<BaoGia_Confirm_Name_Quotation, int , BaoGia_Confirm_Name_QuotationDTO>
+    public interface IBaoGiaConfirmNameService : IBaseService<BaoGia_Confirm_Name_Quotation, int, BaoGia_Confirm_Name_QuotationDTO>
     {
         // search thông tin xác nhận tên hàng
-        public Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section,int pageIndex, int pageSize);
+        public Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize);
         // Luu thong tin
         public Task<GenericResponse<bool>> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User);
         // Them thong tin 

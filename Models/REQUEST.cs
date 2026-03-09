@@ -28,10 +28,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? Account_Name { get; set; }
         public string? Unit { get; set; }
         public string? Unit_Real { get; set; }
-        public decimal? Amount { get; set; }
-        public decimal? Price { get; set; }
-        public decimal? Price_Real { get; set; }
-        public decimal? Total_exchange { get; set; }
+        public double? Amount { get; set; }
+        public double? Price { get; set; }
+        public double? Price_Real { get; set; }
+        public double? Total_exchange { get; set; }
         public int? Rate { get; set; }
         public string? Currency { get; set; }
         public decimal? Total { get; set; }
@@ -283,11 +283,26 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 "VALUES ('" + id_request + "','" + adid_dt + "','" + adid_tt + "','" + adid_pheduyet + "','" + adid_dy + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','0','" + mail_dt + "','" + mail_tt + "','" + mail_pd + "',N'" + ten_dt + "',N'" + ten_tt + "',N'" + ten_pd + "','" + adid_xk + "','" + mail_xk + "',N'" + ten_xk + "',N'" + ten_dy + "','" + mail_dy + "','0','0','0','0')");
             return "OK";
         }
-        public static List<PE_REQUEST_CONFIRM> get_requestconfirm( string us)
+        public static List<PE_REQUEST_CONFIRM> get_requestconfirm( string us, string Urgent, double Total, string Code_Request, string INT_STEP)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
-            var list = _db.GET_DATA_FROM_SQL(" select top (500) * from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center where ((CHR_ADID_NGUOIYEUCAU = '" + us +"' and CONFIRM_NGUOIYEUCAU = '0') OR (CHR_ADID_NGUOITHAMTRA = '" + us +"' and CONFIRM_NGUOITHAMTRA = '0') OR (CHR_ADID_NGUOIPHEDUYET = '" + us +"' and CONFIRM_NGUOIPHEDUYET = '0') OR (CHR_ADID_XACNHAN = '" + us +"' and CONFIRM_XACNHAN = '0')) and INT_STEP < 5 ");
+            string gia = "";
+            if (Total > 0 && Total < 3000)
+            {
+                gia = "and b.Total < '3000'";
+            }
+            if (Total >= 3000 && Total < 10000)
+            {
+                gia = "and b.Total >= '3000' and b.Total < '10000'";
+            }
+            if (Total >= 10000)
+            {
+                gia = "and b.Total >= '10000'";
+            }
+            var list = _db.GET_DATA_FROM_SQL(" select top (500) * from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center " +
+                "where ((CHR_ADID_NGUOIYEUCAU = '" + us +"' and CONFIRM_NGUOIYEUCAU = '0') OR (CHR_ADID_NGUOITHAMTRA = '" + us +"' and CONFIRM_NGUOITHAMTRA = '0') OR (CHR_ADID_NGUOIPHEDUYET = '" + us +"' and CONFIRM_NGUOIPHEDUYET = '0') OR (CHR_ADID_XACNHAN = '" + us +"' and CONFIRM_XACNHAN = '0')) and INT_STEP < 5 " +
+                $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%'");
             for (int i = 0; i < list.Rows.Count; i++)
             {
                 pe_.Add(new PE_REQUEST_CONFIRM {
@@ -402,9 +417,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Account_Code = get_if.Rows[i]["Account_Code"].ToString(),
                     Account_Name = get_if.Rows[i]["Account_Name"].ToString(),
                     Unit = get_if.Rows[i]["Unit"].ToString(),
-                    Amount = decimal.Parse(get_if.Rows[i]["Amount"].ToString()!),
-                    Price = Math.Round(decimal.Parse(get_if.Rows[i]["Price"].ToString()!),2),
-                    Total_exchange = decimal.Parse(get_if.Rows[i]["Total_exchange"].ToString()!),
+                    Amount = Math.Round(double.Parse(get_if.Rows[i]["Amount"].ToString()!)),
+                    Price = Math.Round(double.Parse(get_if.Rows[i]["Price"].ToString()!),2),
+                    Total_exchange = Math.Round(double.Parse(get_if.Rows[i]["Total_exchange"].ToString()!)),
                     Currency = get_if.Rows[i]["Currency"].ToString(),
                     Cost_Center_Group = get_if.Rows[i]["Cost_Center_Group"].ToString(),
                     Name_Dept = get_if.Rows[i]["Name"].ToString(),

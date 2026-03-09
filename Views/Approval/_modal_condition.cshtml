@@ -1,99 +1,100 @@
 ﻿<form class="modal-part" id="modal-detail-part">
     <div class="row">
-        <table class="table table-bordered" style="text-align:center">
-            <tr hidden>
-                <td>Id_request : <i id="id_request"></i></td>
-                <td>Bước : <i id="step"></i></td>
-                <td>Regency : <i id="regency"></i></td>
-                <td>Urgent : <i id="urgent"></i></td>
-            </tr>
-            <tr>
-                <th rowspan="2" colspan="4" style="font-size:18px;background-color:#fff9e1">
-                    Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
-                    物品依頼書（共通間材・比例間材用・消耗品）　
-                </th>
-                <th colspan="2" id="madonhang" style="background-color:#fff9e1; font-size:18px"></th>
-            </tr>
-            <tr>
-                <th>
-                    Phòng tiếp nhận　受け部門：
-                </th>
-                <td style="background-color:#fff9e1" id="khoi"></td>
-            </tr>
-            <tr>
-                <td>
-                    ※Mã bộ phận yêu cầu<br />
-                    依頼部門 コード
-                </td>
-                <td>
-                    ※ Mã phòng ban yêu cầu<br />
-                    依頼部門コストセンター
-                </td>
-                <td>
-                    ※ Tên phòng ban<br />
-                    依頼部門名
-                </td>
-                <td>
-                    ※Chuyền<br />
-                    ライン
-                </td>
-                <td>
-                    ※Ngày yêu cầu<br />
-                    依頼日
-                </td>
-                <td>
-                    ※Thời hạn mong muốn<br />
-                    希望期限
-                </td>
-            </tr>
-            <tr style="height:120px; background-color : #fff9e1">
-                <td id="mbp"></td>
-                <td id="mpb_yc"></td>
-                <td id="tenphongban"></td>
-                <td id="chuyen"></td>
-                <td id="nyc"></td>
-                <td id="thmm"></td>
-            </tr>
-        </table>
-        <table class="table table-bordered">
-            <thead class="text-center">
-                <tr>
-                    <td rowspan="2">No</td>
-                    <td rowspan="2">※ Mã đơn <br />システムコード</td>
-                    <td rowspan="2">※ Tên hàng <br />品名</td>
-                    <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
-                    <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
-                    <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
-                    <td colspan="2">Yêu cầu <br />依頼</td>
-                    <td colspan="2">Già thành<br />単価</td>
-                    <td rowspan="2">Tổng chi phí <br />金額合計</td>
-                    <td rowspan="2">※ Mục đích <br />目的</td>
-                    <td rowspan="2">※ Ghi chú <br />備考</td>
+        <div class="form-group m-2">
+            <table class="table table-bordered" style="text-align:center">
+                <tr hidden>
+                    <td>Id_request : <i id="id_request"></i></td>
+                    <td>Bước : <i id="step"></i></td>
+                    <td>Regency : <i id="regency"></i></td>
+                    <td>Urgent : <i id="urgent"></i></td>
                 </tr>
                 <tr>
-                    <td>※ Số lượng <br />数量</td>
-                    <td>Đơn vị<br />単位</td>
-                    <td>Đơn giá<br />単価</td>
-                    <td>Đơn vị tiền tệ <br />通貨単位</td>
+                    <th rowspan="2" colspan="4" style="font-size:18px;background-color:#fff9e1">
+                        Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
+                        物品依頼書（共通間材・比例間材用・消耗品）　
+                    </th>
+                    <th colspan="2" id="madonhang" style="background-color:#fff9e1; font-size:18px"></th>
                 </tr>
-            </thead>
-            <tbody id="load_detail"></tbody>
-        </table>
-        <div class="col-12" style="font-size:11px">
-            Qui trình:
-            フロー: <br />
-            - Dưới <b>3,000 USD (66 triệu VNĐ)</b> : Người phụ trách làm dự thảo → Quản lý trung cấp thẩm tra → Phó trưởng bộ phận. <br />
-            + 3,000ドル(66百万ドン)未満：担当者起案=>中級管理職審査=>副部長決裁<br />
-            - Dưới <b>10,000 USD (220 triệu VNĐ)</b> : Người phụ trách làm dự thảo → Quản lý trung cấp thẩm tra → Trưởng bộ phận. <br />
-            + 10,000ドル(220百万ドン)未満：担当者起案=>中級管理職審査=>部長決裁<br />
-            - Từ <b>10,000 USD (220 triệu VNĐ) trở lên </b> : Quản lý trung cấp làm dự thảo → Trưởng bộ phận/Phó trưởng bộ phận thẩm tra. <br />
-            + 10,000ドル (220百万ドン)以上：中級管理職起案=>部長/副部長審査=>取締役決裁<br />
-            → Tổng Giám đốc/ Giám đốc phê duyệt <br />
-            - Phê duyệt xuất kho(PR1-MC): Quản lý sơ cấp/quản lý trung cấp  → Đảm nhiệm xuất kho kho Kanzai <br />
+                <tr>
+                    <th>
+                        Phòng tiếp nhận　受け部門：
+                    </th>
+                    <td style="background-color:#fff9e1" id="khoi"></td>
+                </tr>
+                <tr>
+                    <td>
+                        ※Mã bộ phận yêu cầu<br />
+                        依頼部門 コード
+                    </td>
+                    <td>
+                        ※ Mã phòng ban yêu cầu<br />
+                        依頼部門コストセンター
+                    </td>
+                    <td>
+                        ※ Tên phòng ban<br />
+                        依頼部門名
+                    </td>
+                    <td>
+                        ※Chuyền<br />
+                        ライン
+                    </td>
+                    <td>
+                        ※Ngày yêu cầu<br />
+                        依頼日
+                    </td>
+                    <td>
+                        ※Thời hạn mong muốn<br />
+                        希望期限
+                    </td>
+                </tr>
+                <tr style="height:120px; background-color : #fff9e1">
+                    <td id="mbp"></td>
+                    <td id="mpb_yc"></td>
+                    <td id="tenphongban"></td>
+                    <td id="chuyen"></td>
+                    <td id="nyc"></td>
+                    <td id="thmm"></td>
+                </tr>
+            </table>
+            <table class="table table-bordered">
+                <thead class="text-center">
+                    <tr>
+                        <td rowspan="2">No</td>
+                        <td rowspan="2">※ Mã đơn <br />システムコード</td>
+                        <td rowspan="2">※ Tên hàng <br />品名</td>
+                        <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
+                        <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
+                        <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
+                        <td colspan="2">Yêu cầu <br />依頼</td>
+                        <td colspan="2">Già thành<br />単価</td>
+                        <td rowspan="2">Tổng chi phí <br />金額合計</td>
+                        <td rowspan="2">※ Mục đích <br />目的</td>
+                        <td rowspan="2">※ Ghi chú <br />備考</td>
+                    </tr>
+                    <tr>
+                        <td>※ Số lượng <br />数量</td>
+                        <td>Đơn vị<br />単位</td>
+                        <td>Đơn giá<br />単価</td>
+                        <td>Đơn vị tiền tệ <br />通貨単位</td>
+                    </tr>
+                </thead>
+                <tbody id="load_detail"></tbody>
+            </table>
+            <div class="col-12" style="font-size:11px">
+                Qui trình:
+                フロー: <br />
+                - Dưới <b>3,000 USD (66 triệu VNĐ)</b> : Người phụ trách làm dự thảo → Quản lý trung cấp thẩm tra → Phó trưởng bộ phận. <br />
+                + 3,000ドル(66百万ドン)未満：担当者起案=>中級管理職審査=>副部長決裁<br />
+                - Dưới <b>10,000 USD (220 triệu VNĐ)</b> : Người phụ trách làm dự thảo → Quản lý trung cấp thẩm tra → Trưởng bộ phận. <br />
+                + 10,000ドル(220百万ドン)未満：担当者起案=>中級管理職審査=>部長決裁<br />
+                - Từ <b>10,000 USD (220 triệu VNĐ) trở lên </b> : Quản lý trung cấp làm dự thảo → Trưởng bộ phận/Phó trưởng bộ phận thẩm tra. <br />
+                + 10,000ドル (220百万ドン)以上：中級管理職起案=>部長/副部長審査=>取締役決裁<br />
+                → Tổng Giám đốc/ Giám đốc phê duyệt <br />
+                - Phê duyệt xuất kho(PR1-MC): Quản lý sơ cấp/quản lý trung cấp  → Đảm nhiệm xuất kho kho Kanzai <br />
+
+            </div>
+            <br /><br />
 
         </div>
-        <br /><br />
-
-    </div>
-   
+    </div> 
 </form>

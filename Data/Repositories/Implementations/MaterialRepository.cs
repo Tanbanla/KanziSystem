@@ -93,5 +93,28 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             return result;
         }
+        // update danh sách linh kiện
+        public async Task<bool> UpdateMaterialAsync(List<MATERIAL> materials)
+        {
+            if(materials.Count == 0) return false;
+            foreach (var material in materials)
+            {
+                var data = _context.MATERIALs.Where(c => c.Material_Code == material.Material_Code).FirstOrDefault();
+                if (data == null) continue;
+
+                data.Category_VN = material.Category_VN;
+                data.Category_EN = material.Category_EN;
+                data.Category_JP = material.Category_JP;
+                data.Shape = material.Shape;
+                data.Material1 = material.Material1;
+                data.Composition = material.Composition;
+                data.Dimension = material.Dimension;
+                data.UsedFor = material.UsedFor;
+                data.Purpose = material.Purpose;
+
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

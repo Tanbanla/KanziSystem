@@ -72,7 +72,6 @@
                     <label class="form-label mb-1 w-100" style="min-width: 150px;">@Localizer["ConfirmStatus"]</label>
                     <select id="trangThai" class="form-select" style="min-height: 40px;">
                         <option value="">@Localizer["All"]</option>
-                        <option value="Draft">@Localizer["StatusDraft"]</option>
                         <option value="Confirming">@Localizer["StatusConfirming"]</option>
                         <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
                         <option value="Rejected">@Localizer["StatusRejected"]</option>
@@ -104,7 +103,11 @@
             </div>
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
-            <div class="small text-muted" id="resultCount"></div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="small text-muted" id="resultCount"></div>
+                <button class="btn btn-sm btn-primary" id="btnBulkSave">@Localizer["BulkSave"]</button>
+                <button class="btn btn-sm btn-success" id="btnBulkApprove">@Localizer["BulkApprove"]</button>
+            </div>
             <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-outline-secondary" id="prevPage">&lt;</button>
                 <div style="min-width: 6px;"></div>
@@ -143,6 +146,21 @@
         </div>
         <div class="cm-dialog-footer">
             <button type="button" class="cm-btn cm-btn-primary" data-cm-action="ok">@Localizer["Confirm"]</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom action select dialog -->
+<div id="cmActionDialog" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmActionTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmActionTitle" class="cm-dialog-title cm-action-title">@Localizer["SelectAction"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="cancel" aria-label="@Localizer["Close"]">✕</button>
+        </div>
+        <div class="cm-dialog-body cm-action-body">@Localizer["SelectActionMessage"]</div>
+        <div class="cm-dialog-footer">
+            <button type="button" class="cm-btn cm-btn-success" data-cm-action="approve">@Localizer["Approve"]</button>
+            <button type="button" class="cm-btn cm-btn-outline-danger" data-cm-action="reject">@Localizer["Reject"]</button>
         </div>
     </div>
 </div>
@@ -187,7 +205,47 @@
             Close = Localizer["Close"].Value,
             SearchEllipsis = Localizer["SearchEllipsis"].Value,
             NoResults = Localizer["NoResults"].Value,
-            SelectPlaceholder = Localizer["SelectPlaceholder"].Value
+            SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
+            LoadingMessage = Localizer["LoadingMessage"].Value,
+            Success = Localizer["Success"].Value,
+            ImportSuccess = Localizer["ImportSuccess"].Value,
+            Error = Localizer["Error"].Value,
+            ExportError = Localizer["ExportError"].Value,
+            Processing = Localizer["Processing"].Value,
+            BtnSave = Localizer["BtnSave"].Value,
+            RequestQuoteNumber = Localizer["RequestQuoteNumber"].Value,
+            Department = Localizer["Department"].Value,
+            EquipmentClassification = Localizer["EquipmentClassification"].Value,
+            EquipmentCode = Localizer["EquipmentCode"].Value,
+            SupplierItemCode = Localizer["SupplierItemCode"].Value,
+            VietnameseItemNameDraft = Localizer["VietnameseItemNameDraft"].Value,
+            EnglishItemName = Localizer["EnglishItemName"].Value,
+            Quantity = Localizer["Quantity"].Value,
+            Unit = Localizer["Unit"].Value,
+            ItemCategory = Localizer["ItemCategory"].Value,
+            Shape = Localizer["Shape"].Value,
+            Material = Localizer["Material"].Value,
+            Composition = Localizer["Composition"].Value,
+            Dimensions = Localizer["Dimensions"].Value,
+            UsedForMachine = Localizer["UsedForMachine"].Value,
+            Feature = Localizer["Feature"].Value,
+            ConfirmName = Localizer["ConfirmName"].Value,
+            ConfirmCode = Localizer["ConfirmCode"].Value,
+            Status = Localizer["Status"].Value,
+            CreatedDate = Localizer["CreatedDate"].Value,
+            Handler = Localizer["Handler"].Value,
+            Note = Localizer["Note"].Value,
+            Actions = Localizer["Actions"].Value,
+            Record = Localizer["Record"].Value,
+            Datafield = Localizer["Datafield"].Value,
+            Select = Localizer["Select"].Value,
+            BulkSave = Localizer["BulkSave"].Value,
+            BulkApprove = Localizer["BulkApprove"].Value,
+            NoSelection = Localizer["NoSelection"].Value,
+            BulkApproveTitle = Localizer["BulkApproveTitle"].Value,
+            BulkApproveMessage = Localizer["BulkApproveMessage"].Value,
+            SelectAction = Localizer["SelectAction"].Value,
+            SelectActionMessage = Localizer["SelectActionMessage"].Value
         }));
     </script>
 }

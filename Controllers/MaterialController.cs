@@ -17,11 +17,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly INhomViTriService _nhomViTriService;
         private readonly IBaoGiaService _baoGiaService;
         private readonly IWebHostEnvironment _env;
-        public MaterialController(IBaoGiaConfirmNameService confirmNameService, INhomViTriService nhomViTriService, IBaoGiaService baoGiaService, IWebHostEnvironment env)
+        private readonly ISendMailService _sendMailService;
+        public MaterialController(IBaoGiaConfirmNameService confirmNameService, INhomViTriService nhomViTriService, IBaoGiaService baoGiaService, IWebHostEnvironment env, ISendMailService sendMailService)
         {
             _confirmNameService = confirmNameService;
             _nhomViTriService = nhomViTriService;
             _baoGiaService = baoGiaService;
+            _sendMailService = sendMailService;
             _env = env;
         }
         // MARK: Confirm Name actions use EF context directly
@@ -63,6 +65,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
         {
+            //var a = _sendMailService.SendMailAsync("PhuongThuy.VuThi@brother-bivn.com.vn;" +
+            //    "nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn", "", 17, "WebDAV Publishing ",true,"","","khanhmf" );
             var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, req.pageIndex, req.pageSize);
             if (!result.Success)
             {
@@ -140,6 +144,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 for (int r = startRow; r <= lastRow; r++)
                 {
+                    if(ws.Cell(r, 2).GetString() == "")
+                    {
+                        break; // Nếu cột 2 (trạng thái) trống, dừng đọc tiếp
+                    }
                     if (ws.Cell(r, 3).GetString() == "")
                     {
                         ws.Cell(r, 25).SetValue("Số đơn yêu cầu không được để trống");
@@ -159,7 +167,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
-                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                ID_RequestQuote = int.Parse(ws.Cell(r, 3).GetString()),
                                 VCHR_TenHaiQuan = tenHaiQuan,
                                 VCHR_UserShip = GetCurrentUserId(),
                                 DTM_UserShip = DateTime.Now
@@ -175,7 +183,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
-                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                ID_RequestQuote = int.Parse(ws.Cell(r, 3).GetString()),
                                 VCHR_MaHangNoiBo = mahang,
                                 VCHR_UserAcc = GetCurrentUserId(),
                                 DTM_UserAcc = DateTime.Now
@@ -192,7 +200,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
-                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                ID_RequestQuote = int.Parse(ws.Cell(r, 3).GetString()),
                                 VCHR_TenHaiQuan = tenHaiQuanPUR,
                                 VCHR_MaHangNoiBo = mahangPUR,
                                 VCHR_UserPUR = GetCurrentUserId(),
@@ -215,7 +223,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     return File(bytes, contentType, fileName);
                 }
-                if(item.Any() || item == null)
+                if (!item.Any() || item == null)
                 {
                     return BadRequest("Không có dữ liệu hợp lệ để lưu");
                 }
@@ -285,7 +293,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     // Map fields into template columns similar to ExportSelection
                     ws.Cell(row, 2).SetValue(GetString(rq, "CHR_Status"));
-                    ws.Cell(row, 3).SetValue(GetString(rq, "ID") == string.Empty ? GetString(rq, "ID_RequestQuote") : GetString(rq, "ID"));
+                    ws.Cell(row, 3).SetValue(GetString(rq, "ID_RequestQuote"));
                     ws.Cell(row, 4).SetValue(idx);
                     ws.Cell(row, 5).SetValue(GetString(rq, "CHR_SectionCode"));
                     ws.Cell(row, 6).SetValue(GetString(rq, "CHR_SectionName"));

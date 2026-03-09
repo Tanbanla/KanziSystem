@@ -246,6 +246,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             cf.DTM_CreateDate = DateTime.Now;
                             cf.VCHR_CreateBy = GetCurrentUserId();
                             cf.VCHR_TenRecomment = i.NVCHR_NameVN;
+                            cf.CHR_Status = "Confirming";
                             listConfirm.Add(cf);
                         }
                         await _baoGiaConfirmNameService.AddListAsync(listConfirm);
@@ -1227,7 +1228,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var vm = new QuoteModel
             {
-               // per-request distilled lists
+                // per-request distilled lists
                 listCategory = listCategory,
                 listNcc = listNcc,
                 listMaterial = listMaterial,
@@ -1287,53 +1288,53 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // Bắt đầu đọc từ dòng 15
                     for (int r = 15; r <= lastRow; r++)
                     {
-                    var errors = new List<string>();
+                        var errors = new List<string>();
 
-                    // Kiểm tra các cột bắt buộc (17,18,19)
-                    if (string.IsNullOrWhiteSpace(ws.Cell(r, 17).GetString())) errors.Add("Cột 17 (VCHR_CamKet) bắt buộc");
-                    if (string.IsNullOrWhiteSpace(ws.Cell(r, 18).GetString())) errors.Add("Cột 18 (NVCHR_DeliveryTerm) bắt buộc");
-                    if (string.IsNullOrWhiteSpace(ws.Cell(r, 19).GetString())) errors.Add("Cột 19 (NVCHR_PaymentTerm) bắt buộc");
+                        // Kiểm tra các cột bắt buộc (17,18,19)
+                        if (string.IsNullOrWhiteSpace(ws.Cell(r, 17).GetString())) errors.Add("Cột 17 (VCHR_CamKet) bắt buộc");
+                        if (string.IsNullOrWhiteSpace(ws.Cell(r, 18).GetString())) errors.Add("Cột 18 (NVCHR_DeliveryTerm) bắt buộc");
+                        if (string.IsNullOrWhiteSpace(ws.Cell(r, 19).GetString())) errors.Add("Cột 19 (NVCHR_PaymentTerm) bắt buộc");
 
-                    // So sánh tên mở thủ tục hải quan (cột 3 vs 24) và tên tiếng Anh (4 vs 25)
-                    if (!string.Equals(ws.Cell(r, 3).GetString(), ws.Cell(r, 24).GetString(), StringComparison.Ordinal)) errors.Add("Tên mở thủ tục hải quan khác nhau (cột 3 vs 24)");
-                    if (!string.Equals(ws.Cell(r, 4).GetString(), ws.Cell(r, 25).GetString(), StringComparison.Ordinal)) errors.Add("Tên tiếng Anh khác nhau (cột 4 vs 25)");
+                        // So sánh tên mở thủ tục hải quan (cột 3 vs 24) và tên tiếng Anh (4 vs 25)
+                        if (!string.Equals(ws.Cell(r, 3).GetString(), ws.Cell(r, 24).GetString(), StringComparison.Ordinal)) errors.Add("Tên mở thủ tục hải quan khác nhau (cột 3 vs 24)");
+                        if (!string.Equals(ws.Cell(r, 4).GetString(), ws.Cell(r, 25).GetString(), StringComparison.Ordinal)) errors.Add("Tên tiếng Anh khác nhau (cột 4 vs 25)");
 
-                    // So sánh số lượng (5 vs 26)
-                    var qty1 = ParseInt(ws.Cell(r, 5).GetString());
-                    var qty2 = ParseInt(ws.Cell(r, 26).GetString());
-                    if (qty1 == null || qty2 == null)
-                    {
-                        if (qty1 == null) errors.Add("Cột 5 không phải số hợp lệ");
-                        if (qty2 == null) errors.Add("Cột 26 không phải số hợp lệ");
-                    }
-                    else if (qty1 != qty2) errors.Add("Số lượng khác nhau giữa cột 5 và 26");
+                        // So sánh số lượng (5 vs 26)
+                        var qty1 = ParseInt(ws.Cell(r, 5).GetString());
+                        var qty2 = ParseInt(ws.Cell(r, 26).GetString());
+                        if (qty1 == null || qty2 == null)
+                        {
+                            if (qty1 == null) errors.Add("Cột 5 không phải số hợp lệ");
+                            if (qty2 == null) errors.Add("Cột 26 không phải số hợp lệ");
+                        }
+                        else if (qty1 != qty2) errors.Add("Số lượng khác nhau giữa cột 5 và 26");
 
-                    // So sánh đơn vị (6 vs 27)
-                    if (!string.Equals(ws.Cell(r, 6).GetString(), ws.Cell(r, 27).GetString(), StringComparison.Ordinal)) errors.Add("Đơn vị khác nhau (cột 6 vs 27)");
+                        // So sánh đơn vị (6 vs 27)
+                        if (!string.Equals(ws.Cell(r, 6).GetString(), ws.Cell(r, 27).GetString(), StringComparison.Ordinal)) errors.Add("Đơn vị khác nhau (cột 6 vs 27)");
 
-                    // Ngày giao hàng (cột 12) so sánh với yêu cầu (cột 36)
-                    var ship = ParseDate(ws.Cell(r, 12).GetString());
-                    var reqDate = ParseDate(ws.Cell(r, 36).GetString());
-                    if (ship == null) errors.Add("Cột 12 (DTM_ShipTime) không phải ngày hợp lệ");
-                    if (reqDate == null) errors.Add("Cột 36 (DTM_NgayMuonNhan yêu cầu) không phải ngày hợp lệ");
-                    if (ship != null && reqDate != null && ship > reqDate) errors.Add("Thời gian giao hàng muộn hơn yêu cầu (cột 12 > cột 36)");
+                        // Ngày giao hàng (cột 12) so sánh với yêu cầu (cột 36)
+                        var ship = ParseDate(ws.Cell(r, 12).GetString());
+                        var reqDate = ParseDate(ws.Cell(r, 36).GetString());
+                        if (ship == null) errors.Add("Cột 12 (DTM_ShipTime) không phải ngày hợp lệ");
+                        if (reqDate == null) errors.Add("Cột 36 (DTM_NgayMuonNhan yêu cầu) không phải ngày hợp lệ");
+                        if (ship != null && reqDate != null && ship > reqDate) errors.Add("Thời gian giao hàng muộn hơn yêu cầu (cột 12 > cột 36)");
 
-                    // MOQ (cột 9) <= Số lượng (cột 5)
-                    var moq = ParseInt(ws.Cell(r, 9).GetString());
-                    if (moq != null && qty1 != null && moq > qty1) errors.Add("MOQ (cột 9) lớn hơn Số lượng (cột 5)");
+                        // MOQ (cột 9) <= Số lượng (cột 5)
+                        var moq = ParseInt(ws.Cell(r, 9).GetString());
+                        if (moq != null && qty1 != null && moq > qty1) errors.Add("MOQ (cột 9) lớn hơn Số lượng (cột 5)");
 
-                    // Kiểm tra các điều kiện Rohs/COCQ/MSDS/AnToan: nếu expected yêu cầu nhưng value thiếu -> lỗi
-                    if (CheckNotRequired(ws.Cell(r, 13).GetString())) errors.Add("Rohs không thỏa mãn (cột 13)");
-                    if (CheckNotRequired(ws.Cell(r, 14).GetString())) errors.Add("CO/CQ không thỏa mãn (cột 14)");
-                    if (CheckNotRequired(ws.Cell(r, 15).GetString())) errors.Add("MSDS không thỏa mãn (cột 15)");
-                    if (CheckNotRequired(ws.Cell(r, 16).GetString())) errors.Add("An toàn không thỏa mãn (cột 16)");
+                        // Kiểm tra các điều kiện Rohs/COCQ/MSDS/AnToan: nếu expected yêu cầu nhưng value thiếu -> lỗi
+                        if (CheckNotRequired(ws.Cell(r, 13).GetString())) errors.Add("Rohs không thỏa mãn (cột 13)");
+                        if (CheckNotRequired(ws.Cell(r, 14).GetString())) errors.Add("CO/CQ không thỏa mãn (cột 14)");
+                        if (CheckNotRequired(ws.Cell(r, 15).GetString())) errors.Add("MSDS không thỏa mãn (cột 15)");
+                        if (CheckNotRequired(ws.Cell(r, 16).GetString())) errors.Add("An toàn không thỏa mãn (cột 16)");
 
-                    if (errors.Any())
-                    {
-                        ws.Cell(r, 38).SetValue(string.Join("; ", errors));
-                        hasErrors = true;
-                        continue;
-                    }
+                        if (errors.Any())
+                        {
+                            ws.Cell(r, 38).SetValue(string.Join("; ", errors));
+                            hasErrors = true;
+                            continue;
+                        }
                         // lấy Id của đơn lưu trong csdl
                         var checkRQ = await _baoGiaDetailService.GetIdOfQuotationAsync(ws.Cell(r, 20).GetString(),
                             ws.Cell(r, 21).GetString(), ws.Cell(r, 34).GetString(), ws.Cell(r, 24).GetString());
@@ -1353,8 +1354,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             CHR_NameEN = ws.Cell(r, 4).GetString(),
                             INT_SoLuong = (int?)ParseDouble(ws.Cell(r, 5).GetString()),
                             NVCHR_DonVi = ws.Cell(r, 6).GetString(),
-                            FL_USD = ParseDouble(ws.Cell(r, 7).GetString()), 
-                            FL_VND = ParseDouble(ws.Cell(r, 8).GetString()), 
+                            FL_USD = ParseDouble(ws.Cell(r, 7).GetString()),
+                            FL_VND = ParseDouble(ws.Cell(r, 8).GetString()),
                             NVCHR_MOQ = ws.Cell(r, 9).GetString(),
                             NVCHR_Packing = ws.Cell(r, 10).GetString(),
                             DTM_LeadTime = ws.Cell(r, 11).GetString(),
@@ -1363,11 +1364,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             VCHR_COCQ = ws.Cell(r, 14).GetString(),
                             VCHR_MSDS = ws.Cell(r, 15).GetString(),
                             VCHR_AnToan = ws.Cell(r, 16).GetString(),
-                            VCHR_CamKet = ws.Cell(r, 17).GetString(), 
+                            VCHR_CamKet = ws.Cell(r, 17).GetString(),
                             NVCHR_DeliveryTerm = ws.Cell(r, 18).GetString(),
-                            NVCHR_PaymentTerm = ws.Cell(r, 19).GetString(), 
+                            NVCHR_PaymentTerm = ws.Cell(r, 19).GetString(),
                             CHR_UpdateBy = GetCurrentUserId(),
-                            NVCHR_File = "", 
+                            NVCHR_File = "",
                         };
                         items.Add(dto);
                     }
@@ -1416,7 +1417,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var v = (value ?? string.Empty).Trim().ToLowerInvariant();
             var e = expected.Trim().ToLowerInvariant();
-            if (e.Contains("need") && !e.Contains("no need") && !e.Contains("non-need") )
+            if (e.Contains("need") && !e.Contains("no need") && !e.Contains("non-need"))
             {
                 if (string.IsNullOrWhiteSpace(v)) return false;
                 if (v.Contains("ok") || v == "ok") return true;

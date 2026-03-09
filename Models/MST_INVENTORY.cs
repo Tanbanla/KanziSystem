@@ -5,7 +5,7 @@
     {
         public int? Id_Kho { get; set; }
         public string? MaNguyenLieu { get; set; }
-        public string? Hientai { get; set; }
+        public double? Hientai { get; set; }
         public string? ToiThieu { get; set; }
         public string? ToiDa { get; set; }
         public string? Group_Code { get; set; }
@@ -36,7 +36,7 @@
                 {
                     Id_Kho = int.Parse(_cmd.Rows[i]["Id_Kho"].ToString()!),
                     MaNguyenLieu = _cmd.Rows[i]["MaNguyenLieu"].ToString(),
-                    Hientai = _cmd.Rows[i]["Hientai"].ToString(),
+                    Hientai = double.Parse(_cmd.Rows[i]["Hientai"].ToString()!),
                     ToiThieu = _cmd.Rows[i]["ToiThieu"].ToString(),
                     ToiDa = _cmd.Rows[i]["ToiDa"].ToString(),
                     Group_Code = _cmd.Rows[i]["Group_Code"].ToString(),

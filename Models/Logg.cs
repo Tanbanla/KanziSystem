@@ -5,7 +5,7 @@
         public int? Id_Lichsu { get; set; }
         public string? MaNguyenLieu { get; set; }
         public string? Hanhdong { get; set; }
-        public int? Soluong { get; set; }
+        public double? Soluong { get; set; }
         public string? Loai { get; set; }
         public string? Ngaynhaokho { get; set; }
         public string? Thoigian { get; set; }
@@ -32,7 +32,7 @@
                     Id_Lichsu = int.Parse(lst.Rows[i]["Id_Lichsu"].ToString()!),
                     MaNguyenLieu = lst.Rows[i]["MaNguyenLieu"].ToString()!,
                     Hanhdong = lst.Rows[i]["Hanhdong"].ToString()!,
-                    Soluong = int.Parse(lst.Rows[i]["Soluong"].ToString()!),
+                    Soluong = double.Parse(lst.Rows[i]["Soluong"].ToString()!),
                     Loai = lst.Rows[i]["Loai"].ToString()!,
                     Ngaynhaokho = lst.Rows[i]["Ngaynhaokho"].ToString()!,
                     Thoigian = lst.Rows[i]["Thoigian"].ToString()!,

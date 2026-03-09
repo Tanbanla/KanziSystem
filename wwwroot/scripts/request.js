@@ -161,17 +161,26 @@ async function send_mail(mail_to, Urgent) {
         success: function (response) {
             alert("Đăng ký thành công !");
             location.reload();
-            document.querySelectorAll('.close').forEach(button => button.click());
-            var us = document.getElementById("us").innerHTML;
-            _load_confirm(us);
+            document.querySelectorAll('.close').forEach(button => button.click());           
+            _load_confirm();
         }
     })
 }
 
-async function _load_confirm(us) {
+async function _load_confirm() {
 
+    var Urgent = document.getElementById("trangthaidon").value;
+    var Total = document.getElementById("giadonhang").value;
+    var Code_Request = document.getElementById("mnl").value;
+    var INT_STEP = document.getElementById("tinhtrangdon").value;
+
+    var us = document.getElementById("us").innerHTML;
     const formData = new URLSearchParams();
     formData.append('us', us);
+    formData.append('Urgent', Urgent);
+    formData.append('Total', Total);
+    formData.append('Code_Request', Code_Request);
+    formData.append('INT_STEP', INT_STEP);
 
     fetch('/Request/_get_confirm', {
         method: 'POST',
@@ -221,8 +230,7 @@ async function _load_confirm(us) {
 
                 return `
                 <tr>
-                    <td><input type="checkbox" /></td>
-
+                    <td><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>
                     <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info"></i></button></td>
                     <td>${urg}</td>
                     <td>${trangthai}</td>
@@ -252,47 +260,46 @@ function _modal_info(cost_request, step) {
             cost_request: cost_request
         },
         success: function (response) {
-            console.log(response);
             document.getElementById("modal-7").click();
-            document.getElementById("load_detail").innerHTML = "";
-            document.getElementById("madonhang").innerHTML = "*" + response[0].code_Request + "*";
-            document.getElementById("mbp").innerHTML = response[0].cost_Center_Group;
-            document.getElementById("mpb_yc").innerHTML = response[0].cost_Center;
-            document.getElementById("tenphongban").innerHTML = response[0].name_Dept;
-            document.getElementById("nyc").innerHTML = response[0].creat_Date.split(' ')[0];
-            document.getElementById("thmm").innerHTML = response[0].dealine.split(' ')[0];
-            document.getElementById("khoi").innerHTML = response[0].group_Code.split(' ')[0];
-            document.getElementById("id_request").innerHTML = response[0].id_Request;
-            document.getElementById("urgent").innerHTML = response[0].urgent;
-            document.getElementById("step").innerHTML = step;
+            document.getElementById("load_detail_0").innerHTML = "";
+            document.getElementById("madonhang_0").innerHTML = "*" + response[0].code_Request + "*";
+            document.getElementById("mbp_0").innerHTML = response[0].cost_Center_Group;
+            document.getElementById("mpb_yc_0").innerHTML = response[0].cost_Center;
+            document.getElementById("tenphongban_0").innerHTML = response[0].name_Dept;
+            document.getElementById("nyc_0").innerHTML = response[0].creat_Date.split(' ')[0];
+            document.getElementById("thmm_0").innerHTML = response[0].dealine.split(' ')[0];
+            document.getElementById("khoi_0").innerHTML = response[0].group_Code.split(' ')[0];
+            document.getElementById("id_request_0").innerHTML = response[0].id_Request;
+            document.getElementById("urgent_0").innerHTML = response[0].urgent;
+            document.getElementById("step_0").innerHTML = step;
             if (step == "0") {
-                document.getElementById("regency").innerHTML = "NGUOIYEUCAU";
+                document.getElementById("regency_0").innerHTML = "NGUOIYEUCAU";
             }
             if (step == "1") {
-                document.getElementById("regency").innerHTML = "NGUOITHAMTRA";
+                document.getElementById("regency_0").innerHTML = "NGUOITHAMTRA";
             }
             if (step == "2") {
-                document.getElementById("regency").innerHTML = "NGUOIPHEDUYET";
+                document.getElementById("regency_0").innerHTML = "NGUOIPHEDUYET";
             }
             if (step == "3") {
-                document.getElementById("regency").innerHTML = "XACNHAN";
+                document.getElementById("regency_0").innerHTML = "XACNHAN";
             }
             if (step == "4") {
-                document.getElementById("regency").innerHTML = "XUATKHO";
+                document.getElementById("regency_0").innerHTML = "XUATKHO";
             }
             for (var i = 0; i < response.length; i++) {
                 var tongtien = response[i].total_exchange;
-                document.getElementById("load_detail").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount}</td><td>${response[i].unit}</td><td>${response[i].price}</td><td>${response[i].currency}</td><td>${tongtien}</td><td>${response[i].aim}</td>`;
+                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount}</td><td>${response[i].unit}</td><td>${response[i].price}</td><td>${response[i].currency}</td><td>${tongtien}</td><td>${response[i].aim}</td>`;
             }
         }
     })
 }
-function _update_request() {
+function _update_request(id) {
 
-    var id_request = document.getElementById("id_request").innerHTML;
-    var regency = document.getElementById("regency").innerHTML;
-    var step = document.getElementById("step").innerHTML;
-    var urgent = document.getElementById("urgent").innerHTML;
+    var id_request = document.getElementById("id_request" + id).innerHTML;
+    var regency = document.getElementById("regency" + id).innerHTML;
+    var step = document.getElementById("step" + id).innerHTML;
+    var urgent = document.getElementById("urgent" + id).innerHTML;
 
     const params = new URLSearchParams();
     params.append('id_request', id_request);
@@ -323,19 +330,55 @@ function _update_request() {
         });
 
 }
-function _reject() {
-    var id_request = document.getElementById("id_request").innerHTML;
-    var regency = document.getElementById("regency").innerHTML;
-    var step = document.getElementById("step").innerHTML;
-    var urgent = document.getElementById("urgent").innerHTML;
-    var reason = document.getElementById("reason").value;
+function _update_request_all(id) {
+
+    var id_request = document.getElementById("id_request" + id).innerHTML;
+    var regency = document.getElementById("regency" + id).innerHTML;
+    var step = document.getElementById("step" + id).innerHTML;
+    var urgent = document.getElementById("urgent" + id).innerHTML;
 
     const params = new URLSearchParams();
     params.append('id_request', id_request);
     params.append('regency', regency);
     params.append('step', step);
     params.append('urgent', urgent);
-    params.append('reason', reason);
+
+    fetch('/Request/_update_request', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then(data => {
+            alert(data);
+            var us = document.getElementById("us").innerHTML;
+            document.getElementById("cls_" + id).innerHTML = "";
+            _load_confirm(us);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+
+}
+function _reject(id) {
+    var id_request = document.getElementById("id_request" + id).innerHTML;
+    var regency = document.getElementById("regency" + id).innerHTML;
+    var step = document.getElementById("step" + id).innerHTML;
+    var urgent = document.getElementById("urgent" + id).innerHTML;
+    var reason = document.getElementById("reason" + id).value;
+
+    const params = new URLSearchParams();
+    params.append('id_request' + id, id_request);
+    params.append('regency' + id, regency);
+    params.append('step' + id, step);
+    params.append('urgent' + id, urgent);
+    params.append('reason' + id, reason);
 
     fetch('/Request/_reject', {
         method: 'POST',
@@ -359,5 +402,12 @@ function _reject() {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+}
+function _reset() {
+    document.getElementById("trangthaidon").value = "";
+    document.getElementById("giadonhang").value = "";
+    document.getElementById("mnl").value = "";
+    document.getElementById("tinhtrangdon").value = "";
+    _load_confirm();
 }
 

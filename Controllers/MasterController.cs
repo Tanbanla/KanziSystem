@@ -22,12 +22,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
         private readonly IBaoGiaNCCService _baoGiaNCCService;
         private readonly ITmCategoryService _tmCategoryService;
+        private readonly IMaterialService _materialService;
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
             ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
             IBaoGiaNccCategoryService baoGiaNccCategoryService, IBaoGiaNCCService baoGiaNCCService
-            , ILogger<MasterController> logger, ITmCategoryService tmCategoryService)
+            , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService)
         {
             _approverService = approverService;
             _baoGiaStepService = baoGiaStepService;
@@ -39,6 +40,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaNccCategoryService = baoGiaNccCategoryService;
             _logger = logger;
             _tmCategoryService = tmCategoryService;
+            _materialService = materialService;
         }
 
         public IActionResult Masters()
@@ -364,7 +366,56 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
 
         }
+        // Nhập file cập nhật thông tin các mặt hàng
+        [HttpPost]
+        public async Task<IActionResult> UpdateMaterialInfo([FromForm] ImportSupplierDetailDTO insertFile)
+        {
 
+            if(insertFile.FileExcel == null || insertFile.FileExcel.Length == 0)
+            {
+                return BadRequest("File không hợp lệ");
+            }
+
+            var items = new List<MATERIALDTO>();
+            try
+            {
+                using var stream = insertFile.FileExcel.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                // lấy dữ liệu từ dòng 3
+                int startRow = 3;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 2).GetString() == "" || ws.Cell(r, 2).GetString() == null)
+                    {
+                        break;
+                    }
+                    // cac truong con lai doi cap nhat
+                    // Map theo thứ tự cột trong bảng ở giao diện
+                    var dto = new MATERIALDTO
+                    {
+                        Material_Code = ws.Cell(r, 1).GetString().Trim(),
+                        Category_VN = ws.Cell(r, 14).GetString(),
+                    };
+      
+                     items.Add(dto);
+                }
+                if (items.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                await _materialService.UpdateMaterialAsync(items);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
         // Nhập danh sách loại hàng nhà cung cấp
         [HttpPost]
         public async Task<IActionResult> AddListSupplierDetail([FromForm] InsertFileExcelSupplierRequestDTO insertFile)

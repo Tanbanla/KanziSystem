@@ -302,6 +302,35 @@ $("#modal-13").fireModal({
         console.log(form)
     },
 });
+$("#modal-15").fireModal({
+    title: '',
+    body: $("#modal-silder"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '90%');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+        // Form Data
+        let form_data = $(e.target).serialize();
+        console.log(form_data)
+
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
 $('.oh-my-modal').fireModal({
   title: 'My Modal',
   body: 'This is cool plugin!'

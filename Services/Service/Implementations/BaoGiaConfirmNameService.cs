@@ -59,7 +59,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var data = _mapper.Map<BaoGia_Confirm_Name_Quotation>(confirmName);
                 result.Data = await _repo.AddConfirmNameAsync(data);
                 result.Success = true;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 result.Message = ex.Message;
                 result.Success = false;

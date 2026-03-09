@@ -1,7 +1,6 @@
 ﻿@using PRJ_WAREHOUSE_BIVN.Language
 @{
 }
-<script type="text/javascript" src="~/scripts/delivery.js"></script>
 
 <style>
     .card .card-header .form-control {
@@ -137,7 +136,6 @@
                         <input type="text" class="form-control" id="poNumber" placeholder="@Languages.NhapPO">
                     </div>
                 </div>
-
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
@@ -153,7 +151,7 @@
                     </div>
                 </div>
 
-                <button class="btn btn-success" style="margin-left:20px;" onclick="SearchPoDelivery()"> <i class="ion ion-search" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.timkiem</button>
+                <button class="btn btn-success" style="margin-left:20px;" onclick="SearchPoDel()"> <i class="ion ion-search" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.timkiem</button>
                 <button id="openModal" class="btn btn-danger btn-open" style="margin-left:20px;"> <i class="ion ion-cash" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.donviquydoi</button>
                 <button class="btn btn-info" style="margin-left:20px;" onclick="resett()"> <i class="ion ion-ios-refresh" style="align-content:center; margin:5px;vertical-align:middle;"></i>Reset</button>
 
@@ -228,27 +226,62 @@
                                         <th>@Languages.tinhtranghaiquan</th>
                                     </tr>
                                 </thead>
-                                <tbody id="show_kho" style="color:black;"></tbody>
+                                <tbody id="show_kho_iv" style="color:black;"></tbody>
                             </table>
-                            <ul class="pagination" id="pagination-controls"></ul>
-                        </div>
-                   
+                        </div>                  
                 </div>
             </div>
         </div>
     </div>
-
 </div>
+<div class="modal" id="CommonModal">
+    <div class="modal-content" style="width:600px">
+        <div class="modal-header">
+            <h3 id="headerModal" style="color:deepskyblue;">Danh sách đơn vị quy đổi</h3>
+            <div class="modal-footer">
+                <span class=" close-modal">&times;</span>
+            </div>
+        </div>
+        <div class="modal-body" id="bodyModal">
+        </div>
+    </div>
+</div>
+<script src="~/scripts/delivery.js"></script>
 <script>
-    function resett(){
-            document.getElementById("show_kho").innerHTML = "";
-            document.getElementById("poNumber").value = "";
-        }
+    window.onload = function ()
+    {
+        loadListWarehouse();
+    }
+    function loadListWarehouse() {
+            fetch('/Delivery/GetWareHouse', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('IdWarehouse').innerHTML = ""; 
+                console.log(data);
+                data.forEach((wh) => {
+                       document.getElementById('IdWarehouse').innerHTML  += `<option>${wh}</option>`;
+                })
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+      
+    }
     document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById("CommonModal");
-    const btn = document.getElementById("openModal") || document.querySelector(".btn-open");
-    const closeBtn = modal ? modal.querySelector(".close-btn") : null;
-    const closeBottom = modal ? modal.querySelector(".close-modal") : null;
+        let modal = document.getElementById("CommonModal");
+        let btn = document.getElementById("openModal") || document.querySelector(".btn-open");
+        let closeBtn = modal ? modal.querySelector(".close-btn") : null;
+        let closeBottom = modal ? modal.querySelector(".close-modal") : null;
 
     async function openModal() {
     const url = '/Delivery/GetExchangeUnit';
@@ -257,11 +290,10 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     };
-
     try
-    {
-        const response = await fetch(url, options);
-        const result = await response.json();
+    {    
+        response = await fetch(url, options);
+        result = await response.json();
         console.log('openModal Data : ', result);
         populateConversionTable(result);
     }
@@ -317,23 +349,19 @@
 });
 
 // 1. Lấy ra checkbox "Chọn tất cả" và danh sách các checkbox "con"
-const checkAll = document.getElementById('checkAll');
-
-// Sử dụng Event Delegation (Ủy quyền sự kiện) để xử lý cho cả các dòng được tạo động
-document.addEventListener('change', function(e) {
+    let checkAll = document.getElementById('checkAll');
+    document.addEventListener('change', function(e) {
     
-    // XỬ LÝ 1: Khi click vào nút Check All trên đầu bảng
     if (e.target && e.target.id === 'checkAll') {
-        const checkboxes = document.querySelectorAll('.item');
+            let checkboxes = document.querySelectorAll('.item');
         checkboxes.forEach(cb => {
             cb.checked = e.target.checked;
         });
     }
 
-    // XỬ LÝ 2: Khi click vào từng ô .item lẻ (Chiều ngược)
     if (e.target && e.target.classList.contains('item')) {
-        const allItems = document.querySelectorAll('.item');
-        const checkedItems = document.querySelectorAll('.item:checked');
+            let allItems = document.querySelectorAll('.item');
+        let checkedItems = document.querySelectorAll('.item:checked');
         
         // Nếu số lượng checkbox đang chọn bằng tổng số checkbox -> Check nút đầu bảng
         checkAll.checked = (allItems.length === checkedItems.length);
@@ -341,20 +369,7 @@ document.addEventListener('change', function(e) {
         // Trạng thái lửng lơ (Gạch ngang) nếu chỉ chọn một vài ô
         checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
     }
+
 });
 </script>
 
-<div class="modal" id="CommonModal">
-    <div class="modal-content" style="width:600px">
-        <div class="modal-header">
-            <h3 id="headerModal" style="color:deepskyblue;">Danh sách đơn vị quy đổi</h3>
-            <div class="modal-footer">
-                <span class=" close-modal">&times;</span>
-            </div>
-        </div>
-        <div class="modal-body" id="bodyModal">
-            
-        </div>
-     
-    </div>
-</div>

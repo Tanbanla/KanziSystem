@@ -185,57 +185,6 @@
     </form>
 </div>
 
-<div class="modal-part" id="modal-tainhap">
-    <style>
-        .modal-header, .modal-body, .modal-footer {
-            padding: 0px;
-        }
-    </style>
-    <form id="form-chuyenkho" class="needs-validation" novalidate>
-        <div class="card">
-            <div class="card-header bg-light">
-                <strong>Sửa số lượng tái nhập : <span id="id_tn" hidden></span></strong>
-            </div>
-            <div class="card-body">
-                <div class="mb-3 row align-items-center">
-                    <label class="col-sm-3 col-form-label"> Mã hàng :</label>
-                    <div class="col-sm-9">
-                        <span id="ma_tn" class="fs-5 text-primary"></span>
-                    </div>
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label"> Số lượng</label>
-                        <input type="text" id="soluong_tn" class="form-control" />
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label"> Đơn vị</label>
-                        <input type="text" id="donvi_tn" class="form-control" readonly />
-                    </div>
-                </div>
-
-                <div class="row g-3 mt-3">
-                    <div class="col-md-6">
-                        <label class="form-label"> Giá tiền</label>
-                        <input type="number" id="giatien_tn" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label"> Kho</label>
-                        <input type="text" id="kho_tn" class="form-control" readonly />
-                    </div>                 
-                </div>
-            </div>
-
-            <div class="card-footer text-end">
-                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-outline-success" onclick="editt()">
-                    <i class="fas fa-pen"></i> Sửa
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
 <script>
     // Minimal client-side helpers: clamp quantity to available stock and show validation.
    function chekk(){

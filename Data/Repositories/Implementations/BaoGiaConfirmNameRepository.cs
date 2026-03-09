@@ -23,40 +23,39 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         //search thông tin xác nhận tên hàng
         public async Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize)
         {
-            // Xây dựng base query
-            var sqlBuilder = new StringBuilder(@"
-                SELECT c.* ,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.CHR_MaHangNCC,r.INT_SoLuong,
-				r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang
+            // Tách phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
+            var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
                 WHERE 1 = 1
-            ");
+            ";
 
+            var whereBuilder = new StringBuilder();
             var parameters = new DynamicParameters();
 
             // Thêm điều kiện tìm kiếm
             if (!string.IsNullOrWhiteSpace(TenHang))
             {
                 var kw = TenHang.Trim();
-                sqlBuilder.Append(" AND (ISNULL(c.VCHR_TenHaiQuan, '') LIKE @TenHang OR ISNULL(r.NVCHR_NameVN, '') LIKE @TenHang)");
+                whereBuilder.Append(" AND (ISNULL(c.VCHR_TenHaiQuan, '') LIKE @TenHang OR ISNULL(r.NVCHR_NameVN, '') LIKE @TenHang)");
                 parameters.Add("@TenHang", $"%{kw}%");
             }
 
             if (!string.IsNullOrWhiteSpace(SoDon))
             {
                 var md = SoDon.Trim();
-                sqlBuilder.Append(" AND ISNULL(r.CHR_MaDon, '') LIKE @SoDon");
+                whereBuilder.Append(" AND ISNULL(ID_RequestQuote, '') LIKE @SoDon");
                 parameters.Add("@SoDon", $"%{md}%");
             }
             if (!string.IsNullOrWhiteSpace(section))
             {
                 var se = section.Trim();
-                sqlBuilder.Append(" AND ISNULL(r.CHR_SectionCode, '') LIKE @Section");
+                whereBuilder.Append(" AND ISNULL(r.CHR_SectionCode, '') LIKE @Section");
                 parameters.Add("@Section", $"%{se}%");
             }
             if (!string.IsNullOrWhiteSpace(TrangThai))
             {
-                sqlBuilder.Append(" AND c.CHR_Status = @TrangThai");
+                whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
                 parameters.Add("@TrangThai", TrangThai.Trim());
             }
 
@@ -64,27 +63,29 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var PageIndex = pageIndex <= 0 ? 1 : pageIndex;
             var PageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 100);
 
-            sqlBuilder.Append(@"
-                ORDER BY c.DTM_CreateDate DESC
-                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
-            ");
+            // Truy vấn tổng (không có phân trang)
+            var countSql = "SELECT COUNT(1) " + baseFrom + whereBuilder.ToString();
+            var total = await _conn.ExecuteScalarAsync<long>(countSql, parameters);
+
+            // Thực hiện truy vấn dữ liệu với phân trang
+            var selectSql = new StringBuilder();
+            selectSql.Append("SELECT c.* ,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.CHR_MaHangNCC,r.INT_SoLuong,");
+            selectSql.Append(" r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang ");
+            selectSql.Append(baseFrom);
+            selectSql.Append(whereBuilder.ToString());
+            selectSql.Append(@" ORDER BY c.DTM_CreateDate ASC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
 
             parameters.Add("@Offset", (PageIndex - 1) * PageSize);
             parameters.Add("@PageSize", PageSize);
 
-            // Thực hiện query
-            var data = await _conn.QueryAsync<dynamic>(sqlBuilder.ToString(), parameters);
+            var data = await _conn.QueryAsync<dynamic>(selectSql.ToString(), parameters);
 
             var result = new ListRequest<dynamic>
             {
                 Data = data.ToList(),
-                TotalCount = await _conn.ExecuteScalarAsync<long>(@"
-                    SELECT COUNT(1)
-                    FROM BaoGia_Confirm_Name_Quotation c
-                    INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
-                    WHERE 1 = 1
-                    " + sqlBuilder.ToString().Split("ORDER BY")[0], parameters)
+                TotalCount = total
             };
+
             return result;
         }
         // Luu thong tin
@@ -195,7 +196,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var now = DateTime.Now;
             foreach (var i in confirmNames)
             {
-                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == i.ID);
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID_RequestQuote == i.ID_RequestQuote);
                 if (row == null) continue;
                 // Role enforcement
                 if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
@@ -210,13 +211,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_UserAcc = user;
                     row.DTM_UserAcc = now;
                 }
-                //else // UserPUR
-                //{
-                //    row.NVCHR_LyDo = i.NVCHR_LyDo;
-                //    row.NVCHR_Note = i.NVCHR_Note;
-                //    row.VCHR_UserPUR = user;
-                //    row.DTM_UserPUR = now;
-                //}
+                else // UserPUR
+                {
+                    row.VCHR_TenHaiQuan = i.VCHR_TenHaiQuan;
+                    row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
+                    row.NVCHR_LyDo = i.NVCHR_LyDo;
+                    row.NVCHR_Note = i.NVCHR_Note;
+                    row.VCHR_UserPUR = user;
+                    row.DTM_UserPUR = now;
+                }
 
                 if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
                     !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))

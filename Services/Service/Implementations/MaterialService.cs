@@ -81,5 +81,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // update danh sách linh kiện
+        public async Task<GenericResponse<bool>> UpdateMaterialAsync(List<MATERIALDTO> materials)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var materialsToUpdate = _mapper.Map<List<MATERIAL>>(materials);
+                await _repo.UpdateMaterialAsync(materialsToUpdate);
+                result.Data = true;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Data = false;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }
