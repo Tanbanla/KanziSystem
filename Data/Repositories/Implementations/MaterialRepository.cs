@@ -18,18 +18,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lay thong tin thao ma hang hoa
         public async Task<MATERIAL> GetByMaHangAsync(string maHang)
         {
-            try
-            {
-                var result = await _context.MATERIALs
-                .FirstOrDefaultAsync(m => m.Material_Code == maHang);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in GetByMaHangAsync: {ex.Message}");
-                return null;
-            }
+            var result = await _context.MATERIALs
+            .FirstOrDefaultAsync(m => m.Material_Code == maHang);
+            return result;
         }
         // Tim kiem thong tin hang hoa va phan trang
         public async Task<List<MATERIAL>> SearchAsync(string? MaHang, string? Name, string? NhomHang, int? pageIndex, int? pageSize)

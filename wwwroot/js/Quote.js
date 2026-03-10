@@ -784,12 +784,51 @@
         const tr = selectEl.closest('tr');
         const code = selectEl.value;
         if (!code) return;
+        // If supplier already selected on this row, do not auto-fill to avoid overwriting user's choice
+        //try {
+        //    const supplierSel = tr ? tr.querySelector('.nhaCungCapTb') : null;
+        //    const supVal = supplierSel ? (supplierSel.value || '').toString().trim() : '';
+        //    if (supVal) return; 
+        //} catch (e) { /* ignore */ }
         try {
             const res = await fetch(api.getMaterials(code));
             if (!res.ok) throw new Error(await res.text());
             const materials = await res.json();
             const material = Array.isArray(materials) ? materials.find((m) => m.material_Code === code) : null;
             if (!material) return;
+            // If a category is selected on this row, ensure the material's category matches
+            //try {
+            //    const categorySelect = tr ? tr.querySelector('.chungLoaiTb') : null;
+            //    const selectedCategory = categorySelect ? (categorySelect.value || '').toString().trim() : '';
+            //    // material may provide category under different property names
+            //    const materialCategory = (material.category_VN || material.category || material.nvchR_ChungLoai || '').toString().trim();
+            //    const T = window.i18nQuote || {};
+            //    if (selectedCategory && materialCategory && selectedCategory.toLowerCase() !== materialCategory.toLowerCase()) {
+            //        // mark category select as invalid (for both original select and searchable wrapper)
+            //        try { if (categorySelect) categorySelect.classList.add('is-invalid'); } catch (e) { }
+            //        try {
+            //            const $sel = $(categorySelect);
+            //            const $wrapper = $sel.siblings('.ms-container');
+            //            if ($wrapper.length) $wrapper.find('.ms-btn').addClass('is-invalid');
+            //        } catch (e) { }
+
+            //        showDialog({
+            //            title: T.WarningTitle || 'Cảnh báo',
+            //            message: `Chủng loại hàng của mã hàng nội bộ (${materialCategory}) không trùng với chủng loại đã chọn (${selectedCategory}).`,
+            //            type: 'error'
+            //        });
+            //        // do not auto-fill other fields when categories mismatch
+            //        return;
+            //    } else {
+            //        // remove any previous invalid marker
+            //        try { if (categorySelect) categorySelect.classList.remove('is-invalid'); } catch (e) { }
+            //        try {
+            //            const $sel = $(categorySelect);
+            //            const $wrapper = $sel.siblings('.ms-container');
+            //            if ($wrapper.length) $wrapper.find('.ms-btn').removeClass('is-invalid');
+            //        } catch (e) { }
+            //    }
+            //} catch (e) { console.warn('Lỗi khi bắt điều kiện chủng loại và mã hàng nội bộ:', e); }
             // Fill EN name
             const enInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('tên hàng en'));
             if (enInput && material.material_Name_EN) enInput.value = material.material_Name_EN;
@@ -1251,6 +1290,7 @@
                 const T = window.i18nQuote || {};
                 setError(e.message || T.MsgCannotExport || 'Không thể xuất file');
             } finally {
+                hideLoading();
                 setBusy(false);
             }
         };
