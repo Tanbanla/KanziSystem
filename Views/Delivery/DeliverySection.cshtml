@@ -3,180 +3,316 @@
     ViewData["Title"] = "Xác nhận hàng về kho phòng ban";
 }
 
-
-<script type="text/javascript" src="~/scripts/delivery.js"></script>
-
 <style>
-    .card .card-header .form-control {
-        height: 42px;
-        font-size: 13px;
-        border-radius: 2px;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
+    /* Hiệu ứng cuộn cho bảng */
+    .table-wrapper {
         width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(5px);
-        align-items: center;
-        justify-content: center;
+        overflow-x: auto; /* Cho phép cuộn ngang */
+        border: 1px solid #ddd;
+        border-radius: 4px;
     }
 
-    .modal-content {
-        background-color: #fff;
-        padding: 0;
-        border-radius: 12px;
-        width: 400px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        animation: slideDown 0.3s ease-out;
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 3000px; /* Ép bảng rộng ra để chứa 30+ cột */
+        font-size: 13px;
     }
 
-    .modal-header {
-        padding: 15px 20px;
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
         border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        white-space: nowrap; /* Ngăn dòng bị ngắt để bảng gọn gàng */
     }
 
-    .modal-body {
-        padding: 20px;
-        color: #444;
-        line-height: 1.6;
+    /* Header trang trí */
+    thead th {
+        color: #333;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        border-bottom: 2px solid #3498db;
     }
 
-    .modal-footer {
-        padding: 15px 20px;
-        border-top: 1px solid #eee;
-        text-align: right;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
+    /* Cố định cột quan trọng */
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        background-color: #fff;
+        z-index: 1;
+        border-right: 2px solid #ddd;
     }
 
-    .btn-open {
-        padding: 10px 20px;
-        cursor: pointer;
-        background: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
+    thead th.sticky-col {
+        background-color: #f8f9fa;
+        z-index: 2;
     }
 
-    .btn-primary {
-        background: #007bff;
-        color: #fff;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
+    /* Màu dòng khi di chuột qua */
+    tbody tr:hover {
+        background-color: #f1f8ff;
     }
 
-    .btn-secondary {
-        background: #e0e0e0;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
+    /* Trạng thái Label */
+    .status {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
     }
 
-    .close-btn {
-        font-size: 24px;
-        cursor: pointer;
-        color: #888;
+    .status-done {
+        background-color: #d4edda;
+        color: #155724;
     }
 
-        .close-btn:hover {
-            color: #000;
-        }
-
-    .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    /* Khung chứa bảng có thanh cuộn */
+    .table-container {
+        width: 100%;
+        max-height: 500px; /* Giới hạn chiều cao nếu muốn cuộn dọc luôn */
+        overflow: auto; /* Tự động hiện thanh cuộn ngang/dọc */
         border: 1px solid #ddd;
     }
 
-    .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
-        position: relative;
+    table {
+        border-collapse: separate; /* Quan trọng để sticky hoạt động chuẩn */
+        border-spacing: 0;
+        width: max-content; /* Ép bảng rộng theo nội dung cột */
     }
 
-        .table-responsive table thead th {
-            position: sticky;
-            top: 0;
-            background-color: #ffffff;
-            z-index: 10;
-            border-bottom: 2px solid #dee2e6;
-            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
-        }
 
-        .table-responsive table tbody td {
-            position: relative;
-            z-index: 1;
-        }
+    /* 1. Cố định Header khi cuộn dọc */
+    thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    /* 2. Cố định Cột bên trái khi cuộn ngang */
+    .sticky-left {
+        position: sticky;
+        left: 0;
+        z-index: 5;
+        background: #fff;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05); /* Tạo hiệu ứng tách biệt */
+    }
+
+    /* 3. Cố định Cột bên phải (Ví dụ: Trạng thái hoặc Nút sửa) */
+    .sticky-right {
+        position: sticky;
+        right: 0;
+        z-index: 5;
+        background: #fff;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+    }
+
+    /* Xử lý z-index cho ô giao nhau giữa Header và Cột cố định */
+    thead th.sticky-left,
+    thead th.sticky-right {
+        z-index: 15;
+    }
+
+    /* Hiệu ứng hover để dễ theo dõi dòng */
+    tbody tr:hover td {
+        background-color: #f1f7ff;
+    }
 </style>
+<script type="text/javascript" src="~/scripts/delivery.js"></script>
 <div class="row">
-    <div class="col-12">
-        <div class="card card-primary">
-            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer" id="table-1_wrapper">
-                <div class="table-responsive">                   
-                        <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
-                            <table class="table table-bordered">
-                                <thead class="bg-primary">
-                                    <tr>
-                                        <th>@Languages.xacnhannhapkho</th>
-                                        <th>@Languages.Mahethong</th>
-                                        <th>@Languages.Duoctachtu</th>
-                                        <th>@Languages.Bennhaptruoc</th>
-                                        <th>@Languages.Sopo</th>
-                                        <th>@Languages.Mahang</th>
-                                        <th>@Languages.Mahang</th>
-                                        <th>@Languages.TenhangTA</th>
-                                        <th>@Languages.TenhangTV </th>
-                                        <th>@Languages.soluongdathang</th>
-                                        <th>@Languages.Luongthucte</th>
-                                        <th>@Languages.Luonglamthutuc</th>
-                                        <th>@Languages.Ngaynhapkho</th>
-                                        <th>@Languages.Nguoinhapkho</th>
-                                        <th>@Languages.Donvi</th>
-                                        <th>@Languages.Dongiauoctinh</th>
-                                        <th>@Languages.Dieukiengiaohang</th>
-                                        <th>@Languages.Diadiemgiaohang</th>
-                                        <th>@Languages.Phuongthucvanchuyen</th>
-                                        <th>@Languages.Sotien</th>
-                                        <th>@Languages.vat</th>
-                                        <th>@Languages.phongbanyeucau</th>
-                                        <th>@Languages.tenphongyeucau</th>
-                                        <th>@Languages.ngaygiaohangdukien</th>
-                                        <th>@Languages.noigiaohangdukien</th>
-                                        <th>@Languages.thoihanthanhtoan</th>
-                                        <th>@Languages.loaitien</th>
-                                        <th>@Languages.tygia</th>
-                                        <th>@Languages.doisangusd</th>
-                                        <th>@Languages.danhmuc</th>
-                                        <th>@Languages.thuocdonyeucau</th>
-                                        <th>@Languages.tinhtrangtokhai</th>
-                                        <th>@Languages.nhacungcap</th>
-                                        <th>@Languages.Idlichsu</th>
-                                        <th>@Languages.luongvekho</th>
-                                        <th>Invoice</th>
-                                        <th>@Languages.tinhtranghaiquan</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="show_apply" style="color:black;"></tbody>
-                            </table>
-                            <ul class="pagination" id="pagination-controls"></ul>
-                        </div>
+   
+    <div class="card card-primary">
+        <div class="card-header">    
+            
+            <div class="table-container">
+                
+                <table class="table table-bordered">
                    
-                </div>
+                    <tr>
+                        <td colspan="3"><input type="text" class="form-control" placeholder="Mã hệ thống" /></td>
+                        <td colspan="2"><input type="text" class="form-control" placeholder="Đơn yêu cầu" /></td>
+                        <td colspan="2"><input type="text" class="form-control" placeholder="Mã hàng" /></td>
+                        <td colspan="2"><input type="text" class="form-control" placeholder="Tên hàng" /></td>
+                        <td><input type="text" class="form-control" placeholder="Phòng yêu cầu" /></td>
+                        <td><button class="btn btn-success"><i class="fa fa-search"></i> Tìm kiếm</button></td>
+                        <td><button class="btn btn-info"><i class="ion ion-ios-refresh"></i> Refresh</button></td>
+                        <td>Thời gian hàng về :</td>
+                        <td><input type="date" class="form-control" id="idTimeDelivery" /></td>
+                        <td>Kho hàng về : </td>
+                        <td>
+                            <select class="form-control" id="IdWarehouse">
+                                <option>--</option>
+                            </select>
+                        </td>
+                        <td> <button class="btn btn-success" style="margin-left:20px;" onclick="ImportWarehouse()"> <i class="fa fa-file-import" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.Nhapkho</button></td>
+                    </tr>
+                    <tr><td colspan="38"></td></tr>
+                    <tr class="bg-primary text-white" style="cursor:pointer">
+                            <th><input type="checkbox" /></th>
+                            <th>No.</th>
+                            <th>Mã hệ thống</th>
+                            <th>Đơn yêu cầu </th>
+                            <th >Mã hàng</th>
+                            <th>Tên hàng (VN)</th>
+                            <th>Số PO</th>
+                            <th>Lượng thực tế</th>
+                            <th>Đơn vị</th>
+                            <th>Đơn giá ước tính</th>
+                            <th>Số tiền</th>
+                            <th>VAT (%)</th>
+                            <th>Nhà cung cấp</th>
+                            <th>Tình trạng Hải quan</th>
+                            <th>Ngày nhập kho</th>
+                            <th>Người nhập kho</th>
+                            <th>Phòng ban yêu cầu</th>
+                            <th>Tên hàng (Anh/Nhật)</th>
+                            <th>Được tách từ</th>
+                            <th>Bên nhập trước</th>
+                            <th>Lượng Order</th>
+                            <th>Lượng làm thủ tục HQ</th>
+                            <th>Điều kiện giao hàng</th>
+                            <th>Địa điểm giao hàng</th>
+                            <th>Phương thức vận chuyển</th>
+                            <th>Ngày giao dự kiến</th>
+                            <th>Nơi giao dự kiến</th>
+                            <th>Thời hạn thanh toán</th>
+                            <th>Loại tiền</th>
+                            <th>Tỷ giá</th>
+                            <th>Đổi sang USD</th>
+                            <th>Danh mục</th>
+                          
+                            <th>Tình trạng tờ khai</th>
+                            <th>ID Lịch sử</th>
+                            <th>Invoice</th>
+                        </tr>
+                 
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox" /></td>
+                            <td>1</td>
+                            <td class="sticky-col">WH-2026-001 </td>
+                            <td class="sticky-col">ITEM-A12</td>
+                            <td class="sticky-col">E00001</td>
+                            <td>Thép cuộn cán nóng</td>
+                            <td>PO-9942</td>
+                            <td>5,000</td>
+                            <td>Kg</td>
+                            <td>1.25</td>
+                            <td>6,250</td>
+                            <td>10%</td>
+                            <td>Công ty Gang Thép</td>
+                            <td><span class="status status-done">Đã thông quan</span></td>
+                            <td>10/03/2026</td>
+                            <td>Nguyễn Văn A</td>
+                            <td>Sản xuất</td>
+                            <td>Hot Rolled Steel</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>5,000</td>
+                            <td>5,000</td>
+                            <td>CIF</td>
+                            <td>Cảng Hải Phòng</td>
+                            <td>Đường biển</td>
+                            <td>08/03/2026</td>
+                            <td>Kho A1</td>
+                            <td>30 ngày</td>
+                            <td>USD</td>
+                            <td>25,400</td>
+                            <td>6,250</td>
+                            <td>Nguyên liệu</td>                          
+                            <td>Hoàn tất</td>
+                            <td>HIST-99</td>
+                            <td>INV-2026-01</td>
+                        </tr>
+                       @*  <tr id="details-1" class="collapse-row" style="display: none; background-color: #f8f9fa;">
+                            <td colspan="28">
+                                <div class="p-3">
+                                    <div class="row">
+                                        <table class="table table-bordered">
+                                            <tr class="bg-light">
+                                                <td>No</td>
+                                                <td>※ Mã hàng</td>
+                                                <td>※ Tên hàng</td>
+                                                <td>※ Đơn vị đóng gói </td>
+                                                <td>※ Thời gian yêu cầu </td>
+                                                <td>※ Số tài khoản</td>
+                                                <td>※ Số lượng</td>
+                                                <td>※ Đơn vị</td>
+                                                <td>Giá tiền</td>
+                                                <td>Tỷ giá</td>
+                                                <td>Tổng chi phí</td>
+                                                <td>※ Mục đích</td>
+                                                <td>※ Ghi chú</td>
+                                            </tr>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>A000035</td>
+                                                <td>Dây điện cadisun 3x0.75</td>
+                                                <td>Mét</td>
+                                                <td>24/8/2020</td>
+                                                <td>Indirect material for Prod_Tools & Equipment</td>
+                                                <td>100</td>
+                                                <td>Mét</td>
+                                                <td>37</td>
+                                                <td>USD</td>
+                                                <td>37</td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>2</td>
+                                                <td>A000027</td>
+                                                <td>Bu lông WB-0625 HBL</td>
+                                                <td>Pcs(500 pcs/ túi)</td>
+                                                <td>24/8/2020</td>
+                                                <td>Indirect material for Prod_Tools & Equipment</td>
+                                                <td>100</td>
+                                                <td>Pcs(500 pcs/ túi)</td>
+                                                <td>5</td>
+                                                <td>USD</td>
+                                                <td>5</td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>3</td>
+                                                <td>A000027</td>
+                                                <td>Bu lông WB-0625 HBL</td>
+                                                <td>Pcs(500 pcs/ túi)</td>
+                                                <td>24/8/2020</td>
+                                                <td>Indirect material for Prod_Tools & Equipment</td>
+                                                <td>100</td>
+                                                <td>Pcs(500 pcs/ túi)</td>
+                                                <td>5</td>
+                                                <td>USD</td>
+                                                <td>5</td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr> *@
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
 </div>
+<script>
+        function toggleRow(id) {
+        var element = document.getElementById(id);
+        if (element.style.display === "none") {
+            element.style.display = "table-row";
+        } else {
+            element.style.display = "none";
+        }
+    }
+</script>

@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="assets\**" />
+    <Compile Remove="PRJ_WAREHOUSE_BIVN\**" />
     <Content Remove="assets\**" />
+    <Content Remove="PRJ_WAREHOUSE_BIVN\**" />
     <EmbeddedResource Remove="assets\**" />
+    <EmbeddedResource Remove="PRJ_WAREHOUSE_BIVN\**" />
     <None Remove="assets\**" />
+    <None Remove="PRJ_WAREHOUSE_BIVN\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -73,10 +77,6 @@
       <LastGenOutput>Languages.Designer.cs</LastGenOutput>
       <CustomToolNamespace>PRJ_WAREHOUSE_BIVN.Language</CustomToolNamespace>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="PRJ_WAREHOUSE_BIVN\Common\" />
   </ItemGroup>
 
 </Project>

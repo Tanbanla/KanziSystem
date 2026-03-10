@@ -5,5 +5,7 @@
         public int Id { get; set; }
         public string? TenHaiQuan { get; set; }
         public string? MaHangNoiBo { get; set; }
+        public string? LyDo { get; set; }
+        public bool? pheDuyet { get; set; }
     }
 }

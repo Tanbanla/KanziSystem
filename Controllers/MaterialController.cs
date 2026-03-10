@@ -99,6 +99,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result.Success);
         }
+        // Approve in select row
+        [HttpPost]
+        public async Task<IActionResult> ApproveSelectedConfirmName([FromBody] List<ConfirmNameDTO> reqs)
+        {
+            var role = (Request.Query["role"].ToString() ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(role)) role = "UserPUR"; // UserShip | UserAcc | UserPUR
+            var result = await _confirmNameService.ApproveConfirmNameListAsync(reqs, GetCurrentUserId(), role);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Success);
+        }
         // Approve (agree) and update base request
         [HttpPost]
         public async Task<IActionResult> ApproveConfirmName([FromBody] ConfirmNameActionRequest req)
@@ -156,7 +169,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 for (int r = startRow; r <= lastRow; r++)
                 {
-                    if(ws.Cell(r, 2).GetString() == "")
+                    if (ws.Cell(r, 2).GetString() == "")
                     {
                         break; // Nếu cột 2 (trạng thái) trống, dừng đọc tiếp
                     }
@@ -179,7 +192,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
-                                ID_RequestQuote = int.Parse(ws.Cell(r, 3).GetString()),
+                                ID = int.Parse(ws.Cell(r, 3).GetString()),
                                 VCHR_TenHaiQuan = tenHaiQuan,
                                 VCHR_UserShip = GetCurrentUserId(),
                                 DTM_UserShip = DateTime.Now
@@ -195,7 +208,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
-                                ID_RequestQuote = int.Parse(ws.Cell(r, 3).GetString()),
+                                ID = int.Parse(ws.Cell(r, 3).GetString()),
                                 VCHR_MaHangNoiBo = mahang,
                                 VCHR_UserAcc = GetCurrentUserId(),
                                 DTM_UserAcc = DateTime.Now
@@ -212,7 +225,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
-                                ID_RequestQuote = int.Parse(ws.Cell(r, 3).GetString()),
+                                ID = int.Parse(ws.Cell(r, 3).GetString()),
                                 VCHR_TenHaiQuan = tenHaiQuanPUR,
                                 VCHR_MaHangNoiBo = mahangPUR,
                                 VCHR_UserPUR = GetCurrentUserId(),
@@ -305,7 +318,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     // Map fields into template columns similar to ExportSelection
                     ws.Cell(row, 2).SetValue(GetString(rq, "CHR_Status"));
-                    ws.Cell(row, 3).SetValue(GetString(rq, "ID_RequestQuote"));
+                    ws.Cell(row, 3).SetValue(GetString(rq, "ID"));
                     ws.Cell(row, 4).SetValue(idx);
                     ws.Cell(row, 5).SetValue(GetString(rq, "CHR_SectionCode"));
                     ws.Cell(row, 6).SetValue(GetString(rq, "CHR_SectionName"));

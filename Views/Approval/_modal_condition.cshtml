@@ -3,23 +3,23 @@
         <div class="form-group m-2">
             <table class="table table-bordered" style="text-align:center">
                 <tr hidden>
-                    <td>Id_request : <i id="id_request"></i></td>
-                    <td>Bước : <i id="step"></i></td>
-                    <td>Regency : <i id="regency"></i></td>
-                    <td>Urgent : <i id="urgent"></i></td>
+                    <td>Id_request : <i id="id_request_0"></i></td>
+                    <td>Bước : <i id="step_0"></i></td>
+                    <td>Regency : <i id="regency_0"></i></td>
+                    <td>Urgent : <i id="urgent_0"></i></td>
                 </tr>
                 <tr>
                     <th rowspan="2" colspan="4" style="font-size:18px;background-color:#fff9e1">
                         Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                         物品依頼書（共通間材・比例間材用・消耗品）　
                     </th>
-                    <th colspan="2" id="madonhang" style="background-color:#fff9e1; font-size:18px"></th>
+                    <th colspan="2" id="madonhang_0" style="background-color:#fff9e1; font-size:18px"></th>
                 </tr>
                 <tr>
                     <th>
                         Phòng tiếp nhận　受け部門：
                     </th>
-                    <td style="background-color:#fff9e1" id="khoi"></td>
+                    <td style="background-color:#fff9e1" id="khoi_0"></td>
                 </tr>
                 <tr>
                     <td>
@@ -48,12 +48,12 @@
                     </td>
                 </tr>
                 <tr style="height:120px; background-color : #fff9e1">
-                    <td id="mbp"></td>
-                    <td id="mpb_yc"></td>
-                    <td id="tenphongban"></td>
-                    <td id="chuyen"></td>
-                    <td id="nyc"></td>
-                    <td id="thmm"></td>
+                    <td id="mbp_0"></td>
+                    <td id="mpb_yc_0"></td>
+                    <td id="tenphongban_0"></td>
+                    <td id="chuyen_0"></td>
+                    <td id="nyc_0"></td>
+                    <td id="thmm_0"></td>
                 </tr>
             </table>
             <table class="table table-bordered">
@@ -78,7 +78,7 @@
                         <td>Đơn vị tiền tệ <br />通貨単位</td>
                     </tr>
                 </thead>
-                <tbody id="load_detail"></tbody>
+                <tbody id="load_detail_0"></tbody>
             </table>
             <div class="col-12" style="font-size:11px">
                 Qui trình:
@@ -98,3 +98,38 @@
         </div>
     </div> 
 </form>
+
+
+<form class="modal-part" id="modal-bell">
+    <div class="form-group m-2">
+     
+        <table class="table table-bordered">
+            <tr>
+                <td colspan="3" class="bg-primary text-white">Ghi nhập hàng về BIVN</td>
+            </tr>
+           <tr>
+               <td>Số lượng thực nhận</td>
+               <td>Ngày NCC dự định giao hàng</td>
+               <td>Ghi chú</td>
+           </tr>
+           <tr>
+               <td><input type="number" class="form-control" /></td>
+               <td><input type="date" class="form-control" /></td>
+               <td><input type="text" class="form-control" /></td>
+           </tr>   
+        </table>
+        <button type="button" class="btn btn-success">Lưu cài đặt</button>
+        <br /><br />
+    </div>
+
+</form>
+<script>
+function toggleRow(id) {
+    var element = document.getElementById(id);
+    if (element.style.display === "none") {
+        element.style.display = "table-row";
+    } else {
+        element.style.display = "none";
+    }
+}
+</script>

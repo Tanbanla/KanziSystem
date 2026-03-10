@@ -27,7 +27,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // Tách phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
-                INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
+                INNER JOIN BaoGia_Request_of_Quotation r ON c.NVCHR_Note = r.CHR_MaHangNCC
                 WHERE 1 = 1
             ";
 
@@ -146,7 +146,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == id);
             if (row == null) return false;
 
-            var rq = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(x => x.ID == row.ID_RequestQuote);
+            var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
+                .ToListAsync();
             if (rq == null) return false;
 
             var now = DateTime.Now; var user = approvedBy ?? "SYSTEM";
@@ -156,11 +157,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             row.VCHR_UpdateBy = user;
             row.DTM_UpdateDate = now;
 
-            // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
-            if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
-                rq.NVCHR_NameVN = row.VCHR_TenHaiQuan;
-            if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
-                rq.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+            foreach (var r in rq)
+            {
+                // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
+                    r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
+                    r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+            }
 
             await _context.SaveChangesAsync();
             return true;
@@ -278,5 +282,65 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+        // Approvers 
+        public async Task<bool> ApproveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        {
+            if (saveConfirms == null || !saveConfirms.Any()) return false;
+            if (Role != "UserPUR") return false;
+            foreach (var item in saveConfirms)
+            {
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
+                if (row == null) return false;
+                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
+                .ToListAsync();
+                if (rq == null) return false;
+                var now = DateTime.Now;
+                if(item.pheDuyet == true)
+                {
+                    row.CHR_Status = "Confirmed";
+                    row.VCHR_UserPUR = user;
+                    row.DTM_UserPUR = now;
+                    row.VCHR_UpdateBy = user;
+                    row.DTM_UpdateDate = now;
+                    foreach (var r in rq)
+                    {
+                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                        if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
+                            r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                        if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
+                            r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+                    }
+                }
+                else
+                {
+                    row.CHR_Status = "Rejected";
+                    row.NVCHR_LyDo = item.LyDo;
+                    row.VCHR_UserPUR = user;
+                    row.DTM_UserPUR = now;
+                    row.VCHR_UpdateBy = user;
+                    row.DTM_UpdateDate = now;
+                }
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
+// 03/03/2026
+// k có mã nhà cung cấp, cũng đăng xin báo giá dc
+// - thêm mã đơn yêu cầu vào file nhập báo giá nhà cung cấp
+
+// 06/03/2026
+// -- dong đầu tiên k nhảy chủng loại hàng
+// - nhảy trùng nhà cung cấp (Không phải trung mà là 2 thằng 2 PIC)
+
+// -- kiểm tra tất cả rồi mới out lỗi, thời gian gian lỗi vẫn cho up, blane vẫn cho up thông tin 
+// -- lưu lịch sử khi nhập bao giá 
+
+// 03/09/2026
+// - màn hình nhập upload dữ liệu ncc
+// - màn hình xác nhận tên, gom theo mà linh kiện nhà cung, thêm phê duyệt nhiều
+// - mail chỉnh sửa cho gửi , 
+// - cho phép sửa đến hết khi đẩy đi 
+// - tạo lựa chọn trong file báo giá , accept, lỗi lấy thông tin gửi nhà cung cấp 
+// - xử lý trường hợp nhà cung cấp từ chối báo giá.

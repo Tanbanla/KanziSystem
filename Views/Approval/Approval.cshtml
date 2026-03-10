@@ -1,119 +1,261 @@
-﻿@{
-    ViewData["Title"] = "Approval";
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
+    ViewData["Title"] = "Quản lý nhận hàng";
 }
-<div class="section-body">
-    <div class="invoice">
-        <div class="invoice-print">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="invoice-title">
-                        <h2>Stock issue note</h2>
-                        <div class="invoice-number">Order #12345</div>
-                    </div>                           
-                    <div class="row">
-                        <div class="col-md-6">
-                            <address>
-                                <strong>Billed To:</strong><br>
-                                Ujang Maman<br>
-                                1234 Main<br>
-                                Apt. 4B<br>
-                                Bogor Barat, Indonesia
-                            </address>
-                        </div>
-                        <div class="col-md-6 text-md-right">
-                            <address>
-                                <strong>Shipped To:</strong><br>
-                                Muhamad Nauval Azhar<br>
-                                1234 Main<br>
-                                Apt. 4B<br>
-                                Bogor Barat, Indonesia
-                            </address>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <address>
-                                <strong>Payment Method:</strong><br>
-                                Visa ending **** 4242<br>
-                                ujang@maman.com
-                            </address>
-                        </div>
-                        <div class="col-md-6 text-md-right">
-                            <address>
-                                <strong>Order Date:</strong><br>
-                                September 19, 2018<br><br>
-                            </address>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="section-title">Order Summary</div>
-                    <p class="section-lead">All items here cannot be deleted.</p>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover table-md">
-                            <tr>
-                                <th data-width="40">#</th>
-                                <th>Item</th>
-                                <th class="text-center">Price</th>
-                                <th class="text-center">Quantity</th>
-                                <th class="text-right">Totals</th>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>Mouse Wireless</td>
-                                <td class="text-center">$10.99</td>
-                                <td class="text-center">1</td>
-                                <td class="text-right">$10.99</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Keyboard Wireless</td>
-                                <td class="text-center">$20.00</td>
-                                <td class="text-center">3</td>
-                                <td class="text-right">$60.00</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Headphone Blitz TDR-3000</td>
-                                <td class="text-center">$600.00</td>
-                                <td class="text-center">1</td>
-                                <td class="text-right">$600.00</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="row mt-4">
-                        <div class="col-lg-8">
-                            <div class="section-title">Payment Method</div>
-                            <p class="section-lead">The payment method that we provide is to make it easier for you to pay invoices.</p>                                   
-                        </div>
-                        <div class="col-lg-4 text-right">
-                            <div class="invoice-detail-item">
-                                <div class="invoice-detail-name">Subtotal</div>
-                                <div class="invoice-detail-value">$670.99</div>
+<div class="card">
+   
+    <div class="form-group m-3">
+
+        <table class="table table-bordered">
+
+            <thead>
+                <tr>
+                    <td colspan="2"><button type="button" class="btn btn-danger" style="padding: .2rem .3rem;"><i class="fa fa-bell"></i> Thông báo</button></td>
+                    <td><input type="text" class="form-control" placeholder="PO..." onkeyup="filterTable(0)"></td>
+                    <td><input type="text" class="form-control" placeholder="RQ..." onkeyup="filterTable(1)"></td>
+                    <td><input type="text" class="form-control" placeholder="Phòng..." onkeyup="filterTable(2)"></td>
+                    <td><input type="text" class="form-control" placeholder="NCC..." onkeyup="filterTable(3)"></td>
+                    <td><input type="text" class="form-control" placeholder="SĐT..." onkeyup="filterTable(4)"></td>
+                    <td><input type="text" class="form-control" placeholder="Mã hàng..." onkeyup="filterTable(5)"></td>
+                    <td><input type="text" class="form-control" placeholder="Tên hàng..." onkeyup="filterTable(6)"></td>
+                    <td colspan="3"></td>
+
+                    <td><input type="date" class="form-control"></td>
+                    <td><input type="date" class="form-control"></td>
+                    <td></td>
+                    <td>
+                        <select class="form-control">
+                            <option value=""> -- </option>
+                            <option value="Chờ giao hàng">Chờ giao hàng</option>
+                            <option value="Đã hoàn tất">Đã hoàn tất</option>
+                        </select>
+                    </td>
+                    <td></td>
+                    <td >
+                        <button type="button" class="btn btn-success"><i class="fa fa-search"></i> Tìm kiếm</button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-info"><i class="ion ion-ios-refresh"></i> Refresh</button>
+                    </td>
+                </tr>
+                <tr class="bg-primary text-white">
+                    <th rowspan="2" class="text-center"><input type="checkbox" id="checkAll"></th>
+                    <th rowspan="2">No</th>
+                    <th rowspan="2">Số PO</th>
+                    <th rowspan="2">Số yêu cầu hàng hóa</th>
+                    <th rowspan="2">Phòng yêu cầu</th>
+                    <th rowspan="2">Nhà cung cấp</th>
+                    <th rowspan="2">Số điện thoại</th>
+                    <th rowspan="2">Mã hàng</th>
+                    <th rowspan="2">Tên hàng</th>
+                    <th rowspan="2">Số lượng trên PO</th>
+                    <th rowspan="2">Đơn vị</th>
+                    <th rowspan="2">SL thực nhận</th>
+                    <th rowspan="2">Ngày mong muốn nhận hàng</th>
+                    <th rowspan="2">Ngày NCC dự định giao hàng</th>
+                    <th rowspan="2">Phòng đảm nhiệm nhận hàng</th>
+                    <th rowspan="2">Tình trạng</th>
+                    <th rowspan="2">Ghi chú</th>
+                    <th colspan="2" class="text-center">Hành động</th>
+
+                </tr>
+                <tr>
+                    <td class="text-center"><button class="btn btn-sm btn-info" style="padding: .2rem .3rem;" ><i class="ion ion-ios-cart"></i> Giao hàng</button></td>
+                    <td class="text-center"><button class="btn btn-sm btn-danger" style="padding: .2rem .3rem;" id="modal-16"><i class="ion ion-ios-cog-outline"></i> Cài đặt</button></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="main-row" style="cursor:pointer">
+                    <th class="text-center"><input type="checkbox"></th>
+                    <th>1</th>
+                    <td><strong>PO-2026-001</strong> </td>
+                    <td>PR-102</td>
+                    <td>R&D PE</td>
+                    <td>Công ty TNHH Giải Pháp Việt</td>
+                    <td>+84 123 563 22</td>
+                    <td>A000776</td>
+                    <td>Giấy A4 80gsm</td>
+                    <td>50</td>
+                    <td>Pcs</td>
+                    <td>30</td>
+                    <td>2026-03-16</td>
+                    <td>2026-03-15</td>
+                    <td>PUR</td>
+                    <td><span class="badge bg-warning text-white">Chờ giao hàng</span></td>
+                    <td></td>
+                    <td class="text-center"><input type="checkbox" /></td>
+                    <td class="text-center"><input type="checkbox" /></td>
+                  
+                </tr>
+                @*     <tr id="details-1" class="collapse-row" style="display: none; background-color: #f8f9fa;">
+                    <td colspan="20">
+                        <div class="p-3">
+                            <div class="row">
+                                <table class="table table-bordered">
+                                    <tr class="bg-light">
+                                        <td>No</td>
+                                        <td>※ Mã hàng</td>
+                                        <td>※ Tên hàng</td>
+                                        <td>※ Đơn vị đóng gói </td>
+                                        <td>※ Thời gian yêu cầu </td>
+                                        <td>※ Số tài khoản</td>
+                                        <td>※ Số lượng</td>
+                                        <td>※ Đơn vị</td>
+                                        <td>Giá tiền</td>
+                                        <td>Tỷ giá</td>
+                                        <td>Tổng chi phí</td>
+                                        <td>※ Mục đích</td>
+                                        <td>※ Ghi chú</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>A000035</td>
+                                        <td>Dây điện cadisun 3x0.75</td>
+                                        <td>Mét</td>
+                                        <td>24/8/2020</td>
+                                        <td>Indirect material for Prod_Tools & Equipment</td>
+                                        <td>100</td>
+                                        <td>Mét</td>
+                                        <td>37</td>
+                                        <td>USD</td>
+                                        <td>37</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>2</td>
+                                        <td>A000027</td>
+                                        <td>Bu lông WB-0625 HBL</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>24/8/2020</td>
+                                        <td>Indirect material for Prod_Tools & Equipment</td>
+                                        <td>100</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>5</td>
+                                        <td>USD</td>
+                                        <td>5</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>3</td>
+                                        <td>A000027</td>
+                                        <td>Bu lông WB-0625 HBL</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>24/8/2020</td>
+                                        <td>Indirect material for Prod_Tools & Equipment</td>
+                                        <td>100</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>5</td>
+                                        <td>USD</td>
+                                        <td>5</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </table>
                             </div>
-                            <div class="invoice-detail-item">
-                                <div class="invoice-detail-name">Shipping</div>
-                                <div class="invoice-detail-value">$15</div>
-                            </div>
-                            <hr class="mt-2 mb-2">
-                            <div class="invoice-detail-item">
-                                <div class="invoice-detail-name">Total</div>
-                                <div class="invoice-detail-value invoice-detail-value-lg">$685.99</div>
+                        </div>
+                    </td>
+                </tr> *@
+
+                <tr class="main-row" style="cursor:pointer">
+                    <th class="text-center"><input type="checkbox"></th>
+                    <th>2</th>
+                    <td><strong>PO-2026-002</strong> </td>
+                    <td>PR-102</td>
+                    <td>R&D PE</td>
+                    <td>Công ty TNHH Brother VietNam</td>
+                    <td>+84 123 563 22</td>
+                    <td>A000776</td>
+                    <td>Giấy A4 80gsm</td>
+                    <td>50</td>
+                    <td>Pcs</td>
+                    <td>30</td>
+                    <td>2026-03-16</td>
+                    <td>2026-03-15</td>
+                    <td>PUR</td>
+                    <td><span class="badge bg-success text-white">Đã giao hàng</span></td>
+                    <td></td>
+                    <td class="text-center"><input type="checkbox" /></td>
+                    <td class="text-center"><input type="checkbox" /></td>
+                </tr>
+                @*      <tr id="details-2" class="collapse-row" style="display: none; background-color: #f8f9fa;">
+                    <td colspan="20">
+                        <div class="p-3">
+                            <div class="row">
+                               <table class="table table-bordered">
+                                        <tr class="bg-light">
+                                        <td>No</td>
+                                        <td>※ Mã hàng</td>
+                                        <td>※ Tên hàng</td>
+                                        <td>※ Đơn vị đóng gói </td>
+                                        <td>※ Thời gian yêu cầu </td>
+                                        <td>※ Số tài khoản</td>
+                                        <td>※ Số lượng</td>
+                                        <td>※ Đơn vị</td>
+                                        <td>Giá tiền</td>
+                                        <td>Tỷ giá</td>
+                                        <td>Tổng chi phí</td>
+                                        <td>※ Mục đích</td>
+                                        <td>※ Ghi chú</td>
+                                    </tr>    
+                                    <tr>
+                                        <td>1</td>
+                                        <td>A000035</td>
+                                        <td>Dây điện cadisun 3x0.75</td>
+                                        <td>Mét</td>
+                                        <td>24/8/2020</td>
+                                        <td>Indirect material for Prod_Tools & Equipment</td>
+                                        <td>100</td>
+                                        <td>Mét</td>
+                                        <td>37</td>
+                                        <td>USD</td>
+                                        <td>37</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>2</td>
+                                        <td>A000027</td>
+                                        <td>Bu lông WB-0625 HBL</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>24/8/2020</td>
+                                        <td>Indirect material for Prod_Tools & Equipment</td>
+                                        <td>100</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>5</td>
+                                        <td>USD</td>
+                                        <td>5</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>3</td>
+                                        <td>A000027</td>
+                                        <td>Bu lông WB-0625 HBL</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>24/8/2020</td>
+                                        <td>Indirect material for Prod_Tools & Equipment</td>
+                                        <td>100</td>
+                                        <td>Pcs(500 pcs/ túi)</td>
+                                        <td>5</td>
+                                        <td>USD</td>
+                                        <td>5</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="text-md-right">
-            <div class="float-lg-left mb-lg-0 mb-3">
-                <button class="btn btn-primary btn-icon icon-left"><i class="ion ion-android-done-all"></i> Accept</button>
-                <button class="btn btn-danger btn-icon icon-left"><i class="ion ion-android-close"></i> Decline </button>
-            </div>
-            <button class="btn btn-warning btn-icon icon-left"><i class="fas fa-print"></i> Print</button>
-        </div>
+                    </td>
+                </tr> *@
+            </tbody>
+        </table>
+        <br /><br />
     </div>
 </div>
-
+@await Html.PartialAsync("_modal_condition", "Approval")

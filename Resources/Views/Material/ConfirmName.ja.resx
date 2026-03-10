@@ -450,4 +450,16 @@
   <data name="Datafield" xml:space="preserve">
     <value>データフィールド</value>
   </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>ページサイズ</value>
+  </data>
+  <data name="SaveSelected" xml:space="preserve">
+    <value>選択を保存</value>
+  </data>
+  <data name="ApproveSelected" xml:space="preserve">
+    <value>選択項目を承認</value>
+  </data>
+  <data name="RejectSelected" xml:space="preserve">
+    <value>選択項目を却下</value>
+  </data>
 </root>

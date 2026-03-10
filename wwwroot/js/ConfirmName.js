@@ -17,10 +17,28 @@
         btnImportExcel: document.getElementById('btnImportExcel'),
         btnExportTemplate: document.getElementById('btnExportTemplate'),
         btnExportTable: document.getElementById('btnExportTable'),
-        itemsExcelFileInput: document.getElementById('itemsExcelFileInput')
+        btnSaveSelected: document.getElementById('btnSaveSelected'),
+        btnApproveSelected: document.getElementById('btnApproveSelected'),
+        chkSelectAll: document.getElementById('chkSelectAll'),
+        pageSizeSelect: document.getElementById('pageSizeSelect'),
+        itemsExcelFileInput: document.getElementById('itemsExcelFileInput'),
+        btnRejectSelected: document.getElementById('btnRejectSelected')
     };
 
     let state = { pageIndex: 1, pageSize: 20, total: 0, listData: [] };
+
+    // initialize page size select if present
+    try {
+        if (els.pageSizeSelect) {
+            els.pageSizeSelect.value = String(state.pageSize);
+            els.pageSizeSelect.addEventListener('change', function () {
+                const v = parseInt(this.value) || 20;
+                state.pageSize = v;
+                state.pageIndex = 1;
+                search();
+            });
+        }
+    } catch (e) { }
 
     function statusBadge(s) {
         const T = window.i18nConfirmName || {};
@@ -32,16 +50,102 @@
         }
     }
 
+    async function collectSelected(isApporver) {
+        const checks = Array.from(els.tbody.querySelectorAll('.row-select:checked'));
+        if (!checks.length) return [];
+        // map to ConfirmNameDTO shape
+        return checks.map(c => {
+            const id = parseInt(c.getAttribute('data-id'));
+            const ten = els.tbody.querySelector(`.js-tenhq[data-id="${id}"]`);
+            const ma = els.tbody.querySelector(`.js-manb[data-id="${id}"]`);
+            return {
+                id: id,
+                tenHaiQuan: ten ? ten.value : undefined,
+                maHangNoiBo: ma ? ma.value : undefined,
+                pheDuyet: isApporver ? null : undefined,
+                lyDo: ''
+            };
+        });
+    }
+
+    async function saveSelected() {
+        const items = await collectSelected(null);
+        if (!items.length) { showDialog({ title: 'Thông báo', message: 'Chưa chọn bản ghi nào', type: 'info' }); return; }
+        try {
+            showLoading('Đang lưu...');
+            const res = await fetch('/Material/SaveSelectedConfirmName?role=' + encodeURIComponent(role), {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
+            });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => 'Lỗi lưu');
+                throw new Error(txt);
+            }
+            showDialog({ title: 'Thành công', message: 'Lưu thành công', type: 'success' });
+            search();
+        } catch (err) {
+            showDialog({ title: 'Lỗi', message: err.message || 'Lưu thất bại', type: 'error' });
+        } finally { hideLoading(); }
+    }
+
+    async function approveSelected() {
+        const items = await collectSelected(true);
+        if (!items.length) { showDialog({ title: 'Thông báo', message: 'Chưa chọn bản ghi nào', type: 'info' }); return; }
+        const T = window.i18nConfirmName || {};
+        const ok = await showConfirmDialog(T.ConfirmApproveTitle || 'Xác nhận đồng ý?', T.ConfirmApproveMessage || 'Bạn có chắc chắn muốn phê duyệt các yêu cầu này?');
+        if (!ok) return;
+        try {
+            showLoading('Đang phê duyệt...');
+            const res = await fetch('/Material/ApproveSelectedConfirmName?role=' + encodeURIComponent(role), {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
+            });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => 'Lỗi phê duyệt');
+                throw new Error(txt);
+            }
+            showDialog({ title: 'Thành công', message: 'Phê duyệt thành công', type: 'success' });
+            search();
+        } catch (err) {
+            showDialog({ title: 'Lỗi', message: err.message || 'Phê duyệt thất bại', type: 'error' });
+        } finally { hideLoading(); }
+    }
+    async function rejectSelected() {
+        const items = await collectSelected(false);
+        if (!items.length) { showDialog({ title: 'Thông báo', message: 'Chưa chọn bản ghi nào', type: 'info' }); return; }
+        const T = window.i18nConfirmName || {};
+        const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
+        if (lyDo === null) return;
+        for (const i of items) { i.pheDuyet = false; i.lyDo = lyDo; }
+        try {
+            showLoading('Đang phê duyệt...');
+            const res = await fetch('/Material/ApproveSelectedConfirmName?role=' + encodeURIComponent(role), {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
+            });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => 'Lỗi phê duyệt');
+                throw new Error(txt);
+            }
+            showDialog({ title: 'Thành công', message: 'Phê duyệt thành công', type: 'success' });
+            search();
+        } catch (err) {
+            showDialog({ title: 'Lỗi', message: err.message || 'Phê duyệt thất bại', type: 'error' });
+        } finally { hideLoading(); }
+    }
     function canEditTenHQ() { return role === 'UserShip' || role === 'UserPUR'; }
     function canEditMaNB() { return role === 'UserAcc' || role === 'UserPUR'; }
     function canApprove() { return role === 'UserPUR'; }
 
-
     function renderRows(data) {
         const T = window.i18nConfirmName || {};
         const fields = [
-            { key: 'select', label: T.Select || 'Chọn', editable: false },
-            { key: 'ID_RequestQuote', label: T.RequestQuoteNumber || 'ID Yêu cầu báo giá', editable: false },
+            { key: 'actions', label: T.Actions || 'Hành động', editable: false },
+            { key: '__select', label: '<input type="checkbox" id="_row_check_all" />', editable: false },
+            { key: 'tenHQ', label: T.ConfirmName || 'Xác nhận tên', editable: canEditTenHQ() },
+            { key: 'maNB', label: T.ConfirmCode || 'Xác nhận mã', editable: canEditMaNB() },
+            { key: 'status', label: T.Status || 'Trạng thái', editable: false },
+            { key: 'DTM_CreateDate', label: T.CreatedDate || 'Ngày tạo', editable: false },
+            { key: 'handler', label: T.Handler || 'Người xử lý', editable: false },
+            { key: 'note', label: T.Reason || 'Lý do', editable: false },
+            { key: 'ID', label: T.RequestQuoteNumber || 'ID Yêu cầu báo giá', editable: false },
             { key: 'CHR_SectionName', label: T.Department || 'Phòng ban', editable: false },
             { key: 'CHR_Phanloai', label: T.EquipmentClassification || 'Phân loại thiết bị', editable: false },
             { key: 'CHR_MaThietBi', label: T.EquipmentCode || 'Mã thiết bị', editable: false },
@@ -56,17 +160,11 @@
             { key: 'NVCHR_ThanhPhan', label: T.Composition || 'Thành phần, hàm lượng (đối với hóa chất)', editable: false },
             { key: 'NVCHR_KichThuoc', label: T.Dimensions || 'Kích thước(mm) (dài/rộng/cao)', editable: false },
             { key: 'NVCHR_DongMay', label: T.UsedForMachine || 'Dùng cho máy/thiết bị/vị trí nào', editable: false },
-            { key: 'NVCHR_TinhNang', label: T.Feature || 'Dùng để làm gì (tính năng)', editable: false },
-            { key: 'tenHQ', label: T.ConfirmName || 'Xác nhận tên', editable: canEditTenHQ() },
-            { key: 'maNB', label: T.ConfirmCode || 'Xác nhận mã', editable: canEditMaNB() },
-            { key: 'status', label: T.Status || 'Trạng thái', editable: false },
-            { key: 'DTM_CreateDate', label: T.CreatedDate || 'Ngày tạo', editable: false },
-            { key: 'handler', label: T.Handler || 'Người xử lý', editable: false },
-            { key: 'note', label: T.Note || 'Ghi chú', editable: false }
+            { key: 'NVCHR_TinhNang', label: T.Feature || 'Dùng để làm gì (tính năng)', editable: false }
         ];
 
-        // Đánh dấu 7 hàng cuối (giữ màu xanh nhưng không cố định)
-        fields.slice(-7).forEach(f => f.isSpecial = true);
+        // Đánh dấu 8 hàng cuối (giữ màu xanh nhưng không cố định)
+        fields.slice(8).forEach(f => f.isSpecial = true);
 
         // Xóa thead cũ nếu có
         const existingThead = els.tbody.previousElementSibling;
@@ -88,21 +186,7 @@
         thead.style.backgroundColor = 'white';
         thead.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
         const headerRow = document.createElement('tr');
-        //const selectAllCheckbox = document.createElement('input');
-        //selectAllCheckbox.type = 'checkbox';
-        //selectAllCheckbox.className = 'js-select-all';
-        //const selectTh = document.createElement('th');
-        //selectTh.style.minWidth = '50px';
-        //selectTh.style.textAlign = 'center';
-        //selectTh.style.backgroundColor = '#2335B7';
-        //selectTh.style.color = '#FFFF';
-        //selectTh.style.position = 'sticky';
-        //selectTh.style.left = '0';
-        //selectTh.style.zIndex = '21';
-        //selectTh.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
-        // selectTh.appendChild(selectAllCheckbox);
-        //headerRow.appendChild(selectTh);
-        headerRow.innerHTML += `<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">${T.Datafield}</th>` +
+        headerRow.innerHTML = `<th style="min-width: 250px; background-color: #2335B7; color: #FFFF; position: sticky; left: 0; z-index: 21; box-shadow: 2px 0 4px rgba(0,0,0,0.1);">${T.Datafield}</th>` +
             data.map((r, i) => `<th style="min-width: 200px; text-align: center; background-color: #e0e0e0;">${T.Record} ${(state.pageIndex - 1) * state.pageSize + i + 1}</th>`).join('');
         thead.appendChild(headerRow);
         els.tbody.parentNode.insertBefore(thead, els.tbody);
@@ -134,8 +218,8 @@
             th.style.maxWidth = '250px';
             th.style.boxShadow = '2px 0 4px rgba(0,0,0,0.1)';
             th.style.padding = '8px 12px';
-            // Giữ màu xanh cho 7 hàng cuối
-            if (field.isSpecial) {
+            // Giữ màu xanh cho 8 hàng cuối
+            if (!field.isSpecial) {
                 th.style.backgroundColor = '#28a745';
                 th.style.color = '#ffffff';
             }
@@ -145,11 +229,12 @@
                 const td = document.createElement('td');
                 td.style.padding = '8px 12px';
                 td.style.verticalAlign = 'middle';
-
-                if (field.key === 'select') {
-                    td.innerHTML = `<input type="checkbox" class="js-select-row" data-id="${r.ID}" />`;
+                if (field.key === '__select') {
+                    td.innerHTML = `<input type="checkbox" class="row-select" data-id="${r.ID}" />`;
                     td.style.textAlign = 'center';
-                } else if (field.key === 'status') {
+                } else
+                
+                if (field.key === 'status') {
                     td.innerHTML = statusBadge(r.CHR_Status);
                     td.style.textAlign = 'center';
                 } else if (field.key === 'tenHQ') {
@@ -164,6 +249,15 @@
                     } else {
                         td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
                     }
+                } else if (field.key === 'actions') {
+                    // Save button should always be present. Approve/Reject only for approvers.
+                    const actions = [
+                        `<button class="btn btn-sm btn-primary js-save" data-id="${r.ID}">${T.BtnSave || 'Lưu'}</button>`,
+                        canApprove() ? `<button class="btn btn-sm btn-success js-approve" data-id="${r.ID}">${T.BtnApprove || 'Đồng ý'}</button>` : '',
+                        canApprove() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.ID}">${T.BtnReject || 'Từ chối'}</button>` : ''
+                    ].filter(Boolean).join(' ');
+                    td.innerHTML = actions;
+                    td.style.textAlign = 'center';
                 } else if (field.key === 'DTM_CreateDate') {
                     td.textContent = formatDate(r[field.key]);
                     td.style.textAlign = 'center';
@@ -176,7 +270,8 @@
                     td.innerHTML = handler || ((T.CreatedByPrefix || 'Khởi tạo bởi ') + r.VCHR_CreateBy);
                     td.style.textAlign = 'center';
                 } else if (field.key === 'note') {
-                    td.innerHTML = `<div class="small text-muted">${r.NVCHR_Note || ''}</div><div class="text-danger small">${r.NVCHR_LyDo || ''}</div>`;
+                    //<div class="small text-muted">${r.NVCHR_Note || ''}</div>
+                    td.innerHTML = `<div class="text-danger small">${r.NVCHR_LyDo || ''}</div>`;
                 } else {
                     td.textContent = r[field.key] || '';
                 }
@@ -185,14 +280,56 @@
             els.tbody.appendChild(tr);
         });
 
-        // Gán sự kiện cho select all
-        //selectAllCheckbox.addEventListener('change', () => {
-        //    const checkboxes = els.tbody.querySelectorAll('.js-select-row');
-        //    checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
-        //});
+        // wire up select all (table header checkbox)
+        const headerChk = document.getElementById('_row_check_all');
+        if (headerChk) {
+            headerChk.addEventListener('change', function () {
+                const checks = els.tbody.querySelectorAll('.row-select');
+                checks.forEach(c => { c.checked = headerChk.checked; });
+                // also sync top-level checkbox in header area
+                if (els.chkSelectAll) els.chkSelectAll.checked = headerChk.checked;
+            });
+        }
 
-        // Bỏ event listener cho input change và nút actions, vì bây giờ lưu hàng loạt
+        // Gán sự kiện cho các input/button
+        els.tbody.querySelectorAll('.js-approve').forEach(btn => btn.addEventListener('click', () => approve(parseInt(btn.getAttribute('data-id')))));
+        els.tbody.querySelectorAll('.js-reject').forEach(btn => btn.addEventListener('click', () => reject(parseInt(btn.getAttribute('data-id')))));
+
+        // Gán sự kiện cho các nút Lưu (xóa sự kiện change của input)
+        els.tbody.querySelectorAll('.js-save').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = parseInt(this.getAttribute('data-id'));
+
+                // Tìm các input trong toàn bộ tbody dựa trên data-id
+                const tenHQInput = els.tbody.querySelector(`.js-tenhq[data-id="${id}"]`);
+                const maNBInput = els.tbody.querySelector(`.js-manb[data-id="${id}"]`);
+
+                const dataToSave = {};
+
+                if (tenHQInput) {
+                    dataToSave.tenHaiQuan = tenHQInput.value;
+                }
+
+                if (maNBInput) {
+                    dataToSave.maHangNoiBo = maNBInput.value;
+                }
+
+                // Gọi hàm saveInline với dữ liệu từ cả hai input
+                if (Object.keys(dataToSave).length > 0) {
+                    saveInline(id, dataToSave);
+                }
+            });
+
+        // ensure select-all checkbox syncs when individual boxes change
+        els.tbody.querySelectorAll('.row-select').forEach(ch => ch.addEventListener('change', () => {
+            const all = Array.from(els.tbody.querySelectorAll('.row-select'));
+            const header = document.getElementById('_row_check_all');
+            if (header) header.checked = all.length > 0 && all.every(x => x.checked);
+        }));
+        });
+
     }
+
     function formatDate(d) {
         if (window.cmMomentFormat) { return window.cmMomentFormat(d); }
         if (!d) return '';
@@ -228,34 +365,46 @@
     async function saveInline(id, payload) {
         const body = Object.assign({ id, role }, payload);
         const res = await fetch('/Material/SaveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        if (!res.ok) { const T = window.i18nConfirmName || {}; showDialog({ title: T.Error || 'Lỗi', message: err.message || 'Không thể Save', type: 'error' }); }
-    }
-    async function saveSeclections(listSelect) {
-        const res = await fetch('/Material/SaveSelectedConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(listSelect) });
-        if (!res.ok) { const T = window.i18nConfirmName || {}; showDialog({ title: T.Error || 'Lỗi', message: res.message || 'Không thể Save', type: 'error' }); }
-    }
-    async function approve(id, skipConfirm = false) {
-        const T = window.i18nConfirmName || {};
-        if (!skipConfirm) {
-            const ok = await showConfirmDialog(T.ConfirmApproveTitle || 'Xác nhận đồng ý?', T.ConfirmApproveMessage || 'Bạn có chắc chắn muốn phê duyệt yêu cầu này?');
-            if (!ok) return;
-        }
-        const res = await fetch('/Material/ApproveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-        if (res.ok) { search(); } else { showDialog({ title: T.Error || 'Lỗi', message: T.MsgGenericError || 'Thao tác thất bại', type: 'error' }); }
+        if (!res.ok) { const T = window.i18nConfirmName || {}; alert(T.MsgSaveFailed || 'Lưu thất bại'); }
     }
 
-    async function reject(id, lyDo) {
+    async function approve(id) {
         const T = window.i18nConfirmName || {};
-        if (!lyDo) {
-            lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
-            if (lyDo === null) return;
-        }
+        const ok = await showConfirmDialog(T.ConfirmApproveTitle || 'Xác nhận đồng ý?', T.ConfirmApproveMessage || 'Bạn có chắc chắn muốn phê duyệt yêu cầu này?');
+        if (!ok) return;
+        const res = await fetch('/Material/ApproveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
+    }
+
+    async function reject(id) {
+        const T = window.i18nConfirmName || {};
+        const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
+        if (lyDo === null) return;
         const res = await fetch('/Material/RejectConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, lyDo }) });
-        if (res.ok) { search(); } else { showDialog({ title: T.Error || 'Lỗi', message: T.MsgGenericError || 'Thao tác thất bại', type: 'error' }); }
+        if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
     }
 
     els.btnSearch.addEventListener('click', () => { state.pageIndex = 1; search(); });
 
+    // bulk actions
+    try {
+        els.btnSaveSelected && els.btnSaveSelected.addEventListener('click', saveSelected);
+        if (els.btnApproveSelected) {
+            if (!canApprove()) { els.btnApproveSelected.style.display = 'none'; }
+            els.btnApproveSelected.addEventListener('click', approveSelected);
+        }
+        if (els.btnRejectSelected) {
+            if (!canApprove()) { els.btnRejectSelected.style.display = 'none'; }
+            els.btnRejectSelected.addEventListener('click', rejectSelected);
+        }
+        els.chkSelectAll && els.chkSelectAll.addEventListener('change', function () {
+            const rows = Array.from(document.querySelectorAll('.row-select'));
+            rows.forEach(r => r.checked = this.checked);
+            const header = document.getElementById('_row_check_all'); if (header) header.checked = this.checked;
+        });
+    } catch (e) {
+        console.error('Error initializing event listeners', e);
+    }
     // các button excel
     els.btnExportTemplate.addEventListener('click', () => { exportTemplate(); });
     els.btnExportTable.addEventListener('click', () => { exportTable(); });
@@ -363,78 +512,6 @@
     }
     els.prev.addEventListener('click', () => { if (state.pageIndex > 1) { state.pageIndex--; search(); } });
     els.next.addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize)); if (state.pageIndex < totalPages) { state.pageIndex++; search(); } });
-
-    // Bulk save button
-    const btnBulkSave = document.getElementById('btnBulkSave');
-    if (btnBulkSave) {
-        btnBulkSave.addEventListener('click', async () => {
-            const selectedRows = Array.from(els.tbody.querySelectorAll('.js-select-row:checked'));
-            if (selectedRows.length === 0) {
-                const T = window.i18nConfirmName || {};
-                showDialog({ title: T.Warning || 'Cảnh báo', message: T.NoSelection || 'Vui lòng chọn ít nhất một hàng', type: 'info' });
-                return;
-            }
-            const T = window.i18nConfirmName || {};
-            showLoading(T.Processing || 'Đang xử lý...');
-            try {
-                const dataToSave = [];
-                for (const cb of selectedRows) {
-                    const id = parseInt(cb.getAttribute('data-id'));
-                    const TenHaiQuan = els.tbody.querySelector(`.js-tenhq[data-id="${id}"]`);
-                    const MaHangNoiBo = els.tbody.querySelector(`.js-manb[data-id="${id}"]`);
-                    var item = { id };
-                    if (TenHaiQuan) item.tenHaiQuan = TenHaiQuan.value;
-                    if (MaHangNoiBo) item.maHangNoiBo = MaHangNoiBo.value;
-                    dataToSave.push(item);
-                }
-                if (Object.keys(dataToSave).length > 0) {
-                    await saveSeclections(dataToSave);
-                }
-                search(); // Refresh data
-            } catch (err) {
-                console.error('Bulk save failed', err);
-                showDialog({ title: T.Error || 'Lỗi', message: T.MsgSaveFailed || 'Lưu thất bại', type: 'error' });
-            } finally {
-                hideLoading();
-            }
-        });
-    }
-
-    // Bulk approve button
-    const btnBulkApprove = document.getElementById('btnBulkApprove');
-    if (btnBulkApprove) {
-        btnBulkApprove.addEventListener('click', async () => {
-            if (!canApprove()) return;
-            const selectedRows = Array.from(els.tbody.querySelectorAll('.js-select-row:checked'));
-            if (selectedRows.length === 0) {
-                const T = window.i18nConfirmName || {};
-                showDialog({ title: T.Warning || 'Cảnh báo', message: T.NoSelection || 'Vui lòng chọn ít nhất một hàng', type: 'info' });
-                return;
-            }
-            const T = window.i18nConfirmName || {};
-            const action = await showActionDialog(T.BulkApproveTitle || 'Chọn hành động phê duyệt', T.BulkApproveMessage || 'Chọn Đồng ý hoặc Từ chối cho các hàng đã chọn:');
-            if (!action) return;
-            showLoading(T.Processing || 'Đang xử lý...');
-            try {
-                for (const cb of selectedRows) {
-                    const id = parseInt(cb.getAttribute('data-id'));
-                    if (action === 'approve') {
-                        await approve(id, true);
-                    } else if (action === 'reject') {
-                        const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
-                        if (lyDo === null) continue;
-                        await reject(id, lyDo);
-                    }
-                }
-                search(); // Refresh data
-            } catch (err) {
-                console.error('Bulk approve failed', err);
-                showDialog({ title: T.Error || 'Lỗi', message: T.MsgGenericError || 'Thao tác thất bại', type: 'error' });
-            } finally {
-                hideLoading();
-            }
-        });
-    }
     // enhance searchable selects inside the page
     try {
         buildSearchableDropdown(document.getElementById('confirm-name'));
@@ -785,32 +862,5 @@ function buildSearchableDropdown(container) {
 
         // Mark enhanced
         select.dataset.searchDropdown = 'true';
-    });
-}
-
-function showActionDialog(title, message) {
-    return new Promise((resolve) => {
-        const el = document.getElementById('cmActionDialog');
-        if (!el) { resolve(null); return; }
-        const T = window.i18nConfirmName || {};
-        el.querySelector('.cm-action-title').textContent = title || (T.SelectAction || 'Chọn hành động');
-        el.querySelector('.cm-action-body').textContent = message || '';
-        const btnApprove = el.querySelector('[data-cm-action="approve"]');
-        const btnReject = el.querySelector('[data-cm-action="reject"]');
-        const btnCancel = el.querySelector('[data-cm-action="cancel"]');
-        const close = () => { el.setAttribute('aria-hidden', 'true'); el.classList.remove('show'); el.style.display = 'none'; document.body.classList.remove('modal-open'); cleanup(); };
-        const open = () => { el.style.display = 'block'; el.style.zIndex = '3000'; el.setAttribute('aria-hidden', 'false'); el.classList.add('show'); document.body.classList.add('modal-open'); };
-        const onApprove = () => { close(); resolve('approve'); };
-        const onReject = () => { close(); resolve('reject'); };
-        const onCancel = () => { close(); resolve(null); };
-        const cleanup = () => {
-            btnApprove && btnApprove.removeEventListener('click', onApprove);
-            btnReject && btnReject.removeEventListener('click', onReject);
-            btnCancel && btnCancel.removeEventListener('click', onCancel);
-        };
-        btnApprove && btnApprove.addEventListener('click', onApprove);
-        btnReject && btnReject.addEventListener('click', onReject);
-        btnCancel && btnCancel.addEventListener('click', onCancel);
-        open();
     });
 }

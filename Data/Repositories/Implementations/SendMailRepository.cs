@@ -89,5 +89,24 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             return res;
         }
+        // lay thông tin phê duyệt theo phòng ban
+        public async Task<string> GetRequesterEmailAsync(string section, int step)
+        {
+            var res = await _context.BaoGia_Master_Approver_Send_Mails
+                .Where(m => m.CHR_CodeSection == section && m.ID_BaoGiaStep == step && m.CHR_Status == "ON")
+                .GroupBy(m => m.CHR_UserAdid) 
+                .Select(g => g.Key) 
+                .ToListAsync();
+
+            if (res == null || res.Count == 0)
+                return "";
+
+            // Thêm đuôi @brothergroup.net và nối chuỗi
+            var emails = res
+                .Where(adid => !string.IsNullOrEmpty(adid))
+                .Select(adid => adid.Trim() + "@brothergroup.net");
+
+            return string.Join(";", emails);
+        }
     }
 }

@@ -28,7 +28,6 @@ $("#modal-3").fireModal({
     }
   ]
 });
-
 $("#modal-4").fireModal({
   footerClass: 'bg-whitesmoke',
   body: 'Add the <code>bg-whitesmoke</code> class to the <code>footerClass</code> option.',
@@ -41,7 +40,6 @@ $("#modal-4").fireModal({
     }
   ]
 });
-
 $("#modal-5").fireModal({
     title: 'Edit user',
     body: $("#modal-login-part"),
@@ -318,6 +316,32 @@ $("#modal-15").fireModal({
         let form_data = $(e.target).serialize();
         console.log(form_data)
 
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
+$("#modal-16").fireModal({
+    title: '',
+    body: $("#modal-bell"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '56%');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+     
         // DO AJAX HERE
         let fake_ajax = setTimeout(function () {
             form.stopProgress();

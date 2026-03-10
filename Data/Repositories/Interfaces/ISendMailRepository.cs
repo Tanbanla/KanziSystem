@@ -20,5 +20,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 
         // Lay thong tin nha cung cap theo ma don hang
         public Task<List<BaoGia_Request_of_Quotation>> GetNotifyRequestCodeAsync(string requestCode);
+
+        // lay thông tin phê duyệt theo phòng ban
+        public Task<string> GetRequesterEmailAsync(string section, int step);
     }
 }

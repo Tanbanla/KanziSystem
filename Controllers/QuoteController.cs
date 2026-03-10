@@ -228,33 +228,69 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     await _baoGiaHistoryService.InsertHistoryListAsync(histories);
                 }
                 // xac nhan ten
-                var MaterialsNew = insertedList.Where(l => l.CHR_MaHangNoiBo == "" || l.CHR_MaHangNoiBo == null).Select(l => (l.ID, l.NVCHR_NameVN)).ToList();
+                var MaterialsNew = insertedList
+                    .Where(l => string.IsNullOrEmpty(l.CHR_MaHangNoiBo))
+                    .DistinctBy(l => l.CHR_MaHangNCC)
+                    .Select(l => (l.ID, l.NVCHR_NameVN, l.CHR_MaHangNCC))
+                    .ToList();
                 if (!result.Success)
                 {
                     return BadRequest(result.Message);
                 }
-                // Insert xác nhận tên
+                // Insert xác nhận tên và gửi mail trong background
                 if (MaterialsNew.Count > 0)
                 {
-                    try
+                    _ = Task.Run(async () =>
                     {
-                        var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
-                        foreach (var i in MaterialsNew)
+                        try
                         {
-                            var cf = new BaoGia_Confirm_Name_QuotationDTO();
-                            cf.ID_RequestQuote = i.ID;
-                            cf.DTM_CreateDate = DateTime.Now;
-                            cf.VCHR_CreateBy = GetCurrentUserId();
-                            cf.VCHR_TenRecomment = i.NVCHR_NameVN;
-                            cf.CHR_Status = "Confirming";
-                            listConfirm.Add(cf);
+                            var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
+                            foreach (var i in MaterialsNew)
+                            {
+                                var cf = new BaoGia_Confirm_Name_QuotationDTO();
+                                cf.ID_RequestQuote = i.ID;
+                                cf.DTM_CreateDate = DateTime.Now;
+                                cf.VCHR_CreateBy = GetCurrentUserId();
+                                cf.VCHR_TenRecomment = i.NVCHR_NameVN;
+                                cf.CHR_Status = "Confirming";
+                                cf.NVCHR_Note = i.CHR_MaHangNCC;
+                                listConfirm.Add(cf);
+                            }
+                            await _baoGiaConfirmNameService.AddListAsync(listConfirm);
+                            // gửi mail thông báo có yêu cầu xác nhận tên mới
+                            //"PhuongThuy.VuThi@brother-bivn.com.vn;" +
+                            //    "nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn"
+                            var emailResult = await _sendMailService.SendMailAsync(
+                                "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn", "",
+                                17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", GetCurrentUserId());
                         }
-                        await _baoGiaConfirmNameService.AddListAsync(listConfirm);
-                    }
-                    catch (Exception ex)
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                        }
+                    });
+                }
+                // Gui mail phe duyet trong background
+                var SectionApporve = insertedList
+                    .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
+                    .Select(l => (l.CHR_SectionCode, l.CHR_MaDon, l.CHR_Gap))
+                    .ToList();
+                if (SectionApporve != null)
+                {
+                    _ = Task.Run(async () =>
                     {
-                        return BadRequest(ex.Message);
-                    }
+                        try
+                        {
+                            foreach (var item in SectionApporve)
+                            {
+                                await _sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_Gap == "false" ? false : true, 2);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                        }
+                    });
                 }
             }
             catch
@@ -543,7 +579,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 CHR_NameEN = infor.Material_Name_EN,
                                 INT_SoLuong = ParseDouble(ws.Cell(r, 10).GetString()),
                                 NVCHR_DonVi = infor.Unit,
-                                NVCHR_ChungLoai = infor.LoaiHang,
+                                NVCHR_ChungLoai = infor.Category_VN,
                                 NVCHR_HinhDang = infor.Shape,
                                 NVCHR_ChatLieu = infor.Material1,
                                 NVCHR_ThanhPhan = infor.Composition,
@@ -570,13 +606,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 ID_Status = "CREATE"
                             };
                             // Đã có thông tin nhà cung cấp 
-                            if (dto.NVCHR_TenNCC != null && dto.CHR_MaNCC != null)
+                            if (!string.IsNullOrEmpty(dto.CHR_MaNCC))
                             {
                                 items.Add(dto);
                                 continue;
                             }
                             // Nếu có mã hàng nội bộ, tự check nhà cung cấp và nhân bản theo NCC
-                            var suppliersResp = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(dto.CHR_MaHangNoiBo ?? string.Empty);
+                            //var suppliersResp = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(dto.CHR_MaHangNoiBo ?? string.Empty);
+                            var suppliersResp = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(dto.NVCHR_ChungLoai ?? "");
                             if (suppliersResp.Success && suppliersResp.Data != null && suppliersResp.Data.Count > 0)
                             {
                                 var first = true;
@@ -584,11 +621,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 {
                                     var copy = first ? dto : CloneDto(dto);
                                     // k có mà thiết bị
-                                    dto.CHR_MaThietBi = "";
+                                    //dto.CHR_MaThietBi = "";
 
-                                    dto.CHR_MaHangNCC = sup.NVCHR_CodeByNCC;
+                                    //dto.CHR_MaHangNCC = sup.NVCHR_CodeByNCC;
                                     copy.CHR_MaNCC = sup.CHR_MaNCC;
-                                    copy.NVCHR_TenNCC = sup.NVCHAR_TenNCC;
+                                    copy.NVCHR_TenNCC = sup.NVCHR_TenNCC;
                                     items.Add(copy);
                                     first = false;
                                 }

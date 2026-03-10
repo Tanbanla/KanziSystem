@@ -450,4 +450,16 @@
   <data name="Datafield" xml:space="preserve">
     <value>Trường dữ liệu</value>
   </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Hiển thị</value>
+  </data>
+  <data name="SaveSelected" xml:space="preserve">
+    <value>Lưu mục đã chọn</value>
+  </data>
+  <data name="ApproveSelected" xml:space="preserve">
+    <value>Phê duyệt mục đã chọn</value>
+  </data>
+  <data name="RejectSelected" xml:space="preserve">
+    <value>Từ chối mục đã chọn</value>
+  </data>
 </root>

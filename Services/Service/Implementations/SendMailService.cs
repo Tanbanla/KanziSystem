@@ -35,7 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
            // Prepare body with parameters
            string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
-           string body = string.Format(mail.CHR_BODY, url, gapText, section, idRequest);
+           string body = string.Format(mail.CHR_BODY, url, gapText, section, idRequest,user);
 
            bool sendResult = EmailSender.sendEmailNotify(
                mail.CHR_SUBJECT,
@@ -418,6 +418,48 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 await _repo.UpdateMailSentStatusAsync(listSended);
             }
+            return new GenericResponse<bool>
+            {
+                Success = true,
+                Message = "Mail sent successfully"
+            };
+        }
+        // Gửi mail thông báo đến người yêu cầu khi có cập nhật về đơn yêu cầu
+        public async Task<GenericResponse<bool>> SendMailToRequesterAsync(string requestCode, string section, bool? isGap, int step)
+        {
+            // Lấy thông tin người yêu cầu
+            var requesterEmail = await _repo.GetRequesterEmailAsync(section, step);
+            if (string.IsNullOrEmpty(requesterEmail))
+            {
+                return new GenericResponse<bool>
+                {
+                    Success = false,
+                    Message = "Requester email not found"
+                };
+            }
+            // Lấy template mail
+            var mailTemplate = await _repo.GetMailByIdAsync(11); 
+            if (mailTemplate == null)
+            {
+                return new GenericResponse<bool>
+                {
+                    Success = false,
+                    Message = "Mail template not found"
+                };
+            }
+            // Chuẩn bị nội dung mail với các tham số
+            string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
+            string body = string.Format(mailTemplate.CHR_BODY, "http://172.26.248.62:8057/ApprovalQuote/Index", gapText, section, requestCode);
+            // Gửi mail
+            bool sendResult = EmailSender.sendEmailNotify(
+                mailTemplate.CHR_SUBJECT,
+                mailTemplate.CHR_FROM,
+               "nguyenduy.khanh@brother-bivn.com.vn",// requesterEmail,
+                "", // CC nếu cần
+                mailTemplate.CHR_BCC,
+                body,
+                0 // Default priority
+            );
             return new GenericResponse<bool>
             {
                 Success = true,
