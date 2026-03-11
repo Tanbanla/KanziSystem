@@ -30,12 +30,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
         private readonly IWebHostEnvironment _env;
         private readonly ISendMailService _sendMailService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService,
             INhomViTriService nhomViTriService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService,
-            IWebHostEnvironment env, ISendMailService sendMailService)
+            IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _tmNccNewService = tmNccNewService;
@@ -52,6 +53,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaNccCategoryService = baoGiaNccCategoryService;
             _sendMailService = sendMailService;
             _env = env;
+            _serviceScopeFactory = serviceScopeFactory;
         }
         // MARK: - Quote
         public async Task<IActionResult> Index()
@@ -242,53 +244,61 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     _ = Task.Run(async () =>
                     {
-                        try
+                        using (var scope = _serviceScopeFactory.CreateScope())
                         {
-                            var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
-                            foreach (var i in MaterialsNew)
+                            try
                             {
-                                var cf = new BaoGia_Confirm_Name_QuotationDTO();
-                                cf.ID_RequestQuote = i.ID;
-                                cf.DTM_CreateDate = DateTime.Now;
-                                cf.VCHR_CreateBy = GetCurrentUserId();
-                                cf.VCHR_TenRecomment = i.NVCHR_NameVN;
-                                cf.CHR_Status = "Confirming";
-                                cf.NVCHR_Note = i.CHR_MaHangNCC;
-                                listConfirm.Add(cf);
+                                var baoGiaConfirmNameService = scope.ServiceProvider.GetRequiredService<IBaoGiaConfirmNameService>();
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
+                                foreach (var i in MaterialsNew)
+                                {
+                                    var cf = new BaoGia_Confirm_Name_QuotationDTO();
+                                    cf.ID_RequestQuote = i.ID;
+                                    cf.DTM_CreateDate = DateTime.Now;
+                                    cf.VCHR_CreateBy = GetCurrentUserId();
+                                    cf.VCHR_TenRecomment = i.NVCHR_NameVN;
+                                    cf.CHR_Status = "Confirming";
+                                    cf.NVCHR_Note = i.CHR_MaHangNCC;
+                                    listConfirm.Add(cf);
+                                }
+                                await baoGiaConfirmNameService.AddListAsync(listConfirm);
+                                // gửi mail thông báo có yêu cầu xác nhận tên mới
+                                //PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn
+                                var emailResult = await sendMailService.SendMailAsync(
+                                    "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn", "",
+                                    17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", GetCurrentUserId());
                             }
-                            await _baoGiaConfirmNameService.AddListAsync(listConfirm);
-                            // gửi mail thông báo có yêu cầu xác nhận tên mới
-                            //"PhuongThuy.VuThi@brother-bivn.com.vn;" +
-                            //    "nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn"
-                            var emailResult = await _sendMailService.SendMailAsync(
-                                "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn", "",
-                                17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", GetCurrentUserId());
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                            }
                         }
                     });
                 }
                 // Gui mail phe duyet trong background
                 var SectionApporve = insertedList
                     .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
-                    .Select(l => (l.CHR_SectionCode, l.CHR_MaDon, l.CHR_Gap))
+                    .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap,l.ID_StepBaoGia))
                     .ToList();
                 if (SectionApporve != null)
                 {
                     _ = Task.Run(async () =>
                     {
-                        try
+                        using (var scope = _serviceScopeFactory.CreateScope())
                         {
-                            foreach (var item in SectionApporve)
+                            try
                             {
-                                await _sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_Gap == "false" ? false : true, 2);
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                foreach (var item in SectionApporve)
+                                {
+                                    await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                            }
                         }
                     });
                 }
@@ -680,7 +690,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         };
 
                         // Đã có thông tin nhà cung cấp 
-                        if (dto.NVCHR_TenNCC != null && dto.CHR_MaNCC != null)
+                        if (!string.IsNullOrEmpty(dto.CHR_MaNCC))
                         {
                             items.Add(dto);
                             continue;
@@ -1208,7 +1218,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cell(row, col++).SetValue("");
                         ws.Cell(row, col++).SetValue("");
                         ws.Cell(row, col++).SetValue("");
-                        ws.Cell(row, col++).SetValue("");
                         ws.Cell(row, col++).SetValue(a.NVCHR_SanXuat);
                         ws.Cell(row, col++).SetValue(a.CHR_MaNCC);
                         ws.Cell(row, col++).SetValue(a.NVCHR_TenNCC);
@@ -1332,52 +1341,52 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         if (string.IsNullOrWhiteSpace(ws.Cell(r, 18).GetString())) errors.Add("Cột 18 (NVCHR_DeliveryTerm) bắt buộc");
                         if (string.IsNullOrWhiteSpace(ws.Cell(r, 19).GetString())) errors.Add("Cột 19 (NVCHR_PaymentTerm) bắt buộc");
 
-                        // So sánh tên mở thủ tục hải quan (cột 3 vs 24) và tên tiếng Anh (4 vs 25)
-                        if (!string.Equals(ws.Cell(r, 3).GetString(), ws.Cell(r, 24).GetString(), StringComparison.Ordinal)) errors.Add("Tên mở thủ tục hải quan khác nhau (cột 3 vs 24)");
-                        if (!string.Equals(ws.Cell(r, 4).GetString(), ws.Cell(r, 25).GetString(), StringComparison.Ordinal)) errors.Add("Tên tiếng Anh khác nhau (cột 4 vs 25)");
+                        // So sánh tên mở thủ tục hải quan (cột 3 vs 26) và tên tiếng Anh (4 vs 27)
+                        if (!string.Equals(ws.Cell(r, 3).GetString(), ws.Cell(r, 26).GetString(), StringComparison.Ordinal)) errors.Add("Tên mở thủ tục hải quan khác nhau (cột 3 vs 24)");
+                        if (!string.Equals(ws.Cell(r, 4).GetString(), ws.Cell(r, 27).GetString(), StringComparison.Ordinal)) errors.Add("Tên tiếng Anh khác nhau (cột 4 vs 25)");
 
-                        // So sánh số lượng (5 vs 26)
+                        // So sánh số lượng (5 vs 28)
                         var qty1 = ParseInt(ws.Cell(r, 5).GetString());
-                        var qty2 = ParseInt(ws.Cell(r, 26).GetString());
+                        var qty2 = ParseInt(ws.Cell(r, 28).GetString());
                         if (qty1 == null || qty2 == null)
                         {
                             if (qty1 == null) errors.Add("Cột 5 không phải số hợp lệ");
-                            if (qty2 == null) errors.Add("Cột 26 không phải số hợp lệ");
+                            if (qty2 == null) errors.Add("Cột 28 không phải số hợp lệ");
                         }
-                        else if (qty1 != qty2) errors.Add("Số lượng khác nhau giữa cột 5 và 26");
+                        else if (qty1 != qty2) errors.Add("Số lượng khác nhau giữa cột 5 và 28");
 
-                        // So sánh đơn vị (6 vs 27)
-                        if (!string.Equals(ws.Cell(r, 6).GetString(), ws.Cell(r, 27).GetString(), StringComparison.Ordinal)) errors.Add("Đơn vị khác nhau (cột 6 vs 27)");
+                        // So sánh đơn vị (6 vs 29)
+                        if (!string.Equals(ws.Cell(r, 6).GetString(), ws.Cell(r, 29).GetString(), StringComparison.Ordinal)) errors.Add("Đơn vị khác nhau (cột 6 vs 29)");
 
-                        // Ngày giao hàng (cột 12) so sánh với yêu cầu (cột 36)
+                        // Ngày giao hàng (cột 12) so sánh với yêu cầu (cột 38)
                         var ship = ParseDate(ws.Cell(r, 12).GetString());
-                        var reqDate = ParseDate(ws.Cell(r, 36).GetString());
+                        var reqDate = ParseDate(ws.Cell(r, 38).GetString());
                         if (ship == null) errors.Add("Cột 12 (DTM_ShipTime) không phải ngày hợp lệ");
-                        if (reqDate == null) errors.Add("Cột 36 (DTM_NgayMuonNhan yêu cầu) không phải ngày hợp lệ");
-                        if (ship != null && reqDate != null && ship > reqDate) errors.Add("Thời gian giao hàng muộn hơn yêu cầu (cột 12 > cột 36)");
+                        if (reqDate == null) errors.Add("Cột 38 (DTM_NgayMuonNhan yêu cầu) không phải ngày hợp lệ");
+                        if (ship != null && reqDate != null && ship > reqDate) errors.Add("Thời gian giao hàng muộn hơn yêu cầu (cột 12 > cột 38)");
 
                         // MOQ (cột 9) <= Số lượng (cột 5)
                         var moq = ParseInt(ws.Cell(r, 9).GetString());
                         if (moq != null && qty1 != null && moq > qty1) errors.Add("MOQ (cột 9) lớn hơn Số lượng (cột 5)");
 
                         // Kiểm tra các điều kiện Rohs/COCQ/MSDS/AnToan: nếu expected yêu cầu nhưng value thiếu -> lỗi
-                        if (CheckNotRequired(ws.Cell(r, 13).GetString())) errors.Add("Rohs không thỏa mãn (cột 13)");
-                        if (CheckNotRequired(ws.Cell(r, 14).GetString())) errors.Add("CO/CQ không thỏa mãn (cột 14)");
-                        if (CheckNotRequired(ws.Cell(r, 15).GetString())) errors.Add("MSDS không thỏa mãn (cột 15)");
-                        if (CheckNotRequired(ws.Cell(r, 16).GetString())) errors.Add("An toàn không thỏa mãn (cột 16)");
+                        //if (CheckNotRequired(ws.Cell(r, 13).GetString())) errors.Add("Rohs không thỏa mãn (cột 13)");
+                        //if (CheckNotRequired(ws.Cell(r, 14).GetString())) errors.Add("CO/CQ không thỏa mãn (cột 14)");
+                        //if (CheckNotRequired(ws.Cell(r, 15).GetString())) errors.Add("MSDS không thỏa mãn (cột 15)");
+                        //if (CheckNotRequired(ws.Cell(r, 16).GetString())) errors.Add("An toàn không thỏa mãn (cột 16)");
 
                         if (errors.Any())
                         {
-                            ws.Cell(r, 38).SetValue(string.Join("; ", errors));
+                            ws.Cell(r, 40).SetValue(string.Join("; ", errors));
                             hasErrors = true;
                             continue;
                         }
                         // lấy Id của đơn lưu trong csdl
-                        var checkRQ = await _baoGiaDetailService.GetIdOfQuotationAsync(ws.Cell(r, 20).GetString(),
-                            ws.Cell(r, 21).GetString(), ws.Cell(r, 34).GetString(), ws.Cell(r, 24).GetString());
+                        var checkRQ = await _baoGiaDetailService.GetIdOfQuotationAsync(ws.Cell(r, 22).GetString(),
+                            ws.Cell(r, 23).GetString(), ws.Cell(r, 36).GetString(), ws.Cell(r, 26).GetString());
                         if (!checkRQ.Success || checkRQ.Data == null)
                         {
-                            ws.Cell(r, 38).SetValue("Không tìm thấy đơn hàng tương ứng trong hệ thống");
+                            ws.Cell(r, 40).SetValue("Không tìm thấy đơn hàng tương ứng trong hệ thống");
                             hasErrors = true;
                             continue;
                         }
@@ -1404,9 +1413,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             VCHR_CamKet = ws.Cell(r, 17).GetString(),
                             NVCHR_DeliveryTerm = ws.Cell(r, 18).GetString(),
                             NVCHR_PaymentTerm = ws.Cell(r, 19).GetString(),
+                            DTM_EffectiveDate = ParseDate(ws.Cell(r, 20).GetString()),
+                            DTM_ExpiryDate = ParseDate(ws.Cell(r, 21).GetString()),
                             CHR_UpdateBy = GetCurrentUserId(),
                             NVCHR_File = "",
                         };
+
                         items.Add(dto);
                     }
 

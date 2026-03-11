@@ -567,4 +567,10 @@
   <data name="InputTime" xml:space="preserve">
     <value>入力時間</value>
   </data>
+  <data name="ApplyDay" xml:space="preserve">
+    <value>価格有効日</value>
+  </data>
+  <data name="DueDay" xml:space="preserve">
+    <value>価格の有効期限</value>
+  </data>
 </root>

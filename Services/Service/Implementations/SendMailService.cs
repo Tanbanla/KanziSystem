@@ -329,7 +329,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     var worksheet = workbook.Worksheet(1); // Assuming sheet1
                     int rowIndex = 15; // Start from row 15
-                    foreach (var rq in listRq)
+                    var rqByNCC = listRq.Where(r => r.CHR_MaNCC == item).ToList();
+                    foreach (var rq in rqByNCC)
                     {
 
                         tableHtml += "<tr style='vertical-align: middle;'>";
@@ -396,7 +397,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 tableHtml += "</table>";
 
                 var body = mail.CHR_BODY + tableHtml;
-
+                //nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {
                     mail_from = mail.CHR_FROM,
@@ -454,7 +455,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             bool sendResult = EmailSender.sendEmailNotify(
                 mailTemplate.CHR_SUBJECT,
                 mailTemplate.CHR_FROM,
-               "nguyenduy.khanh@brother-bivn.com.vn",// requesterEmail,
+                requesterEmail,//"nguyenduy.khanh@brother-bivn.com.vn",//
                 "", // CC nếu cần
                 mailTemplate.CHR_BCC,
                 body,

@@ -342,4 +342,10 @@
   <data name="SelectPlaceholder" xml:space="preserve">
     <value>-- 選択 --</value>
   </data>
+  <data name="EffectiveDate" xml:space="preserve">
+    <value>発効日</value>
+  </data>
+  <data name="ExpiryDate" xml:space="preserve">
+    <value>有効期限</value>
+  </data>
 </root>

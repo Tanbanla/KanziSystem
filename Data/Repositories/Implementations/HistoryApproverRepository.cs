@@ -41,7 +41,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             try
             {
-                var sql = @"SELECT * FROM [COST_MANAGEMENT].[dbo].[BaoGia_History_Approver_of_Quotation] as h
+                var sql = @"SELECT * FROM [BaoGia_History_Approver_of_Quotation] as h
                   left join BaoGia_Request_of_Quotation as  q on h.ID_RequestQuote = q.ID
                   where q.CHR_MaDon = @SoDon";
                 var parameter = new Microsoft.Data.SqlClient.SqlParameter("@SoDon", soDon);
@@ -139,7 +139,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             try
             {
-                var sql = @"SELECT DISTINCT r.* FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r 
+                var sql = @"SELECT DISTINCT r.* FROM [BaoGia_Request_of_Quotation] as r 
                   left join BaoGia_Master_Approver_Send_Mail as s  on r.ID_StepBaoGia = s.ID_BaoGiaStep and CHR_SectionCode = s.CHR_CodeSection
 				  left join BaoGia_Step as st on r.ID_StepBaoGia = st.INT_StepNumber
 				   where st.CHR_Status = 'APPROVAL' and

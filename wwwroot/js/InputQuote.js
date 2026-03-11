@@ -598,7 +598,7 @@
 
         if (!data || data.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="22" class="text-center text-muted py-4">${window.i18nInputQuote.NoData || 'Không có dữ liệu'}</td>`;
+            row.innerHTML = `<td colspan="24" class="text-center text-muted py-4">${window.i18nInputQuote.NoData || 'Không có dữ liệu'}</td>`;
             tbody.appendChild(row);
             return;
         }
@@ -699,7 +699,13 @@
             // 21 - Attachment
             row.appendChild(td(item.NVCHR_File || ''));
 
-            // 22 - Input time
+            // 22 - DTM_EffectiveDate
+            row.appendChild(td(formatDate(item.DTM_EffectiveDate) || ''));
+
+            // 23 - DTM_ExpiryDate
+            row.appendChild(td(formatDate(item.DTM_ExpiryDate) || ''));
+
+            // 24 - Input time
             row.appendChild(td(formatDate(item.DTM_UpdateDate) || ''));
 
             tbody.appendChild(row);

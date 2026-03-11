@@ -342,4 +342,10 @@
   <data name="SelectPlaceholder" xml:space="preserve">
     <value>-- Chọn --</value>
   </data>
+  <data name="EffectiveDate" xml:space="preserve">
+    <value>Ngày có hiệu lực</value>
+  </data>
+  <data name="ExpiryDate" xml:space="preserve">
+    <value>Ngày hết hạn</value>
+  </data>
 </root>

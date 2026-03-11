@@ -24,8 +24,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM,int? PageSize, int? PageIndex)
         {
             var baseFrom = new StringBuilder();
-            baseFrom.Append(@"FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
-            LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+            baseFrom.Append(@"FROM [BaoGia_Detail_of_Quotation] as d
+            LEFT JOIN [BaoGia_Request_of_Quotation] as r
                 ON d.ID_RequestQuote = r.ID
             WHERE 1 = 1");
 
@@ -230,6 +230,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.VCHR_AnToan = item.VCHR_AnToan;
                     detail.VCHR_CamKet = item.VCHR_CamKet;
                     detail.NVCHR_DonVi = item.NVCHR_DonVi;
+                    detail.DTM_EffectiveDate = item.DTM_EffectiveDate;
+                    detail.DTM_ExpiryDate = item.DTM_ExpiryDate;
                 }
             }
             await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
@@ -240,8 +242,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<int?> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNcc, string NameHQ)
         {
             var sql = new StringBuilder(@"SELECT d.*
-              FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] as d
-              left join [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+              FROM [BaoGia_Detail_of_Quotation] as d
+              left join [BaoGia_Request_of_Quotation] as r
               on d.ID_RequestQuote = r.ID where 1 = 1");
             var parameters = new DynamicParameters();
             if (!string.IsNullOrEmpty(maDon))

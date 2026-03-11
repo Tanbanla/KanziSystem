@@ -785,11 +785,11 @@
         const code = selectEl.value;
         if (!code) return;
         // If supplier already selected on this row, do not auto-fill to avoid overwriting user's choice
-        //try {
-        //    const supplierSel = tr ? tr.querySelector('.nhaCungCapTb') : null;
-        //    const supVal = supplierSel ? (supplierSel.value || '').toString().trim() : '';
-        //    if (supVal) return; 
-        //} catch (e) { /* ignore */ }
+        try {
+            const supplierSel = tr ? tr.querySelector('.nhaCungCapTb') : null;
+            const supVal = supplierSel ? (supplierSel.value || '').toString().trim() : '';
+            if (supVal) return;
+        } catch (e) { /* ignore */ }
         try {
             const res = await fetch(api.getMaterials(code));
             if (!res.ok) throw new Error(await res.text());
@@ -829,6 +829,12 @@
             //        } catch (e) { }
             //    }
             //} catch (e) { console.warn('Lỗi khi bắt điều kiện chủng loại và mã hàng nội bộ:', e); }
+            //// If supplier already selected on this row, do not auto-fill to avoid overwriting user's choice
+            //try {
+            //    const supplierSel = tr ? tr.querySelector('.nhaCungCapTb') : null;
+            //    const supVal = supplierSel ? (supplierSel.value || '').toString().trim() : '';
+            //    if (supVal) return;
+            //} catch (e) { /* ignore */ }
             // Fill EN name
             const enInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('tên hàng en'));
             if (enInput && material.material_Name_EN) enInput.value = material.material_Name_EN;
@@ -863,10 +869,10 @@
                 try {
                     // nếu select đang rỗng, thử set bằng value hoặc bằng text (setSelectValueByText sẽ tìm theo value trước)
                     //if (!categorySelect.value || categorySelect.value === '') {
-                        setSelectValueByText(categorySelect, material.category_VN);
-                        // nếu select được enhance thành searchable, cập nhật hiển thị
-                        updateSearchableSelectDisplay(categorySelect);
-                        autoAddRowByCategory(categorySelect);
+                    setSelectValueByText(categorySelect, material.category_VN);
+                    // nếu select được enhance thành searchable, cập nhật hiển thị
+                    updateSearchableSelectDisplay(categorySelect);
+                    autoAddRowByCategory(categorySelect);
                     //}
                 } catch (e) {
                     console.warn('Error setting category select:', e);
@@ -1434,73 +1440,76 @@
             }
         })
         // When category changes, reload material list from server and update material selects
-        //qs('#quoteTableBody')?.addEventListener('change', async (e) => {
-        //    const t = e.target;
-        //    const T18 = window.i18nQuote || {};
-        //    if (t.classList && t.classList.contains('chungLoaiTb')) {
-        //        const nhomHang = (t.value || '').toString();
-        //        try {
-        //            // call POST /Quote/GetSearchMaterial with JSON body
-        //            const body = { MaHang: '', Name: '', NhomHang: nhomHang, PageIndex: 0, PageSize: 0 };
-        //            const res = await fetch(api.searchMaterials, {
-        //                method: 'POST',
-        //                headers: { 'Content-Type': 'application/json' },
-        //                body: JSON.stringify(body)
-        //            });
-        //            if (!res.ok) throw new Error(await res.text());
-        //            const materials = await res.json();
-        //            // Update all maHangNoiBo selects in the table
-        //            const selects = qsa('.maHangNoiBo');
-        //            selects.forEach((sel) => {
-        //                // remove any custom wrapper
-        //                try {
-        //                    const $sel = $(sel);
-        //                    const next = sel.nextElementSibling;
-        //                    if (next && next.classList && next.classList.contains('ms-container')) {
-        //                        next.remove();
-        //                    }
-        //                    // preserve current selection if any, then rebuild options
-        //                    const prevValue = sel.value;
-        //                    sel.style.display = '';
-        //                    sel.innerHTML = '';
-        //                    const optDefault = document.createElement('option');
-        //                    optDefault.value = '';
-        //                    optDefault.textContent = T18.SelectInternalMaterialCode;
-        //                    sel.appendChild(optDefault);
-        //                    if (Array.isArray(materials)) {
-        //                        materials.forEach((m) => {
-        //                            const code = m.material_Code || '';
-        //                            const name = m.material_Name_VN || '';
-        //                            if (!code) return;
-        //                            const o = document.createElement('option');
-        //                            o.value = code;
-        //                            o.textContent = `${code} - ${name}`;
-        //                            sel.appendChild(o);
-        //                        });
-        //                    }
-        //                    // restore previous selection if it still exists; otherwise keep default
-        //                    try {
-        //                        if (prevValue && Array.from(sel.options).some(o => o.value === prevValue)) {
-        //                            sel.value = prevValue;
-        //                        } else {
-        //                            sel.selectedIndex = 0;
-        //                        }
-        //                    } catch (ex) {
-        //                        sel.selectedIndex = 0;
-        //                    }
-        //                    // mark for rebuild
-        //                    try { $sel.data('search-dropdown', false); } catch { }
-        //                } catch (err) {
-        //                    console.warn('Error updating material select:', err);
-        //                }
-        //            });
-        //            // reinitialize searchable dropdowns
-        //            try { buildSearchableDropdown($(document)); } catch (ex) { }
-        //        } catch (err) {
-        //            console.warn('Không thể tải danh sách vật tư:', err);
-        //        }
-        //    }
-        //});
+        qs('#quoteTableBody')?.addEventListener('change', async (e) => {
+            const t = e.target;
+            const T18 = window.i18nQuote || {};
+            if (t.classList && t.classList.contains('chungLoaiTb')) {
+                const nhomHang = (t.value || '').toString();
+                try {
+                    // call POST /Quote/GetSearchMaterial with JSON body
+                    const body = { MaHang: '', Name: '', NhomHang: nhomHang, PageIndex: 0, PageSize: 0 };
+                    const res = await fetch(api.searchMaterials, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!res.ok) throw new Error(await res.text());
+                    const materials = await res.json();
+                    // Find the row of the changed select
+                    const tr = t.closest('tr');
+                    if (!tr) return;
+                    // Update only the maHangNoiBo select in the same row
+                    const sel = tr.querySelector('.maHangNoiBo');
+                    if (sel) {
+                        // remove any custom wrapper
+                        try {
+                            const $sel = $(sel);
+                            const next = sel.nextElementSibling;
+                            if (next && next.classList && next.classList.contains('ms-container')) {
+                                next.remove();
+                            }
+                            // preserve current selection if any, then rebuild options
+                            const prevValue = sel.value;
+                            sel.style.display = '';
+                            sel.innerHTML = '';
+                            const optDefault = document.createElement('option');
+                            optDefault.value = '';
+                            optDefault.textContent = T18.SelectInternalMaterialCode;
+                            sel.appendChild(optDefault);
+                            if (Array.isArray(materials)) {
+                                materials.forEach((m) => {
+                                    const code = m.material_Code || '';
+                                    const name = m.material_Name_VN || '';
+                                    if (!code) return;
+                                    const o = document.createElement('option');
+                                    o.value = code;
+                                    o.textContent = `${code} - ${name}`;
+                                    sel.appendChild(o);
+                                });
+                            }
+                            // restore previous selection if it still exists; otherwise keep default
+                            try {
+                                if (prevValue && Array.from(sel.options).some(o => o.value === prevValue)) {
+                                    sel.value = prevValue;
+                                } else {
+                                    sel.selectedIndex = 0;
+                                }
+                            } catch (ex) {
+                                sel.selectedIndex = 0;
+                            }
+                            // mark for rebuild
+                            try { $sel.data('search-dropdown', false); } catch { }
+                        } catch (err) {
+                            console.warn('Error updating material select:', err);
+                        }
+                    }
+                    // reinitialize searchable dropdowns for the updated select
+                    try { buildSearchableDropdown($(sel)); } catch (ex) { }
+                } catch (err) {
+                    console.warn('Không thể tải danh sách vật tư:', err);
+                }
+            }
+        });
 
         // Filter and pagination events
         document.addEventListener('input', (e) => {

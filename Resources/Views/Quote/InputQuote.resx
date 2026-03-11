@@ -567,4 +567,10 @@
   <data name="InputTime" xml:space="preserve">
     <value>Thời gian nhập</value>
   </data>
+  <data name="ApplyDay" xml:space="preserve">
+    <value>Ngày áp dụng giá</value>
+  </data>
+  <data name="DueDay" xml:space="preserve">
+    <value>Ngày giá hết hiệu lực</value>
+  </data>
 </root>

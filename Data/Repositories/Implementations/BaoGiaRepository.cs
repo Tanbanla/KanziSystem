@@ -150,7 +150,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = new StringBuilder(@"
             WITH rq AS (
                 SELECT r.*
-                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] AS r
+                FROM [BaoGia_Request_of_Quotation] AS r
                 WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5");
             var parameters = new DynamicParameters();
 
@@ -175,7 +175,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 , det AS (
                     SELECT d.ID_RequestQuote,
                            COUNT(*) AS DetailCount
-                    FROM [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] AS d
+                    FROM [BaoGia_Detail_of_Quotation] AS d
                     INNER JOIN rq ON rq.ID = d.ID_RequestQuote
                     GROUP BY d.ID_RequestQuote
                 )
@@ -234,7 +234,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.CHR_MaHangNoiBo,
                     r.CHR_MaNCC,
                     r.ID_StepBaoGia
-                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] r
+                FROM [BaoGia_Request_of_Quotation] r
                 WHERE 1 = 1 
                     AND r.ID_StepBaoGia > 5 ");
 

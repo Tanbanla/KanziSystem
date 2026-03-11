@@ -368,7 +368,7 @@ public partial class COST_MANAGEMENTContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=172.26.248.81;Database=COST_MANAGEMENT;User Id=whs;Password=147258@;TrustServerCertificate=true;");
-
+        //=> optionsBuilder.UseSqlServer("Server=APBIVNDB28;Database=COST;User Id=cost;Password=cost;TrustServerCertificate=true;");
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ACCOUNT_NAME>(entity =>
@@ -665,15 +665,18 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.VCHR_CamKet)
-                .HasMaxLength(50)
-                .IsUnicode(false);
+                .HasMaxLength(50);
             entity.Property(e => e.VCHR_MSDS)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.VCHR_Rohs)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-        });
+            entity.Property(e => e.DTM_EffectiveDate)
+                .HasColumnType("datetime");
+            entity.Property(e => e.DTM_ExpiryDate)
+                .HasColumnType("datetime");
+    });
 
         modelBuilder.Entity<BaoGia_History_Approver_of_Quotation>(entity =>
         {

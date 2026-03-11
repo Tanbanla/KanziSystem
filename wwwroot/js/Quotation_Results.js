@@ -7,6 +7,105 @@
             // Khởi tạo dropdown có tìm kiếm cho các select có class 'searchable-select'
             buildSearchableDropdown(document);
             console.log('Quotation Results initialized');
+            // Initialize tabs
+            this.initTabs();
+            // Load initial data for first tab
+            this.loadRequestList();
+        },
+        initTabs: function () {
+            const tabs = document.querySelectorAll('#quotationResultsTabs .nav-link');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = tab.getAttribute('data-bs-target');
+                    this.switchTab(target);
+                });
+            });
+        },
+        switchTab: function (target) {
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+            // Show target tab pane
+            const targetPane = document.querySelector(target);
+            if (targetPane) targetPane.classList.add('show', 'active');
+            // Update tab links
+            document.querySelectorAll('#quotationResultsTabs .nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector(`[data-bs-target="${target}"]`).classList.add('active');
+            // Load data based on tab
+            if (target === '#request-list') {
+                this.loadRequestList();
+            } else if (target === '#supplier-input') {
+                this.loadSupplierInput();
+            }
+        },
+        loadRequestList: function () {
+            // Load data for request list tab
+            // This would call the API to get the summarized request data
+            // For now, populate with existing logic or placeholder
+            this.searchItems(); // Reuse existing search logic
+        },
+        loadSupplierInput: function () {
+            // Load data for supplier input tab
+            // Similar to InputQuote supplier search
+            this.loadSupplierData();
+        },
+        loadSupplierData: function () {
+            const payload = {
+                idRequestQuote: null,
+                maDon: document.getElementById('supplierSearchMaDon')?.value || '',
+                maVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
+                maNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
+                section: document.getElementById('supplierSearchSection')?.value || '',
+                dayMM: document.getElementById('supplierSearchDayMM')?.value || '',
+                pageSize: parseInt(document.getElementById('supplierPageSizeSelect')?.value) || 10,
+                pageIndex: 0
+            };
+            fetch('/Quote/SearchInputQuote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.renderSupplierTable(data.data || []);
+                // Update summary
+                const summaryText = document.getElementById('supplierSummaryText');
+                if (summaryText) summaryText.textContent = `Tổng số: ${data.totalCount || 0}`;
+            })
+            .catch(err => console.error('Load supplier data failed', err));
+        },
+        renderSupplierTable: function (data) {
+            const tbody = document.getElementById('supplierQuoteBody');
+            if (!tbody) return;
+            const rowsHtml = data.map((d, index) => `
+                <tr class="text-center">
+                    <td>${index + 1}</td>
+                    <td>${d.CHR_MaDon || ''}</td>
+                    <td>${d.CHR_MaHangNCC || ''}</td>
+                    <td class="text-start">${d.NVCHR_NameNCC || ''}</td>
+                    <td>${d.CHR_MaHangNCC || ''}</td>
+                    <td class="text-start">${d.NVCHR_TenHangHQ || ''}</td>
+                    <td>${d.INT_SoLuong || ''}</td>
+                    <td>${d.NVCHR_DonVi || ''}</td>
+                    <td class="text-end">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
+                    <td class="text-end">${d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : ''}</td>
+                    <td>${d.NVCHR_MOQ || ''}</td>
+                    <td>${d.DTM_LeadTime || ''}</td>
+                    <td>${d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : ''}</td>
+                    <td>${d.VCHR_Rohs || ''}</td>
+                    <td>${d.VCHR_COCQ || ''}</td>
+                    <td>${d.VCHR_MSDS || ''}</td>
+                    <td>${d.VCHR_AnToan || ''}</td>
+                    <td>${d.VCHR_CamKet || ''}</td>
+                    <td>${d.NVCHR_DeliveryTerm || ''}</td>
+                    <td>${d.NVCHR_PaymentTerm || ''}</td>
+                    <td>${d.NVCHR_File || ''}</td>
+                    <td>${d.DTM_InputTime ? new Date(d.DTM_InputTime).toLocaleString() : ''}</td>
+                    <td>${d.DTM_ApplyDay ? new Date(d.DTM_ApplyDay).toLocaleDateString() : ''}</td>
+                    <td>${d.DTM_DueDay ? new Date(d.DTM_DueDay).toLocaleDateString() : ''}</td>
+                </tr>
+            `).join('');
+            tbody.innerHTML = rowsHtml;
         },
         // đóng modal 
         closeEdit: function () {
@@ -74,6 +173,12 @@
             const selectAll = document.getElementById('selectAll');
             if (selectAll) {
                 selectAll.addEventListener('change', this.toggleSelectAll.bind(this));
+            }
+
+            // Supplier search
+            const supplierSearchBtn = document.getElementById('supplierSearchBtn');
+            if (supplierSearchBtn) {
+                supplierSearchBtn.addEventListener('click', this.loadSupplierData.bind(this));
             }
 
             // Delegate: enforce only one supplier per maDon
@@ -308,7 +413,7 @@
                     return;
                 }
                 const data = await res.json();
-                const tbody = document.getElementById('itemsBody');
+                const tbody = document.getElementById('quotationResultsTableBody');
                 if (!tbody) return;
                 const rowsHtml = (data || [])
                     .filter(r => !activeStatus || (r.Status === activeStatus))
@@ -323,20 +428,19 @@
                         const groupId = `${i.CHR_MaDon}-${i.CHR_MaHangNoiBo}`;
                         return `
                         <tr class="item-row" data-status="${i.Status || ''}">
+                            <td class="text-center"><input type="checkbox" class="form-check-input item-select" /></td>
                             <td class="detail-cell text-center">
                                 <button type="button" class="btn btn-sm btn-outline-primary toggle-sup" data-target="#sup-rows-${groupId}" data-madon="${i.CHR_MaDon || ''}" data-mahang="${i.CHR_MaHangNoiBo || ''}" data-ngay="${ngayAttr}" aria-expanded="false" title="Xem chi tiết">
-                                    <span class="ms-1">Chi tiết</span>
+                                    <i class="fas fa-chevron-down"></i>
                                 </button>
                             </td>
                             <td class="text-start"><span class="ms-1 fw-semibold">${i.CHR_MaDon || ''}</span></td>
-                            <td>${i.CHR_MaHangNoiBo || ''}</td>
-                            <td class="text-start">${i.CHR_Phanloai || ''}</td>
-                            <td class="text-end">${i.NVCHR_NameVN || ''}</td>
-                            <td>${i.INT_SoLuong ?? ''}</td>
-                            <td>${i.NVCHR_DonVi || ''}</td>
-                            <td>${ngay}</td>
+                            <td>${i.DTM_CreateDate ? new Date(i.DTM_CreateDate).toLocaleDateString('vi-VN') : ''}</td>
+                            <td class="text-start">${i.CHR_SectionName || ''}</td>
+                            <td>${i.CHR_CreateBy || ''}</td>
+                            <td>${i.INT_CountMaterial || ''}</td>
+                            <td>${i.DTM_KyHan ? new Date(i.DTM_KyHan).toLocaleDateString('vi-VN') : ''}</td>
                             <td><span class="badge status-badge ${statusClass}">${i.Status || ''}</span></td>
-                            <td><input type="checkbox" class="form-check-input item-select" /></td>
                         </tr>
                         <tr id="sup-rows-${groupId}" class="supplier-group d-none">
                             <td colspan="13" class="p-0">
@@ -371,6 +475,9 @@
                         </tr>`;
                     }).join('');
                 tbody.innerHTML = rowsHtml;
+                // Update summary
+                const summaryText = document.getElementById('summaryText');
+                if (summaryText) summaryText.textContent = `Tổng số: ${data.length || 0}`;
             } catch (err) {
                 console.error('Error calling GetThongTinBaoGiaGomNhom', err);
             }
@@ -796,7 +903,7 @@ function buildSearchableDropdown(container) {
                     dropdown.style.top = '';
                     dropdown.style.left = '';
                     dropdown.style.width = '';
-                    dropdown.style.zIndex = '';
+                    d.style.zIndex = '';
                     dropdown._detached = false;
                 }
             } else {

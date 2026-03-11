@@ -90,4 +90,8 @@ public partial class BaoGia_Detail_of_Quotation
     public string? NVCHR_DonVi { get; set; }
 
     public string? NVCHR_NhaSanXuat { get; set; }
+
+    public DateTime? DTM_EffectiveDate { get; set; }
+
+    public DateTime? DTM_ExpiryDate { get; set; }
 }

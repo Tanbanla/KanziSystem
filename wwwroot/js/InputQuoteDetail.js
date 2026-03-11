@@ -214,6 +214,8 @@
                 <td><input type="text" class="form-control form-control-sm" value="${item.NVCHR_DeliveryTerm || ''}" placeholder="${window.i18nInputQuoteDetail.DeliveryMethod}"></td>
                 <td><input type="text" class="form-control form-control-sm" value="${item.NVCHR_PaymentTerm || ''}" placeholder="${window.i18nInputQuoteDetail.PaymentCondition}"></td>
                 <td><input type="text" class="form-control form-control-sm" value="${item.NVCHR_File || ''}" placeholder="${window.i18nInputQuoteDetail.Attachment}"></td>
+                <td><input type="date" class="form-control form-control-sm" value="${item.DTM_EffectiveDate ? new Date(item.DTM_EffectiveDate).toISOString().split('T')[0] : ''}"></td>
+                <td><input type="date" class="form-control form-control-sm" value="${item.DTM_ExpiryDate ? new Date(item.DTM_ExpiryDate).toISOString().split('T')[0] : ''}"></td>
             `;
             tbody.appendChild(row);
             
@@ -396,6 +398,8 @@
                 NVCHR_DeliveryTerm: inputs[14]?.value || '',
                 NVCHR_PaymentTerm: inputs[15]?.value || '',
                 NVCHR_File: inputs[16]?.value || '',
+                DTM_EffectiveDate: inputs[17]?.value || null,
+                DTM_ExpiryDate: inputs[18]?.value || null,
                 CHR_UpdateBy: window.inputQuoteDetailData?.user,
                 //DTM_QuoteDate: elements.pageQuoteDate.value,
                 //DTM_ValidUntil: elements.pageValidUntil.value,

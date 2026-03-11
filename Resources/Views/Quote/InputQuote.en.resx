@@ -567,4 +567,10 @@
   <data name="InputTime" xml:space="preserve">
     <value>Input Time</value>
   </data>
+  <data name="ApplyDay" xml:space="preserve">
+    <value>Price effective date</value>
+  </data>
+  <data name="DueDay" xml:space="preserve">
+    <value>Expiration date of the price</value>
+  </data>
 </root>

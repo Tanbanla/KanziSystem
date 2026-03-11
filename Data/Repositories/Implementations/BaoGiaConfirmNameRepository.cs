@@ -326,21 +326,3 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
     }
 }
-// 03/03/2026
-// k có mã nhà cung cấp, cũng đăng xin báo giá dc
-// - thêm mã đơn yêu cầu vào file nhập báo giá nhà cung cấp
-
-// 06/03/2026
-// -- dong đầu tiên k nhảy chủng loại hàng
-// - nhảy trùng nhà cung cấp (Không phải trung mà là 2 thằng 2 PIC)
-
-// -- kiểm tra tất cả rồi mới out lỗi, thời gian gian lỗi vẫn cho up, blane vẫn cho up thông tin 
-// -- lưu lịch sử khi nhập bao giá 
-
-// 03/09/2026
-// - màn hình nhập upload dữ liệu ncc
-// - màn hình xác nhận tên, gom theo mà linh kiện nhà cung, thêm phê duyệt nhiều
-// - mail chỉnh sửa cho gửi , 
-// - cho phép sửa đến hết khi đẩy đi 
-// - tạo lựa chọn trong file báo giá , accept, lỗi lấy thông tin gửi nhà cung cấp 
-// - xử lý trường hợp nhà cung cấp từ chối báo giá.

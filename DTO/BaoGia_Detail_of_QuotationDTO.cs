@@ -88,4 +88,7 @@ public partial class BaoGia_Detail_of_QuotationDTO
     public string? NVCHR_DonVi { get; set; }
     public string? CHR_NameEN { get; set; }
     public int? INT_SoLuong { get; set; }
+    public DateTime? DTM_EffectiveDate { get; set; }
+
+    public DateTime? DTM_ExpiryDate { get; set; }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
@@ -18,10 +20,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaStatusService _baoGiaStatusService;
         private readonly IBaoGiaStepService _baoGiaStepService;
         private readonly ISendMailService _sendMailService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         public ApprovalQuoteController(ILogger<ApprovalQuoteController> logger,
             IHistoryApproverServive historyApproverServive, INhomViTriService nhomViTriService, IMaterialService materialService,
             IBaoGiaService baoGiaService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStatusService baoGiaStatusService
-            , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService)
+            , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _historyApproverServive = historyApproverServive;
@@ -32,6 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaStatusService = baoGiaStatusService;
             _baoGiaStepService = baoGiaStepService;
             _sendMailService = sendMailService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
         public async Task<IActionResult> Index()
         {
@@ -192,7 +196,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }).ToList();
                     if (approverHistories.Any())
                     {
-                       await _historyApproverServive.AddHistoryListAsync(approverHistories);
+                      // await _historyApproverServive.AddHistoryListAsync(approverHistories);
                     }
                     // Luu lich su thay doi trang thai bao gia
                     var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO
@@ -211,9 +215,34 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (histories.Any())
                     {
-                       await _baoGiaHistoryService.InsertHistoryListAsync(histories);
+                       //await _baoGiaHistoryService.InsertHistoryListAsync(histories);
                     }
-
+                    // Gui mail thông báo phê duyệt báo giá
+                    var SectionApporve = insertedList
+                     .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
+                     .Select(l => (l.CHR_SectionCode,l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap,l.ID_StepBaoGia))
+                     .ToList();
+                    if (SectionApporve != null)
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            using (var scope = _serviceScopeFactory.CreateScope())
+                            {
+                                try
+                                {
+                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                    foreach (var item in SectionApporve)
+                                    {
+                                        await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                                }
+                            }
+                        });
+                    }
                     return Json(new { success = true, message = result.Message });
                 }
                 else
@@ -236,6 +265,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (result.Success)
                 {
                     var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
+                    // Capture user info before background task
+                    var currentUserId = GetCurrentUserId();
+                    var firstItem = insertedList.FirstOrDefault();
+                    var isGap = firstItem?.CHR_Gap == "false" ? false : true;
+                    var sectionName = firstItem?.CHR_SectionName;
+                    var maDon = firstItem?.CHR_MaDon;
                     // Luu lich su phe duyet
                     var approverHistories = insertedList.Select(b => new BaoGia_History_Approver_of_QuotationDTO
                     {
@@ -278,6 +313,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                        await _baoGiaHistoryService.InsertHistoryListAsync(histories);
                     }
                     // Gui mail thông báo trả về người tạo báo giá
+                    _ = Task.Run(async () =>
+                    {
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            try
+                            {
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                var mail = "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn";
+                                var emailResult = await sendMailService.SendMailAsync(mail, mail, 12,
+                                    "http://172.26.248.62:8057/Quote/HistoryQuote", isGap,
+                                    sectionName, maDon, currentUserId);
+                            }
+                            catch(Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending email in UpdateQuotationNG");
+                            }
+                        }
+                    });
 
                     return Json(new { success = true, message = result.Message });
                 }
