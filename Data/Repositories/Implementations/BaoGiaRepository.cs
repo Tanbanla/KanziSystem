@@ -189,12 +189,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 )
                 SELECT DISTINCT 
                     rr.CHR_MaDon,
-                    rr.CHR_MaHangNoiBo,
-                    rr.INT_SoLuong,
-                    rr.NVCHR_DonVi,
-                    rr.CHR_Phanloai,
-                    rr.NVCHR_NameVN,
-                    rr.NVCHR_ChungLoai,
+                    rr.CHR_SectionName,
+                    --rr.CHR_MaHangNoiBo,
+                    --rr.INT_SoLuong,
+                    --rr.NVCHR_DonVi,
+                    --rr.CHR_Phanloai,
+                    --rr.NVCHR_NameVN,
+                    --rr.NVCHR_ChungLoai,
                     rr.DTM_NgayMuonNhan,
                     CASE WHEN grp.CompletedCount = grp.ExpectedCount AND grp.ExpectedCount > 0 THEN N'Chưa chọn NCC' ELSE N'Đang chờ' END AS [Status]
                 FROM rq rr
@@ -323,6 +324,148 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 Data = result.ToList(),
                 TotalCount = total,
+            };
+        }
+        // Lấy thông tin kèm chi tiết báo giá
+        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, int pageIndex, int pageSize)
+        {
+            var sql = new StringBuilder(@"
+            WITH StatusCheck AS (
+                SELECT 
+                    r.id,
+                    r.CHR_MaDon,
+                    r.CHR_MaHangNoiBo,
+                    MAX(CASE 
+                        WHEN r.CHR_MaHangNoiBo IS NULL 
+                            OR r.NVCHR_NameVN IS NULL 
+                            OR r.CHR_MaHangNoiBo = '' 
+                            OR r.NVCHR_NameVN = ''
+                        THEN 1 ELSE 0 
+                    END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS NeedConfirmName,
+                    MAX(CASE WHEN r.ID_StepBaoGia != 7 THEN 1 ELSE 0 END) 
+                        OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep
+                FROM BaoGia_Request_of_Quotation r
+                LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", maDon);
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+                parameters.Add("MaHang", maHang);
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                sql.Append(" AND r.CHR_SectionCode = @Section");
+                parameters.Add("Section", section);
+            }
+            if (!string.IsNullOrEmpty(maNCC))
+            {
+                sql.Append(" AND r.CHR_MaNCC = @MaNCC");
+                parameters.Add("MaNCC", maNCC);
+            }
+
+            sql.Append(@"
+            )
+            SELECT r.*,
+                d.[CHR_CodeNCC],
+                d.[NVCHR_NameNCC],
+                d.[CHR_MaHangNCC],
+                d.[NVCHR_TenHangHQ],
+                d.[NVCHR_PaymentTerm],
+                d.[NVCHR_Warranty],
+                d.[NVCHR_DeliveryTerm],
+                d.[VCHR_Rohs],
+                d.[VCHR_COCQ],
+                d.[VCHR_MSDS],
+                d.[VCHR_AnToan],
+                d.[VCHR_CamKet],
+                d.[CHR_NameEN],
+                d.[INT_SoLuong],
+                d.[NVCHR_DonVi],
+                d.[NVCHR_NhaSanXuat],
+                d.[DTM_EffectiveDate],
+                d.[DTM_ExpiryDate],
+                d.[NVCHR_Note],
+                d.[NVCHR_File],
+                d.[NVCHR_MOQ],
+                d.[DTM_LeadTime],
+                d.[DTM_ShipTime],
+                d.[NVCHR_Packing],
+                CASE 
+                    WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME'
+                    WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC'
+                    ELSE 'WAIT_NCC'
+                END AS status
+            FROM BaoGia_Request_of_Quotation r
+            LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+            INNER JOIN StatusCheck sc ON r.id = sc.id
+            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @MaDon");
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                sql.Append(" AND r.CHR_SectionCode = @Section");
+            }
+            if (!string.IsNullOrEmpty(maNCC))
+            {
+                sql.Append(" AND r.CHR_MaNCC = @MaNCC");
+            }
+
+            sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
+
+            if (pageSize > 0 && pageIndex > 0)
+            {
+                sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                parameters.Add("Offset", (pageIndex - 1) * pageSize);
+                parameters.Add("PageSize", pageSize);
+            }
+
+            var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+
+            // For total count, we need a separate query
+            var countSql = new StringBuilder(@"
+            SELECT COUNT(r.id)
+            FROM BaoGia_Request_of_Quotation r
+            LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                countSql.Append(" AND r.CHR_MaDon = @MaDon");
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                countSql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                countSql.Append(" AND r.CHR_SectionCode = @Section");
+            }
+            if (!string.IsNullOrEmpty(maNCC))
+            {
+                countSql.Append(" AND r.CHR_MaNCC = @MaNCC");
+            }
+
+            var totalCount = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);
+
+            return new ListRequest<dynamic>
+            {
+                Data = data,
+                TotalCount = totalCount
             };
         }
     }

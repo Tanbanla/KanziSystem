@@ -12,12 +12,6 @@
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
     <link rel="stylesheet" href="~/css/Quotation_Results.css" />
-    <style>
-        /* Highlight mismatched supplier values (yellow similar to Bootstrap warning) */
-        .mismatch {
-            background-color: #fff3cd !important;
-        }
-    </style>
 </head>
 
 <div class="container-fluid" id="quotation-results">
@@ -25,18 +19,19 @@
         <div>
             <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
         </div>
-        <div class="btn-group mb-2" role="group">
-            <button class="btn btn-success btn-sm" id="btnSampleExcel" ><i class="fas fa-file-excel"></i> @Localizer["ExportImportFromExcel"]</button>
-        </div>
+        <div class="btn-group mb-2" role="group"></div>
     </div>
+</div>
 
-    <!-- Tabs -->
+<div class="container-fluid" id="quotation-results">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"></div>
+        <div>
     <ul class="nav nav-tabs" id="quotationResultsTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="request-list-tab" data-bs-toggle="tab" data-bs-target="#request-list" type="button" role="tab" aria-controls="request-list" aria-selected="true">@Localizer["RequestList"]</button>
+            <button class="nav-link active" id="request-list-tab" data-bs-toggle="tab" data-bs-target="#request-list" type="button" role="tab" aria-controls="request-list" aria-selected="true">Phê duyệt lựa chọn</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="supplier-input-tab" data-bs-toggle="tab" data-bs-target="#supplier-input" type="button" role="tab" aria-controls="supplier-input" aria-selected="false">@Localizer["SupplierInputTab"]</button>
+            <button class="nav-link" id="supplier-input-tab" data-bs-toggle="tab" data-bs-target="#supplier-input" type="button" role="tab" aria-controls="supplier-input" aria-selected="false">Chọn nhà cung cấp</button>
         </li>
     </ul>
     <div class="tab-content" id="quotationResultsTabsContent" style="background-color: #ffffff; padding: 16px; border: 1px solid #dee2e6; border-top: 0; border-radius: 0 0 .25rem .25rem;">
@@ -121,23 +116,23 @@
                         </table>
                     </div>
                 </div>
-            </div>
-            <!-- Pagination controls -->
-            <div class="p-2 d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="small mb-0" style="margin-right:4px;">@Localizer["RowsPerPage"]</label>
-                    <select id="pageSizeSelect">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                </div>
+                <!-- Pagination controls -->
+                <div class="p-2 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small mb-0" style="margin-right:4px;">@Localizer["RowsPerPage"]</label>
+                        <select id="pageSizeSelect">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
 
-                <div class="d-flex align-items-center gap-2">
-                    <div id="paginationControls" class="btn-group" role="group"></div>
-                    <div style="margin-right: 4px;"></div>
-                    <small class="text-muted" id="pagingInfo">&nbsp;</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <div id="paginationControls" class="btn-group" role="group"></div>
+                        <div style="margin-right: 4px;"></div>
+                        <small class="text-muted" id="pagingInfo">&nbsp;</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,42 +209,75 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SupplierListTitle"]</h6>
-                    <small class="text-muted" id="supplierSummaryText">@Localizer["SummaryFormat", 0]</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <button id="toggleAdditionalColumns" class="btn btn-outline-secondary btn-sm">Ẩn chi tiết</button>
+                        <div style="margin-left: 6px;"></div>
+                        <small class="text-muted" id="supplierSummaryText">@Localizer["SummaryFormat", 0]</small>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 600px;">
-                        <table class="table table-sm table-hover table-bordered align-middle mb-0" id="supplierQuoteTable" style="font-size:13px;">
+                        <table class="table table-sm table-hover table-bordered table-striped align-middle mb-0" id="supplierQuoteTable" style="font-size:13px;">
                             <thead class="table-header-custom">
+                                <tr class="text-center" style="background-color: #f8f9fa;">
+                                    <th colspan="3" style="background-color: #ffff; border: 1px solid #dee2e6;">Status</th>
+                                    <th colspan="19" style="background-color: #d1ecf1; border: 1px solid #dee2e6;">BIVN Input</th>
+                                    <th colspan="21" style="background-color: #f8d7da; border: 1px solid #dee2e6;">Vendor Input</th>
+                                </tr>
                                 <tr class="text-center align-middle">
-                                    <th style="min-width: 40px;">@Localizer["STT"]</th>
-                                    <th style="min-width: 50px;">@Localizer["OrderNumber"]</th>
-                                    <th style="min-width: 100px;">@Localizer["SupplierCodeShort"]</th>
-                                    <th style="min-width: 180px;">@Localizer["SupplierName"]</th>
-                                    <th style="min-width: 120px;">@Localizer["SupplierItemCode"]</th>
-                                    <th style="min-width: 150px;">@Localizer["ItemNameHQ"]</th>
-                                    <th style="min-width: 80px;">@Localizer["Quantity"]</th>
-                                    <th style="min-width: 80px;">@Localizer["Unit"]</th>
-                                    <th style="min-width: 80px;">@Localizer["PriceUSD"]</th>
-                                    <th style="min-width: 80px;">@Localizer["PriceVND"]</th>
-                                    <th style="min-width: 100px;">@Localizer["MOQ"]</th>
-                                    <th style="min-width: 100px;">@Localizer["LeadTime"]</th>
-                                    <th style="min-width: 120px;">@Localizer["DeliveryDate"]</th>
-                                    <th style="min-width: 80px;">@Localizer["Rohs"]</th>
-                                    <th style="min-width: 80px;">@Localizer["COCQ"]</th>
-                                    <th style="min-width: 80px;">@Localizer["MSDS"]</th>
-                                    <th style="min-width: 80px;">@Localizer["Safety"]</th>
-                                    <th style="min-width: 80px;">@Localizer["Commitment"]</th>
-                                    <th style="min-width: 120px;">@Localizer["DeliveryMethod"]</th>
-                                    <th style="min-width: 120px;">@Localizer["PaymentTerms"]</th>
-                                    <th style="min-width: 150px;">@Localizer["Attachment"]</th>
-                                    <th style="min-width: 100px;">@Localizer["InputTime"]</th>
-                                    <th style="min-width: 100px;">@Localizer["ApplyDay"]</th>
-                                    <th style="min-width: 100px;">@Localizer["DueDay"]</th>
+                                    <th rowspan="2"  style="min-width: 40px;">@Localizer["STT"]</th>
+                                    <th  rowspan="2" style="min-width: 50px;">@Localizer["OrderNumber"]</th>
+                                    <th  rowspan="2" style="min-width: 50px;">@Localizer["Status"]</th>
+                                    
+                                    <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;" class="additional-column">@Localizer["InternalMaterialCode"]</th>
+                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6;" class="additional-column">@Localizer["Classification"]</th>
+                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6;" class="additional-column">@Localizer["Category"]</th>
+                                    <th rowspan="2" style="min-width: 200px; background-color: #dee2e6;" class="additional-column">@Localizer["CustomsItemName"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["EnglishName"]</th>
+                                    <th colspan="8" style="background-color: #d3d9e5;" class="additional-column">@Localizer["DescriptionGroup"]</th>
+                                    <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;" class="additional-column">@Localizer["DesignFile"]</th>
+                                    <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;" class="additional-column">@Localizer["Supplier"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["SupplierSelectionDeadline"]</th>
+                                    <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;" class="additional-column">@Localizer["Urgent"]</th>
+                                    <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;" class="additional-column">@Localizer["GetQuote"]</th>
+                                    <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;" class="additional-column">@Localizer["Reason"]</th>
+
+                                    <th  rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["SupplierCodeShort"]</th>
+                                    <th rowspan="2" style="min-width: 180px;background-color: #FDFFE9;">@Localizer["SupplierName"]</th>
+                                    <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["SupplierItemCode"]</th>
+                                    <th rowspan="2" style="min-width: 150px;background-color: #FDFFE9;">@Localizer["ItemNameHQ"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Quantity"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Unit"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["PriceUSD"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["PriceVND"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["MOQ"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["LeadTime"]</th>
+                                    <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["DeliveryDate"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Rohs"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["COCQ"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["MSDS"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Safety"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Commitment"]</th>
+                                    <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["DeliveryMethod"]</th>
+                                    <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["PaymentTerms"]</th>
+                                    <th rowspan="2" style="min-width: 150px;background-color: #FDFFE9;">@Localizer["Attachment"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["ApplyDay"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["DueDay"]</th>
+                                </tr>
+                                <tr class="text-center align-middle" style="background-color: #dee2e6;">
+                                    <th style="min-width: 80px;" class="additional-column">@Localizer["Quantity"]</th>
+                                    <th style="min-width: 70px;" class="additional-column">@Localizer["Unit"]</th>
+                                    <th style="min-width: 80px;" class="additional-column">@Localizer["Shape"]</th>
+                                    <th style="min-width: 70px;" class="additional-column">@Localizer["Material"]</th>
+                                    <th style="min-width: 100px;" class="additional-column">@Localizer["Composition"]</th>
+                                    <th style="min-width: 100px;" class="additional-column">@Localizer["Dimensions"]</th>
+                                    <th style="min-width: 120px;" class="additional-column">@Localizer["UsedPosition"]</th>
+                                    <th style="min-width: 150px;" class="additional-column">@Localizer["PurposeFeature"]</th>
                                 </tr>
                             </thead>
                             <tbody id="supplierQuoteBody">
                                 <tr class="text-center">
-                                    <td colspan="24" class="text-muted py-4">
+                                    <td colspan="31" class="text-muted py-4">
                                         <i class="ion ion-load-c ion-spin"></i> @Localizer["LoadingData"]
                                     </td>
                                 </tr>
@@ -446,6 +474,7 @@
         </div>
     </div>
 </div>
+</div>
 <!-- Dialogs reused from Quote -->
 <div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
@@ -622,4 +651,3 @@
         }));
     </script>
 }
-

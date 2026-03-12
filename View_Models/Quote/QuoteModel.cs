@@ -114,4 +114,14 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string MaDon { get; set; } = string.Empty;
         public List<dynamic> baoGiaDetail { get; set; }  = new List<dynamic>();
     }
+    // Search Quotation_Results
+    public class SearchQuotationResultsModel
+    {
+        public string? MaDon { get; set; }
+        public string? MaNcc { get; set; }
+        public string? MaVatTu { get; set; }
+        public string? Section { get; set; }
+        public int? PageIndex { get; set; }
+        public int? PageSize { get; set; }
+    }
 }

@@ -23,5 +23,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 
         // lay thông tin phê duyệt theo phòng ban
         public Task<string> GetRequesterEmailAsync(string section, int step);
+        // Inset thông tin vào bảng Báo giá detail 
+        public Task<bool> InsertBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> dtos);
     }
 }

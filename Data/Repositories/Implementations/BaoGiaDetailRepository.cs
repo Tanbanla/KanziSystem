@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
@@ -109,15 +110,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
         public async Task<bool> InsertListBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> listDto)
         {
-            try
+            if (listDto == null || listDto.Count() == 0) return false;
+            var listDetailOK = new List<BaoGia_Detail_of_Quotation>();
+            foreach (var detail in listDto)
             {
-                await _context.BaoGia_Detail_of_Quotations.AddRangeAsync(listDto);
-                await _context.SaveChangesAsync();
+                var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
+                if (rq == null) continue;
+                rq.ID_Status = "WAIT_NCC";
+                // kiểm tra dữ liệu Insert
+                var exists = await _context.BaoGia_Detail_of_Quotations
+                    .AnyAsync(c => c.ID_RequestQuote == detail.ID_RequestQuote);
+                if (exists) continue;
+                listDetailOK.Add(detail);
             }
-            catch (Exception ex)
-            {
-               return false;
-            }
+            await _context.BaoGia_Detail_of_Quotations.AddRangeAsync(listDetailOK);
+            await _context.SaveChangesAsync();
             return true;
         }
         // Update lua chon NCC
@@ -232,6 +239,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.NVCHR_DonVi = item.NVCHR_DonVi;
                     detail.DTM_EffectiveDate = item.DTM_EffectiveDate;
                     detail.DTM_ExpiryDate = item.DTM_ExpiryDate;
+                }
+                // save step BaoGia_Request
+                var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
+                if(rq != null)
+                {
+                    rq.ID_StepBaoGia = 7;
+                    rq.ID_Status = "WAIT_PICK_NCC";
                 }
             }
             await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);

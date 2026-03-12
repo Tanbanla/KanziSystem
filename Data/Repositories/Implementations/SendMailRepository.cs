@@ -108,5 +108,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             return string.Join(";", emails);
         }
+        // Inset thông tin vào bảng Báo giá detail 
+        public async Task<bool> InsertBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> dtos)
+        {
+            if (dtos == null || dtos.Count() == 0) return false;
+            var listDetailOK = new List<BaoGia_Detail_of_Quotation>();
+            foreach (var detail in dtos)
+            {
+                var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
+                if (rq == null) continue;
+                rq.ID_Status = "WAIT_NCC";
+                // kiểm tra dữ liệu Insert
+                var exists = await _context.BaoGia_Detail_of_Quotations
+                    .AnyAsync(c => c.ID_RequestQuote == detail.ID_RequestQuote);
+                if (exists) continue;
+                listDetailOK.Add(detail);
+            }
+            await _context.BaoGia_Detail_of_Quotations.AddRangeAsync(listDetailOK);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

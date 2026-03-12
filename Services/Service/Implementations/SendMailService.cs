@@ -8,6 +8,7 @@ using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using System.IO.Pipelines;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
@@ -76,6 +77,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     Message = "Mail template not found"
                 };
             }
+            // tao danh sach bao gia chi tiet
+            var listBaoGiaDetail = new List<BaoGia_Detail_of_Quotation>();
             // danh sach cac don da gui mail
             var listSended = new List<int>();
             foreach (var item in suppliers)
@@ -177,8 +180,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
 
                         // phần của file dữ liệu đính kèm 
-
-
                         worksheet.Cell(rowIndex, 20).Value = rq.CHR_MaDon;
                         worksheet.Cell(rowIndex, 21).Value = rq.CHR_MaThietBi;
                         worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaHangNoiBo;
@@ -200,6 +201,33 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         // Add thin border to the data row
                         worksheet.Range(rowIndex, 1, rowIndex, 10).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 
+                        // Phần insert Rq detail
+                        var itemDetail = new BaoGia_Detail_of_Quotation
+                        {
+                            ID_RequestQuote = rq.ID,
+                            CHR_CodeNCC = rq.CHR_MaNCC ?? "",
+                            NVCHR_NameNCC = rq.NVCHR_TenNCC ?? "",
+                            DTM_CreateDate = DateTime.Now,
+                            CHR_CreateBy = "System Send Mail",
+                            CHR_MaHangNCC = rq.CHR_MaHangNCC,
+                            NVCHR_TenHangHQ = rq.NVCHR_NameVN,
+                            NVCHR_DonVi = "",
+                            INT_SoLuong = 0,
+                            FL_USD = 0,
+                            FL_VND = 0,
+                            NVCHR_MOQ = "",
+                            DTM_LeadTime = "",
+                            DTM_ShipTime = null,
+                            VCHR_Rohs = "",
+                            VCHR_COCQ = "",
+                            VCHR_MSDS = "",
+                            VCHR_AnToan = "",
+                            VCHR_CamKet = "",
+                            NVCHR_DeliveryTerm = "",
+                            NVCHR_PaymentTerm = "",
+                            NVCHR_File = ""
+                        };
+                        listBaoGiaDetail.Add(itemDetail);
                         rowIndex++;
                     }
                     workbook.SaveAs(tempFilePath);
@@ -229,6 +257,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             if (listSended.Any())
             {
                 await _repo.UpdateMailSentStatusAsync(listSended);
+            }
+            if (listBaoGiaDetail.Any())
+            {
+                await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
             }
             return new GenericResponse<bool>
             {

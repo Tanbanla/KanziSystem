@@ -28,5 +28,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<int>>> ExportBaoGiaAsync(string? maDon);
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
         public Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize);
+        // Lấy thông tin kèm chi tiết báo giá
+        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, int pageIndex, int pageSize);
     }
 }

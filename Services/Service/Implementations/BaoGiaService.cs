@@ -208,5 +208,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Lấy thông tin kèm chi tiết báo giá
+        public async Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, int pageIndex, int pageSize)
+        {
+            var result = new GenericResponse<ListRequest<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetThongTinBaoGiaChiTietAsync(maDon, section, maHang, maNCC, pageIndex, pageSize);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

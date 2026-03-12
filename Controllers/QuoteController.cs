@@ -94,6 +94,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             };
             return View(vm);
         }
+        // Search Infor table tab supplierQuoteBody
+        [HttpPost]
+        public async Task<IActionResult> SearchSupplierQuoteBody(SearchQuotationResultsModel search)
+        {
+            var result = await _baoGiaService.GetThongTinBaoGiaChiTietAsync(
+                search.MaDon ?? "",
+                search.Section ?? "",
+                search.MaVatTu ?? "",
+                search.MaNcc ?? "",
+                search.PageIndex ?? 1,
+                100);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result); 
+
+        }
         // MARK: - Input Quote
         public async Task<IActionResult> InputQuote()
         {
@@ -831,6 +849,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchInputQuote([FromBody] SearchInputQuote searchModel)
         {
+            if (searchModel == null) return BadRequest("Không nhận Search Input");
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
                 searchModel.maVatTu, searchModel.maNcc, searchModel.section, searchModel.dayMM, searchModel.pageSize, searchModel.pageIndex);
             if (!result.Success)
