@@ -96,7 +96,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Search Infor table tab supplierQuoteBody
         [HttpPost]
-        public async Task<IActionResult> SearchSupplierQuoteBody(SearchQuotationResultsModel search)
+        public async Task<IActionResult> SearchSupplierQuoteBody([FromBody] SearchQuotationResultsModel search)
         {
             var result = await _baoGiaService.GetThongTinBaoGiaChiTietAsync(
                 search.MaDon ?? "",
@@ -104,7 +104,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 search.MaVatTu ?? "",
                 search.MaNcc ?? "",
                 search.PageIndex ?? 1,
-                100);
+                search.PageSize ?? 10);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

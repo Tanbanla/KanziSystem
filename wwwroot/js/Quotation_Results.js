@@ -1,4 +1,26 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
+    // Global UI state preserved across tab switches
+    // store opened supplier groups (key: "MaDon-MaHang") and additional-columns visibility
+    window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
+
+    // Pagination state for Request List tab
+    const requestListState = {
+        pageIndex: 1,
+        pageSize: 10,
+        returnedCount: 0,
+        totalCount: 0,
+        lastPage: false
+    };
+
+    // Pagination state for Supplier tab
+    const supplierState = {
+        pageIndex: 1,
+        pageSize: 10,
+        returnedCount: 0,
+        totalCount: 0,
+        lastPage: false
+    };
+
     // Khai báo biến toàn cục cho file
     const quotationApp = {
         init: function () {
@@ -14,6 +36,10 @@
             // Initialize toggle for supplier additional columns
             const toggleBtn = document.getElementById('toggleAdditionalColumns');
             if (toggleBtn) toggleBtn.addEventListener('click', this.toggleAdditionalColumns.bind(this));
+            // Apply persisted UI state (in case some thing was toggled earlier)
+            this.applyAdditionalColumnsVisibility();
+            // Initialize pagination event listeners
+            this.initPaginationEvents();
         },
         initTabs: function () {
             const tabs = document.querySelectorAll('#quotationResultsTabs .nav-link');
@@ -37,10 +63,36 @@
             // Load data based on tab
             if (target === '#request-list') {
                 this.loadRequestList();
+                // reapply open-groups and column visibility after data is (re)rendered
+                // searchItems will call reapply after it finishes rendering
             } else if (target === '#supplier-input') {
                 this.loadSupplierInput();
+                // ensure columns visibility applied for supplier table
+                this.applyAdditionalColumnsVisibility();
             }
         },
+        initPaginationEvents: function () {
+            // Request list page size change
+            const pageSize = document.getElementById('pageSizeSelect');
+            if (pageSize) {
+                pageSize.addEventListener('change', () => {
+                    requestListState.pageSize = parseInt(pageSize.value) || 10;
+                    requestListState.pageIndex = 1;
+                    this.searchItems();
+                });
+            }
+
+            // Supplier page size change
+            const supplierPageSize = document.getElementById('supplierPageSizeSelect');
+            if (supplierPageSize) {
+                supplierPageSize.addEventListener('change', () => {
+                    supplierState.pageSize = parseInt(supplierPageSize.value) || 10;
+                    supplierState.pageIndex = 1;
+                    this.loadSupplierData();
+                });
+            }
+        },
+
         loadRequestList: function () {
             // Load data for request list tab
             // This would call the API to get the summarized request data
@@ -54,13 +106,12 @@
         },
         loadSupplierData: function () {
             const payload = {
-                idRequestQuote: 0,
-                maDon: document.getElementById('supplierSearchMaDon')?.value || '',
-                maVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
-                maNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
-                section: document.getElementById('supplierSearchSection')?.value || '',
-                pageSize: parseInt(document.getElementById('supplierPageSizeSelect')?.value) || 10,
-                pageIndex: 1
+                MaDon: document.getElementById('supplierSearchMaDon')?.value || '',
+                MaNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
+                MaVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
+                Section: document.getElementById('supplierSearchSection')?.value || '',
+                PageIndex: supplierState.pageIndex,
+                PageSize: supplierState.pageSize,
             };
             //SearchInputQuote
             fetch('/Quote/SearchSupplierQuoteBody', {
@@ -70,10 +121,23 @@
             })
             .then(res => res.json())
             .then(data => {
-                this.renderSupplierTable(data.data.data || []);
+                const items = Array.isArray(data.data.data) ? data.data.data : [];
+                const total = typeof data.data.totalCount === 'number' ? data.data.totalCount : items.length;
+                supplierState.returnedCount = items.length;
+                supplierState.totalCount = total;
+                supplierState.lastPage = (supplierState.pageIndex * supplierState.pageSize) >= total;
+
+                this.renderSupplierTable(items);
+
                 // Update summary
                 const summaryText = document.getElementById('supplierSummaryText');
-                if (summaryText) summaryText.textContent = `Tổng số: ${data.data.totalCount || 0}`;
+                if (summaryText) summaryText.textContent = `Tổng số: ${total || 0}`;
+
+                // Render pagination
+                this.renderSupplierPaginationControls();
+
+                // after render, reapply additional columns visibility
+                this.applyAdditionalColumnsVisibility();
             })
             .catch(err => console.error('Load supplier data failed', err));
         },
@@ -128,6 +192,8 @@
                 </tr>
             `).join('');
             tbody.innerHTML = rowsHtml;
+            // reapply columns visibility for newly rendered rows
+            this.applyAdditionalColumnsVisibility();
         },
         // đóng modal 
         closeEdit: function () {
@@ -232,6 +298,9 @@
             if (!toggleBtn) return;
             const isHidden = toggleBtn.textContent.includes('Ẩn');
 
+            // Persist state
+            window._quotationResultsState.showAdditionalColumns = !isHidden;
+
             // Ẩn các th và td có class 'additional-column'
             const columns = document.querySelectorAll('#supplierQuoteTable th.additional-column, #supplierQuoteTable td.additional-column');
             columns.forEach(col => {
@@ -261,6 +330,23 @@
             //}
 
             toggleBtn.textContent = isHidden ? 'Hiện chi tiết' : 'Ẩn chi tiết';
+        },
+
+        applyAdditionalColumnsVisibility: function () {
+            // apply persisted visibility state to supplier table columns
+            try {
+                const state = window._quotationResultsState || { showAdditionalColumns: true };
+                const shouldShow = !!state.showAdditionalColumns;
+                const toggleBtn = document.getElementById('toggleAdditionalColumns');
+                if (toggleBtn) toggleBtn.textContent = shouldShow ? 'Ẩn chi tiết' : 'Hiện chi tiết';
+                const columns = document.querySelectorAll('#supplierQuoteTable th.additional-column, #supplierQuoteTable td.additional-column');
+                columns.forEach(col => { col.style.display = shouldShow ? '' : 'none'; });
+                // DescriptionGroup and BIVN Input header
+                const descGroupTh = document.querySelector('#supplierQuoteTable th[colspan="8"].additional-column');
+                if (descGroupTh) descGroupTh.style.display = shouldShow ? '' : 'none';
+                const bivnInputTh = document.querySelector('#supplierQuoteTable th[colspan="19"]');
+                if (bivnInputTh) bivnInputTh.style.display = shouldShow ? '' : 'none';
+            } catch (e) { /* ignore */ }
         },
         openEditRequestModal: async function (id) {
             try {
@@ -434,6 +520,12 @@
                     console.error('Load supplier details failed', err);
                 }
             }
+            // persist open/closed state for this group so switching tabs doesn't lose it
+            try {
+                const groupId = (button.getAttribute('data-madon') || '') + '-' + (button.getAttribute('data-mahang') || '');
+                window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
+                window._quotationResultsState.openGroups[groupId] = willOpen;
+            } catch { }
         },  
 
         filterByStatus: function (e) {
@@ -465,8 +557,8 @@
                 maHang: maHang,
                 section: section,
                 status: status,
-                pageIndex: 1,
-                pageSize: 50
+                pageIndex: requestListState.pageIndex,
+                pageSize: requestListState.pageSize
             };
             try {
                 const res = await fetch('/Quote/GetThongTinBaoGiaGomNhom', {
@@ -479,9 +571,14 @@
                     return;
                 }
                 const data = await res.json();
+                const items = Array.isArray(data) ? data : [];
+                const totalCount = items.length || 0;
+                requestListState.returnedCount = items.length;
+                requestListState.totalCount = totalCount;
+                requestListState.lastPage = (requestListState.pageIndex * requestListState.pageSize) >= totalCount;
                 const tbody = document.getElementById('quotationResultsTableBody');
                 if (!tbody) return;
-                const rowsHtml = (data || []).map(i => {
+                const rowsHtml = (items || []).map(i => {
                         const ngay = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toLocaleDateString('vi-VN') : '';
                         const ngayAttr = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toISOString().slice(0, 10) : '';
                         const statusClass = (function (s) {
@@ -539,11 +636,181 @@
                         </tr>`;
                     }).join('');
                 tbody.innerHTML = rowsHtml;
+
                 // Update summary
                 const summaryText = document.getElementById('summaryText');
-                if (summaryText) summaryText.textContent = `Tổng số: ${data.length || 0}`;
+                if (summaryText) {
+                    const startOne = requestListState.returnedCount === 0 ? 0 : ((requestListState.pageIndex - 1) * requestListState.pageSize + 1);
+                    const endOne = requestListState.returnedCount === 0 ? 0 : ((requestListState.pageIndex - 1) * requestListState.pageSize + requestListState.returnedCount);
+                    summaryText.textContent = `Tổng số: ${startOne}-${endOne} / ${requestListState.totalCount}`;
+                }
+
+                // Render pagination
+                this.renderRequestListPaginationControls();
+
+                // Reapply persisted open-groups state so previously expanded supplier groups remain expanded
+                try {
+                    const state = window._quotationResultsState || { openGroups: {} };
+                    Object.keys(state.openGroups || {}).forEach(gid => {
+                        try {
+                            const row = document.getElementById('sup-rows-' + gid);
+                            const btn = document.querySelector(`.toggle-sup[data-madon="${gid.split('-')[0]}"][data-mahang="${gid.split('-')[1]}"]`);
+                            if (state.openGroups[gid]) {
+                                if (row) row.classList.remove('d-none');
+                                if (btn) {
+                                    btn.setAttribute('aria-expanded', 'true');
+                                    const icon = btn.querySelector('i');
+                                    if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
+                                }
+                            } else {
+                                if (row) row.classList.add('d-none');
+                                if (btn) {
+                                    btn.setAttribute('aria-expanded', 'false');
+                                    const icon = btn.querySelector('i');
+                                    if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+                                }
+                            }
+                        } catch (e) { }
+                    });
+                } catch (e) { }
+                // Also reapply additional columns visibility
+                this.applyAdditionalColumnsVisibility();
             } catch (err) {
                 console.error('Error calling GetThongTinBaoGiaGomNhom', err);
+            }
+        },
+
+        renderRequestListPaginationControls: function () {
+            const container = document.getElementById('paginationControls');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const totalPages = requestListState.totalCount ? Math.ceil(requestListState.totalCount / requestListState.pageSize) : 1;
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
+            prevBtn.className = 'btn btn-sm btn-outline-secondary';
+            prevBtn.textContent = '‹';
+            prevBtn.disabled = requestListState.pageIndex <= 1;
+            prevBtn.addEventListener('click', () => {
+                if (requestListState.pageIndex > 1) {
+                    requestListState.pageIndex--;
+                    this.searchItems();
+                }
+            });
+            container.appendChild(prevBtn);
+
+            // Render a small range of page buttons around current page
+            const range = 2;
+            const start = Math.max(1, Math.min(requestListState.pageIndex - range, Math.max(1, totalPages - (range * 2))));
+            const pages = [];
+            for (let i = start; i <= Math.min(totalPages, start + (range * 2)); i++) {
+                pages.push(i);
+            }
+
+            pages.forEach(p => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm ' + (p === requestListState.pageIndex ? 'btn-primary' : 'btn-outline-secondary');
+                btn.textContent = p;
+                if (p > totalPages) btn.disabled = true;
+                btn.addEventListener('click', () => {
+                    if (p !== requestListState.pageIndex) {
+                        requestListState.pageIndex = p;
+                        this.searchItems();
+                    }
+                });
+                container.appendChild(btn);
+            });
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
+            nextBtn.className = 'btn btn-sm btn-outline-secondary';
+            nextBtn.textContent = '›';
+            nextBtn.disabled = requestListState.pageIndex >= totalPages || requestListState.returnedCount === 0;
+            nextBtn.addEventListener('click', () => {
+                if (!nextBtn.disabled) {
+                    requestListState.pageIndex++;
+                    this.searchItems();
+                }
+            });
+            container.appendChild(nextBtn);
+
+            // Update paging info
+            const pagingInfo = document.getElementById('pagingInfo');
+            if (pagingInfo) {
+                const startOne = requestListState.returnedCount === 0 ? 0 : ((requestListState.pageIndex - 1) * requestListState.pageSize + 1);
+                const endOne = requestListState.returnedCount === 0 ? 0 : ((requestListState.pageIndex - 1) * requestListState.pageSize + requestListState.returnedCount);
+                pagingInfo.textContent = `${startOne}-${endOne} / ${requestListState.totalCount}`;
+            }
+        },
+
+        renderSupplierPaginationControls: function () {
+            const container = document.getElementById('supplierPaginationControls');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const totalPages = supplierState.totalCount ? Math.ceil(supplierState.totalCount / supplierState.pageSize) : 1;
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
+            prevBtn.className = 'btn btn-sm btn-outline-secondary';
+            prevBtn.textContent = '‹';
+            prevBtn.disabled = supplierState.pageIndex <= 1;
+            prevBtn.addEventListener('click', () => {
+                if (supplierState.pageIndex > 1) {
+                    supplierState.pageIndex--;
+                    this.loadSupplierData();
+                }
+            });
+            container.appendChild(prevBtn);
+
+            // Render a small range of page buttons around current page
+            const range = 2;
+            const start = Math.max(1, Math.min(supplierState.pageIndex - range, Math.max(1, totalPages - (range * 2))));
+            const pages = [];
+            for (let i = start; i <= Math.min(totalPages, start + (range * 2)); i++) {
+                pages.push(i);
+            }
+
+            pages.forEach(p => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm ' + (p === supplierState.pageIndex ? 'btn-primary' : 'btn-outline-secondary');
+                btn.textContent = p;
+                if (p > totalPages) btn.disabled = true;
+                btn.addEventListener('click', () => {
+                    if (p !== supplierState.pageIndex) {
+                        supplierState.pageIndex = p;
+                        this.loadSupplierData();
+                    }
+                });
+                container.appendChild(btn);
+            });
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
+            nextBtn.className = 'btn btn-sm btn-outline-secondary';
+            nextBtn.textContent = '›';
+            nextBtn.disabled = supplierState.pageIndex >= totalPages || supplierState.returnedCount === 0;
+            nextBtn.addEventListener('click', () => {
+                if (!nextBtn.disabled) {
+                    supplierState.pageIndex++;
+                    this.loadSupplierData();
+                }
+            });
+            container.appendChild(nextBtn);
+
+            // Update paging info
+            const pagingInfo = document.getElementById('supplierPagingInfo');
+            if (pagingInfo) {
+                const startOne = supplierState.returnedCount === 0 ? 0 : ((supplierState.pageIndex - 1) * supplierState.pageSize + 1);
+                const endOne = supplierState.returnedCount === 0 ? 0 : ((supplierState.pageIndex - 1) * supplierState.pageSize + supplierState.returnedCount);
+                pagingInfo.textContent = `${startOne}-${endOne} / ${supplierState.totalCount}`;
             }
         },
 
@@ -554,13 +821,28 @@
             if (rq) rq.value = '';
             if (internal) internal.value = '';
 
-            // Reset status filter
-            document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('active'));
-            const allOpt = document.querySelector('.status-option[data-value=""]');
-            if (allOpt) allOpt.classList.add('active');
+            // Reset select filters
+            document.getElementById('searchMaDon')?.querySelectorAll('option')[0]?.selected;
+            document.getElementById('searchPhongBan')?.querySelectorAll('option')[0]?.selected;
+            document.getElementById('searchMaterial')?.querySelectorAll('option')[0]?.selected;
+            document.getElementById('searchStatus').value = '1';
+
+            // Ensure underlying selects are updated
+            ['searchMaDon', 'searchPhongBan', 'searchMaterial', 'searchStatus'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+                }
+            });
+
+            // Reset pagination
+            requestListState.pageIndex = 1;
 
             // Show all items
             document.querySelectorAll('.item-row').forEach(item => { item.style.display = ''; });
+
+            // Reload data
+            this.searchItems();
         },
 
         getSelections: function () {

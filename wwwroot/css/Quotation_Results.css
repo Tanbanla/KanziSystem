@@ -50,3 +50,45 @@
 }
 /* Responsive */
 @media (max-width:1200px){ .quot-table { font-size:.8rem; } .supplier-table { font-size:.75rem; } .toggle-sup { font-size:.65rem; } .status-option { font-size:.6rem; } }
+/* Ensure sticky headers inside scrollable .table-responsive */
+.table-responsive {
+    position: relative;
+}
+
+/* Request list: single header row */
+#quotationResultsTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(#fff,#fff);
+}
+
+/* Supplier table has grouped headers (3 rows):
+           first row (grouping) at top 0,
+           second row below it,
+           third row below second. Adjust values if your header heights differ. */
+#supplierQuoteTable thead tr:nth-child(1) th {
+    position: sticky;
+    top: 0;
+    z-index: 30; /* highest so grouping labels stay above */
+    background: #f8f9fa;
+}
+
+#supplierQuoteTable thead tr:nth-child(2) th {
+    position: sticky;
+    top: 36px; /* height of first header row approx; change if needed */
+    z-index: 29;
+    background: #dee2e6;
+}
+
+#supplierQuoteTable thead tr:nth-child(3) th {
+    position: sticky;
+    top: 72px; /* top = first + second heights; adjust if your rows are taller */
+    z-index: 28;
+    background: #dee2e6;
+}
+
+/* Ensure sticky header cells maintain border and don't overlap content */
+#supplierQuoteTable thead th, #quotationResultsTable thead th {
+    box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+}

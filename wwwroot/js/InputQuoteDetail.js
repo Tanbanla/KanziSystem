@@ -314,7 +314,7 @@
         rows.forEach(row => {
             const cells = row.querySelectorAll('td');
             if (cells.length < 20) return; // Skip if not enough cells
-            if (cells[24].textContent.trim() == 'true' || cells[24].textContent.trim() == '1')  return;
+            //if (cells[24].textContent.trim() == 'true' || cells[24].textContent.trim() == '1')  return;
             const item = {
                 CHR_MaHangNoiBo: cells[2].textContent.trim() || '',
                 CHR_MaHangNCC: cells[1].textContent.trim() || '',
