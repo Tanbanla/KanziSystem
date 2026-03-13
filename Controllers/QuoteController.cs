@@ -109,7 +109,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-            return Ok(result); 
+            return Ok(result);
 
         }
         // MARK: - Input Quote
@@ -297,7 +297,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 // Gui mail phe duyet trong background
                 var SectionApporve = insertedList
                     .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
-                    .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap,l.ID_StepBaoGia))
+                    .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia))
                     .ToList();
                 if (SectionApporve != null)
                 {

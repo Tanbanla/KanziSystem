@@ -381,3 +381,30 @@ select.is-invalid {
 }
 /* Ensure table body rows have white background when scrolling under header */
 .table-responsive.fixed-header tbody td { background: #fff; }
+/* bo tron cac th*/
+/* Make table cells have rounded corners and avoid clipped borders */
+/*table.table.table-bordered {
+    border-collapse: separate !important;
+    border-spacing: 1px !important;*/ /* small gap so rounded corners are visible */
+/*}*/
+    /* Apply rounded corners to all cells for a softer look */
+    /*table.table.table-bordered td,
+    table.table.table-bordered th {
+        border-radius: 6px;
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        padding: .35rem .5rem;*/ /* ensure spacing inside cells */
+        /*box-sizing: border-box;
+    }*/
+
+
+/* Highlight mismatched supplier values: yellow background + red text + red border */
+/*.mismatch {
+    background-color: #fff3cd !important;
+    color: red !important;
+    border: 1px solid red !important;*/
+    /* border-radius: 6px !important; */
+    /*box-shadow: none !important;*/
+    /* padding: .25rem .4rem !important; */
+    /*box-sizing: border-box !important;
+}*/

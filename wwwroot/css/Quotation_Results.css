@@ -1,39 +1,133 @@
-.page-bg { background:linear-gradient(180deg,#f0f6ff,#ffffff); padding:1.25rem 1rem; border-radius:.5rem; }
-.filter-card { border:1px solid #e0e9f7; }
+.page-bg {
+    background: linear-gradient(180deg,#f0f6ff,#ffffff);
+    padding: 1.25rem 1rem;
+    border-radius: .5rem;
+}
 
-.quot-table { font-size:.85rem; background:#fff; }
-.quot-table thead .main-head th { font-weight:600; }
+.filter-card {
+    border: 1px solid #e0e9f7;
+}
+
+.quot-table {
+    font-size: .85rem;
+    background: #fff;
+}
+
+    .quot-table thead .main-head th {
+        font-weight: 600;
+    }
+
 .main-head th {
     background-color: #2335b7 !important;
     color: #fff !important;
     border-color: #1a2a9a !important;
 }
-.item-row:hover { background:#fff8ef; }
-.item-row td { vertical-align:middle; }
 
-.detail-cell { width:70px; text-align: center }
-.toggle-sup { padding:.25rem .5rem; font-size:.75rem; border-color:#2563eb; color:#2563eb; background:#ffffff; display:flex; align-items:center; }
-.toggle-sup:hover { color:#fff; background:#2563eb; }
-.toggle-icon { display:inline-block; width:1rem; text-align:center; font-weight:700; }
+.item-row:hover {
+    background: #fff8ef;
+}
 
-.supplier-group { background:#f5faff; }
-.supplier-table { width:100%; }
-.supplier-table thead .supplier-head th { font-weight:600; background:linear-gradient(135deg,#0ea5b9); color:#fff; border-color:#0e6e7d; }
-.supplier-table tbody tr:hover { background:#e3f6ff; }
-.supplier-table td, .supplier-table th { white-space:nowrap; }
-.supplier-group > td { padding:0; border:2px solid #c7e3ff; }
+.item-row td {
+    vertical-align: middle;
+}
 
-.form-check-input:checked { background-color:#2563eb; border-color:#2563eb; }
+.detail-cell {
+    width: 70px;
+    text-align: center
+}
 
-.status-badge { font-size:.65rem; padding:.4em .55em; }
+.toggle-sup {
+    padding: .25rem .5rem;
+    font-size: .75rem;
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+}
 
-.status-filter { user-select:none; }
-.status-option { background:#eef4ff; color:#0d4faf; padding:.3rem .55rem; border-radius:.35rem; font-size:.65rem; cursor:pointer; border:1px solid #d1e3ff; transition:.15s; margin-right : 4px }
-.status-option:hover { background:#dbeafe; }
-.status-option.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+    .toggle-sup:hover {
+        color: #fff;
+        background: #2563eb;
+    }
+
+.toggle-icon {
+    display: inline-block;
+    width: 1rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.supplier-group {
+    background: #f5faff;
+}
+
+.supplier-table {
+    width: 100%;
+}
+
+    .supplier-table thead .supplier-head th {
+        font-weight: 600;
+        background: linear-gradient(135deg,#0ea5b9);
+        color: #fff;
+        border-color: #0e6e7d;
+    }
+
+    .supplier-table tbody tr:hover {
+        background: #e3f6ff;
+    }
+
+    .supplier-table td, .supplier-table th {
+        white-space: nowrap;
+    }
+
+.supplier-group > td {
+    padding: 0;
+    border: 2px solid #c7e3ff;
+}
+
+.form-check-input:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.status-badge {
+    font-size: .65rem;
+    padding: .4em .55em;
+}
+
+.status-filter {
+    user-select: none;
+}
+
+.status-option {
+    background: #eef4ff;
+    color: #0d4faf;
+    padding: .3rem .55rem;
+    border-radius: .35rem;
+    font-size: .65rem;
+    cursor: pointer;
+    border: 1px solid #d1e3ff;
+    transition: .15s;
+    margin-right: 4px
+}
+
+    .status-option:hover {
+        background: #dbeafe;
+    }
+
+    .status-option.active {
+        background: #2563eb;
+        color: #fff;
+        border-color: #2563eb;
+    }
 
 /* Sticky header */
-.quot-table thead th { position:sticky; top:0; z-index:5; }
+.quot-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
 
 /* Center the selection checkbox within table cell */
 .quot-table .item-select {
@@ -42,6 +136,7 @@
     vertical-align: middle; /* align with row middle */
     position: static; /* avoid offset from relative positioning */
 }
+
 .quot-table .supplier-select {
     margin: 0; /* remove default margins */
     display: inline-block;
@@ -49,7 +144,23 @@
     position: static; /* avoid offset from relative positioning */
 }
 /* Responsive */
-@media (max-width:1200px){ .quot-table { font-size:.8rem; } .supplier-table { font-size:.75rem; } .toggle-sup { font-size:.65rem; } .status-option { font-size:.6rem; } }
+@media (max-width:1200px) {
+    .quot-table {
+        font-size: .8rem;
+    }
+
+    .supplier-table {
+        font-size: .75rem;
+    }
+
+    .toggle-sup {
+        font-size: .65rem;
+    }
+
+    .status-option {
+        font-size: .6rem;
+    }
+}
 /* Ensure sticky headers inside scrollable .table-responsive */
 .table-responsive {
     position: relative;
@@ -91,4 +202,86 @@
 /* Ensure sticky header cells maintain border and don't overlap content */
 #supplierQuoteTable thead th, #quotationResultsTable thead th {
     box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+}
+
+
+/* Sticky columns for supplier table */
+#supplierQuoteTable {
+    position: relative;
+}
+
+    #supplierQuoteTable .sticky-column {
+        position: sticky;
+        background-color: #ffffff !important;
+        z-index: 8;
+        border-right: 2px solid #dee2e6;
+    }
+
+/* Column groups styling */
+.bivn-column-group {
+    background-color: #d1ecf1 !important;
+}
+
+.vendor-column-group {
+    background-color: #f8d7da !important;
+}
+
+/* Responsive table improvements */
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.table th {
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 0.5rem 0.3rem;
+}
+
+.table td {
+    padding: 0.4rem 0.3rem;
+    font-size: 11px;
+}
+
+/* Hide/show column groups */
+.hide-bivn .bivn-column,
+.hide-bivn .bivn-column-group {
+    display: none !important;
+}
+
+.hide-vendor .vendor-column,
+.hide-vendor .vendor-column-group {
+    display: none !important;
+}
+
+.hide-description .description-column {
+    display: none !important;
+}
+
+/* Button states */
+.btn.active {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* Sticky header */
+.table-header-custom {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Improve mobile responsiveness */
+@media (max-width: 768px) {
+    .table th, .table td {
+        font-size: 10px;
+        padding: 0.3rem 0.2rem;
+    }
+
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
 }

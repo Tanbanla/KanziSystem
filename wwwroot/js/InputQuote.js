@@ -474,10 +474,10 @@
         document.getElementById('supplierSearchBtn')?.addEventListener('click', function() {
             supplierState.searchParams = {
                 idRequestQuote: 0,
-                maDon: document.getElementById('supplierSearchMaDon')?.value || '',
-                maVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
-                maNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
-                section: document.getElementById('supplierSearchSection')?.value || '',
+                maDon: (document.getElementById('supplierSearchMaDon')?.value || '').trim(),
+                maVatTu: (document.getElementById('supplierSearchMaVatTu')?.value || '').trim(),
+                maNcc: (document.getElementById('supplierSearchMaNcc')?.value || '').trim(),
+                section: (document.getElementById('supplierSearchSection')?.value || '').trim(),
                 dayMM: document.getElementById('supplierSearchDayMM')?.value || null
             };
             supplierState.currentPage = 1;
@@ -632,22 +632,38 @@
 
             // 5 - Supplier item code -> IsMatch_MaHangNCC
             const maHangCell = td(item.CHR_MaHangNCC || '');
-            if (isFalseFlag(item.IsMatch_MaHangNCC)) maHangCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_MaHangNCC)) {
+                maHangCell.classList.add('mismatch');
+                maHangCell.style.color = 'red';
+                maHangCell.style.border = '1px solid red';
+            }
             row.appendChild(maHangCell);
 
             // 6 - Item name HQ -> IsMatch_NameVN
             const nameVNCell = td(item.NVCHR_TenHangHQ || '');
-            if (isFalseFlag(item.IsMatch_NameVN)) nameVNCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_NameVN)) {
+                nameVNCell.classList.add('mismatch');
+                nameVNCell.style.color = 'red';
+                nameVNCell.style.border = '1px solid red';
+            }
             row.appendChild(nameVNCell);
 
             // 7 - Quantity -> IsMatch_SoLuong
             const qtyCell = td(item.INT_SoLuong || '', 'text-center');
-            if (isFalseFlag(item.IsMatch_SoLuong)) qtyCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_SoLuong)) {
+                qtyCell.classList.add('mismatch');
+                qtyCell.style.color = 'red';
+                qtyCell.style.border = '1px solid red';
+            }
             row.appendChild(qtyCell);
 
             // 8 - Unit -> IsMatch_DonVi
             const unitCell = td(item.NVCHR_DonVi || '', 'text-center');
-            if (isFalseFlag(item.IsMatch_DonVi)) unitCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_DonVi)) {
+                unitCell.classList.add('mismatch');
+                unitCell.style.color = 'red';
+                unitCell.style.border = '1px solid red';
+            }
             row.appendChild(unitCell);
 
             // 9 - Price USD
@@ -664,31 +680,57 @@
 
             // 13 - Delivery date -> IsMatch_Ngay
             const deliveryCell = td(item.DTM_ShipTime ? new Date(item.DTM_ShipTime).toLocaleDateString('vi-VN') : '');
-            if (isFalseFlag(item.IsMatch_Ngay)) deliveryCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_Ngay)) {
+                deliveryCell.classList.add('mismatch');
+                deliveryCell.style.color = 'red';
+                deliveryCell.style.border = '1px solid red';
+            }
             row.appendChild(deliveryCell);
 
             // 14 - Rohs -> IsMatch_Rohs
             const rohsCell = td(item.VCHR_Rohs || '');
-            if (isFalseFlag(item.IsMatch_Rohs)) rohsCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_Rohs)) {
+                rohsCell.classList.add('mismatch');
+                rohsCell.style.color = 'red';
+                rohsCell.style.border = '1px solid red';
+            }
             row.appendChild(rohsCell);
 
             // 15 - COCQ -> IsMatch_COCQ
             const cocqCell = td(item.VCHR_COCQ || '');
-            if (isFalseFlag(item.IsMatch_COCQ)) cocqCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_COCQ)) {
+                cocqCell.classList.add('mismatch');
+                cocqCell.style.color = 'red';
+                cocqCell.style.border = '1px solid red';
+            }
             row.appendChild(cocqCell);
 
             // 16 - MSDS -> IsMatch_MSDS
             const msdsCell = td(item.VCHR_MSDS || '');
-            if (isFalseFlag(item.IsMatch_MSDS)) msdsCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_MSDS)) {
+                msdsCell.classList.add('mismatch');
+                msdsCell.style.color = 'red';
+                msdsCell.style.border = '1px solid red';
+            }
             row.appendChild(msdsCell);
 
             // 17 - Safety -> IsMatch_AnToan
             const safetyCell = td(item.VCHR_AnToan || '');
-            if (isFalseFlag(item.IsMatch_AnToan)) safetyCell.classList.add('mismatch');
+            if (isFalseFlag(item.IsMatch_AnToan)) {
+                safetyCell.classList.add('mismatch');
+                safetyCell.style.color = 'red';
+                safetyCell.style.border = '1px solid red';
+            }
             row.appendChild(safetyCell);
 
             // 18 - Commitment
-            row.appendChild(td(item.VCHR_CamKet || ''));
+            const commitCell = td(item.VCHR_CamKet || '');
+            if (isFalseFlag(item.IsMatchCamKet)) {
+                commitCell.classList.add('mismatch');
+                commitCell.style.color = 'red';
+                commitCell.style.border = '1px solid red';
+            }
+            row.appendChild(commitCell);
 
             // 19 - Delivery term
             row.appendChild(td(item.NVCHR_DeliveryTerm || ''));

@@ -180,24 +180,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
 
                         // phần của file dữ liệu đính kèm 
-                        worksheet.Cell(rowIndex, 20).Value = rq.CHR_MaDon;
-                        worksheet.Cell(rowIndex, 21).Value = rq.CHR_MaThietBi;
-                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaHangNoiBo;
-                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaHangNCC;
-                        worksheet.Cell(rowIndex, 24).Value = rq.NVCHR_NameVN;
-                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_NameEN;
-                        worksheet.Cell(rowIndex, 26).Value = rq.INT_SoLuong;
-                        worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_DonVi;
-                        worksheet.Cell(rowIndex, 28).Value = rq.NVCHR_Rohs; 
-                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_COCQ;
-                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_MSDS; 
-                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_AnToan;
-                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_FileThietKe;
-                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_NhaSanXuat;
-                        worksheet.Cell(rowIndex, 34).Value = rq.CHR_MaNCC;
-                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_TenNCC;
-                        worksheet.Cell(rowIndex, 36).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? "";
-                        worksheet.Cell(rowIndex, 37).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";
+                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaDon;
+                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaThietBi;
+                        worksheet.Cell(rowIndex, 24).Value = rq.CHR_MaHangNoiBo;
+                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_MaHangNCC;
+                        worksheet.Cell(rowIndex, 26).Value = rq.NVCHR_NameVN;
+                        worksheet.Cell(rowIndex, 27).Value = rq.CHR_NameEN;
+                        worksheet.Cell(rowIndex, 28).Value = rq.INT_SoLuong;
+                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_DonVi;
+                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_Rohs; 
+                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_COCQ;
+                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_MSDS; 
+                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_AnToan;
+                        worksheet.Cell(rowIndex, 34).Value = rq.NVCHR_FileThietKe;
+                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_NhaSanXuat;
+                        worksheet.Cell(rowIndex, 36).Value = rq.CHR_MaNCC;
+                        worksheet.Cell(rowIndex, 37).Value = rq.NVCHR_TenNCC;
+                        worksheet.Cell(rowIndex, 38).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? "";
+                        worksheet.Cell(rowIndex, 39).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";
                         // Add thin border to the data row
                         worksheet.Range(rowIndex, 1, rowIndex, 10).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 
@@ -400,24 +400,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         // phần của file dữ liệu đính kèm 
 
 
-                        worksheet.Cell(rowIndex, 20).Value = rq.CHR_MaDon;
-                        worksheet.Cell(rowIndex, 21).Value = rq.CHR_MaThietBi;
-                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaHangNoiBo;
-                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaHangNCC;
-                        worksheet.Cell(rowIndex, 24).Value = rq.NVCHR_NameVN;
-                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_NameEN;
-                        worksheet.Cell(rowIndex, 26).Value = rq.INT_SoLuong;
-                        worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_DonVi;
-                        worksheet.Cell(rowIndex, 28).Value = rq.NVCHR_Rohs;
-                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_COCQ;
-                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_MSDS;
-                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_AnToan;
-                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_FileThietKe;
-                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_NhaSanXuat;
-                        worksheet.Cell(rowIndex, 34).Value = rq.CHR_MaNCC;
-                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_TenNCC;
-                        worksheet.Cell(rowIndex, 36).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? "";
-                        worksheet.Cell(rowIndex, 37).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";
+                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaDon;
+                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaThietBi;
+                        worksheet.Cell(rowIndex, 24).Value = rq.CHR_MaHangNoiBo;
+                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_MaHangNCC;
+                        worksheet.Cell(rowIndex, 26).Value = rq.NVCHR_NameVN;
+                        worksheet.Cell(rowIndex, 27).Value = rq.CHR_NameEN;
+                        worksheet.Cell(rowIndex, 28).Value = rq.INT_SoLuong;
+                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_DonVi;
+                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_Rohs;
+                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_COCQ;
+                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_MSDS;
+                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_AnToan;
+                        worksheet.Cell(rowIndex, 34).Value = rq.NVCHR_FileThietKe;
+                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_NhaSanXuat;
+                        worksheet.Cell(rowIndex, 36).Value = rq.CHR_MaNCC;
+                        worksheet.Cell(rowIndex, 37).Value = rq.NVCHR_TenNCC;
+                        worksheet.Cell(rowIndex, 38).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? "";
+                        worksheet.Cell(rowIndex, 39).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";
                         // Add thin border to the data row
                         worksheet.Range(rowIndex, 1, rowIndex, 10).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 

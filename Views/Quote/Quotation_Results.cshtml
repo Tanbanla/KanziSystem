@@ -12,6 +12,20 @@
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
     <link rel="stylesheet" href="~/css/Quotation_Results.css" />
+    <style>
+        /* Compact supplier table: sticky first columns and compact paddings */
+        .supplier-table-wrapper { overflow: auto; max-height: 520px; }
+        #supplierQuoteTable th, #supplierQuoteTable td { white-space: nowrap; padding: .35rem .5rem; font-size: .9rem; }
+        .sticky-col { position: sticky; background: #fff; z-index: 3; }
+        .sticky-col.col-1 { left: 0px; }
+        .sticky-col.col-2 { left: 44px; }
+        .sticky-col.col-3 { left: 120px; }
+        .sticky-col.col-4 { left: 200px; }
+        /* ensure additional columns are hidden by default for compactness (JS will reapply state) */
+        #supplierQuoteTable:not(.show-additional) th.additional-column, #supplierQuoteTable:not(.show-additional) td.additional-column { display: none; }
+        /* make table header stand out when scrolling */
+        #supplierQuoteTable thead th { top: 0; position: sticky; z-index: 2; }
+    </style>
 </head>
 
 <div class="container-fluid" id="quotation-results">
@@ -186,6 +200,14 @@
                                 }
                             </select>
                         </div>
+                        <div class="col-12 col-md-2">
+                            <label for="searchStatus" class="form-label small text-uppercase fw-semibold">@Localizer["Status"]</label>
+                            <select id="searchStatus" name="searchStatus" class="form-select searchStatus searchable-select">
+                                <option value="1" selected>@Localizer["SelectAll"]</option>
+                                <option value="2">@Localizer["Confirm"]</option>
+                                <option value="3">@Localizer["Done"]</option>
+                            </select>
+                        </div>
                         @* <div class="col-12 col-md-2">
                             <label for="supplierSearchDayMM" class="form-label small text-uppercase fw-semibold">@Localizer["Date"]</label>
                             <input type="date" id="supplierSearchDayMM" class="form-control">
@@ -217,24 +239,39 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 600px;">
+                        <div class="supplier-table-wrapper">
                         <table class="table table-sm table-hover table-bordered table-striped align-middle mb-0" id="supplierQuoteTable" style="font-size:13px;">
                             <thead class="table-header-custom">
                                 <tr class="text-center" style="background-color: #f8f9fa;">
-                                    <th colspan="3" style="background-color: #ffff; border: 1px solid #dee2e6;">Status</th>
-                                    <th colspan="19" style="background-color: #d1ecf1; border: 1px solid #dee2e6;">BIVN Input</th>
-                                    <th colspan="21" style="background-color: #f8d7da; border: 1px solid #dee2e6;">Vendor Input</th>
+                                    <th colspan="4" style="background-color: #ffff; border: 1px solid #dee2e6;">Status</th>
+                                    <th colspan="24" style="background-color: #d1ecf1; border: 1px solid #dee2e6;">BIVN Input</th>
+                                    <th colspan="22" style="background-color: #f8d7da; border: 1px solid #dee2e6;">Vendor Input</th>
+                                    <th colspan="24" data-group="bivn" style="background-color: #d1ecf1; border: 1px solid #dee2e6;">BIVN Input</th>
+                                    <th colspan="22" data-group="vendor" style="background-color: #f8d7da; border: 1px solid #dee2e6;">Vendor Input</th>
                                 </tr>
                                 <tr class="text-center align-middle">
-                                    <th rowspan="2"  style="min-width: 40px;">@Localizer["STT"]</th>
-                                    <th  rowspan="2" style="min-width: 50px;">@Localizer["OrderNumber"]</th>
-                                    <th  rowspan="2" style="min-width: 50px;">@Localizer["Status"]</th>
-                                    
+                                    <th rowspan="2"  style="min-width: 40px;background-color: #FFEDE8;">@Localizer["STT"]</th>
+                                    <th  rowspan="2" style="min-width: 50px;background-color: #FFEDE8;">@Localizer["OrderNumber"]</th>
+                                    <th  rowspan="2" style="min-width: 50px;background-color: #FFEDE8;">@Localizer["Status"]</th>
+                                    <th rowspan="2" style="min-width: 150px; background-color: #FFEDE8;">@Localizer["EquipmentCode"]</th>
+                                    <th rowspan="2" class="sticky-col col-1" style="min-width: 40px;background-color: #FFEDE8;">@Localizer["STT"]</th>
+                                    <th  rowspan="2" class="sticky-col col-2" style="min-width: 50px;background-color: #FFEDE8;">@Localizer["OrderNumber"]</th>
+                                    <th  rowspan="2" class="sticky-col col-3" style="min-width: 50px;background-color: #FFEDE8;">@Localizer["Status"]</th>
+                                    <th rowspan="2" class="sticky-col col-4" style="min-width: 150px; background-color: #FFEDE8;">@Localizer["EquipmentCode"]</th>
+
                                     <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;" class="additional-column">@Localizer["InternalMaterialCode"]</th>
+                                    <th rowspan="2" style="min-width: 120px;background-color: #dee2e6;" class="additional-column">@Localizer["SupplierItemCode"]</th>
                                     <th rowspan="2" style="min-width: 120px; background-color: #dee2e6;" class="additional-column">@Localizer["Classification"]</th>
                                     <th rowspan="2" style="min-width: 120px; background-color: #dee2e6;" class="additional-column">@Localizer["Category"]</th>
                                     <th rowspan="2" style="min-width: 200px; background-color: #dee2e6;" class="additional-column">@Localizer["CustomsItemName"]</th>
                                     <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["EnglishName"]</th>
-                                    <th colspan="8" style="background-color: #d3d9e5;" class="additional-column">@Localizer["DescriptionGroup"]</th>
+                                    <th rowspan="2" style="min-width: 80px;" class="additional-column">@Localizer["Quantity"]</th>
+                                    <th rowspan="2" style="min-width: 70px;" class="additional-column">@Localizer["Unit"]</th>
+                                    <th colspan="6" style="background-color: #d3d9e5;" class="additional-column">@Localizer["DescriptionGroup"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["Rohs"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["COCQ"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["MSDS"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["Safety"]</th>
                                     <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;" class="additional-column">@Localizer["DesignFile"]</th>
                                     <th rowspan="2" style="min-width: 150px; background-color: #dee2e6;" class="additional-column">@Localizer["Supplier"]</th>
                                     <th rowspan="2" style="min-width: 100px; background-color: #dee2e6;" class="additional-column">@Localizer["SupplierSelectionDeadline"]</th>
@@ -242,10 +279,11 @@
                                     <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;" class="additional-column">@Localizer["GetQuote"]</th>
                                     <th rowspan="2" style="min-width: 60px; background-color: #dee2e6;" class="additional-column">@Localizer["Reason"]</th>
 
-                                    <th  rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["SupplierCodeShort"]</th>
+                                    <th  rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["Supplier"]</th>
                                     <th rowspan="2" style="min-width: 180px;background-color: #FDFFE9;">@Localizer["SupplierName"]</th>
                                     <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["SupplierItemCode"]</th>
-                                    <th rowspan="2" style="min-width: 150px;background-color: #FDFFE9;">@Localizer["ItemNameHQ"]</th>
+                                    <th rowspan="2" style="min-width: 150px;background-color: #FDFFE9;">@Localizer["CustomsItemName"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #FDFFE9;">@Localizer["EnglishName"]</th>
                                     <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Quantity"]</th>
                                     <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Unit"]</th>
                                     <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["PriceUSD"]</th>
@@ -257,7 +295,7 @@
                                     <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["COCQ"]</th>
                                     <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["MSDS"]</th>
                                     <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Safety"]</th>
-                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Commitment"]</th>
+                                    <th rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["CommitRequirement"]</th>
                                     <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["DeliveryMethod"]</th>
                                     <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["PaymentTerms"]</th>
                                     <th rowspan="2" style="min-width: 150px;background-color: #FDFFE9;">@Localizer["Attachment"]</th>
@@ -265,8 +303,6 @@
                                     <th rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["DueDay"]</th>
                                 </tr>
                                 <tr class="text-center align-middle" style="background-color: #dee2e6;">
-                                    <th style="min-width: 80px;" class="additional-column">@Localizer["Quantity"]</th>
-                                    <th style="min-width: 70px;" class="additional-column">@Localizer["Unit"]</th>
                                     <th style="min-width: 80px;" class="additional-column">@Localizer["Shape"]</th>
                                     <th style="min-width: 70px;" class="additional-column">@Localizer["Material"]</th>
                                     <th style="min-width: 100px;" class="additional-column">@Localizer["Composition"]</th>
@@ -277,12 +313,13 @@
                             </thead>
                             <tbody id="supplierQuoteBody">
                                 <tr class="text-center">
-                                    <td colspan="31" class="text-muted py-4">
+                                    <td colspan="38" class="text-muted py-4">
                                         <i class="ion ion-load-c ion-spin"></i> @Localizer["LoadingData"]
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>

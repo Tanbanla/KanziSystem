@@ -72,13 +72,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
                     CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
                     CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
-                    CAST(CASE WHEN r.INT_SoLuong = d.INT_SoLuong THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
-                    CAST(CASE WHEN r.NVCHR_DonVi = d.NVCHR_DonVi THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
-                    CAST(CASE WHEN r.NVCHR_Rohs = d.VCHR_Rohs THEN 1 ELSE 0 END AS BIT) AS IsMatch_Rohs,
-                    CAST(CASE WHEN r.NVCHR_COCQ = d.VCHR_COCQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_COCQ,
-                    CAST(CASE WHEN r.NVCHR_MSDS = d.VCHR_MSDS THEN 1 ELSE 0 END AS BIT) AS IsMatch_MSDS,
-                    CAST(CASE WHEN r.NVCHR_AnToan = d.VCHR_AnToan THEN 1 ELSE 0 END AS BIT) AS IsMatch_AnToan,
-                    CAST(CASE WHEN r.DTM_NgayMuonNhan = d.DTM_ShipTime THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay
+                    CAST(CASE WHEN (r.INT_SoLuong = d.INT_SoLuong or d.INT_SoLuong = 0) THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
+                    CAST(CASE WHEN (r.NVCHR_DonVi = d.NVCHR_DonVi or d.NVCHR_DonVi is null) THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
+                    CAST(CASE WHEN (r.NVCHR_Rohs = d.VCHR_Rohs or d.VCHR_Rohs = 'OK'or d.VCHR_Rohs = '')THEN 1 ELSE 0 END AS BIT) AS IsMatch_Rohs,
+                    CAST(CASE WHEN (r.NVCHR_COCQ = d.VCHR_COCQ or d.VCHR_COCQ = 'OK'or d.VCHR_COCQ = '') THEN 1 ELSE 0 END AS BIT) AS IsMatch_COCQ,
+                    CAST(CASE WHEN (r.NVCHR_MSDS = d.VCHR_MSDS or d.VCHR_MSDS = 'OK'or d.VCHR_MSDS = '') THEN 1 ELSE 0 END AS BIT) AS IsMatch_MSDS,
+                    CAST(CASE WHEN (r.NVCHR_AnToan = d.VCHR_AnToan or d.VCHR_AnToan = 'OK'or d.VCHR_AnToan = '') THEN 1 ELSE 0 END AS BIT) AS IsMatch_AnToan,
+                    CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) or d.DTM_ShipTime is null ) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
+                    CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet
             ");
             selectSql.Append(baseFrom.ToString());
             selectSql.Append(whereBuilder.ToString());

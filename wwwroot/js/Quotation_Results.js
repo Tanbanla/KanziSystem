@@ -119,27 +119,27 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(res => res.json())
-            .then(data => {
-                const items = Array.isArray(data.data.data) ? data.data.data : [];
-                const total = typeof data.data.totalCount === 'number' ? data.data.totalCount : items.length;
-                supplierState.returnedCount = items.length;
-                supplierState.totalCount = total;
-                supplierState.lastPage = (supplierState.pageIndex * supplierState.pageSize) >= total;
+                .then(res => res.json())
+                .then(data => {
+                    const items = Array.isArray(data.data.data) ? data.data.data : [];
+                    const total = typeof data.data.totalCount === 'number' ? data.data.totalCount : items.length;
+                    supplierState.returnedCount = items.length;
+                    supplierState.totalCount = total;
+                    supplierState.lastPage = (supplierState.pageIndex * supplierState.pageSize) >= total;
 
-                this.renderSupplierTable(items);
+                    this.renderSupplierTable(items);
 
-                // Update summary
-                const summaryText = document.getElementById('supplierSummaryText');
-                if (summaryText) summaryText.textContent = `Tổng số: ${total || 0}`;
+                    // Update summary
+                    const summaryText = document.getElementById('supplierSummaryText');
+                    if (summaryText) summaryText.textContent = `Tổng số: ${total || 0}`;
 
-                // Render pagination
-                this.renderSupplierPaginationControls();
+                    // Render pagination
+                    this.renderSupplierPaginationControls();
 
-                // after render, reapply additional columns visibility
-                this.applyAdditionalColumnsVisibility();
-            })
-            .catch(err => console.error('Load supplier data failed', err));
+                    // after render, reapply additional columns visibility
+                    this.applyAdditionalColumnsVisibility();
+                })
+                .catch(err => console.error('Load supplier data failed', err));
         },
         renderSupplierTable: function (data) {
             const tbody = document.getElementById('supplierQuoteBody');
@@ -149,8 +149,11 @@
                     <td>${index + 1}</td>
                     <td>${d.CHR_MaDon || ''}</td>
                     <td>${d.status || ''}</td>
+                     <td>${d.CHR_MaThietBi || ''}</td>
+
                     <td class="additional-column">${d.CHR_MaHangNoiBo || ''}</td>
                     <td class="additional-column">${d.CHR_Phanloai || ''}</td>
+                    <td class="additional-column">${d.CHR_MaHangNCC || ''}</td>
                     <td class="additional-column">${d.NVCHR_ChungLoai || ''}</td>
                     <td class="additional-column">${d.NVCHR_NameVN || ''}</td>
                     <td class="additional-column">${d.CHR_NameEN || ''}</td>
@@ -162,6 +165,12 @@
                     <td class="additional-column">${d.NVCHR_KichThuoc || ''}</td>
                     <td class="additional-column">${d.NVCHR_DongMay || ''}</td>
                     <td class="additional-column">${d.NVCHR_TinhNang || ''}</td>
+
+                    <td class="additional-column">${d.NVCHR_Rohs || ''}</td>
+                    <td class="additional-column">${d.NVCHR_COCQ || ''}</td>
+                    <td class="additional-column">${d.NVCHR_MSDS || ''}</td>
+                    <td class="additional-column">${d.NVCHR_AnToan || ''}</td>
+
                     <td class="additional-column">${d.NVCHR_FileThietKe || ''}</td>
                     <td class="additional-column">${d.CHR_MaNCC || ''}</td>
                     <td class="additional-column">${d.DTM_KyHan ? new Date(d.DTM_KyHan).toLocaleDateString() : ''}</td>
@@ -170,8 +179,9 @@
                     <td class="additional-column">${d.NVCHR_LyDo || ''}</td>
                     <td>${d.CHR_MaNCC || ''}</td>
                     <td class="text-start">${d.NVCHR_NameNCC || ''}</td>
-                    <td>${d.CHR_MaHangNCC || ''}</td>
+                    <td>${d.CodeEquipmentNCC || ''}</td>
                     <td class="text-start">${d.NVCHR_TenHangHQ || ''}</td>
+                     <td class="text-start">${d.NameENByNCC || ''}</td>
                     <td>${d.INT_SoLuong || ''}</td>
                     <td>${d.NVCHR_DonVi || ''}</td>
                     <td class="text-end">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
@@ -288,10 +298,15 @@
             const table = document.getElementById('supplierQuoteTable');
             const btn = document.getElementById('toggleAdditionalColumns');
             if (!table || !btn) return;
+            // Toggle class for compact/expanded view
             const showing = table.classList.toggle('show-additional');
             try {
                 // update button text to reflect state
                 const T = window.i18nQuotationResults || {};
+                // Persist state
+                window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
+                window._quotationResultsState.showAdditionalColumns = !!showing;
+                // Update button text
                 btn.textContent = showing ? (T.HideAdditionalColumns || 'Ẩn chi tiết') : (T.ToggleAdditionalColumns || 'Hiện chi tiết');
             } catch { }
             const toggleBtn = document.getElementById('toggleAdditionalColumns');
@@ -302,6 +317,7 @@
             window._quotationResultsState.showAdditionalColumns = !isHidden;
 
             // Ẩn các th và td có class 'additional-column'
+            // Show/hide additional columns
             const columns = document.querySelectorAll('#supplierQuoteTable th.additional-column, #supplierQuoteTable td.additional-column');
             columns.forEach(col => {
                 if (isHidden) {
@@ -310,6 +326,7 @@
                     col.style.display = '';
                 }
             });
+            columns.forEach(col => { col.style.display = showing ? '' : 'none'; });
 
             // Ẩn th DescriptionGroup (colspan=8)
             const descGroupTh = document.querySelector('#supplierQuoteTable th[colspan="8"].additional-column');
@@ -318,7 +335,7 @@
             }
 
             // Ẩn th BIVN Input (colspan=19)
-            const bivnInputTh = document.querySelector('#supplierQuoteTable th[colspan="19"]');
+            const bivnInputTh = document.querySelector('#supplierQuoteTable th[colspan="24"]');
             if (bivnInputTh) {
                 bivnInputTh.style.display = isHidden ? 'none' : '';
             }
@@ -330,6 +347,11 @@
             //}
 
             toggleBtn.textContent = isHidden ? 'Hiện chi tiết' : 'Ẩn chi tiết';
+            // Toggle grouped headers based on data-group attributes
+            const bivnTh = document.querySelector('#supplierQuoteTable th[data-group="bivn"]');
+            const vendorTh = document.querySelector('#supplierQuoteTable th[data-group="vendor"]');
+            if (bivnTh) bivnTh.style.display = showing ? '' : 'none';
+            if (vendorTh) vendorTh.style.display = showing ? '' : 'none';
         },
 
         applyAdditionalColumnsVisibility: function () {
@@ -339,6 +361,8 @@
                 const shouldShow = !!state.showAdditionalColumns;
                 const toggleBtn = document.getElementById('toggleAdditionalColumns');
                 if (toggleBtn) toggleBtn.textContent = shouldShow ? 'Ẩn chi tiết' : 'Hiện chi tiết';
+                const T = window.i18nQuotationResults || {};
+                if (toggleBtn) toggleBtn.textContent = shouldShow ? (T.HideAdditionalColumns || 'Ẩn chi tiết') : (T.ToggleAdditionalColumns || 'Hiện chi tiết');
                 const columns = document.querySelectorAll('#supplierQuoteTable th.additional-column, #supplierQuoteTable td.additional-column');
                 columns.forEach(col => { col.style.display = shouldShow ? '' : 'none'; });
                 // DescriptionGroup and BIVN Input header
@@ -346,6 +370,11 @@
                 if (descGroupTh) descGroupTh.style.display = shouldShow ? '' : 'none';
                 const bivnInputTh = document.querySelector('#supplierQuoteTable th[colspan="19"]');
                 if (bivnInputTh) bivnInputTh.style.display = shouldShow ? '' : 'none';
+                // grouped headers
+                const bivnTh = document.querySelector('#supplierQuoteTable th[data-group="bivn"]');
+                const vendorTh = document.querySelector('#supplierQuoteTable th[data-group="vendor"]');
+                if (bivnTh) bivnTh.style.display = shouldShow ? '' : 'none';
+                if (vendorTh) vendorTh.style.display = shouldShow ? '' : 'none';
             } catch (e) { /* ignore */ }
         },
         openEditRequestModal: async function (id) {
@@ -396,7 +425,7 @@
                     if (!d) return '';
                     const dt = new Date(d);
                     const pad = (n) => n.toString().padStart(2, '0');
-                    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+                    return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
                 };
                 setVal('editNgayMuonNhan', toDateInput(data.dtM_NgayMuonNhan));
                 setVal('editKyHan', toDateInput(data.dtM_KyHan));
@@ -526,7 +555,7 @@
                 window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
                 window._quotationResultsState.openGroups[groupId] = willOpen;
             } catch { }
-        },  
+        },
 
         filterByStatus: function (e) {
             const selectedOption = e.currentTarget;
@@ -579,15 +608,15 @@
                 const tbody = document.getElementById('quotationResultsTableBody');
                 if (!tbody) return;
                 const rowsHtml = (items || []).map(i => {
-                        const ngay = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toLocaleDateString('vi-VN') : '';
-                        const ngayAttr = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toISOString().slice(0, 10) : '';
-                        const statusClass = (function (s) {
-                            if (s === 'Chưa chọn NCC') return 'bg-success';
-                            if (s === 'Đang chờ') return 'bg-warning text-dark';
-                            return 'bg-secondary';
-                        })(i.Status);
-                        const groupId = `${i.CHR_MaDon}-${i.CHR_MaHangNoiBo}`;
-                        return `
+                    const ngay = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toLocaleDateString('vi-VN') : '';
+                    const ngayAttr = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toISOString().slice(0, 10) : '';
+                    const statusClass = (function (s) {
+                        if (s === 'Chưa chọn NCC') return 'bg-success';
+                        if (s === 'Đang chờ') return 'bg-warning text-dark';
+                        return 'bg-secondary';
+                    })(i.Status);
+                    const groupId = `${i.CHR_MaDon}-${i.CHR_MaHangNoiBo}`;
+                    return `
                         <tr class="item-row" data-status="${i.Status || ''}">
                             <td class="text-center"><input type="checkbox" class="form-check-input item-select" /></td>
                             <td class="detail-cell text-center">
@@ -634,7 +663,7 @@
                                 </table>
                             </td>
                         </tr>`;
-                    }).join('');
+                }).join('');
                 tbody.innerHTML = rowsHtml;
 
                 // Update summary
@@ -940,13 +969,13 @@
                 const T = window.i18nQuotationResults || {};
                 if (!data) return showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveError || 'lỗi {0}').replace('{0}', ''), type: 'error' });
                 showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveSuccess || 'Gửi thành công'), type: 'success' });
-                
+
             } catch (err) {
                 const T = window.i18nQuotationResults || {};
                 showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveError || 'lỗi {0}').replace('{0}', err), type: 'error' });
                 return;
             }
-            
+
         },
 
         cancelSelection: function () {
@@ -980,7 +1009,7 @@
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `SelectionQuote_${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.xlsx`;
+                    a.download = `SelectionQuote_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.xlsx`;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();

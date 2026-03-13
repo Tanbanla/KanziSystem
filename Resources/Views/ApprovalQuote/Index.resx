@@ -468,4 +468,10 @@
   <data name="CloseButton" xml:space="preserve">
     <value>Đóng</value>
   </data>
+  <data name="ExportToExcel" xml:space="preserve">
+    <value>Xuất Excel</value>
+  </data>
+  <data name="MSGExportOK" xml:space="preserve">
+    <value>Xuất dữ liệu thành công</value>
+  </data>
 </root>

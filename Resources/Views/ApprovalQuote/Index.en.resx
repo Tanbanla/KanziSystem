@@ -468,4 +468,10 @@
   <data name="CloseButton" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="ExportToExcel" xml:space="preserve">
+    <value>Export To Excel</value>
+  </data>
+  <data name="MSGExportOK" xml:space="preserve">
+    <value>Export to Excel is Success</value>
+  </data>
 </root>

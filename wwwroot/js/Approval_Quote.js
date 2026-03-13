@@ -829,7 +829,45 @@
                 });
             }).catch(() => {});
         });
+        // Event click Export to Excel
+        const btnExport = document.getElementById('btnExcelExport');
+        if (btnExport) {
+            const payload = getFilterValues();
+            btnExport.addEventListener('click', async function () {
+                try {
+                    const res = await fetch('/ApprovalQuote/ExportToExcel', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) {
+                        const msg = await res.text().catch(() => 'Lỗi không xác định');
+                        throw new Error(msg || 'Xuất file thất bại');
+                    }
+                    const blob = await res.blob();
+                    let fileName = 'FileApproverQuote.xlsx';
+                    const cd = res.headers.get('content-disposition');
+                    if (cd) {
+                        const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                        if (m && m[1]) fileName = m[1].replace(/["']/g, '').trim();
+                    }
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    hideAr();
+                    const T = window.i18nQuote || {};
+                    showToast('success', T.MSGExportOK);
+                } catch (e) {
+                    console.error('Export to Excel error', e);
+                }
 
+            });
+        }
         // select all checkbox
         const selectAllEl = document.getElementById('selectAll');
         if (selectAllEl) {
