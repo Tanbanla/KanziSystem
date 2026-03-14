@@ -504,4 +504,13 @@
   <data name="PurposeFeature" xml:space="preserve">
     <value>Purpose/Feature</value>
   </data>
+  <data name="SelectSupplier" xml:space="preserve">
+    <value>Select supplier</value>
+  </data>
+  <data name="ExportImportFromExcel" xml:space="preserve">
+    <value>Download sample Excel file</value>
+  </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>Export Excel</value>
+  </data>
 </root>

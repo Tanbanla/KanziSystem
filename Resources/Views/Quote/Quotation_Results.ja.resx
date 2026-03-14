@@ -504,4 +504,13 @@
   <data name="PurposeFeature" xml:space="preserve">
     <value>目的/機能</value>
   </data>
+  <data name="SelectSupplier" xml:space="preserve">
+    <value>仕入先を選択</value>
+  </data>
+  <data name="ExportImportFromExcel" xml:space="preserve">
+    <value>サンプルExcel</value>
+  </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>エクセル出力</value>
+  </data>
 </root>

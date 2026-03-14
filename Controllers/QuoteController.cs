@@ -112,6 +112,115 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Ok(result);
 
         }
+        // Xuất dữ liệu để lựa chọn nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> ExportFileExcelQuotationResult([FromBody] SearchQuotationResultsModel search)
+        {
+            try
+            {
+                var result = await _baoGiaService.GetThongTinBaoGiaChiTietAsync(
+                    search.MaDon ?? "",
+                    search.Section ?? "",
+                    search.MaVatTu ?? "",
+                    search.MaNcc ?? "",
+                    search.PageIndex ?? 1,
+                    search.PageSize ?? 10);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                if (result.Data == null)
+                {
+                    return BadRequest("No data to export");
+                }
+                var dataList = result.Data.Data;
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+                int rowStart = 4;
+                int col = 1;
+                foreach (var item in dataList)
+                {
+                    // BIVN Input
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.status ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.Id ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_NameVN ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_NameEN ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.INT_SoLuong ?? 0);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_DonVi ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChungLoai ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_HinhDang ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChatLieu ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_ThanhPhan ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_KichThuoc ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_DongMay ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TinhNang ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_Rohs ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_COCQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_MSDS ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_AnToan ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan ?? string.Empty);
+                    // Vendor input
+                    ws.Cell(rowStart, col++).SetValue(item.CodeEquipmentNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NameENByNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.soluong ?? 0); // Vendor quantity
+                    ws.Cell(rowStart, col++).SetValue(item.donvi ?? string.Empty); // Vendor unit
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Vendor maker
+                    ws.Cell(rowStart, col++).SetValue(item.FL_USD ?? 0.0);
+                    ws.Cell(rowStart, col++).SetValue(item.FL_VND ?? 0.0);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_MOQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_Packing ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_LeadTime ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_ShipTime ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_Rohs ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_COCQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_MSDS ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_AnToan ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_CamKet ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_DeliveryTerm ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_PaymentTerm ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_File ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_EffectiveDate ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_ExpiryDate ?? string.Empty);
+                    // System count
+
+                    rowStart++;
+                }
+
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"QuotationResults_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
         // MARK: - Input Quote
         public async Task<IActionResult> InputQuote()
         {
@@ -1258,7 +1367,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi xuất file: {ex.Message}");
             }
         }
-        // MARK: Màn hình nhập thông tin chi tiêts
+        // MARK: Màn hình nhập thông tin chi tiết
         public async Task<IActionResult> InputQuoteDetail(string maDon)
         {
             // Load data for the detail page

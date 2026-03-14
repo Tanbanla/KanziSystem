@@ -504,4 +504,13 @@
   <data name="PurposeFeature" xml:space="preserve">
     <value>Mục đích/Tính năng</value>
   </data>
+  <data name="SelectSupplier" xml:space="preserve">
+    <value>Chọn nhà cung cấp</value>
+  </data>
+  <data name="ExportImportFromExcel" xml:space="preserve">
+    <value>Tải file Excel mẫu</value>
+  </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>Xuất Excel</value>
+  </data>
 </root>

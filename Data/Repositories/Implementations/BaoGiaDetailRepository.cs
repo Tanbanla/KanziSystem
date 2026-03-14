@@ -74,10 +74,32 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
                     CAST(CASE WHEN (r.INT_SoLuong = d.INT_SoLuong or d.INT_SoLuong = 0) THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
                     CAST(CASE WHEN (r.NVCHR_DonVi = d.NVCHR_DonVi or d.NVCHR_DonVi is null) THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
-                    CAST(CASE WHEN (r.NVCHR_Rohs = d.VCHR_Rohs or d.VCHR_Rohs = 'OK'or d.VCHR_Rohs = '')THEN 1 ELSE 0 END AS BIT) AS IsMatch_Rohs,
-                    CAST(CASE WHEN (r.NVCHR_COCQ = d.VCHR_COCQ or d.VCHR_COCQ = 'OK'or d.VCHR_COCQ = '') THEN 1 ELSE 0 END AS BIT) AS IsMatch_COCQ,
-                    CAST(CASE WHEN (r.NVCHR_MSDS = d.VCHR_MSDS or d.VCHR_MSDS = 'OK'or d.VCHR_MSDS = '') THEN 1 ELSE 0 END AS BIT) AS IsMatch_MSDS,
-                    CAST(CASE WHEN (r.NVCHR_AnToan = d.VCHR_AnToan or d.VCHR_AnToan = 'OK'or d.VCHR_AnToan = '') THEN 1 ELSE 0 END AS BIT) AS IsMatch_AnToan,
+				    CAST(CASE 
+					    WHEN r.NVCHR_Rohs = N'Need' AND (d.VCHR_Rohs = N'NG' OR d.VCHR_Rohs = N'No need') THEN 0
+					    WHEN (r.NVCHR_Rohs = d.VCHR_Rohs OR d.VCHR_Rohs = N'OK' OR d.VCHR_Rohs = N'' )  THEN 1 
+					    WHEN(r.NVCHR_Rohs ='') THEN 1
+					    ELSE 0 
+				    END AS BIT) AS IsMatch_Rohs,
+				    CAST(CASE 
+					    WHEN r.NVCHR_COCQ = N'Need' AND (d.VCHR_COCQ = N'NG' OR d.VCHR_COCQ = N'No need') THEN 0
+					    WHEN (r.NVCHR_COCQ = d.VCHR_COCQ OR d.VCHR_COCQ = N'OK' OR d.VCHR_COCQ = N'') THEN 1 
+					    WHEN( R.NVCHR_COCQ ='') THEN 1
+					    ELSE 0 
+				    END AS BIT) AS IsMatch_COCQ,
+
+				    CAST(CASE 
+					    WHEN r.NVCHR_MSDS = N'Need' AND (d.VCHR_MSDS = N'NG' OR d.VCHR_MSDS = N'No need') THEN 0
+					    WHEN (r.NVCHR_MSDS = d.VCHR_MSDS OR d.VCHR_MSDS = N'OK' OR d.VCHR_MSDS = N'') THEN 1 
+					    WHEN(r.NVCHR_MSDS ='') THEN 1
+					    ELSE 0 
+				    END AS BIT) AS IsMatch_MSDS,
+
+				    CAST(CASE 
+					    WHEN r.NVCHR_AnToan = N'Need' AND (d.VCHR_AnToan = N'NG' OR d.VCHR_AnToan = N'No need') THEN 0
+					    WHEN (r.NVCHR_AnToan = d.VCHR_AnToan OR d.VCHR_AnToan = N'OK' OR d.VCHR_AnToan = N'') THEN 1 
+					    WHEN(r.NVCHR_AnToan ='') THEN 1
+					    ELSE 0 
+				    END AS BIT) AS IsMatch_AnToan,
                     CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) or d.DTM_ShipTime is null ) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
                     CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet
             ");
@@ -240,6 +262,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.NVCHR_DonVi = item.NVCHR_DonVi;
                     detail.DTM_EffectiveDate = item.DTM_EffectiveDate;
                     detail.DTM_ExpiryDate = item.DTM_ExpiryDate;
+                    detail.BIT_Select = null;
                 }
                 // save step BaoGia_Request
                 var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);

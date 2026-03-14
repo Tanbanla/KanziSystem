@@ -15,7 +15,7 @@
     // Pagination state for Supplier tab
     const supplierState = {
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 20,
         returnedCount: 0,
         totalCount: 0,
         lastPage: false
@@ -85,8 +85,9 @@
             // Supplier page size change
             const supplierPageSize = document.getElementById('supplierPageSizeSelect');
             if (supplierPageSize) {
+                supplierPageSize.value = '20'; // Set default to 50
                 supplierPageSize.addEventListener('change', () => {
-                    supplierState.pageSize = parseInt(supplierPageSize.value) || 10;
+                    supplierState.pageSize = parseInt(supplierPageSize.value) || 50;
                     supplierState.pageIndex = 1;
                     this.loadSupplierData();
                 });
@@ -144,61 +145,78 @@
         renderSupplierTable: function (data) {
             const tbody = document.getElementById('supplierQuoteBody');
             if (!tbody) return;
+            // Make table more compact
+            const table = document.getElementById('supplierQuoteTable');
+            if (table) {
+                table.style.fontSize = '10px';
+                table.style.lineHeight = '1.2';
+            }
+            // Helper function to apply mismatch styling
+            const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
             const rowsHtml = data.map((d, index) => `
-                <tr class="text-center">
-                    <td>${index + 1}</td>
-                    <td>${d.CHR_MaDon || ''}</td>
-                    <td>${d.status || ''}</td>
-                     <td>${d.CHR_MaThietBi || ''}</td>
+                <tr class="text-center" style="text-align: center;">
+                    <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.status || ''}</td>
+                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
 
-                    <td class="additional-column">${d.CHR_MaHangNoiBo || ''}</td>
-                    <td class="additional-column">${d.CHR_Phanloai || ''}</td>
-                    <td class="additional-column">${d.CHR_MaHangNCC || ''}</td>
-                    <td class="additional-column">${d.NVCHR_ChungLoai || ''}</td>
-                    <td class="additional-column">${d.NVCHR_NameVN || ''}</td>
-                    <td class="additional-column">${d.CHR_NameEN || ''}</td>
-                    <td class="additional-column">${d.INT_SoLuong || ''}</td>
-                    <td class="additional-column">${d.NVCHR_DonVi || ''}</td>
-                    <td class="additional-column">${d.NVCHR_HinhDang || ''}</td>
-                    <td class="additional-column">${d.NVCHR_ChatLieu || ''}</td>
-                    <td class="additional-column">${d.NVCHR_ThanhPhan || ''}</td>
-                    <td class="additional-column">${d.NVCHR_KichThuoc || ''}</td>
-                    <td class="additional-column">${d.NVCHR_DongMay || ''}</td>
-                    <td class="additional-column">${d.NVCHR_TinhNang || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNoiBo || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Phanloai || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNCC || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ChungLoai || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_NameVN || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_NameEN || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.INT_SoLuong || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_DonVi || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_HinhDang || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ChatLieu || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ThanhPhan || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_KichThuoc || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_DongMay || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_TinhNang || ''}</td>
 
-                    <td class="additional-column">${d.NVCHR_Rohs || ''}</td>
-                    <td class="additional-column">${d.NVCHR_COCQ || ''}</td>
-                    <td class="additional-column">${d.NVCHR_MSDS || ''}</td>
-                    <td class="additional-column">${d.NVCHR_AnToan || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_Rohs || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_COCQ || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_MSDS || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_AnToan || ''}</td>
 
-                    <td class="additional-column">${d.NVCHR_FileThietKe || ''}</td>
-                    <td class="additional-column">${d.CHR_MaNCC || ''}</td>
-                    <td class="additional-column">${d.DTM_KyHan ? new Date(d.DTM_KyHan).toLocaleDateString() : ''}</td>
-                    <td class="additional-column">${d.CHR_Gap === 'true' || d.CHR_Gap === true ? 'O' : 'X'}</td>
-                    <td class="additional-column">${d.BIT_LayBaoGia === true ? 'O' : 'X'}</td>
-                    <td class="additional-column">${d.NVCHR_LyDo || ''}</td>
-                    <td>${d.CHR_MaNCC || ''}</td>
-                    <td class="text-start">${d.NVCHR_NameNCC || ''}</td>
-                    <td>${d.CodeEquipmentNCC || ''}</td>
-                    <td class="text-start">${d.NVCHR_TenHangHQ || ''}</td>
-                     <td class="text-start">${d.NameENByNCC || ''}</td>
-                    <td>${d.INT_SoLuong || ''}</td>
-                    <td>${d.NVCHR_DonVi || ''}</td>
-                    <td class="text-end">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
-                    <td class="text-end">${d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : ''}</td>
-                    <td>${d.NVCHR_MOQ || ''}</td>
-                    <td>${d.DTM_LeadTime || ''}</td>
-                    <td>${d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : ''}</td>
-                    <td>${d.VCHR_Rohs || ''}</td>
-                    <td>${d.VCHR_COCQ || ''}</td>
-                    <td>${d.VCHR_MSDS || ''}</td>
-                    <td>${d.VCHR_AnToan || ''}</td>
-                    <td>${d.VCHR_CamKet || ''}</td>
-                    <td>${d.NVCHR_DeliveryTerm || ''}</td>
-                    <td>${d.NVCHR_PaymentTerm || ''}</td>
-                    <td>${d.NVCHR_File || ''}</td>
-                    <td>${d.DTM_EffectiveDate ? new Date(d.DTM_EffectiveDate).toLocaleDateString() : ''}</td>
-                    <td>${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_FileThietKe || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.DTM_KyHan ? new Date(d.DTM_KyHan).toLocaleDateString() : ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Gap === 'true' || d.CHR_Gap === true ? 'O' : 'X'}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.BIT_LayBaoGia === true ? 'O' : 'X'}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_LyDo || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
+                    <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NVCHR_NameNCC || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.CodeEquipmentNCC || ''}</td>
+                    <td class="text-start" style="padding: 2px 4px; text-align: left; ${getMismatchStyle(d.IsMatch_NameVN)}">${d.NVCHR_TenHangHQ || ''}</td>
+                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_SoLuong)}">${d.soluong || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_DonVi)}">${d.donvi || ''}</td>
+                    <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
+                    <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_MOQ || ''}</td>
+                    <td style="padding: 2px 4px, text-align: center;">${d.DTM_LeadTime || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Ngay)}">${d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Rohs)}">${d.VCHR_Rohs || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_COCQ)}">${d.VCHR_COCQ || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_MSDS)}">${d.VCHR_MSDS || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_AnToan)}">${d.VCHR_AnToan || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatchCamKet)}">${d.VCHR_CamKet || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_DeliveryTerm || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_PaymentTerm || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_File || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.DTM_EffectiveDate ? new Date(d.DTM_EffectiveDate).toLocaleDateString() : ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;"></td>
+                    <td style="padding: 2px 4px; text-align: center;">
+                         <select class="form-control form-control-sm">
+                            <option value="" selected></option>
+                            <option value="true" ${d.BIT_Select === true ? 'selected' : ''}>O</option>
+                            <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control form-control-sm" value="${d.NVCHR_ReasonPick || ''}"></td>
                 </tr>
             `).join('');
             tbody.innerHTML = rowsHtml;
@@ -275,7 +293,11 @@
             if (supplierSearchBtn) {
                 supplierSearchBtn.addEventListener('click', this.loadSupplierData.bind(this));
             }
-
+            // Dowload file templeate tab 2
+            const btnDownloadTem = document.getElementById('btnDownloadTem');
+            if (btnDownloadTem) {
+                btnDownloadTem.addEventListener('click', this.ExportExcelTepleate.bind(this));
+            }
             // Delegate: enforce only one supplier per maDon
             document.addEventListener('change', (e) => {
                 const cb = e.target.closest('.supplier-select');
@@ -298,15 +320,10 @@
             const table = document.getElementById('supplierQuoteTable');
             const btn = document.getElementById('toggleAdditionalColumns');
             if (!table || !btn) return;
-            // Toggle class for compact/expanded view
             const showing = table.classList.toggle('show-additional');
             try {
                 // update button text to reflect state
                 const T = window.i18nQuotationResults || {};
-                // Persist state
-                window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
-                window._quotationResultsState.showAdditionalColumns = !!showing;
-                // Update button text
                 btn.textContent = showing ? (T.HideAdditionalColumns || 'Ẩn chi tiết') : (T.ToggleAdditionalColumns || 'Hiện chi tiết');
             } catch { }
             const toggleBtn = document.getElementById('toggleAdditionalColumns');
@@ -317,7 +334,6 @@
             window._quotationResultsState.showAdditionalColumns = !isHidden;
 
             // Ẩn các th và td có class 'additional-column'
-            // Show/hide additional columns
             const columns = document.querySelectorAll('#supplierQuoteTable th.additional-column, #supplierQuoteTable td.additional-column');
             columns.forEach(col => {
                 if (isHidden) {
@@ -326,7 +342,6 @@
                     col.style.display = '';
                 }
             });
-            columns.forEach(col => { col.style.display = showing ? '' : 'none'; });
 
             // Ẩn th DescriptionGroup (colspan=8)
             const descGroupTh = document.querySelector('#supplierQuoteTable th[colspan="8"].additional-column');
@@ -334,7 +349,7 @@
                 descGroupTh.style.display = isHidden ? 'none' : '';
             }
 
-            // Ẩn th BIVN Input (colspan=19)
+            // Ẩn th BIVN Input (colspan=24)
             const bivnInputTh = document.querySelector('#supplierQuoteTable th[colspan="24"]');
             if (bivnInputTh) {
                 bivnInputTh.style.display = isHidden ? 'none' : '';
@@ -347,11 +362,6 @@
             //}
 
             toggleBtn.textContent = isHidden ? 'Hiện chi tiết' : 'Ẩn chi tiết';
-            // Toggle grouped headers based on data-group attributes
-            const bivnTh = document.querySelector('#supplierQuoteTable th[data-group="bivn"]');
-            const vendorTh = document.querySelector('#supplierQuoteTable th[data-group="vendor"]');
-            if (bivnTh) bivnTh.style.display = showing ? '' : 'none';
-            if (vendorTh) vendorTh.style.display = showing ? '' : 'none';
         },
 
         applyAdditionalColumnsVisibility: function () {
@@ -361,8 +371,6 @@
                 const shouldShow = !!state.showAdditionalColumns;
                 const toggleBtn = document.getElementById('toggleAdditionalColumns');
                 if (toggleBtn) toggleBtn.textContent = shouldShow ? 'Ẩn chi tiết' : 'Hiện chi tiết';
-                const T = window.i18nQuotationResults || {};
-                if (toggleBtn) toggleBtn.textContent = shouldShow ? (T.HideAdditionalColumns || 'Ẩn chi tiết') : (T.ToggleAdditionalColumns || 'Hiện chi tiết');
                 const columns = document.querySelectorAll('#supplierQuoteTable th.additional-column, #supplierQuoteTable td.additional-column');
                 columns.forEach(col => { col.style.display = shouldShow ? '' : 'none'; });
                 // DescriptionGroup and BIVN Input header
@@ -370,11 +378,6 @@
                 if (descGroupTh) descGroupTh.style.display = shouldShow ? '' : 'none';
                 const bivnInputTh = document.querySelector('#supplierQuoteTable th[colspan="19"]');
                 if (bivnInputTh) bivnInputTh.style.display = shouldShow ? '' : 'none';
-                // grouped headers
-                const bivnTh = document.querySelector('#supplierQuoteTable th[data-group="bivn"]');
-                const vendorTh = document.querySelector('#supplierQuoteTable th[data-group="vendor"]');
-                if (bivnTh) bivnTh.style.display = shouldShow ? '' : 'none';
-                if (vendorTh) vendorTh.style.display = shouldShow ? '' : 'none';
             } catch (e) { /* ignore */ }
         },
         openEditRequestModal: async function (id) {
@@ -451,7 +454,48 @@
                 alert('Đã xảy ra lỗi khi tải dữ liệu.');
             }
         },
-
+        // function xuat file
+        ExportExcelTepleate: async function () {
+            const payload = {
+                MaDon: document.getElementById('supplierSearchMaDon')?.value || '',
+                MaNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
+                MaVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
+                Section: document.getElementById('supplierSearchSection')?.value || '',
+                PageIndex: supplierState.pageIndex,
+                PageSize: supplierState.pageSize,
+            };
+            try {
+                const res = await fetch('/Quote/ExportFileExcelQuotationResult', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const msg = await res.text().catch(() => 'Lỗi không xác định');
+                    throw new Error(msg || 'Xuất file thất bại');
+                }
+                const blob = await res.blob();
+                let fileName = 'ResultQuotation.xlsx';
+                const cd = res.headers.get('content-disposition');
+                if (cd) {
+                    const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                }
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                const T = window.i18nQuotationResults || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (err && err.message) ? err.message : (T.MsgExportError || 'Không thể xuất file'), type: 'error' });
+            } finally {
+                hideLoading();
+            }
+        },
         toggleSupplierDetails: async function (button) {
             const targetSel = button.getAttribute('data-target');
             const targetRow = document.querySelector(targetSel);
@@ -806,6 +850,7 @@
             }
 
             pages.forEach(p => {
+
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'btn btn-sm ' + (p === supplierState.pageIndex ? 'btn-primary' : 'btn-outline-secondary');
@@ -1172,6 +1217,27 @@ function hideEditModal() {
     } catch { }
     const backdrop = document.querySelector('.custom-modal-backdrop');
     if (backdrop) backdrop.remove();
+}
+// Loading overlay helpers
+function showLoading(message) {
+    try {
+        const el = document.getElementById('globalLoading');
+        if (!el) return;
+        const msgEl = el.querySelector('.loader-msg');
+        if (msgEl && message) msgEl.textContent = message;
+        el.style.display = 'flex';
+        el.setAttribute('aria-hidden', 'false');
+    } catch (e) { }
+}
+function hideLoading() {
+    try {
+        const el = document.getElementById('globalLoading');
+        if (!el) return;
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+        const msgEl = el.querySelector('.loader-msg');
+        if (msgEl) msgEl.textContent = 'Đang xử lý...';
+    } catch (e) { }
 }
 // Tìm kiếm - support both jQuery and plain DOM
 function buildSearchableDropdown(container) {
