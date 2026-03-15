@@ -468,7 +468,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("Status", status);
             }
 
-            sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon ,r.CHR_MaThietBi ,r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
+            sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon ,r.CHR_MaThietBi, r.CHR_MaNCC ,r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
 
             if (pageSize > 0 && pageIndex > 0)
             {

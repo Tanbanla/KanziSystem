@@ -154,7 +154,47 @@
             }
             // Helper function to apply mismatch styling
             const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
-            const rowsHtml = data.map((d, index) => `
+
+            // Pre-calc totals grouped by MaDon + MaThietBi + MaNCC
+            const totals = {};
+            const counts = {}; // number of rows per group (for rowspan)
+            data.forEach(d => {
+                const maDon = d.CHR_MaDon || '';
+                const maThietBi = d.CHR_MaThietBi || '';
+                const maNcc = d.CHR_MaNCC || '';
+                const key = `${maDon}|${maThietBi}|${maNcc}`;
+                const vnd = (d.FL_VND != null && !isNaN(Number(d.FL_VND))) ? Number(d.FL_VND) : 0;
+                const usd = (d.FL_USD != null && !isNaN(Number(d.FL_USD))) ? Number(d.FL_USD) : 0;
+                if (!totals[key]) totals[key] = { vnd: 0, usd: 0 };
+                // As per requirement: mỗi loại lấy số lượng = 1 rồi nhân với giá -> tương đương cộng mỗi giá 1 lần
+                totals[key].vnd += vnd;
+                totals[key].usd += usd;
+                counts[key] = (counts[key] || 0) + 1;
+            });
+
+            // Track which group total has been rendered (so we render only once per group using rowspan)
+            const renderedTotals = new Set();
+
+            const rowsHtml = data.map((d, index) => {
+                // compute whether to show group total here
+                const maDon = d.CHR_MaDon || '';
+                const maThietBi = d.CHR_MaThietBi || '';
+                const maNcc = d.CHR_MaNCC || '';
+                const key = `${maDon}|${maThietBi}|${maNcc}`;
+                let totalCell = '';
+                if (!renderedTotals.has(key)) {
+                    renderedTotals.add(key);
+                    const tot = totals[key] || { vnd: 0, usd: 0 };
+                    if (tot.vnd && tot.vnd !== 0) {
+                        try { totalCell = Number(tot.vnd).toLocaleString(); } catch { totalCell = tot.vnd; }
+                        totalCell = totalCell + ' VND';
+                    } else if (tot.usd && tot.usd !== 0) {
+                        try { totalCell = Number(tot.usd).toLocaleString(); } catch { totalCell = tot.usd; }
+                        totalCell = totalCell + ' USD';
+                    }
+                }
+
+                return `
                 <tr class="text-center" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
                     <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
@@ -209,7 +249,22 @@
                     <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_File || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_EffectiveDate ? new Date(d.DTM_EffectiveDate).toLocaleDateString() : ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
-                    <td style="padding: 2px 4px; text-align: center;"></td>
+                    ${(() => {
+                        // If this is first row for group, render TD with rowspan equal to counts[key]
+                        if (totalCell) {
+                            const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
+                            return `<td style="padding: 2px 4px; text-align: center;"${span}>${totalCell}</td>`;
+                        }
+                        // If totalCell empty (no value) still render empty cell once
+                        if (!renderedTotals.has(key)) {
+                            // mark as rendered to avoid further empty TDs
+                            renderedTotals.add(key);
+                            const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
+                            return `<td style="padding: 2px 4px; text-align: center;"${span}></td>`;
+                        }
+                        // For subsequent rows in group, omit the TD so rowspan covers them
+                    return '<td style="padding: 2px 4px; text-align: center;"></td>';
+                    })()}
                     <td style="padding: 2px 4px; text-align: center;">
                          <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
                             <option value="" ${(!d.BIT_Select && d.BIT_Select !== false) ? 'selected' : ''}></option>
@@ -219,7 +274,7 @@
                     </td>
                     <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_ReasonPick || ''}"></td>
                 </tr>
-            `).join('');
+            `}).join('');
             tbody.innerHTML = rowsHtml;
             // reapply columns visibility for newly rendered rows
             this.applyAdditionalColumnsVisibility();
