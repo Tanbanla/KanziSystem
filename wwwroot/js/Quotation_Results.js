@@ -111,6 +111,7 @@
                 MaNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
                 MaVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
                 Section: document.getElementById('supplierSearchSection')?.value || '',
+                Status: document.getElementById('searchStatusTab2')?.value || '',
                 PageIndex: supplierState.pageIndex,
                 PageSize: supplierState.pageSize,
             };
@@ -154,10 +155,10 @@
             // Helper function to apply mismatch styling
             const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
             const rowsHtml = data.map((d, index) => `
-                <tr class="text-center" style="text-align: center;">
+                <tr class="text-center" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
                     <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
-                    <td style="padding: 2px 4px; text-align: center;">${d.status || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${this.MappingStatusSupplier(d.status || '')}</td>
                      <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
 
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNoiBo || ''}</td>
@@ -210,18 +211,28 @@
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
                     <td style="padding: 2px 4px; text-align: center;"></td>
                     <td style="padding: 2px 4px; text-align: center;">
-                         <select class="form-control form-control-sm">
-                            <option value="" selected></option>
+                         <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
+                            <option value="" ${(!d.BIT_Select && d.BIT_Select !== false) ? 'selected' : ''}></option>
                             <option value="true" ${d.BIT_Select === true ? 'selected' : ''}>O</option>
                             <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
                         </select>
                     </td>
-                    <td><input type="text" class="form-control form-control-sm" value="${d.NVCHR_ReasonPick || ''}"></td>
+                    <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_ReasonPick || ''}"></td>
                 </tr>
             `).join('');
             tbody.innerHTML = rowsHtml;
             // reapply columns visibility for newly rendered rows
             this.applyAdditionalColumnsVisibility();
+        },
+        // mapping status supplier tab
+        MappingStatusSupplier: function (codeStatus) {
+            switch (codeStatus) {
+                case 'WAIT_PICK_NCC': return 'Chờ chọn nhà cung cấp';
+                case 'PICKED': return 'Đã chọn nhà cung cấp';
+                case 'WAIT_CONFIRM_NAME': return 'Chờ xác nhận tên';
+                case 'WAIT_NCC': return 'Chờ báo giá nhà cung cấp';
+                default: return '';
+            }
         },
         // đóng modal 
         closeEdit: function () {
@@ -264,11 +275,19 @@
             const btnClear = document.getElementById('btnClear');
             if (btnClear) btnClear.addEventListener('click', this.resetFilters.bind(this));
 
+            // Reset supplier search filters
+            const btnResetSupplierSearch = document.getElementById('btnClearnTAB2');
+            if (btnResetSupplierSearch) btnResetSupplierSearch.addEventListener('click', this.resetFiltersTab2.bind(this));
+
             // Xác nhận lựa chọn
             const btnConfirmTop = document.getElementById('btnConfirmTop');
             const btnConfirmBottom = document.getElementById('btnConfirmBottom');
             if (btnConfirmTop) btnConfirmTop.addEventListener('click', this.confirmSelection.bind(this));
             if (btnConfirmBottom) btnConfirmBottom.addEventListener('click', this.confirmSelection.bind(this));
+
+            // Save tab2 selections
+            const btnSaveTab2 = document.getElementById('SaveTab2');
+            if (btnSaveTab2) btnSaveTab2.addEventListener('click', this.saveTab2.bind(this));
 
             // Hủy
             const btnCancel = document.getElementById('btnCancel');
@@ -298,22 +317,143 @@
             if (btnDownloadTem) {
                 btnDownloadTem.addEventListener('click', this.ExportExcelTepleate.bind(this));
             }
-            // Delegate: enforce only one supplier per maDon
+            // Input file Excel to system
+            const btnImportSupplier = document.getElementById('supplierImportExcelBtn');
+            if (btnImportSupplier) {
+                btnImportSupplier.addEventListener('click', this.ImportSupplier.bind(this));
+            }
+            // Delegate: enforce only one supplier per maDon AND handle supplier-choice selects
             document.addEventListener('change', (e) => {
+                // Handle checkbox selection inside expanded supplier-group (old style)
                 const cb = e.target.closest('.supplier-select');
-                if (!cb) return;
-                if (!cb.checked) return;
-                // Find current supplier group and derive maDon from groupId pattern: CHR_MaDon-CHR_MaHangNoiBo
-                const row = cb.closest('tr');
-                const groupContainer = row?.closest('.supplier-group');
-                const groupId = groupContainer?.id?.replace('sup-rows-', '') || '';
-                const maDon = groupId.split('-')[0] || '';
-                if (!maDon) return;
-                // Uncheck other supplier-select in all groups matching same maDon, except current checkbox
-                document.querySelectorAll('.supplier-group[id^="sup-rows-' + maDon + '-"] .supplier-select').forEach(other => {
-                    if (other !== cb) other.checked = false;
-                });
+                if (cb) {
+                    if (!cb.checked) return;
+                    // Find current supplier group and derive maDon from groupId pattern: CHR_MaDon-CHR_MaHangNoiBo
+                    const row = cb.closest('tr');
+                    const groupContainer = row?.closest('.supplier-group');
+                    const groupId = groupContainer?.id?.replace('sup-rows-', '') || '';
+                    const maDon = groupId.split('-')[0] || '';
+                    const maHang = groupId.split('-')[1] || '';
+                    if (!maDon) return;
+                    // Uncheck other supplier-select in all groups matching same maDon, except current checkbox
+                    document.querySelectorAll('.supplier-group[id^="sup-rows-' + maDon + '-"] .supplier-select').forEach(other => {
+                        if (other !== cb) other.checked = false;
+                    });
+
+                    // Also sync main supplier table selects: set matching supplier select to true, others in same group to false
+                    const supplierId = cb.getAttribute('data-id') || cb.value || '';
+                    if (supplierId) {
+                        const selMatch = document.querySelector(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"][data-id="${supplierId}"]`);
+                        if (selMatch) {
+                            // find reason input in expanded row
+                            const reasonEl = row.querySelector('.reason-input');
+                            const reason = reasonEl?.value?.trim() || '';
+                            if (!reason) {
+                                // prompt for reason
+                                showPrompt({ title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do', message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp', placeholder: '' })
+                                    .then(r => {
+                                        if (!r) {
+                                            cb.checked = false;
+                                            try { reasonEl && reasonEl.focus(); } catch { }
+                                            return;
+                                        }
+                                        try { reasonEl.value = r; } catch { }
+                                        selMatch.value = 'true';
+                                        document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => { if (s !== selMatch) s.value = 'false'; });
+                                    });
+                                return;
+                            }
+                            selMatch.value = 'true';
+                            // set other selects in same group to false
+                            document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => { if (s !== selMatch) s.value = 'false'; });
+                        }
+                    }
+                    return;
+                }
+
+                // Handle select change in supplierQuoteTable rows
+                const sel = e.target.closest('.supplier-choice');
+                if (sel) {
+                    const val = sel.value;
+                    const row = sel.closest('tr');
+                    const maDon = row?.getAttribute('data-madon') || '';
+                    const maHang = row?.getAttribute('data-mahang') || '';
+                    const reasonEl = row?.querySelector('.reason-input');
+                    if (val === 'true') {
+                        const reason = reasonEl?.value?.trim() || '';
+                        if (!reason) {
+                            showPrompt({ title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do', message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp', placeholder: '' })
+                                .then(r => {
+                                    if (!r) {
+                                        try { sel.value = ''; } catch { }
+                                        try { reasonEl && reasonEl.focus(); } catch { }
+                                        return;
+                                    }
+                                    try { reasonEl.value = r; } catch { }
+                                    document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => {
+                                        if (s !== sel) s.value = 'false';
+                                    });
+                                });
+                            return;
+                        }
+                        // set other suppliers in same maDon+maHang to false
+                        document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => {
+                            if (s !== sel) s.value = 'false';
+                        });
+                    }
+                }
             });
+        },
+        // Save selections from supplier table to server using SavePickSupplier endpoint
+        saveTab2: async function () {
+            const T = window.i18nQuotationResults || {};
+            const btn = document.getElementById('SaveTab2');
+            try {
+                if (btn) btn.disabled = true;
+                const rows = Array.from(document.querySelectorAll('#supplierQuoteBody tr'));
+                const payload = [];
+                rows.forEach(row => {
+                    const sel = row.querySelector('select.supplier-choice');
+                    if (!sel) return;
+                    // include only rows where selection is explicitly set (true/false)
+                    const val = sel.value;
+                    if (val === '' ) return;
+                    const idAttr = row.getAttribute('data-id') || sel.getAttribute('data-id') || '';
+                    const id = idAttr !== '' && !isNaN(Number(idAttr)) ? Number(idAttr) : idAttr;
+                    const reason = (row.querySelector('.reason-input')?.value || '').toString();
+                    const maDon = row.getAttribute('data-madon') || '';
+                    const maHang = row.getAttribute('data-mahang') || '';
+                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, CHR_MaDon: maDon, CHR_MaHangNoiBo: maHang });
+                });
+
+                if (!payload.length) {
+                    showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgWarnSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp.'), type: 'info' });
+                    return;
+                }
+
+                showLoading((T && T.LoadingData) ? T.LoadingData : 'Đang lưu...');
+                const res = await fetch('/Quote/SavePickSupplier', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                hideLoading();
+                if (!res.ok) {
+                    const txt = await res.text().catch(() => 'Lỗi server');
+                    showDialog({ title: T.Notification || 'Thông báo', message: txt || (T.MsgSaveError || 'Lưu thất bại'), type: 'error' });
+                    return;
+                }
+                const data = await res.json().catch(() => null);
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveSuccess || 'Lưu thành công'), type: 'success' });
+                // refresh supplier data to reflect saved selections
+                this.loadSupplierData();
+            } catch (err) {
+                hideLoading();
+                const T = window.i18nQuotationResults || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (err && err.message) ? err.message : (T.MsgSaveError || 'Lưu thất bại'), type: 'error' });
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         },
 
         toggleAdditionalColumns: function () {
@@ -461,6 +601,7 @@
                 MaNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
                 MaVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
                 Section: document.getElementById('supplierSearchSection')?.value || '',
+                Status: document.getElementById('searchStatusTab2')?.value || '',
                 PageIndex: supplierState.pageIndex,
                 PageSize: supplierState.pageSize,
             };
@@ -494,6 +635,77 @@
                 showDialog({ title: T.Notification || 'Thông báo', message: (err && err.message) ? err.message : (T.MsgExportError || 'Không thể xuất file'), type: 'error' });
             } finally {
                 hideLoading();
+            }
+        },
+        // function Import tab 2
+        ImportSupplier: async function () {
+            // Tạo input file ẩn
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.xlsx, .xls';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
+            fileInput.addEventListener('change', function () {
+                const file = fileInput.files[0];
+                if (!file) return;
+                const T = window.i18nQuotationResults || {};
+                // Kiểm tra loại file
+                const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+                if (!allowedTypes.includes(file.type)) {
+                    showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidFileType || 'Không thể xuất file'), type: 'error' });
+                    document.body.removeChild(fileInput);
+                    return;
+                }
+
+                // Tạo FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                // Gửi request
+                fetch('/Quote/ImportQuotianExcel', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                    }
+
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                        // Trả về file lỗi
+                        return response.blob().then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                            showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
+                        });
+                    } else {
+                        // Thành công
+                        return response.json().then(data => {
+                            showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                        });
+                    }
+                })
+                .catch(error => {
+                    const T = window.i18nQuotationResults || {};
+                    showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
+                })
+                .finally(() => {
+                    document.body.removeChild(fileInput);
+                });
+            });
+            this.loadSupplierData(); // refresh data before opening file dialog
+            try {
+                // open native file dialog
+                fileInput.click();
+            } catch (e) {
+                console.error('Could not open file dialog', e);
             }
         },
         toggleSupplierDetails: async function (button) {
@@ -889,17 +1101,23 @@
         },
 
         resetFilters: function () {
-            // Reset input fields
-            const rq = document.getElementById('filterRq');
-            const internal = document.getElementById('filterInternal');
-            if (rq) rq.value = '';
-            if (internal) internal.value = '';
-
-            // Reset select filters
-            document.getElementById('searchMaDon')?.querySelectorAll('option')[0]?.selected;
-            document.getElementById('searchPhongBan')?.querySelectorAll('option')[0]?.selected;
-            document.getElementById('searchMaterial')?.querySelectorAll('option')[0]?.selected;
-            document.getElementById('searchStatus').value = '1';
+            // Reset select filters (set value and dispatch change so enhanced dropdown UI updates)
+            const selIds = ['searchMaDon', 'searchPhongBan', 'searchMaterial'];
+            selIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    try {
+                        el.value = '';
+                        el.selectedIndex = 0;
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    } catch (e) { /* ignore */ }
+                }
+            });
+            const statusEl = document.getElementById('searchStatus');
+            if (statusEl) {
+                statusEl.value = '1';
+                try { statusEl.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+            }
 
             // Ensure underlying selects are updated
             ['searchMaDon', 'searchPhongBan', 'searchMaterial', 'searchStatus'].forEach(id => {
@@ -918,7 +1136,42 @@
             // Reload data
             this.searchItems();
         },
+        resetFiltersTab2: function () {
+            // Reset select filters (set value and dispatch change so enhanced dropdown UI updates)
+            const selIds = ['supplierSearchSection', 'supplierSearchMaVatTu', 'supplierSearchMaNcc','supplierSearchMaDon'];
+            selIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    try {
+                        el.value = '';
+                        el.selectedIndex = 0;
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    } catch (e) { /* ignore */ }
+                }
+            });
+            const statusEl = document.getElementById('searchStatusTab2');
+            if (statusEl) {
+                statusEl.value = '1';
+                try { statusEl.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+            }
 
+            // Ensure underlying selects are updated
+            ['supplierSearchSection', 'supplierSearchMaVatTu', 'supplierSearchMaNcc', 'supplierSearchMaDon', 'searchStatusTab2'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+                }
+            });
+
+            // Reset pagination
+            supplierState.pageIndex = 1;
+
+            // Show all items
+            document.querySelectorAll('.item-row').forEach(item => { item.style.display = ''; });
+
+            // Reload data
+            this.loadSupplierData();
+        },
         getSelections: function () {
             const result = [];
             document.querySelectorAll('.item-row').forEach(tr => {
@@ -1131,6 +1384,65 @@ function showDialog({ title = (window.i18nQuotationResults && window.i18nQuotati
     overlay.setAttribute('aria-hidden', 'false');
     overlay.style.display = 'flex';
     attachDialogCloseHandlers();
+}
+// Prompt dialog that returns a Promise resolving to the entered text, or null if cancelled
+function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', placeholder = '', defaultValue = '' } = {}) {
+    return new Promise((resolve) => {
+        const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+        if (!overlay) {
+            const val = window.prompt(message || title, defaultValue || '');
+            resolve(val === null ? null : (val || '').toString());
+            return;
+        }
+        try {
+            if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
+        } catch (e) { }
+
+        titleEl.textContent = title;
+        bodyEl.innerHTML = '';
+        const container = document.createElement('div');
+        container.className = 'd-flex flex-column gap-2';
+        if (message) {
+            const msg = document.createElement('div');
+            msg.innerHTML = message;
+            container.appendChild(msg);
+        }
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.className = 'form-control';
+        inp.placeholder = placeholder || '';
+        inp.value = defaultValue || '';
+        container.appendChild(inp);
+        bodyEl.appendChild(container);
+
+        footerEl.innerHTML = '';
+        const btnCancel = document.createElement('button');
+        btnCancel.className = 'cm-btn cm-btn-outline';
+        btnCancel.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.Cancel) || 'Hủy';
+        btnCancel.addEventListener('click', () => {
+            hideDialog();
+            resolve(null);
+        });
+        const btnOk = document.createElement('button');
+        btnOk.className = 'cm-btn cm-btn-primary';
+        btnOk.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.Confirm) || 'Đồng ý';
+        btnOk.addEventListener('click', () => {
+            const v = inp.value == null ? '' : inp.value.toString();
+            hideDialog();
+            resolve(v.trim());
+        });
+        footerEl.appendChild(btnCancel);
+        footerEl.appendChild(btnOk);
+
+        // wire up global pending resolver so overlay/close buttons can cancel the prompt
+        window.__cmPendingResolve = function (v) { try { resolve(v === false ? null : v); } catch { } window.__cmPendingResolve = null; };
+
+        overlay.setAttribute('aria-hidden', 'false');
+        overlay.style.display = 'flex';
+        attachDialogCloseHandlers();
+        // focus
+        setTimeout(() => { try { inp.focus(); inp.select(); } catch { } }, 50);
+    });
 }
 function hideDialog() {
     const { overlay } = getDialogEls();

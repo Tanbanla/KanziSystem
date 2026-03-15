@@ -119,5 +119,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // update thông tin lựa chọn nhà  cung cấp
+        public async Task<GenericResponse<bool>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var data = _mapper.Map<List<BaoGia_Detail_of_Quotation>>(dtos);
+                result.Data = await _repo.UpdatePickSupplierDetailAsync(data);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

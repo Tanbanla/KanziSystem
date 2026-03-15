@@ -182,9 +182,9 @@
                 <td>
                     <select class="form-control form-control-sm">
                         <option value="">--</option>
-                        <option value="CO" ${item.VCHR_COCQ === 'CO' ? 'selected' : ''}>CO</option>
-                        <option value="CQ" ${item.VCHR_COCQ === 'CQ' ? 'selected' : ''}>CQ</option>
-                        <option value="CO&CQ" ${item.VCHR_COCQ === 'CO&CQ' ? 'selected' : ''}>CO&CQ</option>
+                        <option value="OK" ${item.VCHR_COCQ === 'OK' ? 'selected' : ''}>OK</option>
+                        <option value="NG" ${item.VCHR_COCQ === 'NG' ? 'selected' : ''}>NG</option>
+                        <option value="No Need" ${item.VCHR_COCQ === 'No Need' ? 'selected' : ''}>No Need</option>
                     </select>
                 </td>
                 <td>
@@ -206,9 +206,8 @@
                 <td>
                     <select class="form-control form-control-sm">
                         <option value="">--</option>
-                        <option value="OK" ${item.VCHR_CamKet === 'OK' ? 'selected' : ''}>OK</option>
-                        <option value="NG" ${item.VCHR_CamKet === 'NG' ? 'selected' : ''}>NG</option>
-                        <option value="No Need" ${item.VCHR_CamKet === 'No Need' ? 'selected' : ''}>No Need</option>
+                        <option value="Đồng ý (accept)" ${item.VCHR_CamKet === 'Đồng ý (accept)' ? 'selected' : ''}>Đồng ý (accept)</option>
+                        <option value="Không đồng ý (not accept)" ${item.VCHR_CamKet === 'Không đồng ý (not accept)' ? 'selected' : ''}>Không đồng ý (not accept)</option>
                     </select>
                 </td>
                 <td><input type="text" class="form-control form-control-sm" value="${item.NVCHR_DeliveryTerm || ''}" placeholder="${window.i18nInputQuoteDetail.DeliveryMethod}"></td>
@@ -233,20 +232,33 @@
                     select.classList.add('highlight-yellow');
                 }
             };
-            
+            //  COCQ: nếu chọn CO hoặc CQ mà giá trị request không phải OK thì highlight
+            const updateCocqHighlight = (select, compareValue) => {
+                select.classList.remove('highlight-yellow');
+                if ((select.value === 'NG' || select.value === 'No Need') && compareValue !== '') {
+                    select.classList.add('highlight-yellow');
+                } 
+            };
+            // Cam kết: nếu chọn NG mà giá trị request không phải Đồng ý (accept) thì highlight
+            const updateCamKetHighlight = (select) => {
+                select.classList.remove('highlight-yellow');
+                if (select.value !== 'Đồng ý (accept)') {
+                    select.classList.add('highlight-yellow');
+                } 
+            };
             // Initial highlight
             updateSelectHighlight(rohsSelect, requestItem?.nvchR_Rohs);
-            updateSelectHighlight(cocqSelect, requestItem?.nvchR_Cocq);
+            updateCocqHighlight(cocqSelect, requestItem?.nvchR_Cocq);
             updateSelectHighlight(msdsSelect, requestItem?.nvchR_Msds);
             updateSelectHighlight(anToanSelect, requestItem?.nvchR_AnToan);
-            updateSelectHighlight(camKetSelect, requestItem?.nvchR_CamKet);
+            updateCamKetHighlight(camKetSelect);
             
             // Attach event listeners for select changes
             rohsSelect.addEventListener('change', () => updateSelectHighlight(rohsSelect, requestItem?.nvchR_Rohs));
-            cocqSelect.addEventListener('change', () => updateSelectHighlight(cocqSelect, requestItem?.nvchR_Cocq));
-            msdsSelect.addEventListener('change', () => updateSelectHighlight(msdsSelect, requestItem?.nvchR_Msds));
+            cocqSelect.addEventListener('change', () => updateCocqHighlight(cocqSelect, requestItem?.nvchR_COCQ));
+            msdsSelect.addEventListener('change', () => updateSelectHighlight(msdsSelect, requestItem?.nvchR_MSDS));
             anToanSelect.addEventListener('change', () => updateSelectHighlight(anToanSelect, requestItem?.nvchR_AnToan));
-            camKetSelect.addEventListener('change', () => updateSelectHighlight(camKetSelect, requestItem?.nvchR_CamKet));
+            camKetSelect.addEventListener('change', () => updateCamKetHighlight(camKetSelect));
 
             // Attach event listeners for price calculation
             const usdInput = row.querySelector('.price-usd');

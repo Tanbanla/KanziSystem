@@ -103,6 +103,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 search.Section ?? "",
                 search.MaVatTu ?? "",
                 search.MaNcc ?? "",
+                search.Status ?? "",
                 search.PageIndex ?? 1,
                 search.PageSize ?? 10);
             if (!result.Success)
@@ -123,6 +124,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     search.Section ?? "",
                     search.MaVatTu ?? "",
                     search.MaNcc ?? "",
+                    search.Status ?? "",
                     search.PageIndex ?? 1,
                     search.PageSize ?? 10);
                 if (!result.Success)
@@ -149,9 +151,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không tìm thấy worksheet trong template");
                 }
                 int rowStart = 4;
-                int col = 1;
                 foreach (var item in dataList)
                 {
+                    int col = 1;
                     // BIVN Input
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.status ?? string.Empty);
@@ -220,6 +222,31 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(ex.Message);
             }
 
+        }
+        // Nhập lựa chọn báo giá file excel
+        [HttpPost]
+        public async Task<IActionResult> ImportQuotianExcel([FromBody] IFormFile file)
+        {
+            try
+            {
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        // Save pick supplier
+        [HttpPost]
+        public async Task<IActionResult> SavePickSupplier([FromBody] List<BaoGia_Detail_of_QuotationDTO> listPick)
+        {
+            var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(listPick);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
         }
         // MARK: - Input Quote
         public async Task<IActionResult> InputQuote()

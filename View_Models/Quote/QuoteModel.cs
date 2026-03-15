@@ -121,6 +121,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string? MaNcc { get; set; }
         public string? MaVatTu { get; set; }
         public string? Section { get; set; }
+        public string? Status { get; set; }
         public int? PageIndex { get; set; }
         public int? PageSize { get; set; }
     }

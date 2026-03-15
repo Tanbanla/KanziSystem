@@ -327,7 +327,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             };
         }
         // Lấy thông tin kèm chi tiết báo giá
-        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, int pageIndex, int pageSize)
         {
             var sql = new StringBuilder(@"
             WITH StatusCheck AS (
@@ -400,6 +400,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 d.[NVCHR_Packing],
                 d.BIT_Select,
                 d.NVCHR_ReasonPick,
+                d.FL_USD,
+                d.FL_VND,
                 CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
                 CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
                 CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
@@ -459,6 +461,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(" AND r.CHR_MaNCC = @MaNCC");
             }
+            // Filter by computed status coming from StatusCheck (WAIT_CONFIRM_NAME, WAIT_PICK_NCC, WAIT_NCC)
+            if (!string.IsNullOrEmpty(status))
+            {
+                sql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC' ELSE 'WAIT_NCC' END) = @Status");
+                parameters.Add("Status", status);
+            }
 
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon ,r.CHR_MaThietBi ,r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
 
@@ -471,11 +479,42 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
 
-            // For total count, we need a separate query
+            // For total count, build a similar CTE so status filter and partition logic match the main query
             var countSql = new StringBuilder(@"
+            WITH StatusCheck AS (
+                SELECT r.id,
+                       MAX(CASE 
+                           WHEN r.CHR_MaHangNoiBo IS NULL 
+                               OR r.NVCHR_NameVN IS NULL 
+                               OR r.CHR_MaHangNoiBo = '' 
+                               OR r.NVCHR_NameVN = ''
+                           THEN 1 ELSE 0 END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS NeedConfirmName,
+                       MAX(CASE WHEN r.ID_StepBaoGia != 7 THEN 1 ELSE 0 END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep
+                FROM BaoGia_Request_of_Quotation r
+                LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                countSql.Append(" AND r.CHR_MaDon = @MaDon");
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                countSql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                countSql.Append(" AND r.CHR_SectionCode = @Section");
+            }
+            if (!string.IsNullOrEmpty(maNCC))
+            {
+                countSql.Append(" AND r.CHR_MaNCC = @MaNCC");
+            }
+
+            countSql.Append(@")
             SELECT COUNT(r.id)
             FROM BaoGia_Request_of_Quotation r
-            LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+            INNER JOIN StatusCheck sc ON r.id = sc.id
             WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
 
             if (!string.IsNullOrEmpty(maDon))
@@ -493,6 +532,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (!string.IsNullOrEmpty(maNCC))
             {
                 countSql.Append(" AND r.CHR_MaNCC = @MaNCC");
+            }
+            if (!string.IsNullOrEmpty(status))
+            {
+                countSql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC' ELSE 'WAIT_NCC' END) = @Status");
             }
 
             var totalCount = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);

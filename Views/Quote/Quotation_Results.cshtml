@@ -195,11 +195,13 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-2">
-                            <label for="searchStatus" class="form-label small text-uppercase fw-semibold">@Localizer["Status"]</label>
-                            <select id="searchStatus" name="searchStatus" class="form-select searchStatus searchable-select">
-                                <option value="1" selected>@Localizer["SelectAll"]</option>
-                                <option value="2">@Localizer["Confirm"]</option>
-                                <option value="3">@Localizer["Done"]</option>
+                            <label for="searchStatusTab2" class="form-label small text-uppercase fw-semibold">@Localizer["Status"]</label>
+                            <select id="searchStatusTab2" name="searchStatusTab2" class="form-select searchStatusTab2 searchable-select">
+                                <option value="">@Localizer["SelectAll"]</option>
+                                <option value="WAIT_PICK_NCC" selected>Chờ chọn nhà cung cấp</option>
+                                <option value="WAIT_CONFIRM_NAME">Chờ xác nhận tên</option>
+                                <option value="WAIT_NCC">Chờ báo giá nhà cung cấp</option>
+                                <option value="CONFIRM">Đã chọn nhà cung cấp</option>
                             </select>
                         </div>
                         @* <div class="col-12 col-md-2">
@@ -226,7 +228,13 @@
             <!-- Supplier Quote Table -->
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 text-secondary" style="color:black !important; margin-bottom: 0.5rem; padding: 0.25rem 0; font-weight: 600;">@Localizer["SupplierListTitle"]</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <h6 class="mb-0 text-secondary" style="color:black !important; margin-bottom: 0.5rem; padding: 0.25rem 0; font-weight: 600;">@Localizer["SupplierListTitle"]</h6>
+                        <div style="margin-left: 6px;"></div>
+                        <button id="SaveTab2" class="btn btn-primary btn-sm">
+                           <i class="fas fa-save"></i> @Localizer["Save"]
+                        </button>
+                    </div>
                     <div class="d-flex align-items-center gap-2">
                         <button id="toggleAdditionalColumns" class="btn btn-outline-secondary btn-sm">Ẩn chi tiết</button>
                         <div style="margin-left: 6px;"></div>

@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -272,7 +273,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     rq.ID_Status = "WAIT_PICK_NCC";
                 }
             }
-            await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+            //await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -309,6 +310,45 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var result = data
                 .Select(b => b.ID).FirstOrDefault();
             return result;
+        }
+        // update thông tin lựa chọn nhà  cung cấp
+        public async Task<bool> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos)
+        {
+            if (dtos == null || dtos.Count == 0)
+            {
+                return false;
+            }
+            // lưu lịch sử thay đổi
+            var historyList = new List<BaoGia_History_Detail_Request>();
+            foreach (var item in dtos)
+            {
+                var detail = await _context.BaoGia_Detail_of_Quotations.FindAsync(item.ID);
+                if (detail != null)
+                {
+                    detail.BIT_Select = item.BIT_Select;
+                    detail.NVCHR_ReasonPick = item.NVCHR_ReasonPick;
+                    // save rq
+                    var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
+                    if (rq != null) {
+                        rq.ID_StepBaoGia = 8;
+                        //rq.ID_Status = "APPROVAL";
+                    }
+                    // luu lịch sử thay đổi
+                    var history = new BaoGia_History_Detail_Request
+                    {
+                        ID = 0,
+                        ID_RQ_Detail = detail.ID,
+                        NVCHR_dataOld = System.Text.Json.JsonSerializer.Serialize(detail),
+                        NVCHR_dataNew = System.Text.Json.JsonSerializer.Serialize(item),
+                        CHR_CreateBy = item.CHR_UpdateBy,
+                        DTM_CreateBy = DateTime.Now
+                    };
+                    historyList.Add(history);
+                }
+            }
+            //await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+            //await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
