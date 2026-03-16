@@ -16,7 +16,7 @@
 	<data name="MenuUser" xml:space="preserve"><value>Người dùng</value></data>
 	<data name="MenuQuote" xml:space="preserve"><value>Báo giá</value></data>
 	<data name="MenuQuoteCreate" xml:space="preserve"><value>Tạo yêu cầu báo giá</value></data>
-	<data name="MenuQuoteApprove" xml:space="preserve"><value>Phê duyệt báo giá</value></data>
+	<data name="MenuQuoteApprove" xml:space="preserve"><value>Phê duyệt yêu cầu báo giá</value></data>
 	<data name="MenuQuoteInput" xml:space="preserve"><value>Nhập báo giá</value></data>
 	<data name="MenuQuoteResults" xml:space="preserve"><value>Kết quả báo giá</value></data>
 	<data name="MenuQuoteRequest" xml:space="preserve"><value>Yêu cầu hàng hóa</value></data>

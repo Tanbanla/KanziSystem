@@ -3,7 +3,7 @@ using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
-    public interface IBaoGiaRepository: IBaseRepository<BaoGia_Request_of_Quotation , int>
+    public interface IBaoGiaRepository : IBaseRepository<BaoGia_Request_of_Quotation, int>
     {
         // Lấy thông tin báo giá theo mã báo giá
         public Task<List<BaoGia_Request_of_Quotation>> GetByMaBaoGiaAsync(string maBaoGia);
@@ -18,7 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Lấy danh sách mã đơn báo giá 
         public Task<List<string>> GetListMaDonBGAsync();
         // Cập nhâp danh sách mã đơn báo giá
-        public Task<List<BaoGia_Request_of_Quotation>> CapNhatDanhSachBGAsync(List<BaoGia_Request_of_Quotation> danhSachMaDonBG); 
+        public Task<List<BaoGia_Request_of_Quotation>> CapNhatDanhSachBGAsync(List<BaoGia_Request_of_Quotation> danhSachMaDonBG);
         // Cập nhật đơn báo giá
         public Task<BaoGia_Request_of_Quotation> CapNhatDonBaoGiaAsync(BaoGia_Request_of_Quotation baogia);
         // Lấy thông tin báo giá gom nhóm

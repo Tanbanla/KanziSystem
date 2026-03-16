@@ -27,7 +27,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // Tách phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
-                INNER JOIN BaoGia_Request_of_Quotation r ON c.NVCHR_Note = r.CHR_MaHangNCC
+                INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
                 WHERE 1 = 1
             ";
 
@@ -65,12 +65,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var PageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 100);
 
             // Truy vấn tổng (không có phân trang)
-            var countSql = "SELECT COUNT(1) " + baseFrom + whereBuilder.ToString();
+            var countSql = "SELECT COUNT(DISTINCT c.ID) " + baseFrom + whereBuilder.ToString();
             var total = await _conn.ExecuteScalarAsync<long>(countSql, parameters);
 
             // Thực hiện truy vấn dữ liệu với phân trang
             var selectSql = new StringBuilder();
-            selectSql.Append("SELECT c.* ,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.CHR_MaHangNCC,r.INT_SoLuong,");
+            selectSql.Append("SELECT DISTINCT c.* ,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.CHR_MaHangNCC,r.INT_SoLuong,");
             selectSql.Append(" r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang ");
             selectSql.Append(baseFrom);
             selectSql.Append(whereBuilder.ToString());
@@ -201,7 +201,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var now = DateTime.Now;
             foreach (var i in confirmNames)
             {
-                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID_RequestQuote == i.ID_RequestQuote);
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID== i.ID);
                 if (row == null) continue;
                 // Role enforcement
                 if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
@@ -279,7 +279,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.DTM_UpdateDate = now;
                 row.VCHR_UpdateBy = user;
             }
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
             return true;
         }
         // Approvers 

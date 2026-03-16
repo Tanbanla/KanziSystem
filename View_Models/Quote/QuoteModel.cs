@@ -93,8 +93,8 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string? ID { get; set; }
         public string? MaDon { get; set; }
     }
-   // Paramater Export file
-   public class AutoRenderFile
+    // Paramater Export file
+    public class AutoRenderFile
     {
         public List<string> selectedItemIds { get; set; } = new List<string>();
         public string sectionCode { get; set; } = string.Empty;
@@ -112,7 +112,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
     public class InsertInputQuoteModel
     {
         public string MaDon { get; set; } = string.Empty;
-        public List<dynamic> baoGiaDetail { get; set; }  = new List<dynamic>();
+        public List<dynamic> baoGiaDetail { get; set; } = new List<dynamic>();
     }
     // Search Quotation_Results
     public class SearchQuotationResultsModel

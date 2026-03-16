@@ -16,7 +16,7 @@
   <data name="MenuUser" xml:space="preserve"><value>User</value></data>
   <data name="MenuQuote" xml:space="preserve"><value>Quote</value></data>
   <data name="MenuQuoteCreate" xml:space="preserve"><value>Create quotation request</value></data>
-  <data name="MenuQuoteApprove" xml:space="preserve"><value>Approve quotations</value></data>
+  <data name="MenuQuoteApprove" xml:space="preserve"><value>Approval of request for quotation</value></data>
   <data name="MenuQuoteInput" xml:space="preserve"><value>Input quotation</value></data>
   <data name="MenuQuoteResults" xml:space="preserve"><value>Quotation results</value></data>
   <data name="MenuQuoteRequest" xml:space="preserve"><value>Goods request</value></data>

@@ -236,7 +236,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                     foreach (var item in SectionApporve)
                                     {
-                                        await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
+                                        await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
                                     }
                                 }
                                 catch (Exception ex)

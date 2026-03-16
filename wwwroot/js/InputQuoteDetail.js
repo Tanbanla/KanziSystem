@@ -1,5 +1,5 @@
 ﻿// InputQuoteDetail.js - JavaScript cho màn hình chi tiết nhập báo giá
-(function() {
+(function () {
     'use strict';
 
     // State management
@@ -19,7 +19,7 @@
         try {
             buildSearchableDropdown(root || document);
         } catch (e) {
-    
+
         }
 
     }
@@ -52,13 +52,13 @@
         document.getElementById('pageSendMail')?.addEventListener('click', SendMail);
         document.getElementById('pageSearch')?.addEventListener('click', SearchEvent);
         document.getElementById('btnInputExcel')?.addEventListener('click', btnInputExcel);
-        
+
         // Exchange rate change
         elements.exchangeRateInput?.addEventListener('input', updateExchangeRate);
-        
+
         // Set initial exchange rate
         updateExchangeRate();
-        
+
         // Load initial data
         loadDetailData();
     }
@@ -96,18 +96,18 @@
             pageSize: 1000,
             pageIndex: 0
         })
-        .then(data => {
-            if (data.data && Array.isArray(data.data)) {
-                renderQuoteInputTable(data.data);
-            }
-        })
-        .catch(err => showAlert('danger', window.i18nInputQuoteDetail.ErrorLoadingDetails + err));
+            .then(data => {
+                if (data.data && Array.isArray(data.data)) {
+                    renderQuoteInputTable(data.data);
+                }
+            })
+            .catch(err => showAlert('danger', window.i18nInputQuoteDetail.ErrorLoadingDetails + err));
     }
     // Render detail table
     function renderDetailTable(data) {
         const tbody = elements.pageDetailBody;
         tbody.innerHTML = '';
-        
+
         data.forEach((item, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -145,17 +145,17 @@
     function renderQuoteInputTable(data = []) {
         const tbody = elements.quoteInputBody;
         tbody.innerHTML = '';
-        
+
         data.forEach((item, index) => {
             // Find matching request item
             const requestItem = quoteState.requestData.find(r => r.id === item.ID_RequestQuote);
-            
+
             // Helper to check mismatch and add class
             const getClassIfMismatch = (value, requestValue, compareFunc = (a, b) => a !== b) => {
                 if (!requestItem || requestValue === undefined || requestValue === null) return '';
                 return compareFunc(value, requestValue) ? 'highlight-yellow' : '';
             };
-            
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td hidden>${item.ID || 0}</td>
@@ -217,14 +217,14 @@
                 <td><input type="date" class="form-control form-control-sm" value="${item.DTM_ExpiryDate ? new Date(item.DTM_ExpiryDate).toISOString().split('T')[0] : ''}"></td>
             `;
             tbody.appendChild(row);
-            
+
             // Get select elements for mismatch highlighting
             const rohsSelect = row.cells[13].querySelector('select');
             const cocqSelect = row.cells[14].querySelector('select');
             const msdsSelect = row.cells[15].querySelector('select');
             const anToanSelect = row.cells[16].querySelector('select');
             const camKetSelect = row.cells[17].querySelector('select');
-            
+
             // Function to update highlight for selects
             const updateSelectHighlight = (select, compareValue) => {
                 select.classList.remove('highlight-yellow');
@@ -237,14 +237,14 @@
                 select.classList.remove('highlight-yellow');
                 if ((select.value === 'NG' || select.value === 'No Need') && compareValue !== '') {
                     select.classList.add('highlight-yellow');
-                } 
+                }
             };
             // Cam kết: nếu chọn NG mà giá trị request không phải Đồng ý (accept) thì highlight
             const updateCamKetHighlight = (select) => {
                 select.classList.remove('highlight-yellow');
                 if (select.value !== 'Đồng ý (accept)') {
                     select.classList.add('highlight-yellow');
-                } 
+                }
             };
             // Initial highlight
             updateSelectHighlight(rohsSelect, requestItem?.nvchR_Rohs);
@@ -252,7 +252,7 @@
             updateSelectHighlight(msdsSelect, requestItem?.nvchR_Msds);
             updateSelectHighlight(anToanSelect, requestItem?.nvchR_AnToan);
             updateCamKetHighlight(camKetSelect);
-            
+
             // Attach event listeners for select changes
             rohsSelect.addEventListener('change', () => updateSelectHighlight(rohsSelect, requestItem?.nvchR_Rohs));
             cocqSelect.addEventListener('change', () => updateCocqHighlight(cocqSelect, requestItem?.nvchR_COCQ));
@@ -297,7 +297,7 @@
         //    showAlert('warning', 'Vui lòng chọn nhà cung cấp');
         //    return;
         //}
-        
+
         const items = collectQuoteItems();
         // Call API to save
         callApi('/Quote/UpdateQuoteDetail', items)
@@ -352,7 +352,7 @@
                 ID_RequestQuote: parseInt(cells[21].textContent.trim()) || 0,
                 NVCHR_NameNCC: cells[23].textContent.trim() || '',
 
-//                    parseInt(elements.pageIdRequest.textContent) || 0
+                //                    parseInt(elements.pageIdRequest.textContent) || 0
             };
             items.push(item);
         });
@@ -387,7 +387,7 @@
     function collectQuoteItems() {
         const rows = elements.quoteInputBody.querySelectorAll('tr');
         const items = [];
-        
+
         rows.forEach(row => {
             const inputs = row.querySelectorAll('input, select');
             items.push({
@@ -417,7 +417,7 @@
                 //DTM_ValidUntil: elements.pageValidUntil.value,
             });
         });
-        
+
         return items;
     }
 
@@ -646,15 +646,15 @@
     // Initialize
     function init() {
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(init, 100);
                 return;
             });
         }
-        
+
         initializeElements();
         initializeEventListeners();
-        
+
         console.log('InputQuoteDetail module initialized');
     }
 

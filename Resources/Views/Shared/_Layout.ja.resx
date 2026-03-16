@@ -16,7 +16,7 @@
 	<data name="MenuUser" xml:space="preserve"><value>ユーザー</value></data>
 	<data name="MenuQuote" xml:space="preserve"><value>見積</value></data>
 	<data name="MenuQuoteCreate" xml:space="preserve"><value>見積依頼作成</value></data>
-	<data name="MenuQuoteApprove" xml:space="preserve"><value>見積承認</value></data>
+	<data name="MenuQuoteApprove" xml:space="preserve"><value>見積依頼の承認</value></data>
 	<data name="MenuQuoteInput" xml:space="preserve"><value>見積入力</value></data>
 	<data name="MenuQuoteResults" xml:space="preserve"><value>見積結果</value></data>
 	<data name="MenuQuoteRequest" xml:space="preserve"><value>商品依頼</value></data>

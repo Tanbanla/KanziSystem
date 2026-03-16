@@ -458,10 +458,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             };
         }
         // Gửi mail thông báo đến người yêu cầu khi có cập nhật về đơn yêu cầu
-        public async Task<GenericResponse<bool>> SendMailToRequesterAsync(string requestCode, string section, bool? isGap, int step)
+        public async Task<GenericResponse<bool>> SendMailToRequesterAsync(string requestCode, string sectionCode, string sectionName, bool? isGap, int step)
         {
             // Lấy thông tin người yêu cầu
-            var requesterEmail = await _repo.GetRequesterEmailAsync(section, step);
+            var requesterEmail = await _repo.GetRequesterEmailAsync(sectionCode, step);
             if (string.IsNullOrEmpty(requesterEmail))
             {
                 return new GenericResponse<bool>
@@ -482,7 +482,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             // Chuẩn bị nội dung mail với các tham số
             string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
-            string body = string.Format(mailTemplate.CHR_BODY, "http://172.26.248.62:8057/ApprovalQuote/Index", gapText, section, requestCode);
+            string body = string.Format(mailTemplate.CHR_BODY, "http://172.26.248.62:8057/ApprovalQuote/Index", gapText, sectionName, requestCode);
             // Gửi mail
             bool sendResult = EmailSender.sendEmailNotify(
                 mailTemplate.CHR_SUBJECT,

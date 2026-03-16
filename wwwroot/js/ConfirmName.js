@@ -450,11 +450,19 @@
         const T = window.i18nConfirmName || {};
         try {
             showLoading(T.Processing || 'Đang xuất...');
+            const body = {
+                tenHang: els.tenHang.value.trim(),
+                soDon: els.soDon.value.trim(),
+                trangThai: els.trangThai.value,
+                Section: els.vitri.value,
+                pageIndex: 1,//state.pageIndex,
+                pageSize: 1000//state.pageSize
+            };
 
             const res = await fetch('/Material/ExportToExcel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(state.listData)
+                body: JSON.stringify(body)
             });
             if (!res.ok) {
                 const msg = await res.text().catch(() => 'Lỗi không xác định');

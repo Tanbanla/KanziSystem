@@ -1412,6 +1412,7 @@
         // Download Excel stub
         qs('#btnDownloadExcel')?.addEventListener('click', () => {
             try {
+                showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xử lý...');
                 const url = '/template/TemPlateQuote.xlsx';
                 const a = document.createElement('a');
                 a.href = url;
@@ -1421,6 +1422,8 @@
                 a.remove();
             } catch (err) {
                 console.error('Error downloading template', err);
+            } finally {
+                hideLoading();
             }
 
         });
@@ -1790,22 +1793,41 @@
         // Lý do
         setInputById('lyDo', dto.nvchR_LyDo);
 
-        // Helper function để format ngày
-        const dateVN = (d) => {
+        // Helper function: normalize various date representations and return value for input[type="date"] (yyyy-MM-dd)
+        const dateToInputValue = (d) => {
+            if (!d) return '';
             try {
-                if (!d) return '';
-                const dt = new Date(d);
-                return dt.toISOString().slice(0, 10);
-            } catch {
+                // If it's already a Date
+                let dt = (d instanceof Date) ? d : null;
+                if (!dt) {
+                    // Try native parsing (ISO, RFC)
+                    dt = new Date(d);
+                    if (isNaN(dt)) {
+                        // Try dd/MM/yyyy or dd-MM-yyyy
+                        const m = (d || '').toString().match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
+                        if (m) {
+                            const day = parseInt(m[1], 10);
+                            const month = parseInt(m[2], 10) - 1;
+                            const year = parseInt(m[3], 10);
+                            dt = new Date(year, month, day);
+                        }
+                    }
+                }
+                if (!dt || isNaN(dt)) return '';
+                const y = dt.getFullYear();
+                const m = String(dt.getMonth() + 1).padStart(2, '0');
+                const day = String(dt.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            } catch (e) {
                 return '';
             }
         };
 
         // Ngày muốn nhận
-        setInputById('ngayMuonNhan', dateVN(dto.dtM_NgayMuonNhan));
+        setInputById('ngayMuonNhan', dateToInputValue( dto.dtM_NgayMuonNhan));
 
         // Kỳ hạn chọn NCC
-        setInputById('kyHanChonNCC', dateVN(dto.dtM_KyHan));
+        setInputById('kyHanChonNCC', dateToInputValue(dto.dtM_KyHan));
 
         // Gấp
         setSelectById('gapTb', dto.chR_Gap);

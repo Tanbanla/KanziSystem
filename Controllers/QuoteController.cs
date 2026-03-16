@@ -365,12 +365,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
+                // Capture user info locally to avoid accessing HttpContext inside background tasks
+                var currentUserId = GetCurrentUserId();
+                var currentUserFullName = GetCurrentUserFullName();
                 var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO
                 {
                     ID_RequestQuote = b.ID,
                     CHR_MaDon = b.CHR_MaDon ?? string.Empty,
-                    CHR_UpdateBy = GetCurrentUserId() ?? string.Empty,
-                    NVCHR_UpdateName = GetCurrentUserFullName() ?? string.Empty,
+                    CHR_UpdateBy = currentUserId ?? string.Empty,
+                    NVCHR_UpdateName = currentUserFullName ?? string.Empty,
                     CHR_Updatedate = DateTime.Now,
                     CHR_ChangedColumns = null,
                     CHR_OldData = null,
@@ -396,6 +399,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 // Insert xác nhận tên và gửi mail trong background
                 if (MaterialsNew.Count > 0)
                 {
+                    // Run background work without accessing controller/HttpContext inside the task
                     _ = Task.Run(async () =>
                     {
                         using (var scope = _serviceScopeFactory.CreateScope())
@@ -410,7 +414,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var cf = new BaoGia_Confirm_Name_QuotationDTO();
                                     cf.ID_RequestQuote = i.ID;
                                     cf.DTM_CreateDate = DateTime.Now;
-                                    cf.VCHR_CreateBy = GetCurrentUserId();
+                                    cf.VCHR_CreateBy = currentUserId;
                                     cf.VCHR_TenRecomment = i.NVCHR_NameVN;
                                     cf.CHR_Status = "Confirming";
                                     cf.NVCHR_Note = i.CHR_MaHangNCC;
@@ -418,10 +422,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 }
                                 await baoGiaConfirmNameService.AddListAsync(listConfirm);
                                 // gửi mail thông báo có yêu cầu xác nhận tên mới
-                                //PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn
                                 var emailResult = await sendMailService.SendMailAsync(
-                                    "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn", "",
-                                    17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", GetCurrentUserId());
+                                    "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn",
+                                    string.Empty,
+                                    17,
+                                    "http://172.26.248.62:8057/Material/ConfirmName",
+                                    true,
+                                    string.Empty,
+                                    string.Empty,
+                                    currentUserId);
                             }
                             catch (Exception ex)
                             {
@@ -446,7 +455,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                 foreach (var item in SectionApporve)
                                 {
-                                    await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
+                                   await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
                                 }
                             }
                             catch (Exception ex)
@@ -732,6 +741,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         if (inforMateial.Success && inforMateial.Data != null)
                         {
                             var infor = inforMateial.Data;
+                            var nmn = ParseDate(ws.Cell(r, 29).GetString());
+                            var DT = ParseDate(ws.Cell(r, 30).GetString());
                             // Map theo thứ tự cột trong bảng ở giao diện
                             dto = new BaoGia_Request_of_QuotationDTO
                             {

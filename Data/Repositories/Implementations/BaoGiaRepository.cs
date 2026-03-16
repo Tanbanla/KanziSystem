@@ -12,11 +12,12 @@ using System.Text.RegularExpressions;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
-    public class BaoGiaRepository: BaseRepository<BaoGia_Request_of_Quotation , int>, IBaoGiaRepository 
+    public class BaoGiaRepository : BaseRepository<BaoGia_Request_of_Quotation, int>, IBaoGiaRepository
     {
         private readonly COST_MANAGEMENTContext _context;
         public BaoGiaRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration)
-        : base(context, options, configuration) {
+        : base(context, options, configuration)
+        {
             _context = context;
         }
 
@@ -28,7 +29,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Tìm kiếm thông tin báo giá và phân trang
-        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step,int pageIndex, int pageSize, DateTime? date, string? chungLoai)
+        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
             var sql = @"
                 SELECT *
@@ -76,48 +77,23 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Nhap bao gia
         public async Task<bool> NhapBaoGiaAsync(BaoGia_Request_of_Quotation baoGia)
         {
-            try
-            {
-                _context.BaoGia_Request_of_Quotations.Add(baoGia);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in NhapBaoGiaAsync: {ex.Message}");
-                return false;
-            }
+            _context.BaoGia_Request_of_Quotations.Add(baoGia);
+            await _context.SaveChangesAsync();
+            return true;
         }
         // Nhap danh sach
         public async Task<List<BaoGia_Request_of_Quotation>> NhapDanhSachBaoGiaAsync(List<BaoGia_Request_of_Quotation> danhSachBaoGia)
         {
-            try
-            {
-                await _context.BaoGia_Request_of_Quotations.AddRangeAsync(danhSachBaoGia);
-                await _context.SaveChangesAsync();
-
-                return danhSachBaoGia;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in NhapDanhSachBaoGiaAsync: {ex.Message}");
-                return new List<BaoGia_Request_of_Quotation>();
-            }
+            await _context.BaoGia_Request_of_Quotations.AddRangeAsync(danhSachBaoGia);
+            await _context.SaveChangesAsync();
+            return danhSachBaoGia;
         }
         // Update thông tin bao gia
         public async Task<bool> CapNhatThongTinBaoGiaAsync(BaoGia_Request_of_Quotation baoGia)
         {
-            try
-            {
-                _context.BaoGia_Request_of_Quotations.Update(baoGia);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            { 
-                Console.WriteLine($"Error in CapNhatThongTinBaoGiaAsync: {ex.Message}");
-                return false;
-            }
+            _context.BaoGia_Request_of_Quotations.Update(baoGia);
+            await _context.SaveChangesAsync();
+            return true;
         }
         // Lấy danh sách mã đơn báo giá 
         public async Task<List<string>> GetListMaDonBGAsync()

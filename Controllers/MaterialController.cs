@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -65,8 +66,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
         {
-            //var a = _sendMailService.SendMailAsync("PhuongThuy.VuThi@brother-bivn.com.vn;" +
-            //    "nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn", "", 17, "WebDAV Publishing ",true,"","","khanhmf" );
             var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, req.pageIndex, req.pageSize);
             if (!result.Success)
             {
@@ -217,12 +216,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         case "UserPUR":
                             var tenHaiQuanPUR = ws.Cell(r, 22).GetString();
                             var mahangPUR = ws.Cell(r, 9).GetString();
-                            if (string.IsNullOrWhiteSpace(tenHaiQuanPUR) || string.IsNullOrWhiteSpace(mahangPUR))
-                            {
-                                ws.Cell(r, 25).SetValue("Tên hải quan và mã hàng nội bộ không được để trống");
-                                hasErrors = true;
-                                continue;
-                            }
+                            //if (string.IsNullOrWhiteSpace(tenHaiQuanPUR) || string.IsNullOrWhiteSpace(mahangPUR))
+                            //{
+                            //    ws.Cell(r, 25).SetValue("Tên hải quan và mã hàng nội bộ không được để trống");
+                            //    hasErrors = true;
+                            //    continue;
+                            //}
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
@@ -263,19 +262,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Xuất file Excel table
         [HttpPost]
-        public async Task<IActionResult> ExportToExcel([FromBody] System.Text.Json.JsonElement data)
+        public async Task<IActionResult> ExportToExcel([FromBody] ConfirmNameSearchRequest req)
         {
             try
             {
-                if (data.ValueKind != System.Text.Json.JsonValueKind.Array)
+
+                var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, req.pageIndex, req.pageSize);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                if(result.Data.Data == null)
                 {
                     return BadRequest("Không có dữ liệu để xuất");
                 }
-
-                var items = data.EnumerateArray().ToArray();
-                if (items.Length == 0) return BadRequest("Không có dữ liệu để xuất");
+                var items = result.Data.Data;
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
-                var templatePath = Path.Combine(root, "template", "TemplateCofirmName.xlsx");
+                var templatePath = System.IO.Path.Combine(root, "template", "TemplateCofirmName.xlsx");
                 if (!System.IO.File.Exists(templatePath))
                 {
                     return BadRequest("Không tìm thấy file template: TemplateCofirmName.xlsx");
@@ -289,57 +292,34 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không tìm thấy worksheet trong template");
                 }
 
-                // helper to read properties from JsonElement safely
-                static string GetString(System.Text.Json.JsonElement el, string prop)
-                {
-                    if (el.ValueKind != System.Text.Json.JsonValueKind.Object) return string.Empty;
-                    if (el.TryGetProperty(prop, out var p))
-                    {
-                        if (p.ValueKind == System.Text.Json.JsonValueKind.String) return p.GetString() ?? string.Empty;
-                        // For numbers or other types, use ToString
-                        return p.ToString();
-                    }
-                    return string.Empty;
-                }
-                static int GetInt(System.Text.Json.JsonElement el, string prop)
-                {
-                    if (el.ValueKind != System.Text.Json.JsonValueKind.Object) return 0;
-                    if (el.TryGetProperty(prop, out var p))
-                    {
-                        if (p.ValueKind == System.Text.Json.JsonValueKind.Number && p.TryGetInt32(out var v)) return v;
-                        if (p.ValueKind == System.Text.Json.JsonValueKind.String && int.TryParse(p.GetString(), out var v2)) return v2;
-                    }
-                    return 0;
-                }
-
                 int row = 4;
                 int idx = 1;
                 foreach (var rq in items)
                 {
                     // Map fields into template columns similar to ExportSelection
-                    ws.Cell(row, 2).SetValue(GetString(rq, "CHR_Status"));
-                    ws.Cell(row, 3).SetValue(GetString(rq, "ID"));
+                    ws.Cell(row, 2).SetValue(rq.CHR_Status ?? "");
+                    ws.Cell(row, 3).SetValue(rq.ID ?? 0);
                     ws.Cell(row, 4).SetValue(idx);
-                    ws.Cell(row, 5).SetValue(GetString(rq, "CHR_SectionCode"));
-                    ws.Cell(row, 6).SetValue(GetString(rq, "CHR_SectionName"));
-                    ws.Cell(row, 7).SetValue(GetString(rq, "CHR_Phanloai"));
-                    ws.Cell(row, 8).SetValue(GetString(rq, "CHR_MaThietBi"));
-                    ws.Cell(row, 9).SetValue(GetString(rq, "VCHR_MaHangNoiBo"));
-                    ws.Cell(row, 10).SetValue(GetString(rq, "CHR_MaHangNCC"));
-                    ws.Cell(row, 11).SetValue(GetString(rq, "VCHR_TenRecomment"));
-                    ws.Cell(row, 12).SetValue(GetString(rq, "CHR_NameEN"));
-                    ws.Cell(row, 13).SetValue(GetInt(rq, "INT_SoLuong"));
-                    ws.Cell(row, 14).SetValue(GetString(rq, "NVCHR_DonVi"));
-                    ws.Cell(row, 15).SetValue(GetString(rq, "NVCHR_ChungLoai"));
-                    ws.Cell(row, 16).SetValue(GetString(rq, "NVCHR_HinhDang"));
-                    ws.Cell(row, 17).SetValue(GetString(rq, "NVCHR_ChatLieu"));
-                    ws.Cell(row, 18).SetValue(GetString(rq, "NVCHR_ThanhPhan"));
-                    ws.Cell(row, 19).SetValue(GetString(rq, "NVCHR_KichThuoc"));
-                    ws.Cell(row, 20).SetValue(GetString(rq, "NVCHR_DongMay"));
-                    ws.Cell(row, 21).SetValue(GetString(rq, "NVCHR_TinhNang"));
-                    ws.Cell(row, 22).SetValue(GetString(rq, "VCHR_TenHaiQuan"));
-                    ws.Cell(row, 23).SetValue(GetString(rq, "VCHR_UserShip"));
-                    ws.Cell(row, 24).SetValue(GetString(rq, "VCHR_UserAcc"));
+                    ws.Cell(row, 5).SetValue(rq.CHR_SectionCode ?? "");
+                    ws.Cell(row, 6).SetValue(rq.CHR_SectionName ?? "");
+                    ws.Cell(row, 7).SetValue(rq.CHR_Phanloai ?? "");
+                    ws.Cell(row, 8).SetValue(rq.CHR_MaThietBi ?? "");
+                    ws.Cell(row, 9).SetValue(rq.VCHR_MaHangNoiBo ?? "");
+                    ws.Cell(row, 10).SetValue(rq.CHR_MaHangNCC ?? "");
+                    ws.Cell(row, 11).SetValue(rq.VCHR_TenRecomment ?? "");
+                    ws.Cell(row, 12).SetValue(rq.CHR_NameEN ?? "");
+                    ws.Cell(row, 13).SetValue(rq.INT_SoLuong ?? "");
+                    ws.Cell(row, 14).SetValue(rq.NVCHR_DonVi ?? "");
+                    ws.Cell(row, 15).SetValue(rq.NVCHR_ChungLoai ?? "");
+                    ws.Cell(row, 16).SetValue(rq.NVCHR_HinhDang ?? "");
+                    ws.Cell(row, 17).SetValue(rq.NVCHR_ChatLieu ?? "");
+                    ws.Cell(row, 18).SetValue(rq.NVCHR_ThanhPhan ?? "");
+                    ws.Cell(row, 19).SetValue(rq.NVCHR_KichThuoc ?? "");
+                    ws.Cell(row, 20).SetValue(rq.NVCHR_DongMay ?? "");
+                    ws.Cell(row, 21).SetValue(rq.NVCHR_TinhNang ?? "");
+                    ws.Cell(row, 22).SetValue(rq.VCHR_TenHaiQuan ?? "");
+                    ws.Cell(row, 23).SetValue(rq.VCHR_UserShip ?? "");
+                    ws.Cell(row, 24).SetValue(rq.VCHR_UserAcc ?? "");
                     row++;
                     idx++;
                 }

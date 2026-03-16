@@ -4,12 +4,12 @@ using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
 {
-    public interface IBaoGiaService: IBaseService<BaoGia_Request_of_Quotation, int, BaoGia_Request_of_QuotationDTO>
+    public interface IBaoGiaService : IBaseService<BaoGia_Request_of_Quotation, int, BaoGia_Request_of_QuotationDTO>
     {
         // Lấy thông tin báo giá theo mã báo giá
         public Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> GetByMaBaoGiaAsync(string maBaoGia);
         // Tìm kiếm thông tin báo giá và phân trang 
-        public Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang,string? status, int? step, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
+        public Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
         // Nhap bao gia
         public Task<GenericResponse<bool>> NhapBaoGiaAsync(BaoGia_Request_of_QuotationDTO baoGia);
         // Nhap danh sach bao gia - trả về danh sách DTO có ID sau khi insert

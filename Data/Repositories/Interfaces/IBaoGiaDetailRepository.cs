@@ -4,7 +4,7 @@ using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
-    public interface IBaoGiaDetailRepository: IBaseRepository<BaoGia_Detail_of_Quotation , int>
+    public interface IBaoGiaDetailRepository : IBaseRepository<BaoGia_Detail_of_Quotation, int>
     {
         // Tìm kiếm thông tin liên quan đến báo giá
         public Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM, int? PageSize, int? PageIndex);

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>PHÊ DUYỆT ĐƠN YÊU CẦU BÁO GIÁ</value>
+    <value>PHÊ DUYỆT YÊU CẦU BÁO GIÁ</value>
   </data>
   <data name="PageSubtitle" xml:space="preserve">
     <value>Trạng thái phê duyệt cho các yêu cầu báo giá</value>

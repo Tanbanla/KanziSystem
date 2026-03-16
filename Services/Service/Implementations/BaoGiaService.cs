@@ -8,11 +8,11 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
-    public class BaoGiaService: BaseService<BaoGia_Request_of_Quotation, int, BaoGia_Request_of_QuotationDTO>, IBaoGiaService
+    public class BaoGiaService : BaseService<BaoGia_Request_of_Quotation, int, BaoGia_Request_of_QuotationDTO>, IBaoGiaService
     {
         private readonly IBaoGiaRepository _repo;
         private readonly IMapper _mapper;
-        public BaoGiaService(IBaoGiaRepository repo, IMapper mapper): base(repo, mapper)
+        public BaoGiaService(IBaoGiaRepository repo, IMapper mapper) : base(repo, mapper)
         {
             _repo = repo;
             _mapper = mapper;
@@ -39,7 +39,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
             try
             {
-                var data = await _repo.SearchAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, pageIndex, pageSize,  date, chungLoai);
+                var data = await _repo.SearchAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, pageIndex, pageSize, date, chungLoai);
                 result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(data);
                 result.Success = true;
             }
@@ -164,7 +164,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                result.Data = await _repo.GetThongTinBaoGiaGomNhomAsync(maDon,section, maHang, pageIndex, pageSize);
+                result.Data = await _repo.GetThongTinBaoGiaGomNhomAsync(maDon, section, maHang, pageIndex, pageSize);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -195,7 +195,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
         public async Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
         {
-           var result = new GenericResponse<ListRequest<dynamic>>();
+            var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
                 result.Data = await _repo.SearchThongTinNhapBaoGiaAsync(maDon, section, maHang, pageIndex, pageSize);
@@ -214,10 +214,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.GetThongTinBaoGiaChiTietAsync(maDon, section, maHang, maNCC , status, pageIndex, pageSize);
+                result.Data = await _repo.GetThongTinBaoGiaChiTietAsync(maDon, section, maHang, maNCC, status, pageIndex, pageSize);
                 result.Success = true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 result.Message = ex.Message;
                 result.Success = false;

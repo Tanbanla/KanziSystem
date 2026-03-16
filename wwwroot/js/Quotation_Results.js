@@ -237,7 +237,7 @@
                     <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
                     <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_MOQ || ''}</td>
-                    <td style="padding: 2px 4px, text-align: center;">${d.DTM_LeadTime || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.DTM_LeadTime || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Ngay)}">${d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Rohs)}">${d.VCHR_Rohs || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_COCQ)}">${d.VCHR_COCQ || ''}</td>
@@ -263,7 +263,7 @@
                             return `<td style="padding: 2px 4px; text-align: center;"${span}></td>`;
                         }
                         // For subsequent rows in group, omit the TD so rowspan covers them
-                    return '<td style="padding: 2px 4px; text-align: center;"></td>';
+                        return '<td style="padding: 2px 4px; text-align: center;"></td>';
                     })()}
                     <td style="padding: 2px 4px; text-align: center;">
                          <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
@@ -472,7 +472,7 @@
                     if (!sel) return;
                     // include only rows where selection is explicitly set (true/false)
                     const val = sel.value;
-                    if (val === '' ) return;
+                    if (val === '') return;
                     const idAttr = row.getAttribute('data-id') || sel.getAttribute('data-id') || '';
                     const id = idAttr !== '' && !isNaN(Number(idAttr)) ? Number(idAttr) : idAttr;
                     const reason = (row.querySelector('.reason-input')?.value || '').toString();
@@ -721,39 +721,39 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
-                    }
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                        }
 
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
-                        // Trả về file lỗi
-                        return response.blob().then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(url);
-                            showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
-                        });
-                    } else {
-                        // Thành công
-                        return response.json().then(data => {
-                            showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
-                        });
-                    }
-                })
-                .catch(error => {
-                    const T = window.i18nQuotationResults || {};
-                    showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
-                })
-                .finally(() => {
-                    document.body.removeChild(fileInput);
-                });
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                            // Trả về file lỗi
+                            return response.blob().then(blob => {
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(url);
+                                showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
+                            });
+                        } else {
+                            // Thành công
+                            return response.json().then(data => {
+                                showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        const T = window.i18nQuotationResults || {};
+                        showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
+                    })
+                    .finally(() => {
+                        document.body.removeChild(fileInput);
+                    });
             });
             this.loadSupplierData(); // refresh data before opening file dialog
             try {
@@ -932,7 +932,7 @@
                             <td class="text-center"><input type="checkbox" class="form-check-input item-select" /></td>
                             <td class="detail-cell text-center">
                                 <button type="button" class="btn btn-sm btn-outline-primary toggle-sup" data-target="#sup-rows-${groupId}" data-madon="${i.CHR_MaDon || ''}" data-mahang="${i.CHR_MaHangNoiBo || ''}" data-ngay="${ngayAttr}" aria-expanded="false" title="Xem chi tiết">
-                                    <i class="fas fa-chevron-down"></i>
+                                    <i class="fas fa-info-circle"></i>
                                 </button>
                             </td>
                             <td class="text-start"><span class="ms-1 fw-semibold">${i.CHR_MaDon || ''}</span></td>
@@ -1193,7 +1193,7 @@
         },
         resetFiltersTab2: function () {
             // Reset select filters (set value and dispatch change so enhanced dropdown UI updates)
-            const selIds = ['supplierSearchSection', 'supplierSearchMaVatTu', 'supplierSearchMaNcc','supplierSearchMaDon'];
+            const selIds = ['supplierSearchSection', 'supplierSearchMaVatTu', 'supplierSearchMaNcc', 'supplierSearchMaDon'];
             selIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -1206,7 +1206,7 @@
             });
             const statusEl = document.getElementById('searchStatusTab2');
             if (statusEl) {
-                statusEl.value = '1';
+                statusEl.value = 'WAIT_PICK_NCC';
                 try { statusEl.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
             }
 

@@ -16,14 +16,15 @@ using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
-    public class BaoGiaDetailRepository: BaseRepository<BaoGia_Detail_of_Quotation , int>, IBaoGiaDetailRepository
+    public class BaoGiaDetailRepository : BaseRepository<BaoGia_Detail_of_Quotation, int>, IBaoGiaDetailRepository
     {
         private readonly COST_MANAGEMENTContext _context;
         public BaoGiaDetailRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration)
-        : base(context, options, configuration) {
+        : base(context, options, configuration)
+        {
             _context = context;
         }
-        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM,int? PageSize, int? PageIndex)
+        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM, int? PageSize, int? PageIndex)
         {
             var baseFrom = new StringBuilder();
             baseFrom.Append(@"FROM [BaoGia_Detail_of_Quotation] as d
@@ -34,7 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var whereBuilder = new StringBuilder();
             var parameters = new DynamicParameters();
 
-            if(idRequest != 0 && idRequest != null)
+            if (idRequest != 0 && idRequest != null)
             {
                 whereBuilder.Append(" AND r.ID = @IdRequest");
                 parameters.Add("IdRequest", idRequest);
@@ -42,7 +43,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (!string.IsNullOrEmpty(maDon))
             {
                 whereBuilder.Append(" AND r.CHR_MaDon = @Madon");
-                parameters.Add("Madon",maDon);
+                parameters.Add("Madon", maDon);
             }
             if (!string.IsNullOrEmpty(maVatTu))
             {
@@ -267,13 +268,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 }
                 // save step BaoGia_Request
                 var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
-                if(rq != null)
+                if (rq != null)
                 {
                     rq.ID_StepBaoGia = 7;
                     rq.ID_Status = "WAIT_PICK_NCC";
                 }
             }
-            //await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+            await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -329,9 +330,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.NVCHR_ReasonPick = item.NVCHR_ReasonPick;
                     // save rq
                     var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
-                    if (rq != null) {
-                        rq.ID_StepBaoGia = 8;
-                        //rq.ID_Status = "APPROVAL";
+                    if (rq != null)
+                    {
+                        rq.ID_StepBaoGia = 9;
+                        rq.ID_Status = "WAIT_APPROVE";
                     }
                     // luu lịch sử thay đổi
                     var history = new BaoGia_History_Detail_Request
@@ -346,8 +348,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     historyList.Add(history);
                 }
             }
-            //await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
-            //await _context.SaveChangesAsync();
+            await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+            await _context.SaveChangesAsync();
             return true;
         }
     }
