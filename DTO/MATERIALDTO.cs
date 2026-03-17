@@ -39,7 +39,7 @@ public partial class MATERIALDTO
 
     public string? Shape { get; set; }
 
-    public string? Material1 { get; set; }
+    public string? Material { get; set; }
 
     public string? Composition { get; set; }
 
@@ -63,7 +63,7 @@ public partial class MATERIALDTO
 
     public string? GetTenMoThuTuc()
     {
-        return Shape + " " + Material1 + " " + Composition + " " + Dimension + " " + UsedFor + " " + Purpose;
+        return Shape + " " + Material + " " + Composition + " " + Dimension + " " + UsedFor + " " + Purpose;
     }
 
     // Expose TenMoThuTuc as a property so it will be included in JSON responses

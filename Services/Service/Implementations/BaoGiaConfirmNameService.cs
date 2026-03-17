@@ -165,5 +165,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Rejects Acc
+        public async Task<GenericResponse<bool>> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.RejectAccConfirmNameListAsync(saveConfirms, user, Role);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

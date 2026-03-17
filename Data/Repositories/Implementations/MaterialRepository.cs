@@ -97,13 +97,34 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 data.Category_EN = material.Category_EN;
                 data.Category_JP = material.Category_JP;
                 data.Shape = material.Shape;
-                data.Material1 = material.Material1;
+                data.Material = material.Material;
                 data.Composition = material.Composition;
                 data.Dimension = material.Dimension;
                 data.UsedFor = material.UsedFor;
                 data.Purpose = material.Purpose;
 
             }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // check mã linh kiện 
+        public async Task<bool> CheckMaHangExistsAsync(string codeMaterial)
+        {
+            var result = await _context.MATERIALs.AnyAsync(m => m.Material_Code == codeMaterial);
+            //
+            var checkTableConfirm = await _context.BaoGia_Confirm_Name_Quotations.AnyAsync(t => t.VCHR_MaHangNoiBo == codeMaterial);
+
+            if (result || checkTableConfirm)
+            {
+                return true;
+            }
+            return false;
+        }
+        // Insert 
+        public async Task<bool> InsertMaterial(MATERIAL mt)
+        {
+            if (mt == null) return false;
+            await _context.MATERIALs.AddAsync(mt);
             await _context.SaveChangesAsync();
             return true;
         }

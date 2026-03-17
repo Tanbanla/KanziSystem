@@ -1865,7 +1865,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.GoodKind).HasMaxLength(50);
             entity.Property(e => e.Group_Code).HasMaxLength(50);
             entity.Property(e => e.Id_Material).ValueGeneratedOnAdd();
-            entity.Property(e => e.Material1)
+            entity.Property(e => e.Material)
                 .HasMaxLength(250)
                 .HasColumnName("Material");
             entity.Property(e => e.Material_Name_EN).HasMaxLength(500);

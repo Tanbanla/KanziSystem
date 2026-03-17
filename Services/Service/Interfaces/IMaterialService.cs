@@ -15,5 +15,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<dynamic>>> GetListMaterial();
         // update danh sách linh kiện
         public Task<GenericResponse<bool>> UpdateMaterialAsync(List<MATERIALDTO> materials);
+        // check mã linh kiện 
+        public Task<GenericResponse<bool>> CheckMaHangExistsAsync(string codeMaterial);
+        // Insert 
+        public Task<GenericResponse<bool>> InsertMaterial(MATERIALDTO mt);
     }
 }

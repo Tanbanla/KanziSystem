@@ -15,5 +15,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 
         // update danh sách linh kiện
         public Task<bool> UpdateMaterialAsync(List<MATERIAL> materials);
+        // check mã linh kiện 
+        public Task<bool> CheckMaHangExistsAsync(string codeMaterial);
+        // Insert 
+        public Task<bool> InsertMaterial(MATERIAL mt);
     }
 }

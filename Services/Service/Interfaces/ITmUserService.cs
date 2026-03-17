@@ -8,5 +8,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
     {
         // Login
         public Task<GenericResponse<TM_USERDTO>> Login(string username, string password);
+        // lấy quyền user
+        public Task<GenericResponse<string>> GetRoleAsync(string adId);
     }
 }

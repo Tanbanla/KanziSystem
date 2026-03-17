@@ -1540,7 +1540,20 @@
 
     // Tìm kiếm 
     function buildSearchableDropdown($container) {
-        $container.find('select.searchable-select').each(function () {
+        let $targets;
+        if (!$container) return;
+        try {
+            if (typeof $container.is === 'function' && $container.is('select')) {
+                $targets = $container;
+            } else {
+                $targets = $container.find('select.searchable-select');
+            }
+        } catch (e) {
+            // fallback
+            $targets = $container.find('select.searchable-select');
+        }
+
+        $targets.each(function () {
             const $select = $(this);
             if ($select.data('search-dropdown') === true) return;
 

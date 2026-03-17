@@ -68,12 +68,14 @@
                 </div>
 
                 <!-- Hàng 2: 2 cột - Trạng thái và nút tìm kiếm -->
-                <div class="col-10 col-sm-10 col-md-1">
-                    <label class="form-label mb-1 w-100" style="min-width: 150px;">@Localizer["ConfirmStatus"]</label>
-                    <select id="trangThai" class="form-select" style="min-height: 40px;">
+                <div class="col-12 col-sm-6 col-md-4">
+                    <!-- Điều chỉnh từ col-md-3 lên col-md-4 -->
+                    <label class="form-label mb-1 d-block">@Localizer["ConfirmStatus"]</label>
+                    <select id="trangThai" name="trangThai" class="form-select trangThai searchable-select" style="min-height:50px;">
                         <option value="">@Localizer["All"]</option>
                         <option value="Confirming" selected>@Localizer["StatusConfirming"]</option>
                         <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
+                        <option value="RejectedAcc">@Localizer["StatusRejectedAcc"]</option>
                         <option value="Rejected">@Localizer["StatusRejected"]</option>
                     </select>
                 </div>
@@ -104,6 +106,12 @@
                     </button>
                     <div style="min-width: 6px;"></div>
                     <button type="button" class="btn btn-sm btn-outline-danger" id="btnRejectSelected">
+                        <i class="fas fa-check me-1"></i> @Localizer["RejectSelected"]
+                    </button>
+                }
+                @if (role == "UserAcc")
+                {
+                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnRejectAccSelected">
                         <i class="fas fa-check me-1"></i> @Localizer["RejectSelected"]
                     </button>
                 }

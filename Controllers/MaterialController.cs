@@ -19,13 +19,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaService _baoGiaService;
         private readonly IWebHostEnvironment _env;
         private readonly ISendMailService _sendMailService;
-        public MaterialController(IBaoGiaConfirmNameService confirmNameService, INhomViTriService nhomViTriService, IBaoGiaService baoGiaService, IWebHostEnvironment env, ISendMailService sendMailService)
+        private readonly ITmUserService _tmUserService;
+        private readonly IMaterialService _materialService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ILogger<MaterialController> _logger;
+        public MaterialController(IBaoGiaConfirmNameService confirmNameService, INhomViTriService nhomViTriService,
+            IBaoGiaService baoGiaService, IWebHostEnvironment env, ISendMailService sendMailService, 
+            ITmUserService tmUserService, IMaterialService materialService, IServiceScopeFactory serviceScopeFactory, ILogger<MaterialController> logger)
         {
             _confirmNameService = confirmNameService;
             _nhomViTriService = nhomViTriService;
             _baoGiaService = baoGiaService;
             _sendMailService = sendMailService;
+            _logger = logger;
+            _materialService = materialService;
+            _tmUserService = tmUserService;
             _env = env;
+            _materialService = materialService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
         // MARK: Confirm Name actions use EF context directly
         public IActionResult Material()
@@ -47,9 +58,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> ConfirmName()
         {
             // Determine role from query or default to UserPUR
-            var role = (Request.Query["role"].ToString() ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(role)) role = "UserPUR"; // UserShip | UserAcc | UserPUR
-            ViewBag.Role = role;
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            //(Request.Query["role"].ToString() ?? string.Empty).Trim();
+            if (!role.Success)
+            {
+                return BadRequest(role.Message);
+            }
+            ViewBag.Role = role.Data;
             var vitris = await LoadNhomViTriDataAsync();
             var vm = new MaterialVM
             {
@@ -62,6 +77,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nhomViTri = await _nhomViTriService.GetAllNhomViTriAsync();
             return nhomViTri.Data ?? new List<ACC_NHOMVITRIDTO>();
         }
+
         // Search confirm list
         [HttpPost]
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
@@ -72,6 +88,27 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result.Message);
             }
             return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create_Material([FromBody] MATERIALDTO model)  
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);  
+            }
+
+            var result = await _materialService.InsertMaterial(model);
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = "Material created successfully.";
+                return RedirectToAction("Material");  
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, result.Message ?? "Failed to create material.");
+                return View(model);
+            }
         }
 
         // Save inline changes by role
@@ -89,9 +126,29 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveSelectedConfirmName([FromBody] List<ConfirmNameDTO> reqs)
         {
-            var role = (Request.Query["role"].ToString() ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(role)) role = "UserShip"; // UserShip | UserAcc | UserPUR
-            var result = await _confirmNameService.SaveConfirmNameListAsync(reqs, GetCurrentUserId(), role);
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            // kiểm tra điều kiện  
+            foreach (var req in reqs)
+            {
+                if (role.Data == "UserShip" && string.IsNullOrWhiteSpace(req.TenHaiQuan))
+                {
+                    return BadRequest("Tên hải quan không được để trống");
+                }
+                if ((role.Data == "UserAcc") && string.IsNullOrWhiteSpace(req.MaHangNoiBo))
+                {
+                    return BadRequest("Mã hàng nội bộ không được để trống");
+                }
+                var checkAsync = await _materialService.CheckMaHangExistsAsync(req.MaHangNoiBo);
+                if (!checkAsync.Success)
+                {
+                    return BadRequest(checkAsync.Message);
+                }
+                if (checkAsync.Data)
+                {
+                    return BadRequest($"Mã hàng nội bộ '{req.MaHangNoiBo}' đã tồn tại trong hệ thống");
+                }
+            }
+            var result = await _confirmNameService.SaveConfirmNameListAsync(reqs, GetCurrentUserId(), role.Data);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -102,24 +159,65 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> ApproveSelectedConfirmName([FromBody] List<ConfirmNameDTO> reqs)
         {
-            var role = (Request.Query["role"].ToString() ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(role)) role = "UserPUR"; // UserShip | UserAcc | UserPUR
-            var result = await _confirmNameService.ApproveConfirmNameListAsync(reqs, GetCurrentUserId(), role);
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            var result = await _confirmNameService.ApproveConfirmNameListAsync(reqs, GetCurrentUserId(), role.Data);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
             return Ok(result.Success);
         }
-        // Approve (agree) and update base request
+        // Reject in select row (User ACC)
         [HttpPost]
-        public async Task<IActionResult> ApproveConfirmName([FromBody] ConfirmNameActionRequest req)
+        public async Task<IActionResult> RejectAccSelectedConfirmName([FromBody] List<ConfirmNameDTO> reqs)
         {
-            var result = await _confirmNameService.ApproveConfirmNameAsync(req.Id, GetCurrentUserId());
+            var user = GetCurrentUserId();
+            var reject = reqs.Select(d => d.LyDo).FirstOrDefault();
+            var role = await _tmUserService.GetRoleAsync(user);
+            var result = await _confirmNameService.RejectAccConfirmNameListAsync(reqs, user, role.Data);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
+            _ = Task.Run(async () =>
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    try
+                    {
+                        var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                        var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
+                        //PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn
+                        // gửi mail thông báo có yêu cầu xác nhận tên mới 
+                        var emailResult = await sendMailService.SendMailAsync(
+                            "nguyenduy.khanh@brother-bivn.com.vn",
+                            string.Empty,
+                            21,
+                            "http://172.26.248.62:8057/Material/ConfirmName",
+                            true,
+                            reject,
+                            string.Empty,
+                            user);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                    }
+                }
+            });
+            return Ok(result.Success);
+        }
+        // Approve (agree) and update base request
+        [HttpPost]
+        public async Task<IActionResult> ApproveConfirmName([FromBody] ConfirmNameActionRequest req)
+        {
+            var user = GetCurrentUserId();
+            var result = await _confirmNameService.ApproveConfirmNameAsync(req.Id, user);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+           
             return Ok(result.Success);
         }
 
@@ -127,7 +225,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> RejectConfirmName([FromBody] ConfirmNameRejectRequest req)
         {
-            var result = await _confirmNameService.RejectConfirmNameAsync(req.Id, req.LyDo ?? "", GetCurrentUserId());
+            var user = GetCurrentUserId();
+            var result = await _confirmNameService.RejectConfirmNameAsync(req.Id, req.LyDo ?? "", user);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -152,7 +251,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest("File không hợp lệ");
 
-            var role = "UserPUR";//(Request.Query["role"].ToString() ?? string.Empty).Trim();
+            var roleAsync = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            var role = roleAsync.Success ? roleAsync.Data : string.Empty;
             var item = new List<BaoGia_Confirm_Name_Quotation>();
             var hasErrors = false;
             try
@@ -201,7 +301,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var mahang = ws.Cell(r, 9).GetString();
                             if (string.IsNullOrWhiteSpace(mahang))
                             {
-                                ws.Cell(r, 25).SetValue("Tên hải quan không được để trống");
+                                ws.Cell(r, 25).SetValue("Mã hàng nội bộ không được để trống");
+                                hasErrors = true;
+                                continue;
+                            }
+                            // kiểm tra mã hàng đã tồn tại trong hệ thống chưa
+                            var checkMaHang = await _materialService.CheckMaHangExistsAsync(mahang);
+                            if (checkMaHang.Data)
+                            {
+                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong hệ thống");
+                                hasErrors = true;
+                                continue;
+                            }
+                            var checkList = item.Where(x => x.VCHR_MaHangNoiBo == mahang).ToList();
+                            if (checkList.Any())
+                            {
+                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong file");
                                 hasErrors = true;
                                 continue;
                             }
@@ -216,12 +331,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         case "UserPUR":
                             var tenHaiQuanPUR = ws.Cell(r, 22).GetString();
                             var mahangPUR = ws.Cell(r, 9).GetString();
-                            //if (string.IsNullOrWhiteSpace(tenHaiQuanPUR) || string.IsNullOrWhiteSpace(mahangPUR))
-                            //{
-                            //    ws.Cell(r, 25).SetValue("Tên hải quan và mã hàng nội bộ không được để trống");
-                            //    hasErrors = true;
-                            //    continue;
-                            //}
+                            // kiểm tra mã hàng đã tồn tại trong hệ thống chưa
+                            var checkMaHangPUR = await _materialService.CheckMaHangExistsAsync(mahangPUR);
+                            if (checkMaHangPUR.Data)
+                            {
+                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong hệ thống");
+                                hasErrors = true;
+                                continue;
+                            }
+                            var checkListPUR = item.Where(x => x.VCHR_MaHangNoiBo == mahangPUR).ToList();
+                            if (checkListPUR.Any())
+                            {
+                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong file");
+                                hasErrors = true;
+                                continue;
+                            }
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),

@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
+using Dapper;
 
 namespace PRJ_WAREHOUSE_BIVN.Models
 {
@@ -53,6 +54,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 }
             }
             catch { return ""; }
+        }
+
+        public int ExecuteSP(string spName, object? param = null)
+        {
+            string connectionString = @"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;";
+
+            using var conn = new SqlConnection(connectionString);
+            return conn.Execute(spName, param, commandType: CommandType.StoredProcedure);
         }
     }   
 

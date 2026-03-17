@@ -462,4 +462,7 @@
   <data name="RejectSelected" xml:space="preserve">
     <value>Reject Selected</value>
   </data>
+  <data name="StatusRejectedAcc" xml:space="preserve">
+    <value>Reject code confirmation</value>
+  </data>
 </root>

@@ -9,6 +9,7 @@ using PRJ_WAREHOUSE_BIVN.Controllers;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Data;
 using System.Text;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
@@ -320,6 +321,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_UpdateBy = user;
                     row.DTM_UpdateDate = now;
                 }
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // Rejects Acc
+        public async Task<bool> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        {
+            if (saveConfirms == null || !saveConfirms.Any()) return false;
+            if (Role != "UserAcc") return false;
+            foreach (var item in saveConfirms)
+            {
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
+                if (row == null) return false;
+                row.CHR_Status = "RejectedAcc";
+                row.NVCHR_LyDo = item.LyDo;
+                row.VCHR_UserAcc = user;
+                row.DTM_UserAcc = DateTime.Now;
+                row.VCHR_UpdateBy = user;
+                row.DTM_UpdateDate = DateTime.Now;
             }
             await _context.SaveChangesAsync();
             return true;

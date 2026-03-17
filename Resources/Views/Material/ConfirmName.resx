@@ -454,12 +454,15 @@
     <value>Hiển thị</value>
   </data>
   <data name="SaveSelected" xml:space="preserve">
-    <value>Lưu mục đã chọn</value>
+    <value>Lưu tất cả</value>
   </data>
   <data name="ApproveSelected" xml:space="preserve">
     <value>Phê duyệt mục đã chọn</value>
   </data>
   <data name="RejectSelected" xml:space="preserve">
     <value>Từ chối mục đã chọn</value>
+  </data>
+  <data name="StatusRejectedAcc" xml:space="preserve">
+    <value>Từ chối xác nhận mã</value>
   </data>
 </root>

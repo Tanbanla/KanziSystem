@@ -7,6 +7,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using System;
 using System.IO.Pipelines;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -57,6 +58,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         // Mail gửi nhà cung cấp 
         public async Task<GenericResponse<bool>> SendMailToSupplierAsync()
         {
+            string dearMail = "";
+            string titleMail = "";
             // lay thong tin nha cung cap tu db
             var suppliers = await _repo.GetSuppliersToNotifyAsync();
             if (suppliers == null || !suppliers.Any())
@@ -89,6 +92,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     continue;
                 }
+
                 // lay email nha cung cap
                 var toEmail = await _repo.GetSupplierEmailAsync(item);
                 if (string.IsNullOrEmpty(toEmail))
@@ -227,6 +231,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                             NVCHR_PaymentTerm = "",
                             NVCHR_File = ""
                         };
+                        dearMail = "nhà cung cấp " + rq.NVCHR_TenNCC + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
+                        titleMail = rq.NVCHR_TenNCC + " - Yêu cầu báo giá đến ngày " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: "+rq.CHR_MaDon;
                         listBaoGiaDetail.Add(itemDetail);
                         rowIndex++;
                     }
@@ -235,15 +241,15 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 tableHtml += "</table>";
 
-                var body = mail.CHR_BODY + tableHtml;
-
+                var bodyTable = mail.CHR_BODY + tableHtml;
+                var body =  string.Format(bodyTable, dearMail);
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
-                {
+                {//nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn
                     mail_from = mail.CHR_FROM,
                     mail_to = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn",
                     mail_cc = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn",
                     mail_bcc = mail.CHR_BCC,
-                    title = mail.CHR_SUBJECT,
+                    title = titleMail,
                     body = body,
                     attachmentPaths = new List<string> { tempFilePath }
                 };
@@ -272,6 +278,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         // Gửi mail nhà cung cấp theo mã đơn 
         public async Task<GenericResponse<bool>> SendMailToSupplierByRequestCodeAsync(string requestCode)
         {
+            string dearMail = "";
+            string titleMail = "";
             // lấy dữ liệu các đơn của mã đơn yêu cầu báo giá
             var listRq = await _repo.GetNotifyRequestCodeAsync(requestCode);
             if (listRq == null || !listRq.Any())
@@ -421,6 +429,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         // Add thin border to the data row
                         worksheet.Range(rowIndex, 1, rowIndex, 10).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 
+                        dearMail = "nhà cung cấp " + rq.NVCHR_TenNCC + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
+                        titleMail = rq.NVCHR_TenNCC + " - Yêu cầu báo giá đến ngày " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
                         rowIndex++;
                     }
                     workbook.SaveAs(tempFilePath);
@@ -428,15 +438,16 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 tableHtml += "</table>";
 
-                var body = mail.CHR_BODY + tableHtml;
+                var bodyTable = mail.CHR_BODY + tableHtml;
+                var body = string.Format(bodyTable, dearMail);
                 //nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {
                     mail_from = mail.CHR_FROM,
-                    mail_to = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn",
-                    mail_cc = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn",
+                    mail_to = "nguyenduy.khanh@brother-bivn.com.vn",
+                    mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",
                     mail_bcc = mail.CHR_BCC,
-                    title = mail.CHR_SUBJECT,
+                    title = titleMail,
                     body = body,
                     attachmentPaths = new List<string> { tempFilePath }
                 };

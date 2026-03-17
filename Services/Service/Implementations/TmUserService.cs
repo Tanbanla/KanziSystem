@@ -62,5 +62,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return response;
         }
+        // lấy quyền user
+        public async Task<GenericResponse<string>> GetRoleAsync(string adId)
+        {
+            var response = new GenericResponse<string>();
+            try
+            {
+                var role = await _repo.GetRoleAsync(adId);
+                response.Data = role;
+                response.Success = true;
+                response.Message = "Role retrieved successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in GetRoleAsync: {ex.Message}";
+            }
+            return response;
+        }
     }
 }

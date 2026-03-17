@@ -22,7 +22,8 @@
         chkSelectAll: document.getElementById('chkSelectAll'),
         pageSizeSelect: document.getElementById('pageSizeSelect'),
         itemsExcelFileInput: document.getElementById('itemsExcelFileInput'),
-        btnRejectSelected: document.getElementById('btnRejectSelected')
+        btnRejectSelected: document.getElementById('btnRejectSelected'),
+        btnRejectAccSelected: document.getElementById('btnRejectAccSelected')
     };
 
     let state = { pageIndex: 1, pageSize: 20, total: 0, listData: [] };
@@ -118,6 +119,28 @@
         try {
             showLoading('Đang phê duyệt...');
             const res = await fetch('/Material/ApproveSelectedConfirmName?role=' + encodeURIComponent(role), {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
+            });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => 'Lỗi phê duyệt');
+                throw new Error(txt);
+            }
+            showDialog({ title: 'Thành công', message: 'Phê duyệt thành công', type: 'success' });
+            search();
+        } catch (err) {
+            showDialog({ title: 'Lỗi', message: err.message || 'Phê duyệt thất bại', type: 'error' });
+        } finally { hideLoading(); }
+    }
+    async function rejectAccSelected() {
+        const items = await collectSelected(false);
+        if (!items.length) { showDialog({ title: 'Thông báo', message: 'Chưa chọn bản ghi nào', type: 'info' }); return; }
+        const T = window.i18nConfirmName || {};
+        const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
+        if (lyDo === null) return;
+        for (const i of items) { i.pheDuyet = false; i.lyDo = lyDo; }
+        try {
+            showLoading('Đang phê duyệt...');
+            const res = await fetch('/Material/RejectAccSelectedConfirmName?role=' + encodeURIComponent(role), {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
             });
             if (!res.ok) {
@@ -397,6 +420,10 @@
             if (!canApprove()) { els.btnRejectSelected.style.display = 'none'; }
             els.btnRejectSelected.addEventListener('click', rejectSelected);
         }
+        if (els.btnRejectAccSelected) {
+            if (!canEditMaNB()) { els.btnRejectAccSelected.style.display = 'none'; }
+            els.btnRejectAccSelected.addEventListener('click', rejectAccSelected);
+        }
         els.chkSelectAll && els.chkSelectAll.addEventListener('change', function () {
             const rows = Array.from(document.querySelectorAll('.row-select'));
             rows.forEach(r => r.checked = this.checked);
@@ -434,7 +461,43 @@
             const fd = new FormData();
             fd.append('file', file);
             const res = await fetch('/Material/ImportFromExcel', { method: 'POST', body: fd });
-            if (!res.ok) throw new Error(await res.text());
+
+            // Detect if server returned an Excel file (validation errors)
+            const contentType = (res.headers.get('content-type') || '').toLowerCase();
+            const cd = res.headers.get('content-disposition') || '';
+            const isExcel = contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                || contentType.includes('application/octet-stream')
+                || /filename=.*\.xlsx/i.test(cd);
+
+            if (!res.ok) {
+                // non-OK: could be text error or file with errors
+                if (isExcel) {
+                    const blob = await res.blob();
+                    let fileName = 'ImportErrors.xlsx';
+                    const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+                    showDialog({ title: T.Error || 'Lỗi', message: T.ImportHasErrors || 'File nhập có lỗi. File lỗi đã được tải xuống.', type: 'error' });
+                    return;
+                }
+                const txt = await res.text().catch(() => 'Lỗi không xác định');
+                throw new Error(txt);
+            }
+
+            // OK response: could be JSON items or an Excel file with errors
+            if (isExcel) {
+                const blob = await res.blob();
+                let fileName = 'ImportErrors.xlsx';
+                const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+                showDialog({ title: T.Error || 'Lỗi', message: T.ImportHasErrors || 'File nhập có lỗi. File lỗi đã được tải xuống.', type: 'error' });
+                return;
+            }
+
+            // Otherwise expect JSON array
             const items = await res.json();
             if (!Array.isArray(items)) throw new Error('Dữ liệu không hợp lệ');
             showDialog({ title: T.Success || 'Thành công', message: T.ImportSuccess || 'Nhập bằng file thành công', type: 'success' });

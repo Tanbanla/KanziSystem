@@ -8,6 +8,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<TM_USER> Login(string username, string password);
         // Lấy thông tin user theo ADID
         public Task<TM_USER> GetUserByAdId(string adId);
+        // lấy quyền user
+        public Task<string> GetRoleAsync(string adId);
 
     }
 }

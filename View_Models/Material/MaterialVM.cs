@@ -54,5 +54,22 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Material
             public int Id { get; set; }
             public string? LyDo { get; set; }
         }
+
+        public class MaterialCreate
+        {
+            public string? MaterialCode { get; set; }  // Required
+            public string? MaterialNameVN { get; set; }  // Required
+            public string? MaterialNameEN { get; set; }
+            public string? MaterialNameJP { get; set; }
+            public string? AccountCode { get; set; }
+            public string? AccountNameEN { get; set; }
+            public string? AccountNameVN { get; set; }
+            public string? Unit { get; set; }
+            public string? UnitNote { get; set; }
+            public decimal? Price { get; set; }
+            public string? Currency { get; set; }  
+            public string? GroupCode { get; set; }
+            public string? GoodKind { get; set; }
+        }
     }
 }

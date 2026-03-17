@@ -95,8 +95,44 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             catch (Exception ex)
             {
                 result.Message = ex.Message;
-                result.Data = false;
                 result.Success = false;
+            }
+            return result;
+        }
+        // check mã linh kiện 
+        public async Task<GenericResponse<bool>> CheckMaHangExistsAsync(string codeMaterial)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var exists = await _repo.CheckMaHangExistsAsync(codeMaterial);
+                result.Data = exists;
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+
+        // Insert 
+        public async Task<GenericResponse<bool>> InsertMaterial(MATERIALDTO mt)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                
+
+                var dto = _mapper.Map<MATERIAL>(mt);
+                result.Data = await _repo.InsertMaterial(dto);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
             }
             return result;
         }

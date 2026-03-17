@@ -39,7 +39,7 @@ public partial class MATERIAL
 
     public string? Shape { get; set; }
 
-    public string? Material1 { get; set; }
+    public string? Material { get; set; }
 
     public string? Composition { get; set; }
 

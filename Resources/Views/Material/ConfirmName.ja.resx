@@ -462,4 +462,7 @@
   <data name="RejectSelected" xml:space="preserve">
     <value>選択項目を却下</value>
   </data>
+  <data name="StatusRejectedAcc" xml:space="preserve">
+    <value>拒否コード確認</value>
+  </data>
 </root>

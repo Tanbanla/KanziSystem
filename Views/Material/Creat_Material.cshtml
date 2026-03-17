@@ -95,43 +95,77 @@
                         <label for="GoodKind">Good Kind</label>
                         <input type="text" class="form-control" id="GoodKind" name="GoodKind" placeholder="Type">
                     </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Category_VN</label>
+                        <input type="text" class="form-control" id="Category_VN" name="Category_VN" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Category_JP</label>
+                        <input type="text" class="form-control" id="Category_JP" name="Category_JP" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Category_EN</label>
+                        <input type="text" class="form-control" id="Category_EN" name="Category_EN" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Shape</label>
+                        <input type="text" class="form-control" id="Shape" name="Shape" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Material</label>
+                        <input type="text" class="form-control" id="Material" name="Material" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Material</label>
+                        <input type="text" class="form-control" id="Material" name="Material" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Composition</label>
+                        <input type="text" class="form-control" id="Composition" name="Composition" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Dimension</label>
+                        <input type="text" class="form-control" id="Dimension" name="Dimension" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">UsedFor</label>
+                        <input type="text" class="form-control" id="UsedFor" name="UsedFor" placeholder="Type">
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label for="GoodKind">Purpose</label>
+                        <input type="text" class="form-control" id="Purpose" name="Purpose" placeholder="Type">
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end mt-3">
                     <button type="button" class="btn btn-secondary mr-2" onclick="history.back()">Cancel</button>
+                    <button type="button" class="btn btn-info mr-2" id="importFileBtn" onclick="document.getElementById('fileInput').click()">Import from file</button>
                     <button type="submit" id="submitBtn" class="btn btn-primary">
                         <span id="btnText">Submit</span>
                         <span id="btnSpinner" class="spinner-border spinner-border-sm ml-2 d-none" role="status" aria-hidden="true"></span>
                     </button>
                 </div>
+
+                <input type="file" id="fileInput" style="display: none;" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
+
             </form>
         </div>
     </div>
     <small class="form-text text-muted mt-2">Fields marked with <span class="text-danger">*</span> are required.</small>
 </div>
 
-<script>
-    (function () {
-        'use strict';
-        var form = document.getElementById('materialForm');
-        var submitBtn = document.getElementById('submitBtn');
-        var btnText = document.getElementById('btnText');
-        var btnSpinner = document.getElementById('btnSpinner');
+<script src="/js/Material_Create.js">
 
-        form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // Show spinner and let form submit (or perform AJAX here)
-                btnText.textContent = 'Saving...';
-                btnSpinner.classList.remove('d-none');
-                // If you want to prevent real submit for demo, uncomment:
-                // event.preventDefault();
-            }
-            form.classList.add('was-validated');
-        }, false);
-    })();
-
+    //tạo thông tin xong bấm submit tại sao dữ liệu không vào cơ sở dữ liệu
 
 </script>

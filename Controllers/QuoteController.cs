@@ -756,7 +756,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 NVCHR_DonVi = infor.Unit,
                                 NVCHR_ChungLoai = infor.Category_VN,
                                 NVCHR_HinhDang = infor.Shape,
-                                NVCHR_ChatLieu = infor.Material1,
+                                NVCHR_ChatLieu = infor.Material,
                                 NVCHR_ThanhPhan = infor.Composition,
                                 NVCHR_KichThuoc = infor.Dimension,
                                 NVCHR_DongMay = infor.UsedFor,
@@ -1296,7 +1296,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cell(row, col++).SetValue(m.Unit);
                         ws.Cell(row, col++).SetValue(m.Category_VN);
                         ws.Cell(row, col++).SetValue(m.Shape);
-                        ws.Cell(row, col++).SetValue(m.Material1);
+                        ws.Cell(row, col++).SetValue(m.Material);
                         ws.Cell(row, col++).SetValue(m.Composition);
                         ws.Cell(row, col++).SetValue(m.Dimension);
                         ws.Cell(row, col++).SetValue(m.UsedFor);
