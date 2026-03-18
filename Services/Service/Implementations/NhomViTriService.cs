@@ -35,5 +35,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return response;
         }
+        // Insert list Section
+        public async Task<GenericResponse<bool>> InsertNhomViTriListAsync(List<ACC_NHOMVITRIDTO> nhomViTriDTOs)
+        {
+            var response = new GenericResponse<bool>();
+            try
+            {
+                var nhomViTriList = _mapper.Map<List<ACC_NHOMVITRI>>(nhomViTriDTOs);
+                var result = await _repo.InsertListSectionAsync(nhomViTriList);
+                response.Data = result;
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "Lỗi khi thêm danh sách nhóm vị trí: " + ex.Message;
+            }
+            return response;
+        }
     }
 }

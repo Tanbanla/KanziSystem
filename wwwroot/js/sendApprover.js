@@ -75,7 +75,7 @@
         fileInput.addEventListener('change', function () {
             const file = fileInput.files[0];
             if (!file) return;
-            const T = window.i18nQuotationResults || {};
+            const T = window.i18nSendApprover || {};
             // Kiểm tra loại file
             const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
             if (!allowedTypes.includes(file.type)) {
@@ -88,8 +88,8 @@
             const formData = new FormData();
             formData.append('file', file);
             // Gửi request
-            try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
-            fetch('/Master/ImportExcel', {
+            try { showLoading((window.i18nSendApprover && window.i18nSendApprover.LoadingData) || 'Đang xử lý...'); } catch { }
+            fetch('/Master/ImportSectionExcel', {
                 method: 'POST',
                 body: formData
             })
@@ -97,30 +97,13 @@
                     if (!response.ok) {
                         return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
                     }
-
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
-                        // Trả về file lỗi
-                        return response.blob().then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(url);
-                            showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
-                        });
-                    } else {
-                        // Thành công
-                        return response.json().then(data => {
-                            showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
-                        });
-                    }
+                    // Thành công
+                    return response.json().then(data => {
+                        showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                    });
                 })
                 .catch(error => {
-                    const T = window.i18nQuotationResults || {};
+                    const T = window.i18nSendApprover || {};
                     showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
                 })
                 .finally(() => {
@@ -128,6 +111,9 @@
                     document.body.removeChild(fileInput);
                 });
         });
+
+        // Trigger the file picker
+        fileInput.click();
     }
     function showAddForm() {
         clearForm();
@@ -730,7 +716,27 @@
             try { console.error(err); alert(message); } catch (e) {}
         }
     }
-
+    // Loading overlay helpers
+    function showLoading(message) {
+        try {
+            const el = document.getElementById('globalLoading');
+            if (!el) return;
+            const msgEl = el.querySelector('.loader-msg');
+            if (msgEl && message) msgEl.textContent = message;
+            el.style.display = 'flex';
+            el.setAttribute('aria-hidden', 'false');
+        } catch (e) { }
+    }
+    function hideLoading() {
+        try {
+            const el = document.getElementById('globalLoading');
+            if (!el) return;
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+            const msgEl = el.querySelector('.loader-msg');
+            if (msgEl) msgEl.textContent = 'Đang xử lý...';
+        } catch (e) { }
+    }
     // Initialize
     hideForm();
     // Tìm kiếm - support both jQuery and plain DOM

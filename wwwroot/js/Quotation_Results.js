@@ -263,7 +263,7 @@
                             return `<td style="padding: 2px 4px; text-align: center;"${span}></td>`;
                         }
                         // For subsequent rows in group, omit the TD so rowspan covers them
-                        return '<td style="padding: 2px 4px; text-align: center;"></td>';
+                    return `<td style="padding: 2px 4px; text-align: center;"></td>`;
                     })()}
                     <td style="padding: 2px 4px; text-align: center;">
                          <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
@@ -1715,7 +1715,7 @@ function buildSearchableDropdown(container) {
                     dropdown.style.top = '';
                     dropdown.style.left = '';
                     dropdown.style.width = '';
-                    d.style.zIndex = '';
+                    dropdown.style.zIndex = '';
                     dropdown._detached = false;
                 }
             } else {

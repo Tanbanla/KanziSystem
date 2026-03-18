@@ -366,6 +366,54 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
 
         }
+        // Nhập file cập nhật thông tin phòng ban
+        [HttpPost]
+        public async Task<IActionResult> ImportSectionExcel([FromForm] IFormFile file)
+        {
+            if(file == null || file.Length == 0)
+            {
+                return BadRequest("Không nhận được dữ liệu từ file");
+            }
+            var listSections = new List<ACC_NHOMVITRIDTO>();
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                int startRow = 1;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+                for (int i = startRow; i <= lastRow; i++)
+                {
+                    var cellVal = ws.Cell(i, 1).GetString();
+                    if (string.IsNullOrWhiteSpace(cellVal))
+                    {
+                        break;
+                    }
+                    var dto = new ACC_NHOMVITRIDTO
+                    {
+                        LoaiVitri = "",
+                        Mahangmuctheovitri = cellVal.Trim(),
+                        Tenhangmuctheovitri = ws.Cell(i, 2).GetString().Trim(),
+                        Model = ""
+                    };
+                    listSections.Add(dto);
+                }
+                if (listSections.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                var result = await _nhomViTriService.InsertNhomViTriListAsync(listSections);
+                if (!result.Success)
+                {
+                    return BadRequest("Error Insert database: "+result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex) { 
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
         // Nhập file cập nhật thông tin các mặt hàng
         [HttpPost]
         public async Task<IActionResult> UpdateMaterialInfo([FromForm] ImportSupplierDetailDTO insertFile)

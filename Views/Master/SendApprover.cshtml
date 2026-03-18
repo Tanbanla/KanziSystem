@@ -9,7 +9,13 @@
 </head>
 <div class="container-fluid mt-3">
     <h3>@ViewData["Title"]</h3>
-
+    <!-- Global loading overlay -->
+    <div id="globalLoading" aria-hidden="true">
+        <div class="loader-box">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="loader-msg">Đang xử lý...</div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-4">
             <div class="card shadow-sm mb-3">
@@ -56,7 +62,7 @@
                                 <button id="btnClear" class="btn btn-outline-secondary">
                                     <i class="fas fa-broom me-1"></i> @Localizer["ClearSearch"]
                                 </button>
-                                <button type="button" class="btn btn-success btn-sm" id="ImportExcelBtn">
+                                <button type="button" class="btn btn-success" id="ImportExcelBtn">
                                     <i class="fas fa-file-excel"></i> @Localizer["ImportExcel"]
                                 </button>
                             </div>

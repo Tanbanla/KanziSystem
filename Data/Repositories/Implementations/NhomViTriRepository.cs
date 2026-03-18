@@ -16,14 +16,29 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lấy danh sách nhóm vị trí
         public async Task<List<ACC_NHOMVITRI>> GetAllNhomViTriAsync()
         {
-            try
+            return await Task.FromResult(_context.ACC_NHOMVITRIs.ToList());
+        }
+        // Insert list Section
+        public async Task<bool> InsertListSectionAsync(List<ACC_NHOMVITRI> nhomViTriList)
+        {
+            if(nhomViTriList == null)
             {
-                return await Task.FromResult(_context.ACC_NHOMVITRIs.ToList());
+                return false;
             }
-            catch (Exception ex)
+            var listTem = new List<ACC_NHOMVITRI>();
+            foreach (var item in nhomViTriList)
             {
-                throw new Exception("Lỗi khi lấy danh sách nhóm vị trí: " + ex.Message);
+                var check = _context.ACC_NHOMVITRIs.FirstOrDefault(x => x.Mahangmuctheovitri == item.Mahangmuctheovitri);
+                var checkList = listTem.Where(c => c.Mahangmuctheovitri == item.Mahangmuctheovitri).FirstOrDefault();
+                if(checkList != null || check != null)
+                {
+                    continue;
+                }
+                listTem.Add(item);
             }
+            await _context.ACC_NHOMVITRIs.AddRangeAsync(listTem);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

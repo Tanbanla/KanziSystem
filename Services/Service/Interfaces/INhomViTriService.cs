@@ -8,5 +8,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
     {
         // Lấy danh sách nhóm vị trí 
         Task<GenericResponse<List<ACC_NHOMVITRIDTO>>> GetAllNhomViTriAsync();
+        // Insert list Section
+        Task<GenericResponse<bool>> InsertNhomViTriListAsync(List<ACC_NHOMVITRIDTO> nhomViTriDTOs);
     }
 }
