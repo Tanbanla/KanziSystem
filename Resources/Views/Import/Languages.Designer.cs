@@ -610,11 +610,38 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ngày mong muốn nhận.
+        /// </summary>
+        public static string Ngaymongmuonnhan {
+            get {
+                return ResourceManager.GetString("Ngaymongmuonnhan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ngày nhập kho.
         /// </summary>
         public static string Ngaynhapkho {
             get {
                 return ResourceManager.GetString("Ngaynhapkho", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ngày tạo.
+        /// </summary>
+        public static string ngaytao {
+            get {
+                return ResourceManager.GetString("ngaytao", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ngày Update.
+        /// </summary>
+        public static string ngayupdate {
+            get {
+                return ResourceManager.GetString("ngayupdate", resourceCulture);
             }
         }
         
@@ -687,6 +714,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string nguoithamtra {
             get {
                 return ResourceManager.GetString("nguoithamtra", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Người update.
+        /// </summary>
+        public static string nguoiupdate {
+            get {
+                return ResourceManager.GetString("nguoiupdate", resourceCulture);
             }
         }
         
@@ -1123,6 +1159,24 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tổng tiền.
+        /// </summary>
+        public static string tongtien {
+            get {
+                return ResourceManager.GetString("tongtien", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tổng tiền thực tế.
+        /// </summary>
+        public static string tongtienthucte {
+            get {
+                return ResourceManager.GetString("tongtienthucte", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tồn kho.
         /// </summary>
         public static string tonkho {
@@ -1209,6 +1263,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string Xem {
             get {
                 return ResourceManager.GetString("Xem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Xuất kho.
+        /// </summary>
+        public static string Xuatkho {
+            get {
+                return ResourceManager.GetString("Xuatkho", resourceCulture);
             }
         }
     }

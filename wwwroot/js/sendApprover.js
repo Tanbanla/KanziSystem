@@ -15,7 +15,10 @@
     const modalPositionEl = document.getElementById('modalPosition');
     const modalSectionEl = document.getElementById('modalSectionCode');
     const modalLookupStatusEl = document.getElementById('modalLookupStatus');
+    const ImportExcelBtn = document.getElementById('ImportExcelBtn');
 
+    // Khởi tạo dropdown có tìm kiếm cho các select có class 'searchable-select'
+    buildSearchableDropdown(document);
     // helper to get value by possible keys (case-insensitive) for dynamic objects
     function getVal(obj, keys) {
         if (!obj) return null;
@@ -37,6 +40,7 @@
     if (btnAddNew) btnAddNew.addEventListener('click', showAddForm);
     if (cancelFormBtn) cancelFormBtn.addEventListener('click', hideForm);
     if (approverForm) approverForm.addEventListener('submit', handleFormSubmit);
+    if (ImportExcelBtn) ImportExcelBtn.addEventListener('click', ImportExcel);
     if (modalAdidEl) {
         // Only trigger lookup when user presses Enter and input is non-empty
         modalAdidEl.addEventListener('keydown', (e) => {
@@ -60,7 +64,71 @@
         hideForm();
         showEmptyState();
     }
+    async function ImportExcel() {
+        // Tạo input file ẩn
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.xlsx, .xls';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
 
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const T = window.i18nQuotationResults || {};
+            // Kiểm tra loại file
+            const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+            if (!allowedTypes.includes(file.type)) {
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidFileType || 'Không thể xuất file'), type: 'error' });
+                document.body.removeChild(fileInput);
+                return;
+            }
+
+            // Tạo FormData
+            const formData = new FormData();
+            formData.append('file', file);
+            // Gửi request
+            try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
+            fetch('/Master/ImportExcel', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                    }
+
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                        // Trả về file lỗi
+                        return response.blob().then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                            showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
+                        });
+                    } else {
+                        // Thành công
+                        return response.json().then(data => {
+                            showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                        });
+                    }
+                })
+                .catch(error => {
+                    const T = window.i18nQuotationResults || {};
+                    showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
+                })
+                .finally(() => {
+                    try { hideLoading(); } catch { }
+                    document.body.removeChild(fileInput);
+                });
+        });
+    }
     function showAddForm() {
         clearForm();
         const T = window.i18nSendApprover || {};
@@ -309,7 +377,7 @@
             <div>
                 <i class="fas fa-step-forward me-2"></i>
                 <strong>${stepGroup.stepName}</strong>
-                <span class="badge bg-white text-secondary border ms-2">${(T.TotalApproverBadge || '{0} người').replace('{0}', stepGroup.approvers.length)}</span>
+                <span class="badge bg-white text-secondary border ms-2">${(T.TotalApproverBadge || '{0} người').replace('{0', stepGroup.approvers.length)}</span>
             </div>
             <button class="btn btn-sm btn-outline-primary btn-add-to-step" data-step="${stepGroup.stepId}">
                 <i class="fas fa-user-plus me-1"></i> ${T.AddToThisStep || 'Thêm vào bước này'}
@@ -665,4 +733,180 @@
 
     // Initialize
     hideForm();
+    // Tìm kiếm - support both jQuery and plain DOM
+    function buildSearchableDropdown(container) {
+        // Accept either a jQuery object or a DOM node
+        const root = (window.jQuery && container && container.jquery) ? container[0] : container || document;
+
+        const selects = root.querySelectorAll ? root.querySelectorAll('select.searchable-select') : [];
+        selects.forEach(function (select) {
+            if (select.dataset.searchDropdown === 'true') return;
+
+            const options = Array.from(select.options).map(function (opt) {
+                return { value: opt.value, text: opt.textContent || opt.innerText || '', selected: opt.selected };
+            });
+
+            // Build UI elements
+            const wrapper = document.createElement('div'); wrapper.className = 'ms-container';
+            const btn = document.createElement('div'); btn.className = 'ms-btn';
+            btn.innerHTML = '<span class="ms-values"></span><span class="ms-placeholder"></span><span class="ms-caret">▾</span>';
+            const dropdown = document.createElement('div'); dropdown.className = 'ms-dropdown';
+            const search = document.createElement('div'); search.className = 'ms-search';
+            const T = window.i18nQuotationResults || {};
+            search.innerHTML = '<input type="text" placeholder="' + (T.SearchEllipsis || 'Tìm...') + '" />';
+            const list = document.createElement('div'); list.className = 'ms-list';
+
+            function renderList(query) {
+                const q = (query || '').toLowerCase();
+                list.innerHTML = '';
+                let hasItems = false;
+                options.forEach(function (opt) {
+                    if (!q || opt.text.toLowerCase().includes(q)) {
+                        const item = document.createElement('div');
+                        item.className = 'ms-item';
+                        item.dataset.value = opt.value;
+                        item.textContent = opt.text;
+                        if (select.value === opt.value || opt.selected) item.classList.add('selected');
+                        list.appendChild(item);
+                        hasItems = true;
+                    }
+                });
+                if (!hasItems) {
+                    const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.NoResults) || 'Không có kết quả';
+                    list.appendChild(empty);
+                }
+            }
+
+            function updateButtonText() {
+                const val = select.value;
+                const found = options.find(o => o.value === val);
+                const valuesEl = btn.querySelector('.ms-values');
+                const placeholderEl = btn.querySelector('.ms-placeholder');
+                if (found && found.text) {
+                    valuesEl.textContent = found.text;
+                    placeholderEl.textContent = '';
+                } else {
+                    valuesEl.textContent = '';
+                    placeholderEl.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.SelectPlaceholder) || '-- Chọn --';
+                }
+            }
+
+            // update when underlying select changes programmatically
+            select.addEventListener('change', function () {
+                updateButtonText();
+            });
+
+            updateButtonText();
+            renderList('');
+
+            dropdown.appendChild(search);
+            dropdown.appendChild(list);
+            // insert after select
+            select.style.display = 'none';
+            select.parentNode.insertBefore(wrapper, select.nextSibling);
+            wrapper.appendChild(btn);
+            wrapper.appendChild(dropdown);
+
+            // store reference for reattaching
+            dropdown._wrapper = wrapper;
+            dropdown._detached = false;
+
+            // Events
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                // close other dropdowns
+                document.querySelectorAll('.ms-dropdown.open').forEach(function (d) {
+                    if (d !== dropdown) {
+                        d.classList.remove('open');
+                        if (d._detached) {
+                            d._wrapper.appendChild(d);
+                            d.style.position = '';
+                            d.style.top = '';
+                            d.style.left = '';
+                            d.style.width = '';
+                            d.style.zIndex = '';
+                            d._detached = false;
+                        }
+                    }
+                });
+
+                if (dropdown.classList.contains('open')) {
+                    dropdown.classList.remove('open');
+                    if (dropdown._detached) {
+                        dropdown._wrapper.appendChild(dropdown);
+                        dropdown.style.position = '';
+                        dropdown.style.top = '';
+                        dropdown.style.left = '';
+                        dropdown.style.width = '';
+                        dropdown.style.zIndex = '';
+                        dropdown._detached = false;
+                    }
+                } else {
+                    // attach to body to avoid clipping
+                    const rect = btn.getBoundingClientRect();
+                    const top = rect.top + window.scrollY + btn.offsetHeight;
+                    const left = rect.left + window.scrollX;
+                    document.body.appendChild(dropdown);
+                    dropdown.style.position = 'absolute';
+                    dropdown.style.top = top + 'px';
+                    dropdown.style.left = left + 'px';
+                    dropdown.style.width = btn.offsetWidth + 'px';
+                    dropdown.style.zIndex = 3000;
+                    dropdown.classList.add('open');
+                    dropdown._detached = true;
+                    const inp = search.querySelector('input');
+                    if (inp) { inp.value = ''; inp.focus(); }
+                    renderList('');
+                }
+            });
+
+            // clicking outside should close and reattach any open dropdowns
+            document.addEventListener('click', function () {
+                document.querySelectorAll('.ms-dropdown').forEach(function (d) {
+                    if (d.classList.contains('open')) {
+                        d.classList.remove('open');
+                        if (d._detached) {
+                            d._wrapper.appendChild(d);
+                            d.style.position = '';
+                            d.style.top = '';
+                            d.style.left = '';
+                            d.style.width = '';
+                            d.style.zIndex = '';
+                            d._detached = false;
+                        }
+                    }
+                });
+            });
+
+            dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+
+            list.addEventListener('click', function (ev) {
+                const it = ev.target.closest('.ms-item');
+                if (!it) return;
+                const value = it.dataset.value;
+                select.value = value;
+                // dispatch change events
+                try { select.dispatchEvent(new Event('change', { bubbles: true })); } catch (ex) { }
+                updateButtonText();
+                dropdown.classList.remove('open');
+                if (dropdown._detached) {
+                    dropdown._wrapper.appendChild(dropdown);
+                    dropdown.style.position = '';
+                    dropdown.style.top = '';
+                    dropdown.style.left = '';
+                    dropdown.style.width = '';
+                    dropdown.style.zIndex = '';
+                    dropdown._detached = false;
+                }
+            });
+
+            const inp = search.querySelector('input');
+            if (inp) {
+                inp.addEventListener('input', function () { renderList(this.value); });
+            }
+
+            // Mark enhanced
+            select.dataset.searchDropdown = 'true';
+        });
+    }
 });

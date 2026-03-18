@@ -23,7 +23,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context = context;
         }
         //search thông tin xác nhận tên hàng
-        public async Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, int pageIndex, int pageSize)
         {
             // Tách phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
             var baseFrom = @"
@@ -57,7 +57,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrWhiteSpace(TrangThai))
             {
-                whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
+                if (string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase))
+                {
+                    whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
+                }
+                else if (string.Equals(role, "UserAcc", StringComparison.OrdinalIgnoreCase))
+                {
+                    whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
+                }
+                else
+                {
+                    whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
+                }
                 parameters.Add("@TrangThai", TrangThai.Trim());
             }
 
@@ -98,6 +109,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == Id);
             if (row == null) return false;
 
+            var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
+            .ToListAsync();
+            if (rq == null) return false;
+
             var now = DateTime.Now;
             var user = User ?? "SYSTEM";
 
@@ -107,12 +122,26 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.VCHR_TenHaiQuan = TenHaiQuan ?? row.VCHR_TenHaiQuan;
                 row.VCHR_UserShip = user;
                 row.DTM_UserShip = now;
+                row.CHR_StatusShip = "Confirmed";
+                foreach (var r in rq)
+                {
+                    // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                    if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
+                        r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                }
             }
             else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
             {
                 row.VCHR_MaHangNoiBo = MaHangNoiBo ?? row.VCHR_MaHangNoiBo;
                 row.VCHR_UserAcc = user;
                 row.DTM_UserAcc = now;
+                row.CHR_StatusACC = "Confirmed";
+                foreach (var r in rq)
+                {
+                    // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                    if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
+                        r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+                }
             }
             else // UserPUR
             {
@@ -122,11 +151,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.DTM_UserPUR = now;
             }
 
-            if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
-            {
-                row.CHR_Status = "Confirming"; // đang xác nhận
-            }
+            //if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
+            //    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    row.CHR_Status = "Confirming"; // đang xác nhận
+            //}
             row.DTM_UpdateDate = now;
             row.VCHR_UpdateBy = user;
 
@@ -204,18 +233,38 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID== i.ID);
                 if (row == null) continue;
+
+
+                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
+                .ToListAsync();
+                if (rq == null) continue;
+
                 // Role enforcement
                 if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
                 {
                     row.VCHR_TenHaiQuan = i.VCHR_TenHaiQuan;
                     row.VCHR_UserShip = user;
                     row.DTM_UserShip = now;
+                    row.CHR_StatusShip = "Confirmed";
+                    foreach (var r in rq)
+                    {
+                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                        if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
+                            r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                    }
                 }
                 else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
                 {
                     row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
                     row.VCHR_UserAcc = user;
                     row.DTM_UserAcc = now;
+                    row.CHR_StatusACC = "Confirmed";
+                    foreach (var r in rq)
+                    {
+                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                        if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
+                            r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+                    }
                 }
                 else // UserPUR
                 {
@@ -227,11 +276,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.DTM_UserPUR = now;
                 }
 
-                if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
-                    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
-                {
-                    row.CHR_Status = "Confirming"; // đang xác nhận
-                }
+                //if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
+                //    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+                //{
+                //    row.CHR_Status = "Confirming"; // đang xác nhận
+                //}
                 row.DTM_UpdateDate = now;
                 row.VCHR_UpdateBy = user;
             }
@@ -249,6 +298,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
                 if (row == null) return false;
 
+                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
+                .ToListAsync();
+                if (rq == null) return false;
+
                 var now = DateTime.Now;
 
                 // Role enforcement
@@ -257,12 +310,26 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_TenHaiQuan = item.TenHaiQuan ?? row.VCHR_TenHaiQuan;
                     row.VCHR_UserShip = user;
                     row.DTM_UserShip = now;
+                    row.CHR_StatusShip = "Confirmed";
+                    foreach (var r in rq)
+                    {
+                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                        if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
+                            r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                    }
                 }
                 else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
                 {
                     row.VCHR_MaHangNoiBo = item.MaHangNoiBo ?? row.VCHR_MaHangNoiBo;
                     row.VCHR_UserAcc = user;
                     row.DTM_UserAcc = now;
+                    row.CHR_StatusACC = "Confirmed";
+                    foreach (var r in rq)
+                    {
+                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                        if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
+                            r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+                    }
                 }
                 else // UserPUR
                 {
@@ -272,11 +339,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.DTM_UserPUR = now;
                 }
 
-                if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
-                    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
-                {
-                    row.CHR_Status = "Confirming"; // đang xác nhận
-                }
+                //if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
+                //    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+                //{
+                //    row.CHR_Status = "Confirming"; // đang xác nhận
+                //}
                 row.DTM_UpdateDate = now;
                 row.VCHR_UpdateBy = user;
             }

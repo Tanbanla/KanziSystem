@@ -40,14 +40,41 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                   AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
                   AND (@NguoiYeuCau IS NULL OR CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
                   AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
-                  AND (@status IS NULL OR ID_Status = @status)
                   AND (@Step IS NULL OR ID_StepBaoGia = @Step)
                   AND (@Date IS NULL OR CAST(DTM_CreateDate AS DATE) = CAST(@Date AS DATE))
             ";
+
+            // Build status SQL fragment and append it directly to the WHERE clause when needed
+            var statusSql = "1=1";
+            if (!string.IsNullOrEmpty(status))
+            {
+                switch (status)
+                {
+                    case "RETURN":
+                        statusSql = "ID_Status LIKE '%RETURN%'";
+                        break;
+                    case "DONE":
+                        statusSql = "ID_Status = 'DONE'";
+                        break;
+                    case "APPROVAL":
+                        statusSql = "ID_Status LIKE 'APPROVAL'";
+                        break;
+                    case "WAIT":
+                        statusSql = "ID_Status LIKE '%WAIT%'";
+                        break;
+                    default:
+                        break;
+                }
+
+                // append status filter
+                sql += " AND (" + statusSql + ")";
+            }
+
+            // Add ordering and paging
             if (pageSize > 0 && pageIndex > 0)
             {
                 sql += @"
-                    ORDER BY DTM_CreateDate
+                    ORDER BY DTM_CreateDate DESC
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY
                 ";
@@ -55,9 +82,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             else
             {
                 sql += @"
-                    ORDER BY DTM_CreateDate
+                    ORDER BY DTM_CreateDate DESC
                 ";
             }
+
             var parameters = new
             {
                 MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
@@ -65,13 +93,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Section = string.IsNullOrEmpty(Section) ? null : Section,
                 NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
                 MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
-                status = string.IsNullOrEmpty(status) ? null : status,
                 Step = step,
                 Offset = (pageIndex - 1) * pageSize,
                 PageSize = pageSize,
                 Date = date,
                 ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai
             };
+
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Nhap bao gia
@@ -319,10 +347,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         THEN 1 ELSE 0 
                     END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS NeedConfirmName,
                     MAX(CASE WHEN r.ID_StepBaoGia != 7 THEN 1 ELSE 0 END) 
-                        OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep
+                        OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep,
+                     CASE WHEN r.ID_StepBaoGia >= 9 and r.ID_StepBaoGia <12 then 1 else 0 END as CofirmedName 
                 FROM BaoGia_Request_of_Quotation r
                 LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
 
             var parameters = new DynamicParameters();
 
@@ -414,12 +443,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 CASE 
                     WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME'
                     WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC'
+		            WHEN SC.CofirmedName  = 1  THEN 'CONFIRMED'
                     ELSE 'WAIT_NCC'
                 END AS status
             FROM BaoGia_Request_of_Quotation r
             LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
             INNER JOIN StatusCheck sc ON r.id = sc.id
-            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
 
             if (!string.IsNullOrEmpty(maDon))
             {
@@ -440,7 +470,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // Filter by computed status coming from StatusCheck (WAIT_CONFIRM_NAME, WAIT_PICK_NCC, WAIT_NCC)
             if (!string.IsNullOrEmpty(status))
             {
-                sql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC' ELSE 'WAIT_NCC' END) = @Status");
+                sql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC' " +
+                    "WHEN sc.CofirmedName  = 1  THEN 'CONFIRMED' ELSE 'WAIT_NCC' END) = @Status");
                 parameters.Add("Status", status);
             }
 
@@ -465,10 +496,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                                OR r.CHR_MaHangNoiBo = '' 
                                OR r.NVCHR_NameVN = ''
                            THEN 1 ELSE 0 END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS NeedConfirmName,
-                       MAX(CASE WHEN r.ID_StepBaoGia != 7 THEN 1 ELSE 0 END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep
+                           MAX(CASE WHEN r.ID_StepBaoGia != 7 THEN 1 ELSE 0 END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep,
+                           CASE WHEN r.ID_StepBaoGia >= 9 and r.ID_StepBaoGia <12 then 1 else 0 END as CofirmedName 
                 FROM BaoGia_Request_of_Quotation r
                 LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
 
             if (!string.IsNullOrEmpty(maDon))
             {
@@ -491,7 +523,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             SELECT COUNT(r.id)
             FROM BaoGia_Request_of_Quotation r
             INNER JOIN StatusCheck sc ON r.id = sc.id
-            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia < 9");
+            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
 
             if (!string.IsNullOrEmpty(maDon))
             {
@@ -511,7 +543,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(status))
             {
-                countSql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC' ELSE 'WAIT_NCC' END) = @Status");
+                countSql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC'" +
+                    "WHEN sc.CofirmedName  = 1  THEN 'CONFIRMED' ELSE 'WAIT_NCC' END) = @Status");
             }
 
             var totalCount = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);

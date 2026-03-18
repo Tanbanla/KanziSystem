@@ -162,6 +162,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             db.GET_DATA_FROM_SQL($"update [KHO] set QTY_NEW = (QTY_NEW - QTY_RE_IMPORT) + {soluong}, GIA_TAI_NHAP = '{giatien}',QTY_RE_IMPORT = '{soluong}' where Id_Kho = '{id}'");
             return "Sửa thành công !";
         }
+
     }
     public class SECTION
     {

@@ -12,6 +12,31 @@
             font-size: 13px;
             border-radius: 0px;
         }
+    /* Thiết lập chiều cao cho vùng cuộn và cố định header */
+    .table-responsive.card {
+        max-height: 800px; /* Bạn có thể thay đổi chiều cao tùy ý */
+        overflow-y: auto;
+    }
+
+    .table thead th {
+        position: sticky;
+        top: -1px; /* Tránh khoảng hở nhỏ khi cuộn */
+        z-index: 10;
+        background-color: #007bff; /* Trùng với màu bg-primary của Bootstrap */
+        color: white;
+        border-bottom: 0;
+    }
+
+    /* Đảm bảo border không bị mất khi dùng sticky */
+    .table-bordered thead th {
+        border-top: 0;
+    }
+
+    .table:not(.table-sm) thead th{
+        border-bottom: none;
+        background-color: rgb(35 53 183);
+        color: white;
+    }
 </style>
 <div class="row">
     <div class="col-12">
@@ -77,6 +102,9 @@
                                 <th>@Languages.MaNVL</th>
                                 <th>@Languages.Noidung</th>
                                 <th>@Languages.soluong</th>
+                                <th>@Languages.soluongdathang</th>
+                                <th>@Languages.Sopo</th>
+                                <th>@Languages.Donvi</th>
                                 <th>@Languages.Loai</th>
                                 <th>@Languages.Ngaynhapkho</th>
                                 <th>@Languages.Damnhiem</th>
@@ -89,7 +117,6 @@
                         <tbody id="list_log"></tbody>
                     </table>
                 </div>
-                <ul class="pagination" id="pagination-controls"></ul>
             </div>
         </div>
     </div>

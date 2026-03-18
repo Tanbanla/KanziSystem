@@ -24,7 +24,7 @@
 	<data name="MenuMaterial" xml:space="preserve"><value>Vật tư</value></data>
 	<data name="MenuMaterialManage" xml:space="preserve"><value>Quản lý vật tư</value></data>
 	<data name="MenuMaterialCreate" xml:space="preserve"><value>Tạo mã vật tư</value></data>
-	<data name="MenuMaterialConfirmName" xml:space="preserve"><value>Xác nhận tên vật tư</value></data>
+	<data name="MenuMaterialConfirmName" xml:space="preserve"><value>Xác nhận tên và mã yêu báo giá</value></data>
 	<data name="MenuWarehouse" xml:space="preserve"><value>Kho</value></data>
 	<data name="MenuWarehouseImportPO" xml:space="preserve"><value>Nhập theo đơn hàng</value></data>
 	<data name="MenuWarehouseConfirmImport" xml:space="preserve"><value>Xác nhận nhập kho</value></data>

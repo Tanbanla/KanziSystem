@@ -17,6 +17,22 @@
     th {
         background-color: #f4f4f4;
     }
+
+    .table-responsive {
+        max-height: 800px; /* Chiều cao tối đa của bảng */
+        overflow-y: auto; /* Tạo cuộn dọc */
+        overflow-x: auto; /* Tạo cuộn ngang nếu cột quá nhiều */
+        border: 1px solid #dee2e6;
+    }
+
+        /* Giữ tiêu đề (header) đứng yên khi cuộn */
+        .table-responsive table thead tr td {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 2;
+            box-shadow: inset 0 -1px 0 #dee2e6;
+        }
     /* Xóa dấu mũi tên mặc định của summary nếu muốn */
     summary {
         cursor: pointer;
@@ -39,77 +55,103 @@
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
-            <div class="card-header">
-                <div class="form-group" style="margin : 10px 0 0 0" >
-                    <div class="input-group mb-2">
-                      
-                        <select id="lst_khoi" class="form-control">
-                            <option>PROD</option>
-                            <option>GA</option>
-                            <option>IT</option>
-                            <option>PUR</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 0">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.mayeucau ">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-
-                        <input type="text" class="form-control" id="kho" placeholder="@Languages.Tinhtrangdon">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="cost" placeholder="Cost">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="cost" placeholder="@Languages.Ngayyeucau">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="cost" placeholder="@Languages.nguoitao">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-info ml-3"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+            <div class="card-header" style="padding-left: 5px">
+                <h3 class="text-primary">@Languages.Xuatkho</h3>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
                     <table class="table table-bordered">
-                        <thead class="bg-primary">
+                        <thead >
                             <tr>
-                                <th></th>
+                                <td class="text-center"></td>
+                                <td><input type="text" class="form-control" id="mayeucau" placeholder="@Languages.mayeucau "></td>
+                                <td><input type="text" class="form-control" id="nguoitao" placeholder="@Languages.nguoitao"></td>
+                                <td><button type="button" class="btn btn-success ml-3" onclick="_load_xuatkho()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button></td>
+                                <td><button type="button" class="btn btn-info ml-3" onclick="resett()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button></td>
+                            </tr>
+                            <tr class="bg-primary">                          
+                                <th width="80px"></th>
                                 <th>@Languages.mayeucau</th>
+                                <th>@Languages.Phongban</th>
+                                <th>@Languages.Ngayyeucau</th>
+                                <th>@Languages.loaichiphi</th>
+                                <th>@Languages.Ngaymongmuonnhan</th>
+                                <th>@Languages.tongtien</th>
+                                <th>@Languages.tongtienthucte</th>
+                                <th>@Languages.hangngoaidanhmuc/@Languages.hangtrongdanhmuc</th>
                                 <th>@Languages.loaihang</th>
-                                <th>@Languages.TenNVL</th>
-                                <th>@Languages.soluong</th>
-                                <th>@Languages.Donvi</th>
-                                <th>@Languages.Giatien</th>
+                                <th>@Languages.Tinhtrangdon</th>
+                                <th>@Languages.ngaytao</th>
                                 <th>@Languages.nguoitao</th>
-                                <th>@Languages.nguoixuatkho</th>
+                                <th>@Languages.ngayupdate</th>
+                                <th>@Languages.nguoiupdate</th>
+                                <th>@Languages.Khoi</th>
                                 <th></th>
                             </tr>
-
                         </thead>
                         <tbody id="list_xuatkho"></tbody>
                     </table>
                 </div>
-                <ul class="pagination" id="pagination-controls"></ul>
             </div>
         </div>
     </div>
 </div>
 <button id="modal-10" hidden>Click</button>
+<button id="modal-19" hidden>Click</button>
 @await Html.PartialAsync("_modal", "Import")
 <script src="~/scripts/xuatkho.js"></script>
 <script>
     window.onload = function(){
         _load_xuatkho();
     }
+    function resett(){
+        document.getElementById("mayeucau").value = "";
+        document.getElementById("nguoitao").value = "";
+        _load_xuatkho();
+    }
+    //       let checkAll = document.getElementById('checkAll');
+    // document.addEventListener('change', function(e) {
+
+    //     if (e.target && e.target.id === 'checkAll') {
+    //             let checkboxes = document.querySelectorAll('.item');
+    //         checkboxes.forEach(cb => {
+    //             cb.checked = e.target.checked;
+    //         });
+    //     }
+
+    //     if (e.target && e.target.classList.contains('item')) {
+    //             let allItems = document.querySelectorAll('.item');
+    //         let checkedItems = document.querySelectorAll('.item:checked');
+
+    //         // Nếu số lượng checkbox đang chọn bằng tổng số checkbox -> Check nút đầu bảng
+    //         checkAll.checked = (allItems.length === checkedItems.length);
+
+    //         // Trạng thái lửng lơ (Gạch ngang) nếu chỉ chọn một vài ô
+    //         checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
+    //     }
+
+    // });
+    
+
+      let smallcheck = document.getElementById('smallcheck');
+     document.addEventListener('change', function(e) {
+
+        if (e.target && e.target.id === 'smallcheck') {
+                let checkboxes = document.querySelectorAll('.itemsmall');
+            checkboxes.forEach(cb => {
+                cb.checked = e.target.checked;
+            });
+        }
+        if (e.target && e.target.classList.contains('itemsmall')) {
+                let allItems = document.querySelectorAll('.itemsmall');
+            let checkedItems = document.querySelectorAll('.itemsmall:checked');
+
+            // Nếu số lượng checkbox đang chọn bằng tổng số checkbox -> Check nút đầu bảng
+            smallcheck.checked = (allItems.length === checkedItems.length);
+
+            // Trạng thái lửng lơ (Gạch ngang) nếu chỉ chọn một vài ô
+            smallcheck.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
+        }
+
+     });
 </script>

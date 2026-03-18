@@ -42,4 +42,6 @@ public partial class BaoGia_Confirm_Name_QuotationDTO
     public string? NVCHR_Note { get; set; }
 
     public string? VCHR_TenRecomment { get; set; }
+    public string? CHR_StatusACC { get; set; }
+    public string? CHR_StatusShip { get; set; }
 }

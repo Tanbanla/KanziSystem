@@ -113,8 +113,7 @@
                             </tr>
                         </thead>
                         <tbody id="list_approve"></tbody>
-                    </table>
-             
+                    </table>             
                 </div>
                 <ul class="pagination" id="pagination-controls"></ul>
             </div>
@@ -171,6 +170,7 @@
                 return response.json();
             })
             .then(data => {
+                console.log(data);
                  userPagingState.fullData = data;
                 // Tính tổng số trang
                 userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);

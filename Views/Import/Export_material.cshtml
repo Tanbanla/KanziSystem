@@ -128,9 +128,9 @@
                     </div>
                     <div class="form-group col-md-1">
                         <label class="text-danger">@Languages.thoihanmuonnhan</label>
-                        <input type="date" class="form-control" id="thoihan" />
+                        <input type="date" class="form-control" id="thoihan" required/>
                     </div>
-                    <div class="form-group col-md-1">
+                    <div class="form-group col-md-1"> 
                         <label>@Languages.loaihang </label>
                         <select class="form-control" id="typee">
                             <option>NEW</option>
@@ -141,14 +141,22 @@
                         <label>@Languages.loaihinhtokhai </label>
                         <input type="text" class="form-control" value="Loại khác" readonly />
                     </div>
-                    <div class="form-group col-md-1">
+                    <div class="form-group col-md-2">
                         <label for="inputCity">@Languages.tygia :  </label> <code style="float:right"><b> USD ↔ VND</b></code>
                         <input type="text" class="form-control" id="rate" readonly>
                     </div>
                     <div class="form-group col-md-1">
                         <label for="inputCity">@Languages.thanhtien  </label> <code style="float:right"><b>USD</b></code>
                         <input type="text" class="form-control" id="thanhtien" value="0" readonly>
+                    </div>                  
+                    <div class="form-group col-md-2">
+                        <label for="inputCity">Chọn file  </label> <code style="float:right"><b></b></code>
+                        <input type="file" class="form-control" />
                     </div>
+                    <div class="form-group col-md-1">
+                        <label for="inputCity"><a href=""> File mẫu excel </a></label> <code style="float:right"><b></b></code>
+                        <button type="button" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Import file</button>                    
+                    </div>                  
                 </div>
                 <div class="form-row">
                     <div class="table-responsive">
@@ -165,7 +173,7 @@
                                     <th width="80">@Languages.tonkho</th>
                                     <th width="80">@Languages.soluong</th>
                                     <th width="150px">@Languages.Donvi</th>
-                                    <th>@Languages.tygia</th>
+                                    <th>@Languages.Giatien</th>
                                     <th width="70px">@Languages.Ngoaite</th>
                                     <th>@Languages.tongdon</th>
                                     <th>@Languages.Mucdich</th>
@@ -338,7 +346,7 @@
         var tcpValue = parseFloat(pricee) * parseFloat(sl);
 
         // Gán giá trị vào ô TCP (định dạng số thực hoặc 0 nếu NaN)
-        document.getElementById("tcp_" + idd).value = isNaN(tcpValue) ? 0 : tcpValue;
+        document.getElementById("tcp_" + idd).value = (isNaN(tcpValue) ? 0 : tcpValue).toFixed(2);;
 
         document.getElementById("sl_" + idd).setAttribute('max', parseFloat(document.getElementById("tk_" + idd).value));
         var currentVal = parseFloat(document.getElementById("sl_" + idd).value);
@@ -352,7 +360,7 @@
         tinhTongTatCa();
     }
 
-        function tinhTongTatCa() {
+       function tinhTongTatCa() {
         let tongMoi = 0;
         // Tìm tất cả các ô input có class 'tcp'
         const allTcp = document.querySelectorAll('.tcp');
@@ -368,4 +376,5 @@
             displayTotal.value = Math.round(tongMoi,3);
         }
     }
+
 </script>

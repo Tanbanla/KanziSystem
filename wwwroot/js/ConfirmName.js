@@ -47,7 +47,7 @@
             case 'confirmed': return '<span class="status-badge status-confirmed">' + (T.StatusConfirmed || 'Đã xác nhận') + '</span>';
             case 'confirming': return '<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span';
             case 'rejected': return '<span class="status-badge status-rejected">' + (T.StatusRejected || 'Từ chối') + '</span>';
-            default: return '<span class="status-badge status-draft">' + (T.StatusDraft || 'Mới') + '</span>';
+            default: return '<span class="<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span>';
         }
     }
 
@@ -159,7 +159,7 @@
 
     function renderRows(data) {
         const T = window.i18nConfirmName || {};
-        const fields = [
+        let fields = [
             { key: 'actions', label: T.Actions || 'Hành động', editable: false },
             { key: '__select', label: '<input type="checkbox" id="_row_check_all" />', editable: false },
             { key: 'tenHQ', label: T.ConfirmName || 'Xác nhận tên', editable: canEditTenHQ() },
@@ -185,6 +185,16 @@
             { key: 'NVCHR_DongMay', label: T.UsedForMachine || 'Dùng cho máy/thiết bị/vị trí nào', editable: false },
             { key: 'NVCHR_TinhNang', label: T.Feature || 'Dùng để làm gì (tính năng)', editable: false }
         ];
+
+        // Remove fields user is not allowed to see
+        try {
+            if (!canEditTenHQ()) {
+                fields = fields.filter(f => f.key !== 'tenHQ');
+            }
+            if (!canEditMaNB()) {
+                fields = fields.filter(f => f.key !== 'maNB');
+            }
+        } catch (e) { }
 
         // Đánh dấu 8 hàng cuối (giữ màu xanh nhưng không cố định)
         fields.slice(8).forEach(f => f.isSpecial = true);
@@ -258,20 +268,30 @@
                 } else
                 
                 if (field.key === 'status') {
-                    td.innerHTML = statusBadge(r.CHR_Status);
+                    
+                    if (role == "UserShip") {
+                        td.innerHTML = statusBadge(r.CHR_StatusShip);
+                    }
+                    if (role == "UserAcc") {
+                        td.innerHTML = statusBadge(r.CHR_StatusACC);
+                    } else {
+                        td.innerHTML = statusBadge(r.CHR_Status);
+                    }
                     td.style.textAlign = 'center';
                 } else if (field.key === 'tenHQ') {
                     if (field.editable) {
                         td.innerHTML = `<input class="form-control form-control-sm js-tenhq" data-id="${r.ID}" value="${r.VCHR_TenHaiQuan || ''}" />`;
-                    } else {
-                        td.innerHTML = `<div class="cell-sm">${r.VCHR_TenHaiQuan || ''}</div>`;
                     }
+                    //else {
+                    //    td.innerHTML = `<div class="cell-sm">${r.VCHR_TenHaiQuan || ''}</div>`;
+                    //}
                 } else if (field.key === 'maNB') {
                     if (canEditMaNB()) {
                         td.innerHTML = `<input class="form-control form-control-sm js-manb" data-id="${r.ID}" value="${r.VCHR_MaHangNoiBo || ''}" />`;
-                    } else {
-                        td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
                     }
+                    //else {
+                    //    td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
+                    //}
                 } else if (field.key === 'actions') {
                     // Save button should always be present. Approve/Reject only for approvers.
                     const actions = [

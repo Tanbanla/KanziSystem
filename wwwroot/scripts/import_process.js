@@ -75,10 +75,10 @@ function goToPage(page) {
 // --- 4. Hàm Render Bảng  ---
 function renderUserTable(data) {
     const tbody = document.getElementById("show_kho");
-    console.log(data);
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(vd => {
-        const btn = `<td><button class=" btn btn-outline-success" onclick="_modal11('${vd.maNguyenLieu}','${vd.kho}','${vd.hientai}','${vd.material_Name}','${vd.group_Code}')"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
+        const btn = `<td class="text-center"><button class=" btn btn-outline-danger" onclick="_log_material('${vd.maNguyenLieu}')"><i class="ion ion-ios-eye-outline"></i> Xem lịch sử</button></td>
+                     <td class="text-center"><button class=" btn btn-outline-success" onclick="_modal11('${vd.maNguyenLieu}','${vd.kho}','${vd.hientai}','${vd.material_Name}','${vd.group_Code}')"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
         return `<tr>
                     <td>${vd.maNguyenLieu}</td>
                     <td>${vd.material_Name}</td>
@@ -89,7 +89,7 @@ function renderUserTable(data) {
                     <td>${vd.kho}</td>
                     <td>${vd.nvchR_COST}</td>
                     <td>${vd.nvchr_note}</td>
-                    <td>${vd.dtM_UPDATE}</td>
+                    <td>${vd.dtM_UPDATE}</td>                  
                         ${btn}
                 </tr>`;
     }).join(''); // Nối tất cả các chuỗi thành một chuỗi HTML lớn
@@ -370,6 +370,71 @@ async function _WH() {
             for (var i = 0; i < data.length; i++) {
                 document.getElementById("den_kho").innerHTML += `<option>${data[i].chR_WAREHOUSE}</option>`
             }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+async function _log_material(malinhkien) {
+
+    document.getElementById("modal-17").click();
+    const params = new URLSearchParams({ malinhkien: malinhkien });
+    fetch('/Master/_truyxuatlylich', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById("load_truyxuat").innerHTML = "";
+            const tableBody = document.getElementById("load_truyxuat");
+            let htmlContent = "";
+
+            data.forEach((item) => {
+                const isNhap = item.loai?.toLowerCase().includes("nhap");
+                const rowClass = isNhap ? "text-primary" : "text-danger";
+
+                // Xác định cột Số lượng (Nhập nằm cột 1, Xuất nằm cột 2)
+                const colSoLuong = isNhap
+                    ? `<td>${item.soluong}</td><td></td>`
+                    : `<td></td><td>${item.soluong}</td>`;
+
+                htmlContent += `
+                <tr class="${rowClass}">
+                    ${colSoLuong}
+                    <td>${item.maNguyenLieu}</td>
+                    <td>${item.hanhdong}</td>
+                    <td>${item.ngaynhaokho.split(' ')[0]}</td>
+                    <td>${item.thoigian}</td>
+                    <td>${item.nguoicapnhat}</td>
+                    <td>${item.kho}</td>
+                    <td>${item.khoi}</td>
+                    <td>${item.phong}</td>
+                    <td>${item.vitri}</td>
+                    <td>${item.tenNguyenlieu}</td>
+                    <td>${item.ncc}</td>
+                    <td>${item.donvi}</td>
+                    <td>${item.maNguoinhap}</td>
+                    <td>${item.gia}</td>
+                    <td>${item.soPO}</td>
+                    <td>${item.soluongPO}</td>
+                    <td>${item.donviPO}</td>
+                    <td>${item.soluongconlai}</td>
+                    <td>${item.sotaikhoan}</td>
+                    <td>${item.soluongtruocthaydoi}</td>
+                    <td>${item.soluongsauthaydoi}</td>
+                </tr>`;
+            });
+
+            tableBody.innerHTML += htmlContent;
+         
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);

@@ -285,6 +285,7 @@
                 case 'WAIT_PICK_NCC': return 'Chờ chọn nhà cung cấp';
                 case 'PICKED': return 'Đã chọn nhà cung cấp';
                 case 'WAIT_CONFIRM_NAME': return 'Chờ xác nhận tên';
+                case 'CONFIRMED': return 'Chờ phê duyệt';
                 case 'WAIT_NCC': return 'Chờ báo giá nhà cung cấp';
                 default: return '';
             }
@@ -661,6 +662,7 @@
                 PageSize: supplierState.pageSize,
             };
             try {
+                showLoading('Loading...');
                 const res = await fetch('/Quote/ExportFileExcelQuotationResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -717,6 +719,7 @@
                 const formData = new FormData();
                 formData.append('file', file);
                 // Gửi request
+                try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
                 fetch('/Quote/ImportQuotianExcel', {
                     method: 'POST',
                     body: formData
@@ -752,6 +755,7 @@
                         showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
                     })
                     .finally(() => {
+                        try { hideLoading(); } catch { }
                         document.body.removeChild(fileInput);
                     });
             });

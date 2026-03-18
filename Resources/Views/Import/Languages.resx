@@ -501,4 +501,25 @@
   <data name="Pheduyetdon" xml:space="preserve">
     <value>Phê duyệt đơn</value>
   </data>
+  <data name="Xuatkho" xml:space="preserve">
+    <value>Xuất kho</value>
+  </data>
+  <data name="Ngaymongmuonnhan" xml:space="preserve">
+    <value>Ngày mong muốn nhận</value>
+  </data>
+  <data name="tongtien" xml:space="preserve">
+    <value>Tổng tiền</value>
+  </data>
+  <data name="tongtienthucte" xml:space="preserve">
+    <value>Tổng tiền thực tế</value>
+  </data>
+  <data name="ngaytao" xml:space="preserve">
+    <value>Ngày tạo</value>
+  </data>
+  <data name="ngayupdate" xml:space="preserve">
+    <value>Ngày Update</value>
+  </data>
+  <data name="nguoiupdate" xml:space="preserve">
+    <value>Người update</value>
+  </data>
 </root>

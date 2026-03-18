@@ -2,12 +2,12 @@
 @{
     ViewData["Title"] = "Quản lý nhận hàng";
 }
-<div class="card"> 
+<div class="card">
     <div class="form-group m-3">
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <td colspan="2"><button type="button" class="btn btn-danger" style="padding: .2rem .3rem;" onclick="_thongbao()"><i class="fa fa-save"></i> Lưu</button></td>
+                    <td colspan="2"></td>
                     <td><input type="text" class="form-control" placeholder="PO..." onkeyup="filterTable(0)"></td>
                     <td><input type="text" class="form-control" placeholder="RQ..." onkeyup="filterTable(1)"></td>
                     <td><input type="text" class="form-control" placeholder="Phòng..." onkeyup="filterTable(2)"></td>
@@ -27,7 +27,7 @@
                         </select>
                     </td>
                     <td></td>
-                    <td >
+                    <td>
                         <button type="button" class="btn btn-success"><i class="fa fa-search"></i> Tìm kiếm</button>
                     </td>
                     <td>
@@ -57,8 +57,7 @@
 
                 </tr>
                 <tr>
-                    <td class="text-center"><button class="btn btn-sm btn-info" style="padding: .2rem .3rem;" onclick="_giaohang()"><i class="ion ion-ios-cart"></i> Giao hàng</button></td>
-                    <td class="text-center"><button class="btn btn-sm btn-danger" style="padding: .2rem .3rem;" id="modal-16"><i class="ion ion-ios-cog-outline"></i> Cài đặt</button></td>
+                    <td class="text-center"><button class="btn btn-sm btn-info" style="padding: .2rem .3rem;" id="modal-18"><i class="ion ion-ios-cart"></i> Giao hàng</button></td>
                 </tr>
             </thead>
             <tbody>
@@ -82,7 +81,6 @@
                     <td><span class="badge bg-warning text-white">Chờ giao hàng</span></td>
                     <td></td>
                     <td class="text-center"><input type="checkbox" /></td>
-                    <td class="text-center"><input type="checkbox" /></td>                
                 </tr>
                 @*  <tr id="details-1" class="collapse-row" style="display: none; background-color: #f8f9fa;">
                     <td colspan="20">
@@ -177,7 +175,6 @@
                     <td><span class="badge bg-success text-white">Đã giao hàng</span></td>
                     <td></td>
                     <td class="text-center"><input type="checkbox" /></td>
-                    <td class="text-center"><input type="checkbox" /></td>
                 </tr>
                 @*  <tr id="details-2" class="collapse-row" style="display: none; background-color: #f8f9fa;">
                     <td colspan="20">
@@ -210,7 +207,7 @@
         <br /><br />
     </div>
 </div>
-@await Html.PartialAsync("_modal_condition", "Approval")
+@await Html.PartialAsync("_modal", "Delivery")
 <script>
     function toggleRow(id) {
         var element = document.getElementById(id);

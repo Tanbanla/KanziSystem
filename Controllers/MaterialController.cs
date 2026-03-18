@@ -64,6 +64,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(role.Message);
             }
+            if (role.Data == null || (role.Data !="UserPUR" && role.Data != "UserShip"&& role.Data != "UserAcc"))
+            {
+                return BadRequest("Không có quyền truy cập vào trang này.");
+            }
             ViewBag.Role = role.Data;
             var vitris = await LoadNhomViTriDataAsync();
             var vm = new MaterialVM
@@ -82,7 +86,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
         {
-            var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, req.pageIndex, req.pageSize);
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role.Data, req.pageIndex, req.pageSize);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -390,8 +395,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                var roleAsync = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+                var role = roleAsync.Success ? roleAsync.Data : string.Empty;
 
-                var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, req.pageIndex, req.pageSize);
+                var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role, req.pageIndex, req.pageSize);
                 if (!result.Success)
                 {
                     return BadRequest(result.Message);
@@ -416,6 +423,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không tìm thấy worksheet trong template");
                 }
 
+                // Determine which columns to show based on role
+                var showMaNB = (role == "UserAcc" || role == "UserPUR"); // VCHR_MaHangNoiBo (col 9)
+                var showTenHQ = (role == "UserShip" || role == "UserPUR"); // VCHR_TenHaiQuan (col 22)
+                var showUserShip = (role == "UserShip" || role == "UserPUR"); // VCHR_UserShip (col 23)
+                var showUserAcc = (role == "UserAcc" || role == "UserPUR"); // VCHR_UserAcc (col 24)
+
+                // Optionally hide entire columns in output if role lacks permission
+                try
+                {
+                    if (!showMaNB) ws.Column(9).Hide();
+                    if (!showTenHQ) ws.Column(22).Hide();
+                    if (!showUserShip) ws.Column(23).Hide();
+                    if (!showUserAcc) ws.Column(24).Hide();
+                }
+                catch { /* ignore if template layout differs */ }
+
                 int row = 4;
                 int idx = 1;
                 foreach (var rq in items)
@@ -428,7 +451,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 6).SetValue(rq.CHR_SectionName ?? "");
                     ws.Cell(row, 7).SetValue(rq.CHR_Phanloai ?? "");
                     ws.Cell(row, 8).SetValue(rq.CHR_MaThietBi ?? "");
-                    ws.Cell(row, 9).SetValue(rq.VCHR_MaHangNoiBo ?? "");
+                    ws.Cell(row, 9).SetValue(showMaNB ? (rq.VCHR_MaHangNoiBo ?? "") : "");
                     ws.Cell(row, 10).SetValue(rq.CHR_MaHangNCC ?? "");
                     ws.Cell(row, 11).SetValue(rq.VCHR_TenRecomment ?? "");
                     ws.Cell(row, 12).SetValue(rq.CHR_NameEN ?? "");
@@ -441,9 +464,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 19).SetValue(rq.NVCHR_KichThuoc ?? "");
                     ws.Cell(row, 20).SetValue(rq.NVCHR_DongMay ?? "");
                     ws.Cell(row, 21).SetValue(rq.NVCHR_TinhNang ?? "");
-                    ws.Cell(row, 22).SetValue(rq.VCHR_TenHaiQuan ?? "");
-                    ws.Cell(row, 23).SetValue(rq.VCHR_UserShip ?? "");
-                    ws.Cell(row, 24).SetValue(rq.VCHR_UserAcc ?? "");
+                    ws.Cell(row, 22).SetValue(showTenHQ ? (rq.VCHR_TenHaiQuan ?? "") : "");
+                    ws.Cell(row, 23).SetValue(showUserShip ? (rq.VCHR_UserShip ?? "") : "");
+                    ws.Cell(row, 24).SetValue(showUserAcc ? (rq.VCHR_UserAcc ?? "") : "");
                     row++;
                     idx++;
                 }

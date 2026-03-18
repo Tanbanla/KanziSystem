@@ -1,0 +1,121 @@
+﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
+    ViewData["Title"] = "Quản lý nhận hàng";
+}
+<div class="card">
+    <div class="form-group m-3">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                 
+                    <td><input type="text" class="form-control" placeholder="PO..." onkeyup="filterTable(0)"></td>
+                    <td><input type="text" class="form-control" placeholder="NCC..." onkeyup="filterTable(1)"></td>
+                    <td><input type="text" class="form-control" placeholder="Phòng..." onkeyup="filterTable(2)"></td>
+                    <td><input type="text" class="form-control" placeholder="NCC..." onkeyup="filterTable(3)"></td>
+                    <td><input type="date" class="form-control"></td>
+                    <td><input type="date" class="form-control"></td>
+                    <td></td>
+                    <td>
+                        <select class="form-control">
+                            <option value=""> -- </option>
+                            <option value="Chờ giao hàng">Đã thông báo</option>
+                            <option value="Đã hoàn tất">Chưa thông báo</option>
+                        </select>
+                    </td>
+                    <td></td>
+                    <td>
+                        <button type="button" class="btn btn-success"><i class="fa fa-search"></i> Tìm kiếm</button>
+                    </td>
+                    <td colspan="3">
+                        <button type="button" class="btn btn-info"><i class="ion ion-ios-refresh"></i> Refresh</button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-success"><i class="fa fa-file-import "></i> Import dữ liệu</button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-info"><i class="fa fa-file-export "></i> Export dữ liệu</button>
+                    </td>
+                </tr>          
+            </thead>
+            <tbody>
+                <tr class="bg-primary text-white">
+                    <td>No</td>
+                    <td>Số PO</td>
+                    <th>Nhà cung cấp</th>
+                    <th>Số yêu cầu hàng hóa</th>
+                    <th>Phòng yêu cầu</th>
+                    <th>Người yêu cầu</th>                 
+                    <th>Phòng đảm nhiệm nhận hàng</th>
+                    <td>Mã hàng</td>
+                    <td>Tên hàng</td>
+                    <td>Số lượng hàng theo PO</td>
+                    <td>Đơn vị đóng gói </td>
+                  
+                    <td>Ngày mong muốn nhận hàng </td>
+                    <td>Ngày dự định giao hàng </td>                
+         
+                    <td>Tình trạng</td>
+                    <td>Ghi chú</td>
+                </tr>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>PO-2024-001</td>
+                    <td>Công ty TNHH Thép Việt</td>
+                    <td>PR-0852</td>
+                    <td>Kỹ thuật</td>
+                    <td>Nguyễn Văn A</td>
+                    <td>Kho Thành Phẩm</td>
+                    <td>STL-001</td>
+                    <td>Thép tấm 5mm</td>
+                    <td>5</td>
+                    <td>Tấn</td>
+                
+                    <td>20/03/2024</td>
+                    <td>22/03/2024</td>
+              
+                  
+                    <td>Đã thông báo</td>
+                    <td>Giao gấp buổi sáng</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>PO-2024-002</td>
+                    <td>VPP Hồng Hà</td>
+                    <td>PR-0853</td>
+                    <td>Hành chính</td>
+                    <td>Trần Thị B</td>
+                    <td>Lễ tân</td>
+                    <td>PAP-A4</td>
+                    <td>Giấy A4 Double A</td>
+                    <td>20</td>
+                    <td>Thùng</td>
+                
+                    <td>15/03/2024</td>
+                    <td>15/03/2024</td>
+                  
+                    <td>Chưa thông báo</td>
+                    <td></td>
+                </tr>
+            </tbody>
+           
+        </table>
+        <br /><br />
+    </div>
+</div>
+<script>
+    function toggleRow(id) {
+        var element = document.getElementById(id);
+        if (element.style.display === "none") {
+            element.style.display = "table-row";
+        } else {
+            element.style.display = "none";
+        }
+    }
+    function _giaohang(){
+       alert("Giao hàng thành công !");
+    }
+    function _thongbao(){
+        alert("Đã thông báo đơn hàng đến phòng ban!");
+    }
+</script>

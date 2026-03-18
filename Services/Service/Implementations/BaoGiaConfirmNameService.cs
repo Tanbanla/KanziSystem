@@ -18,12 +18,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _mapper = mapper;
         }
         // search thông tin xác nhận tên hàng
-        public async Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role,int pageIndex, int pageSize)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.SearchAsync(TenHang, SoDon, TrangThai, section, pageIndex, pageSize);
+                result.Data = await _repo.SearchAsync(TenHang, SoDon, TrangThai, section, role, pageIndex, pageSize);
                 result.Success = true;
             }
             catch (Exception ex)

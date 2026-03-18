@@ -4,6 +4,9 @@
     var listSteps = Model.baoGiaSteps;
     var listSections = Model.NhomViTris;
 }
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+</head>
 <div class="container-fluid mt-3">
     <h3>@ViewData["Title"]</h3>
 
@@ -17,11 +20,11 @@
                     <div class="row g-2">
                         <div class="col-12">
                             <label class="form-label">@Localizer["SectionName"]</label>
-                            <select id="searchSection" class="form-control form-control-sm">
+                            <select id="searchSection" name="searchSection" class="form-select searchSection searchable-select">
                                 <option value="">@Localizer["All"]</option>
                                 @foreach (var item in listSections)
                                 {
-                                    <option value="@item.Mahangmuctheovitri">@item.Tenhangmuctheovitri</option>
+                                     <option value="@item.Mahangmuctheovitri">@item.Mahangmuctheovitri - @item.Tenhangmuctheovitri</option>
                                 }
                             </select>
                         </div>
@@ -52,6 +55,9 @@
                                 </button>
                                 <button id="btnClear" class="btn btn-outline-secondary">
                                     <i class="fas fa-broom me-1"></i> @Localizer["ClearSearch"]
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm" id="ImportExcelBtn">
+                                    <i class="fas fa-file-excel"></i> @Localizer["ImportExcel"]
                                 </button>
                             </div>
                         </div>
@@ -88,11 +94,11 @@
 
                         <div class="mb-3">
                             <label class="form-label">@Localizer["Section"] <span class="text-danger">*</span></label>
-                            <select id="modalSectionCode" class="form-control form-control-sm" required>
-                                <option value="">@Localizer["SelectSection"]</option>
-                                @foreach (var s in listSections)
+                            <select id="modalSectionCode" name="modalSectionCode" class="form-select modalSectionCode searchable-select">
+                                <option value="">@Localizer["All"]</option>
+                                @foreach (var item in listSections)
                                 {
-                                    <option value="@s.Mahangmuctheovitri">@s.Tenhangmuctheovitri</option>
+                                     <option value="@item.Mahangmuctheovitri">@item.Mahangmuctheovitri - @item.Tenhangmuctheovitri</option>
                                 }
                             </select>
                             <div class="invalid-feedback">@Localizer["ValidateSelectSection"]</div>

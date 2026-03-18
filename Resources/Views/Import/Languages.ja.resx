@@ -331,7 +331,7 @@
     <value>申告状況</value>
   </data>
   <data name="tongdon" xml:space="preserve">
-    <value>合計注文数</value>
+    <value>合計費用</value>
   </data>
   <data name="Truycap" xml:space="preserve">
     <value>最終アクセス日</value>
@@ -500,5 +500,26 @@
   </data>
   <data name="Pheduyetdon" xml:space="preserve">
     <value>申請承認</value>
+  </data>
+  <data name="Xuatkho" xml:space="preserve">
+    <value>出庫</value>
+  </data>
+  <data name="Ngaymongmuonnhan" xml:space="preserve">
+    <value>希望配送日</value>
+  </data>
+  <data name="tongtien" xml:space="preserve">
+    <value>合計注文数</value>
+  </data>
+  <data name="tongtienthucte" xml:space="preserve">
+    <value>実計金額</value>
+  </data>
+  <data name="ngaytao" xml:space="preserve">
+    <value>作成日</value>
+  </data>
+  <data name="ngayupdate" xml:space="preserve">
+    <value>更新日</value>
+  </data>
+  <data name="nguoiupdate" xml:space="preserve">
+    <value>氏名</value>
   </data>
 </root>

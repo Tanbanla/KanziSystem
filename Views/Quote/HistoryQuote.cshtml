@@ -25,6 +25,13 @@
 </head>
 
 <div class="container-fluid" id="quote-history">
+        <!-- Global loading overlay -->
+    <div id="globalLoading" aria-hidden="true">
+        <div class="loader-box">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="loader-msg">Đang xử lý...</div>
+        </div>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
@@ -91,10 +98,10 @@
                     <label for="statusFilter" class="form-label small text-uppercase fw-semibold">@Localizer["OrderStatus"]</label>
                     <select id="statusFilter" name="statusFilter" class="form-control statusFilter searchable-select">
                         <option value="" selected>@Localizer["All"]</option>
-                        @foreach (var s in localizedStatus)
-                        {
-                            <option value="@s.VCHR_CodeStatus">@s.DisplayName</option>
-                        }
+                        <option value="APPROVAL">@Localizer["Approving"]</option>
+                        <option value="WAIT">@Localizer["Waiting"]</option>
+                        <option value="RETURN">@Localizer["RETURN"]</option>
+                        <option value="DONE">@Localizer["DONE"]</option>
                     </select>
                 </div>
                 <div class="col-md-3">

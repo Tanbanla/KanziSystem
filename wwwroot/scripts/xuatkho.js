@@ -1,20 +1,13 @@
-﻿// --- 1. Quản lý Trạng thái Phân trang ---
-const userPagingState = {
-    fullData: [],
-    currentPage: 1,
-    itemsPerPage: 18, // Số mục muốn hiển thị trên mỗi trang
-    totalPages: 0
-};
-
-// --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
-function _load_xuatkho() {
-
-    fetch('/Import/chitiet_xuatkho', {
+﻿function _load_xuatkho() {
+    var mayeucau = document.getElementById("mayeucau").value;
+    var nguoitao = document.getElementById("nguoitao").value;
+    const params = new URLSearchParams({ mayeucau: mayeucau, nguoitao: nguoitao });
+    fetch('/Import/_load_xuatkhohang', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        /*body: params.toString()*/
+        body: params.toString()
     })
         .then(response => {
             if (!response.ok) {
@@ -23,119 +16,164 @@ function _load_xuatkho() {
             return response.json();
         })
         .then(data => {
-            console.log(data);
-            userPagingState.fullData = data;
-            // Tính tổng số trang
-            userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
-
-            // Khởi tạo hiển thị trang đầu tiên
-            goToPage(1);
+            const tbody = document.getElementById("list_xuatkho");
+            // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
+            const htmlContent = data.map(user => {
+                let loaichiphi = "";
+                if (user.declaration == "AUXILIARY")
+                {
+                    loaichiphi = "Chi phí biến đổi theo sản lượng";
+                }
+                if (user.declaration == "EUQIMENT") {
+                    loaichiphi = "Chi phí cố định";
+                }
+                if (user.declaration == "FIXED") {
+                    loaichiphi = "Tài sản cố định";
+                }
+                if (user.declaration == "COMMON") {
+                    loaichiphi = "Chi phí chung";
+                }
+                if (user.declaration == "OTHER") {
+                    loaichiphi = "OTHER";
+                }
+                let hangdanhmuc = "";
+                if (user.kind == "OUT") {
+                    hangdanhmuc = "Hàng ngoài danh mục";
+                }
+                if (user.kind == "IN") {
+                    hangdanhmuc = "Hàng trong danh mục";
+                }
+                let tinhtrang = "";
+                if (user.status == "WAITCONFIRM") {
+                    tinhtrang = "Đang chờ xác nhận";
+                }
+                if (user.status == "DONE") {
+                    tinhtrang = "Đã hoàn thành";
+                } 
+                if (user.status == "ACCEPT") {
+                    tinhtrang = "Chờ xác nhận";
+                } 
+                return `<tr class="main-row">
+                <td class="text-primary text-center" onclick="_modal_chitietxuatkho('${user.code_Request}')">chi tiết</td>
+                <td class="text-primary" style="cursor:pointer" onclick="toggleRow('${user.code_Request}')">${user.code_Request}</td>
+                <td>${user.cost_Center}</td>
+                <td>${user.create_Date}</td>
+                <td id="lcp_${user.code_Request}">${loaichiphi}</td>
+                <td>${user.dealine.split(' ')[0]}</td>
+                <td>${user.total_exchange}</td>            
+                <td>${user.total}</td>
+                <td id="hdm_${user.code_Request}">${hangdanhmuc}</td>
+                <td>${user.type}</td>
+                <td>${tinhtrang}</td>
+                <td>${user.create_Date}</td>
+                <td>${user.user_Create}</td>
+                <td>${user.last_Update}</td>
+                <td>${user.user_Update}</td>
+                <td>${user.group_Code}</td>
+                </tr>
+                <tr id="dt_${user.code_Request}" class="collapse-row" style="display: none; background-color: #f8f9fa;">
+                 <td colspan="18">
+                        <div class="p-3">
+                            <div class="row">
+                               <table class="table table-bordered">
+                                        <tr class="bg-light">
+                                        <td>No</td>
+                                        <td>Mã hàng</td>
+                                        <td>Tên hàng (VN)</td>                                
+                                        <td>Hãng</td>
+                                        <td>Mã sản phẩm </td>
+                                        <td>Số tài khoản</td>
+                                        <td>Tên tài khoản</td>
+                                        <td>Số lượng</td>
+                                        <td>Số lượng thực tế</td>
+                                        <td>Đơn vị</td>
+                                        <td>Đơn giá</td>
+                                        <td>Đơn giá thực tế</td>
+                                        <td>VAT(%)</td>
+                                        <td>Tổng chi phí</td>
+                                        <td>Tổng chi phí thực tế</td>
+                                        <td>Số PO</td>
+                                        <td></td>
+                                    </tr>   
+                                    <tbody id="_bd_${user.code_Request}"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join(''); // Thêm .join('') để biến mảng thành một chuỗi HTML lớn 
+            tbody.innerHTML = htmlContent;
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
 
-// --- 3. Hàm Xử lý Chuyển Trang ---
-function goToPage(page) {
-    if (page < 1 || page > userPagingState.totalPages) return;
-
-    userPagingState.currentPage = page;
-
-    // Tính toán chỉ số
-    const startIndex = (page - 1) * userPagingState.itemsPerPage;
-    const endIndex = page * userPagingState.itemsPerPage;
-
-    // Lấy dữ liệu trang hiện tại
-    const pageData = userPagingState.fullData.slice(startIndex, endIndex);
-
-    // Render giao diện
-    renderUserTable(pageData);
-    renderPaginationControls();
-}
-
-// --- 4. Hàm Render Bảng  ---
-function renderUserTable(data) {
-    const tbody = document.getElementById("list_xuatkho");
-    // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
-    const htmlContent = data.map(user => {
-        return `<tr>
-                <td class="text-center"><input type="checkbox" /></td>
-             
-                <td>${user.code_Request}</td>
-                <td>${user.material_Code}</td>
-                <td>${user.material_Name}</td>
-                <td>${user.amount}</td>
-                <td>${user.unit}</td>
-                <td>${user.price}</td>            
-                <td>${user.chR_ADID_NGUOIYEUCAU}</td>
-                <td>${user.chR_ADID_XUATKHO}</td>        
-                <td><button class="btn btn-danger" onclick="_load_tonkhotheonhamay('${user.material_Code}','${user.amount}','${user.id_RequestDetail}','${user.unit}')"><i class="fa ion-ios-cart"></i>&nbsp; XK</button></td>
-            </tr>`;
-    }).join(''); // Thêm .join('') để biến mảng thành một chuỗi HTML lớn 
-    tbody.innerHTML = htmlContent;
-}
-
-// --- 5. Hàm Render Nút Phân trang ---
-function renderPaginationControls() {
-
-    const container = document.getElementById("pagination-controls");
-    const { currentPage, totalPages } = userPagingState;
-    const maxButtonsToShow = 5; // Số nút tối đa (không tính Previous/Next)
-    let controlsHTML = '';
-
-    if (totalPages <= 1) {
-        container.innerHTML = '';
+function toggleRow(id) {
+    // id is expected to be the raw code_Request (without "dt_" prefix)
+    var element = document.getElementById("dt_" + id);
+    // defensive fallback in case callers pass full id
+    if (!element) {
+        element = document.getElementById(id);
+    }
+    if (!element) {
+        console.warn('toggleRow: element not found for', id);
         return;
     }
-
-    // Nút Previous
-    controlsHTML += ` <li class="page-item"><a class="page-link ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">« </a></li>`;
-
-    // Tính toán phạm vi hiển thị
-    let startPage = Math.max(1, currentPage - Math.floor((maxButtonsToShow - 1) / 2));
-    let endPage = Math.min(totalPages, startPage + maxButtonsToShow - 1);
-
-    // Điều chỉnh nếu phạm vi bị thu hẹp ở cuối
-    if (endPage - startPage + 1 < maxButtonsToShow) {
-        startPage = Math.max(1, endPage - maxButtonsToShow + 1);
+    if (element.style.display === "none") {
+        element.style.display = "table-row";
+    } else {
+        element.style.display = "none";
     }
-
-    // 1. Nút Trang 1
-    if (startPage > 1) {
-        controlsHTML += renderButton(1, currentPage);
-        // Thêm dấu ... nếu trang 1 không sát với nút bắt đầu
-        if (startPage > 2) {
-            controlsHTML += `<span class="px-2">...</span>`;
-        }
-    }
-
-    // 2. Các nút chính giữa
-    for (let i = startPage; i <= endPage; i++) {
-        controlsHTML += renderButton(i, currentPage);
-    }
-
-    // 3. Nút Trang Cuối
-    if (endPage < totalPages) {
-        // Thêm dấu ... nếu nút cuối không sát với trang cuối
-        if (endPage < totalPages - 1) {
-            controlsHTML += `<span class="px-2">...</span>`;
-        }
-        controlsHTML += renderButton(totalPages, currentPage);
-    }
-
-    // Nút Next
-
-    controlsHTML += ` <li class="page-item"><a class="page-link  ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})"> »</a></li>`;
-    container.innerHTML = controlsHTML;
+    _load_body_detail(id);
 }
+function _load_body_detail(code_request) {
 
-// Hàm trợ giúp để tạo nút
-function renderButton(pageNumber, currentPage) {
-    const activeClass = pageNumber === currentPage ? 'btn-primary text-white' : '';
-    return ` <li class="page-item"><a class="page-link  ${activeClass}"  onclick="goToPage(${pageNumber})">${pageNumber}</a></li>`;
+    const params = new URLSearchParams();
+    params.append('code_request', code_request);
+
+    fetch('/Import/_load_body_detail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const container = document.getElementById("_bd_" + code_request);
+            console.log(data);
+            container.innerHTML = "";
+            data.forEach((item,i) => {
+                    container.innerHTML += `<tr>
+                    <td>${i + 1}</td>
+                    <td>${item.material_Code}</td>
+                    <td>${item.material_Name}</td>                 
+                    <td>${item.brand}</td>
+                    <td>${item.good_Code}</td>
+                    <td>${item.account_Code}</td>
+                    <td>${item.account_Name}</td>
+                    <td>${item.amount}</td>
+                    <td>${item.amount}</td>
+                    <td>${item.unit} (${item.unit_Note})</td>
+                    <td>${item.price} </td>
+                    <td>${item.price_Real} </td>
+                    <td>${item.vat} % </td>
+                    <td>${item.total_exchange}</td>
+                    <td>${item.total_exchange_real}</td>
+                    <td>${item.po}</td>
+                </tr>`;
+            })
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
-
 function _load_tonkhotheonhamay(mahang, sl, id_rq, unit) {
     document.getElementById("modal-10").click();
     const params = new URLSearchParams();
@@ -170,7 +208,6 @@ function _load_tonkhotheonhamay(mahang, sl, id_rq, unit) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-
 function _soluongtontainhamay(kho) {
     var mahang = document.getElementById("mahagg").innerHTML;
     const params = new URLSearchParams();
@@ -198,7 +235,6 @@ function _soluongtontainhamay(kho) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-
 function caculator() {
     document.getElementById("sl_xuat").setAttribute('max', parseFloat(document.getElementById("sl_ton").value));
     var currentVal = parseFloat(document.getElementById("sl_xuat").value);
@@ -211,12 +247,11 @@ function caculator() {
         document.getElementById("sl_xuat").value = canxuat; // Tự động đưa về giá trị Max (tồn kho)   
     }
     if (currentVal > tonKho) {
-        alert("Số lượng xuất vượt quá tồn kho : " + tonKho + "");
+        alert("Số lượng xuất vượt quá tồn kho : " + tonKho);
         document.getElementById("sl_xuat").value = tonKho;
     }
 
 }
-
 function _xuatkho() {
     var code_request = document.getElementById("madon").innerHTML;
     var adid_nx = document.getElementById("us").innerHTML;
@@ -256,4 +291,117 @@ function _xuatkho() {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+}
+function _modal_chitietxuatkho(code_request) {
+    document.getElementById("modal-19").click();
+    const params = new URLSearchParams();
+    params.append('code_request', code_request);
+
+    fetch('/Import/_load_modal_detail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            // Cập nhật thông tin Header Modal
+            const header = data.load[0];
+            document.getElementById("loaiphieu").innerHTML = document.getElementById("hdm_" + code_request).innerHTML;
+            document.getElementById("loaichiphi").innerHTML = document.getElementById("lcp_" + code_request).innerHTML;
+            document.getElementById("phongban").innerHTML = `${header.cost_Center}:${header.name}`;
+            document.getElementById("tenphong").innerHTML = header.name;
+            document.getElementById("bophan").innerHTML = header.cost_Center_Group;
+            document.getElementById("vitri").innerHTML = header.place;
+            document.getElementById("usd").innerHTML = header.total_exchange;
+            document.getElementById("tongdonhang").innerHTML = header.total;
+            document.getElementById("ngayyeucau").innerHTML = header.create_Date;
+            document.getElementById("thoihanmuonnhan").innerHTML = header.dealine.split(' ')[0];
+            document.getElementById("loaihang").innerHTML = header.typee;
+            document.getElementById("loaihinhtokhai").innerHTML = header.loaihinhtokhai;
+            document.getElementById("thucteusd").innerHTML = header.total_exchange_real || 0;
+            document.getElementById("thucte").innerHTML = header.total_Real || 0;
+            document.getElementById("madonn").innerHTML = header.code_Request;
+            document.getElementById("nguoitaoo").innerHTML = `${header.user_Create} - ${header.create_Date}`;
+            document.getElementById("ghichu").innerHTML = header.note || "-";
+
+            // 1. Tạo chuỗi HTML cho toàn bộ danh sách
+            const container = document.getElementById("_bd_hienchitiet");
+            let htmlContent = "";
+
+            data.list.forEach((item, i) => {
+                htmlContent += `<tr>
+                <td><input type="checkbox" class="form-control itemsmall" /></td>
+                <td>${i + 1}</td>
+                <td>${item.material_Code}</td>
+                <td>${item.material_Name}</td>                  
+                <td>${item.brand}</td>
+                <td>${item.good_Code}</td>
+                <td>${item.account_Code}</td>
+                <td>${item.account_Name}</td>
+                <td>
+                    <select id="khoSelect_${i}" class="form-control" style="background-color:lightyellow">
+                        <option value="">- chọn kho -</option>
+                    </select>
+                </td>
+                <td id="hienThiSoLuong_${i}" style="font-weight:bold; color:blue">0</td>
+                <td id="slpo_${i}">${item.amount}</td>                  
+                <td>${item.unit}</td>
+                <td>${item.price}</td>
+                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="slthucte_${i}" value="${item.amount}" onblur="_tinhthucte('${i}')" /></td>
+                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="dgthucte_${i}" value="${item.price}" onblur="_tinhthucte('${i}')" /></td>
+                <td>${item.vat} %</td>
+                <td>${item.total_exchange}</td>
+                <td style="background-color:#d0ffd8ab" id="ttthucte_${i}">${item.total_exchange_real}</td>
+                <td>${item.po}</td>
+            </tr>`;
+            });
+
+            // Gán HTML vào DOM một lần duy nhất
+            container.innerHTML = htmlContent;
+
+            // 2. Sau khi HTML đã có trong DOM, chạy vòng lặp để xử lý Select và Event
+            data.list.forEach((item, i) => {
+                const selectElement = document.getElementById(`khoSelect_${i}`);
+                const displayElement = document.getElementById(`hienThiSoLuong_${i}`);
+
+                if (item.slk && Array.isArray(item.slk)) {
+                    // Đổ dữ liệu vào select
+                    item.slk.forEach(kho => {
+                        const option = document.createElement('option');
+                        option.value = kho.tenkho;
+                        option.textContent = kho.tenkho;
+                        selectElement.appendChild(option);
+                    });
+
+                    // Gán sự kiện thay đổi
+                    selectElement.addEventListener('change', function () {
+                        const selectedKho = this.value;
+                        const khoData = item.slk.find(k => k.tenkho === selectedKho);
+                        displayElement.innerText = khoData ? khoData.soluong : "0";
+                    });
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Lỗi khi tải chi tiết:', error);
+        });
+}
+function _tinhthucte(id) {
+    var solgPo = parseFloat(document.getElementById("slpo_" + id).innerHTML);
+    var solgThucte = parseFloat(document.getElementById("slthucte_" + id).value);
+    var hienThiSoLuong = parseFloat(document.getElementById("hienThiSoLuong_" + id).innerHTML);
+    if (solgThucte > solgPo) {
+        alert("Số lượng thực tế quá số lượng trong đơn !");
+        document.getElementById("slthucte_" + id).value = solgPo;
+    }
+    if (solgThucte > hienThiSoLuong) {
+        alert("Số lượng thực tế nhiều hơn số lượng trong kho !");
+        document.getElementById("slthucte_" + id).value = "0";
+    }
+    document.getElementById("ttthucte_" + id).innerHTML = solgThucte * parseFloat(document.getElementById("dgthucte_" + id).value);
 }

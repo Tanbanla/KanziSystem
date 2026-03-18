@@ -1,66 +1,26 @@
 ﻿@{
     ViewData["Title"] = "Export";
 }
-<style>
-    .card .card-header .form-control {
-        height: 42px;
-        font-size: 13px;
-        border-radius: 2px;
-    }
-</style>
-<div class="container mt-5">
-    <h5>Danh sách nhân sự</h5>
-    <form>
-        <div id="dynamic-input-container">
-            <div class="row mb-3 input-row">
-                <div class="col-md-5">
-                    <input type="text" class="form-control" placeholder="Họ tên" name="name[]">
-                </div>
-                <div class="col-md-5">
-                    <input type="email" class="form-control" placeholder="Email" name="email[]">
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger btn-remove" style="display: none;">Xóa</button>
-                </div>
-            </div>
-        </div>
-
-        <button type="button" class="btn btn-success" id="add-row">Thêm dòng mới</button>
-        <button type="submit" class="btn btn-primary">Lưu dữ liệu</button>
-    </form>
+<div class="card">
+    <div class="card-header">Xuất dữ liệu Excel</div>
+    <div class="card-body">
+        <p>Nhấn vào nút dưới đây để tải danh sách hiện tại.</p>
+        <a asp-controller="Export" asp-action="Export" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Tải xuống Excel (.xlsx)
+        </a>
+    </div>
 </div>
-<script>
-        document.getElementById('add-row').addEventListener('click', function() {
-        // 1. Lấy container và hàng mẫu đầu tiên
-        const container = document.getElementById('dynamic-input-container');
-        const rows = container.getElementsByClassName('input-row');
-        const newRow = rows[0].cloneNode(true);
-
-        // 2. Xóa dữ liệu trong các ô input mới
-        const inputs = newRow.querySelectorAll('input');
-        inputs.forEach(input => input.value = '');
-
-        // 3. Hiển thị nút "Xóa" cho hàng mới
-        const removeBtn = newRow.querySelector('.btn-remove');
-        removeBtn.style.display = 'block';
-
-        // 4. Thêm sự kiện xóa cho nút mới
-        removeBtn.addEventListener('click', function() {
-            newRow.remove();
-        });
-
-        // 5. Thêm hàng mới vào container
-        container.appendChild(newRow);
-    });
-
-    // Xử lý nút xóa cho các hàng được thêm (Event Delegation)
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('btn-remove')) {
-            const row = e.target.closest('.input-row');
-            // Không xóa nếu chỉ còn 1 hàng (tùy chọn)
-            if (document.getElementsByClassName('input-row').length > 1) {
-                row.remove();
-            }
-        }
-    });
-</script>
+<div class="card mt-4">
+    <div class="card-header">Nhập dữ liệu từ Excel</div>
+    <div class="card-body">
+        <form asp-controller="Export" asp-action="Import" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="fileExcel" class="form-label">Chọn file Excel mẫu (.xlsx)</label>
+                <input class="form-control" type="file" id="fileExcel" name="file" accept=".xlsx, .xls">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Upload và Xử lý
+            </button>
+        </form>
+    </div>
+</div>

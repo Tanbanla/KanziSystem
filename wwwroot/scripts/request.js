@@ -1,6 +1,6 @@
 ﻿function _insert_request() {
     // truyền list
-
+   
     let dataList = [];
     // Chọn tất cả các dòng có class 'input-row'
     const rows = document.querySelectorAll('.input-row');
@@ -35,7 +35,7 @@
     var Exchange_rate = document.getElementById("rate").value;
     var Currency = "USD";
     var Total = document.getElementById("thanhtien").value;
-    var Kind = "OUT";
+    var Kind = "IN";
     var Type = document.getElementById("typee").value;
     var Status = "WAITCONFIRM";
     var Place = name_dept.split(':')[1];
@@ -63,22 +63,27 @@
     var mail_pd = document.getElementById("mail_pheduyet").value;
     var mail_dy = document.getElementById("mail_dongy").value;
     var mail_xk = document.getElementById("mail_xuatkho").value;
+    if (Place == "" || name_dept == "" || Dealine == "") {
+        alert("Vui lòng điền đủ thông tin vào đơn !");
+    }
+    else {
+        $.ajax({
+            url: '/Request/_Insert_request',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
+                Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
+                adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, adid_dy: adid_dy, ten_dy: ten_dy,
+                mail_dy: mail_dy, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk
+            },
+            success: function (response) {
+                send_mail(mail_dt, Urgent);
 
-    $.ajax({
-        url: '/Request/_Insert_request',
-        type: 'POST',
-        dataType: 'JSON',
-        data: {
-            Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
-            Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
-            adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, adid_dy: adid_dy, ten_dy: ten_dy,
-            mail_dy: mail_dy, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk
-        },
-        success: function (response) {
-            send_mail(mail_dt, Urgent);
-         
-        }
-    })
+            }
+        })
+    }
+  
 }
 async function _load_rate() {
     fetch('/Request/_get_rate', {

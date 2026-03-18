@@ -43,6 +43,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
+        public IActionResult PO_Info()
+        {
+            return View();
+        }
+        public IActionResult Giaohang()
+        {
+            return View();
+        }
         private void UpdateTinhTrangPO(string PO)
         {
             Models.SQL_Connect_DB20 db = new Models.SQL_Connect_DB20();

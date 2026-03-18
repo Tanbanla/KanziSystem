@@ -611,6 +611,12 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.VCHR_UserShip)
                 .HasMaxLength(20)
                 .IsUnicode(false);
+            entity.Property(e => e.CHR_StatusShip)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CHR_StatusACC)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<BaoGia_Detail_of_Quotation>(entity =>

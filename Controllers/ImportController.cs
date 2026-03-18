@@ -145,9 +145,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
         }
-        public JsonResult chitiet_xuatkho()
+        public JsonResult chitiet_xuatkho(string mayeucau, string nguoitao)
         {
-            List<CHITIET_XUATKHO> ctxk = REQUEST_PROCESS.ct_xk();
+            List<CHITIET_XUATKHO> ctxk = REQUEST_PROCESS.ct_xk( mayeucau, nguoitao);
             return Json(ctxk);
         }
         public JsonResult _tonkhotheonhamay(string mahang)
@@ -173,6 +173,60 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, manguyenlieu, soluong, donvi, kho, nguoinhan, khoi, phong, vitri, request);
             return Json(check);
+        }
+        public JsonResult _load_xuatkhohang(string mayeucau, string nguoitao)
+        {
+            var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(mayeucau, nguoitao);
+            return Json(list);
+        }
+        public JsonResult _load_body_detail(string code_request)
+        {
+            var list = Models.REQUEST_PROCESS._load_body_detail(code_request);
+            return Json(list);
+        }
+        public JsonResult _load_modal_detail(string code_request)
+        {
+            var list = Models.REQUEST_PROCESS._load_body_detail(code_request);
+            var load = Models.REQUEST_PROCESS._load_request(code_request);
+            return Json(new
+            {
+                list = list,
+                load = load
+            });
+        }
+        public byte[] ExportToExcel_FileEx<T>(List<T> data, string sheetName)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add(sheetName);
+
+                // Load dữ liệu từ List vào sheet, bắt đầu từ ô A1, tự động tạo Header
+                worksheet.Cells["A1"].LoadFromCollection(data, false);
+
+                // Format Header (Bôi đậm)
+                using (var range = worksheet.Cells[1, 1, 1, worksheet.Dimension.End.Column])
+                {
+                    range.Style.Font.Bold = true;
+                }
+                // Tự động căn chỉnh độ rộng cột
+                worksheet.Cells.AutoFitColumns();
+                return package.GetAsByteArray();
+            }
+        }
+        [HttpGet("export")]
+        public IActionResult Export()
+        {
+            var data = new List<KHO_NHAPXUAT> {
+            new KHO_NHAPXUAT { /*Name = "Nguyen Van A", Age = 20, Email = "a@gmail.com"*/ }
+        };
+            var fileContents = ExportToExcel_FileEx(data, "Students");
+
+            return File(
+                fileContents,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "StudentList.xlsx"
+            );
         }
     }
 }

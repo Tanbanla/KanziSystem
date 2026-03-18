@@ -1,4 +1,5 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@using PRJ_WAREHOUSE_BIVN.Language
 <!DOCTYPE html>
 <html lang="@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
@@ -172,8 +173,11 @@
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Import" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cloud-upload"></i> <span>@Localizer["MenuWarehouse"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="fas fa-truck-pickup"></i> @Localizer["MenuWarehouseImportPO"]</a></li> @* Nhập hàng PO *@
-                                <li><a class="nav-link" href="~/Delivery/DeliverySection"><i class="fas fa-calendar-check"></i> @Localizer["MenuWarehouseConfirmImport"]</a></li> @* Nhập hàng PO *@
+                              @*   <li><a class="nav-link" href="~/Delivery/PO_Info"><i class="ion ion-ios-information"></i> Thông tin PO</a></li> @* thông tin PO *@
+                             @*    <li><a class="nav-link" href="~/Approval/Approval"><i class="ion ion-social-dropbox"></i> Nhận hàng PO</a></li> @* Nhập hàng PO *@ 
+                             @*    <li><a class="nav-link" href="~/Delivery/Giaohang"><i class="ion ion-ios-cart"></i>Giao hàng PO</a></li> @* Nhập kho *@ 
+                              @*   <li><a class="nav-link" href="~/Delivery/DeliverySection"><i class="ion ion-ios-medkit"></i> @Localizer["MenuWarehouseConfirmImport"]</a></li> @* Nhập kho *@  
+                                <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="ion ion-ios-medkit"></i> @Languages.nhanhangtheoPO</a></li>  
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExportRequest"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Tainhap"><i class="fas fa-donate"></i> @Localizer["MenuWarehouseReimport"]</a></li>

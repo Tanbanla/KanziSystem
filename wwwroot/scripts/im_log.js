@@ -39,13 +39,25 @@ function _load_log() {
             return response.json();
         })
         .then(data => {
+            document.getElementById("list_log").innerHTML = "";
             console.log(data);
-            userPagingState.fullData = data;
-            // Tính tổng số trang
-            userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
-
-            // Khởi tạo hiển thị trang đầu tiên
-            goToPage(1);
+            data.forEach((item) => {
+                document.getElementById("list_log").innerHTML += `<tr>
+                    <td>${item.maNguyenLieu}</td>
+                    <td>${item.hanhdong}</td>
+                    <td>${item.soluong}</td>
+                    <td>${item.soluongPO}</td>
+                    <td>${item.soPO}</td>
+                    <td>${item.donviPO}</td>
+                    <td>${item.loai}</td>
+                    <td>${item.ngaynhaokho}</td>
+                    <td>${item.nguoicapnhat}</td>
+                    <td>${item.kho}</td>
+                    <td>${item.khoi}</td>                 
+                    <td>${item.vitri}</td>
+                    <td>${item.phong}</td>
+                </tr>`;
+            });
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);

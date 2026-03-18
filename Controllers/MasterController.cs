@@ -576,7 +576,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Import dữ liệu nhà cung cấp từ file excel
         [HttpPost]
-        public async Task<IActionResult> ImportExcel([FromForm] IFormFile importRequest)
+        public async Task<IActionResult> ImportSupplierExcel([FromForm] IFormFile importRequest)
         {
             if (importRequest == null || importRequest.Length == 0)
                 return BadRequest("File không hợp lệ");
@@ -787,6 +787,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var edit = Models.MST_WAREHOUSE.edit_tainhap(id, soluong, donvi, giatien, kho);
             return Json(edit);
+        }
+        public JsonResult _truyxuatlylich(string malinhkien)
+        {
+            var log = Models.KHO_NHAPXUAT._truyxuat(malinhkien);
+            return Json(log);
         }
     }
 }

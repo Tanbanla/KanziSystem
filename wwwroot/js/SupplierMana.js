@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
         supplierUpdate: `/Master/UpdateSupplier`,
         supplierDelete: `/Master/DeleteSupplier`,
         supplierExport: '/Master/ExportExcel',
-        supplierImport: '/Master/ImportExcel',
+        supplierImport: '/Master/ImportSupplierExcel',
         // Supplier Category Items API (BaoGia_NCC_CategoryDTO)
         getSupplierDetail: (codeNcc) => `/Master/GetSupplierDetail?codeNcc=${encodeURIComponent(codeNcc)}`,
         addSupplierDetail: '/Master/AddSupplierDetail',

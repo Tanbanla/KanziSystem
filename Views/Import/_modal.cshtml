@@ -2,7 +2,20 @@
     .modal-dialog {
         max-width: 72%;
     }
-
+    .table-scroll-container {
+        max-height: 600px; /* Chiều cao tối đa của bảng */
+        overflow-y: auto; /* Tạo cuộn dọc */
+        overflow-x: auto; /* Tạo cuộn ngang nếu cột quá nhiều */
+        border: 1px solid #dee2e6;
+    }
+    /* Giữ tiêu đề (header) đứng yên khi cuộn */
+    .table-scroll-container table thead tr td {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 2;
+        box-shadow: inset 0 -1px 0 #dee2e6;
+    }
 </style>
 <form class="modal-part" id="modal-warehouse-part">
     <div class="row  m-1">
@@ -185,6 +198,188 @@
     </form>
 </div>
 
+<div class="modal-part" id="modal-tainhap">
+    <style>
+        .modal-header, .modal-body, .modal-footer {
+            padding: 0px;
+        }
+    </style>
+    <form id="form-chuyenkho" class="needs-validation" novalidate>
+        <div class="card">
+            <div class="card-header bg-light">
+                <strong>Sửa số lượng tái nhập : <span id="id_tn" hidden></span></strong>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 row align-items-center">
+                    <label class="col-sm-3 col-form-label"> Mã hàng :</label>
+                    <div class="col-sm-9">
+                        <span id="ma_tn" class="fs-5 text-primary"></span>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label"> Số lượng</label>
+                        <input type="text" id="soluong_tn" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label"> Đơn vị</label>
+                        <input type="text" id="donvi_tn" class="form-control" readonly />
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label"> Giá tiền</label>
+                        <input type="number" id="giatien_tn" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"> Kho</label>
+                        <input type="text" id="kho_tn" class="form-control" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-end">
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-outline-success" onclick="editt()">
+                    <i class="fas fa-pen"></i> Sửa
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<form class="modal-part" id="modal-truyxuat">
+    <div class="row  m-1">
+        <div class="form-group col-12">
+            <div class="table-scroll-container">
+                <table class="table table-bordered">
+                <tr>
+                    <td>Nhập</td>                
+                    <td>Xuất</td>                
+                    <td>Mã linh kiện</td>                
+                    <td>Hành động</td>                
+                    <td>Ngày nhập kho</td>          
+                    <td>Thời gian</td>
+                    <td>Người cấp phát</td>
+                    <td>Kho</td>
+                    <td>Khối</td>
+                    <td>Phòng</td>
+                    <td>Vị trí</td>
+                    <td>Tên nguyên liệu</td>
+                    <td>NCC</td>
+                    <td>Đơn vị</td>
+                    <td>Mã người nhập</td>
+                    <td>Giá</td>
+                    <td>Số PO</td>
+                    <td>Số lượng PO</td>
+                    <td>Đơn vị PO</td>
+                    <td>Số lượng còn lại</td>
+                    <td>Số tài khoản</td>
+                    <td>Số lượng trước thay đổi</td>
+                    <td>Số lượng sau thay đổi</td>
+                </tr>  
+                <tbody id="load_truyxuat"></tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<div class="modal-part" id="modal-hienchitiet">
+    <style>
+        .modal-header, .modal-body, .modal-footer {
+            padding: 0px;
+        }
+    </style>
+    <form id="form-chuyenkho" class="needs-validation" novalidate>
+        <div class="card form-group p-3">  
+            <table class="table table-bordered">
+                <tr>
+                    <td> Loại phiếu :</td>
+                    <th id="loaiphieu"></th>
+                    <td> Phòng ban :</td>
+                    <th id="phongban"></th>
+                    <td> Tên phòng :</td>
+                    <th id="tenphong"></th>
+                    <td> Bộ phận :</td>
+                    <th id="bophan"></th>
+                    <td> Vị trí(chuyền) :</td>
+                    <th id="vitri"></th>
+                 
+                </tr>
+                <tr>
+                    <td>Loại chi phí :</td>
+                    <th id="loaichiphi"></th>
+                    <td>Ngày yêu cầu :</td>
+                    <th id="ngayyeucau"></th>
+                    <td>Thời hạn muốn nhận :</td>
+                    <th id="thoihanmuonnhan"></th>
+                    <td>Loại hàng :</td>
+                    <th id="loaihang"></th>
+                    <td>Loại hình tờ khai :</td>
+                    <th id="loaihinhtokhai"></th>
+                  
+                </tr>
+                <tr>
+                    <td> Đổi sang USD :</td>
+                    <th id="usd"></th>
+                    <td> Tổng đơn hàng :</td>
+                    <th id="tongdonhang"></th>
+                    <td>Thực tế USD :</td>
+                    <th id="thucteusd"></th>
+                    <td>Thực tế :</td>
+                    <th id="thucte"></th>
+                 
+                </tr>
+                <tr>
+                    <td>Mã đơn hàng :</td>
+                    <th id="madonn"></th>
+                    <td>Người tạo đơn :</td>
+                    <th id="nguoitaoo"></th>
+                    <td>Ghi chú :</td>
+                    <th id="ghichu" colspan="5"></th>
+                </tr>
+                <tr>
+                    <td>Người xuất kho:</td>
+                    <td><input type="text" class="form-control" style="background-color:lightyellow" required /></td>
+                    <td>Người nhận :</td>
+                    <td><input type="text" class="form-control" style="background-color:lightyellow" required /></td>
+                    <td>Thời gian xuất :</td>
+                    <td><input type="datetime-local" class="form-control" style="background-color:lightyellow" /></td>
+                    <td><button type="button" class="btn btn-danger" onclick="_xuatkho()"><i class="fa fa-cart-plus"></i> Xuất kho</button></td>
+                </tr>
+            </table>
+            <table class="table table-bordered">
+                       
+                <tr class="bg-light">
+                    <td><input type="checkbox" class=" form-control" id="smallcheck" /></td>
+                    <td>No</td>
+                    <td>Mã hàng</td>
+                    <td>Tên hàng (VN)</td>
+                    <td>Hãng</td>
+                    <td>Mã sản phẩm </td>
+                    <td>Số tài khoản</td>
+                    <td>Tên tài khoản</td>
+                    <td width="120px">Tên kho</td>
+                    <td>Tồn kho</td>
+                    <td >Số lượng</td>           
+                    <td>Đơn vị</td>
+                    <td>Đơn giá</td>
+                    <td width="80px">Số lượng thực tế</td>
+                    <td width="100px">Đơn giá thực tế</td>
+                    <td>VAT(%)</td>
+                    <td>Tổng chi phí</td>
+                    <td>Tổng chi phí thực tế</td>
+                    <td>Số PO</td>                     
+                </tr>
+                <tbody id="_bd_hienchitiet"></tbody>
+            </table>
+        </div>
+    </form>
+</div>
 <script>
     // Minimal client-side helpers: clamp quantity to available stock and show validation.
    function chekk(){
@@ -245,4 +440,5 @@
                     });
          
     }
+
 </script>

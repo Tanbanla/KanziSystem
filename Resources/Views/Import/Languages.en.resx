@@ -316,7 +316,7 @@
     <value>Add new row</value>
   </data>
   <data name="thoihanmuonnhan" xml:space="preserve">
-    <value>Deadline to receive</value>
+    <value>Deadline receive</value>
   </data>
   <data name="thoihanthanhtoan" xml:space="preserve">
     <value>Payment term</value>
@@ -500,5 +500,26 @@
   </data>
   <data name="Pheduyetdon" xml:space="preserve">
     <value>Request Approval</value>
+  </data>
+  <data name="Xuatkho" xml:space="preserve">
+    <value>Delivery</value>
+  </data>
+  <data name="Ngaymongmuonnhan" xml:space="preserve">
+    <value>Desired Delivery Date</value>
+  </data>
+  <data name="tongtien" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="tongtienthucte" xml:space="preserve">
+    <value>Total Actual</value>
+  </data>
+  <data name="ngaytao" xml:space="preserve">
+    <value>Date of Issue</value>
+  </data>
+  <data name="ngayupdate" xml:space="preserve">
+    <value>Last Updated</value>
+  </data>
+  <data name="nguoiupdate" xml:space="preserve">
+    <value>User update</value>
   </data>
 </root>

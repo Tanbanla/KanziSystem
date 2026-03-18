@@ -136,6 +136,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("No data to export");
                 }
                 var dataList = result.Data.Data;
+                // Calculate totals for system columns
+                var totals = new Dictionary<string, (double vnd, double usd)>();
+                foreach (var item in dataList)
+                {
+                    string key = $"{item.CHR_MaDon ?? ""}|{item.CHR_MaThietBi ?? ""}|{item.CHR_MaNCC ?? ""}";
+                    double vnd = item.FL_VND ?? 0.0;
+                    double usd = item.FL_USD ?? 0.0;
+                    if (!totals.ContainsKey(key))
+                    {
+                        totals[key] = (0.0, 0.0);
+                    }
+                    var current = totals[key];
+                    totals[key] = (current.Item1 + vnd, current.Item2 + usd);
+                }
+
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
                 var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
                 if (!System.IO.File.Exists(templatePath))
@@ -157,7 +172,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // BIVN Input
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.status ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.Id ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.ID ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNCC ?? string.Empty);
@@ -206,9 +221,41 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.DTM_EffectiveDate ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_ExpiryDate ?? string.Empty);
                     // System count
-
+                    string key = $"{item.CHR_MaDon ?? ""}|{item.CHR_MaThietBi ?? ""}|{item.CHR_MaNCC ?? ""}";
+                    var tot = totals.ContainsKey(key) ? totals[key] : (0.0, 0.0);
+                    string totalCell = "";
+                    if (tot.Item1 != 0)
+                    {
+                        totalCell = tot.Item1.ToString("N0") + " VND";
+                    }
+                    else if (tot.Item2 != 0)
+                    {
+                        totalCell = tot.Item2.ToString("N0") + " USD";
+                    }
+                    ws.Cell(rowStart, col++).SetValue(totalCell);
+                    ws.Cell(rowStart, col++).SetValue(""); // BIT_Select placeholder
+                    ws.Cell(rowStart, col++).SetValue(""); // NVCHR_ReasonPick placeholder
                     rowStart++;
                 }
+
+                // Thêm tổng vào Excel
+                //int rowTotal = rowStart;
+                //foreach (var total in totals)
+                //{
+                //    var items = total.Key.Split('|');
+                //    string maDon = items[0];
+                //    string maThietBi = items[1];
+                //    string maNCC = items[2];
+
+                //    // Tìm dòng tương ứng để cập nhật tổng
+                //    var rowIndex = dataList.FindIndex(d => d.CHR_MaDon == maDon && d.CHR_MaThietBi == maThietBi && d.CHR_MaNCC == maNCC);
+                //    if (rowIndex >= 0)
+                //    {
+                //        // Cập nhật tổng vào các ô tương ứng
+                //        ws.Cell(rowIndex + 4, 8).SetValue(totals[total.Key].usd); // Tổng USD
+                //        ws.Cell(rowIndex + 4, 9).SetValue(totals[total.Key].vnd); // Tổng VND
+                //    }
+                //}
 
                 using var outStream = new MemoryStream();
                 workbook.SaveAs(outStream);
@@ -225,16 +272,115 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Nhập lựa chọn báo giá file excel
         [HttpPost]
-        public async Task<IActionResult> ImportQuotianExcel([FromBody] IFormFile file)
+        public async Task<IActionResult> ImportQuotianExcel([FromForm] IFormFile file)
         {
+            if (file == null || file.Length == 0)
+                return BadRequest("File không hợp lệ");
+
+            var items = new List<dynamic>();
+            var errorRows = new List<dynamic>();
             try
             {
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                var isErrors = false;
+                // Dữ liệu bắt đầu từ dòng 4
+                int startRow = 4;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
 
-                return Ok();
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    var errors = new List<string>();
+                    var maDon = ws.Cell(r, 1).GetString();
+                    if (string.IsNullOrEmpty(maDon))
+                    {
+                        break;
+                    }
+                    var id = ws.Cell(r, 3).GetString(); // Assuming ID is in column 3
+                    var bitSelect = ws.Cell(r, 51).GetString();
+                    var reason = ws.Cell(r, 52).GetString();
+
+                    // Validate
+                    if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
+                    {
+                        isErrors = true;
+                        errors.Add("Hàng chưa được chọn nhà cung cấp nhưng đã có lý do từ chối");
+                    }
+
+                    if (errors.Any())
+                    {
+                        errorRows.Add(new
+                        {
+                            Row = r,
+                            MaDon = maDon,
+                            ID = id,
+                            BIT_Select = bitSelect,
+                            NVCHR_ReasonPick = reason,
+                            Errors = string.Join("; ", errors)
+                        });
+                    }
+                    else
+                    {
+                        items.Add(new
+                        {
+                            ID = id,
+                            BIT_Select = bitSelect.Contains("O"),
+                            NVCHR_ReasonPick = reason,
+                            CHR_MaDon = maDon
+                        });
+                    }
+                }
+
+                if (isErrors)
+                {
+                    // Create error file
+                    using var errorWorkbook = new ClosedXML.Excel.XLWorkbook();
+                    var errorWs = errorWorkbook.Worksheets.Add("Errors");
+                    errorWs.Cell(1, 1).Value = "Row";
+                    errorWs.Cell(1, 2).Value = "MaDon";
+                    errorWs.Cell(1, 3).Value = "ID";
+                    errorWs.Cell(1, 4).Value = "BIT_Select";
+                    errorWs.Cell(1, 5).Value = "NVCHR_ReasonPick";
+                    errorWs.Cell(1, 6).Value = "Errors";
+                    for (int i = 0; i < errorRows.Count; i++)
+                    {
+                        var row = errorRows[i];
+                        errorWs.Cell(i + 2, 1).Value = row.Row;
+                        errorWs.Cell(i + 2, 2).Value = row.MaDon;
+                        errorWs.Cell(i + 2, 3).Value = row.ID;
+                        errorWs.Cell(i + 2, 4).Value = row.BIT_Select;
+                        errorWs.Cell(i + 2, 5).Value = row.NVCHR_ReasonPick;
+                        errorWs.Cell(i + 2, 6).Value = row.Errors;
+                    }
+                    using var errorStream = new MemoryStream();
+                    errorWorkbook.SaveAs(errorStream);
+                    var errorBytes = errorStream.ToArray();
+                    var errorFileName = $"ImportErrors_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                    const string errorContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    return File(errorBytes, errorContentType, errorFileName);
+                }
+                else
+                {
+                    // Update database
+                    var dtoList = items.Select(i => new BaoGia_Detail_of_QuotationDTO
+                    {
+                        ID = int.Parse(i.ID.ToString()),
+                        BIT_Select = (bool)i.BIT_Select,
+                        NVCHR_ReasonPick = i.NVCHR_ReasonPick.ToString(),
+                    }).ToList();
+                    var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(dtoList);
+                    if (!result.Success)
+                    {
+                        return BadRequest(result.Message);
+                    }
+                    return Ok(new { message = "Import successful" });
+                }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
         }
         // Save pick supplier
@@ -246,6 +392,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
+            _ = Task.Run(() => { 
+                
+            });
             return Ok(result.Data);
         }
         // MARK: - Input Quote
@@ -417,6 +566,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     cf.VCHR_CreateBy = currentUserId;
                                     cf.VCHR_TenRecomment = i.NVCHR_NameVN;
                                     cf.CHR_Status = "Confirming";
+                                    cf.CHR_StatusACC = "Confirming";
+                                    cf.CHR_StatusShip = "Confirming";
                                     cf.NVCHR_Note = i.CHR_MaHangNCC;
                                     listConfirm.Add(cf);
                                 }
@@ -1470,7 +1621,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi chuyển đổi dữ liệu: {ex.Message}");
             }
         }
-        // Nhap file excel
+        // Nhập file excel
         [HttpPost]
         public async Task<IActionResult> ImportExcelInputQuote([FromForm] IFormFile file)
         {
@@ -1611,6 +1762,104 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+        // Xuất file lịch sử báo giá 
+        [HttpPost]
+        public async Task<IActionResult> ExportHistory([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            var result = await _baoGiaService.SearchAsync(
+                searchModel.MaDon,
+                searchModel.MaNcc,
+                searchModel.Section,
+                searchModel.NguoiYeuCau,
+                searchModel.MaHang,
+                searchModel.TrangThai,
+                searchModel.Step,
+                searchModel.PageIndex,
+                searchModel.PageSize,
+                searchModel.Date,
+                searchModel.ChungLoai
+                );
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            try { 
+                // lấy thong tin status
+                var Status = await _baoGiaStatusService.GetListStatusAsync();
+                if (Status == null || !Status.Success)
+                {
+                    return BadRequest("Lỗi lấy danh sách trạng thái");
+                }
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "HistoryQuote.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: HistoryQuote.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+
+                int row = 10;
+                foreach (var rq in result.Data)
+                {
+                    // Map fields into template columns similar to ExportSelection
+                    ws.Cell(row, 1).SetValue(row - 9); // status placeholder
+                    ws.Cell(row, 2).SetValue(rq?.CHR_SectionCode ?? string.Empty);
+                    ws.Cell(row, 4).SetValue(rq?.CHR_Phanloai ?? string.Empty);
+                    ws.Cell(row, 5).SetValue(rq?.CHR_MaThietBi ?? string.Empty);
+                    ws.Cell(row, 6).SetValue(rq?.CHR_MaHangNoiBo ?? string.Empty);
+                    ws.Cell(row, 7).SetValue(rq?.CHR_MaHangNCC ?? string.Empty);
+                    ws.Cell(row, 8).SetValue(rq?.NVCHR_NameVN ?? string.Empty);
+                    ws.Cell(row, 9).SetValue(rq?.CHR_NameEN ?? string.Empty);
+                    ws.Cell(row, 10).SetValue(rq?.INT_SoLuong.HasValue == true ? rq.INT_SoLuong.Value : 0);
+                    ws.Cell(row, 11).SetValue(rq?.NVCHR_DonVi ?? string.Empty);
+                    ws.Cell(row, 12).SetValue(rq?.NVCHR_ChungLoai ?? string.Empty);
+                    ws.Cell(row, 13).SetValue(rq?.NVCHR_HinhDang ?? string.Empty);
+                    ws.Cell(row, 14).SetValue(rq?.NVCHR_ChatLieu ?? string.Empty);
+                    ws.Cell(row, 15).SetValue(rq?.NVCHR_ThanhPhan ?? string.Empty);
+                    ws.Cell(row, 16).SetValue(rq?.NVCHR_KichThuoc ?? string.Empty);
+                    ws.Cell(row, 17).SetValue(rq?.NVCHR_DongMay ?? string.Empty);
+                    ws.Cell(row, 18).SetValue(rq?.NVCHR_TinhNang ?? string.Empty);
+                    ws.Cell(row, 19).SetValue(rq?.NVCHR_Rohs ?? string.Empty);
+                    ws.Cell(row, 20).SetValue(rq?.NVCHR_COCQ ?? string.Empty);
+                    ws.Cell(row, 21).SetValue(rq?.NVCHR_MSDS ?? string.Empty);
+                    ws.Cell(row, 22).SetValue(rq?.NVCHR_AnToan ?? string.Empty);
+                    ws.Cell(row, 23).SetValue(rq?.NVCHR_FileThietKe ?? string.Empty);
+                    ws.Cell(row, 24).SetValue(rq?.NVCHR_NhaSanXuat ?? string.Empty);
+                    ws.Cell(row, 25).SetValue(rq?.CHR_MaNCC ?? string.Empty);
+                    ws.Cell(row, 26).SetValue(rq?.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(row, 27).SetValue(rq?.BIT_LayBaoGia == false ? "X" : "O");
+                    ws.Cell(row, 28).SetValue(rq?.NVCHR_LyDo ?? string.Empty);
+                    ws.Cell(row, 29).SetValue(rq?.DTM_NgayMuonNhan.HasValue == true ? rq.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(row, 30).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(row, 31).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
+                    ws.Cell(row, 32).SetValue(rq?.CHR_CreateBy ?? string.Empty);
+                    var history = await _baoGiaHistoryService.GetByRequestQuoteIdAsync(rq.ID);
+                    var reson = history.Data.Capacity > 0 ? history.Data.OrderByDescending(h => h.CHR_Updatedate).FirstOrDefault()?.NVCHR_LyDo : string.Empty;
+                    var statusName = Status.Data.Where(s => s.VCHR_CodeStatus == rq.ID_Status).Select(s => s.NVCHR_TenStatus).FirstOrDefault() ?? string.Empty;
+                    ws.Cell(row, 33).SetValue(statusName);
+                    ws.Cell(row, 34).SetValue(reson);
+                    row++;
+                }
+
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"HistoryQuote_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xuất file: {ex.Message}");
             }
         }
         // check điều kiện k nhap

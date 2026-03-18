@@ -323,7 +323,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var historyList = new List<BaoGia_History_Detail_Request>();
             foreach (var item in dtos)
             {
-                var detail = await _context.BaoGia_Detail_of_Quotations.FindAsync(item.ID);
+                var detail = await _context.BaoGia_Detail_of_Quotations.Where(c=> c.ID_RequestQuote == item.ID).FirstOrDefaultAsync();
                 if (detail != null)
                 {
                     detail.BIT_Select = item.BIT_Select;

@@ -7,7 +7,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
     public interface IBaoGiaConfirmNameRepository : IBaseRepository<BaoGia_Confirm_Name_Quotation, int>
     {
         // search thông tin xác nhận tên hàng
-        public Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, int pageIndex, int pageSize);
+        public Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, int pageIndex, int pageSize);
         // Luu thong tin
         public Task<bool> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User);
         // Them thong tin 

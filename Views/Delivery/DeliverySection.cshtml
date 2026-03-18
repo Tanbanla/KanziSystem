@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "Xác nhận hàng về kho phòng ban";
 }
-
 <style>
     /* Hiệu ứng cuộn cho bảng */
     .table-wrapper {
@@ -123,15 +122,14 @@
     }
 </style>
 <script type="text/javascript" src="~/scripts/delivery.js"></script>
-<div class="row">
-   
+<div class="row">  
     <div class="card card-primary">
-        <div class="card-header">    
-            
-            <div class="table-container">
-                
+        <div class="card-header">               
+            <div class="table-container">           
                 <table class="table table-bordered">
-                   
+                    <tr>
+                        <td colspan="38"></td>
+                    </tr>
                     <tr>
                         <td colspan="3"><input type="text" class="form-control" placeholder="Mã hệ thống" /></td>
                         <td colspan="2"><input type="text" class="form-control" placeholder="Đơn yêu cầu" /></td>
@@ -140,6 +138,18 @@
                         <td><input type="text" class="form-control" placeholder="Phòng yêu cầu" /></td>
                         <td><button class="btn btn-success"><i class="fa fa-search"></i> Tìm kiếm</button></td>
                         <td><button class="btn btn-info"><i class="ion ion-ios-refresh"></i> Refresh</button></td>
+                        <td colspan="25"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="38"></td>
+                    </tr>
+                    <tr class="bg-light">
+                        <td colspan="2">
+                            <button class="btn btn-success"> <i class="ion ion-ios-cart" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.Nhapkho</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger"> <i class="ion ion-ios-briefcase" style="align-content:center; margin:5px;vertical-align:middle;"></i>Sử dụng</button>
+                        </td>
                         <td>Thời gian hàng về :</td>
                         <td><input type="date" class="form-control" id="idTimeDelivery" /></td>
                         <td>Kho hàng về : </td>
@@ -148,9 +158,8 @@
                                 <option>--</option>
                             </select>
                         </td>
-                        <td> <button class="btn btn-success" style="margin-left:20px;" onclick="ImportWarehouse()"> <i class="fa fa-file-import" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.Nhapkho</button></td>
+                        <td colspan="30"></td>
                     </tr>
-                    <tr><td colspan="38"></td></tr>
                     <tr class="bg-primary text-white" style="cursor:pointer">
                             <th><input type="checkbox" /></th>
                             <th>No.</th>
@@ -188,8 +197,7 @@
                             <th>Tình trạng tờ khai</th>
                             <th>ID Lịch sử</th>
                             <th>Invoice</th>
-                        </tr>
-                 
+                        </tr>                
                     <tbody>
                         <tr>
                             <td><input type="checkbox" /></td>

@@ -5,7 +5,7 @@
     const btnReset = document.getElementById('btnResetFilters');
     const paginationEl = document.getElementById('historyPagination');
     const paginationInfoEl = document.getElementById('historyPaginationInfo');
-
+    const btnExportHistory = document.getElementById('btnExportHistory');
     let currentPage = 1;
     const pageSize = 20;
     let currentGroups = [];
@@ -66,7 +66,63 @@
         document.getElementById('dateTo').value = '';
         applyFilters();
     });
+    btnExportHistory?.addEventListener('click', async () => {
+        const maDon = (document.getElementById('searchMaDon').value || '').trim();
+        const phongBan = (document.getElementById('searchPhongBan').value || '').trim();
+        const nguoiTao = (document.getElementById('searchNguoiTao').value || '').trim();
+        const maVatTu = (document.getElementById('searchMaVatTu').value || '').trim();
+        const nhaCungCap = (document.getElementById('searchNhaCungCap').value || '').trim();
+        const status = statusFilter.value;
+        const from = document.getElementById('dateFrom').value;
+        const to = document.getElementById('dateTo').value;
+        // build payload for ExportHistory
+        const payload = {
+            MaDon: maDon,
+            MaNcc: nhaCungCap,
+            Section: phongBan,
+            NguoiYeuCau: nguoiTao,
+            MaHang: maVatTu,
+            TrangThai: status,
+            Step: null,
+            PageIndex: 1,
+            PageSize: 10000,
+            Date: (from && to) ? { From: from, To: to } : null
+        };
 
+        const T = window.i18nHistoryQuote || {};
+        try {
+            showLoading(T.Exporting || 'Đang xuất...');
+            const res = await fetch('/Quote/ExportHistory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const msg = await res.text().catch(() => T.ExportError || 'Xuất file thất bại');
+                throw new Error(msg);
+            }
+            const blob = await res.blob();
+            let fileName = 'HistoryQuote.xlsx';
+            const cd = res.headers.get('content-disposition');
+            if (cd) {
+                const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+            }
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error exporting history', err);
+            showDialog(T.Notification || 'Thông báo', `<div class="text-danger">${err.message}</div>`);
+        } finally {
+            hideLoading();
+        }
+    });
     tblBody?.addEventListener('click', (e) => {
         const t = e.target.closest('button');
         if (!t) return;
@@ -844,7 +900,27 @@
             </div>
         `;
     }
-
+    // Loading overlay helpers
+    function showLoading(message) {
+        try {
+            const el = document.getElementById('globalLoading');
+            if (!el) return;
+            const msgEl = el.querySelector('.loader-msg');
+            if (msgEl && message) msgEl.textContent = message;
+            el.style.display = 'flex';
+            el.setAttribute('aria-hidden', 'false');
+        } catch (e) { }
+    }
+    function hideLoading() {
+        try {
+            const el = document.getElementById('globalLoading');
+            if (!el) return;
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+            const msgEl = el.querySelector('.loader-msg');
+            if (msgEl) msgEl.textContent = 'Đang xử lý...';
+        } catch (e) { }
+    }
     // Initial load
     document.addEventListener('DOMContentLoaded', function () {
         applyFilters();
