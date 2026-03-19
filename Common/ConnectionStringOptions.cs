@@ -11,5 +11,6 @@ namespace PRJ_WAREHOUSE_BIVN.Common
         // Match appsettings.json key: "ConnectionStrings:CostManagerConnection"
         public string CostManagerConnection { get; set; }
         public string WorkingControlConnection { get; set; }
+        public string AgentConnection { get; set; }
     }
 }

@@ -29,19 +29,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Tìm kiếm thông tin báo giá và phân trang
-        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
+        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user , int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
             var sql = @"
-                SELECT *
-                FROM BaoGia_Request_of_Quotation
+                SELECT distinct q.*
+                FROM BaoGia_Request_of_Quotation as q
+				  inner join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+				on q.CHR_SectionCode = s.CHR_CodeSection
                 WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
                   AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
                   AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
-                  AND (@NguoiYeuCau IS NULL OR CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
+                  AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
                   AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
                   AND (@Step IS NULL OR ID_StepBaoGia = @Step)
                   AND (@Date IS NULL OR CAST(DTM_CreateDate AS DATE) = CAST(@Date AS DATE))
+                  AND ( s.CHR_UserAdid = @Adid)
             ";
 
             // Build status SQL fragment and append it directly to the WHERE clause when needed
@@ -97,7 +100,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Offset = (pageIndex - 1) * pageSize,
                 PageSize = pageSize,
                 Date = date,
-                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai
+                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
+                Adid = user
             };
 
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
@@ -226,7 +230,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return a;
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang,string? user, int pageIndex, int pageSize)
         {
             var cteBuilder = new StringBuilder();
             cteBuilder.Append(@"
@@ -240,11 +244,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.CHR_MaNCC,
                     r.ID_StepBaoGia
                 FROM [BaoGia_Request_of_Quotation] r
+	            left join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+	            on r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE 1 = 1 
                     AND r.ID_StepBaoGia > 5 ");
 
             var parameters = new DynamicParameters();
 
+            if (!string.IsNullOrEmpty(user))
+            {
+                cteBuilder.Append(" AND s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
             if (!string.IsNullOrEmpty(maDon))
             {
                 cteBuilder.Append(" AND r.CHR_MaDon = @MaDon");
@@ -554,6 +565,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Data = data,
                 TotalCount = totalCount
             };
+        }
+        // lấy mã đơn theo Adid
+        public async Task<List<string>> GetMaDonByAdidAsync(string adid)
+        {
+            var sql = @"  SELECT DISTINCT CHR_MaDon FROM BaoGia_Request_of_Quotation as q
+                  inner join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+                  on q.CHR_SectionCode = s.CHR_CodeSection
+                  WHERE s.CHR_UserAdid = @Adid AND ID_StepBaoGia < 9";
+            var parameters = new { Adid = adid };
+            var maDons = await _conn.QueryAsync<string>(sql, parameters);
+            return maDons.ToList();
         }
     }
 }

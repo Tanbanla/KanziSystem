@@ -7,7 +7,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
     public interface IBaoGiaDetailRepository : IBaseRepository<BaoGia_Detail_of_Quotation, int>
     {
         // Tìm kiếm thông tin liên quan đến báo giá
-        public Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM, int? PageSize, int? PageIndex);
+        public Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, int? PageSize, int? PageIndex);
         // Insert danh sách báo giá
         public Task<bool> InsertListBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> listDto);
         // Update lua chon NCC

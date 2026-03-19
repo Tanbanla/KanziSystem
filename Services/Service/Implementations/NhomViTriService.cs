@@ -7,7 +7,7 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
-    public class NhomViTriService: BaseService<ACC_NHOMVITRI, int, ACC_NHOMVITRIDTO>, INhomViTriService
+    public class NhomViTriService : BaseService<ACC_NHOMVITRI, int, ACC_NHOMVITRIDTO>, INhomViTriService
     {
         private readonly INhomViTriRepository _repo;
         private readonly IMapper _mapper;
@@ -50,6 +50,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 response.Success = false;
                 response.Message = "Lỗi khi thêm danh sách nhóm vị trí: " + ex.Message;
+            }
+            return response;
+        }
+        // Lấy thông tin theo quyền
+        public async Task<GenericResponse<List<ACC_NHOMVITRIDTO>>> GetNhomViTriByDepartmentIdAsync(string user)
+        {
+            var response = new GenericResponse<List<ACC_NHOMVITRIDTO>>();
+            try
+            {
+                var nhomViTriList = await _repo.GetNhomViTriByDepartmentIdAsync(user);
+                response.Data = _mapper.Map<List<ACC_NHOMVITRIDTO>>(nhomViTriList);
+                response.Success = true;
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
             }
             return response;
         }

@@ -405,7 +405,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
-            var danhSach = await _baoGiaService.SearchAsync("", "", "", "", "", "", 6, 0, 0, null, "");
             var vm = new QuoteModel
             {
                 DanhSachNhomViTri = nhomViTri,
@@ -413,8 +412,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachNhaCungCap = nccs,
                 DanhSachCategory = categorys,
                 DanhSachMaDon = madons,
-                NguoiThaoTac = GetCurrentUserId() ?? "",
-                DanhSachYeuCauBaoGia = danhSach.Data ?? new List<BaoGia_Request_of_QuotationDTO>()
+                NguoiThaoTac = GetCurrentUserId() ?? ""
             };
             return View(vm);
         }
@@ -470,7 +468,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<ACC_NHOMVITRIDTO>> LoadNhomViTriDataAsync()
         {
-            var nhomViTri = await _nhomViTriService.GetAllNhomViTriAsync();
+            //var nhomViTri = await _nhomViTriService.GetAllNhomViTriAsync();
+            var nhomViTri = await _nhomViTriService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId() ?? "");
             return nhomViTri.Data ?? new List<ACC_NHOMVITRIDTO>();
         }
         private async Task<List<IM_NCC_NEWDTO>> LoadNhaCungCapDataAsync()
@@ -480,7 +479,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<string>> LoadMadonAsync()
         {
-            var madons = await _baoGiaService.GetListMaDonBGAsync();
+            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "");
             return madons.Data ?? new List<string>();
         }
         // lấy thông tin mặt hàng
@@ -573,15 +572,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 }
                                 await baoGiaConfirmNameService.AddListAsync(listConfirm);
                                 // gửi mail thông báo có yêu cầu xác nhận tên mới
-                                var emailResult = await sendMailService.SendMailAsync(
-                                    "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn",
-                                    string.Empty,
-                                    17,
-                                    "http://172.26.248.62:8057/Material/ConfirmName",
-                                    true,
-                                    string.Empty,
-                                    string.Empty,
-                                    currentUserId);
+                                //var emailResult = await sendMailService.SendMailAsync(
+                                //    "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn",
+                                //    string.Empty,
+                                //    17,
+                                //    "http://172.26.248.62:8057/Material/ConfirmName",
+                                //    true,
+                                //    string.Empty,
+                                //    string.Empty,
+                                //    currentUserId);
+                                var emailResult = await sendMailService.SendMailToConfirmItemAsync(13,17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", currentUserId);
                             }
                             catch (Exception ex)
                             {
@@ -726,6 +726,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 searchModel.MaHang,
                 searchModel.TrangThai,
                 searchModel.Step,
+                GetCurrentUserId() ?? "",
                 searchModel.PageIndex,
                 searchModel.PageSize,
                 searchModel.Date,
@@ -927,7 +928,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
                                 DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
                                 CHR_Gap = ws.Cell(r, 31).GetString(),
-                                CHR_CreateBy = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
+                                CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
                                 DTM_CreateDate = DateTime.Now,
                                 ID_Status = "CREATE"
                             };
@@ -1000,7 +1001,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
                             DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
                             CHR_Gap = ws.Cell(r, 31).GetString(),
-                            CHR_CreateBy = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
+                            CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
                             DTM_CreateDate = DateTime.Now,
                             ID_Status = "CREATE"
                         };
@@ -1149,7 +1150,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (searchModel == null) return BadRequest("Không nhận Search Input");
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
-                searchModel.maVatTu, searchModel.maNcc, searchModel.section, searchModel.dayMM, searchModel.pageSize, searchModel.pageIndex);
+                searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM, searchModel.pageSize, searchModel.pageIndex);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1160,7 +1161,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchInputQuoteBySoDon([FromBody] ThongTinBaoGiaGomNhomModel mod)
         {
-            var result = await _baoGiaService.SearchThongTinNhapBaoGiaAsync(mod.maDon, mod.section, mod.maHang, mod.pageIndex, mod.pageSize);
+            var result = await _baoGiaService.SearchThongTinNhapBaoGiaAsync(mod.maDon, mod.section, mod.maHang, GetCurrentUserId(), mod.pageIndex, mod.pageSize);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1776,6 +1777,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 searchModel.MaHang,
                 searchModel.TrangThai,
                 searchModel.Step,
+                GetCurrentUserId() ?? "",
                 searchModel.PageIndex,
                 searchModel.PageSize,
                 searchModel.Date,

@@ -27,6 +27,20 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
-
+        public async Task<GenericResponse<List<string>>> GetCodeCenterBySec(string codeSecion)
+        {
+            var result = new GenericResponse<List<string>>();
+            try
+            {
+                result.Data = await _repo.GetCodeCenterBySec(codeSecion);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

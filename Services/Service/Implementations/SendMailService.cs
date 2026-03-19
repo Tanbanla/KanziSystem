@@ -510,5 +510,54 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 Message = "Mail sent successfully"
             };
         }
+        // Mail gữi xác nhận tên và mã hàng 
+        public async Task<GenericResponse<bool>> SendMailToConfirmItemAsync(int step, int codeMail, string? link, bool? isGap, string? sectionCode, string? sectionName, string user)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                // Lấy thông tin người yêu cầu
+                var requesterEmail = await _repo.GetRequesterEmailAsync("", step);
+                if (string.IsNullOrEmpty(requesterEmail))
+                {
+                    return new GenericResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Requester email not found"
+                    };
+                }
+                // Lấy template mail
+                var mailTemplate = await _repo.GetMailByIdAsync(codeMail);
+                if (mailTemplate == null)
+                {
+                    return new GenericResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Mail template not found"
+                    };
+                }
+                // Chuẩn bị nội dung mail với các tham số
+                string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
+                // Chuẩn bị nội dung mail với các tham số
+                string body = string.Format(mailTemplate.CHR_BODY ?? "", link, gapText, sectionName, sectionCode, user);
+                // Gửi mail
+                bool sendResult = EmailSender.sendEmailNotify(
+                    mailTemplate.CHR_SUBJECT ?? "",
+                    mailTemplate.CHR_FROM ?? "",
+                    requesterEmail,
+                    mailTemplate.CHR_CC ?? "", 
+                    mailTemplate.CHR_BCC ?? "",
+                    body,
+                    0 // Default priority
+                );
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = $"Error sending confirmation mail: {ex.Message}";
+            }
+
+            return result;
+        }
     }
 }

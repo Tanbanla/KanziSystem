@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models;
@@ -23,12 +24,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaNCCService _baoGiaNCCService;
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IMaterialService _materialService;
+        private readonly ITmEmployeeAgentService _employeeAgentService;
+
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
             ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
             IBaoGiaNccCategoryService baoGiaNccCategoryService, IBaoGiaNCCService baoGiaNCCService
-            , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService)
+            , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService, ITmEmployeeAgentService employeeAgentService)
         {
             _approverService = approverService;
             _baoGiaStepService = baoGiaStepService;
@@ -41,6 +44,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _logger = logger;
             _tmCategoryService = tmCategoryService;
             _materialService = materialService;
+            _employeeAgentService = employeeAgentService;
         }
 
         public IActionResult Masters()
@@ -70,7 +74,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public JsonResult load_fac()
         {
-            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();       
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
             var dup = dt.Select(x => x.CHR_FACTORY).Distinct();
             return Json(dup);
         }
@@ -370,7 +374,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> ImportSectionExcel([FromForm] IFormFile file)
         {
-            if(file == null || file.Length == 0)
+            if (file == null || file.Length == 0)
             {
                 return BadRequest("Không nhận được dữ liệu từ file");
             }
@@ -406,11 +410,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var result = await _nhomViTriService.InsertNhomViTriListAsync(listSections);
                 if (!result.Success)
                 {
-                    return BadRequest("Error Insert database: "+result.Message);
+                    return BadRequest("Error Insert database: " + result.Message);
                 }
                 return Ok(result.Data);
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
         }
@@ -419,7 +424,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> UpdateMaterialInfo([FromForm] ImportSupplierDetailDTO insertFile)
         {
 
-            if(insertFile.FileExcel == null || insertFile.FileExcel.Length == 0)
+            if (insertFile.FileExcel == null || insertFile.FileExcel.Length == 0)
             {
                 return BadRequest("File không hợp lệ");
             }
@@ -449,8 +454,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         Material_Code = ws.Cell(r, 1).GetString().Trim(),
                         Category_VN = ws.Cell(r, 14).GetString(),
                     };
-      
-                     items.Add(dto);
+
+                    items.Add(dto);
                 }
                 if (items.Count == 0)
                 {
@@ -795,7 +800,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult Tainhap(string malinhkien, string soluong, string kho, string vitri, string thoigian, string giatien, string ghichu, string khoi, string nguoichuyen, string phongban)
         {
-            var tainhaphang = Models.MST_WAREHOUSE.TaiNhapkho(malinhkien.Split(':')[0], soluong, kho, vitri, thoigian, giatien, ghichu, khoi,nguoichuyen, phongban);
+            var tainhaphang = Models.MST_WAREHOUSE.TaiNhapkho(malinhkien.Split(':')[0], soluong, kho, vitri, thoigian, giatien, ghichu, khoi, nguoichuyen, phongban);
             return Json(tainhaphang);
         }
         public JsonResult Get_location()
@@ -840,6 +845,89 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var log = Models.KHO_NHAPXUAT._truyxuat(malinhkien);
             return Json(log);
+        }
+        // Nhp file dang cho cac user tu file
+        [HttpPost]
+        public async Task<IActionResult> UploadFileUser([FromForm]IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("File not Data");
+            var stepAsync = await _baoGiaStepService.GetStepsApproverAsync();
+            if (stepAsync == null || !stepAsync.Success || stepAsync.Data == null || stepAsync.Data.Count == 0)
+            {
+                return BadRequest("Không tìm thấy thông tin bước phê duyệt");
+            }
+            var listInsert = new List<BaoGia_Master_Approver_Send_Mail>();
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                // Dữ liệu bắt đầu từ dòng 1
+                int startRow = 1;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 1).GetString() == "" || ws.Cell(r, 1).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột
+                    var seticon = ws.Cell(r, 1).GetString().Trim();
+                    var mailUser = ws.Cell(r, 2).GetString().Trim();
+                    // lay thong tin user
+                    var userInfo = await _employeeAgentService.GetInforEmployeeByMail(mailUser);
+                    if (userInfo == null || !userInfo.Success || userInfo.Data == null)
+                    {
+                        continue; // bỏ qua nếu không tìm thấy thông tin user
+                    }
+                    // lay thong tin vi tri
+                    var listCodeCenter = await _employeeWorkingService.GetCodeCenterBySec(userInfo.Data.CHR_SEC_CODE ?? "");
+                    if (listCodeCenter == null || !listCodeCenter.Success || listCodeCenter.Data == null || listCodeCenter.Data.Count == 0)
+                    {
+                        continue; // bỏ qua nếu không tìm thấy thông tin phòng ban
+                    }
+                    foreach (var item in listCodeCenter.Data)
+                    {
+                        foreach (var step in stepAsync.Data ?? new List<BaoGia_StepDTO>())
+                        {
+                            // nếu tên step trùng với tên step trong file thì mới tạo bản ghi, tránh trường hợp file có nhiều dòng cùng 1 user nhưng các step khác nhau
+                            var dto = new BaoGia_Master_Approver_Send_Mail
+                            {
+                                ID = 0,
+                                ID_BaoGiaStep = step.INT_StepNumber,
+                                CHR_UserAdid = userInfo.Data.CHR_EMPLOYEE_ADID,
+                                CHR_CodeSection = item,
+                                CHR_NameSection = "",
+                                NVCHR_UserName = userInfo.Data.CHR_EMPLOYEE_NAME,
+                                NVCHR_Position = userInfo.Data.CHR_POSITION_NAME,
+                                NVCHR_StepName = step.CHR_StepName,
+                                CHR_CreateBy = GetCurrentUserId() ?? "system",
+                                CHR_CreateDate = DateTime.Now,
+                                CHR_Status = "ON",
+                                CHR_UpdateBy = null,
+                                CHR_UpdateDate = null
+                            };
+                            listInsert.Add(dto);
+                        }
+                    }
+                }
+                if (listInsert.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                // Giả sử service có AddListCategory
+                var result = await _approverService.AddMultiAsync(listInsert);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
         }
     }
 }

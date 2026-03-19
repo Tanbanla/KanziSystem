@@ -45,5 +45,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             }
         }
+        // lay  CHR_CODE_CENTER
+        public async Task<List<string>> GetCodeCenterBySec(string codeSecion)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new { codeSecion };
+                var result = await connection.QueryAsync<string>(
+                    "SELECT [CHR_CODE_CENTER] FROM [Working_Control].[dbo].[TM_CENTER] WHERE CHR_CODE_SEC = @codeSecion",
+                    parameters);
+                return result.ToList();
+            }
+        }
     }
 }

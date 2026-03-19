@@ -47,7 +47,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // lấy quyền user
         public async Task<string> GetRoleAsync(string adId)
         {
-            var result = await _context.TM_AUTHORITY_MENUs.Where(x => x.CHR_USERID == adId).Select(x => x.CHR_CODE_MENU).FirstOrDefaultAsync();
+            var result = await _context.TM_AUTHORITY_MENUs.Where(x => x.CHR_USERID == adId && (x.CHR_CODE_MENU == "UserAcc" || x.CHR_CODE_MENU == "UserShip" || x.CHR_CODE_MENU == "UserPUR")).Select(x => x.CHR_CODE_MENU).FirstOrDefaultAsync();
             return result ?? "";
         }
     }

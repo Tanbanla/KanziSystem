@@ -4,5 +4,7 @@
     {
         // Lấy thông tin nhân viên theo ADID or MNV
         Task<IEnumerable<dynamic>> GetEmployeeWorkingByIdAsync(string adidOrMnv);
+        // lay  CHR_CODE_CENTER
+        Task<List<string>> GetCodeCenterBySec(string codeSecion);
     }
 }

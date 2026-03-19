@@ -11,6 +11,7 @@ using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
@@ -24,17 +25,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             _context = context;
         }
-        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, DateTime? dayMM, int? PageSize, int? PageIndex)
+        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, int? PageSize, int? PageIndex)
         {
             var baseFrom = new StringBuilder();
             baseFrom.Append(@"FROM [BaoGia_Detail_of_Quotation] as d
-            LEFT JOIN [BaoGia_Request_of_Quotation] as r
-                ON d.ID_RequestQuote = r.ID
+			LEFT JOIN [BaoGia_Request_of_Quotation] AS r ON d.ID_RequestQuote = r.ID
+			LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
             WHERE 1 = 1");
 
             var whereBuilder = new StringBuilder();
             var parameters = new DynamicParameters();
-
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereBuilder.Append(" AND s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
             if (idRequest != 0 && idRequest != null)
             {
                 whereBuilder.Append(" AND r.ID = @IdRequest");
@@ -68,7 +73,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             // Build select SQL
             var selectSql = new StringBuilder();
-            selectSql.Append(@"SELECT d.*, 
+            selectSql.Append(@"SELECT distinct d.*, 
                     r.CHR_MaHangNoiBo, 
                     r.CHR_MaDon,
                     CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,

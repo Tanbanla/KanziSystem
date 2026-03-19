@@ -64,6 +64,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ISendMailRepository, SendMailRepository>();
         services.AddScoped<ISendMailService, SendMailService>();
+
+        services.AddScoped<ITmEmployeeAgentService, TmEmployeeAgentService>();
+        services.AddScoped<ITmEmployeeAgentRepository, TmEmployeeAgentRepository>();
         return services;
     }
 }

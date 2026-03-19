@@ -87,9 +87,9 @@
             // Tạo FormData
             const formData = new FormData();
             formData.append('file', file);
-            // Gửi request
+            // Gửi request ImportSectionExcel
             try { showLoading((window.i18nSendApprover && window.i18nSendApprover.LoadingData) || 'Đang xử lý...'); } catch { }
-            fetch('/Master/ImportSectionExcel', {
+            fetch('/Master/UploadFileUser', {
                 method: 'POST',
                 body: formData
             })
@@ -363,7 +363,7 @@
             <div>
                 <i class="fas fa-step-forward me-2"></i>
                 <strong>${stepGroup.stepName}</strong>
-                <span class="badge bg-white text-secondary border ms-2">${(T.TotalApproverBadge || '{0} người').replace('{0', stepGroup.approvers.length)}</span>
+                <span class="badge bg-white text-secondary border ms-2">${(T.TotalApproverBadge || '{0} người').replace('{0}', stepGroup.approvers.length)}</span>
             </div>
             <button class="btn btn-sm btn-outline-primary btn-add-to-step" data-step="${stepGroup.stepId}">
                 <i class="fas fa-user-plus me-1"></i> ${T.AddToThisStep || 'Thêm vào bước này'}
@@ -702,7 +702,7 @@
             const remove = () => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(-6px)';
-                setTimeout(() => { try { container.removeChild(toast); } catch (e) {} }, 220);
+                setTimeout(() => { try { container.removeChild(toast); } catch (e) { } }, 220);
             };
 
             const tId = setTimeout(remove, timeout);
@@ -713,7 +713,7 @@
             });
         } catch (err) {
             // fallback to alert if something goes wrong
-            try { console.error(err); alert(message); } catch (e) {}
+            try { console.error(err); alert(message); } catch (e) { }
         }
     }
     // Loading overlay helpers

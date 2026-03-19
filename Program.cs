@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using PRJ_WAREHOUSE_BIVN.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using PRJ_WAREHOUSE_BIVN.Models_Agent;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -22,6 +23,7 @@ builder.Services.AddControllersWithViews()
 
 var costManagerConnection = builder.Configuration.GetConnectionString("CostManagerConnection");
 var workingControlConnection = builder.Configuration.GetConnectionString("WorkingControlConnection");
+var agentConnection = builder.Configuration.GetConnectionString("AgentConnection");
 // Add services to the container and require authentication globally by default.
 
 builder.Services.AddControllersWithViews(options =>
@@ -48,7 +50,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login"; // Đường dẫn đến trang login
         options.LogoutPath = "/Account/Logout"; // Đường dẫn logout
         options.AccessDeniedPath = "/Account/AccessDenied"; // Đường dẫn khi bị từ chối truy cập
-        options.ExpireTimeSpan = TimeSpan.FromHours(5); // Thời gian hết hạn cookie 3 tiếng
+        options.ExpireTimeSpan = TimeSpan.FromHours(3); // Thời gian hết hạn cookie 3 tiếng
         options.SlidingExpiration = true; // Gia hạn cookie khi user hoạt động
         options.Cookie.Name = ".PRJ_WAREHOUSE_BIVN.Auth";
         options.Cookie.HttpOnly = true;
@@ -62,12 +64,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddDbContext<COST_MANAGEMENTContext>(options =>
     options.UseSqlServer(costManagerConnection));
 builder.Services.AddDbContext<WorkingSystemContext> (options =>options.UseSqlServer(workingControlConnection));
+builder.Services.AddDbContext<AgentContext>(options => options.UseSqlServer(agentConnection));
 
 
 builder.Services.Configure<ConnectionStringOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 
 builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(costManagerConnection));
 builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(workingControlConnection));
+builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(agentConnection));
 
 // khai bao services
 builder.Services.AddAppServices();

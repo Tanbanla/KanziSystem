@@ -1,12 +1,18 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
+using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
-    public class NhomViTriRepository: BaseRepository<ACC_NHOMVITRI, int>, INhomViTriRepository
+    public class NhomViTriRepository : BaseRepository<ACC_NHOMVITRI, int>, INhomViTriRepository
     {
         private readonly COST_MANAGEMENTContext _context;
         public NhomViTriRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration) : base(context, options, configuration)
@@ -18,10 +24,28 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             return await Task.FromResult(_context.ACC_NHOMVITRIs.ToList());
         }
+        // Lấy thông tin theo quyền
+        public async Task<List<ACC_NHOMVITRIDTO>> GetNhomViTriByDepartmentIdAsync(string user)
+        {
+            var sql = @"SELECT distinct [Id_Nhomvitri]
+                  ,[LoaiVitri]
+                  ,[Mahangmuctheovitri]
+                  ,[Tenhangmuctheovitri]
+                  ,[Model]
+              FROM [COST_MANAGEMENT].[dbo].[ACC_NHOMVITRI] as a
+              inner join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+              on a.Mahangmuctheovitri = s.CHR_CodeSection
+              where s.CHR_UserAdid = @User";
+            var parameters = new
+            {
+                User = user
+            };
+            return (await _conn.QueryAsync<ACC_NHOMVITRIDTO>(sql, parameters)).ToList();
+        }
         // Insert list Section
         public async Task<bool> InsertListSectionAsync(List<ACC_NHOMVITRI> nhomViTriList)
         {
-            if(nhomViTriList == null)
+            if (nhomViTriList == null)
             {
                 return false;
             }
@@ -30,7 +54,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 var check = _context.ACC_NHOMVITRIs.FirstOrDefault(x => x.Mahangmuctheovitri == item.Mahangmuctheovitri);
                 var checkList = listTem.Where(c => c.Mahangmuctheovitri == item.Mahangmuctheovitri).FirstOrDefault();
-                if(checkList != null || check != null)
+                if (checkList != null || check != null)
                 {
                     continue;
                 }

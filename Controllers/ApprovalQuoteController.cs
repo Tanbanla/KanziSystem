@@ -62,8 +62,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
-                var result = await _nhomViTriService.GetAllAsync();
-                return (List<ACC_NHOMVITRIDTO>)result.Data;
+                var result = await _nhomViTriService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId() ?? "");
+                return result.Data;
             }
             catch (Exception ex)
             {
@@ -88,7 +88,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
-                var result = await _baoGiaService.GetListMaDonBGAsync();
+                //var result = await _baoGiaService.GetListMaDonBGAsync();
+                var adid = GetCurrentUserId() ?? string.Empty;
+                var result = await _baoGiaService.GetMaDonByAdidAsync(adid);
                 return result.Data;
             }
             catch (Exception ex)
@@ -274,6 +276,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var isGap = firstItem?.CHR_Gap == "false" ? false : true;
                     var sectionName = firstItem?.CHR_SectionName;
                     var maDon = firstItem?.CHR_MaDon;
+                    var userCreate = firstItem?.CHR_CreateBy;
                     // Luu lich su phe duyet
                     var approverHistories = insertedList.Select(b => new BaoGia_History_Approver_of_QuotationDTO
                     {
@@ -323,10 +326,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             try
                             {
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                                var mail = "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn";
+                                var mail = userCreate+ "@brothergroup.net";
                                 var emailResult = await sendMailService.SendMailAsync(mail, mail, 12,
                                     "http://172.26.248.62:8057/Quote/HistoryQuote", isGap,
                                     sectionName, maDon, currentUserId);
+                                //var emailResult = await sendMailService.SendMailToConfirmItemAsync(12, 12, "http://172.26.248.62:8057/Quote/HistoryQuote", true, "", "", currentUserId);
                             }
                             catch(Exception ex)
                             {

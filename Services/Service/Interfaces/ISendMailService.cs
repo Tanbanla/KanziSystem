@@ -16,5 +16,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> SendMailToSupplierByRequestCodeAsync(string requestCode);
         // Gửi mail thông báo đến người yêu cầu khi có cập nhật về đơn yêu cầu
         public Task<GenericResponse<bool>> SendMailToRequesterAsync(string requestCode, string sectionCode, string sectionName, bool? isGap, int step);
+        // Mail gữi xác nhận tên và mã hàng 
+        public Task<GenericResponse<bool>> SendMailToConfirmItemAsync(int step, int codeMail, string? link, bool? isGap, string? sectionCode, string? sectionName ,string user);
     }
 }
