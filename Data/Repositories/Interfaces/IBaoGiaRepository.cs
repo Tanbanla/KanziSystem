@@ -22,16 +22,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Cập nhật đơn báo giá
         public Task<BaoGia_Request_of_Quotation> CapNhatDonBaoGiaAsync(BaoGia_Request_of_Quotation baogia);
         // Lấy thông tin báo giá gom nhóm
-        public Task<List<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize);
+        public Task<List<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string user, int pageIndex, int pageSize);
         // Xuất báo giá
         public Task<List<int>> ExportBaoGiaAsync(string? maDon);
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
         public Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, int pageIndex, int pageSize);
 
         // Lấy thông tin kèm chi tiết báo giá
-        public Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, int pageIndex, int pageSize);
+        public Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize);
     
         // lấy mã đơn theo Adid
         public Task<List<string>> GetMaDonByAdidAsync(string adid);
+        // update thông tin màn hình lịch sử báo giá
+        public Task<bool> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_Quotation> baoGias);
     }
 }

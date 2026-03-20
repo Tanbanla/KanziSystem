@@ -1,7 +1,5 @@
 ﻿using Dapper;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Wordprocessing;
+// removed unused OpenXML usings
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -137,6 +135,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Cập nhâp danh sách mã đơn báo giá
         public async Task<List<BaoGia_Request_of_Quotation>> CapNhatDanhSachBGAsync(List<BaoGia_Request_of_Quotation> danhSachMaDonBG)
         {
+            if (danhSachMaDonBG == null || !danhSachMaDonBG.Any())
+            {
+                return new List<BaoGia_Request_of_Quotation>();
+            }
+
+            // Update range and persist changes
             _context.BaoGia_Request_of_Quotations.UpdateRange(danhSachMaDonBG);
             await _context.SaveChangesAsync();
             return danhSachMaDonBG;
@@ -153,15 +157,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return baogia;
         }
         // Lấy danh sách báo giá theo mã đơn
-        public async Task<List<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
+        public async Task<List<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string user, int pageIndex, int pageSize)
         {
             var sql = new StringBuilder(@"
             WITH rq AS (
                 SELECT r.*
                 FROM [BaoGia_Request_of_Quotation] AS r
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5");
             var parameters = new DynamicParameters();
 
+            if (!string.IsNullOrEmpty(user))
+            {
+                sql.Append(" AND s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
             if (!string.IsNullOrEmpty(maDon))
             {
                 sql.Append(" AND r.CHR_MaDon = @MaDon");
@@ -204,14 +214,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     --rr.CHR_Phanloai,
                     --rr.NVCHR_NameVN,
                     --rr.NVCHR_ChungLoai,
-                    rr.DTM_NgayMuonNhan,
+                    --rr.DTM_NgayMuonNhan,
                     CASE WHEN grp.CompletedCount = grp.ExpectedCount AND grp.ExpectedCount > 0 THEN N'Chưa chọn NCC' ELSE N'Đang chờ' END AS [Status]
                 FROM rq rr
                 LEFT JOIN grp ON grp.CHR_MaDon = rr.CHR_MaDon AND grp.CHR_MaHangNoiBo = rr.CHR_MaHangNoiBo");
 
             if (pageSize > 0 && pageIndex > 0)
             {
-                sql.Append(" ORDER BY rr.DTM_NgayMuonNhan DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                sql.Append(" ORDER BY rr.CHR_MaDon DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
                 parameters.Add("Offset", (pageIndex - 1) * pageSize);
                 parameters.Add("PageSize", pageSize);
             }
@@ -342,11 +352,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             };
         }
         // Lấy thông tin kèm chi tiết báo giá
-        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize)
         {
             var sql = new StringBuilder(@"
             WITH StatusCheck AS (
                 SELECT 
+                    distinct
                     r.id,
                     r.CHR_MaDon,
                     r.CHR_MaHangNoiBo,
@@ -362,10 +373,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                      CASE WHEN r.ID_StepBaoGia >= 9 and r.ID_StepBaoGia <12 then 1 else 0 END as CofirmedName 
                 FROM BaoGia_Request_of_Quotation r
                 LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
 
             var parameters = new DynamicParameters();
-
+            if (!string.IsNullOrEmpty(user))
+            {
+                sql.Append(" AND s.CHR_UserAdid= @User");
+                parameters.Add("User", user);
+            }
             if (!string.IsNullOrEmpty(maDon))
             {
                 sql.Append(" AND r.CHR_MaDon = @MaDon");
@@ -500,7 +516,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // For total count, build a similar CTE so status filter and partition logic match the main query
             var countSql = new StringBuilder(@"
             WITH StatusCheck AS (
-                SELECT r.id,
+                SELECT distinct r.id,
                        MAX(CASE 
                            WHEN r.CHR_MaHangNoiBo IS NULL 
                                OR r.NVCHR_NameVN IS NULL 
@@ -511,8 +527,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                            CASE WHEN r.ID_StepBaoGia >= 9 and r.ID_StepBaoGia <12 then 1 else 0 END as CofirmedName 
                 FROM BaoGia_Request_of_Quotation r
                 LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
-
+            if (!string.IsNullOrEmpty(user))
+            {
+                countSql.Append(" AND s.CHR_UserAdid= @User");
+            }
             if (!string.IsNullOrEmpty(maDon))
             {
                 countSql.Append(" AND r.CHR_MaDon = @MaDon");
@@ -576,6 +596,76 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var parameters = new { Adid = adid };
             var maDons = await _conn.QueryAsync<string>(sql, parameters);
             return maDons.ToList();
+        }
+        // update thông tin màn hình lịch sử báo giá
+        public async Task<bool> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_Quotation> baoGias)
+        {
+            var listUpdate = new List<BaoGia_Request_of_Quotation>();
+            var listOldData = await _context.BaoGia_Request_of_Quotations.Where(c => baoGias.Select(b => b.ID).Contains(c.ID) && c.ID_Status.Contains("RETURN")).ToListAsync();
+            if(listOldData == null || !listOldData.Any())
+            {
+                throw new Exception("Dữ liệu không tồn tại hoặc không ở trạng thái RETURN để sửa lại");
+            }
+            var listHistory = new List<BaoGia_History_Request_of_Quotation>();
+            foreach (var baoGia in baoGias)
+            {
+                var dto = listOldData.Find(c => c.ID == baoGia.ID);
+                if (dto != null)
+                {
+                    dto.CHR_SectionCode = baoGia.CHR_SectionCode;
+                    dto.CHR_SectionName = baoGia.CHR_SectionName;
+                    dto.CHR_Phanloai = baoGia.CHR_Phanloai;
+                    dto.CHR_MaThietBi = baoGia.CHR_MaThietBi;
+                    dto.CHR_MaHangNoiBo = baoGia.CHR_MaHangNoiBo;
+                    dto.CHR_MaHangNCC = baoGia.CHR_MaHangNCC;
+                    dto.NVCHR_NameVN = baoGia.NVCHR_NameVN;
+                    dto.CHR_NameEN = baoGia.CHR_NameEN;
+                    dto.INT_SoLuong = baoGia.INT_SoLuong;
+                    dto.NVCHR_DonVi = baoGia.NVCHR_DonVi;
+                    dto.NVCHR_ChungLoai = baoGia.NVCHR_ChungLoai;
+                    dto.NVCHR_HinhDang = baoGia.NVCHR_HinhDang;
+                    dto.NVCHR_ChatLieu = baoGia.NVCHR_ChatLieu;
+                    dto.NVCHR_ThanhPhan = baoGia.NVCHR_ThanhPhan;
+                    dto.NVCHR_KichThuoc = baoGia.NVCHR_KichThuoc;
+                    dto.NVCHR_DongMay = baoGia.NVCHR_DongMay;
+                    dto.NVCHR_TinhNang = baoGia.NVCHR_TinhNang;
+                    dto.NVCHR_Rohs = baoGia.NVCHR_Rohs;
+                    dto.NVCHR_COCQ = baoGia.NVCHR_COCQ;
+                    dto.NVCHR_MSDS = baoGia.NVCHR_MSDS;
+                    dto.NVCHR_AnToan = baoGia.NVCHR_AnToan;
+                    dto.NVCHR_FileThietKe = baoGia.NVCHR_FileThietKe;
+                    dto.NVCHR_NhaSanXuat = baoGia.NVCHR_NhaSanXuat;
+                    dto.CHR_MaNCC = baoGia.CHR_MaNCC;
+                    dto.NVCHR_TenNCC = baoGia.NVCHR_TenNCC;
+                    dto.DTM_NgayMuonNhan = baoGia.DTM_NgayMuonNhan;
+                    dto.DTM_KyHan = baoGia.DTM_KyHan;
+                    dto.BIT_LayBaoGia = baoGia.BIT_LayBaoGia;
+                    dto.NVCHR_LyDo = baoGia.NVCHR_LyDo;
+                    dto.CHR_Gap = baoGia.CHR_Gap;
+                    dto.CHR_CreateBy = baoGia.CHR_CreateBy;
+                    dto.DTM_UpdateLater = DateTime.Now;
+                    dto.INT_SoLanUpdate = (dto.INT_SoLanUpdate ?? 0) + 1;
+                    listUpdate.Add(dto);
+                    var history = new BaoGia_History_Request_of_Quotation
+                    {
+                        ID_RequestQuote = dto.ID,
+                        CHR_MaDon = dto.CHR_MaDon,
+                        CHR_UpdateBy = dto.CHR_CreateBy,
+                        NVCHR_UpdateName = "",
+                        CHR_Updatedate = DateTime.Now,
+                        CHR_ChangedColumns = "",
+                        CHR_OldData = System.Text.Json.JsonSerializer.Serialize(listOldData.FirstOrDefault(c => c.ID == dto.ID)),
+                        CHR_NewData = System.Text.Json.JsonSerializer.Serialize(dto),
+                        NVCHR_LyDo = "",
+                        CHR_ActionType = "UPDATE"
+                    };
+                    listHistory.Add(history);
+                }
+            }
+            await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(listHistory);
+            _context.BaoGia_Request_of_Quotations.UpdateRange(listUpdate);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

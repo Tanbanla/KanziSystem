@@ -126,7 +126,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             // Build count SQL using same FROM/WHERE so total respects filters
             var countSql = new StringBuilder();
-            countSql.Append("SELECT COUNT(1) ");
+            countSql.Append("SELECT COUNT(distinct d.ID) ");
             countSql.Append(baseFrom.ToString());
             countSql.Append(whereBuilder.ToString());
 

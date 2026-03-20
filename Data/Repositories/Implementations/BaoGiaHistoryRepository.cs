@@ -19,122 +19,73 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lấy lịch sử báo giá theo ID_RequestQuote
         public async Task<List<BaoGia_History_Request_of_Quotation>> GetByRequestQuoteIdAsync(int idRequestQuote)
         {
-            try
-            {
-                var result = await _context.BaoGia_History_Request_of_Quotations
-                .Where(h => h.ID_RequestQuote == idRequestQuote)
-                .ToListAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in GetByRequestQuoteIdAsync: {ex.Message}");
-                return new List<BaoGia_History_Request_of_Quotation>();
-            }
+            var result = await _context.BaoGia_History_Request_of_Quotations
+            .Where(h => h.ID_RequestQuote == idRequestQuote)
+            .ToListAsync();
+            return result;
         }
         // Tìm kiếm danh sách thông tin lịch sử báo giá theo số đơn
         public async Task<List<BaoGia_History_Request_of_Quotation>> SearchBySoDonAsync(string soDon)
         {
-            try
-            {
-                var result = await _context.BaoGia_History_Request_of_Quotations
-                .Where(h => h.CHR_MaDon == soDon)
-                .OrderBy(h => h.ID_RequestQuote)
-                .ToListAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in SearchBySoDonAsync: {ex.Message}");
-                return new List<BaoGia_History_Request_of_Quotation>();
-            }
+            var result = await _context.BaoGia_History_Request_of_Quotations
+            .Where(h => h.CHR_MaDon == soDon)
+            .OrderBy(h => h.ID_RequestQuote)
+            .ToListAsync();
+            return result;
         }
         // Tìm kiếm lịch sử báo giá và phân trang
         public async Task<List<BaoGia_History_Request_of_Quotation>> SearchAsync(int? idRequestQuote, string? soDon, int? pageIndex, int? pageSize)
         {
-            try
+            var sql = @"
+                SELECT *
+                FROM BaoGia_History_Request_of_Quotation
+                WHERE (@soDon IS NULL OR @soDon = '' OR CHR_MaDon LIKE '%' + @soDon + '%') 
+                AND (ID_RequestQuote = @IdRequestQuote OR @IdRequestQuote IS NULL OR @IdRequestQuote = '')
+                ";
+            if (pageSize > 0 && pageIndex > 0)
             {
-                var sql = @"
-                    SELECT *
-                    FROM BaoGia_History_Request_of_Quotation
-                    WHERE (@soDon IS NULL OR @soDon = '' OR CHR_MaDon LIKE '%' + @soDon + '%') 
-                    AND (ID_RequestQuote = @IdRequestQuote OR @IdRequestQuote IS NULL OR @IdRequestQuote = '')
-                    ";
-                if (pageSize > 0 && pageIndex > 0)
-                {
-                    sql += @"
-                    ORDER BY ID_RequestQuote
-                    OFFSET @Offset ROWS
-                    FETCH NEXT @PageSize ROWS ONLY
-                    ";
-                }
-                else
-                {
-                    sql += @"
-                    ORDER BY ID_RequestQuote
-                    ";
-                }
-
-                var parameters = new
-                {
-                    soDon = string.IsNullOrEmpty(soDon) ? null : soDon,
-                    IdRequestQuote = idRequestQuote,
-                    Offset = (pageIndex - 1) * pageSize,
-                    PageSize = pageSize
-                };
-                return (await _conn.QueryAsync<BaoGia_History_Request_of_Quotation>(sql, parameters)).ToList();
-
+                sql += @"
+                ORDER BY ID_RequestQuote
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY
+                ";
             }
-            catch(Exception ex)
+            else
             {
-                Console.WriteLine($"Error in SearchAsync: {ex.Message}");
-                return new List<BaoGia_History_Request_of_Quotation>();
+                sql += @"
+                ORDER BY ID_RequestQuote
+                ";
             }
+
+            var parameters = new
+            {
+                soDon = string.IsNullOrEmpty(soDon) ? null : soDon,
+                IdRequestQuote = idRequestQuote,
+                Offset = (pageIndex - 1) * pageSize,
+                PageSize = pageSize
+            };
+            return (await _conn.QueryAsync<BaoGia_History_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Insert thông tin lịch sử báo giá
         public async Task<bool> InsertHistoryAsync(BaoGia_History_Request_of_Quotation history)
         {
-            try
-            {
-                await _context.BaoGia_History_Request_of_Quotations.AddAsync(history);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in InsertHistoryAsync: {ex.Message}");
-                return false;
-            }
+            await _context.BaoGia_History_Request_of_Quotations.AddAsync(history);
+            await _context.SaveChangesAsync();
+            return true;
         }
         // Insert danh sách lịch sử báo giá
         public async Task<bool> InsertHistoryListAsync(List<BaoGia_History_Request_of_Quotation> historyList)
         {
-            try
-            {
-                await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in InsertHistoryListAsync: {ex.Message}");
-                return false;
-            }
+            await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
+            await _context.SaveChangesAsync();
+            return true;
         }
         // Sửa thông tin lịch sử báo giá
         public async Task<bool> UpdateHistoryAsync(BaoGia_History_Request_of_Quotation history)
         {
-            try
-            {
-                _context.BaoGia_History_Request_of_Quotations.Update(history);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in UpdateHistoryAsync: {ex.Message}");
-                return false;
-            }
+            _context.BaoGia_History_Request_of_Quotations.Update(history);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

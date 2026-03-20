@@ -94,11 +94,11 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 }
 
                 // lay email nha cung cap
-                var toEmail = await _repo.GetSupplierEmailAsync(item);
-                if (string.IsNullOrEmpty(toEmail))
-                {
-                    continue;
-                }
+                //var toEmail = await _repo.GetSupplierEmailAsync(item);
+                //if (string.IsNullOrEmpty(toEmail))
+                //{
+                //    continue;
+                //}
                 // tao bang html
                 var tableHtml = "<table border='1' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;'>";
 
@@ -243,11 +243,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 var bodyTable = mail.CHR_BODY + tableHtml;
                 var body =  string.Format(bodyTable, dearMail);
+                var email = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;" +
+                    "nguyenthilan.huong2@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn;nganng@brothergroup.net;thuongti@brothergroup.net;phuongxq@brothergroup.net";
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {//nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn
                     mail_from = mail.CHR_FROM,
-                    mail_to = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn",
-                    mail_cc = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn",
+                    mail_to = email,
+                    mail_cc = email,
                     mail_bcc = mail.CHR_BCC,
                     title = titleMail,
                     body = body,
@@ -440,12 +442,14 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 var bodyTable = mail.CHR_BODY + tableHtml;
                 var body = string.Format(bodyTable, dearMail);
+                var email = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;" +
+                 "nguyenthilan.huong2@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn;nganng@brothergroup.net;thuongti@brothergroup.net;phuongxq@brothergroup.net";
                 //nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {
                     mail_from = mail.CHR_FROM,
-                    mail_to = "nguyenduy.khanh@brother-bivn.com.vn",
-                    mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",
+                    mail_to = email,
+                    mail_cc = email,
                     mail_bcc = mail.CHR_BCC,
                     title = titleMail,
                     body = body,

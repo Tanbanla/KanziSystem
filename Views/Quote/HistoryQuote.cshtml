@@ -22,6 +22,7 @@
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/HistoryQuote.css" />
 </head>
 
 <div class="container-fluid" id="quote-history">
@@ -38,6 +39,10 @@
             <small class="text-muted">@Localizer["PageSubtitle"]</small>
         </div>
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+            <div class="btn-group me-2 mb-2" role="group">
+                <button type="button" class="btn btn-outline-success" id="btnImportHistory"><i class="fas fa-file-import"></i> @Localizer["ImportFileExcel"]</button>
+            </div>
+            <div style="margin-right: 6px;"></div>
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-primary" id="btnExportHistory"><i class="fas fa-file-export"></i> @Localizer["Export"]</button>
             </div>
@@ -124,7 +129,7 @@
             </div>
         </div>
         <div class="card-body pt-2">
-            <div class="table-responsive">
+            <div class="table-responsive" id="historyGroupTableContainer">
                 <table class="table table-sm table-hover table-bordered align-middle" id="historyGroupTable">
                     <thead class="table-light">
                         <tr class="text-center align-middle">
@@ -232,19 +237,44 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@Localizer["DepartmentCode"]</label>
-                        <input type="text" class="form-control" id="editSectionName" readonly />
+                        <select id="editSectionCode" name="editSectionCode" class="form-select editSectionCode searchable-select">
+                            <option value="">@Localizer["SelectDepartment"].Value</option>
+                            @foreach (var s in listPhong)
+                            {
+                                <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                            }
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@Localizer["Classification"]</label>
-                        <input type="text" class="form-control" id="editPhanLoai" readonly />
+                        <select id="editPhanLoai" name="editPhanLoai" class="form-select editPhanLoai searchable-select">
+                            <option value="">--</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="E">E</option>
+                            <option value="NO LIST">NO LIST</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label w-100">@Localizer["Category"]</label>
-                        <input type="text" class="form-control" id="editChungLoai" readonly />
+                        <select id="editChungLoai" class="form-select editChungLoai searchable-select">
+                            <option value="">--</option>
+                            @foreach (var c in categoryS)
+                            {
+                                <option value="@c">@c</option>
+                            }
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@Localizer["InternalMaterialCode"]</label>
-                        <input type="text" class="form-control" id="editMaHangNoiBo" readonly/>
+                        <select id="editMaHangNoiBo" name="editMaHangNoiBo" class="form-select editMaHangNoiBo searchable-select">
+                            <option value="">--</option>
+                            @foreach (var m in listMaterials)
+                            {
+                                <option value="@m.Material_Code">@m.Material_Code - @m.Material_Name_VN</option>
+                            }
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@Localizer["EquipmentCode"]</label>
@@ -298,7 +328,6 @@
                     <!-- Regulatory and files -->
                     <div class="col-md-4">
                         <label class="form-label w-100">@Localizer["Rohs"]</label>
-@*                         <input type="text" class="form-control" id="editRohs" /> *@
                         <select id="editRohs" name="editRohs" class="form-select editRohs" style="min-height: 40px;">
                             <option value="No Need" selected>No Need</option>
                             <option value="Need">Need</option>
@@ -306,7 +335,6 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label w-100">@Localizer["COCQ"]</label>
-@*                         <input type="text" class="form-control" id="editCOCQ" /> *@
                         <select id="editCOCQ" name="editCOCQ" class="form-select editCOCQ" style="min-height: 40px;">
                             <option value="" selected>-- Chọn CO/CQ --</option>
                             <option value="CO">CO</option>
@@ -332,7 +360,13 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">@Localizer["Supplier"]</label>
-                        <input type="text" class="form-control" id="editNhaCungCap" readonly />
+                        <select id="editNhaCungCap" name="editNhaCungCap" class="form-select searchNhaCungCap searchable-select">
+                            <option value="">--</option>
+                            @foreach (var n in listNCC)
+                            {
+                                <option value="@n.Ma">@n.Ma - @n.Ten</option>
+                            }
+                        </select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label w-100">@Localizer["GetQuotation"]</label>
@@ -365,13 +399,13 @@
                         <input type="date" class="form-control" id="editDaycreate" hidden />
                         <input type="text" class="form-control" id="editStatus" hidden />
                         <input type="text" class="form-control" id="editStep" hidden />
-                        <input type="hidden" id="editSectionCode" />
+
                         <input type="hidden" id="editTenNCC" />
                         <input type="number" class="form-control" id="editSoLanUpdate" hidden />
                         <input type="date" class="form-control" id="editUpdateLater" hidden />
                         <input type="date" class="form-control" id="editDeadline" hidden />
                         <input type="hidden" id="editIsTemplate" />
-                        <input type="hidden" id="editSectionCode" />
+                        <input type="hidden" id="editSectionName" />
                     </div>
                 </form>
             </div>
@@ -461,4 +495,13 @@
 </script>
 @section Scripts {
     <script src="~/js/HistoryQuote.js"></script>
+    <script>
+        (function() {
+            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
+            var panel = document.getElementById('editHistoryModal');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        })();
+    </script>
 }

@@ -394,7 +394,7 @@
         const tbody = document.getElementById('approvalTableBody');
         if (!tbody) return;
         tbody.innerHTML = '';
-        state.orderedMaDons.forEach(maDon => {
+        state.orderedMaDons.forEach((maDon, index) => {
             const group = state.groupsByMaDon[maDon];
             if (!group || group.length === 0) return;
             const first = group[0];
@@ -425,6 +425,8 @@
             tdSelect.appendChild(chk);
 
             const tdStatus = document.createElement('td');
+            const tdNo = document.createElement('td');
+            tdNo.textContent = String(index + 1);
             tdStatus.textContent = getStepName(first.iD_StepBaoGia) || '';
             const tdDetail = document.createElement('td');
             const btn = document.createElement('button');
@@ -469,8 +471,9 @@
                 updateSelectAllState();
             });
 
-            // append cells in order: select, status, detail, ...
+            // append cells in order: select, no, status, detail, ...
             tr.appendChild(tdSelect);
+            tr.appendChild(tdNo);
             tr.appendChild(tdStatus);
             tr.appendChild(tdDetail);
             tr.appendChild(tdMaDon);

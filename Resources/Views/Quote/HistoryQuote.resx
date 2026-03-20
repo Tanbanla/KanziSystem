@@ -372,4 +372,25 @@
   <data name="DONE" xml:space="preserve">
     <value>Hoàn thành</value>
   </data>
+  <data name="ImportFileExcel" xml:space="preserve">
+    <value>Nhập file sửa</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>Đang xuất...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Xuất file thất bại</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Loại file không hợp lệ</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>Nhập file thành công</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Không thể xuất file</value>
+  </data>
 </root>

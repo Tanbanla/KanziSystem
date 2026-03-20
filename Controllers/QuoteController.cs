@@ -81,7 +81,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
-            var danhSach = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync("", "", "", 1, 10);
+            var danhSach = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync("", "", "", GetCurrentUserId(), 1, 10);
             var vm = new QuoteModel
             {
                 DanhSachNhomViTri = nhomViTri,
@@ -104,6 +104,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 search.MaVatTu ?? "",
                 search.MaNcc ?? "",
                 search.Status ?? "",
+                GetCurrentUserId() ?? "",
                 search.PageIndex ?? 1,
                 search.PageSize ?? 10);
             if (!result.Success)
@@ -125,6 +126,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     search.MaVatTu ?? "",
                     search.MaNcc ?? "",
                     search.Status ?? "",
+                    GetCurrentUserId() ?? "",
                     search.PageIndex ?? 1,
                     search.PageSize ?? 10);
                 if (!result.Success)
@@ -1203,7 +1205,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> GetThongTinBaoGiaGomNhom([FromBody] ThongTinBaoGiaGomNhomModel model)
         {
-            var result = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync(model.maDon, model.section, model.maHang, model.pageIndex, model.pageSize);
+            var result = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync(model.maDon, model.section, model.maHang, GetCurrentUserId(), model.pageIndex, model.pageSize);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1809,46 +1811,50 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không tìm thấy worksheet trong template");
                 }
 
-                int row = 10;
+                int row = 7;
                 foreach (var rq in result.Data)
                 {
+                    int col = 1;
                     // Map fields into template columns similar to ExportSelection
-                    ws.Cell(row, 1).SetValue(row - 9); // status placeholder
-                    ws.Cell(row, 2).SetValue(rq?.CHR_SectionCode ?? string.Empty);
-                    ws.Cell(row, 4).SetValue(rq?.CHR_Phanloai ?? string.Empty);
-                    ws.Cell(row, 5).SetValue(rq?.CHR_MaThietBi ?? string.Empty);
-                    ws.Cell(row, 6).SetValue(rq?.CHR_MaHangNoiBo ?? string.Empty);
-                    ws.Cell(row, 7).SetValue(rq?.CHR_MaHangNCC ?? string.Empty);
-                    ws.Cell(row, 8).SetValue(rq?.NVCHR_NameVN ?? string.Empty);
-                    ws.Cell(row, 9).SetValue(rq?.CHR_NameEN ?? string.Empty);
-                    ws.Cell(row, 10).SetValue(rq?.INT_SoLuong.HasValue == true ? rq.INT_SoLuong.Value : 0);
-                    ws.Cell(row, 11).SetValue(rq?.NVCHR_DonVi ?? string.Empty);
-                    ws.Cell(row, 12).SetValue(rq?.NVCHR_ChungLoai ?? string.Empty);
-                    ws.Cell(row, 13).SetValue(rq?.NVCHR_HinhDang ?? string.Empty);
-                    ws.Cell(row, 14).SetValue(rq?.NVCHR_ChatLieu ?? string.Empty);
-                    ws.Cell(row, 15).SetValue(rq?.NVCHR_ThanhPhan ?? string.Empty);
-                    ws.Cell(row, 16).SetValue(rq?.NVCHR_KichThuoc ?? string.Empty);
-                    ws.Cell(row, 17).SetValue(rq?.NVCHR_DongMay ?? string.Empty);
-                    ws.Cell(row, 18).SetValue(rq?.NVCHR_TinhNang ?? string.Empty);
-                    ws.Cell(row, 19).SetValue(rq?.NVCHR_Rohs ?? string.Empty);
-                    ws.Cell(row, 20).SetValue(rq?.NVCHR_COCQ ?? string.Empty);
-                    ws.Cell(row, 21).SetValue(rq?.NVCHR_MSDS ?? string.Empty);
-                    ws.Cell(row, 22).SetValue(rq?.NVCHR_AnToan ?? string.Empty);
-                    ws.Cell(row, 23).SetValue(rq?.NVCHR_FileThietKe ?? string.Empty);
-                    ws.Cell(row, 24).SetValue(rq?.NVCHR_NhaSanXuat ?? string.Empty);
-                    ws.Cell(row, 25).SetValue(rq?.CHR_MaNCC ?? string.Empty);
-                    ws.Cell(row, 26).SetValue(rq?.NVCHR_TenNCC ?? string.Empty);
-                    ws.Cell(row, 27).SetValue(rq?.BIT_LayBaoGia == false ? "X" : "O");
-                    ws.Cell(row, 28).SetValue(rq?.NVCHR_LyDo ?? string.Empty);
-                    ws.Cell(row, 29).SetValue(rq?.DTM_NgayMuonNhan.HasValue == true ? rq.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
-                    ws.Cell(row, 30).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
-                    ws.Cell(row, 31).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
-                    ws.Cell(row, 32).SetValue(rq?.CHR_CreateBy ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(row - 6); // status placeholder
+                    ws.Cell(row, col++).SetValue(rq?.CHR_MaDon ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.ID);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_SectionCode ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_SectionName ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_Phanloai ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_MaThietBi ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_MaHangNoiBo ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_MaHangNCC ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_NameVN ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_NameEN ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.INT_SoLuong.HasValue == true ? rq.INT_SoLuong.Value : 0);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_DonVi ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_ChungLoai ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_HinhDang ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_ChatLieu ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_ThanhPhan ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_KichThuoc ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_DongMay ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_TinhNang ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_Rohs ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_COCQ ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_MSDS ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_AnToan ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_FileThietKe ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_NhaSanXuat ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_MaNCC ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.BIT_LayBaoGia == false ? "X" : "O");
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_LyDo ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.DTM_NgayMuonNhan.HasValue == true ? rq.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
+                    ws.Cell(row, col++).SetValue(rq?.CHR_CreateBy ?? string.Empty);
                     var history = await _baoGiaHistoryService.GetByRequestQuoteIdAsync(rq.ID);
                     var reson = history.Data.Capacity > 0 ? history.Data.OrderByDescending(h => h.CHR_Updatedate).FirstOrDefault()?.NVCHR_LyDo : string.Empty;
                     var statusName = Status.Data.Where(s => s.VCHR_CodeStatus == rq.ID_Status).Select(s => s.NVCHR_TenStatus).FirstOrDefault() ?? string.Empty;
-                    ws.Cell(row, 33).SetValue(statusName);
-                    ws.Cell(row, 34).SetValue(reson);
+                    ws.Cell(row, col++).SetValue(statusName);
+                    ws.Cell(row, col++).SetValue(reson);
                     row++;
                 }
 
@@ -1862,6 +1868,92 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Lỗi xuất file: {ex.Message}");
+            }
+        }
+        // Nhập file chỉnh sửa thông tin lịch sử báo giá 
+        [HttpPost]
+        public async Task<IActionResult> ImportFileExcelEditHistory([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("Not data import file");
+            var listRequest = new List<BaoGia_Request_of_QuotationDTO>();
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                // Dữ liệu bắt đầu từ dòng 7 (the same layout as ExportHistory)
+                int startRow = 7;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int i = startRow; i <= lastRow; i++)
+                {
+                    // Stop if MaDon empty
+                    var maDon = ws.Cell(i, 2).GetString();
+                    if (string.IsNullOrWhiteSpace(maDon)) break;
+
+                    // Read values according to the expected column layout
+                    var dto = new BaoGia_Request_of_QuotationDTO();
+                    try
+                    {
+                        dto.ID = ws.Cell(i, 3).GetValue<int>();
+                    }
+                    catch
+                    {
+                        // if cannot parse id, skip row
+                        continue;
+                    }
+                    dto.CHR_MaDon = maDon;
+                    dto.CHR_SectionCode = ws.Cell(i, 4).GetString();
+                    dto.CHR_SectionName = ws.Cell(i, 5).GetString();
+                    dto.CHR_Phanloai = ws.Cell(i, 6).GetString();
+                    dto.CHR_MaThietBi = ws.Cell(i, 7).GetString();
+                    dto.CHR_MaHangNoiBo = ws.Cell(i, 8).GetString();
+                    dto.CHR_MaHangNCC = ws.Cell(i, 9).GetString();
+                    dto.NVCHR_NameVN = ws.Cell(i, 10).GetString();
+                    dto.CHR_NameEN = ws.Cell(i, 11).GetString();
+                    dto.INT_SoLuong = ParseDouble(ws.Cell(i, 12).GetString());
+                    dto.NVCHR_DonVi = ws.Cell(i, 13).GetString();
+                    dto.NVCHR_ChungLoai = ws.Cell(i, 14).GetString();
+                    dto.NVCHR_HinhDang = ws.Cell(i, 15).GetString();
+                    dto.NVCHR_ChatLieu = ws.Cell(i, 16).GetString();
+                    dto.NVCHR_ThanhPhan = ws.Cell(i, 17).GetString();
+                    dto.NVCHR_KichThuoc = ws.Cell(i, 18).GetString();
+                    dto.NVCHR_DongMay = ws.Cell(i, 19).GetString();
+                    dto.NVCHR_TinhNang = ws.Cell(i, 20).GetString();
+                    dto.NVCHR_Rohs = ws.Cell(i, 21).GetString();
+                    dto.NVCHR_COCQ = ws.Cell(i, 22).GetString();
+                    dto.NVCHR_MSDS = ws.Cell(i, 23).GetString();
+                    dto.NVCHR_AnToan = ws.Cell(i, 24).GetString();
+                    dto.NVCHR_FileThietKe = ws.Cell(i, 25).GetString();
+                    dto.NVCHR_NhaSanXuat = ws.Cell(i, 26).GetString();
+                    dto.CHR_MaNCC = ws.Cell(i, 27).GetString();
+                    dto.NVCHR_TenNCC = ws.Cell(i, 28).GetString();
+                    dto.BIT_LayBaoGia = ParseBool(ws.Cell(i, 29).GetString());
+                    dto.NVCHR_LyDo = ws.Cell(i, 30).GetString();
+                    dto.DTM_NgayMuonNhan = ParseDate(ws.Cell(i, 31).GetString());
+                    dto.DTM_KyHan = ParseDate(ws.Cell(i, 32).GetString());
+                    dto.CHR_Gap = ws.Cell(i, 33).GetString() == "X" ? "false" : "true";
+                    dto.CHR_CreateBy = ws.Cell(i, 34).GetString() ?? GetCurrentUserId() ?? string.Empty;
+                    dto.DTM_UpdateLater = DateTime.Now;
+
+                    listRequest.Add(dto);
+                }
+
+                if (!listRequest.Any()) return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
+
+                // Call service to update list of requests
+                var result = await _baoGiaService.UpdateThongTinLichSuBaoGiaAsync(listRequest);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error: " + ex.Message);
             }
         }
         // check điều kiện k nhap

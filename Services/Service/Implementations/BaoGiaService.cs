@@ -159,12 +159,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Lấy thông tin báo giá gom nhóm
-        public async Task<GenericResponse<List<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, int pageIndex, int pageSize)
+        public async Task<GenericResponse<List<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string user, int pageIndex, int pageSize)
         {
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                result.Data = await _repo.GetThongTinBaoGiaGomNhomAsync(maDon, section, maHang, pageIndex, pageSize);
+                result.Data = await _repo.GetThongTinBaoGiaGomNhomAsync(maDon, section, maHang, user ,pageIndex, pageSize);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -209,12 +209,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Lấy thông tin kèm chi tiết báo giá
-        public async Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.GetThongTinBaoGiaChiTietAsync(maDon, section, maHang, maNCC, status, pageIndex, pageSize);
+                result.Data = await _repo.GetThongTinBaoGiaChiTietAsync(maDon, section, maHang, maNCC, status, user, pageIndex, pageSize);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -231,6 +231,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             try
             {
                 result.Data = await _repo.GetMaDonByAdidAsync(adid);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // update thông tin màn hình lịch sử báo giá
+        public async Task<GenericResponse<bool>> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.UpdateThongTinLichSuBaoGiaAsync(_mapper.Map<List<BaoGia_Request_of_Quotation>>(baoGias));
                 result.Success = true;
             }
             catch (Exception ex)

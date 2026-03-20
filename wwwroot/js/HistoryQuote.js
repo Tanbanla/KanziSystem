@@ -6,6 +6,7 @@
     const paginationEl = document.getElementById('historyPagination');
     const paginationInfoEl = document.getElementById('historyPaginationInfo');
     const btnExportHistory = document.getElementById('btnExportHistory');
+    const btnImportHistory = document.getElementById('btnImportHistory');
     let currentPage = 1;
     const pageSize = 20;
     let currentGroups = [];
@@ -122,6 +123,57 @@
         } finally {
             hideLoading();
         }
+    });
+    btnImportHistory?.addEventListener('click', async => {
+        // Tạo input file ẩn
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.xlsx, .xls';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const T = window.i18nHistoryQuote || {};
+            // Kiểm tra loại file
+            const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+            if (!allowedTypes.includes(file.type)) {
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidFileType || 'Không thể xuất file'), type: 'error' });
+                document.body.removeChild(fileInput);
+                return;
+            }
+
+            // Tạo FormData
+            const formData = new FormData();
+            formData.append('file', file);
+            // Gửi request ImportSectionExcel
+            try { showLoading((window.i18nHistoryQuote && window.i18nHistoryQuote.LoadingData) || 'Đang xử lý...'); } catch { }
+            fetch('/Quote/ImportFileExcelEditHistory', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                    }
+                    // Thành công
+                    return response.json().then(data => {
+                        showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                    });
+                })
+                .catch(error => {
+                    const T = window.i18nHistoryQuote || {};
+                    showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
+                })
+                .finally(() => {
+                    try { hideLoading(); } catch { }
+                    document.body.removeChild(fileInput);
+                });
+        });
+
+        // Trigger the file picker
+        fileInput.click();
     });
     tblBody?.addEventListener('click', (e) => {
         const t = e.target.closest('button');
@@ -627,58 +679,74 @@
     }
 
     function fillEditFormFromDto(dto) {
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
-        const setSelect = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
-        document.getElementById('editRequestId')?.setAttribute('value', dto.ID ?? dto.id ?? '');
-        document.getElementById('editMaDon') && (document.getElementById('editMaDon').value =  dto.chR_MaDon || '');
-        document.getElementById('editRequester') && (document.getElementById('editRequester').value =  dto.chR_CreateBy || '');
-        setVal('editSectionName', dto.chR_SectionName || '');
-        setVal('editSectionCode', dto.chR_SectionCode || '');
+        // universal setter for inputs and selects; for selects ensure option exists
+        function setControlValue(id, val, textForOption) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            try {
+                if (el.tagName === 'SELECT') {
+                    const strVal = val == null ? '' : String(val);
+                    const exists = Array.from(el.options).some(o => String(o.value) === strVal);
+                    if (!exists && strVal !== '') {
+                        const opt = document.createElement('option');
+                        opt.value = strVal;
+                        opt.text = textForOption ?? strVal;
+                        el.appendChild(opt);
+                    }
+                    el.value = strVal;
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+                } else {
+                    el.value = val ?? '';
+                }
+            } catch (e) { try { el.value = val ?? ''; } catch {} }
+        }
 
-        setSelect('editChungLoai',  dto.nvchR_ChungLoai || '');
-        try { document.getElementById('editChungLoai')?.dispatchEvent(new Event('change', { bubbles: true })); } catch {}
-        setSelect('editPhanLoai', dto.chR_Phanloai || '');
-        try { document.getElementById('editPhanLoai')?.dispatchEvent(new Event('change', { bubbles: true })); } catch {}
-        setVal('editMaThietBi',  dto.chR_MaThietBi || '');
-        setSelect('editMaHangNoiBo',  dto.chR_MaHangNoiBo || '');
-        try { document.getElementById('editMaHangNoiBo')?.dispatchEvent(new Event('change', { bubbles: true })); } catch {}
-        setVal('editMaHangNCC',  dto.chR_MaHangNCC || '');
-        setVal('editTenHangVN',  dto.nvchR_NameVN || '');
-        setVal('editTenHangEN',  dto.chR_NameEN || '');
-        setVal('editSoLuong',  dto.inT_SoLuong ?? '');
-        setVal('editDonVi',  dto.nvchR_DonVi || '');
-        setVal('editHinhDang',  dto.nvchR_HinhDang || '');
-        setVal('editChatLieu',  dto.nvchR_ChatLieu || '');
-        setVal('editThanhPhan',  dto.nvchR_ThanhPhan || '');
-        setVal('editKichThuoc',  dto.nvchR_KichThuoc || '');
-        setVal('editDongMay',  dto.nvchR_DongMay || '');
-        setVal('editTinhNang',  dto.nvchR_TinhNang || '');
-        setSelect('editRohs',  dto.nvchR_Rohs || '');
-        setSelect('editCOCQ',  dto.nvchR_COCQ || '');
-        setVal('editMSDS',  dto.nvchR_MSDS || '');
-        setVal('editAnToan',dto.nvchR_AnToan || '');
-        setVal('editFileThietKe', dto.nvchR_FileThietKe || '');
-        setVal('editNhaSanXuat',  dto.nvchR_NhaSanXuat || '');
-        setSelect('editNhaCungCap', dto.chR_MaNCC || '');
-        setVal('editTenNCC', dto.nvchR_TenNCC || '');
-        setVal('editStatus', dto.iD_Status || '');
-        setVal('editStep', dto.iD_StepBaoGia || '');
-        setVal('editSoLanUpdate', dto.inT_SoLanUpdate ?? '');
-
-        try { document.getElementById('editNhaCungCap')?.dispatchEvent(new Event('change', { bubbles: true })); } catch {}
-        setSelect('editLayBaoGia', (dto.biT_LayBaoGia) ? 'true' : 'false');
-        try { document.getElementById('editLayBaoGia')?.dispatchEvent(new Event('change', { bubbles: true })); } catch {}
-        setVal('editLyDo', dto.nvchR_LyDo || '');
         const toDateInput = (d) => { try { if (!d) return ''; const dt = new Date(d); return dt.toISOString().slice(0,10);} catch { return ''; } };
-        setVal('editNgayMuonNhan', toDateInput(dto.dtM_NgayMuonNhan));
-        setVal('editKyHan', toDateInput(dto.dtM_KyHan));
-        setSelect('editGap', (dto.chR_Gap) ?? 'false');
-        setVal('editDaycreate', toDateInput(dto.dtM_CreateDate) || '');
-        setVal('editUpdateLater', toDateInput(dto.dtM_UpdateLater) || '');
-        setVal('editDeadline', toDateInput(dto.dtM_Deadline) || '');
-        setSelect('editIsTemplate', (dto.biT_IsTemplate === true) ? 'true' : (dto.biT_IsTemplate === false) ? 'false' : '');
-        setVal('editSectionName', dto.chR_SectionName || '');
-        try { document.getElementById('editGap')?.dispatchEvent(new Event('change', { bubbles: true })); } catch {}
+
+        document.getElementById('editRequestId')?.setAttribute('value', dto.ID ?? dto.id ?? '');
+        setControlValue('editMaDon', dto.chR_MaDon || dto.CHR_MaDon || '');
+        setControlValue('editRequester', dto.chR_CreateBy || dto.CHR_CreateBy || '');
+        // Section uses code as option value
+        setControlValue('editSectionCode', dto.chR_SectionCode || dto.CHR_SectionCode || '');
+        setControlValue('editSectionName', dto.chR_SectionName || dto.CHR_SectionName || '');
+
+        setControlValue('editChungLoai', dto.nvchR_ChungLoai || dto.NVCHR_ChungLoai || '');
+        setControlValue('editPhanLoai', dto.chR_Phanloai || dto.CHR_Phanloai || '');
+        setControlValue('editMaThietBi', dto.chR_MaThietBi || dto.CHR_MaThietBi || '');
+        setControlValue('editMaHangNoiBo', dto.chR_MaHangNoiBo || dto.CHR_MaHangNoiBo || '');
+        setControlValue('editMaHangNCC', dto.chR_MaHangNCC || dto.CHR_MaHangNCC || '');
+        setControlValue('editTenHangVN', dto.nvchR_NameVN || dto.NVCHR_NameVN || '');
+        setControlValue('editTenHangEN', dto.chR_NameEN || dto.CHR_NameEN || '');
+        setControlValue('editSoLuong', dto.inT_SoLuong ?? '');
+        setControlValue('editDonVi', dto.nvchR_DonVi || dto.NVCHR_DonVi || '');
+        setControlValue('editHinhDang', dto.nvchR_HinhDang || dto.NVCHR_HinhDang || '');
+        setControlValue('editChatLieu', dto.nvchR_ChatLieu || dto.NVCHR_ChatLieu || '');
+        setControlValue('editThanhPhan', dto.nvchR_ThanhPhan || dto.NVCHR_ThanhPhan || '');
+        setControlValue('editKichThuoc', dto.nvchR_KichThuoc || dto.NVCHR_KichThuoc || '');
+        setControlValue('editDongMay', dto.nvchR_DongMay || dto.NVCHR_DongMay || '');
+        setControlValue('editTinhNang', dto.nvchR_TinhNang || dto.NVCHR_TinhNang || '');
+        setControlValue('editRohs', dto.nvchR_Rohs || dto.NVCHR_Rohs || '');
+        setControlValue('editCOCQ', dto.nvchR_COCQ || dto.NVCHR_COCQ || '');
+        setControlValue('editMSDS', dto.nvchR_MSDS || dto.NVCHR_MSDS || '');
+        setControlValue('editAnToan', dto.nvchR_AnToan || dto.NVCHR_AnToan || '');
+        setControlValue('editFileThietKe', dto.nvchR_FileThietKe || dto.NVCHR_FileThietKe || '');
+        setControlValue('editNhaSanXuat', dto.nvchR_NhaSanXuat || dto.NVCHR_NhaSanXuat || '');
+        setControlValue('editNhaCungCap', dto.chR_MaNCC || dto.CHR_MaNCC || '');
+        setControlValue('editTenNCC', dto.nvchR_TenNCC || dto.NVCHR_TenNCC || '');
+        setControlValue('editStatus', dto.iD_Status || dto.ID_Status || '');
+        setControlValue('editStep', dto.iD_StepBaoGia || dto.ID_StepBaoGia || '');
+        setControlValue('editSoLanUpdate', dto.inT_SoLanUpdate ?? '');
+
+        setControlValue('editLayBaoGia', (dto.biT_LayBaoGia) ? 'true' : 'false');
+        setControlValue('editLyDo', dto.nvchR_LyDo || dto.NVCHR_LyDo || '');
+        setControlValue('editNgayMuonNhan', toDateInput(dto.dtM_NgayMuonNhan));
+        setControlValue('editKyHan', toDateInput(dto.dtM_KyHan));
+        setControlValue('editGap', (dto.chR_Gap) ?? 'false');
+        setControlValue('editDaycreate', toDateInput(dto.dtM_CreateDate) || '');
+        setControlValue('editUpdateLater', toDateInput(dto.dtM_UpdateLater) || '');
+        setControlValue('editDeadline', toDateInput(dto.dtM_Deadline) || '');
+        setControlValue('editIsTemplate', (dto.biT_IsTemplate === true) ? 'true' : (dto.biT_IsTemplate === false) ? 'false' : '');
+
         // enhance selects if needed
         try { if (window.jQuery) buildSearchableDropdown($(document)); else buildSearchableDropdown(document); } catch {}
     }

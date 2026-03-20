@@ -372,4 +372,25 @@
   <data name="DONE" xml:space="preserve">
     <value>終わり</value>
   </data>
+  <data name="ImportFileExcel" xml:space="preserve">
+    <value>Import edited files</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>エクスポート中...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>ファイルのエクスポートに失敗しました</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>無効なファイル形式</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>処理中...</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>ファイルのインポートに成功しました</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>ファイルをエクスポートできません</value>
+  </data>
 </root>

@@ -372,4 +372,25 @@
   <data name="DONE" xml:space="preserve">
     <value>Done</value>
   </data>
+  <data name="ImportFileExcel" xml:space="preserve">
+    <value>Import edited files</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>Exporting...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Export file failed</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Invalid file type</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>File imported successfully</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Cannot export file</value>
+  </data>
 </root>
