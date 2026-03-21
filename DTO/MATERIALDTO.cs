@@ -63,7 +63,8 @@ public partial class MATERIALDTO
 
     public string? GetTenMoThuTuc()
     {
-        return Shape + " " + Material + " " + Composition + " " + Dimension + " " + UsedFor + " " + Purpose;
+        return Category_VN +" có hình dáng dạng " +Shape + " chất liệu " 
+            + Material + " thành phần hóa chất " + Composition + " có kích thước " + Dimension + " dung để " + UsedFor + " cho " + Purpose;
     }
 
     // Expose TenMoThuTuc as a property so it will be included in JSON responses

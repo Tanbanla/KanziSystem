@@ -72,7 +72,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var vitris = await LoadNhomViTriDataAsync();
             var vm = new MaterialVM
             {
-                vitris = vitris
+                vitris = vitris,
+                confirmedCodes = await LoadConfirmedCodesAsync()
             };
             return View(vm);
         }
@@ -81,7 +82,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nhomViTri = await _nhomViTriService.GetAllNhomViTriAsync();
             return nhomViTri.Data ?? new List<ACC_NHOMVITRIDTO>();
         }
-
+        private async Task<List<dynamic>> LoadConfirmedCodesAsync()
+        {
+            var result = await _confirmNameService.ExportCodeConfirmedAsync();
+            return result.Success && result.Data != null ? result.Data : new List<dynamic>();
+        }
         // Search confirm list
         [HttpPost]
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
@@ -475,6 +480,55 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 workbook.SaveAs(outStream);
                 var bytes = outStream.ToArray();
                 var fileName = $"TableConfirmName_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xuất file: {ex.Message}");
+            }
+        }
+        // Xuất các mã hàng đã được xác nhận thành file Excel
+        [HttpPost]
+        public async Task<IActionResult> ExportCodeCofirmed()
+        {
+            try
+            {
+                var data = await _confirmNameService.ExportCodeConfirmedAsync();
+                if (!data.Success)
+                {
+                    return BadRequest("Error retrieving data: " + data.Message);
+                }
+                if (data.Data == null) return BadRequest("Not data");
+                var items = data.Data;
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = System.IO.Path.Combine(root, "template", "ConfirmedCodeMaterial.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: ConfirmedCodeMaterial.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+                int row = 2;
+                int idx = 1;
+                foreach (var rq in items)
+                {
+                    ws.Cell(row, 1).SetValue(idx);
+                    ws.Cell(row, 2).SetValue(rq.Material_Code);
+                    ws.Cell(row, 3).SetValue(rq.Material_Name_VN);
+                    idx++;
+                    row++;
+                }
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"ConfirmedCodeMaterial_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 return File(bytes, contentType, fileName);
             }

@@ -444,6 +444,18 @@
             const tdNgayNhan = document.createElement('td'); tdNgayNhan.textContent = formatDate(first.dtM_NgayMuonNhan);
             const tdKyHan = document.createElement('td'); tdKyHan.textContent = formatDate(first.dtM_Deadline || first.dtM_KyHan);
 
+            // NOTE: append cells once (order: select, no, status, detail, maDon, ngayYC, tenPB, pic, ngayNhan, kyHan)
+            // style some cells centered for better readability
+            tdSelect.className = (tdSelect.className ? tdSelect.className + ' ' : '') + 'text-center align-middle';
+            tdNo.className = (tdNo.className ? tdNo.className + ' ' : '') + 'text-center';
+            tdStatus.className = (tdStatus.className ? tdStatus.className + ' ' : '') + 'text-center';
+            tdDetail.className = (tdDetail.className ? tdDetail.className + ' ' : '') + 'text-center';
+            tdNgayYC.className = (tdNgayYC.className ? tdNgayYC.className + ' ' : '') + 'text-center';
+            tdNgayNhan.className = (tdNgayNhan.className ? tdNgayNhan.className + ' ' : '') + 'text-center';
+            tdKyHan.className = (tdKyHan.className ? tdKyHan.className + ' ' : '') + 'text-center';
+
+            tr.appendChild(tdSelect);
+            tr.appendChild(tdNo);
             tr.appendChild(tdStatus);
             tr.appendChild(tdDetail);
             tr.appendChild(tdMaDon);
@@ -565,29 +577,57 @@
         const frag = document.createDocumentFragment();
         group.forEach((it, idx) => {
             const tr = document.createElement('tr');
-            function td(text) { const c = document.createElement('td'); c.textContent = text || ''; return c; }
-            tr.appendChild(td(String(idx + 1)));
-                tr.appendChild(td(maDon)); // Mã đơn
-                tr.appendChild(td(it.chR_MaHangNoiBo)); // Mã vật tư nội bộ
-                tr.appendChild(td(it.nvchR_ChungLoai)); // Mã vật tư nội bộ
-                tr.appendChild(td(((it.nvchR_NameVN || '') + (it.nvchR_NameEN ? ' / ' + it.nvchR_NameEN : '')).trim())); // Tên hàng (VN/EN)
-                tr.appendChild(td(it.inT_SoLuong != null ? String(it.inT_SoLuong) : ''));// Số lượng
-                tr.appendChild(td(it.nvchR_DonVi)); // Đơn vị
-                tr.appendChild(td(it.nvchR_HinhDang)); // Hình dạng
-                tr.appendChild(td(it.nvchR_ChatLieu)); // Vật liệu
-                tr.appendChild(td(it.nvchR_ThanhPhan)); // Thành phần
-                tr.appendChild(td(it.nvchR_KichThuoc)); // Kích thước
-                tr.appendChild(td(it.nvchR_DongMay)); // dòng máy
-                //tr.appendChild(td(it.nvchR_DongMay)); // Vị trí sử dụng
-                tr.appendChild(td(it.nvchR_TinhNang)); // Mục đích/Tính năng
-                const ncc = (it.chR_MaNCC ? it.chR_MaNCC : '') + (it.nvchR_TenNCC ? ` - ${it.nvchR_TenNCC}` : '');
-                tr.appendChild(td(ncc.trim())); // NCC
-                tr.appendChild(td(formatDate(it.dtM_KyHan))); // Ngày nhận mong muốn
-                const gap = it.chR_Gap != null ? (String(it.chR_Gap).toLowerCase() === 'true' || String(it.chR_Gap) === '1' ? 'O' : 'X') : '';
-                tr.appendChild(td(gap)); // Khẩn
-                const layBaogia = it.biT_LayBaoGia != null ? (String(it.biT_LayBaoGia).toLowerCase() === 'true' || String(it.biT_LayBaoGia) === '1' ? 'O' : 'X') : '';
-                tr.appendChild(td(layBaogia)); // Lấy báo giá
-                tr.appendChild(td(it.nvchR_LyDo)); // Lý do
+            function td(text) { const c = document.createElement('td'); c.textContent = text == null ? '' : String(text); return c; }
+            // helper to read multiple possible property names
+            const getVal = (obj, ...names) => {
+                for (const n of names) {
+                    if (!obj) continue;
+                    // accept exact property or different casing
+                    if (obj[n] !== undefined && obj[n] !== null) return obj[n];
+                    const alt = Object.keys(obj).find(k => k.toLowerCase() === n.toLowerCase());
+                    if (alt && obj[alt] !== undefined) return obj[alt];
+                }
+                return '';
+            };
+
+            // Build cells and apply centering to numeric/short columns
+            const tdIndex = td(String(idx + 1)); tdIndex.className = 'text-center'; tr.appendChild(tdIndex);
+            const tdMaDonCell = td(maDon); tr.appendChild(tdMaDonCell); // Mã đơn (SystemCode)
+            tr.appendChild(td(getVal(it, 'chR_MaHangNoiBo', 'chR_MaHangNoiBo'))); // Mã vật tư nội bộ
+            tr.appendChild(td(getVal(it, 'nvchR_ChungLoai', 'nvchR_ChungLoai'))); // Chủng loại
+            const tdPhanLoai = td(getVal(it, 'chR_Phanloai', 'chR_Phanloai')); tdPhanLoai.className = 'text-center'; tr.appendChild(tdPhanLoai); // Phân loại (Classification)
+            tr.appendChild(td(getVal(it, 'chR_MaHangNCC', 'chR_MaHangNCC'))); // Mã hàng NCC (SupplierItemCode)
+            tr.appendChild(td(((getVal(it, 'nvchR_NameVN', 'nvchR_NameVN') || '') + (getVal(it, 'nvchR_NameEN', 'nvchR_NameEN') ? ' / ' + getVal(it, 'nvchR_NameEN', 'nvchR_NameEN') : '')).trim())); // Tên hàng (VN/EN)
+
+            // Description group (8 cols)
+            const tdQty = td(getVal(it, 'inT_SoLuong', 'inT_SoLuong')); tdQty.className = 'text-center'; tr.appendChild(tdQty); // Số lượng
+            const tdDonVi = td(getVal(it, 'nvchR_DonVi', 'nvchR_DonVi')); tdDonVi.className = 'text-center'; tr.appendChild(tdDonVi); // Đơn vị
+            tr.appendChild(td(getVal(it, 'nvchR_HinhDang', 'nvchR_HinhDang'))); // Hình dạng
+            tr.appendChild(td(getVal(it, 'nvchR_ChatLieu', 'nvchR_ChatLieu'))); // Chất liệu
+            tr.appendChild(td(getVal(it, 'nvchR_ThanhPhan', 'nvchR_ThanhPhan'))); // Thành phần
+            tr.appendChild(td(getVal(it, 'nvchR_KichThuoc', 'nvchR_KichThuoc'))); // Kích thước
+            tr.appendChild(td(getVal(it, 'nvchR_DongMay', 'nvchR_DongMay'))); // Dùng cho máy/vi trí
+            tr.appendChild(td(getVal(it, 'nvchR_TinhNang', 'nvchR_TinhNang'))); // Tính năng/Purpose
+
+            // Additional fields requested
+            tr.appendChild(td(getVal(it, 'nvchR_FileThietKe', 'nvchR_FileThietKe', 'chr_FileThietKe'))); // File thiết kế
+            tr.appendChild(td(getVal(it, 'nvchR_NhaSanXuat', 'nvchR_NhaSanXuat'))); // Nhà sản xuất / Maker
+            tr.appendChild(td(getVal(it, 'chR_MaNCC', 'chR_MaNCC', 'MaNCC'))); // Mã nhà cung cấp / Vendor code
+            tr.appendChild(td(getVal(it, 'nvchR_TenNCC', 'nvchR_TenNCC'))); // Tên nhà cung cấp / Vendor name
+            tr.appendChild(td(getVal(it, 'nvchR_Rohs', 'nvchR_Rohs'))); // ROHS
+            tr.appendChild(td(getVal(it, 'nvchR_COCQ', 'nvchR_COCQ'))); // COCQ
+            tr.appendChild(td(getVal(it, 'nvchR_MSDS', 'nvchR_MSDS'))); // MSDS
+            tr.appendChild(td(getVal(it, 'vchR_AnToan', 'vchR_AnToan'))); // vchR_AnToan
+
+            // Supplier deadline, urgent, get quotation, reason
+            const tdDeadline = td(formatDate(getVal(it, 'dtM_KyHan', 'dtM_KyHan'))); tdDeadline.className = 'text-center'; tr.appendChild(tdDeadline); // Kỳ hạn chọn NCC
+            const gap = getVal(it, 'chR_Gap', 'chR_Gap');
+            const gapLabel = gap != null && gap !== '' ? (String(gap).toLowerCase() === 'true' || String(gap) === '1' ? 'O' : 'X') : '';
+            const tdGap = td(gapLabel); tdGap.className = 'text-center'; tr.appendChild(tdGap); // Khẩn
+            const layBaogia = getVal(it, 'biT_LayBaoGia', 'biT_LayBaoGia');
+            const layLabel = layBaogia != null && layBaogia !== '' ? (String(layBaogia).toLowerCase() === 'true' || String(layBaogia) === '1' ? 'O' : 'X') : '';
+            const tdLay = td(layLabel); tdLay.className = 'text-center'; tr.appendChild(tdLay); // Lấy báo giá
+            tr.appendChild(td(getVal(it, 'nvchR_LyDo', 'nvchR_LyDo'))); // Lý do
             frag.appendChild(tr);
         });
         tbody.appendChild(frag);
@@ -835,9 +875,9 @@
         // Event click Export to Excel
         const btnExport = document.getElementById('btnExcelExport');
         if (btnExport) {
-            const payload = getFilterValues();
             btnExport.addEventListener('click', async function () {
                 try {
+                    const payload = getFilterValues();
                     const res = await fetch('/ApprovalQuote/ExportToExcel', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

@@ -915,8 +915,8 @@
                     return;
                 }
                 const data = await res.json();
-                const items = Array.isArray(data) ? data : [];
-                const totalCount = items.length || 0;
+                const items = Array.isArray(data.data) ? data.data : [];
+                const totalCount = data.totalCount || 0;
                 requestListState.returnedCount = items.length;
                 requestListState.totalCount = totalCount;
                 requestListState.lastPage = (requestListState.pageIndex * requestListState.pageSize) >= totalCount;

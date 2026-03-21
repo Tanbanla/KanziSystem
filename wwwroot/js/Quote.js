@@ -1513,6 +1513,37 @@
                 }
             }
         });
+        function updateTenThuTucHaiQuan(tr) {
+            const categorySel = tr.querySelector('.chungLoaiTb');
+            const categoryVN = categorySel ? (categorySel.options[categorySel.selectedIndex]?.text || '') : '';
+            const shape = getInputValue(tr, 'hinhDang');
+            const material = getInputValue(tr, 'chatLieu');
+            const composition = getInputValue(tr, 'thanhPhan');
+            const dimension = getInputValue(tr, 'kichThuoc');
+            const usedFor = getInputValue(tr, 'viTriSuDung');
+            const purpose = getInputValue(tr, 'tinhNang');
+            const tenHangVN = categoryVN + " có hình dáng dạng " + shape + " chất liệu " + material + " thành phần hóa chất " + composition + " có kích thước " + dimension + " dung để " + usedFor + " cho " + purpose;
+            const vnInput = tr.querySelector('input[id^="tenHangVN_"]');
+            if (vnInput) vnInput.value = tenHangVN;
+        }
+
+        function getInputValue(tr, className) {
+            const el = tr.querySelector('.' + className);
+            return el ? (el.value || '') : '';
+        }
+        // Update ten thu tuc hai quan when related fields change
+        qs('#quoteTableBody')?.addEventListener('input', (e) => {
+            const t = e.target;
+            if (t.classList.contains('chungLoaiTb') || t.classList.contains('hinhDang') || t.classList.contains('chatLieu') || t.classList.contains('thanhPhan') || t.classList.contains('kichThuoc') || t.classList.contains('viTriSuDung') || t.classList.contains('tinhNang')) {
+                updateTenThuTucHaiQuan(t.closest('tr'));
+            }
+        });
+        qs('#quoteTableBody')?.addEventListener('change', (e) => {
+            const t = e.target;
+            if (t.classList.contains('chungLoaiTb')) {
+                updateTenThuTucHaiQuan(t.closest('tr'));
+            }
+        });
 
         // Filter and pagination events
         document.addEventListener('input', (e) => {

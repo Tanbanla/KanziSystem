@@ -27,5 +27,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> ApproveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Rejects Acc
         public Task<bool> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
+        // Export Code Cofirmed
+        public Task<List<dynamic>> ExportCodeConfirmedAsync();
     }
 }

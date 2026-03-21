@@ -209,18 +209,27 @@
                                     <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["SystemCode"]</th>
                                     <th rowspan="2" style="min-width: 150px; background-color: #dee2e6; color:#000;">@Localizer["InternalMaterialCodeShort"]</th>
                                     <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["Category"]</th>
+                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["Classification"]</th>
+                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["SupplierItemCode"]</th>
                                     <th rowspan="2" style="min-width: 200px; background-color: #dee2e6; color:#000;">@Localizer["ItemNameVNEN"]</th>
-                                    <th colspan="8" style="background-color: #d3d9e5; color:#000;">@Localizer["DescriptionGroup"]</th>
-                                    <th rowspan="2" style="min-width: 150px; background-color: #dee2e6; color:#000;">@Localizer["SupplierShort"]</th>
+                                    <th rowspan="2" style="min-width: 80px; background-color: #dee2e6; color:#000;">@Localizer["QuantityShort"]</th>
+                                    <th rowspan="2" style="min-width: 70px;background-color: #dee2e6; color:#000;">@Localizer["UnitShort"]</th>
+                                    <th colspan="6" style="background-color: #d3d9e5; color:#000;">@Localizer["DescriptionGroup"]</th>
+                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["DesignFile"]</th>
+                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["Manufacturer"]</th>
+                                    <th rowspan="2" style="min-width: 120px; background-color: #dee2e6; color:#000;">@Localizer["VendorCode"]</th>
+                                    <th rowspan="2" style="min-width: 150px; background-color: #dee2e6; color:#000;">@Localizer["Supplier"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["ROHSRequirement"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["COCQRequirement"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["MSDSRequirement"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["SafetyStandardRequirement"]</th>
                                     <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["SupplierSelectionDeadline"]</th>
-                                    <th rowspan="2" style="width: 60px; background-color: #dee2e6; color:#000;">@Localizer["UrgentShort"]</th>
-                                    <th rowspan="2" style="width: 60px; background-color: #dee2e6; color:#000;">@Localizer["GetQuotation"]</th>
-                                    <th rowspan="2" style="width: 60px; background-color: #dee2e6; color:#000;">@Localizer["Reason"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["UrgentShort"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["GetQuotation"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #dee2e6; color:#000;">@Localizer["Reason"]</th>
                                 </tr>
                                 <!-- Header phụ -->
                                 <tr class="text-center align-middle" style="background-color: #e9ecef; color:#000;">
-                                    <th style="min-width: 80px; color:#000;">@Localizer["QuantityShort"]</th>
-                                    <th style="min-width: 70px; color:#000;">@Localizer["UnitShort"]</th>
                                     <th style="min-width: 80px; color:#000;">@Localizer["ShapeShort"]</th>
                                     <th style="min-width: 80px; color:#000;">@Localizer["MaterialShort"]</th>
                                     <th style="min-width: 100px; color:#000;">@Localizer["CompositionShort"]</th>
@@ -262,18 +271,6 @@
                                 </div>
                                 <div class="card-body p-2">
                                     <table class="table table-sm table-borderless mb-0">
-                                        <tr>
-                                            <td class="fw-bold p-1">@Localizer["ROHSLabel"]</td>
-                                            <td class="p-1" id="rohs_requirement">-</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-bold p-1">@Localizer["COCQLabel"]</td>
-                                            <td class="p-1" id="cocq_requirement">-</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-bold p-1">@Localizer["MSDSLabel"]</td>
-                                            <td class="p-1" id="msds_requirement">-</td>
-                                        </tr>
                                         <tr>
                                             <td class="fw-bold p-1">@Localizer["RequesterLabel"]</td>
                                             <td class="p-1" id="requester">-</td>
@@ -387,7 +384,7 @@
     }));
 </script>
 @section Scripts {
-   <script src="~/js/Approval_Quote.js"></script>
+    <script src="~/js/Approval_Quote.js"></script>
     <script>
         (function() {
             // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts

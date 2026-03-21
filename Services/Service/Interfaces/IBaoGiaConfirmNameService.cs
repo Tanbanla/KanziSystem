@@ -26,5 +26,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> ApproveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Rejects Acc
         public Task<GenericResponse<bool>> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
+        // Export Code Cofirmed
+        public Task<GenericResponse<List<dynamic>>> ExportCodeConfirmedAsync();
     }
 }

@@ -474,4 +474,7 @@
   <data name="MSGExportOK" xml:space="preserve">
     <value>Export to Excel is Success</value>
   </data>
+  <data name="VendorCode" xml:space="preserve">
+    <value>Vendor Code</value>
+  </data>
 </root>

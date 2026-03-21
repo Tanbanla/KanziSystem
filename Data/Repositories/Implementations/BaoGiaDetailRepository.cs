@@ -144,7 +144,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var listDetailOK = new List<BaoGia_Detail_of_Quotation>();
             foreach (var detail in listDto)
             {
-                var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
+                var rq = await _context.BaoGia_Request_of_Quotations
+                .Where(c => c.BIT_LayBaoGia == true && c.ID == detail.ID_RequestQuote)
+                .FirstOrDefaultAsync();
                 if (rq == null) continue;
                 rq.ID_Status = "WAIT_NCC";
                 // kiểm tra dữ liệu Insert

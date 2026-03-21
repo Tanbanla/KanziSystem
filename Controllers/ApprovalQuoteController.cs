@@ -425,7 +425,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     using var outStream = new MemoryStream();
                     workbook.SaveAs(outStream);
                     var bytes = outStream.ToArray();
-                    var fileName = $"AutoRenderQuote_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                    var fileName = $"FileApproverQuote_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
                     const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     return File(bytes, contentType, fileName);
                 }

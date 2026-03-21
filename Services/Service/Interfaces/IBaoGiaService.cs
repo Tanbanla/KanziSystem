@@ -23,7 +23,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Cập nhật đơn báo giá
         public Task<GenericResponse<BaoGia_Request_of_QuotationDTO>> CapNhatDonBaoGiaAsync(BaoGia_Request_of_QuotationDTO baogia);
         // Lấy thông tin báo giá gom nhóm
-        public Task<GenericResponse<List<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang,string user, int pageIndex, int pageSize);
+        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang,string user, int pageIndex, int pageSize);
         // Xuất báo giá
         public Task<GenericResponse<List<int>>> ExportBaoGiaAsync(string? maDon);
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu

@@ -465,4 +465,7 @@
   <data name="StatusRejectedAcc" xml:space="preserve">
     <value>拒否コード確認</value>
   </data>
+  <data name="CodeLocalExport" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
 </root>

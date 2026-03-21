@@ -90,7 +90,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachCategory = categorys,
                 DanhSachMaDon = madons,
                 NguoiThaoTac = GetCurrentUserId() ?? "",
-                DanhSachBaoGiaGomNhom = danhSach.Data
+                DanhSachBaoGiaGomNhom = danhSach.Data.Data ?? new List<dynamic>()
             };
             return View(vm);
         }
@@ -1210,7 +1210,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-            return Ok(result.Data);
+            return Ok(result);
         }
         // MARK: Phe duyet
         [HttpPost]

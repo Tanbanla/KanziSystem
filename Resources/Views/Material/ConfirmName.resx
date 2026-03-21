@@ -465,4 +465,7 @@
   <data name="StatusRejectedAcc" xml:space="preserve">
     <value>Từ chối xác nhận mã</value>
   </data>
+  <data name="CodeLocalExport" xml:space="preserve">
+    <value>Xuất file mã đã xác nhận</value>
+  </data>
 </root>

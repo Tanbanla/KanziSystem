@@ -474,4 +474,7 @@
   <data name="MSGExportOK" xml:space="preserve">
     <value>Xuất dữ liệu thành công</value>
   </data>
+  <data name="VendorCode" xml:space="preserve">
+    <value>Mã NCC</value>
+  </data>
 </root>

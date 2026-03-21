@@ -407,9 +407,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.DTM_UserAcc = DateTime.Now;
                 row.VCHR_UpdateBy = user;
                 row.DTM_UpdateDate = DateTime.Now;
+                row.CHR_StatusACC = "RejectedAcc";
             }
             await _context.SaveChangesAsync();
             return true;
+        }
+        // Export Code Confirmed
+        public async Task<List<dynamic>> ExportCodeConfirmedAsync()
+        {
+            var data = await _context.MATERIALs
+                .Select(c => new { c.Material_Code, c.Material_Name_VN })
+                .ToListAsync();
+
+            return data.Cast<dynamic>().ToList();
         }
     }
 }

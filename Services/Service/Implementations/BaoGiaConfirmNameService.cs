@@ -181,5 +181,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Export Code Cofirmed
+        public async Task<GenericResponse<List<dynamic>>> ExportCodeConfirmedAsync()
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.ExportCodeConfirmedAsync();
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

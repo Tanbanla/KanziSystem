@@ -114,6 +114,34 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Nhap danh sach
         public async Task<List<BaoGia_Request_of_Quotation>> NhapDanhSachBaoGiaAsync(List<BaoGia_Request_of_Quotation> danhSachBaoGia)
         {
+            if (danhSachBaoGia == null || !danhSachBaoGia.Any())
+            {
+                return new List<BaoGia_Request_of_Quotation>();
+            }
+
+            // Process each item to handle duplicate CHR_MaDon
+            foreach (var baoGia in danhSachBaoGia)
+            {
+                if (!string.IsNullOrEmpty(baoGia.CHR_MaDon))
+                {
+                    // Check if CHR_MaDon already exists
+                    var exists = await _context.BaoGia_Request_of_Quotations.AnyAsync(b => b.CHR_MaDon == baoGia.CHR_MaDon);
+                    if (exists)
+                    {
+                        // Find the next available suffix
+                        var baseMaDon = baoGia.CHR_MaDon;
+                        var maxSuffix = await _conn.ExecuteScalarAsync<int?>(@"
+                            SELECT MAX(CAST(SUBSTRING(CHR_MaDon, LEN(@BaseMaDon) + 2, LEN(CHR_MaDon) - LEN(@BaseMaDon) - 1) AS INT))
+                            FROM BaoGia_Request_of_Quotation
+                            WHERE CHR_MaDon LIKE @BaseMaDon + '_%' AND ISNUMERIC(SUBSTRING(CHR_MaDon, LEN(@BaseMaDon) + 2, LEN(CHR_MaDon) - LEN(@BaseMaDon) - 1)) = 1",
+                            new { BaseMaDon = baseMaDon });
+
+                        int nextSuffix = (maxSuffix ?? 0) + 1;
+                        baoGia.CHR_MaDon = $"{baseMaDon}_{nextSuffix}";
+                    }
+                }
+            }
+
             await _context.BaoGia_Request_of_Quotations.AddRangeAsync(danhSachBaoGia);
             await _context.SaveChangesAsync();
             return danhSachBaoGia;
@@ -157,14 +185,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return baogia;
         }
         // Lấy danh sách báo giá theo mã đơn
-        public async Task<List<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string user, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string user, int pageIndex, int pageSize)
         {
             var sql = new StringBuilder(@"
             WITH rq AS (
                 SELECT r.*
                 FROM [BaoGia_Request_of_Quotation] AS r
                 LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5");
+                WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(user))
@@ -230,7 +258,38 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sql.Append(" ORDER BY rr.DTM_NgayMuonNhan DESC");
             }
 
-            return (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+            var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+
+            // Build count query using same filters to provide TotalCount for paging
+            var countSql = new StringBuilder(@"SELECT COUNT(DISTINCT r.CHR_MaDon)
+                FROM [BaoGia_Request_of_Quotation] r
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] s ON r.CHR_SectionCode = s.CHR_CodeSection
+                WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
+
+            if (!string.IsNullOrEmpty(user))
+            {
+                countSql.Append(" AND s.CHR_UserAdid = @Adid");
+            }
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                countSql.Append(" AND r.CHR_MaDon = @MaDon");
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                countSql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                countSql.Append(" AND r.CHR_SectionCode = @Section");
+            }
+
+            var total = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);
+
+            return new ListRequest<dynamic>
+            {
+                Data = data,
+                TotalCount = total
+            };
         }
         // Xuất báo giá
         public async Task<List<int>> ExportBaoGiaAsync(string? maDon)
@@ -374,7 +433,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM BaoGia_Request_of_Quotation r
                 LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
                 LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
+                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1");
 
             var parameters = new DynamicParameters();
             if (!string.IsNullOrEmpty(user))
@@ -554,7 +613,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             SELECT COUNT(r.id)
             FROM BaoGia_Request_of_Quotation r
             INNER JOIN StatusCheck sc ON r.id = sc.id
-            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
+            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1");
 
             if (!string.IsNullOrEmpty(maDon))
             {

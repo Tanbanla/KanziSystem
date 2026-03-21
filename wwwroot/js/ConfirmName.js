@@ -23,7 +23,8 @@
         pageSizeSelect: document.getElementById('pageSizeSelect'),
         itemsExcelFileInput: document.getElementById('itemsExcelFileInput'),
         btnRejectSelected: document.getElementById('btnRejectSelected'),
-        btnRejectAccSelected: document.getElementById('btnRejectAccSelected')
+        btnRejectAccSelected: document.getElementById('btnRejectAccSelected'),
+        btnCodeLocalCofirmed: document.getElementById('btnCodeLocalCofirmed')
     };
 
     let state = { pageIndex: 1, pageSize: 20, total: 0, listData: [] };
@@ -287,7 +288,8 @@
                     //}
                 } else if (field.key === 'maNB') {
                     if (canEditMaNB()) {
-                        td.innerHTML = `<input class="form-control form-control-sm js-manb" data-id="${r.ID}" value="${r.VCHR_MaHangNoiBo || ''}" />`;
+                        const listAttr = role === 'UserAcc' ? ' list="maNBList"' : '';
+                        td.innerHTML = `<input class="form-control form-control-sm js-manb" data-id="${r.ID}" value="${r.VCHR_MaHangNoiBo || ''}"${listAttr} />`;
                     }
                     //else {
                     //    td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
@@ -457,7 +459,7 @@
     els.btnExportTable.addEventListener('click', () => { exportTable(); });
     els.btnImportExcel.addEventListener('click', () => itemsExcelFileInput?.click());
     els.itemsExcelFileInput.addEventListener('change', async (e) => { importExcel(e); });
-
+    els.btnCodeLocalCofirmed.addEventListener('click', () => { exportCodeCofirmed();});
     // cac ham excel
     async function exportTemplate() {
         try {
@@ -572,7 +574,41 @@
             hideLoading();
         }
     }
+    async function exportCodeCofirmed() {
+        const T = window.i18nConfirmName || {};
+        try {
+            showLoading(T.Processing || 'Đang xuất...');
 
+            const res = await fetch('/Material/ExportCodeCofirmed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: null
+            });
+            if (!res.ok) {
+                const msg = await res.text().catch(() => 'Lỗi không xác định');
+                throw new Error(msg || (T.ExportError || 'Xuất file thất bại'));
+            }
+            const blob = await res.blob();
+            let fileName = 'TableConfirmName.xlsx';
+            const cd = res.headers.get('content-disposition');
+            if (cd) {
+                const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+            }
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error export table', err);
+        } finally {
+            hideLoading();
+        }
+    }
     // Reset button
     const resetBtn = document.getElementById('btnReset');
     if (resetBtn) {

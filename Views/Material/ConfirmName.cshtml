@@ -4,6 +4,7 @@
     ViewData["Title"] = Localizer["PageTitle"].Value;
     var role = ViewBag.Role as string ?? "UserPUR"; // UserShip | UserAcc | UserPUR
     List<ACC_NHOMVITRIDTO> nhomVitris = Model.vitris;
+    List<dynamic> confirmedCodes = Model.confirmedCodes;
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
@@ -85,6 +86,13 @@
                     <button type="button" class="btn btn-primary" id="btnSearch">
                         <i class="fas fa-search me-1"></i> @Localizer["Search"]
                     </button>
+                    @if (role == "UserAcc")
+                    {
+                        <div style="min-width: 6px;"></div>
+                        <button type="button" class="btn btn-success" id="btnCodeLocalCofirmed">
+                            <i class="fas fa-download me-1"></i> @Localizer["CodeLocalExport"]
+                        </button>
+                    }
                 </div>
             </form>
         </div>
@@ -206,6 +214,12 @@
     <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
 </div>
 @section Scripts {
+    <datalist id="maNBList">
+        @foreach (var code in confirmedCodes)
+        {
+            <option value="@code.Material_Code">@code.Material_Code - @code.Material_Name_VN</option>
+        }
+    </datalist>
     <script src="~/js/utils/date.js"></script>
     <script src="~/js/ConfirmName.js"></script>
     <script>
