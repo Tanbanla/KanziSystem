@@ -34,5 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid);
         // update thông tin màn hình lịch sử báo giá
         public Task<GenericResponse<bool>> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias);
+        // Get thông tin đơn phê duyệt lựa chọn ncc
+        public Task<GenericResponse<List<dynamic>>> GetSupplierApprovalInfoAsync(string maDon);
     }
 }

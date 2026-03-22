@@ -256,5 +256,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Get thông tin đơn phê duyệt lựa chọn ncc
+        public async Task<GenericResponse<List<dynamic>>> GetSupplierApprovalInfoAsync(string maDon)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetSupplierApprovalInfoAsync(maDon);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+
     }
 }

@@ -192,7 +192,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 SELECT r.*
                 FROM [BaoGia_Request_of_Quotation] AS r
                 LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
+                WHERE 1 = 1 and r.ID_StepBaoGia < 12 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(user))
@@ -264,7 +264,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var countSql = new StringBuilder(@"SELECT COUNT(DISTINCT r.CHR_MaDon)
                 FROM [BaoGia_Request_of_Quotation] r
                 LEFT JOIN [BaoGia_Master_Approver_Send_Mail] s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE 1 = 1 and r.ID_StepBaoGia < 9 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
+                WHERE 1 = 1 and r.ID_StepBaoGia < 12 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
 
             if (!string.IsNullOrEmpty(user))
             {
@@ -725,6 +725,104 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context.BaoGia_Request_of_Quotations.UpdateRange(listUpdate);
             await _context.SaveChangesAsync();
             return true;
+        }
+        // Get thông tin đơn phê duyệt lựa chọn ncc
+        public async Task<List<dynamic>> GetSupplierApprovalInfoAsync(string maDon)
+        {
+            var sql = new StringBuilder(@"
+            WITH StatusCheck AS (
+                SELECT 
+                    distinct
+                    r.id,
+                    r.CHR_MaDon,
+                    r.CHR_MaHangNoiBo
+                FROM BaoGia_Request_of_Quotation r
+                LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+                WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
+
+            var parameters = new DynamicParameters();
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", maDon);
+            }
+
+            sql.Append(@"
+            )
+            SELECT r.*,
+                d.[CHR_CodeNCC],
+                d.[NVCHR_NameNCC],
+                d.[CHR_MaHangNCC] as CodeEquipmentNCC,
+                d.[NVCHR_TenHangHQ],
+                d.[NVCHR_PaymentTerm],
+                d.[NVCHR_Warranty],
+                d.[NVCHR_DeliveryTerm],
+                d.[VCHR_Rohs],
+                d.[VCHR_COCQ],
+                d.[VCHR_MSDS],
+                d.[VCHR_AnToan],
+                d.[VCHR_CamKet],
+                d.[CHR_NameEN] as NameENByNCC,
+                d.[INT_SoLuong] as soluong,
+                d.[NVCHR_DonVi] as donvi,
+                d.[NVCHR_NhaSanXuat],
+                d.[DTM_EffectiveDate],
+                d.[DTM_ExpiryDate],
+                d.[NVCHR_Note],
+                d.[NVCHR_File],
+                d.[NVCHR_MOQ],
+                d.[DTM_LeadTime],
+                d.[DTM_ShipTime],
+                d.[NVCHR_Packing],
+                d.BIT_Select,
+                d.NVCHR_ReasonPick,
+                d.FL_USD,
+                d.FL_VND,
+                CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
+                CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
+                CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
+                CAST(CASE WHEN (r.INT_SoLuong = d.INT_SoLuong or d.INT_SoLuong = 0) THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
+                CAST(CASE WHEN (r.NVCHR_DonVi = d.NVCHR_DonVi or d.NVCHR_DonVi is null) THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
+                CAST(CASE 
+                    WHEN r.NVCHR_Rohs = N'Need' AND (d.VCHR_Rohs = N'NG' OR d.VCHR_Rohs = N'No need') THEN 0
+                    WHEN (r.NVCHR_Rohs = d.VCHR_Rohs OR d.VCHR_Rohs = N'OK' OR d.VCHR_Rohs = N'' )  THEN 1 
+                    WHEN(r.NVCHR_Rohs ='') THEN 1
+                    ELSE 0 
+                END AS BIT) AS IsMatch_Rohs,
+                CAST(CASE 
+                    WHEN r.NVCHR_COCQ = N'Need' AND (d.VCHR_COCQ = N'NG' OR d.VCHR_COCQ = N'No need') THEN 0
+                    WHEN (r.NVCHR_COCQ = d.VCHR_COCQ OR d.VCHR_COCQ = N'OK' OR d.VCHR_COCQ = N'') THEN 1 
+                    WHEN( R.NVCHR_COCQ ='') THEN 1
+                    ELSE 0 
+                END AS BIT) AS IsMatch_COCQ,
+
+                CAST(CASE 
+                    WHEN r.NVCHR_MSDS = N'Need' AND (d.VCHR_MSDS = N'NG' OR d.VCHR_MSDS = N'No need') THEN 0
+                    WHEN (r.NVCHR_MSDS = d.VCHR_MSDS OR d.VCHR_MSDS = N'OK' OR d.VCHR_MSDS = N'') THEN 1 
+                    WHEN(r.NVCHR_MSDS ='') THEN 1
+                    ELSE 0 
+                END AS BIT) AS IsMatch_MSDS,
+
+                CAST(CASE 
+                    WHEN r.NVCHR_AnToan = N'Need' AND (d.VCHR_AnToan = N'NG' OR d.VCHR_AnToan = N'No need') THEN 0
+                    WHEN (r.NVCHR_AnToan = d.VCHR_AnToan OR d.VCHR_AnToan = N'OK' OR d.VCHR_AnToan = N'') THEN 1 
+                    WHEN(r.NVCHR_AnToan ='') THEN 1
+                    ELSE 0 
+                END AS BIT) AS IsMatch_AnToan,
+                CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) or d.DTM_ShipTime is null ) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
+                CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet
+            FROM BaoGia_Request_of_Quotation r
+            LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+            INNER JOIN StatusCheck sc ON r.id = sc.id
+            WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
+
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @MaDon");
+            }
+
+            var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+            return data;
         }
     }
 }

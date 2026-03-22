@@ -914,9 +914,9 @@
                     console.error('Search failed');
                     return;
                 }
-                const data = await res.json();
-                const items = Array.isArray(data.data) ? data.data : [];
-                const totalCount = data.totalCount || 0;
+                const result = await res.json();
+                const items = Array.isArray(result.data.data) ? result.data.data : [];
+                const totalCount = result.data.totalCount || 0;
                 requestListState.returnedCount = items.length;
                 requestListState.totalCount = totalCount;
                 requestListState.lastPage = (requestListState.pageIndex * requestListState.pageSize) >= totalCount;
@@ -932,7 +932,7 @@
                     })(i.Status);
                     const groupId = `${i.CHR_MaDon}-${i.CHR_MaHangNoiBo}`;
                     return `
-                        <tr class="item-row" data-status="${i.Status || ''}">
+                        <tr class="item-row" data-status="${i.Status || ''}" data-id="${i.CHR_MaDon || ''}">
                             <td class="text-center"><input type="checkbox" class="form-check-input item-select" /></td>
                             <td class="detail-cell text-center">
                                 <button type="button" class="btn btn-sm btn-outline-primary toggle-sup" data-target="#sup-rows-${groupId}" data-madon="${i.CHR_MaDon || ''}" data-mahang="${i.CHR_MaHangNoiBo || ''}" data-ngay="${ngayAttr}" aria-expanded="false" title="Xem chi tiết">
@@ -947,37 +947,7 @@
                             <td>${i.DTM_KyHan ? new Date(i.DTM_KyHan).toLocaleDateString('vi-VN') : ''}</td>
                             <td><span class="badge status-badge ${statusClass}">${i.Status || ''}</span></td>
                         </tr>
-                        <tr id="sup-rows-${groupId}" class="supplier-group d-none">
-                            <td colspan="13" class="p-0">
-                                <table class="table table-sm mb-0 supplier-table">
-                                    <thead>
-                                        <tr class="supplier-head text-center">
-                                            <th>Nội dung</th>
-                                            <th>Nhà cung cấp</th>
-                                            <th>Mã HS</th>
-                                            <th>Tên hàng (HQ)</th>
-                                            <th>Đơn giá USD</th>
-                                            <th>Đơn giá VND</th>
-                                            <th>MOQ</th>
-                                            <th>Lead time</th>
-                                            <th>Quy cách đóng hàng</th>
-                                            <th>Ngày giao</th>
-                                            <th>Rohs</th>
-                                            <th>CO/CQ</th>
-                                            <th>MSDS kèm số CAS</th>
-                                            <th>An toàn</th>
-                                            <th>Cam kết đúng yêu cầu</th>
-                                            <th>Phương thức giao</th>
-                                            <th>Điều kiện</th>
-                                            <th>File đính kèm</th>
-                                            <th>Chọn</th>
-                                            <th>Lý do</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="supplier-body-${groupId}"></tbody>
-                                </table>
-                            </td>
-                        </tr>`;
+                     `;
                 }).join('');
                 tbody.innerHTML = rowsHtml;
 
@@ -1019,8 +989,242 @@
                 } catch (e) { }
                 // Also reapply additional columns visibility
                 this.applyAdditionalColumnsVisibility();
+                // Wire up click on row to open approval modal (avoid clicks on toggle button / checkbox)
+                document.querySelectorAll('#quotationResultsTableBody .item-row').forEach(row => {
+                    row.addEventListener('click', (ev) => {
+                        // ignore if clicking on control elements
+                        //const ignore = ev.target.closest('.toggle-sup, .item-select, button, a, input, .detail-cell');
+                        //if (ignore && !ev.target.classList.contains('item-row')) return;
+                        const maDon = row.getAttribute('data-id');
+                        if (!maDon) return;
+                        // open modal to view and approve
+                        quotationApp.openApprovalModal(maDon);
+                    });
+                });
             } catch (err) {
                 console.error('Error calling GetThongTinBaoGiaGomNhom', err);
+            }
+        },
+
+        // Open approval modal by request id and populate fields
+        openApprovalModal: async function (maDon) {
+            if (!maDon) return;
+            try {
+                const res = await fetch('/Quote/GetSupplierApprovalInfor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(maDon)
+                });
+                if (!res.ok) {
+                    console.error('Load request detail failed');
+                    showDialog({ message: 'Không tải được dữ liệu chi tiết yêu cầu.' });
+                    return;
+                }
+                const data = await res.json();
+
+                // Helper to safely get possible property names (case-insensitive)
+                const getVal = (obj, ...names) => {
+                    if (!obj) return '';
+                    for (const n of names) {
+                        if (obj[n] !== undefined && obj[n] !== null) return obj[n];
+                        const alt = Object.keys(obj).find(k => k.toLowerCase() === (n || '').toLowerCase());
+                        if (alt && obj[alt] !== undefined && obj[alt] !== null) return obj[alt];
+                    }
+                    return '';
+                };
+
+                const formatDate = (val) => {
+                    if (!val) return '';
+                    try {
+                        const d = new Date(val);
+                        if (!isNaN(d.getTime())) return d.toLocaleDateString();
+                    } catch { }
+                    return String(val || '');
+                };
+
+                // Determine master record to populate modal header/footer (use first detail if API returned array)
+                let master = data;
+                if (Array.isArray(data) && data.length > 0) {
+                    master = data[0];
+                }
+
+                // populate modal header/footer fields using master record
+                try { document.getElementById('madonhang').textContent = getVal(master, 'CHR_MaDon', 'chR_MaDon', 'ID') || maDon; } catch { }
+                try { document.getElementById('khoi').textContent = getVal(master, 'CHR_SectionName', 'chR_SectionName') || ''; } catch { }
+                try { document.getElementById('mpb_yc').textContent = getVal(master, 'CHR_SectionCode', 'chR_SectionCode', 'chR_CostCenter') || ''; } catch { }
+                try { document.getElementById('tenphongban').textContent = getVal(master, 'CHR_SectionName', 'chR_SectionName') || ''; } catch { }
+                try { document.getElementById('nyc').textContent = formatDate(getVal(master, 'DTM_NgayMuonNhan', 'dtM_NgayMuonNhan', 'DTM_CreateDate')); } catch { }
+                try { document.getElementById('thmm').textContent = formatDate(getVal(master, 'DTM_KyHan', 'dtM_KyHan', 'DTM_Deadline')); } catch { }
+                try { document.getElementById('requester').textContent = getVal(master, 'CHR_CreateBy', 'chR_CreateBy') || '-'; } catch { }
+                try { document.getElementById('id_request').textContent = getVal(master, 'ID', 'iD', 'CHR_MaDon') || maDon; } catch { }
+                try { document.getElementById('step').textContent = getVal(master, 'ID_StepBaoGia', 'iD_StepBaoGia') || ''; } catch { }
+                try { document.getElementById('regency').textContent = getVal(master, 'ID_Status', 'iD_Status', 'CHR_Status') || ''; } catch { }
+
+                // urgent badge
+                try {
+                    const ub = document.getElementById('urgent-badge');
+                    const gap = getVal(data, 'CHR_Gap', 'chR_Gap');
+                    const isUrgent = gap === true || String(gap).toLowerCase() === 'true' || String(gap) === '1' || String(gap).toLowerCase() === 'o';
+                    if (ub) ub.style.display = isUrgent ? '' : 'none';
+                } catch { }
+
+                // Prepare details array: controller might return object with .Detail or an array
+                let details = [];
+                if (Array.isArray(data)) {
+                    // maybe array of items
+                    details = data;
+                } else if (data && Array.isArray(data.Detail)) {
+                    details = data.Detail;
+                } else if (data && Array.isArray(data.data)) {
+                    details = data.data;
+                } else if (data && typeof data === 'object') {
+                    // some APIs return single object representing the master row with detail fields on it
+                    // Try to find detail-like properties by common names
+                    if (Array.isArray(data.DetailList)) details = data.DetailList;
+                    else details = [data];
+                }
+
+                const tbody = document.getElementById('detailModalBody');
+                if (!tbody) return;
+                // render rows using DOM for safety
+                tbody.innerHTML = '';
+                const frag = document.createDocumentFragment();
+                // helper to render mismatch styling for vendor comparison fields
+                const mismatchStyle = (v) => {
+                    if (v === false || v === 0 || v === '0' || String(v).toLowerCase() === 'false') {
+                        return 'color: #a00; background-color: #ffecec;';
+                    }
+                    return '';
+                };
+                details.forEach((d, idx) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'text-center';
+                    const addTd = (txt, cls, style) => { const td = document.createElement('td'); td.textContent = txt == null ? '' : String(txt); if (cls) td.className = cls; if (style) td.style.cssText = style; return td; };
+
+                    tr.appendChild(addTd(idx + 1));
+                    tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
+                    tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_ChungLoai', 'NVCHR_ChungLoai')));
+                    tr.appendChild(addTd(getVal(d, 'chR_Phanloai', 'CHR_Phanloai')));
+                    tr.appendChild(addTd(getVal(d, 'chR_MaHangNCC', 'CHR_MaHangNCC')));
+                    // name VN/EN combined
+                    const nameVN = getVal(d, 'nvchR_NameVN', 'NVCHR_NameVN') || '';
+                    const nameEN = getVal(d, 'nvchR_NameEN', 'NVCHR_NameEN') || '';
+                    tr.appendChild(addTd((nameVN + (nameEN ? ' / ' + nameEN : '')).trim(), 'text-start'));
+
+                    tr.appendChild(addTd(getVal(d, 'inT_SoLuong', 'INT_SoLuong') || '', 'text-center'));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_DonVi', 'NVCHR_DonVi') || '', 'text-center'));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_HinhDang', 'NVCHR_HinhDang')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_ChatLieu', 'NVCHR_ChatLieu')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_ThanhPhan', 'NVCHR_ThanhPhan')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_KichThuoc', 'NVCHR_KichThuoc')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_DongMay', 'NVCHR_DongMay')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_TinhNang', 'NVCHR_TinhNang')));
+
+                    tr.appendChild(addTd(getVal(d, 'nvchR_FileThietKe', 'NVCHR_FileThietKe')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_NhaSanXuat', 'NVCHR_NhaSanXuat')));
+                    tr.appendChild(addTd(getVal(d, 'chR_MaNCC', 'CHR_MaNCC')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_TenNCC', 'NVCHR_TenNCC')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_Rohs', 'NVCHR_Rohs')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_COCQ', 'NVCHR_COCQ')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_MSDS', 'NVCHR_MSDS')));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_AnToan', 'NVCHR_AnToan')));
+
+                    tr.appendChild(addTd(formatDate(getVal(d, 'dtM_KyHan', 'DTM_KyHan')),'text-center'));
+                    const gap = getVal(d, 'chR_Gap', 'CHR_Gap');
+                    const gapLabel = gap != null && gap !== '' ? (String(gap).toLowerCase() === 'true' || String(gap) === '1' ? 'O' : 'X') : '';
+                    tr.appendChild(addTd(gapLabel, 'text-center'));
+                    const lay = getVal(d, 'biT_LayBaoGia', 'BIT_LayBaoGia');
+                    const layLabel = lay != null && lay !== '' ? (String(lay).toLowerCase() === 'true' || String(lay) === '1' ? 'O' : 'X') : '';
+                    tr.appendChild(addTd(layLabel, 'text-center'));
+                    tr.appendChild(addTd(getVal(d, 'nvchR_LyDo', 'NVCHR_LyDo')));
+
+                    // Vendor input columns (read-only)
+                    const fmtNum = v => { try { return v != null && v !== '' ? Number(v).toLocaleString() : ''; } catch { return v || ''; } };
+                    tr.appendChild(addTd(getVal(d, 'CHR_MaNCC', 'chR_MaNCC')));
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_NameNCC', 'nvchR_NameNCC'), 'text-start'));
+                    tr.appendChild(addTd(getVal(d, 'CHR_MaHangNCC', 'chR_MaHangNCC'), null, mismatchStyle(getVal(d, 'IsMatch_MaHangNCC', 'IsMatch_MaHangNCC'))));
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_TenHangHQ', 'nvchR_TenHangHQ'), 'text-start', mismatchStyle(getVal(d, 'IsMatch_NameVN', 'IsMatch_NameVN'))));
+                    tr.appendChild(addTd(getVal(d, 'NameENByNCC', 'nameENByNCC'), null, mismatchStyle(getVal(d, 'IsMatch_NameEN', 'IsMatch_NameEN'))));
+                    tr.appendChild(addTd(getVal(d, 'soluong', 'INT_SoLuong', 'soluong') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_SoLuong', 'IsMatch_SoLuong'))));
+                    tr.appendChild(addTd(getVal(d, 'donvi', 'NVCHR_DonVi') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_DonVi', 'IsMatch_DonVi'))));
+                    tr.appendChild(addTd(fmtNum(getVal(d, 'FL_USD', 'fl_usd')), 'text-end'));
+                    tr.appendChild(addTd(fmtNum(getVal(d, 'FL_VND', 'fl_vnd')), 'text-end'));
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_MOQ', 'nvchr_MOQ')));
+                    tr.appendChild(addTd(getVal(d, 'DTM_LeadTime', 'dtm_LeadTime')));
+                    tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ShipTime', 'dtm_ShipTime')), null, mismatchStyle(getVal(d, 'IsMatch_Ngay', 'IsMatch_Ngay'))));
+                    tr.appendChild(addTd(getVal(d, 'VCHR_Rohs', 'vchr_Rohs'), null, mismatchStyle(getVal(d, 'IsMatch_Rohs', 'IsMatch_Rohs'))));
+                    tr.appendChild(addTd(getVal(d, 'VCHR_COCQ', 'vchr_COCQ'), null, mismatchStyle(getVal(d, 'IsMatch_COCQ', 'IsMatch_COCQ'))));
+                    tr.appendChild(addTd(getVal(d, 'VCHR_MSDS', 'vchr_MSDS'), null, mismatchStyle(getVal(d, 'IsMatch_MSDS', 'IsMatch_MSDS'))));
+                    tr.appendChild(addTd(getVal(d, 'VCHR_AnToan', 'vchr_AnToan'), null, mismatchStyle(getVal(d, 'IsMatch_AnToan', 'IsMatch_AnToan'))));
+                    tr.appendChild(addTd(getVal(d, 'VCHR_CamKet', 'vchr_CamKet'), null, mismatchStyle(getVal(d, 'IsMatchCamKet', 'IsMatchCamKet'))));
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_DeliveryTerm', 'nvchr_DeliveryTerm')));
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_PaymentTerm', 'nvchr_PaymentTerm')));
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_File', 'nvchr_File')));
+                    tr.appendChild(addTd(formatDate(getVal(d, 'DTM_EffectiveDate', 'dtm_EffectiveDate'))));
+                    tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ExpiryDate', 'dtm_ExpiryDate'))));
+
+                    // System total (try VND then USD)
+                    const totalSys = (getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) ? (fmtNum(getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) + ' VND') : (getVal(d, 'FL_USD', 'fl_usd') ? (fmtNum(getVal(d, 'FL_USD', 'fl_usd')) + ' USD') : '');
+                    tr.appendChild(addTd(totalSys, 'text-center'));
+
+                    // PIC selection and reason (display only)
+                    const pick = getVal(d, 'BIT_Select', 'bit_Select');
+                    const pickLabel = pick === true || String(pick).toLowerCase() === 'true' ? 'O' : (pick === false || String(pick).toLowerCase() === 'false' ? 'X' : '');
+                    tr.appendChild(addTd(pickLabel, 'text-center'));
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_ReasonPick', 'nvchr_ReasonPick') || getVal(d, 'NVCHR_LyDo', 'nvchr_LyDo')));
+
+                    frag.appendChild(tr);
+                });
+                tbody.appendChild(frag);
+
+                // attach approve/reject handlers (reuse existing modal buttons)
+                const btnApprove = document.getElementById('modalApprove');
+                const btnReject = document.getElementById('modalReject');
+                if (btnApprove) {
+                    btnApprove.onclick = async () => {
+                        try {
+                            btnApprove.disabled = true;
+                            const r = await fetch('/Quote/PheDuyetBaoGia', {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(maDon)
+                            });
+                            if (!r.ok) {
+                                const txt = await r.text().catch(() => null);
+                                showDialog({ message: txt || 'Phê duyệt thất bại', type: 'error' });
+                                return;
+                            }
+                            showDialog({ message: 'Phê duyệt thành công', type: 'success' });
+                            quotationApp.searchItems();
+                            hideEditModal();
+                        } catch (e) {
+                            showDialog({ message: 'Lỗi phê duyệt', type: 'error' });
+                        } finally { btnApprove.disabled = false; }
+                    };
+                }
+                if (btnReject) {
+                    btnReject.onclick = async () => {
+                        const reason = await showPrompt({ title: 'Lý do', message: 'Vui lòng nhập lý do trả về', placeholder: '' });
+                        if (reason == null) return;
+                        try {
+                            btnReject.disabled = true;
+                            const payload = { ID: maDon, NVCHR_LyDo: reason, ID_Status: 'RETURN' };
+                            const r = await fetch('/Quote/UpdateBaoGiaById', {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                            });
+                            if (!r.ok) { const txt = await r.text().catch(() => null); showDialog({ message: txt || 'Trả về thất bại', type: 'error' }); return; }
+                            showDialog({ message: 'Trả về thành công', type: 'success' });
+                            quotationApp.searchItems();
+                            hideEditModal();
+                        } catch (e) { showDialog({ message: 'Lỗi', type: 'error' }); }
+                        finally { btnReject.disabled = false; }
+                    };
+                }
+
+                // show modal
+                showModal();
+            } catch (err) {
+                console.error('Error loading request detail', err);
+                showDialog({ message: 'Đã xảy ra lỗi khi tải dữ liệu.' });
             }
         },
 

@@ -81,7 +81,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
-            var danhSach = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync("", "", "", GetCurrentUserId(), 1, 10);
+            //var danhSach = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync("", "", "", GetCurrentUserId(), 1, 10);
             var vm = new QuoteModel
             {
                 DanhSachNhomViTri = nhomViTri,
@@ -90,7 +90,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachCategory = categorys,
                 DanhSachMaDon = madons,
                 NguoiThaoTac = GetCurrentUserId() ?? "",
-                DanhSachBaoGiaGomNhom = danhSach.Data.Data ?? new List<dynamic>()
+                //DanhSachBaoGiaGomNhom = danhSach.Data.Data ?? new List<dynamic>()
             };
             return View(vm);
         }
@@ -1955,6 +1955,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest("Error: " + ex.Message);
             }
+        }
+        // lấy thông tin theo chi tiêt mã đơn phe duyet
+        [HttpPost]
+        public async Task<IActionResult> GetSupplierApprovalInfor([FromBody] string maDon)
+        {
+            if (string.IsNullOrWhiteSpace(maDon))
+            {
+                return BadRequest("Mã đơn không được để trống");
+            }
+            var result = await _baoGiaService.GetByMaBaoGiaAsync(maDon);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
         }
         // check điều kiện k nhap
         private static bool CheckNotRequired(string value)
