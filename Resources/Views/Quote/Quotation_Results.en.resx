@@ -513,4 +513,253 @@
   <data name="ExportExcel" xml:space="preserve">
     <value>Export Excel</value>
   </data>
+  <data name="PageSubtitle" xml:space="preserve">
+    <value>Page subtitle</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Return" xml:space="preserve">
+    <value>Return</value>
+  </data>
+  <data name="ApprovalStatusLabel" xml:space="preserve">
+    <value>Approval status</value>
+  </data>
+  <data name="AllOption" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="ExportToExcel" xml:space="preserve">
+    <value>Export to Excel</value>
+  </data>
+  <data name="OrderStatus" xml:space="preserve">
+    <value>Order status</value>
+  </data>
+  <data name="DetailModalTitle" xml:space="preserve">
+    <value>Quotation request details</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>Receiving department</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>Department cost center</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>Department name</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>Request date</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>Desired deadline</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>Goods details</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>System code</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>Internal material code</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>Item name VN/EN</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>Composition</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>Used position</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>Purpose/Feature</value>
+  </data>
+  <data name="VendorCode" xml:space="preserve">
+    <value>Vendor code</value>
+  </data>
+  <data name="ROHSRequirement" xml:space="preserve">
+    <value>ROHS requirement</value>
+  </data>
+  <data name="COCQRequirement" xml:space="preserve">
+    <value>CO/CQ requirement</value>
+  </data>
+  <data name="MSDSRequirement" xml:space="preserve">
+    <value>MSDS requirement</value>
+  </data>
+  <data name="SafetyStandardRequirement" xml:space="preserve">
+    <value>Safety standard requirement</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="ApprovalFlowTitle" xml:space="preserve">
+    <value>Approval flow</value>
+  </data>
+  <data name="ApprovalFlowLine1" xml:space="preserve">
+    <value>• Under 3,000 USD (66M VND): PIC → Middle manager → Deputy section manager.</value>
+  </data>
+  <data name="ApprovalFlowLine2" xml:space="preserve">
+    <value>• Under 10,000 USD (220M VND): PIC → Middle manager → Section manager.</value>
+  </data>
+  <data name="ApprovalFlowLine3" xml:space="preserve">
+    <value>• From 10,000 USD (220M VND) and above: Middle manager → Section/Deputy manager → General Director/Director.</value>
+  </data>
+  <data name="ApprovalFlowLine4" xml:space="preserve">
+    <value>→ Warehouse issue approval (PR1-MC): Junior/Middle manager → Kanzai warehouse</value>
+  </data>
+  <data name="AdditionalInfoTitle" xml:space="preserve">
+    <value>Additional information</value>
+  </data>
+  <data name="RequesterLabel" xml:space="preserve">
+    <value>Requester</value>
+  </data>
+  <data name="ApproveButton" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="RejectButton" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="DetailModalTitleFormat" xml:space="preserve">
+    <value>Quotation request details - {0}</value>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="InputReasonTitle" xml:space="preserve">
+    <value>Input reason</value>
+  </data>
+  <data name="InputReasonPlaceholder" xml:space="preserve">
+    <value>Enter your reason</value>
+  </data>
+  <data name="ReasonRequired" xml:space="preserve">
+    <value>Reason is required</value>
+  </data>
+  <data name="ApproveSuccess" xml:space="preserve">
+    <value>Approve success</value>
+  </data>
+  <data name="ApproveFailed" xml:space="preserve">
+    <value>Approve failed: {0}</value>
+  </data>
+  <data name="ApproveError" xml:space="preserve">
+    <value>Approve error</value>
+  </data>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>Return success</value>
+  </data>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>Return failed: {0}</value>
+  </data>
+  <data name="ReturnError" xml:space="preserve">
+    <value>Return error</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="MsgSusscesAprover" xml:space="preserve">
+    <value>Approval success</value>
+  </data>
+  <data name="MSGFailedApprover" xml:space="preserve">
+    <value>Approval failed</value>
+  </data>
+  <data name="MSGErrorApprover" xml:space="preserve">
+    <value>Approval error</value>
+  </data>
+  <data name="MSGReturnFailed" xml:space="preserve">
+    <value>Return failed</value>
+  </data>
+  <data name="MSGReturnOK" xml:space="preserve">
+    <value>Return OK</value>
+  </data>
+  <data name="MSGExportOK" xml:space="preserve">
+    <value>Export OK</value>
+  </data>
+  <data name="InputQuoteTitle" xml:space="preserve">
+    <value>Input quote title</value>
+  </data>
+  <data name="QuoteInputTitle" xml:space="preserve">
+    <value>Quote input title</value>
+  </data>
+  <data name="NoLabel" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ApprovalTabTitle" xml:space="preserve">
+    <value>Approval selection</value>
+  </data>
+  <data name="SupplierSelectionTabTitle" xml:space="preserve">
+    <value>Select supplier</value>
+  </data>
+  <data name="SystemCalculatedTotal" xml:space="preserve">
+    <value>System calculated total</value>
+  </data>
+  <data name="SupplierSelection" xml:space="preserve">
+    <value>Supplier selection</value>
+  </data>
+  <data name="SelectionReason" xml:space="preserve">
+    <value>Selection reason</value>
+  </data>
+  <data name="WaitPickSupplier" xml:space="preserve">
+    <value>Wait pick supplier</value>
+  </data>
+  <data name="WaitConfirmName" xml:space="preserve">
+    <value>Wait confirm name</value>
+  </data>
+  <data name="WaitSupplierQuote" xml:space="preserve">
+    <value>Wait supplier quote</value>
+  </data>
+  <data name="SupplierSelected" xml:space="preserve">
+    <value>Supplier selected</value>
+  </data>
+  <data name="WaitApproval" xml:space="preserve">
+    <value>Wait approval</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="HideDetails" xml:space="preserve">
+    <value>Hide details</value>
+  </data>
+  <data name="ShowDetails" xml:space="preserve">
+    <value>Show details</value>
+  </data>
+  <data name="PromptEnterReason" xml:space="preserve">
+    <value>Please enter the reason for selecting the supplier</value>
+  </data>
+  <data name="WaitPickApSupplier" xml:space="preserve">
+    <value>Waiting for supplier quotes.</value>
+  </data>
+  <data name="SupplierApSelected" xml:space="preserve">
+    <value>Waiting for supplier selection</value>
+  </data>
+  <data name="WaitApConfirmName" xml:space="preserve">
+    <value>Awaiting approval</value>
+  </data>
+  <data name="undefined" xml:space="preserve">
+    <value>Undefined</value>
+  </data>
 </root>

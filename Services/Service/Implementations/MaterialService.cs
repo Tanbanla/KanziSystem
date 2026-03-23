@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -99,6 +99,26 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // update thông tin danh sách linh kiện
+        public async Task<GenericResponse<bool>> UpdateListThongTin(List<MATERIALDTO> listDTO)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var materials = _mapper.Map<List<MATERIAL>>(listDTO);
+                // You may need to implement this method in IMaterialRepository if not already present
+                var updateResult = await _repo.UpdateMaterialAsync(materials);
+                result.Data = updateResult;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+
         // check mã linh kiện 
         public async Task<GenericResponse<bool>> CheckMaHangExistsAsync(string codeMaterial)
         {
@@ -123,8 +143,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             var result = new GenericResponse<bool>();
             try
             {
-                
-
                 var dto = _mapper.Map<MATERIAL>(mt);
                 result.Data = await _repo.InsertMaterial(dto);
                 result.Success = true;
@@ -133,6 +151,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 result.Success = false;
                 result.Message = ex.Message;
+            }
+            return result;
+        }
+        // Insert nhiều cho ma hang No list
+        public async Task<GenericResponse<bool>> UpdateListThongTinNoList(List<MATERIALDTO> listMT)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var materials = _mapper.Map<List<MATERIAL>>(listMT);
+                var updateResult = await _repo.UpdateListThongTinNoList(materials);
+                result.Data = updateResult;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
             }
             return result;
         }

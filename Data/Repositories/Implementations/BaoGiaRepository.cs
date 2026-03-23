@@ -27,7 +27,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Tìm kiếm thông tin báo giá và phân trang
-        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user , int pageIndex, int pageSize, DateTime? date, string? chungLoai)
+        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
             var sql = @"
                 SELECT distinct q.*
@@ -185,14 +185,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return baogia;
         }
         // Lấy danh sách báo giá theo mã đơn
-        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string user, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string? status, string user, int pageIndex, int pageSize)
         {
             var sql = new StringBuilder(@"
             WITH rq AS (
                 SELECT r.*
                 FROM [BaoGia_Request_of_Quotation] AS r
-                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE 1 = 1 and r.ID_StepBaoGia < 12 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s 
+                    ON r.CHR_SectionCode = s.CHR_CodeSection
+                WHERE 1 = 1 
+                    AND r.ID_StepBaoGia BETWEEN 6 AND 11
+                    AND r.BIT_LayBaoGia = 1");
+
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrEmpty(user))
@@ -216,55 +220,68 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("Section", section);
             }
 
-            sql.Append(@"
-                )
-                , det AS (
-                    SELECT d.ID_RequestQuote,
-                           COUNT(*) AS DetailCount
-                    FROM [BaoGia_Detail_of_Quotation] AS d
-                    INNER JOIN rq ON rq.ID = d.ID_RequestQuote
-                    GROUP BY d.ID_RequestQuote
-                )
-                , grp AS (
-                    SELECT rr.CHR_MaDon, rr.CHR_MaHangNoiBo,
-                           COUNT(*) AS ExpectedCount,
-                           SUM(CASE WHEN ISNULL(det.DetailCount, 0) > 0 THEN 1 ELSE 0 END) AS CompletedCount
-                    FROM rq rr
-                    LEFT JOIN det ON det.ID_RequestQuote = rr.ID
-                    GROUP BY rr.CHR_MaDon, rr.CHR_MaHangNoiBo
-                )
-                SELECT DISTINCT 
-                    rr.CHR_MaDon,
-                    rr.CHR_SectionName,
-                    --rr.CHR_MaHangNoiBo,
-                    --rr.INT_SoLuong,
-                    --rr.NVCHR_DonVi,
-                    --rr.CHR_Phanloai,
-                    --rr.NVCHR_NameVN,
-                    --rr.NVCHR_ChungLoai,
-                    --rr.DTM_NgayMuonNhan,
-                    CASE WHEN grp.CompletedCount = grp.ExpectedCount AND grp.ExpectedCount > 0 THEN N'Chưa chọn NCC' ELSE N'Đang chờ' END AS [Status]
-                FROM rq rr
-                LEFT JOIN grp ON grp.CHR_MaDon = rr.CHR_MaDon AND grp.CHR_MaHangNoiBo = rr.CHR_MaHangNoiBo");
+            sql.Append(@")
+            SELECT DISTINCT   
+                rr.CHR_MaDon,
+                rr.CHR_SectionName,
+                rr.CHR_MaHangNoiBo,
+                rr.INT_SoLuong,
+                rr.NVCHR_DonVi,
+                rr.CHR_Phanloai,
+                rr.NVCHR_NameVN,
+                rr.NVCHR_ChungLoai,
+                rr.DTM_NgayMuonNhan,
+                rr.ID_StepBaoGia,
+                CASE 
+                    WHEN rr.ID_StepBaoGia = 6 THEN N'WAITING_NCC'
+                    WHEN rr.ID_StepBaoGia = 7 THEN N'WAITING_PICK_NCC'
+                    WHEN rr.ID_StepBaoGia IN (9, 10, 11) THEN N'WAITING_APPROVER'
+                    ELSE 'NO'
+                END AS [Status]
+            FROM rq rr");
 
+            // Apply status filter if provided
+            if (!string.IsNullOrEmpty(status))
+            {
+                sql.Append(@"
+                WHERE 
+                    CASE 
+                        WHEN rr.ID_StepBaoGia = 6 THEN N'WAITING_NCC'
+                        WHEN rr.ID_StepBaoGia = 7 THEN N'WAITING_PICK_NCC'
+                        WHEN rr.ID_StepBaoGia IN (9, 10, 11) THEN N'WAITING_APPROVER'
+                        ELSE 'NO'
+                    END = @Status");
+                            parameters.Add("Status", status);
+            }
+
+            // Add ordering and pagination
             if (pageSize > 0 && pageIndex > 0)
             {
-                sql.Append(" ORDER BY rr.CHR_MaDon DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                sql.Append(@"
+                ORDER BY 
+                    rr.DTM_NgayMuonNhan DESC
+                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
                 parameters.Add("Offset", (pageIndex - 1) * pageSize);
                 parameters.Add("PageSize", pageSize);
             }
             else
             {
-                sql.Append(" ORDER BY rr.DTM_NgayMuonNhan DESC");
+                sql.Append(@"
+                ORDER BY 
+                    rr.DTM_NgayMuonNhan DESC");
             }
 
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
 
-            // Build count query using same filters to provide TotalCount for paging
-            var countSql = new StringBuilder(@"SELECT COUNT(DISTINCT r.CHR_MaDon)
+            // Count query with status filter
+            var countSql = new StringBuilder(@"
+                SELECT COUNT(DISTINCT CONCAT(r.CHR_MaDon, '|', r.CHR_SectionName, '|', r.CHR_MaHangNoiBo))
                 FROM [BaoGia_Request_of_Quotation] r
-                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE 1 = 1 and r.ID_StepBaoGia < 12 and  r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1");
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] s 
+                    ON r.CHR_SectionCode = s.CHR_CodeSection
+                WHERE 1 = 1 
+                    AND r.ID_StepBaoGia BETWEEN 6 AND 11 
+                    AND r.BIT_LayBaoGia = 1");
 
             if (!string.IsNullOrEmpty(user))
             {
@@ -283,6 +300,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 countSql.Append(" AND r.CHR_SectionCode = @Section");
             }
 
+            // Add status filter to count query
+            if (!string.IsNullOrEmpty(status))
+            {
+                countSql.Append(@"
+                AND 
+                CASE 
+                    WHEN r.ID_StepBaoGia = 6 THEN N'WAITING_NCC'
+                    WHEN r.ID_StepBaoGia = 7 THEN N'WAITING_PICK_NCC'
+                    WHEN r.ID_StepBaoGia IN (9, 10, 11) THEN N'WAITING_APPROVER'
+                    ELSE 'NO'
+                END = @Status");
+            }
+
             var total = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);
 
             return new ListRequest<dynamic>
@@ -299,7 +329,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return a;
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang,string? user, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, int pageIndex, int pageSize)
         {
             var cteBuilder = new StringBuilder();
             cteBuilder.Append(@"
@@ -661,7 +691,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var listUpdate = new List<BaoGia_Request_of_Quotation>();
             var listOldData = await _context.BaoGia_Request_of_Quotations.Where(c => baoGias.Select(b => b.ID).Contains(c.ID) && c.ID_Status.Contains("RETURN")).ToListAsync();
-            if(listOldData == null || !listOldData.Any())
+            if (listOldData == null || !listOldData.Any())
             {
                 throw new Exception("Dữ liệu không tồn tại hoặc không ở trạng thái RETURN để sửa lại");
             }

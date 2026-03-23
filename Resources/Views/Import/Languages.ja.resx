@@ -522,4 +522,22 @@
   <data name="nguoiupdate" xml:space="preserve">
     <value>氏名</value>
   </data>
+  <data name="NhaphangPO" xml:space="preserve">
+    <value>PO入荷</value>
+  </data>
+  <data name="sudung" xml:space="preserve">
+    <value>使用</value>
+  </data>
+  <data name="soluongthucte" xml:space="preserve">
+    <value>実績数量</value>
+  </data>
+  <data name="chonhanhang" xml:space="preserve">
+    <value>商品到着待ち</value>
+  </data>
+  <data name="dangnhanhang" xml:space="preserve">
+    <value>分割配送の一部受取り</value>
+  </data>
+  <data name="danhanhang" xml:space="preserve">
+    <value>受領済み</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["PageTitle"].Value;
 }
@@ -15,7 +15,8 @@
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-success" id="btnExportExcel"><i class="fas fa-file-excel"></i> Download Excel</button>
                 <button type="button" class="btn btn-outline-primary" id="btnImportExcel"><i class="fas fa-upload"></i> Upload Excel</button>
-                <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst"><i class="fas fa-upload"></i> Upload Excel First</button>
+                <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" hidden><i class="fas fa-upload"></i> Upload Excel First</button>
+                <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
             </div>
         </div>
     </div>

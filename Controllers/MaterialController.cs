@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Drawing;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -120,6 +121,100 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return View(model);
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ImportMaterials(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "Chọn File." });
+            }
+
+            if (!file.FileName.EndsWith(".xlsx") && !file.FileName.EndsWith(".xls"))
+            {
+                return Json(new { success = false, message = "Chỉ hỗ trợ file excel" });
+            }
+
+            try
+            {
+                var details = new List<MATERIALDTO>();
+
+                using (var stream = file.OpenReadStream())
+                using (var workbook = new XLWorkbook(stream))
+                {
+                    var worksheet = workbook.Worksheets.First();
+                    if (worksheet == null)
+                    {
+                        return Json(new { success = false, message = "No worksheets found in the file." });
+                    }
+
+                    var rows = worksheet.RowsUsed().Skip(1);
+                    if (!rows.Any())
+                    {
+                        return Json(new { success = false, message = "File must have at least a header row and one data row." });
+                    }
+
+                    foreach (var row in rows)
+                    {
+                        var Material_Code = row.Cell(6).GetString().Trim();
+                        var Material_Name_VN = row.Cell(7).GetString().Trim();
+                        var Material_Name_EN = row.Cell(8).GetString().Trim();
+                        //var Material_Name_JP = row.Cell(9).GetString().Trim();
+                        var Account_Code = row.Cell(10).GetString().Trim();
+                        var Account_Name_EN = row.Cell(11).GetString().Trim();
+                        var Account_Name_VN = row.Cell(12).GetString().Trim();
+                        var Unit = row.Cell(10).GetString().Trim();
+                        //var Unit_Note = row.Cell(13).GetString().Trim();
+                        //var Price = row.Cell(13).GetString().Trim();
+
+                        var Currency = row.Cell(13).GetString().Trim();
+                        var Group_Code = row.Cell(5).GetString().Trim();
+                        //var GoodKind = row.Cell(13).GetString().Trim();
+                        var Category_VN = row.Cell(11).GetString().Trim();
+                        //var Category_EN = row.Cell(13).GetString().Trim();
+                        //var Category_JP = row.Cell(13).GetString().Trim();
+                        var Shape = row.Cell(12).GetString().Trim();
+                        var Material = row.Cell(13).GetString().Trim();
+                        var Composition = row.Cell(14).GetString().Trim();
+                        var Dimension = row.Cell(15).GetString().Trim();
+                        var UsedFor = row.Cell(16).GetString().Trim();
+                        var Purpose = row.Cell(17).GetString().Trim();
+
+                        if (string.IsNullOrEmpty(Material_Code))
+                        {
+                            continue; // Skip invalid rows
+                        }
+
+                        details.Add(new MATERIALDTO
+                        {
+                            Material_Code = Material_Code,
+                            Material_Name_VN = Material_Name_VN,
+                            Material_Name_EN = Material_Name_EN,
+                            Account_Code = Account_Code,
+                            Account_Name_VN = Account_Name_VN,
+                            Account_Name_EN = Account_Name_EN,
+                            Unit = Unit,
+                            Currency = Currency,
+
+                        });
+                    }
+                }
+
+                var result = await _materialService.UpdateListThongTin(details);
+                if (!result.Success)
+                {
+                    return Json(new { success = false, message = result.Message });
+                }
+
+                return Json(new { success = true, message = $"Imported {details.Count} quote details successfully!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error importing quote details from Excel");
+                return Json(new { success = false, message = "An error occurred during import. Check the file format." });
+            }
+        }
+
 
         // Save inline changes by role
         [HttpPost]

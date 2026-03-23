@@ -1,4 +1,4 @@
-﻿// Supplier management page script
+// Supplier management page script
 document.addEventListener('DOMContentLoaded', function () {
     const api = {
         supplierSearch: '/Master/SearchSupplier',
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
         addSupplierDetail: '/Master/AddSupplierDetail',
         deleteSupplierDetail: (id) => `/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
         addListSupplierDetail: '/Master/AddListSupplierDetail',
-        ImportSupplierDetail: '/Master/ImportSupplierDetail'
+        ImportSupplierDetail: '/Master/UpdateMaterialInfo'
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');
@@ -200,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnImportItemsExcel = document.getElementById('btnImportItemsExcel');
     const itemsExcelFileInput = document.getElementById('itemsExcelFileInput');
     const btnImportExcelFirst = document.getElementById('btnImportExcelFirst');
+    const itemsExcelFileInputFirst = document.getElementById('itemsExcelFileInputFirst');
 
     async function showDetails(r) {
         currentItemSupplier = { ma: r.ma || '', ten: r.ten || '' };
@@ -326,8 +327,8 @@ document.addEventListener('DOMContentLoaded', function () {
         e.target.value = '';
     });
 
-    btnImportExcelFirst?.addEventListener('click', () => itemsExcelFileInput?.click());
-    itemsExcelFileInput?.addEventListener('change', async (e) => {
+    btnImportExcelFirst?.addEventListener('click', () => itemsExcelFileInputFirst?.click());
+    itemsExcelFileInputFirst?.addEventListener('change', async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
         try {

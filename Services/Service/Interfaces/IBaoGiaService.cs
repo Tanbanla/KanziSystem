@@ -23,13 +23,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Cập nhật đơn báo giá
         public Task<GenericResponse<BaoGia_Request_of_QuotationDTO>> CapNhatDonBaoGiaAsync(BaoGia_Request_of_QuotationDTO baogia);
         // Lấy thông tin báo giá gom nhóm
-        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang,string user, int pageIndex, int pageSize);
+        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string? status, string user, int pageIndex, int pageSize);
         // Xuất báo giá
         public Task<GenericResponse<List<int>>> ExportBaoGiaAsync(string? maDon);
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
         public Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, int pageIndex, int pageSize);
         // Lấy thông tin kèm chi tiết báo giá
-        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status,string user, int pageIndex, int pageSize);
+        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize);
         // lấy mã đơn theo Adid
         public Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid);
         // update thông tin màn hình lịch sử báo giá

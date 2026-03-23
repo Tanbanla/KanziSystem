@@ -115,6 +115,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chờ nhận hàng.
+        /// </summary>
+        public static string chonhanhang {
+            get {
+                return ResourceManager.GetString("chonhanhang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chuyển kho.
         /// </summary>
         public static string chuyenkho {
@@ -165,6 +174,24 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string Dangky {
             get {
                 return ResourceManager.GetString("Dangky", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Đang nhận hàng (Nhận 1 phần).
+        /// </summary>
+        public static string dangnhanhang {
+            get {
+                return ResourceManager.GetString("dangnhanhang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Đã nhận hàng (Kết thúc nhận hàng).
+        /// </summary>
+        public static string danhanhang {
+            get {
+                return ResourceManager.GetString("danhanhang", resourceCulture);
             }
         }
         
@@ -754,6 +781,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nhập hàng PO.
+        /// </summary>
+        public static string NhaphangPO {
+            get {
+                return ResourceManager.GetString("NhaphangPO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Nhập kho.
         /// </summary>
         public static string Nhapkho {
@@ -916,6 +952,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Số lượng thực tế.
+        /// </summary>
+        public static string soluongthucte {
+            get {
+                return ResourceManager.GetString("soluongthucte", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Số PO.
         /// </summary>
         public static string Sopo {
@@ -939,6 +984,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string Sua {
             get {
                 return ResourceManager.GetString("Sua", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sử dụng.
+        /// </summary>
+        public static string sudung {
+            get {
+                return ResourceManager.GetString("sudung", resourceCulture);
             }
         }
         

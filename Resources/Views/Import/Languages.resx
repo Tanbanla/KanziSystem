@@ -522,4 +522,22 @@
   <data name="nguoiupdate" xml:space="preserve">
     <value>Người update</value>
   </data>
+  <data name="NhaphangPO" xml:space="preserve">
+    <value>Nhập hàng PO</value>
+  </data>
+  <data name="sudung" xml:space="preserve">
+    <value>Sử dụng</value>
+  </data>
+  <data name="soluongthucte" xml:space="preserve">
+    <value>Số lượng thực tế</value>
+  </data>
+  <data name="chonhanhang" xml:space="preserve">
+    <value>Chờ nhận hàng</value>
+  </data>
+  <data name="dangnhanhang" xml:space="preserve">
+    <value>Đang nhận hàng (Nhận 1 phần)</value>
+  </data>
+  <data name="danhanhang" xml:space="preserve">
+    <value>Đã nhận hàng (Kết thúc nhận hàng)</value>
+  </data>
 </root>

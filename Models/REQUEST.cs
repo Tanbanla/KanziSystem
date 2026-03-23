@@ -1,8 +1,11 @@
-﻿using DocumentFormat.OpenXml.Vml;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Vml;
 using Microsoft.AspNetCore.Http.HttpResults;
 using OfficeOpenXml.Utils;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Data;
 using System.DirectoryServices.AccountManagement;
+using System.Drawing;
 using System.Net;
 using System.Net.Mail;
 using System.Net.WebSockets;
@@ -68,6 +71,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? Urgent { get; set; }
         public string? MaHangTem { get; set; }
         public List<SOLUONGKHO>? slk { get; set; }
+
 
     }
     public class REQUEST
@@ -208,7 +212,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     }
     public class REQUEST_PROCESS
     {
-        public static string Insert_request(string Cost_Center, string Declaration, string Dealine, string Total_exchange, string Exchange_rate, string Currency, string Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk)
+        public static string Insert_request(string Cost_Center, string Declaration, string Dealine, string Total_exchange, string Exchange_rate, string Currency, string Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk,string adidnguoitao, string mailnguoitao)
         {
             try
             {
@@ -264,9 +268,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                                         )";
                     _db.GET_DATA_FROM_SQL(_cmdDetail);
                 }
-                _insert_request_confirm(newId, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd, ten_dy.Split('_')[1], adid_dy, mail_dy, ten_xk.Split('_')[1], adid_xk, mail_xk);
+                _insert_request_confirm(newId, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd, ten_dy.Split('_')[1], adid_dy, mail_dy, ten_xk.Split('_')[1], adid_xk, mail_xk, adidnguoitao, mailnguoitao);
 
-                return "Thêm thành công !";
+                return newCode;
             }
             catch (Exception ex)
             {
@@ -291,11 +295,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return pcp;
         }
-        public static string _insert_request_confirm(string id_request, string adid_dt, string adid_tt, string adid_pheduyet, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk)
+        public static string _insert_request_confirm(string id_request, string adid_dt, string adid_tt, string adid_pheduyet, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk, string nguoitao, string mailnguoitao)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            _db.GET_DATA_FROM_SQL("insert into [PE_REQUEST_CONFIRM] (ID_REQUEST,CHR_ADID_NGUOIYEUCAU,CHR_ADID_NGUOITHAMTRA,CHR_ADID_NGUOIPHEDUYET,CHR_ADID_XACNHAN, DTM_XACNHAN, INT_STEP,CHR_MAIL_NGUOIYEUCAU,CHR_MAIL_NGUOITHAMTRA,CHR_MAIL_NGUOIPHEDUYET,CHR_TEN_NGUOIYEUCAU,CHR_TEN_NGUOITHAMTRA,CHR_TEN_NGUOIPHEDUYET,CHR_ADID_XUATKHO,CHR_MAIL_XUATKHO,CHR_TEN_XUATKHO,CHR_TEN_XACNHAN,CHR_MAIL_XACNHAN,CONFIRM_NGUOIYEUCAU,CONFIRM_NGUOITHAMTRA,CONFIRM_NGUOIPHEDUYET,CONFIRM_XACNHAN) " +
-                "VALUES ('" + id_request + "','" + adid_dt + "','" + adid_tt + "','" + adid_pheduyet + "','" + adid_dy + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','0','" + mail_dt + "','" + mail_tt + "','" + mail_pd + "',N'" + ten_dt + "',N'" + ten_tt + "',N'" + ten_pd + "','" + adid_xk + "','" + mail_xk + "',N'" + ten_xk + "',N'" + ten_dy + "','" + mail_dy + "','0','0','0','0')");
+            _db.GET_DATA_FROM_SQL("insert into [PE_REQUEST_CONFIRM] (ID_REQUEST,CHR_ADID_NGUOIYEUCAU,CHR_ADID_NGUOITHAMTRA,CHR_ADID_NGUOIPHEDUYET,CHR_ADID_XACNHAN, DTM_XACNHAN, INT_STEP,CHR_MAIL_NGUOIYEUCAU,CHR_MAIL_NGUOITHAMTRA,CHR_MAIL_NGUOIPHEDUYET,CHR_TEN_NGUOIYEUCAU,CHR_TEN_NGUOITHAMTRA,CHR_TEN_NGUOIPHEDUYET,CHR_ADID_XUATKHO,CHR_MAIL_XUATKHO,CHR_TEN_XUATKHO,CHR_TEN_XACNHAN,CHR_MAIL_XACNHAN,CONFIRM_NGUOIYEUCAU,CONFIRM_NGUOITHAMTRA,CONFIRM_NGUOIPHEDUYET,CONFIRM_XACNHAN,CHR_ADID_NGUOITAO,CHR_MAIL_NGUOITAO) " +
+                "VALUES ('" + id_request + "','" + adid_dt + "','" + adid_tt + "','" + adid_pheduyet + "','" + adid_dy + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','0','" + mail_dt + "','" + mail_tt + "','" + mail_pd + "',N'" + ten_dt + "',N'" + ten_tt + "',N'" + ten_pd + "','" + adid_xk + "','" + mail_xk + "',N'" + ten_xk + "',N'" + ten_dy + "','" + mail_dy + "','0','0','0','0','" + nguoitao + "','"  + mailnguoitao + "')");
             return "OK";
         }
         public static List<PE_REQUEST_CONFIRM> get_requestconfirm( string us, string Urgent, double Total, string Code_Request, string INT_STEP)
@@ -454,6 +458,38 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '" + step + "' , CONFIRM_" + regency + " = '1', DTM_" + regency + " = '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' where ID_REQUEST = '" + id_request + "'");
             return "Xác nhận thành công !";
         }
+        public static string _update_all(string us)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            db.GET_DATA_FROM_SQL($@"
+                                UPDATE [COST_MANAGEMENT].[dbo].[PE_REQUEST_CONFIRM]
+                                SET 
+                                    -- Cập nhật trạng thái xác nhận: Chỉ chuyển từ '0' sang '1'
+                                    [CONFIRM_NGUOIYEUCAU]   = CASE WHEN [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' THEN '1' ELSE [CONFIRM_NGUOIYEUCAU] END,
+                                    [CONFIRM_NGUOITHAMTRA]  = CASE WHEN [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' THEN '1' ELSE [CONFIRM_NGUOITHAMTRA] END,
+                                    [CONFIRM_NGUOIPHEDUYET] = CASE WHEN [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' THEN '1' ELSE [CONFIRM_NGUOIPHEDUYET] END,
+                                    [CONFIRM_XACNHAN]       = CASE WHEN [CHR_ADID_XACNHAN]       = '{us}' AND [CONFIRM_XACNHAN]       = '0' THEN '1' ELSE [CONFIRM_XACNHAN] END,
+                                    [CONFIRM_XUATKHO]       = CASE WHEN [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' THEN '1' ELSE [CONFIRM_XUATKHO] END,
+    
+                                    -- Chỉ tăng step nếu có ít nhất một cột thực sự được cập nhật từ '0' thành '1'
+                                    [INT_STEP] = ISNULL([INT_STEP], 0) + 1,
+
+                                    -- Cập nhật ngày giờ xác nhận: Chỉ cập nhật nếu cột confirm tương ứng đang là '0'
+                                    [DTM_NGUOIYEUCAU]   = CASE WHEN [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' THEN GETDATE() ELSE [DTM_NGUOIYEUCAU] END,
+                                    [DTM_NGUOITHAMTRA]  = CASE WHEN [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' THEN GETDATE() ELSE [DTM_NGUOITHAMTRA] END,
+                                    [DTM_NGUOIPHEDUYET] = CASE WHEN [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' THEN GETDATE() ELSE [DTM_NGUOIPHEDUYET] END,
+                                    [DTM_XACNHAN]       = CASE WHEN [CHR_ADID_XACNHAN]       = '{us}' AND [CONFIRM_XACNHAN]       = '0' THEN GETDATE() ELSE [DTM_XACNHAN] END,
+                                    [DTM_XUATKHO]       = CASE WHEN [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' THEN GETDATE() ELSE [DTM_XUATKHO] END
+
+                                WHERE 
+                                    -- Điều kiện lọc: User có tên trong danh sách và cột đó phải đang ở trạng thái '0'
+                                    ( [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' ) OR
+                                    ( [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' ) OR
+                                    ( [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' ) OR
+                                    ( [CHR_ADID_XACNHAN]       = '{us}' AND [CONFIRM_XACNHAN]       = '0' ) OR
+                                    ( [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' );");
+            return "Update thành công !";
+        }
         public static List<PE_USERNAME> _load_userinventory(string group_code, string id)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
@@ -525,23 +561,30 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return ctxk;
         }
-        public static string _xuatkho(string code_request, string adid_nx, string manguyenlieu, string soluong, string donvi, string kho, string us, string khoi, string phong, string vitri, string donhang)
+        public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             var ins = _db.GET_DATA_FROM_SQL($"Insert into [PE_REQUEST_INFORMATION] (NCHR_REQUEST_CODE,NCHR_EMPLOYEE_ADID,NCHR_MATERIAL_CODE,QTY_NEED,NCHR_UNIT,NCHR_WAREHOUSE_NAME,DTM_UPDATE,NCHAR_USER) " +
-                $"values ('{code_request}','{adid_nx}', '{manguyenlieu}','{soluong}',N'{donvi}', '{kho}','{DateTime.Now}', N'{us}')");
+                $"values ('{code_request}','{adid_nx}', '{manguyenlieu}','{soluong}',N'{donvi}', '{kho}','{DateTime.Now}', N'{adid_nx}')");
             _db.GET_DATA_FROM_SQL("Update PE_REQUEST_CONFIRM set INT_STEP = '5' where ID_REQUEST = '" + code_request + "'");
             // update thông tin vào bảng trong quản lý chi phí
             _db.GET_DATA_FROM_SQL($"Insert into [KHO_NHAPXUAT] (MaNguyenLieu,Hanhdong,Soluong,Loai,Ngaynhaokho,Thoigian,Nguoicapnhat,Kho,Khoi,Phong,Vitri) " +
-                $"values ('{manguyenlieu}', N'Xuất kho {kho} cho request {donhang}','{soluong}','XUAT','{DateTime.Now}','{DateTime.Now}','{adid_nx}','{kho}','{khoi}','{phong}','{vitri}')");
+                $"values ('{manguyenlieu}', N'Xuất kho {kho} cho request {code_request}','{soluong}','XUAT','{DateTime.Now}','{DateTime.Now}','{adid_nx}','{kho}','{khoi}','{phong}','{vitri}')");
 
             //update bảng request
+            //string UpdateRequest = "";
+            //UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + Math.Round(Tong, 4) + "'";
+            //UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + drpMoneyKind.SelectedValue + "'";
+            //UpdateRequest = UpdateRequest + ",[Currency_Real] = '" + ((KeyValuePair<string, string>)drpMoneyKind.SelectedItem).Key + "'";
+            //UpdateRequest = UpdateRequest + ",[Total_Real] = '" + Math.Round(USD(Tong), 4) + "' ,[Status] = 'PROGRESS' ";
+            //UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + User + "'";
+            //UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + Code_Request + "'";
+            //con.Excutesql(UpdateRequest);
 
-            _db.GET_DATA_FROM_SQL("UPDATE [REQUEST] SET [Total_exchange_real] = '',Exchange_rate_Real = '',Currency_Real = '', Total_Real = '',[Last_Update] = GETDATE(),[User_Update]= '" + adid_nx + "',[Status] = 'PROGRESS' [Code_Request] = '" + code_request + "'");
-            _db.GET_DATA_FROM_SQL("UPDATE [REQUEST] SET [Total_exchange_real] = '',Exchange_rate_Real = '',Currency_Real = '', Total_Real = '',[Last_Update] = GETDATE(),[User_Update]= '" + adid_nx + "',[Status] = 'PROGRESS' [Code_Request] = '" + code_request + "'");
 
-            _db.GET_DATA_FROM_SQL("UPDATE [REQUEST] SET [Status] = 'DONE' WHERE [Code_Request] = '" + code_request + "' ");
 
+            //con.Excutesql("UPDATE [KHO] SET [Hientai] = [Hientai] - " + Convert.ToDouble(gvRow.Cells["Amount_Real"].EditedFormattedValue.ToString().Trim()) + " WHERE [MaNguyenLieu] = '" + gvRow.Cells["Material_Code"].EditedFormattedValue.ToString().Trim() + "' AND [Kho] = '" + cmbKho.SelectedValue.ToString().Trim() + "' AND [Group_Code] = '" + Khoi + "' ");
+            //Id_LichsuXuat = con.ReturnString("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Phong],[Vitri],[Ngaynhaokho],[Sotaikhoan],[Soluongtruocthaydoi],[Soluongsauthaydoi]) OUTPUT Inserted.Id_Lichsu  VALUES(N'" + gvRow.Cells["Material_Code"].EditedFormattedValue.ToString().Trim() + "',N'Xuất kho " + cmbKho.SelectedValue.ToString().Trim() + " cho request: " + lbCodeRequest.Text.Trim() + "','" + Convert.ToDouble(gvRow.Cells["Amount_Real"].EditedFormattedValue.ToString().Trim()) + "','XUAT',GETDATE(),'" + User + "','" + cmbKho.SelectedValue.ToString().Trim() + "','" + Khoi + "','" + Dept.SelectedValue.ToString().Trim() + "',N'" + gvRow.Cells["Vitri"].EditedFormattedValue.ToString().Trim() + "','" + txtNgayxuatkho.Value.ToString("MM/dd/yyyy") + "','" + gvRow.Cells["Account_Code"].EditedFormattedValue.ToString().Trim() + "','" + Convert.ToDouble(SlKho) + "','" + (Convert.ToDouble(SlKho) - Convert.ToDouble(gvRow.Cells["Amount_Real"].EditedFormattedValue.ToString().Trim())) + "')");
             _db.GET_DATA_FROM_SQL($"Update [KHO] set [Hientai] = Hientai - {soluong} where MaNguyenLieu = '{manguyenlieu}' and Kho = '{kho}'");
 
             return "Thêm thành công !";

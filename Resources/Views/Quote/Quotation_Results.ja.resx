@@ -513,4 +513,253 @@
   <data name="ExportExcel" xml:space="preserve">
     <value>エクセル出力</value>
   </data>
+  <data name="PageSubtitle" xml:space="preserve">
+    <value>ページサブタイトル</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>承認</value>
+  </data>
+  <data name="Return" xml:space="preserve">
+    <value>戻す</value>
+  </data>
+  <data name="ApprovalStatusLabel" xml:space="preserve">
+    <value>承認ステータス</value>
+  </data>
+  <data name="AllOption" xml:space="preserve">
+    <value>すべて</value>
+  </data>
+  <data name="ExportToExcel" xml:space="preserve">
+    <value>Excelにエクスポート</value>
+  </data>
+  <data name="OrderStatus" xml:space="preserve">
+    <value>注文ステータス</value>
+  </data>
+  <data name="DetailModalTitle" xml:space="preserve">
+    <value>見積依頼詳細</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>受信部門</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>緊急</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>部門コストセンター</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>部門名</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>依頼日</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>希望期限</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>物品詳細</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>番号</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>システムコード</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>社内品目コード</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>品目名VN/EN</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>単位</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>形状</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>材料</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>成分</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>寸法</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>使用位置</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>目的/機能</value>
+  </data>
+  <data name="VendorCode" xml:space="preserve">
+    <value>ベンダーコード</value>
+  </data>
+  <data name="ROHSRequirement" xml:space="preserve">
+    <value>ROHS要件</value>
+  </data>
+  <data name="COCQRequirement" xml:space="preserve">
+    <value>CO/CQ要件</value>
+  </data>
+  <data name="MSDSRequirement" xml:space="preserve">
+    <value>MSDS要件</value>
+  </data>
+  <data name="SafetyStandardRequirement" xml:space="preserve">
+    <value>安全基準要件</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>緊急</value>
+  </data>
+  <data name="ApprovalFlowTitle" xml:space="preserve">
+    <value>承認フロー</value>
+  </data>
+  <data name="ApprovalFlowLine1" xml:space="preserve">
+    <value>• 3,000USD（6,600万VND）未満：担当者 → 中間管理職 → 部門副長。</value>
+  </data>
+  <data name="ApprovalFlowLine2" xml:space="preserve">
+    <value>• 10,000USD（2億2千万VND）未満：担当者 → 中間管理職 → 部門長。</value>
+  </data>
+  <data name="ApprovalFlowLine3" xml:space="preserve">
+    <value>• 10,000USD（2億2千万VND）以上：中間管理職 → 部門長/副部門長 → 総支配人/ディレクター。</value>
+  </data>
+  <data name="ApprovalFlowLine4" xml:space="preserve">
+    <value>→ 出庫承認（PR1-MC）：初級/中級管理職 → 管財倉庫</value>
+  </data>
+  <data name="AdditionalInfoTitle" xml:space="preserve">
+    <value>追加情報</value>
+  </data>
+  <data name="RequesterLabel" xml:space="preserve">
+    <value>依頼者</value>
+  </data>
+  <data name="ApproveButton" xml:space="preserve">
+    <value>承認</value>
+  </data>
+  <data name="RejectButton" xml:space="preserve">
+    <value>拒否</value>
+  </data>
+  <data name="DetailModalTitleFormat" xml:space="preserve">
+    <value>見積依頼詳細 - {0}</value>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="InputReasonTitle" xml:space="preserve">
+    <value>理由を入力</value>
+  </data>
+  <data name="InputReasonPlaceholder" xml:space="preserve">
+    <value>理由を入力してください</value>
+  </data>
+  <data name="ReasonRequired" xml:space="preserve">
+    <value>理由は必須です</value>
+  </data>
+  <data name="ApproveSuccess" xml:space="preserve">
+    <value>承認成功</value>
+  </data>
+  <data name="ApproveFailed" xml:space="preserve">
+    <value>承認失敗: {0}</value>
+  </data>
+  <data name="ApproveError" xml:space="preserve">
+    <value>承認エラー</value>
+  </data>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>戻す成功</value>
+  </data>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>戻す失敗: {0}</value>
+  </data>
+  <data name="ReturnError" xml:space="preserve">
+    <value>戻すエラー</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>不明</value>
+  </data>
+  <data name="MsgSusscesAprover" xml:space="preserve">
+    <value>承認成功</value>
+  </data>
+  <data name="MSGFailedApprover" xml:space="preserve">
+    <value>承認失敗</value>
+  </data>
+  <data name="MSGErrorApprover" xml:space="preserve">
+    <value>承認エラー</value>
+  </data>
+  <data name="MSGReturnFailed" xml:space="preserve">
+    <value>戻す失敗</value>
+  </data>
+  <data name="MSGReturnOK" xml:space="preserve">
+    <value>戻すOK</value>
+  </data>
+  <data name="MSGExportOK" xml:space="preserve">
+    <value>エクスポートOK</value>
+  </data>
+  <data name="InputQuoteTitle" xml:space="preserve">
+    <value>見積入力タイトル</value>
+  </data>
+  <data name="QuoteInputTitle" xml:space="preserve">
+    <value>見積入力タイトル</value>
+  </data>
+  <data name="NoLabel" xml:space="preserve">
+    <value>いいえ</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="ApprovalTabTitle" xml:space="preserve">
+    <value>承認選択</value>
+  </data>
+  <data name="SupplierSelectionTabTitle" xml:space="preserve">
+    <value>仕入先選択</value>
+  </data>
+  <data name="SystemCalculatedTotal" xml:space="preserve">
+    <value>システム計算合計</value>
+  </data>
+  <data name="SupplierSelection" xml:space="preserve">
+    <value>仕入先選択</value>
+  </data>
+  <data name="SelectionReason" xml:space="preserve">
+    <value>選択理由</value>
+  </data>
+  <data name="WaitPickSupplier" xml:space="preserve">
+    <value>仕入先選択待ち</value>
+  </data>
+  <data name="WaitConfirmName" xml:space="preserve">
+    <value>名前確認待ち</value>
+  </data>
+  <data name="WaitSupplierQuote" xml:space="preserve">
+    <value>仕入先見積待ち</value>
+  </data>
+  <data name="SupplierSelected" xml:space="preserve">
+    <value>仕入先選択済み</value>
+  </data>
+  <data name="WaitApproval" xml:space="preserve">
+    <value>承認待ち</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="HideDetails" xml:space="preserve">
+    <value>詳細を隠す</value>
+  </data>
+  <data name="ShowDetails" xml:space="preserve">
+    <value>詳細を表示</value>
+  </data>
+  <data name="PromptEnterReason" xml:space="preserve">
+    <value>仕入先を選択する理由を入力してください</value>
+  </data>
+  <data name="WaitPickApSupplier" xml:space="preserve">
+    <value>仕入先の見積もりを待っています。</value>
+  </data>
+  <data name="SupplierApSelected" xml:space="preserve">
+    <value>サプライヤー選定待ち</value>
+  </data>
+  <data name="WaitApConfirmName" xml:space="preserve">
+    <value>承認待ち</value>
+  </data>
+  <data name="undefined" xml:space="preserve">
+    <value>未定義</value>
+  </data>
 </root>

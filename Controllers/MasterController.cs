@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+using Azure.Core;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -324,7 +324,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (ws == null) return BadRequest("Không tìm thấy worksheet");
 
                 // lấy dữ liệu từ dòng 3
-                int startRow = 3;
+                int startRow = 2;
                 int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
 
                 for (int r = startRow; r <= lastRow; r++)
@@ -337,15 +337,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var dto = new BaoGia_NCC_CategoryDTO
                     {
                         Id = 0,
-                        CHR_MaNCC = ws.Cell(r, 4).GetString().Trim(),
-                        NVCHR_TenNCC = ws.Cell(r, 6).GetString().Trim(),
-                        NVCHR_ChungLoai = ws.Cell(r, 2).GetString().Trim(),
+                        CHR_MaNCC = ws.Cell(r, 2).GetString().Trim(),
+                        NVCHR_TenNCC = ws.Cell(r, 4).GetString().Trim(),
+                        NVCHR_ChungLoai = ws.Cell(r, 1).GetString().Trim(),
                         NVCHR_SanXuat = ws.Cell(r, 3).GetString().Trim(),
                         CHR_Status = "Active",
                         CHR_CreateBy = user,
                         DTM_CreateBy = DateTime.Now,
-                        CHR_Mail = ws.Cell(r, 8).GetString().Trim(),
-                        CHR_PIC = ws.Cell(r, 10).GetString().Trim()
+                        CHR_Mail = ws.Cell(r, 6).GetString().Trim(),
+                        CHR_PIC = "SDT: " +ws.Cell(r, 7).GetString().Trim()+  ",Name: " + ws.Cell(r, 8).GetString().Trim()
                     };
                     // Lọc trùng dữ liệu trong file excel trước khi thêm vào danh sách, tránh trường hợp file có nhiều
                     if (items.Where(x => x.CHR_MaNCC == dto.CHR_MaNCC && x.NVCHR_ChungLoai == dto.NVCHR_ChungLoai && x.NVCHR_SanXuat == dto.NVCHR_SanXuat).Any())
@@ -451,8 +451,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // Map theo thứ tự cột trong bảng ở giao diện
                     var dto = new MATERIALDTO
                     {
-                        Material_Code = ws.Cell(r, 1).GetString().Trim(),
-                        Category_VN = ws.Cell(r, 14).GetString(),
+                        Material_Code = ws.Cell(r, 2).GetString().Trim(),
+                        Category_VN = ws.Cell(r, 6).GetString(),
+                        Code_Suppiler = ws.Cell(r, 3).GetString(),
+                        Material_Name_VN = ws.Cell(r, 5).GetString(),
+                        Material_Name_EN = ws.Cell(r, 4).GetString(),
+                        Group_Code = ws.Cell(r, 7).GetString(),
+                        Shape = ws.Cell(r, 8).GetString(),
+                        Material = ws.Cell(r, 9).GetString(),
+                        Composition = ws.Cell(r, 10).GetString(),
+                        Dimension = ws.Cell(r, 11).GetString(),
+                        UsedFor = ws.Cell(r, 12).GetString(),
+                        Purpose = ws.Cell(r, 13).GetString(),
                     };
 
                     items.Add(dto);
@@ -461,7 +471,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("File không có dữ liệu hợp lệ");
                 }
-                await _materialService.UpdateMaterialAsync(items);
+                await _materialService.UpdateListThongTinNoList(items);
                 return Ok(items);
             }
             catch (Exception ex)

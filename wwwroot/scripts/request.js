@@ -63,6 +63,8 @@
     var mail_pd = document.getElementById("mail_pheduyet").value;
     var mail_dy = document.getElementById("mail_dongy").value;
     var mail_xk = document.getElementById("mail_xuatkho").value;
+    var adidnguoitao = document.getElementById("us").innerHTML;
+    var mailnguoitao = document.getElementById("email_us").textContent;
     if (Place == "" || name_dept == "" || Dealine == "") {
         alert("Vui lòng điền đủ thông tin vào đơn !");
     }
@@ -75,11 +77,14 @@
                 Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
                 Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
                 adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, adid_dy: adid_dy, ten_dy: ten_dy,
-                mail_dy: mail_dy, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk
+                mail_dy: mail_dy, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk, adidnguoitao: adidnguoitao, mailnguoitao: mailnguoitao
             },
             success: function (response) {
-                send_mail(mail_dt, Urgent);
-
+                /*    send_mail(mail_dt, Urgent);*/
+                alert(response);
+                location.reload();
+                document.querySelectorAll('.close').forEach(button => button.click());
+                _load_confirm();
             }
         })
     }
@@ -194,7 +199,7 @@ async function _load_confirm() {
     })
         .then(response => response.ok ? response.json() : Promise.reject(response))
         .then(data => {
-
+            console.log(data);
             const tbody = document.getElementById('list_approve');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
@@ -230,7 +235,6 @@ async function _load_confirm() {
                 });
 
                 const urg = item.urgent == "True" ? "<b class='text-danger'><i>* Gấp</i></b>" : "Thông thường";
-
                 const trangthai = `<div class="badge badge-pill badge-${config[1]} mb-1">${config[0]}</div>`;
 
                 return `
@@ -335,20 +339,14 @@ function _update_request(id) {
         });
 
 }
-function _update_request_all(id) {
+function _update_request_all(request) {
 
-    var id_request = document.getElementById("id_request" + id).innerHTML;
-    var regency = document.getElementById("regency" + id).innerHTML;
-    var step = document.getElementById("step" + id).innerHTML;
-    var urgent = document.getElementById("urgent" + id).innerHTML;
-
+    var us = document.getElementById("us").innerHTML;
     const params = new URLSearchParams();
-    params.append('id_request', id_request);
-    params.append('regency', regency);
-    params.append('step', step);
-    params.append('urgent', urgent);
-
-    fetch('/Request/_update_request', {
+    params.append('us', us);
+    params.append('madon', request);
+ 
+    fetch('/Request/_update_dongytatca', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -361,15 +359,22 @@ function _update_request_all(id) {
         return response.json();
     })
         .then(data => {
-            alert(data);
-            var us = document.getElementById("us").innerHTML;
-            document.getElementById("cls_" + id).innerHTML = "";
+           
             _load_confirm(us);
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 
+}
+function _dongy_all() {
+    // Thay đổi từ [name="item"] sang .item
+    const checkboxes = document.querySelectorAll('input.item');
+  
+    checkboxes.forEach((item) => {
+        _update_request_all(item.value);
+    });
+    alert("Hoàn thành !");
 }
 function _reject(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;

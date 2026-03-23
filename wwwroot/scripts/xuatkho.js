@@ -69,7 +69,7 @@
                 <td>${user.user_Create}</td>
                 <td>${user.last_Update}</td>
                 <td>${user.user_Update}</td>
-                <td>${user.group_Code}</td>
+                <td id="khoi_${user.code_Request}">${user.group_Code}</td>
                 </tr>
                 <tr id="dt_${user.code_Request}" class="collapse-row" style="display: none; background-color: #f8f9fa;">
                  <td colspan="18">
@@ -108,7 +108,6 @@
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-
 function toggleRow(id) {
     // id is expected to be the raw code_Request (without "dt_" prefix)
     var element = document.getElementById("dt_" + id);
@@ -253,44 +252,66 @@ function caculator() {
 
 }
 function _xuatkho() {
-    var code_request = document.getElementById("madon").innerHTML;
+
+    var code_request = document.getElementById("madonn").innerHTML;
     var adid_nx = document.getElementById("us").innerHTML;
-    var manguyenlieu = document.getElementById("mahagg").innerHTML;
-    var soluong = document.getElementById("sl_xuat").value;
-    var donvi = document.getElementById("donvi").innerHTML;
-    var kho = document.getElementById("_lskho").value;
-    var nguoinhan = document.getElementById("nguoinhan").value;
+    var nguoinhan = document.getElementById("nguoinhan_thucte").value;
+    var nguoixuatkho = document.getElementById("nguoixuatkho_thucte").value;
+    var thoigian = document.getElementById("thoigianxuat_thucte").value;
+    var vitri = document.getElementById("vitri").innerHTML;
+    var phong = document.getElementById("phong").innerHTML;
+   
+    const checkboxes = document.querySelectorAll('input.itemsmall');
 
-    const params = new URLSearchParams();
-    params.append('code_request', code_request);
-    params.append('adid_nx', adid_nx);
-    params.append('manguyenlieu', manguyenlieu);
-    params.append('soluong', soluong);
-    params.append('donvi', donvi);
-    params.append('kho', kho);
-    params.append('nguoinhan', nguoinhan);
+    checkboxes.forEach((item, i) => {
+        var manguyenlieu = document.getElementById("mahang_" + i).innerHTML;
+        var soluong = document.getElementById("slthucte_" + i).value;
+        var giathucte = document.getElementById("dgthucte_" + i).value;
+        var donvi = document.getElementById("donvi_" + i).innerHTML;
+        var kho = document.getElementById("khoSelect_" + i).value;
+        var tongchiphi = document.getElementById("ttthucte_" + i).innerHTML;
+        var khoi = document.getElementById("khoi_" + i).innerHTML;
 
-    fetch('/Import/_xuatkhothucte', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString()
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
+        const params = new URLSearchParams();
+        params.append('code_request', code_request);
+        params.append('adid_nx', adid_nx);
+        params.append('nguoinhan', nguoinhan);
+        params.append('nguoixuatkho', nguoixuatkho);
+        params.append('thoigian', thoigian);
+        params.append('manguyenlieu', manguyenlieu);
+        params.append('soluong', soluong);
+        params.append('giathucte', giathucte);
+        params.append('donvi', donvi);
+        params.append('kho', kho);
+        params.append('tongchiphi', tongchiphi);
+        params.append('tongchiphi', tongchiphi);
+        params.append('vitri', vitri);
+        params.append('phong', phong);
+        params.append('khoi', khoi);
+
+        fetch('/Import/_xuatkhothucte', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
         })
-        .then(data => {
-            alert(data);
-            document.querySelectorAll('.close').forEach(button => button.click());
-            _load_xuatkho();
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data);
+                document.querySelectorAll('.close').forEach(button => button.click());
+                _load_xuatkho();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    });
+  
 }
 function _modal_chitietxuatkho(code_request) {
     document.getElementById("modal-19").click();
@@ -337,7 +358,7 @@ function _modal_chitietxuatkho(code_request) {
                 htmlContent += `<tr>
                 <td><input type="checkbox" class="form-control itemsmall" /></td>
                 <td>${i + 1}</td>
-                <td>${item.material_Code}</td>
+                <td id="mahang_${i}">${item.material_Code}</td>
                 <td>${item.material_Name}</td>                  
                 <td>${item.brand}</td>
                 <td>${item.good_Code}</td>
@@ -345,12 +366,12 @@ function _modal_chitietxuatkho(code_request) {
                 <td>${item.account_Name}</td>
                 <td>
                     <select id="khoSelect_${i}" class="form-control" style="background-color:lightyellow">
-                        <option value="">- chọn kho -</option>
+                       
                     </select>
                 </td>
                 <td id="hienThiSoLuong_${i}" style="font-weight:bold; color:blue">0</td>
                 <td id="slpo_${i}">${item.amount}</td>                  
-                <td>${item.unit}</td>
+                <td id="donvi_${i}">${item.unit}</td>
                 <td>${item.price}</td>
                 <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="slthucte_${i}" value="${item.amount}" onblur="_tinhthucte('${i}')" /></td>
                 <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="dgthucte_${i}" value="${item.price}" onblur="_tinhthucte('${i}')" /></td>
@@ -384,6 +405,9 @@ function _modal_chitietxuatkho(code_request) {
                         const khoData = item.slk.find(k => k.tenkho === selectedKho);
                         displayElement.innerText = khoData ? khoData.soluong : "0";
                     });
+                    if (item.slk.length > 0) {
+                        selectElement.dispatchEvent(new Event('change'));
+                    }
                 }
             });
         })

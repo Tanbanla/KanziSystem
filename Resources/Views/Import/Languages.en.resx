@@ -522,4 +522,22 @@
   <data name="nguoiupdate" xml:space="preserve">
     <value>User update</value>
   </data>
+  <data name="NhaphangPO" xml:space="preserve">
+    <value>PO Receiving</value>
+  </data>
+  <data name="sudung" xml:space="preserve">
+    <value>Use</value>
+  </data>
+  <data name="soluongthucte" xml:space="preserve">
+    <value>Actual Quantity</value>
+  </data>
+  <data name="chonhanhang" xml:space="preserve">
+    <value>Awaiting delivery</value>
+  </data>
+  <data name="dangnhanhang" xml:space="preserve">
+    <value>Partially received</value>
+  </data>
+  <data name="danhanhang" xml:space="preserve">
+    <value>Order Received</value>
+  </data>
 </root>

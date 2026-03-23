@@ -1,4 +1,7 @@
 ﻿@using PRJ_WAREHOUSE_BIVN.Language
+@{
+    ViewData["Title"] = Languages.NhaphangPO;
+}
 <style>
     .card .card-header .form-control {
         height: 42px;
@@ -61,43 +64,37 @@
         border-radius: 5px;
     }
 
-  
     .close-btn {
         font-size: 24px;
         cursor: pointer;
         color: #888;
     }
 
-        .close-btn:hover {
-            color: #000;
-        }
+    .close-btn:hover {
+        color: #000;
+    }
 
-  .table-responsive
-   {
-        max-height: 400px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-   }
+    /* allow both axes scrolling when table is larger than container */
+    .table-responsive {
+        max-height: 800px;
+        overflow: auto; /* changed from overflow-y to allow horizontal scroll too */
+        position: relative;
+        font-size: 13px;
+    }
 
-  .table-responsive {
-  max-height: 400px;
-  overflow-y: auto; 
-  position: relative;
-}
+    .table-responsive table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 2px solid #dee2e6;
+        box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+    }
 
-.table-responsive table thead th {
-  position: sticky;
-  top: 0;
-  background-color: #ffffff;
-  z-index: 10;
-  border-bottom: 2px solid #dee2e6;
-  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
-}
-
-.table-responsive table tbody td {
-  position: relative;
-  z-index: 1;
-}
+    .table:not(.table-sm) thead th{
+        border-bottom: none;
+        background-color: rgb(35 53 183);
+        color: white;
+    }
 
     .container-fluid {
         width: 100% !important;
@@ -106,126 +103,152 @@
         max-width: none !important;
     }
 
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        max-height: 80vh;
-    }
-
-  
-
     .table {
-        width: 100% !important;
+       
+       
         margin-bottom: 0;
-        white-space: nowrap;
+        table-layout: fixed;
     }
 
 </style>
 <div class="row">
     <div class="col-12">
-        <div class="card card-primary">
-            <div class="card-header">
-                <div class="form-group" style="margin : 10px 0 0 0px">
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-android-contact"></i></div>
+        <div class="card card-primary">        
+            <div class="card-body p-0">                            
+                <table class="table table-bordered">
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <div class="input-group-prepend">                              
+                                    <span class="input-group-text">@Languages.Khoi :</span>
+                                </div>
+                                <select class="form-control" id="IdDept" style="background-color:beige">
+                                    <option value="GA">GA</option>
+                                    <option value="IT">IT</option>
+                                    <option value="PROD" selected>PROD</option>
+                                    <option value="PUR">PUR</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td colspan="2">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="ion ion-arrow-swap"></i></span>
+                                    <span class="input-group-text">@Languages.NhapPO :</span>
+                                </div>
+                                <input type="text" class="form-control" style="background-color:beige" id="poNumber" />
+                            </div>
+                        </td>
+                        <td colspan="2">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="ion ion-ios-alarm"></i></span>
+                                    <span class="input-group-text">@Languages.mayeucau :</span>
+                                </div>
+                            <input type="text" class="form-control" id="mayeucau" style="background-color:beige" />
+                            </div>                              
+                        </td>
+                        <td colspan="2">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="ion ion-ios-checkmark"></i></span>
+                                    <span class="input-group-text">@Languages.Mahang :</span>
+                                </div>
+                            <input type="text" class="form-control" id="mahang" style="background-color:beige" />
                         </div>
-                        <input type="text" class="form-control" id="poNumber" placeholder="@Languages.NhapPO">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-code-working"></i></div>
-                            <div class="input-group-text">@Languages.Khoi : </div>
-                        </div>
-                        <select class="form-control" id="IdDept">
-                            <option value="GA">GA</option>
-                            <option value="IT">IT</option>
-                            <option value="PROD" selected>PROD</option>
-                            <option value="PUR">PUR</option>
-                        </select>
-                    </div>
-                </div>
+                        </td>
+                        <td colspan="2">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="ion ion-person-stalker"></i></span>
+                                    <span class="input-group-text">@Languages.phongbanyeucau :</span>
+                                </div>
+                                <input type="text" class="form-control" id="phongyeucau" style="background-color:beige" />
+                            </div>
+                        </td>
+                            
+                        <td><button class="btn btn-success" onclick="SearchPoDel()"><i class="fa fa-search"></i> @Languages.timkiem </button></td>
+                        <td><button class="btn btn-info" onclick="resett()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button></td>
+                         
+                    </tr>
+                    <tr class="bg-light">
+                        <td colspan="2">
+                            <button class="btn btn-success" onclick="ImportWarehouse()"> <i class="ion ion-ios-cart"></i> @Languages.Nhapkho</button>
+                            <button class="btn btn-danger ml-3"> <i class="ion ion-ios-unlocked"></i> @Languages.sudung</button>
+                        </td>
 
-                <button class="btn btn-success" style="margin-left:20px;" onclick="SearchPoDel()"> <i class="ion ion-search" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.timkiem</button>
-                <button id="openModal" class="btn btn-danger btn-open" style="margin-left:20px;"> <i class="ion ion-cash" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.donviquydoi</button>
-                <button class="btn btn-info" style="margin-left:20px;" onclick="resett()"> <i class="ion ion-ios-refresh" style="align-content:center; margin:5px;vertical-align:middle;"></i>Reset</button>
+                        <td colspan="2">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="ion ion-ios-timer"></i></span>
+                                    <span class="input-group-text">@Languages.thoigiannhanve :</span>
+                                </div>
+                                <input type="date" class="form-control" id="idTimeDelivery" style="background-color:beige" />
+                            </div>
+                        </td>                        
+                        <td>
+                            <div class="input-group" hidden>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="ion ion-ios-grid-view-outline"></i></span>
+                                    <span class="input-group-text">@Languages.khonhapve :</span>
+                                </div>
+                                <select class="form-control" id="IdWarehouse">
+                                    <option>--</option>
+                                </select>
+                            </div>                               
+                        </td>
+                    <td colspan="6">
+                        <img src="~/img/do.png" width="20px" height="13px" /> <span class="text-danger"> @Languages.chonhanhang</span>
+                        <img src="~/img/xanh.png" width="20px" height="13px" style="margin-left:15px" />  <span class="text-primary"> @Languages.dangnhanhang</span>
+                        <img src="~/img/den.png" width="20px" height="13px" style="margin-left:15px" /> @Languages.danhanhang
+                        </td>
+                    </tr>
+                </table>
+                <div class=" table-responsive">
+                    <table class="table table-bordered mb-0" style=" width: 180% !important;">
+                        <thead>
+                            <tr class="bg-primary text-white">
+                                <th class="text-center" width="50px"><input type="checkbox" id="checkAll"></th>
+                                <th width="80px">@Languages.Mahethong</th>
+                                <th width="80px">@Languages.Duoctachtu</th>
+                                <th width="80px">@Languages.Bennhaptruoc</th>
+                                <th width="80px">@Languages.Sopo</th>
+                                <th width="80px">@Languages.mayeucau</th>
+                                <th width="80px">@Languages.Mahang</th>
+                                <th style="width:100px">@Languages.Masanpham</th>
+                                <th width="200px" class="text-wrap">@Languages.TenhangTA</th>
+                                <th width="200px" class="text-wrap">@Languages.TenhangTV</th>
+                                <th >@Languages.dathang</th>           
+                                <th style="width:100px">@Languages.luongvekho</th>
+                                <th>@Languages.Ngaynhapkho</th>
+                                <th>@Languages.Nguoinhapkho</th>
+                                <th width="60px">@Languages.Donvi</th>
+                                <th>@Languages.Dongiauoctinh</th>
+                                <th>@Languages.Dieukiengiaohang</th>
+                                <th>@Languages.Diadiemgiaohang</th>
+                                <th>@Languages.Phuongthucvanchuyen</th>
+                                <th>@Languages.Sotien</th>
+                                <th>@Languages.vat</th>
+                                <th>@Languages.phongbanyeucau</th>
+                                <th>@Languages.tenphongyeucau</th>
+                                <th>@Languages.ngaygiaohangdukien</th>
+                                <th>@Languages.noigiaohangdukien</th>
+                                <th>@Languages.thoihanthanhtoan</th>
+                                <th>@Languages.loaitien</th>
+                                <th>@Languages.tygia</th>
+                                <th>@Languages.doisangusd</th>
+                                <th width="80px">@Languages.danhmuc</th>
+                                <th width="200px">@Languages.nhacungcap</th>
+                                <th>@Languages.Idlichsu</th>
+                                <th>@Languages.luongvekho</th>
+                                <th>Invoice</th>
 
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-home"></i></div>
-                            <div class="input-group-text">@Languages.khonhapve : </div>
-                        </div>
-                        <select class="form-control" id="IdWarehouse">
-                            <option>--</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin : 10px 0 0 20px">
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-android-time"></i></div>
-                            <div class="input-group-text">@Languages.thoigiannhanve : </div>
-                        </div>
-                        <input type="date" class="form-control" id="idTimeDelivery"/>
-                    </div>
-                </div>
-
-                <button class="btn btn-success" style="margin-left:20px;" onclick="ImportWarehouse()"> <i class="ion ion-pull-request" style="align-content:center; margin:5px;vertical-align:middle;"></i>@Languages.Nhapkho</button>
-
-            </div>
-            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer" id="table-1_wrapper">
-                <div class="table-responsive">
-                   
-                        <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
-                            <table class="table table-bordered">
-                                <thead class="bg-primary">
-                                    <tr>
-                                        <th><input type="checkbox" id="checkAll"></th>
-                                        <th>@Languages.Mahethong</th>
-                                        <th>@Languages.Duoctachtu</th>
-                                        <th>@Languages.Bennhaptruoc</th>
-                                        <th>@Languages.Sopo</th>
-                                        <th>@Languages.Mahang</th>
-                                        <th>@Languages.Masanpham</th>
-                                        <th>@Languages.TenhangTA</th>
-                                        <th>@Languages.TenhangTV </th>
-                                        <th>@Languages.dathang</th>
-                                        <th>@Languages.luongvekho</th>
-                                        <th>@Languages.Luonglamthutuc</th>
-                                        <th>@Languages.Ngaynhapkho</th>
-                                        <th>@Languages.Nguoinhapkho</th>
-                                        <th>@Languages.Donvi</th>
-                                        <th>@Languages.Dongiauoctinh</th>
-                                        <th>@Languages.Dieukiengiaohang</th>
-                                        <th>@Languages.Diadiemgiaohang</th>
-                                        <th>@Languages.Phuongthucvanchuyen</th>
-                                        <th>@Languages.Phuongthucvanchuyen</th>
-                                        <th>@Languages.vat</th>
-                                        <th>@Languages.phongbanyeucau</th>
-                                        <th>@Languages.tenphongyeucau</th>
-                                        <th>@Languages.ngaygiaohangdukien</th>
-                                        <th>@Languages.noigiaohangdukien</th>
-                                        <th>@Languages.thoihanthanhtoan</th>
-                                        <th>@Languages.loaitien</th>
-                                        <th>@Languages.tygia</th>
-                                        <th>@Languages.doisangusd</th>
-                                        <th>@Languages.danhmuc</th>
-                                        <th>@Languages.thuocdonyeucau</th>
-                                        <th>@Languages.tinhtranghaiquan</th>
-                                        <th>@Languages.nhacungcap</th>
-                                        <th>@Languages.Idlichsu</th>
-                                        <th>@Languages.luongvekho</th>
-                                        <th>Invoice</th>
-                                        <th>@Languages.tinhtranghaiquan</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="show_kho_iv" style="color:black;"></tbody>
-                            </table>
-                        </div>                  
+                                <th>@Languages.tinhtranghaiquan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="show_kho_iv" style="color:black;">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -247,7 +270,9 @@
 <script>
     window.onload = function ()
     {
+        _Load_PO();
         loadListWarehouse();
+       
     }
     function loadListWarehouse() {
             fetch('/Delivery/GetWareHouse', {
@@ -266,7 +291,8 @@
                 document.getElementById('IdWarehouse').innerHTML = ""; 
                 console.log(data);
                 data.forEach((wh) => {
-                       document.getElementById('IdWarehouse').innerHTML  += `<option>${wh}</option>`;
+                       
+                document.getElementById('IdWarehouse').innerHTML  += `<option>${wh}</option>`;
                 })
             })
             .catch(error => {
@@ -338,11 +364,11 @@
         body.innerHTML = html;
     }
 
-    function escapeHtml(str) {
-        return String(str).replace(/[&<>"']/g, function (m) {
-            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
-        });
-    }
+    // function escapeHtml(str) {
+    //     return String(str).replace(/[&<>"']/g, function (m) {
+    //         return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+    //     });
+    // }
 });
 
     // 1. Lấy ra checkbox "Chọn tất cả" và danh sách các checkbox "con"

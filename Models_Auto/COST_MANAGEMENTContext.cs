@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -1882,6 +1882,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Unit).HasMaxLength(50);
             entity.Property(e => e.Unit_Note).HasMaxLength(500);
             entity.Property(e => e.UsedFor).HasMaxLength(250);
+            entity.Property(e => e.Code_Suppiler).HasMaxLength(200);
         });
 
         modelBuilder.Entity<MATERIAL_ACCOUNT>(entity =>

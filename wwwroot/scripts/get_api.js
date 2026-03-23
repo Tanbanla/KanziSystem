@@ -134,7 +134,7 @@ const createSearchData = (position) => ({
 });
 // Hàm gọi API và gán vào Combobox
 async function loadToCombo(position, comboId) {
-    alert(position);
+    
     const response = await fetch('http://172.26.248.62:8507/api/Employee/search-by-condition', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

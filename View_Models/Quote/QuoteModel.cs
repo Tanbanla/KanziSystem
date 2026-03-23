@@ -85,6 +85,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string? maDon { get; set; }
         public string? section { get; set; }
         public string? maHang { get; set; }
+        public string? status { get; set; }
         public int pageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
     }

@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
@@ -18,6 +18,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // check mã linh kiện 
         public Task<GenericResponse<bool>> CheckMaHangExistsAsync(string codeMaterial);
         // Insert 
-        public Task<GenericResponse<bool>> InsertMaterial(MATERIALDTO mt);
+        public Task<GenericResponse<bool>> InsertMaterial(MATERIALDTO mt);  
+        //insert nhiều
+        public Task<GenericResponse<bool>> UpdateListThongTin(List<MATERIALDTO> listDTO);
+        // Insert nhiều cho ma hang No list
+        public Task<GenericResponse<bool>> UpdateListThongTinNoList(List<MATERIALDTO> listMT);
     }
 }

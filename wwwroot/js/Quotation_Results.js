@@ -281,12 +281,13 @@
         },
         // mapping status supplier tab
         MappingStatusSupplier: function (codeStatus) {
+            const T = window.i18nQuotationResults || {};
             switch (codeStatus) {
-                case 'WAIT_PICK_NCC': return 'Chờ chọn nhà cung cấp';
-                case 'PICKED': return 'Đã chọn nhà cung cấp';
-                case 'WAIT_CONFIRM_NAME': return 'Chờ xác nhận tên';
-                case 'CONFIRMED': return 'Chờ phê duyệt';
-                case 'WAIT_NCC': return 'Chờ báo giá nhà cung cấp';
+                case 'WAIT_PICK_NCC': return T.WaitPickSupplier || 'Chờ chọn nhà cung cấp';
+                case 'PICKED': return T.SupplierSelected || 'Đã chọn nhà cung cấp';
+                case 'WAIT_CONFIRM_NAME': return T.WaitConfirmName || 'Chờ xác nhận tên';
+                case 'CONFIRMED': return T.WaitApproval || 'Chờ phê duyệt';
+                case 'WAIT_NCC': return T.WaitSupplierQuote || 'Chờ báo giá nhà cung cấp';
                 default: return '';
             }
         },
@@ -520,7 +521,7 @@
             try {
                 // update button text to reflect state
                 const T = window.i18nQuotationResults || {};
-                btn.textContent = showing ? (T.HideAdditionalColumns || 'Ẩn chi tiết') : (T.ToggleAdditionalColumns || 'Hiện chi tiết');
+                btn.textContent = showing ? (T.HideDetails || 'Ẩn chi tiết') : (T.ShowDetails || 'Hiện chi tiết');
             } catch { }
             const toggleBtn = document.getElementById('toggleAdditionalColumns');
             if (!toggleBtn) return;
@@ -565,8 +566,9 @@
             try {
                 const state = window._quotationResultsState || { showAdditionalColumns: true };
                 const shouldShow = !!state.showAdditionalColumns;
+                const T = window.i18nQuotationResults || {};
                 const toggleBtn = document.getElementById('toggleAdditionalColumns');
-                if (toggleBtn) toggleBtn.textContent = shouldShow ? 'Ẩn chi tiết' : 'Hiện chi tiết';
+                if (toggleBtn) toggleBtn.textContent = shouldShow ? (T.HideDetails || 'Ẩn chi tiết') : (T.ShowDetails || 'Hiện chi tiết');
                 const columns = document.querySelectorAll('#supplierQuoteTable th.additional-column, #supplierQuoteTable td.additional-column');
                 columns.forEach(col => { col.style.display = shouldShow ? '' : 'none'; });
                 // DescriptionGroup and BIVN Input header
@@ -889,7 +891,6 @@
                 item.style.display = (!status || itemStatus === status) ? '' : 'none';
             });
         },
-
         searchItems: async function () {
             // Use select IDs from the view: searchMaDon, searchMaterial, searchPhongBan, searchStatus
             const maDon = document.getElementById('searchMaDon')?.value || '';
@@ -926,10 +927,18 @@
                     const ngay = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toLocaleDateString('vi-VN') : '';
                     const ngayAttr = i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toISOString().slice(0, 10) : '';
                     const statusClass = (function (s) {
-                        if (s === 'Chưa chọn NCC') return 'bg-success';
-                        if (s === 'Đang chờ') return 'bg-warning text-dark';
+                        if (!s && s !== 0) return 'bg-secondary';
+                        const str = String(s).trim();
+                        const code = str.toUpperCase();
+                        // Map known status codes
+                        if (code === 'WAITING_NCC') return 'bg-warning text-dark';
+                        if (code === 'WAITING_PICK_NCC') return 'bg-success';
+                        if (code === 'WAITING_APPROVER') return 'bg-primary text-white';
+                        if (code === 'NO') return 'bg-secondary';
+
                         return 'bg-secondary';
                     })(i.Status);
+                    const mapNameStatus = this.MappingStatusApproverSupplier(i.Status);
                     const groupId = `${i.CHR_MaDon}-${i.CHR_MaHangNoiBo}`;
                     return `
                         <tr class="item-row" data-status="${i.Status || ''}" data-id="${i.CHR_MaDon || ''}">
@@ -945,7 +954,7 @@
                             <td>${i.CHR_CreateBy || ''}</td>
                             <td>${i.INT_CountMaterial || ''}</td>
                             <td>${i.DTM_KyHan ? new Date(i.DTM_KyHan).toLocaleDateString('vi-VN') : ''}</td>
-                            <td><span class="badge status-badge ${statusClass}">${i.Status || ''}</span></td>
+                            <td class="text-center"><span class="badge status-badge ${statusClass}">${mapNameStatus}</span></td>
                         </tr>
                      `;
                 }).join('');
@@ -967,7 +976,7 @@
                     const state = window._quotationResultsState || { openGroups: {} };
                     Object.keys(state.openGroups || {}).forEach(gid => {
                         try {
-                            const row = document.getElementById('sup-rows-' + gid);
+                            const row = document.getElementById('sup-rows' + gid);
                             const btn = document.querySelector(`.toggle-sup[data-madon="${gid.split('-')[0]}"][data-mahang="${gid.split('-')[1]}"]`);
                             if (state.openGroups[gid]) {
                                 if (row) row.classList.remove('d-none');
@@ -1005,7 +1014,17 @@
                 console.error('Error calling GetThongTinBaoGiaGomNhom', err);
             }
         },
-
+        // mapping status Approver supplier tab
+        MappingStatusApproverSupplier: function (codeStatus) {
+            const T = window.i18nQuotationResults || {};
+            switch (codeStatus) {
+                case 'WAITING_NCC': return T.WaitPickApSupplier || 'Chờ báo gía nhà cung cấp';
+                case 'WAITING_PICK_NCC': return T.SupplierApSelected || 'Chờ chọn nhà cung cấp';
+                case 'WAITING_APPROVER': return T.WaitApConfirmName || 'Chờ phê duyệt';
+                case 'NO': return T.undefined || 'Không xác định';
+                default: return '';
+            }
+        },
         // Open approval modal by request id and populate fields
         openApprovalModal: async function (maDon) {
             if (!maDon) return;
@@ -1130,7 +1149,7 @@
                     tr.appendChild(addTd(getVal(d, 'nvchR_MSDS', 'NVCHR_MSDS')));
                     tr.appendChild(addTd(getVal(d, 'nvchR_AnToan', 'NVCHR_AnToan')));
 
-                    tr.appendChild(addTd(formatDate(getVal(d, 'dtM_KyHan', 'DTM_KyHan')),'text-center'));
+                    tr.appendChild(addTd(formatDate(getVal(d, 'dtM_KyHan', 'DTM_KyHan')), 'text-center'));
                     const gap = getVal(d, 'chR_Gap', 'CHR_Gap');
                     const gapLabel = gap != null && gap !== '' ? (String(gap).toLowerCase() === 'true' || String(gap) === '1' ? 'O' : 'X') : '';
                     tr.appendChild(addTd(gapLabel, 'text-center'));
@@ -1504,7 +1523,7 @@
             const selections = this.getSelections();
             if (!selections.length) {
                 const T = window.i18nQuotationResults || {};
-                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgWarnSelectOne || 'Vui lòng chọn ít nhất một sản phẩm hoặc nhà cung cấp.'), type: 'info' });
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgWarnSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp.'), type: 'info' });
                 return;
             }
 
@@ -1746,7 +1765,7 @@ function ToDateTimeLocal(date) {
         if (date.length === 10) return date + 'T00:00:00';
         return date;
     }
-    // Nếu là dd/MM/yyyy hh:mm:ss AM/PM
+    // nếu là dd/MM/yyyy hh:mm:ss AM/PM
     const match = date.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{1,2}):(\d{2}):(\d{2}) (AM|PM)/);
     if (match) {
         let [_, d, m, y, h, min, s, ap] = match;
@@ -1756,7 +1775,7 @@ function ToDateTimeLocal(date) {
         const pad = n => n.toString().padStart(2, '0');
         return `${y}-${pad(m)}-${pad(d)}T${pad(h)}:${pad(min)}:${pad(s)}`;
     }
-    // Nếu là dd/MM/yyyy
+    // nếu là dd/MM/yyyy
     const match2 = date.match(/(\d{2})\/(\d{2})\/(\d{4})/);
     if (match2) {
         let [_, d, m, y] = match2;

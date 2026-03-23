@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -30,6 +30,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = ex.Message;
             }
 
+            return result;
+        }
+        // Lấy thông tin nhân viên theo phòng ban
+        public async Task<GenericResponse<List<dynamic>>> GetApproverBySection(string sectionCode)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                var dataRepo = await _repo.GetApproverBySection(sectionCode);
+                result.Data = _mapper.Map<List<dynamic>>(dataRepo);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+            }
             return result;
         }
     }

@@ -1,0 +1,152 @@
+/* Detail modal specific */
+#detailModal .modal-dialog {
+    width: 98%;
+    max-width: 1600px;
+    margin: 1.25rem auto;
+}
+
+#detailModal {
+    z-index: 4000;
+}
+
+    #detailModal .modal-content {
+        border: 0;
+        border-radius: 10px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+
+    #detailModal .modal-header {
+        padding: .75rem 1rem;
+        border-bottom: 1px solid #eef1f6;
+    }
+
+    #detailModal .modal-title {
+        font-weight: 700;
+        color: #2335B7;
+    }
+
+    #detailModal .modal-body {
+        padding: .75rem;
+    }
+
+    #detailModal .table-responsive {
+        max-height: 70vh;
+    }
+
+    /* Sticky header styling */
+    #detailModal thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        white-space: nowrap;
+    }
+
+    /* Table body styling */
+    #detailModal tbody td {
+        font-size: .72rem;
+        vertical-align: middle;
+    }
+
+    #detailModal tbody tr:nth-child(even) {
+        background-color: #fafbff;
+    }
+
+    #detailModal tbody tr:hover {
+        background: #f2f6ff;
+    }
+
+/* Fixed responsive table */
+.table-responsive-fixed {
+    max-height: 380px;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Two-row sticky header styling */
+#detailTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #dee2e6;
+}
+
+#detailTable thead tr:nth-child(2) th {
+    top: 38px;
+    z-index: 3;
+    background: #e9ecef;
+}
+
+/* Compact footer */
+#detailModal .modal-footer {
+    padding: .5rem .75rem;
+}
+
+/* Custom header styling */
+.table-header-custom {
+    background-color: #2335b7 !important;
+    color: white !important;
+    border-color: #1a2a9a !important;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px 8px;
+    font-size: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+    .table-header-custom:hover {
+        background-color: #1a2a9a !important;
+        color: white !important;
+    }
+/* Ensure text is black across modal and tables for readability */
+body, .modal-content, .card, table, .table, .table th, .table td {
+    color: #000 !important;
+}
+
+/* Section colors for clarity */
+.vendor-column {
+    background-color: #FDFFE9 !important;
+    color: #000 !important;
+}
+
+.approval-column {
+    background-color: #E1FAFD !important;
+    color: #000 !important;
+}
+
+.bivn-column {
+    background-color: #d1ecf1 !important;
+    color: #000 !important;
+}
+
+.bivn-input-header {
+    background-color: #d1ecf1 !important;
+    color: #000 !important;
+}
+
+/* Highlight mismatches remain red as implemented in JS, ensure contrast */
+td[style*="#ffecec"] {
+    color: #a00 !important;
+}
+/* Rounded corners for table cells */
+/*table.table.table-bordered {
+    border-collapse: separate !important;
+    border-spacing: 1px !important;
+}
+
+    table.table.table-bordered td,
+    table.table.table-bordered th {
+        border-radius: 6px;
+        padding: .35rem .5rem;
+        box-sizing: border-box;
+    }*/
+
+/* Highlight mismatch */
+/*.mismatch {
+    background-color: #fff3cd !important;
+    color: red !important;
+    border: 1px solid red !important;
+    box-sizing: border-box !important;
+}*/

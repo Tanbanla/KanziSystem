@@ -15,11 +15,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? Mahang { get; set; }
         public string? Soluong { get; set; }
         public string? Dovi { get; set; }
-        public string? Dongia { get; set; }
+        public double? Dongia { get; set; }
         public string? Dieukiengiaohang { get; set; }
         public string? Diadiemgiaohang { get; set; }
         public string? Phuongthucvanchuyen { get; set; }
-        public string? Sotien { get; set; }
+        public double? Sotien { get; set; }
         public string? Vat { get; set; }
         public string?  Maphongyeucau { get; set; }
         public string? Tenphongyeucau { get; set; }
@@ -27,8 +27,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? Noigiaodukien { get; set; }
         public string? Thoigianthanhtoan { get; set; }
         public string? Loaitien { get; set; }
-        public string? Tygia { get; set; }
-        public string? DoisangUSD { get; set; }
+        public double? Tygia { get; set; }
+        public double? DoisangUSD { get; set; }
         public string? Danhmuc { get; set; }
         public string? Invoice { get; set; }
         public string? InvoiceNgaynhap { get; set; }
@@ -89,8 +89,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Danhmuc = data.Rows[idx]["Danhmuc"] is null ? "" : data.Rows[idx]["Danhmuc"].ToString()!,
                     Diadiemgiaohang = data.Rows[idx]["Diadiemgiaohang"] is null ? "" : data.Rows[idx]["Diadiemgiaohang"].ToString()!,
                     Dieukiengiaohang = data.Rows[idx]["Dieukiengiaohang"] is null ? "" : data.Rows[idx]["Dieukiengiaohang"].ToString()!,
-                    DoisangUSD = data.Rows[idx]["DoisangUSD"] is null ? "" : data.Rows[idx]["DoisangUSD"].ToString()!,
-                    Dongia = data.Rows[idx]["Dongia"] is null ? "" : data.Rows[idx]["Dongia"].ToString()!,
+                    DoisangUSD = double.Parse(data.Rows[idx]["DoisangUSD"] is null ? "0" : data.Rows[idx]["DoisangUSD"].ToString()!),
+                    Dongia = double.Parse(data.Rows[idx]["Dongia"] is null ? "0" : data.Rows[idx]["Dongia"].ToString()!),
                     Dovi = data.Rows[idx]["Dovi"] is null ? "" : data.Rows[idx]["Dovi"].ToString()!,
                     Good_Code = data.Rows[idx]["Good_Code"] is null ? "" : data.Rows[idx]["Good_Code"].ToString()!,
                     Group_Code = data.Rows[idx]["Group_Code"] is null ? "" : data.Rows[idx]["Group_Code"].ToString()!,
@@ -137,7 +137,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     PO_Detail_Id = data.Rows[idx]["PO_Detail_Id"] is null ? "" : data.Rows[idx]["PO_Detail_Id"].ToString()!,
                     Soluong = data.Rows[idx]["Soluong"] is null ? "" : data.Rows[idx]["Soluong"].ToString()!,
                     SoPO = data.Rows[idx]["SoPO"] is null ? "" : data.Rows[idx]["SoPO"].ToString()!,
-                    Sotien = data.Rows[idx]["Sotien"] is null ? "" : data.Rows[idx]["Sotien"].ToString()!,
+                    Sotien = double.Parse(data.Rows[idx]["Sotien"] is null ? "0" : data.Rows[idx]["Sotien"].ToString()!),
                     Sotokhai = data.Rows[idx]["Sotokhai"] is null ? "" : data.Rows[idx]["Sotokhai"].ToString()!,
                     SotokhaiNgaynhap = data.Rows[idx]["SotokhaiNgaynhap"] is null ? "" : data.Rows[idx]["SotokhaiNgaynhap"].ToString()!,
                     SotokhaiNguoinhap = data.Rows[idx]["SotokhaiNguoinhap"] is null ? "" : data.Rows[idx]["SotokhaiNguoinhap"].ToString()!,
@@ -153,7 +153,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
                     TinhtrangPO = data.Rows[idx]["TinhtrangPO"] is null ? "" : data.Rows[idx]["TinhtrangPO"].ToString()!,
                     Tinhtrangtokhai = data.Rows[idx]["Tinhtrangtokhai"] is null ? "" : data.Rows[idx]["Tinhtrangtokhai"].ToString()!,
-                    Tygia = data.Rows[idx]["Tygia"] is null ? "" : data.Rows[idx]["Tygia"].ToString()!,
+                    Tygia = double.Parse(data.Rows[idx]["Tygia"] is null ? "0" : data.Rows[idx]["Tygia"].ToString()!),
                     Vat = data.Rows[idx]["Vat"] is null ? "" : data.Rows[idx]["Vat"].ToString()!
                 };
 
@@ -179,8 +179,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Danhmuc = data.Rows[idx]["Danhmuc"] is null ? "" : data.Rows[idx]["Danhmuc"].ToString()!,
                     Diadiemgiaohang = data.Rows[idx]["Diadiemgiaohang"] is null ? "" : data.Rows[idx]["Diadiemgiaohang"].ToString()!,
                     Dieukiengiaohang = data.Rows[idx]["Dieukiengiaohang"] is null ? "" : data.Rows[idx]["Dieukiengiaohang"].ToString()!,
-                    DoisangUSD = data.Rows[idx]["DoisangUSD"] is null ? "" : data.Rows[idx]["DoisangUSD"].ToString()!,
-                    Dongia = data.Rows[idx]["Dongia"] is null ? "" : data.Rows[idx]["Dongia"].ToString()!,
+                    DoisangUSD = double.Parse(data.Rows[idx]["DoisangUSD"] is null ? "0" : data.Rows[idx]["DoisangUSD"].ToString()!),
+                    Dongia = double.Parse(data.Rows[idx]["Dongia"] is null ? "0" : data.Rows[idx]["Dongia"].ToString()!),
                     Dovi = data.Rows[idx]["Dovi"] is null ? "" : data.Rows[idx]["Dovi"].ToString()!,
                     Good_Code = data.Rows[idx]["Good_Code"] is null ? "" : data.Rows[idx]["Good_Code"].ToString()!,
                     Group_Code = data.Rows[idx]["Group_Code"] is null ? "" : data.Rows[idx]["Group_Code"].ToString()!,
@@ -227,7 +227,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     PO_Detail_Id = data.Rows[idx]["PO_Detail_Id"] is null ? "" : data.Rows[idx]["PO_Detail_Id"].ToString()!,
                     Soluong = data.Rows[idx]["Soluong"] is null ? "" : data.Rows[idx]["Soluong"].ToString()!,
                     SoPO = data.Rows[idx]["SoPO"] is null ? "" : data.Rows[idx]["SoPO"].ToString()!,
-                    Sotien = data.Rows[idx]["Sotien"] is null ? "" : data.Rows[idx]["Sotien"].ToString()!,
+                    Sotien = double.Parse(data.Rows[idx]["Sotien"] is null ? "0" : data.Rows[idx]["Sotien"].ToString()!),
                     Sotokhai = data.Rows[idx]["Sotokhai"] is null ? "" : data.Rows[idx]["Sotokhai"].ToString()!,
                     SotokhaiNgaynhap = data.Rows[idx]["SotokhaiNgaynhap"] is null ? "" : data.Rows[idx]["SotokhaiNgaynhap"].ToString()!,
                     SotokhaiNguoinhap = data.Rows[idx]["SotokhaiNguoinhap"] is null ? "" : data.Rows[idx]["SotokhaiNguoinhap"].ToString()!,
@@ -243,7 +243,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
                     TinhtrangPO = data.Rows[idx]["TinhtrangPO"] is null ? "" : data.Rows[idx]["TinhtrangPO"].ToString()!,
                     Tinhtrangtokhai = data.Rows[idx]["Tinhtrangtokhai"] is null ? "" : data.Rows[idx]["Tinhtrangtokhai"].ToString()!,
-                    Tygia = data.Rows[idx]["Tygia"] is null ? "" : data.Rows[idx]["Tygia"].ToString()!,
+                    Tygia = double.Parse(data.Rows[idx]["Tygia"] is null ? "0" : data.Rows[idx]["Tygia"].ToString()!),
                     Vat = data.Rows[idx]["Vat"] is null ? "" : data.Rows[idx]["Vat"].ToString()!
                 };
 

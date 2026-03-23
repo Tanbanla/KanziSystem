@@ -513,4 +513,253 @@
   <data name="ExportExcel" xml:space="preserve">
     <value>Xuất Excel</value>
   </data>
+  <data name="PageSubtitle" xml:space="preserve">
+    <value>Phụ đề trang</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>Phê duyệt</value>
+  </data>
+  <data name="Return" xml:space="preserve">
+    <value>Trả về</value>
+  </data>
+  <data name="ApprovalStatusLabel" xml:space="preserve">
+    <value>Tình trạng phê duyệt</value>
+  </data>
+  <data name="AllOption" xml:space="preserve">
+    <value>Tất cả</value>
+  </data>
+  <data name="ExportToExcel" xml:space="preserve">
+    <value>Xuất ra Excel</value>
+  </data>
+  <data name="OrderStatus" xml:space="preserve">
+    <value>Trạng thái đơn hàng</value>
+  </data>
+  <data name="DetailModalTitle" xml:space="preserve">
+    <value>Chi tiết yêu cầu báo giá</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>Phòng ban nhận</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>Khẩn cấp</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>Mã chi phí phòng ban</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>Tên phòng ban</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>Ngày yêu cầu</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>Hạn mong muốn</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>Chi tiết hàng hóa</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>STT</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>Mã hệ thống</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>Mã hàng nội bộ</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>Tên hàng VN/EN</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>SL</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>ĐV</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>Hình dáng</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>Chất liệu</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>Thành phần</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>Kích thước</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>Vị trí sử dụng</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>Mục đích/Tính năng</value>
+  </data>
+  <data name="VendorCode" xml:space="preserve">
+    <value>Mã nhà cung cấp</value>
+  </data>
+  <data name="ROHSRequirement" xml:space="preserve">
+    <value>Yêu cầu ROHS</value>
+  </data>
+  <data name="COCQRequirement" xml:space="preserve">
+    <value>Yêu cầu CO/CQ</value>
+  </data>
+  <data name="MSDSRequirement" xml:space="preserve">
+    <value>Yêu cầu MSDS</value>
+  </data>
+  <data name="SafetyStandardRequirement" xml:space="preserve">
+    <value>Yêu cầu tiêu chuẩn an toàn</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>Gấp</value>
+  </data>
+  <data name="ApprovalFlowTitle" xml:space="preserve">
+    <value>Quy trình phê duyệt</value>
+  </data>
+  <data name="ApprovalFlowLine1" xml:space="preserve">
+    <value>• Dưới 3,000 USD (66 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Phó trưởng bộ phận.</value>
+  </data>
+  <data name="ApprovalFlowLine2" xml:space="preserve">
+    <value>• Dưới 10,000 USD (220 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Trưởng bộ phận.</value>
+  </data>
+  <data name="ApprovalFlowLine3" xml:space="preserve">
+    <value>• Từ 10,000 USD (220 triệu VNĐ) trở lên : Quản lý trung cấp → Trưởng bộ phận/Phó trưởng bộ phận → Tổng Giám đốc/Giám đốc.</value>
+  </data>
+  <data name="ApprovalFlowLine4" xml:space="preserve">
+    <value>→ Phê duyệt xuất kho (PR1-MC): Quản lý sơ cấp/quản lý trung cấp → Kho Kanzai</value>
+  </data>
+  <data name="AdditionalInfoTitle" xml:space="preserve">
+    <value>Thông tin bổ sung</value>
+  </data>
+  <data name="RequesterLabel" xml:space="preserve">
+    <value>Người yêu cầu</value>
+  </data>
+  <data name="ApproveButton" xml:space="preserve">
+    <value>Phê duyệt</value>
+  </data>
+  <data name="RejectButton" xml:space="preserve">
+    <value>Từ chối</value>
+  </data>
+  <data name="DetailModalTitleFormat" xml:space="preserve">
+    <value>Chi tiết yêu cầu báo giá - {0}</value>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Hủy</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
+  <data name="InputReasonTitle" xml:space="preserve">
+    <value>Nhập lý do</value>
+  </data>
+  <data name="InputReasonPlaceholder" xml:space="preserve">
+    <value>Nhập lý do của bạn</value>
+  </data>
+  <data name="ReasonRequired" xml:space="preserve">
+    <value>Lý do là bắt buộc</value>
+  </data>
+  <data name="ApproveSuccess" xml:space="preserve">
+    <value>Phê duyệt thành công</value>
+  </data>
+  <data name="ApproveFailed" xml:space="preserve">
+    <value>Phê duyệt thất bại: {0}</value>
+  </data>
+  <data name="ApproveError" xml:space="preserve">
+    <value>Lỗi phê duyệt</value>
+  </data>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>Trả về thành công</value>
+  </data>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>Trả về thất bại: {0}</value>
+  </data>
+  <data name="ReturnError" xml:space="preserve">
+    <value>Lỗi trả về</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Không xác định</value>
+  </data>
+  <data name="MsgSusscesAprover" xml:space="preserve">
+    <value>Phê duyệt thành công</value>
+  </data>
+  <data name="MSGFailedApprover" xml:space="preserve">
+    <value>Phê duyệt thất bại</value>
+  </data>
+  <data name="MSGErrorApprover" xml:space="preserve">
+    <value>Lỗi phê duyệt</value>
+  </data>
+  <data name="MSGReturnFailed" xml:space="preserve">
+    <value>Trả về thất bại</value>
+  </data>
+  <data name="MSGReturnOK" xml:space="preserve">
+    <value>Trả về thành công</value>
+  </data>
+  <data name="MSGExportOK" xml:space="preserve">
+    <value>Xuất thành công</value>
+  </data>
+  <data name="InputQuoteTitle" xml:space="preserve">
+    <value>Tiêu đề nhập báo giá</value>
+  </data>
+  <data name="QuoteInputTitle" xml:space="preserve">
+    <value>Tiêu đề nhập báo giá</value>
+  </data>
+  <data name="NoLabel" xml:space="preserve">
+    <value>Không</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Hoàn thành</value>
+  </data>
+  <data name="ApprovalTabTitle" xml:space="preserve">
+    <value>Phê duyệt lựa chọn</value>
+  </data>
+  <data name="SupplierSelectionTabTitle" xml:space="preserve">
+    <value>Chọn nhà cung cấp</value>
+  </data>
+  <data name="SystemCalculatedTotal" xml:space="preserve">
+    <value>Tổng tiền hệ thống tính</value>
+  </data>
+  <data name="SupplierSelection" xml:space="preserve">
+    <value>Lựa chọn nhà cung cấp</value>
+  </data>
+  <data name="SelectionReason" xml:space="preserve">
+    <value>Lý do lựa chọn</value>
+  </data>
+  <data name="WaitPickSupplier" xml:space="preserve">
+    <value>Chờ chọn nhà cung cấp</value>
+  </data>
+  <data name="WaitConfirmName" xml:space="preserve">
+    <value>Chờ xác nhận tên</value>
+  </data>
+  <data name="WaitSupplierQuote" xml:space="preserve">
+    <value>Chờ báo giá nhà cung cấp</value>
+  </data>
+  <data name="SupplierSelected" xml:space="preserve">
+    <value>Đã chọn nhà cung cấp</value>
+  </data>
+  <data name="WaitApproval" xml:space="preserve">
+    <value>Chờ phê duyệt</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
+  <data name="HideDetails" xml:space="preserve">
+    <value>Ẩn chi tiết</value>
+  </data>
+  <data name="ShowDetails" xml:space="preserve">
+    <value>Hiện chi tiết</value>
+  </data>
+  <data name="PromptEnterReason" xml:space="preserve">
+    <value>Vui lòng nhập lý do chọn nhà cung cấp</value>
+  </data>
+  <data name="WaitPickApSupplier" xml:space="preserve">
+    <value>Chờ báo giá nhà cung cấp</value>
+  </data>
+  <data name="SupplierApSelected" xml:space="preserve">
+    <value>Chờ chọn nhà cung cấp</value>
+  </data>
+  <data name="WaitApConfirmName" xml:space="preserve">
+    <value>Chờ phê duyệt</value>
+  </data>
+  <data name="undefined" xml:space="preserve">
+    <value>Không xác định</value>
+  </data>
 </root>

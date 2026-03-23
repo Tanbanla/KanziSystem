@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -31,11 +31,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly ISendMailService _sendMailService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ITmEmployeeAgentService _tmEmployeeAgentService;
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService,
             INhomViTriService nhomViTriService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
-            ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService,
+            ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
             IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
@@ -51,6 +52,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _tmCategoryService = tmCategoryService;
             _baoGiaConfirmNameService = baoGiaConfirmNameService;
             _baoGiaNccCategoryService = baoGiaNccCategoryService;
+            _tmEmployeeAgentService = tmEmployeeAgentService;
             _sendMailService = sendMailService;
             _env = env;
             _serviceScopeFactory = serviceScopeFactory;
@@ -394,8 +396,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-            _ = Task.Run(() => { 
-                
+            _ = Task.Run(() => {
+
             });
             return Ok(result.Data);
         }
@@ -583,7 +585,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 //    string.Empty,
                                 //    string.Empty,
                                 //    currentUserId);
-                                var emailResult = await sendMailService.SendMailToConfirmItemAsync(13,17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", currentUserId);
+                                var emailResult = await sendMailService.SendMailToConfirmItemAsync(13, 17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", currentUserId);
                             }
                             catch (Exception ex)
                             {
@@ -608,7 +610,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                 foreach (var item in SectionApporve)
                                 {
-                                   await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
+                                    await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
                                 }
                             }
                             catch (Exception ex)
@@ -1205,7 +1207,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> GetThongTinBaoGiaGomNhom([FromBody] ThongTinBaoGiaGomNhomModel model)
         {
-            var result = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync(model.maDon, model.section, model.maHang, GetCurrentUserId(), model.pageIndex, model.pageSize);
+            var result = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync(model.maDon, model.section, model.maHang, model.status, GetCurrentUserId(), model.pageIndex, model.pageSize);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1789,7 +1791,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-            try { 
+            try
+            {
                 // lấy thong tin status
                 var Status = await _baoGiaStatusService.GetListStatusAsync();
                 if (Status == null || !Status.Success)
@@ -1964,7 +1967,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest("Mã đơn không được để trống");
             }
-            var result = await _baoGiaService.GetByMaBaoGiaAsync(maDon);
+            var result = await _baoGiaService.GetSupplierApprovalInfoAsync(maDon);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

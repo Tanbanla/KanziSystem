@@ -1,8 +1,10 @@
-﻿using Dapper;
+using Dapper;
+using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
+using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
@@ -127,6 +129,57 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.MATERIALs.AddAsync(mt);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        //insert nhiều
+        public async Task<GenericResponse<bool>> UpdateListThongTin(List<MATERIALDTO> listDTO)
+        {
+            if (listDTO == null || listDTO.Count == 0)
+                return new GenericResponse<bool> { Data = false, Success = false, Message = "Input list is empty." };
+
+            foreach (var dto in listDTO)
+            {
+                var material = await _context.MATERIALs.FirstOrDefaultAsync(m => m.Material_Code == dto.Material_Code);
+                if (material == null)
+                    continue;
+
+                material.Category_VN = dto.Category_VN;
+                material.Category_EN = dto.Category_EN;
+                material.Category_JP = dto.Category_JP;
+                material.Shape = dto.Shape;
+                material.Material = dto.Material;
+                material.Composition = dto.Composition;
+                material.Dimension = dto.Dimension;
+                material.UsedFor = dto.UsedFor;
+                material.Purpose = dto.Purpose;
+                // Add other fields as needed from MATERIALDTO
+            }
+
+            await _context.SaveChangesAsync();
+            return new GenericResponse<bool> { Data = true, Success = true, Message = "Update successful." };
+        }
+        // Insert nhiều
+        public async Task<bool> UpdateListThongTinNoList(List<MATERIAL> listMT)
+        {
+            if (listMT == null || !listMT.Any())
+                return false;
+
+            // Lấy danh sách Material_Code đã tồn tại trong database
+            var existingMaterialCodes = await _context.MATERIALs
+                .Where(m => listMT.Select(x => x.Material_Code).Contains(m.Material_Code))
+                .Select(m => m.Material_Code)
+                .ToListAsync();
+
+            // Lọc ra các vật tư chưa tồn tại
+            var newMaterials = listMT
+                .Where(m => !existingMaterialCodes.Contains(m.Material_Code))
+                .ToList();
+
+            if (!newMaterials.Any())
+                return false;
+
+            await _context.MATERIALs.AddRangeAsync(newMaterials);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

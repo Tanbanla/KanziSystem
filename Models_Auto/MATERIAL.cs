@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -50,4 +50,5 @@ public partial class MATERIAL
     public string? Purpose { get; set; }
 
     public string? Category_EN { get; set; }
+    public string? Code_Suppiler { get; set; }
 }

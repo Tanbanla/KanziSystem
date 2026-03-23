@@ -1,4 +1,4 @@
-﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@using PRJ_WAREHOUSE_BIVN.DTO
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Quotation Results";
@@ -12,20 +12,6 @@
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
     <link rel="stylesheet" href="~/css/Quotation_Results.css" />
-    <link rel="stylesheet" href="~/css/Approval_Quote.css" />
-    <style>
-        /* Ensure text is black across modal and tables for readability */
-        body, .modal-content, .card, table, .table, .table th, .table td { color: #000 !important; }
-
-        /* Section colors for clarity */
-        .vendor-column { background-color: #FDFFE9 !important; color: #000 !important; }
-        .approval-column { background-color: #E1FAFD !important; color: #000 !important; }
-        .bivn-column { background-color: #d1ecf1 !important; color: #000 !important; }
-        .bivn-input-header { background-color: #d1ecf1 !important; color: #000 !important; }
-
-        /* Highlight mismatches remain red as implemented in JS, ensure contrast */
-        td[style*="#ffecec"] { color: #a00 !important; }
-    </style>
 </head>
 <!-- Global loading overlay -->
 <div id="globalLoading" aria-hidden="true">
@@ -141,9 +127,9 @@
                                     <th rowspan="2" class="vendor-column" style="min-width: 70px;">@Localizer["ApplyDay"]</th>
                                     <th rowspan="2" class="vendor-column" style="min-width: 70px;">@Localizer["DueDay"]</th>
                                     @* Approval columns *@
-                                    <th rowspan="2" class="approval-column" style="min-width: 70px;">Tổng tiền hệ thống tính</th>
-                                    <th rowspan="2" class="approval-column" style="min-width: 70px;">Lựa chọn nhà cung cấp</th>
-                                    <th rowspan="2" class="approval-column" style="min-width: 70px;">Lý do lựa chọn</th>
+                                    <th rowspan="2" class="approval-column" style="min-width: 70px;">@Localizer["SystemCalculatedTotal"]</th>
+                                    <th rowspan="2" class="approval-column" style="min-width: 70px;">@Localizer["SupplierSelection"]</th>
+                                    <th rowspan="2" class="approval-column" style="min-width: 70px;">@Localizer["SelectionReason"]</th>
                                 </tr>
                                 <tr class="text-center align-middle" style="background-color: #e9ecef; color:#000;">
                                     <th style="min-width: 80px; color:#000;">@Localizer["ShapeShort"]</th>
@@ -236,10 +222,10 @@
 
     <ul class="nav nav-tabs" id="quotationResultsTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="request-list-tab" data-bs-toggle="tab" data-bs-target="#request-list" type="button" role="tab" aria-controls="request-list" aria-selected="true">Phê duyệt lựa chọn</button>
+            <button class="nav-link active" id="request-list-tab" data-bs-toggle="tab" data-bs-target="#request-list" type="button" role="tab" aria-controls="request-list" aria-selected="true">@Localizer["ApprovalTabTitle"]</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="supplier-input-tab" data-bs-toggle="tab" data-bs-target="#supplier-input" type="button" role="tab" aria-controls="supplier-input" aria-selected="false">Chọn nhà cung cấp</button>
+            <button class="nav-link" id="supplier-input-tab" data-bs-toggle="tab" data-bs-target="#supplier-input" type="button" role="tab" aria-controls="supplier-input" aria-selected="false">@Localizer["SupplierSelectionTabTitle"]</button>
         </li>
     </ul>
     <div class="tab-content" id="quotationResultsTabsContent" style="background-color: #ffffff; padding: 16px; border: 1px solid #dee2e6; border-top: 0; border-radius: 0 0 .25rem .25rem;">
@@ -284,9 +270,10 @@
                          <div class="col-12 col-md-3">
                             <label for="searchStatus" class="form-label small text-uppercase fw-semibold">@Localizer["Status"]</label>
                             <select id="searchStatus" name="searchStatus" class="form-select searchStatus searchable-select">
-                                <option value="1" selected>@Localizer["SelectAll"]</option>
-                                <option value="2">@Localizer["Confirm"]</option>
-                                <option value="3">@Localizer["Done"]</option>
+                                <option value="">@Localizer["SelectAll"]</option>
+                                <option value="WAITING_NCC">@Localizer["WaitPickApSupplier"]</option>
+                                <option value="WAITING_PICK_NCC">@Localizer["SupplierApSelected"]</option>
+                                <option value="WAITING_APPROVER" selected>@Localizer["WaitApConfirmName"]</option>
                             </select>
                         </div>
                         <div class="col-12 d-flex gap-2 mt-2">
@@ -308,15 +295,15 @@
                         <table class="table table-sm table-hover table-bordered align-middle mb-0" id="quotationResultsTable" style="font-size:13px;">
                             <thead class="table-header-custom">
                                 <tr class="text-center align-middle">
-                                    <th style="width:40px"><input type="checkbox" id="selectAll" title="@Localizer["SelectAll"]" /></th>
-                                    <th style="min-width:80px">@Localizer["Detail"]</th>
-                                    <th style="min-width:140px">@Localizer["OrderCode"]</th>
-                                    <th style="min-width:110px">@Localizer["RequestDate"]<br></th>
-                                    <th style="min-width:140px">@Localizer["DepartmentName"]<br></th>
-                                    <th style="min-width:130px">@Localizer["CreatorPIC"]</th>
-                                    <th style="min-width:150px">@Localizer["NumberMaterial"]<br></th>
-                                    <th style="min-width:170px">@Localizer["SupplierSelectionDeadline"]<br></th>
-                                    <th style="min-width:70px">@Localizer["Status"]<br></th>
+                                    <th style="width:40px; color: #fff !important;"><input type="checkbox" id="selectAll" title="@Localizer["SelectAll"]" /></th>
+                                    <th style="min-width:80px; color: #fff !important;">@Localizer["Detail"]</th>
+                                    <th style="min-width:140px; color: #fff !important;">@Localizer["OrderCode"]</th>
+                                    <th style="min-width:110px; color: #fff !important;">@Localizer["RequestDateLabel"]<br></th>
+                                    <th style="min-width:140px; color: #fff !important;">@Localizer["DepartmentName"]<br></th>
+                                    <th style="min-width:130px; color: #fff !important;">@Localizer["CreatorPIC"]</th>
+                                    <th style="min-width:150px; color: #fff !important;">@Localizer["NumberMaterial"]<br></th>
+                                    <th style="min-width:170px; color: #fff !important;">@Localizer["SupplierSelectionDeadline"]<br></th>
+                                    <th style="min-width:70px; color: #fff !important;">@Localizer["Status"]<br></th>
                                 </tr>
                             </thead>
                             <tbody id="quotationResultsTableBody">
@@ -400,11 +387,11 @@
                             <label for="searchStatusTab2" class="form-label small text-uppercase fw-semibold">@Localizer["Status"]</label>
                             <select id="searchStatusTab2" name="searchStatusTab2" class="form-select searchStatusTab2 searchable-select">
                                 <option value="">@Localizer["SelectAll"]</option>
-                                <option value="WAIT_PICK_NCC" selected>Chờ chọn nhà cung cấp</option>
-                                <option value="WAIT_CONFIRM_NAME">Chờ xác nhận tên</option>
-                                <option value="WAIT_NCC">Chờ báo giá nhà cung cấp</option>
-                                <option value="CONFIRM">Đã chọn nhà cung cấp</option>
-                                <option value="CONFIRMED">Chờ phê duyệt</option>
+                                <option value="WAIT_PICK_NCC" selected>@Localizer["WaitPickSupplier"]</option>
+                                <option value="WAIT_CONFIRM_NAME">@Localizer["WaitConfirmName"]</option>
+                                <option value="WAIT_NCC">@Localizer["WaitSupplierQuote"]</option>
+                                <option value="CONFIRM">@Localizer["SupplierSelected"]</option>
+                                <option value="CONFIRMED">@Localizer["WaitApproval"]</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-2 text-md-end mt-2 mt-md-0">
@@ -435,7 +422,7 @@
                         </button>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <button id="toggleAdditionalColumns" class="btn btn-outline-secondary btn-sm">Ẩn chi tiết</button>
+                        <button id="toggleAdditionalColumns" class="btn btn-outline-secondary btn-sm">@Localizer["HideDetails"]</button>
                         <div style="margin-left: 6px;"></div>
                         <small class="text-muted" id="supplierSummaryText">@Localizer["SummaryFormat", 0]</small>
                     </div>
@@ -500,9 +487,9 @@
                                     <th rowspan="2" style="min-width: 70px;background-color: #FDFFE9;">@Localizer["ApplyDay"]</th>
                                     <th rowspan="2" style="min-width: 70px;background-color: #FDFFE9;">@Localizer["DueDay"]</th>
                                     @*  Phần phê duyệt  *@
-                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">Tổng tiền hệ thống tính</th>
-                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">Lựa chọn nhà cung cấp</th>
-                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">Lý do lựa chọn</th>
+                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SystemCalculatedTotal"]</th>
+                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SupplierSelection"]</th>
+                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SelectionReason"]</th>
                                 </tr>
                                 <tr class="text-center align-middle" style="background-color: #dee2e6; font-size: 9px;text-align: center;top: 0;">
                                     <th style="min-width: 60px;" class="additional-column">@Localizer["Shape"]</th>
@@ -712,9 +699,12 @@
             SafetyStandard = Localizer["SafetyStandard"].Value,
             DesignFile = Localizer["DesignFile"].Value,
             Manufacturer = Localizer["Manufacturer"].Value,
-
             Urgent = Localizer["Urgent"].Value,
             Notification = Localizer["Notification"].Value,
+            Undefined = Localizer["Undefined"].Value,
+            WaitPickApSupplier = Localizer["WaitPickApSupplier"].Value,
+            SupplierApSelected = Localizer["SupplierApSelected"].Value,
+            WaitApConfirmName = Localizer["WaitApConfirmName"].Value,
             // JS messages
             MsgWarnSelectOne = Localizer["MsgWarnSelectOne"].Value,
             MsgMissingReasons = Localizer["MsgMissingReasons", "{0}"].Value,

@@ -153,7 +153,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _tonkhotheonhamay(string mahang)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            var Kho = _db.GET_DATA_FROM_SQL("  select Kho, Hientai from Kho where MaNguyenLieu = '" + mahang + "' and Hientai > 0");
+            var Kho = _db.GET_DATA_FROM_SQL("select Kho, Hientai from Kho where MaNguyenLieu = '" + mahang + "' and Hientai > 0");
             List<string> lst_kho = new List<string>();
             for (int a = 0; a < Kho.Rows.Count; a++)
             {
@@ -169,13 +169,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string soluong = Kho.Rows[0]["Hientai"].ToString()!;
             return Json(soluong);
         }
-        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string manguyenlieu, string soluong, string donvi, string kho, string nguoinhan, string request, string khoi, string phong, string vitri)
+        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi)
         {
-            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, manguyenlieu, soluong, donvi, kho, nguoinhan, khoi, phong, vitri, request);
+            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho,thoigian,manguyenlieu,soluong, giathucte, donvi,kho,tongchiphi,vitri,phong,khoi);
             return Json(check);
         }
         public JsonResult _load_xuatkhohang(string mayeucau, string nguoitao)
         {
+
             var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(mayeucau, nguoitao);
             return Json(list);
         }

@@ -66,8 +66,7 @@
             <div class="card-header" style="padding-left: 0px;">
                 <div class="form-group" style="margin : 10px 0 0 5px">
                     <div class="input-group mb-2">
-                        <button class="btn btn-outline-success" style="border-radius : 0px;"><i class="fa fa-check"></i> @Languages.Dongy</button>
-                        <button class="btn btn-outline-danger ml-1" style="border-radius : 0px;">× @Languages.Tuchoi</button>
+                        <button class="btn btn-outline-success" style="border-radius : 0px;" onclick="_dongy_all()"><i class="fa fa-check"></i> @Languages.Dongy</button>
                         <button class="btn btn-outline-info ml-1" style="border-radius : 0px;" id="modal-15" onclick="_list_view()"><i class="fa fa-eye-dropper"></i> @Languages.Xem</button>
                     </div>
                 </div>
@@ -162,27 +161,36 @@
     }
     let lst = [];
     const checkAll = document.getElementById('idd');
+
     document.addEventListener('change', function(e) {
-        lst = [];
+        // 1. Xử lý logic Click vào nút "Chọn tất cả" (Check All)
         if (e.target && e.target.id === 'idd') {
             const checkboxes = document.querySelectorAll('.item');
             checkboxes.forEach(cb => {
                 cb.checked = e.target.checked;
-                lst.push(cb.value);
             });
         }
-        if (e.target && e.target.classList.contains('item')) {
-            const allItems = document.querySelectorAll('.item');
-            const checkedItems = document.querySelectorAll('.item:checked');
 
-            // Nếu số lượng checkbox đang chọn bằng tổng số checkbox -> Check nút đầu bảng
-            checkAll.checked = (allItems.length === checkedItems.length);
+        // 2. Cập nhật trạng thái hiển thị cho nút "Check All" (Toàn bộ / Lửng lơ / Bỏ chọn)
+        const allItems = document.querySelectorAll('.item');
+        const checkedItems = document.querySelectorAll('.item:checked');
 
-            // Trạng thái lửng lơ (Gạch ngang) nếu chỉ chọn một vài ô
+        if (checkAll) {
+            // Tích chọn nếu tất cả con được chọn
+            checkAll.checked = (allItems.length > 0 && allItems.length === checkedItems.length);
+            // Gạch ngang nếu có ít nhất 1 cái chọn nhưng không phải tất cả
             checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
         }
+
+        // 3. GÁN GIÁ TRỊ VÀO LST
+        // Dù là chọn tất cả hay chọn lẻ, ta chỉ cần lấy tất cả những ô đang được checked
+        lst = Array.from(checkedItems).map(cb => cb.value);
+
+        console.log("Danh sách giá trị hiện tại:", lst);
     });
-    function _list_view(){
+
+    function _list_view()
+    {    
         document.getElementById('slider').innerHTML = "";
         for(let i = 0; i < lst.length; i++){
             var mayeucau = lst[i].split('_')[0];

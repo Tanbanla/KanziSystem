@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     'use strict';
     var form = document.getElementById('materialForm');
     var submitBtn = document.getElementById('submitBtn');
@@ -29,6 +29,17 @@
                 Currency: document.getElementById("Currency").value,
                 Group_Code: document.getElementById("GroupCode").value,
                 GoodKind: document.getElementById("GoodKind").value,
+                Category_VN: document.getElementById("Category_VN").value,
+                Category_JP: document.getElementById("Category_JP").value,
+                Category_EN: document.getElementById("Category_EN").value,
+                Shape: document.getElementById("Shape").value,
+                Material: document.getElementById("Material").value,
+                Composition: document.getElementById("Composition").value,
+
+                Composition: document.getElementById("Composition").value,
+                Dimension: document.getElementById("Dimension").value,
+                UsedFor: document.getElementById("UsedFor").value,
+                Purpose: document.getElementById("Purpose").value,
             };
 
             fetch('/Material/Create_Material', {
@@ -62,58 +73,21 @@
     }, false);
 })();
 
-function handleFileSelect(event) {
-    const file = event.target.files[0];  // Lấy file đầu tiên (hoặc loop nếu multiple)
-    if (!file) return;
 
-    // Kiểm tra loại file (tùy chọn)
-    const allowedTypes = ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
-    if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid CSV or Excel file.');
-        return;
-    }
-
-    // Tạo FormData để gửi file
-    const formData = new FormData();
-    formData.append('file', file);
-
-    // Gửi file lên server (endpoint mới, xem bước 3)
-    fetch('/Material/ImportMaterials', {
-        method: 'POST',
-        body: formData  // Không cần Content-Type, browser tự set
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Import successful!');
-                location.reload();  // Reload để cập nhật dữ liệu
-            } else {
-                alert('Import failed: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred during import.');
-        });
-}
-
-// Thêm hàm này vào cuối file JS (sau code hiện tại)
+document.getElementById('fileInput').addEventListener('change', handleFileSelect);
 function handleFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Kiểm tra loại file (tùy chọn)
-    const allowedTypes = ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+    const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
     if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid CSV or Excel file.');
+        alert('Please select a valid Excel file (.xlsx or .xls).');
         return;
     }
 
-    // Tạo FormData để gửi file
     const formData = new FormData();
     formData.append('file', file);
 
-    // Gửi file lên server (endpoint mới, xem bước 3 trong phản hồi trước)
     fetch('/Material/ImportMaterials', {
         method: 'POST',
         body: formData
@@ -121,14 +95,14 @@ function handleFileSelect(event) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Import successful!');
-                location.reload();
+                alert(data.message);
+                location.reload(); // Or update the UI
             } else {
                 alert('Import failed: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             alert('An error occurred during import.');
         });
 }
+

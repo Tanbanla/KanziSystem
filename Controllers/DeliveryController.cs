@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
+using PRJ_WAREHOUSE_BIVN.Models;
 using System.Data;
+using System.DirectoryServices.AccountManagement;
 using System.Transactions;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -10,6 +12,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     {
         public string? PoNumber { get; set; }
         public string? Department { get; set; }
+        public string? Mayeucau { get; set; }
+        public string? Mahang { get; set; }
+        public string? Phongbanyeucau { get; set; }
+        public string ? UserName { get; set; }
     }
 
     public class ExchangeUnit
@@ -31,6 +37,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? Id_nhapkho { get; set; }
         public string? Mahang { get; set; }
         public string? Soluong { get; set; }
+        public string? Group_Code { get; set; }
+        public string? UserName { get; set; }
     }
 
     public class DeliveryController : Controller
@@ -102,10 +110,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         public JsonResult SearchDataPo([FromBody] SearchPoPayload data)
         {
-            string WhereCmd = string.Empty;
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + data.UserName + "'");
 
-            if (data.PoNumber!.Trim() == "") return Json(null);
-            if (data.PoNumber.Contains(','))
+            string WhereCmd = string.Empty;
+            if (data.PoNumber!.Contains(','))
             {
                 string[] lstPO = data.PoNumber.Split(',');
                 WhereCmd = $"[SoPO] in ('{String.Join("','", lstPO)}') AND ";
@@ -135,7 +144,38 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             sqlColumn += ",[Id_LichsuNhap],[LuongvekhoDanhap],[Loaichiphi]";
             sqlColumn += ",[LuongvekhoKhonhap],[Aim],[Loaihinhtokhai],[Account_Code],[Phongchiuchiphi]";
 
-            string cmdQry = $"SELECT {sqlColumn} FROM [PO] WHERE {WhereCmd} [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{data.Department}' ORDER BY [SoPO] DESC, Hienthi ASC";
+            string cmdQry = $"SELECT TOP 200 {sqlColumn} FROM [PO] WHERE {WhereCmd} [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{data.Department}' and Code_Request like '%{data.Mayeucau}%' and Mahang like '%{data.Mahang}%' and Tenphongyeucau like N'%{data.Phongbanyeucau}%'  ORDER BY [SoPO] DESC, Hienthi ASC";
+
+            var dataResult = Models.PO.GetPoByPoNumber(cmdQry);
+            return Json(dataResult);
+        }
+        public JsonResult LoadDataPo(string us)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
+           
+            string sqlColumn = "[PO_Detail_Id],[Id_Goc],[SoPO],[Code_Request]";
+            sqlColumn += ",[Id_RequestDetail],[Good_Code],[Tentienganh]";
+            sqlColumn += ",[Tentiengviet],[Mahang],[Soluong]";
+            sqlColumn += ",[Dovi],[Dongia],[Dieukiengiaohang]";
+            sqlColumn += ",[Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien]";
+            sqlColumn += ",[Vat],[Maphongyeucau],[Tenphongyeucau]";
+            sqlColumn += ",[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan]";
+            sqlColumn += ",[Loaitien],[Tygia],[DoisangUSD]";
+            sqlColumn += ",[Danhmuc],[Invoice],[InvoiceNgaynhap],[InvoiceNguoinhap],[Luongvethucte]";
+            sqlColumn += ",[LuongvethucteNgaynhap],[LuongvethucteNguoinhap],[Luongvekho],[LuongvekhoNgaynhap] ";
+            sqlColumn += ",[LuongvekhoNguoinhap],[Sotokhai],[Ngaydangkytk]";
+            sqlColumn += ",[Kiemtratk],[SotokhaiNgaynhap],[SotokhaiNguoinhap]";
+            sqlColumn += ",[Tinhtrangtokhai],[Hienthi],[Benxacnhantruoc]";
+            sqlColumn += ",[Ngayphathanh],[TinhtrangPO],[TinhtranghaiquanPO]";
+            sqlColumn += ",[MaNCC],[TenNCC],[Maphongban]";
+            sqlColumn += ",[Nguoixacnhan],[Thoigianxacnhan],[Group_Code]";
+            sqlColumn += ",[InvoicePO],[InvoicePODenghithanhtoan],[InvoicePONgaynhap],[InvoicePONguoinhap]";
+            sqlColumn += ",[Nguoilamdon],[Ngaytao],[TinhtranghaiquanPONguoinhap],[TinhtranghaiquanPONgaynhap]";
+            sqlColumn += ",[Id_LichsuNhap],[LuongvekhoDanhap],[Loaichiphi]";
+            sqlColumn += ",[LuongvekhoKhonhap],[Aim],[Loaihinhtokhai],[Account_Code],[Phongchiuchiphi]";
+
+            string cmdQry = $"SELECT TOP (300) {sqlColumn} FROM [PO] WHERE [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{khoi}' ORDER BY [SoPO] DESC, Hienthi ASC";
 
             var dataResult = Models.PO.GetPoByPoNumber(cmdQry);
             return Json(dataResult);
@@ -161,10 +201,20 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Json(values);
         }
-
         public JsonResult ImportWarehouse([FromBody] ConfirmImport data)
         {
+            data.NgayNhap = string.IsNullOrWhiteSpace(data.NgayNhap)
+                ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                : data.NgayNhap;
+            data.luongvethuctekho = string.IsNullOrWhiteSpace(data.luongvethuctekho) ? data.Soluong : data.luongvethuctekho;
             Models.SQL_Connect_DB20 db = new Models.SQL_Connect_DB20();
+
+            // lấy ra khối và set kho
+            var get_khoi = db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE  PO_Detail_Id = '" + data.Id_nhapkho + "'");
+            // nếu khối Prod về kho F2, GA về GA, IT về IT, PUR về PUR
+            string khoi = get_khoi.Rows[0][0].ToString()!;
+            data.KhoNhan = (khoi == "PROD") ? "F2" : khoi;
+
             string sqlColumn = "[PO_Detail_Id],[Id_Goc],[SoPO],[Code_Request]";
             sqlColumn += ",[Id_RequestDetail],[Good_Code],[Tentienganh]";
             sqlColumn += ",[Tentiengviet],[Mahang],[Soluong]";
@@ -186,15 +236,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             sqlColumn += ",[Id_LichsuNhap],[LuongvekhoDanhap],[Loaichiphi]";
             sqlColumn += ",[LuongvekhoKhonhap],[Aim],[Loaihinhtokhai],[Account_Code],[Phongchiuchiphi]";
 
-            string cmdQry = $"SELECT {sqlColumn} FROM [PO] WHERE [SoPO] = '{data.PO_Detail_Id}'";
+            string cmdQry = $"SELECT {sqlColumn} FROM [PO] WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'";
 
-            //Console.WriteLine("abc");
             var dataPO = Models.PO.GetPoByPoIdentify(cmdQry);
-            if (dataPO.Count == 0) return Json($"Không tìm thấy ID {data.Id_nhapkho} của mục PO");
-            string UserName = User.Identity?.Name is not null ? User.Identity?.Name!.Split('\\').Last() : "luannd";
-
-            string Khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + UserName + "'");
-            if (Khoi == "") Khoi = "PROD";
+            if (dataPO.Count == 0) return Json($"Không tìm thấy ID {data.Id_nhapkho} của mục PO");          
+            //string Khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + data.UserName + "'");
+            //if (Khoi == "") Khoi = "PROD";
             if (data.benXacNhanTruoc!.Equals("STOCK")) // Hàng trong kho cũ của hệ thống cost (PR1-MC, IT, GA)
             {
                 bool IsExists = db.GET_DATA_FROM_SQL($"SELECT * FROM [IM_PO_DETAIL] WHERE [Id_Goc] ='{data.Id_nhapkho}'").Rows.Count > 0;
@@ -214,7 +261,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json($"Danh mục hàng số: {data.Id_nhapkho} đang trong tình trạng chờ xác nhận Need/No Need của shipping nên không thể nhập kho");
             }
 
-
             if (dataPO[0].Luongvekho!.Trim() == "")
             {
                 dataPO[0].Luongvekho = dataPO[0].Soluong;
@@ -231,7 +277,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     double Soluongmoi = soluong - dbluongvekho;
                     double Dongia = 0.0;
-                    double.TryParse(dataPO[0].Dongia, out Dongia);
+                    Dongia = dataPO[0].Dongia ?? 0.0;
                     double Sotien = Soluongmoi * Dongia;
                     double VAT_Unit = 0.0;
                     double.TryParse(dataPO[0].Vat, out VAT_Unit);
@@ -239,7 +285,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     Sotien = Sotien + VAT;
                     double DoisangUSD = 0.0;
-                    double.TryParse(dataPO[0].Tygia, out DoisangUSD);
+                    DoisangUSD = dataPO[0].Tygia ?? 0.0;
+                    //double.TryParse(dataPO[0].Tygia, out DoisangUSD);
 
                     string Insert = "INSERT INTO IM_PO_DETAIL([SoPO],[Tentienganh],[Tentiengviet],[Mahang],[Soluong],[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien],[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],[DoisangUSD],[Danhmuc],[Id_Goc],[Hienthi],[Benxacnhantruoc],[Good_Code]) ";
                     Insert += $" SELECT [SoPO],[Tentienganh],[Tentiengviet],[Mahang],'{Soluongmoi}',[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],'{Sotien}',[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],'{DoisangUSD}',[Danhmuc],[PO_Detail_Id],[Hienthi] + 1,'STOCK',[Good_Code]";
@@ -248,10 +295,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 double Luongvekho = 0.0;
-                double.TryParse(dataPO[0].Luongvekho, out Luongvekho);
+                double.TryParse(data.luongvethuctekho, out Luongvekho);
 
                 double Dongiaroot = 0.0;
-                double.TryParse(dataPO[0].Dongia, out Dongiaroot);
+                Dongiaroot = dataPO[0].Dongia ?? 0.0;
 
                 double Sotienroot = Luongvekho * Dongiaroot;
                 double VAT_Unit_2 = 0.0;
@@ -259,33 +306,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 double VAT_2 = Sotienroot * VAT_Unit_2 / 100;
                 Sotienroot += VAT_2;
 
-                double DoisangUSDroot = 0.0;
-                double.TryParse(dataPO[0].Tygia, out DoisangUSDroot);
+                double DoisangUSDroot = dataPO[0].Tygia ?? 0.0;
+               
                 DoisangUSDroot = Sotienroot / DoisangUSDroot;
 
-                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{dataPO[0].Luongvekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', [Benxacnhantruoc] = 'STOCK', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.PO_Detail_Id}' ");
+                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{Luongvekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{data.UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', [Benxacnhantruoc] = 'STOCK', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.PO_Detail_Id}' ");
             }
-            else
+            else // trường hợp = "SHIP"
             {
                 double Luongvekho = 0.0;
-                double.TryParse(dataPO[0].Luongvekho, out Luongvekho);
+                double.TryParse(data.luongvethuctekho, out Luongvekho);
 
                 double Dongiaroot = 0.0;
-                double.TryParse(dataPO[0].Dongia, out Dongiaroot);
+                Dongiaroot = dataPO[0].Dongia ?? 0.0;
 
                 double Sotienroot = Luongvekho * Dongiaroot;
-                double DoisangUSDroot = 0.0;
-                double.TryParse(dataPO[0].Tygia, out DoisangUSDroot);
+                double DoisangUSDroot = dataPO[0].Tygia ?? 0.0;
+                
                 DoisangUSDroot = Sotienroot / DoisangUSDroot;
 
-                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{dataPO[0].Luongvekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.PO_Detail_Id}' ");
+                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{dataPO[0].Luongvekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{data.UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.PO_Detail_Id}' ");
             }
 
             string Lydo = "";
-            if (!data.Mahang.Trim().Equals("")) // Không có mã hàng là hàng ngoài danh mục ....
+            if (!data.Mahang!.Trim().Equals("")) // Không có mã hàng là hàng ngoài danh mục ....
             {
                 double Luongnhapkho = 0.0;
-                double.TryParse(data.luongvethuctekho.Trim(), out Luongnhapkho);
+                double.TryParse(data.luongvethuctekho!.Trim(), out Luongnhapkho);
 
                 string DonviRequest = db.ReturnString($"SELECT [Unit] FROM [MATERIAL] WHERE [Material_Code] = N'{data.Mahang}'");
                 string Quydoi = db.ReturnString($"SELECT [Soluongquydoi] FROM [KHO_DONVIQUYDOI] WHERE [MaNguyenLieu] = '{data.Mahang}' AND [DonviRequest] = '{DonviRequest}' AND [DonviPO] = N'{dataPO[0].Dovi}' ");
@@ -295,18 +342,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     Luongnhapkho = double.Parse(Quydoi) * Luongnhapkho;
                 }
                 //Nhập kho
-                string Soluonghientai = db.ReturnString($"SELECT [Hientai] FROM KHO WHERE [MaNguyenLieu] =  N'{data.Mahang}' AND [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{Khoi}'");
+                string Soluonghientai = db.ReturnString($"SELECT [Hientai] FROM KHO WHERE [MaNguyenLieu] =  N'{data.Mahang}' AND [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{khoi}'");
                 double SoluongTruocthaydoi = 0;
 
                 if (dataPO[0].Benxacnhantruoc == "" || dataPO[0].Benxacnhantruoc!.Equals("STOCK")) // Thực hiện với hàng kho của PR1-MC/GA
                 {
                     if (Soluonghientai.Trim() == "")
                     {
-                        db.ReturnString($"INSERT INTO KHO(MaNguyenLieu,Hientai,Group_Code,Kho) VALUES (N'{data.Mahang}','{data.luongvethuctekho}','{Khoi}','{data.KhoNhan}')");
+                        db.ReturnString($"INSERT INTO KHO(MaNguyenLieu,Hientai,Group_Code,Kho, QTY_NEW) VALUES (N'{data.Mahang}','{data.luongvethuctekho}','{khoi}','{data.KhoNhan}','{data.luongvethuctekho}')");
                     }
                     else
                     {
-                        db.ReturnString($"UPDATE KHO SET [Hientai] = [Hientai] + {data.luongvethuctekho} WHERE [MaNguyenLieu] =  N'{data.Mahang}' AND  [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{Khoi}'");
+                        db.ReturnString($"UPDATE KHO SET [Hientai] = [Hientai] + {data.luongvethuctekho}, [QTY_NEW] = [QTY_NEW] + {data.luongvethuctekho} WHERE [MaNguyenLieu] =  N'{data.Mahang}' AND  [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{khoi}'");
                     }
                 }
                 else // Hàng trong kho của các phòng ban khác
@@ -317,12 +364,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         QUANTITY = Luongnhapkho,
                         CHR_WAREHOUSE = data.KhoNhan,
                         CHR_CODE_MATERIAL = dataPO[0].Mahang,
-                        CHR_GROUP_CODE = Khoi
+                        CHR_GROUP_CODE = khoi
                     };
                     Models.KHO_TMP.InsertDataImport(tmp);
                 }
 
-                string Manhanvien = db.ReturnString($"SELECT CHR_CRT_USERID FROM [TM_USER] WHERE [CHR_USERID] = '{UserName}'");
+                string Manhanvien = db.ReturnString($"SELECT CHR_CRT_USERID FROM [TM_USER] WHERE [CHR_USERID] = '{data.UserName}'");
                 double Soluongconlai = 0;
                 double SoluongPO = 0;
                 if (Quydoi != "")
@@ -332,12 +379,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 db.ReturnString($"DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '{dataPO[0].Id_LichsuNhap}'");
-                string Id_Lichsu = db.ReturnString($"INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[NCC],[Donvi],[MaNguoinhap],[Gia],[SoPO],[SoluongPO],[DonviPO],[Soluongconlai],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) OUTPUT Inserted.Id_Lichsu VALUES(N'{dataPO[0].Mahang}',N'Nhập kho {data.KhoNhan} từ PO: {dataPO[0].SoPO} -> {Lydo}','{Luongnhapkho}','NHAP',GETDATE(),'{UserName}','{data.KhoNhan}','{Khoi}',N'{dataPO[0].Tentienganh}',N'{dataPO[0].TenNCC}',N'{DonviRequest}','{Manhanvien}','{dataPO[0].Dongia}','{dataPO[0].SoPO}','{SoluongPO}',N'{dataPO[0].Dovi}','{Soluongconlai}','{data.NgayNhap}','{SoluongTruocthaydoi}','{Luongnhapkho + SoluongTruocthaydoi}')");
-                db.ReturnString($"UPDATE [IM_PO_DETAIL] SET [Id_LichsuNhap] = '{Id_Lichsu}' WHERE [PO_Detail_Id] = '{dataPO[0].PO_Detail_Id}'");
+                string Id_Lichsu = db.ReturnString($"INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[NCC],[Donvi],[MaNguoinhap],[Gia],[SoPO],[SoluongPO],[DonviPO],[Soluongconlai],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) OUTPUT Inserted.Id_Lichsu VALUES(N'{dataPO[0].Mahang}',N'Nhập kho {data.KhoNhan} từ PO: {dataPO[0].SoPO} -> {Lydo}','{Luongnhapkho}','NHAP',GETDATE(),'{data.UserName}','{data.KhoNhan}','{khoi}',N'{dataPO[0].Tentienganh}',N'{dataPO[0].TenNCC}',N'{DonviRequest}','{Manhanvien}','{dataPO[0].Dongia}','{dataPO[0].SoPO}','{SoluongPO}',N'{dataPO[0].Dovi}','{Soluongconlai}','{data.NgayNhap}','{SoluongTruocthaydoi}','{Luongnhapkho + SoluongTruocthaydoi}')");
+                db.ReturnString($"UPDATE [IM_PO_DETAIL] SET [Id_LichsuNhap] = '{Id_Lichsu}' WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'");
             }
 
-            db.ReturnString($"INSERT INTO [IM_LOG]([Loai],[SoPO],[PO_Detail_Id],[Hanhdong],[Thogian],[Nguoicapnhat]) VALUES  ('DM','{data.PO_Detail_Id}','{data.Id_nhapkho}',N'Nhập kho',Getdate(),'{UserName}')");
-            db.ReturnString($"UPDATE [IM_PO] SET [Nguoixacnhan] = '{UserName}',[Thoigianxacnhan] = GETDATE() WHERE [SoPO] = '{data.PO_Detail_Id}'");
+            db.ReturnString($"INSERT INTO [IM_LOG]([Loai],[SoPO],[PO_Detail_Id],[Hanhdong],[Thogian],[Nguoicapnhat]) VALUES  ('DM','{data.PO_Detail_Id}','{data.Id_nhapkho}',N'Nhập kho',Getdate(),'{data.UserName}')");
+            db.ReturnString($"UPDATE [IM_PO] SET [Nguoixacnhan] = '{data.UserName}',[Thoigianxacnhan] = GETDATE() WHERE [SoPO] = '{data.PO_Detail_Id}'");
 
             UpdateTinhTrangPO(data.PO_Detail_Id!);
             return Json("OK");

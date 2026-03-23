@@ -1,4 +1,6 @@
-﻿using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -19,5 +21,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> CheckMaHangExistsAsync(string codeMaterial);
         // Insert 
         public Task<bool> InsertMaterial(MATERIAL mt);
+        // Insert nhiều
+        public Task<bool> UpdateListThongTinNoList(List<MATERIAL> listMT);
+
     }
 }

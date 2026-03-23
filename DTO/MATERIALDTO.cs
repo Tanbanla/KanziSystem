@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.DTO;
@@ -51,12 +51,25 @@ public partial class MATERIALDTO
 
     public string? Category_EN { get; set; }
 
+    public string? Code_Suppiler { get; set; }
+
     public string? GetLoaiHang()
     {
         if (string.IsNullOrEmpty(Material_Code))
             return null;
-
-        return Material_Code.Substring(0, 1);
+        switch(Material_Code.Substring(0, 1))
+        {
+            case "A":
+                return "A";
+            case "B":
+                return "B";
+            case "C":
+                return "C";
+            case "E":
+                return "E";
+            default:
+                return "NO LIST";
+        }
     }
     // Serialized convenience properties so computed values are available to client-side JavaScript
     public string? LoaiHang => GetLoaiHang();

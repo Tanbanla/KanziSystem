@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -43,9 +43,54 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return await _context.SaveChangesAsync() > 0;
         }
         // them danh sach
+        //public async Task<bool> AddListBaoGiaNccCategory(List<BaoGia_NCC_Category> listBaoGiaNccCategory)
+        //{
+        //    var listInsert = new List<BaoGia_NCC_Category>();
+        //    foreach (var item in listBaoGiaNccCategory)
+        //    {
+        //        var checklist = listInsert.Where(c => c.CHR_MaNCC == item.CHR_MaNCC && c.NVCHR_ChungLoai == item.NVCHR_ChungLoai);
+        //        if (checklist != null) continue;
+        //        var a = await _context.BaoGia_NCC_Categories.Where(c => c.CHR_MaNCC == item.CHR_MaNCC && c.NVCHR_ChungLoai == item.NVCHR_ChungLoai).FirstOrDefaultAsync();
+        //        if (a != null) continue;
+
+        //        listInsert.Add(item);
+        //    }
+        //    if(listInsert.Count == 0)
+        //    {
+        //        return false;
+        //    }
+        //    await _context.BaoGia_NCC_Categories.AddRangeAsync(listInsert);
+        //    return await _context.SaveChangesAsync() > 0;
+        //}
         public async Task<bool> AddListBaoGiaNccCategory(List<BaoGia_NCC_Category> listBaoGiaNccCategory)
         {
-            await _context.BaoGia_NCC_Categories.AddRangeAsync(listBaoGiaNccCategory);
+            if (listBaoGiaNccCategory == null || !listBaoGiaNccCategory.Any())
+                return false;
+
+            // Lấy tất cả các cặp (MaNCC, ChungLoai) đã tồn tại trong database
+            var existingKeys = await _context.BaoGia_NCC_Categories
+                .Where(c => listBaoGiaNccCategory.Select(x => x.CHR_MaNCC).Contains(c.CHR_MaNCC))
+                .Select(c => new { c.CHR_MaNCC, c.NVCHR_ChungLoai })
+                .ToListAsync();
+
+            // Tạo HashSet để kiểm tra nhanh
+            var existingSet = new HashSet<(string MaNCC, string ChungLoai)>(
+                existingKeys.Select(k => (k.CHR_MaNCC, k.NVCHR_ChungLoai))
+            );
+
+            // Lọc các item chưa tồn tại trong database và không trùng trong list
+            var uniqueItems = listBaoGiaNccCategory
+                .Where(item => !existingSet.Contains((item.CHR_MaNCC, item.NVCHR_ChungLoai)))
+                .GroupBy(item => new { item.CHR_MaNCC, item.NVCHR_ChungLoai })
+                .Select(g => g.First()) // Lấy item đầu tiên nếu có trùng trong list
+                .ToList();
+
+            if (!uniqueItems.Any())
+            {
+                return false;
+            }
+
+            await _context.BaoGia_NCC_Categories.AddRangeAsync(uniqueItems);
             return await _context.SaveChangesAsync() > 0;
         }
         // update thong tin
