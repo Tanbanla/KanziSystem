@@ -35,7 +35,7 @@
         <table class="table table-sm table-hover table-bordered align-middle" id="categoriesTable">
             <thead class="table-light">
                 <tr class="text-center align-middle">
-                    <th style="width: 100px">@Localizer["ID"]</th>
+                    <th style="width: 100px">STT</th>
                     <th>@Localizer["CategoryName"]</th>
                     <th style="width: 150px" class="text-end">@Localizer["Actions"]</th>
                 </tr>
@@ -44,6 +44,23 @@
                
             </tbody>
         </table>
+    </div>
+    <!-- Pagination controls -->
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <div class="d-flex align-items-center gap-2">
+            <label for="categoryPageSize" class="form-label mb-0">@Localizer["PageSize"]</label>
+            <select id="categoryPageSize" class="form-select form-select-sm" style="width:90px">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+        <div id="categoryPagination" class="btn-group" role="group" aria-label="pagination">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="categoryPrev">@Localizer["Previous"]</button>
+            <button type="button" class="btn btn-light btn-sm disabled" id="categoryPageInfo">1</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="categoryNext">@Localizer["Next"]</button>
+        </div>
     </div>
 </div>
 <!-- Modal for Add Category -->

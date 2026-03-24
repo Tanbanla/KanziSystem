@@ -2,21 +2,37 @@
 document.addEventListener('DOMContentLoaded', function () {
     let categories = [];
     let filteredCategories = [];
+    let pageIndex = 1;
+    let pageSize = 100;
+    let totalPages = 1;
 
     // Load categories
     async function loadCategories(searchTerm = '') {
         try {
+            const payload = {
+                Name: searchTerm,
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            };
             const response = await fetch('/Master/SearchCategoryByName', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(searchTerm)
+                body: JSON.stringify(payload)
             });
             const result = await response.json();
             if (result.success) {
-                categories = result.data;
+                // If API returns a paged result, it may include total count/properties. We expect data array here.
+                categories = result.data || [];
                 filteredCategories = categories;
+                // try to read paging metadata if present
+                if (result.totalPages) totalPages = result.totalPages;
+                else {
+                    // if API doesn't provide totalPages, assume single page for now
+                    totalPages = categories.length < pageSize ? pageIndex : pageIndex; 
+                }
+                updatePaginationUI();
                 renderTable();
             } else {
                 showDialog(window.i18nCategory.ErrorTitle, result.message || window.i18nCategory.LoadFailed);
@@ -34,13 +50,14 @@ document.addEventListener('DOMContentLoaded', function () {
             tbody.innerHTML = `<tr><td colspan="3" class="text-center">${window.i18nCategory.NoData}</td></tr>`;
             return;
         }
-        filteredCategories.forEach(cat => {
+        filteredCategories.forEach((cat, idx) => {
+            const stt = (pageIndex - 1) * pageSize + idx + 1;
             const row = `
                 <tr>
-                    <td class="text-center">${cat.id}</td>
-                    <td>${cat.nvchR_Category}</td>
+                    <td class="text-center">${stt}</td>
+                    <td>${cat.nvchR_Category || cat.NVCHR_Category || ''}</td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(${cat.id})">
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(${cat.id || cat.Id})">
                             <i class="fas fa-trash"></i> ${window.i18nCategory.Delete}
                         </button>
                     </td>
@@ -53,15 +70,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Search
     document.getElementById('btnSearch').addEventListener('click', function () {
         const searchTerm = document.getElementById('searchName').value.trim();
-        filteredCategories = categories.filter(cat => cat.nvchR_Category.toLowerCase().includes(searchTerm.toLowerCase()));
-        renderTable();
+        pageIndex = 1;
+        loadCategories(searchTerm);
     });
 
     // Reset
     document.getElementById('btnReset').addEventListener('click', function () {
         document.getElementById('searchName').value = '';
-        filteredCategories = categories;
-        renderTable();
+        pageIndex = 1;
+        loadCategories('');
     });
 
     // Add category
@@ -74,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btnSaveCategory').addEventListener('click', async function () {
         const name = document.getElementById('categoryName').value.trim();
         if (!name) {
-            showDialog(window.i18nCategory.ErrorTitle, 'Tên ch?ng lo?i không ???c ?? tr?ng');
+            showDialog(window.i18nCategory.ErrorTitle, 'TÃªn ch?ng lo?i khÃ´ng ???c ?? tr?ng');
             return;
         }
         try {
@@ -139,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             const result = await response.json();
             if (response.ok) {
-                showDialog(window.i18nCategory.SuccessTitle, 'Import thành công');
+                showDialog(window.i18nCategory.SuccessTitle, 'Import thÃ nh cÃ´ng');
                 loadCategories();
             } else {
                 showDialog(window.i18nCategory.ErrorTitle, result.title || 'Import th?t b?i');
@@ -185,5 +202,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Initial load
+    // initialize page size selector
+    const pageSizeSelect = document.getElementById('categoryPageSize');
+    pageSizeSelect.value = pageSize;
+    pageSizeSelect.addEventListener('change', function () {
+        pageSize = parseInt(this.value, 10) || 100;
+        pageIndex = 1;
+        loadCategories(document.getElementById('searchName').value.trim());
+    });
+
+    document.getElementById('categoryPrev').addEventListener('click', function () {
+        if (pageIndex > 1) {
+            pageIndex--;
+            loadCategories(document.getElementById('searchName').value.trim());
+        }
+    });
+    document.getElementById('categoryNext').addEventListener('click', function () {
+        if (pageIndex < totalPages) {
+            pageIndex++;
+            loadCategories(document.getElementById('searchName').value.trim());
+        }
+    });
+
+    function updatePaginationUI() {
+        document.getElementById('categoryPageInfo').textContent = pageIndex + (totalPages ? (' / ' + totalPages) : '');
+        document.getElementById('categoryPrev').disabled = pageIndex <= 1;
+        document.getElementById('categoryNext').disabled = pageIndex >= totalPages;
+    }
+
     loadCategories();
 });
