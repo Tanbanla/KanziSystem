@@ -1,4 +1,5 @@
-﻿function _load_xuatkho() {
+﻿// Load trang xuất kho 
+function _load_xuatkho() {
     var mayeucau = document.getElementById("mayeucau").value;
     var nguoitao = document.getElementById("nguoitao").value;
     const params = new URLSearchParams({ mayeucau: mayeucau, nguoitao: nguoitao });
@@ -16,6 +17,7 @@
             return response.json();
         })
         .then(data => {
+            console.log(data);
             const tbody = document.getElementById("list_xuatkho");
             // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
             const htmlContent = data.map(user => {
@@ -54,7 +56,9 @@
                     tinhtrang = "Chờ xác nhận";
                 } 
                 return `<tr class="main-row">
-                <td class="text-primary text-center" onclick="_modal_chitietxuatkho('${user.code_Request}')">chi tiết</td>
+                <td class="text-primary text-center" onclick="_modal_chitietxuatkho('${user.code_Request}')"><button type="button" class="btn btn-outline-success" style="padding:2px 5px 2px 5px" >chi tiết</button></td>
+                <td>${tinhtrang}</td>
+                <td hidden id="idrq_${user.code_Request}">${user.iD_REQUEST}</td>
                 <td class="text-primary" style="cursor:pointer" onclick="toggleRow('${user.code_Request}')">${user.code_Request}</td>
                 <td>${user.cost_Center}</td>
                 <td>${user.create_Date}</td>
@@ -64,12 +68,11 @@
                 <td>${user.total}</td>
                 <td id="hdm_${user.code_Request}">${hangdanhmuc}</td>
                 <td>${user.type}</td>
-                <td>${tinhtrang}</td>
                 <td>${user.create_Date}</td>
                 <td>${user.user_Create}</td>
                 <td>${user.last_Update}</td>
                 <td>${user.user_Update}</td>
-                <td id="khoi_${user.code_Request}">${user.group_Code}</td>
+                <td>${user.group_Code}</td>
                 </tr>
                 <tr id="dt_${user.code_Request}" class="collapse-row" style="display: none; background-color: #f8f9fa;">
                  <td colspan="18">
@@ -126,6 +129,7 @@ function toggleRow(id) {
     }
     _load_body_detail(id);
 }
+// load thông tin chi tiết trong modal
 function _load_body_detail(code_request) {
 
     const params = new URLSearchParams();
@@ -159,7 +163,7 @@ function _load_body_detail(code_request) {
                     <td>${item.account_Name}</td>
                     <td>${item.amount}</td>
                     <td>${item.amount}</td>
-                    <td>${item.unit} (${item.unit_Note})</td>
+                    <td>${item.unit} </td>
                     <td>${item.price} </td>
                     <td>${item.price_Real} </td>
                     <td>${item.vat} % </td>
@@ -252,67 +256,76 @@ function caculator() {
 
 }
 function _xuatkho() {
-
     var code_request = document.getElementById("madonn").innerHTML;
     var adid_nx = document.getElementById("us").innerHTML;
     var nguoinhan = document.getElementById("nguoinhan_thucte").value;
     var nguoixuatkho = document.getElementById("nguoixuatkho_thucte").value;
     var thoigian = document.getElementById("thoigianxuat_thucte").value;
-    var vitri = document.getElementById("vitri").innerHTML;
-    var phong = document.getElementById("phong").innerHTML;
-   
-    const checkboxes = document.querySelectorAll('input.itemsmall');
+    var vitri = document.getElementById("vitri").textContent;
+    var khoi = document.getElementById("khoi_yc").innerHTML;
+    var phong = document.getElementById("phong_yc").innerHTML;
+    var id_rq = document.getElementById("id_rq").innerHTML;
+    var kho = document.getElementById("khoSelect").value;
+    if (nguoixuatkho == "" || nguoinhan == "") {
+        alert("Điền thông tin người xuất kho và người nhận !");
+    }
+    else {
+        const checkboxes = document.querySelectorAll('input.itemsmall');
 
-    checkboxes.forEach((item, i) => {
-        var manguyenlieu = document.getElementById("mahang_" + i).innerHTML;
-        var soluong = document.getElementById("slthucte_" + i).value;
-        var giathucte = document.getElementById("dgthucte_" + i).value;
-        var donvi = document.getElementById("donvi_" + i).innerHTML;
-        var kho = document.getElementById("khoSelect_" + i).value;
-        var tongchiphi = document.getElementById("ttthucte_" + i).innerHTML;
-        var khoi = document.getElementById("khoi_" + i).innerHTML;
+        checkboxes.forEach((item, i) => {
+            var manguyenlieu = document.getElementById("mahang_" + i).innerHTML;
+            var soluong = document.getElementById("slthucte_" + i).value;
+            var giathucte = document.getElementById("dgthucte_" + i).value;
+            var donvi = document.getElementById("donvi_" + i).innerHTML;         
+            var tongchiphi = document.getElementById("ttthucte_" + i).innerHTML;
+            var tongchiphiold = document.getElementById("tongchiphiold_" + i).innerHTML;
+        
+            const params = new URLSearchParams();
+            params.append('code_request', code_request);
+            params.append('adid_nx', adid_nx);
+            params.append('nguoinhan', nguoinhan);
+            params.append('nguoixuatkho', nguoixuatkho);
+            params.append('thoigian', thoigian);
+            params.append('manguyenlieu', manguyenlieu);
+            params.append('soluong', soluong);
+            params.append('giathucte', giathucte);
+            params.append('donvi', donvi);
+            params.append('kho', kho);
+            params.append('tongchiphi', tongchiphi);
+            params.append('tongchiphi', tongchiphi);
+            params.append('vitri', vitri);
+            params.append('phong', phong);
+            params.append('khoi', khoi);
+            params.append('tongchiphiold', tongchiphiold);
+            params.append('id_rq', id_rq);
 
-        const params = new URLSearchParams();
-        params.append('code_request', code_request);
-        params.append('adid_nx', adid_nx);
-        params.append('nguoinhan', nguoinhan);
-        params.append('nguoixuatkho', nguoixuatkho);
-        params.append('thoigian', thoigian);
-        params.append('manguyenlieu', manguyenlieu);
-        params.append('soluong', soluong);
-        params.append('giathucte', giathucte);
-        params.append('donvi', donvi);
-        params.append('kho', kho);
-        params.append('tongchiphi', tongchiphi);
-        params.append('tongchiphi', tongchiphi);
-        params.append('vitri', vitri);
-        params.append('phong', phong);
-        params.append('khoi', khoi);
-
-        fetch('/Import/_xuatkhothucte', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params.toString()
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
+            fetch('/Import/_xuatkhothucte', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
             })
-            .then(data => {
-                alert(data);
-                document.querySelectorAll('.close').forEach(button => button.click());
-                _load_xuatkho();
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data);
+                    document.querySelectorAll('.close').forEach(button => button.click());
+                    _load_xuatkho();
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        });
+    }
+    
   
 }
+// Hiển thị chi tiết khi hiện modal
 function _modal_chitietxuatkho(code_request) {
     document.getElementById("modal-19").click();
     const params = new URLSearchParams();
@@ -349,8 +362,11 @@ function _modal_chitietxuatkho(code_request) {
             document.getElementById("madonn").innerHTML = header.code_Request;
             document.getElementById("nguoitaoo").innerHTML = `${header.user_Create} - ${header.create_Date}`;
             document.getElementById("ghichu").innerHTML = header.note || "-";
+            document.getElementById("khoi_yc").innerHTML = header.group_Code || "-";
+            document.getElementById("phong_yc").innerHTML = header.cost_Center || "-";
+            document.getElementById("id_rq").innerHTML = header.iD_REQUEST || "-";
 
-            // 1. Tạo chuỗi HTML cho toàn bộ danh sách
+            //Tạo chuỗi HTML cho toàn bộ danh sách
             const container = document.getElementById("_bd_hienchitiet");
             let htmlContent = "";
 
@@ -364,11 +380,6 @@ function _modal_chitietxuatkho(code_request) {
                 <td>${item.good_Code}</td>
                 <td>${item.account_Code}</td>
                 <td>${item.account_Name}</td>
-                <td>
-                    <select id="khoSelect_${i}" class="form-control" style="background-color:lightyellow">
-                       
-                    </select>
-                </td>
                 <td id="hienThiSoLuong_${i}" style="font-weight:bold; color:blue">0</td>
                 <td id="slpo_${i}">${item.amount}</td>                  
                 <td id="donvi_${i}">${item.unit}</td>
@@ -376,18 +387,17 @@ function _modal_chitietxuatkho(code_request) {
                 <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="slthucte_${i}" value="${item.amount}" onblur="_tinhthucte('${i}')" /></td>
                 <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="dgthucte_${i}" value="${item.price}" onblur="_tinhthucte('${i}')" /></td>
                 <td>${item.vat} %</td>
-                <td>${item.total_exchange}</td>
+                <td id="tongchiphiold_${i}">${item.total_exchange}</td>
                 <td style="background-color:#d0ffd8ab" id="ttthucte_${i}">${item.total_exchange_real}</td>
                 <td>${item.po}</td>
             </tr>`;
             });
 
-            // Gán HTML vào DOM một lần duy nhất
             container.innerHTML = htmlContent;
 
-            // 2. Sau khi HTML đã có trong DOM, chạy vòng lặp để xử lý Select và Event
+            //  chạy vòng lặp để xử lý Select và Event
             data.list.forEach((item, i) => {
-                const selectElement = document.getElementById(`khoSelect_${i}`);
+                const selectElement = document.getElementById(`khoSelect`);
                 const displayElement = document.getElementById(`hienThiSoLuong_${i}`);
 
                 if (item.slk && Array.isArray(item.slk)) {
@@ -410,6 +420,27 @@ function _modal_chitietxuatkho(code_request) {
                     }
                 }
             });
+
+
+            const select = document.getElementById('khoSelect');
+            const uniqueOptions = [];
+            const values = new Set();
+
+            // Lọc lấy các option không trùng
+            for (let option of select.options) {
+                if (!values.has(option.value)) {
+                    values.add(option.value);
+                    uniqueOptions.push({ value: option.value, text: option.text });
+                }
+            }
+
+            // Xóa sạch select cũ và nạp lại
+            select.innerHTML = '';
+            uniqueOptions.forEach(opt => {
+                const newOpt = new Option(opt.text, opt.value);
+                select.add(newOpt);
+            });
+
         })
         .catch(error => {
             console.error('Lỗi khi tải chi tiết:', error);

@@ -1,4 +1,4 @@
-﻿@using Newtonsoft.Json
+@using Newtonsoft.Json
 @using PRJ_WAREHOUSE_BIVN.DTO
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
@@ -9,6 +9,7 @@
     List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
     List<string> categoryS = Model.DanhSachCategory;
     string currentUser = Model.NguoiThaoTac;
+    List<BaoGia_Master_Approver_Send_MailDTO> listApproval = Model.ListApprovel;
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
@@ -39,10 +40,24 @@
             <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Operations"]</h6>
         </div>
         <div class="btn_quote">
-            <div class="btn-group">
-                <button type="button" class="btn btn-outline-secondary" id="btnReset"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
-                <button type="button" class="btn btn-outline-success" id="btnAuto"><i class="fas fa-file-excel"></i> @Localizer["AutoRender"]</button>
-                <button type="button" class="btn btn-primary" id="btnCreate"><i class="fas fa-check"></i> @Localizer["Submit"]</button>
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div class="btn-group mb-2">
+                    <button type="button" class="btn btn-outline-secondary" id="btnReset"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
+                    <button type="button" class="btn btn-outline-success" id="btnAuto"><i class="fas fa-file-excel"></i> @Localizer["AutoRender"]</button>
+                    <button type="button" class="btn btn-outline-success" id="btnAddRowSmall" hidden><i class="fas fa-plus"></i></button>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <select id="approverSelect" name="approverAdid" class="form-select form-select-sm" style="min-width: 260px; max-width: 360px; border-radius: 0; min-height: 38px;">
+                        <option value="">@Localizer["SelectApprover"]</option>
+                        @foreach (var a in listApproval)
+                        {
+                            @* <option value="@a.Adid">@a.FullName (@a.Adid) - @a.DepartmentName</option> *@
+                            <option value="@a.CHR_UserAdid">@a.NVCHR_UserName (@a.CHR_UserAdid)</option> 
+                        }
+                    </select>
+                    <button type="button" class="btn btn-primary" id="btnCreate"><i class="fas fa-check me-1"></i> @Localizer["Submit"]</button>
+                </div>
             </div>
         </div>
         <div class="card-header bg-white border-top">

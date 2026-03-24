@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing.Constraints;
 using PRJ_WAREHOUSE_BIVN.Models;
 using System.Data;
@@ -213,7 +213,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var get_khoi = db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE  PO_Detail_Id = '" + data.Id_nhapkho + "'");
             // nếu khối Prod về kho F2, GA về GA, IT về IT, PUR về PUR
             string khoi = get_khoi.Rows[0][0].ToString()!;
-            data.KhoNhan = (khoi == "PROD") ? "F2" : khoi;
+            data.KhoNhan = data.Mahang switch
+            {
+                var s when s!.Contains("E") || s.Contains("A") => "F2",
+                var s when s!.Contains("I") => "IT",
+                var s when s!.Contains("B") || s.Contains("C") => "F1",
+                _ => khoi switch // không có mã hàng sẽ gán theo khối
+                {
+                    "PROD" => "F2",
+                    "GA" => "F1",
+                    _ => khoi
+                }
+            };
 
             string sqlColumn = "[PO_Detail_Id],[Id_Goc],[SoPO],[Code_Request]";
             sqlColumn += ",[Id_RequestDetail],[Good_Code],[Tentienganh]";
@@ -308,9 +319,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 double DoisangUSDroot = dataPO[0].Tygia ?? 0.0;
                
-                DoisangUSDroot = Sotienroot / DoisangUSDroot;
+                DoisangUSDroot = Math.Round(Sotienroot / DoisangUSDroot);
 
-                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{Luongvekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{data.UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', [Benxacnhantruoc] = 'STOCK', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.PO_Detail_Id}' ");
+                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{data.luongvethuctekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{data.UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', [Benxacnhantruoc] = 'STOCK', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.Id_nhapkho}' ");
             }
             else // trường hợp = "SHIP"
             {
@@ -323,13 +334,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 double Sotienroot = Luongvekho * Dongiaroot;
                 double DoisangUSDroot = dataPO[0].Tygia ?? 0.0;
                 
-                DoisangUSDroot = Sotienroot / DoisangUSDroot;
+                DoisangUSDroot = Math.Round(Sotienroot / DoisangUSDroot,2);
 
-                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{dataPO[0].Luongvekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{data.UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.PO_Detail_Id}' ");
+                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Luongvekho] = '{data.luongvethuctekho}', LuongvekhoNgaynhap = '{data.NgayNhap}', [LuongvekhoNguoinhap] = '{data.UserName}', LuongvekhoKhonhap = '{data.KhoNhan}', Sotien = '{Sotienroot}', DoisangUSD = '{DoisangUSDroot}', LuongvekhoDanhap = 'True' WHERE [PO_Detail_Id] = '{data.Id_nhapkho}' ");
             }
 
             string Lydo = "";
-            if (!data.Mahang!.Trim().Equals("")) // Không có mã hàng là hàng ngoài danh mục ....
+            if (data.Mahang!.Trim().Equals("")) // Không có mã hàng là hàng ngoài danh mục ....
             {
                 double Luongnhapkho = 0.0;
                 double.TryParse(data.luongvethuctekho!.Trim(), out Luongnhapkho);
@@ -349,11 +360,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     if (Soluonghientai.Trim() == "")
                     {
-                        db.ReturnString($"INSERT INTO KHO(MaNguyenLieu,Hientai,Group_Code,Kho, QTY_NEW) VALUES (N'{data.Mahang}','{data.luongvethuctekho}','{khoi}','{data.KhoNhan}','{data.luongvethuctekho}')");
+                        db.ReturnString($"INSERT INTO KHO(MaNguyenLieu,Hientai,Group_Code,Kho, QTY_NEW) VALUES (N'{data.Mahang}','{Luongnhapkho}','{khoi}','{data.KhoNhan}','{Luongnhapkho}')");
                     }
                     else
                     {
-                        db.ReturnString($"UPDATE KHO SET [Hientai] = [Hientai] + {data.luongvethuctekho}, [QTY_NEW] = [QTY_NEW] + {data.luongvethuctekho} WHERE [MaNguyenLieu] =  N'{data.Mahang}' AND  [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{khoi}'");
+                        db.ReturnString($"UPDATE KHO SET [Hientai] = [Hientai] + {Luongnhapkho}, [QTY_NEW] = [QTY_NEW] + {Luongnhapkho} WHERE [MaNguyenLieu] =  N'{data.Mahang}' AND  [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{khoi}'");
                     }
                 }
                 else // Hàng trong kho của các phòng ban khác

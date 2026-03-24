@@ -1,4 +1,4 @@
-﻿
+
 // --- 1. Quản lý Trạng thái Phân trang ---
 const userPagingState = {
     fullData: [],
@@ -36,7 +36,7 @@ async function _load_inv() {
             return response.json();
         })
         .then(data => {
-            
+
             userPagingState.fullData = data;
             // Tính tổng số trang
             userPagingState.totalPages = Math.ceil(data.length / userPagingState.itemsPerPage);
@@ -180,7 +180,7 @@ async function _load_name_inv(group_code) {
     })
         .then(res => res.json())
         .then(data => {
-           
+
             globalMaterialData = data; // Lưu lại để dùng sau
             const $allSelects = $('.select2');
 
@@ -238,7 +238,7 @@ async function _load_dept(dept) {
             console.log(data);
             document.getElementById("dept").value = dept.split(':')[1];
             document.getElementById("secs").value = data.cost_Center_Group;
-            
+
         })
         .catch(error => console.error('Error:', error));
 }
@@ -322,13 +322,13 @@ async function _Fac() {
 async function _SEC(fac) {
 
     const params = new URLSearchParams({ fac: fac });
-        fetch('/Master/load_sec', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-             body: params.toString()
-        })
+    fetch('/Master/load_sec', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -350,7 +350,7 @@ async function _WH() {
     var fac = document.getElementById("nhamay_chuyen").value;
     var sec = document.getElementById("phongban_chuyen").value;
 
-    const params = new URLSearchParams({ fac: fac, sec : sec });
+    const params = new URLSearchParams({ fac: fac, sec: sec });
     fetch('/Master/load_wh', {
         method: 'POST',
         headers: {
@@ -434,9 +434,69 @@ async function _log_material(malinhkien) {
             });
 
             tableBody.innerHTML += htmlContent;
-         
+
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+}
+
+//Chuẩn bị dữ liệu và download master
+async function UploadFileFormat() {
+    const fileInput = document.getElementById('mstFile');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert("Vui lòng chọn một file Excel trước!");
+        return;
+    }
+    console.log("Đang tải file: " + file.name);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+        const response = await fetch('/Import/ImportFileExcel', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("Có lỗi xảy ra khi upload!");
+        }
+        const data = await response.json();
+        console.log(data);
+        const table = document.getElementById('lstMaterial');
+        table.innerHTML = "";
+        data.forEach((item, index) => {
+            let data = `<tr class="input-row">`;
+            data += `<td class="row-number text-center fw-bold">${item.id}</td>`;
+            data += `<td>`;
+            data += `<select class="form-control select2 tenhang" onchange="_load_material(this.value, this.id)" id="tenhang_${index}">`;
+            data += `<option selected>${item.nameMaterial}</option>`;
+            data += `</select>`;
+            data += `</td>`;
+            data += `<td><input type="text" class="form-control stk" id="stk_${index}" readonly value="${item.costKT}"></td>`;
+            data += `<td><input type="text" class="form-control kho" id="kho_${index}" readonly value="${item.warehouse}"></td>`;
+            data += `<td><input type="text" class="form-control tk" id="tk_${index}" readonly value="${item.stock}"></td>`;
+            data += `<td><input type="number" class="form-control sl" id="sl_${index}" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)" value="${item.quantity}"></td>`;
+            data += `<td><input type="text" class="form-control dv" id="dv_${index}" readonly value="${item.unit}"></td>`;
+            data += `<td><input type="number" class="form-control dg" id="dg_${index}" readonly value="${item.price}"></td>`;
+            data += `<td><input type="text" class="form-control nt" id="nt_${index}" readonly value="${item.typePay}"></td>`;
+            data += `<td><input type="text" class="form-control tcp" id="tcp_${index}" readonly value="${item.deptCost}"></td>`;
+            data += `<td><input type="text" class="form-control md" id="md_${index}" value="${item.purpose}"></td>`;
+            data += `<td>`;
+            data += `<select class="form-control pcp" onchange="" id="pcp_${index}"><option selected>${item.deptCost}</option></select>`;
+            data += `</td>`;
+            data += `<td><input type="text" class="form-control vt" id="vt_${index}" value="${item.location}"></td>`;
+            data += `<td><input type="text" class="form-control" id="gc_${index}" value="${item.notetake}"></td>`;
+            data += `<td>`;
+            data += `<button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>`;
+            data += `</td>`;
+            data += `<button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>`;
+            data += `</td>`;
+            data += `</tr>`;
+            table.innerHTML += data;
+        });
+    } catch (error) {
+        console.error(error);
+        alert("Lỗi: " + error.message);
+    }
 }

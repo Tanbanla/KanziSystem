@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Reflection.Metadata;
@@ -15,5 +15,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> UpdateMasterApproverSendMailAsync(BaoGia_Master_Approver_Send_MailDTO obj);
         // Xóa thông tin 
         public Task<GenericResponse<bool>> DeleteMasterApproverSendMailAsync(int id, string userAction);
+
+        // Lấy thông tin phê duyệt step của phòng ban
+        public Task<GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>> GetApproverByStepAndSectionAsync(int idStep, string sectionCode);
+        // Inser thông tin và đăng ký user đăng nhập
+        public Task<GenericResponse<bool>> InsertMasterApproverSendMailAsync(List<BaoGia_Master_Approver_Send_Mail> dtos);
     }
 }

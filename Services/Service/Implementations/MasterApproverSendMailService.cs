@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -79,6 +79,40 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 response.Success = false;
                 response.Message = $"Error in DeleteMasterApproverSendMailAsync: {ex.Message}";
+            }
+            return response;
+        }
+        // Lấy thông tin phê duyệt step của phòng ban
+        public async Task<GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>> GetApproverByStepAndSectionAsync(int idStep, string sectionCode)
+        {
+            var response = new GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>();
+            try
+            {
+                var data = await _repo.GetApproverByStepAndSectionAsync(idStep, sectionCode);
+                response.Data = _mapper.Map<List<BaoGia_Master_Approver_Send_MailDTO>>(data);
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in GetApproverByStepAndSectionAsync: {ex.Message}";
+            }
+            return response;
+        }
+        // Inser thông tin và đăng ký user đăng nhập
+        public async Task<GenericResponse<bool>> InsertMasterApproverSendMailAsync(List<BaoGia_Master_Approver_Send_Mail> dtos)
+        {
+            var response = new GenericResponse<bool>();
+            try
+            {
+                var result = await _repo.InsertMasterApproverSendMailAsync(dtos);
+                response.Data = result;
+                response.Success = true;
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in InsertMasterApproverSendMailAsync: {ex.Message}";
             }
             return response;
         }

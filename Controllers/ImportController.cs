@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting.Server;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using PRJ_WAREHOUSE_BIVN.Models;
@@ -147,7 +148,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult chitiet_xuatkho(string mayeucau, string nguoitao)
         {
-            List<CHITIET_XUATKHO> ctxk = REQUEST_PROCESS.ct_xk( mayeucau, nguoitao);
+            List<CHITIET_XUATKHO> ctxk = REQUEST_PROCESS.ct_xk(mayeucau, nguoitao);
             return Json(ctxk);
         }
         public JsonResult _tonkhotheonhamay(string mahang)
@@ -169,9 +170,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string soluong = Kho.Rows[0]["Hientai"].ToString()!;
             return Json(soluong);
         }
-        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi)
-        {
-            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho,thoigian,manguyenlieu,soluong, giathucte, donvi,kho,tongchiphi,vitri,phong,khoi);
+        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string tongchiphiold, string id_rq)
+        {           
+            if(tongchiphi == "0")
+            {
+                tongchiphi = tongchiphiold;
+            }
+            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho,thoigian,manguyenlieu,soluong, giathucte, donvi,kho, tongchiphi, vitri,phong,khoi, id_rq);
             return Json(check);
         }
         public JsonResult _load_xuatkhohang(string mayeucau, string nguoitao)
@@ -219,7 +224,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public IActionResult Export()
         {
             var data = new List<KHO_NHAPXUAT> {
-            new KHO_NHAPXUAT { /*Name = "Nguyen Van A", Age = 20, Email = "a@gmail.com"*/ }
+            new KHO_NHAPXUAT {  }
         };
             var fileContents = ExportToExcel_FileEx(data, "Students");
 
@@ -228,6 +233,141 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "StudentList.xlsx"
             );
+        }
+
+        [HttpGet]
+        public ActionResult ExportToExcel()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            string pathDir = Path.Combine(_env.ContentRootPath, "Data");
+            string templatePath = Path.Combine(pathDir, "File_import_ex.xlsx");
+            string tempFileName = $"Temp_{Guid.NewGuid()}.xlsx";
+            string tempPath = Path.Combine(pathDir, tempFileName);
+
+            try
+            {
+                System.IO.File.Copy(templatePath, tempPath, true);
+                FileInfo fileInfo = new FileInfo(tempPath);
+                using (var package = new ExcelPackage(fileInfo))
+                {
+                    var wsMaterial = package.Workbook.Worksheets[1];
+                    List<string> DataListMaterial = MST_INVENTORY._getname_material();
+                    for (int idx = 0; idx < DataListMaterial.Count; idx++)
+                    {
+                        wsMaterial.Cells["A" + (idx + 2)].Value = DataListMaterial[idx];
+                    }
+
+                    var wsDept = package.Workbook.Worksheets[2];
+                    List<string> DataForDept = User_Info._GetCostCenter();
+                    for (int idx = 0; idx < DataForDept.Count; idx++)
+                    {
+                        wsDept.Cells["A" + (idx + 2)].Value = DataForDept[idx];
+                    }
+
+                    var wsLocation = package.Workbook.Worksheets[3];
+                    List<string> DataLocation = User_Info._GetLocation();
+                    for (int idx = 0; idx < DataLocation.Count; idx++)
+                    {
+                        wsLocation.Cells["A" + (idx + 2)].Value = DataLocation[idx];
+                    }
+
+                    package.Save();
+                }
+
+                byte[] fileBytes = System.IO.File.ReadAllBytes(tempPath);
+                System.IO.File.Delete(tempPath);
+                return File(
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "FormatTemplateRequest.xlsx"
+            );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xử lý: {ex.Message}");
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ImportFileExcel(IFormFile file)
+        {
+            //if(file == null || file.Length = 0)
+            //{
+            //    return BadRequest("Chưa lựa chọn file");
+            //}
+            //var extension = Path.GetExtension(file.FileName).ToLower();
+            //if (extension != ".xlsx") return BadRequest("Định dạng file không hỗ trợ. Vui lòng upload file Excel!");
+            //string folderPath = Path.Combine(_env.ContentRootPath, "DataUpload", "Uploads");
+            //string uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+            //string filePath = Path.Combine(folderPath, uniqueFileName);
+            //using (var stream = new FileStream(filePath, FileMode.Create))
+            //{
+            //    await file.CopyToAsync(stream);
+            //}
+
+            var resultList = new List<Dictionary<string, object>>();
+
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (extension != ".xlsx") return BadRequest("Định dạng file không hỗ trợ. Vui lòng upload file Excel!");
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (var stream = new MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+
+                using (var package = new ExcelPackage(stream))
+                {
+                    var wsFormat = package.Workbook.Worksheets[0];
+                    var rowCount = wsFormat.Dimension?.Rows ?? 0;
+                    if (rowCount < 2) return Json(new { message = "File Empty" });
+                    var headers = new List<string>()
+                    {
+                        "id",
+                        "nameMaterial",
+                        "quantity",
+                        "purpose",
+                        "deptCost",
+                        "location",
+                        "notetake"
+                    };
+                    //"costKT",
+                    //    "warehouse",
+                    //    "stock",
+                    //    "unit",
+                    //    "price",
+                    //    "typePay"
+
+                    for (int idx = 2; idx <= rowCount; idx++)
+                    {
+                        string nameMaterial = wsFormat.Cells["B" + idx].Text;
+                        if (nameMaterial.Trim() == "") continue;
+                        var rowData = new Dictionary<string, object>();
+                        for (int i = 0; i < headers.Count; i++)
+                        {
+                            var key = headers[i];
+                            var value = wsFormat.Cells[idx, i + 1].Text;
+                            rowData[key] = value;
+                        }
+                        var dataOther = MATERIA.material_process(new PARAS()
+                        {
+                            Material_Code = nameMaterial
+                        });
+
+                        if(dataOther.Count == 1)
+                        {
+                            rowData["costKT"] = dataOther.First().Account_Code!.ToString();
+                            rowData["warehouse"] = dataOther.First().Inventory!.ToString();
+                            rowData["stock"] = dataOther.First().Num_Inventory!.ToString();
+                            rowData["unit"] = dataOther.First().Unit!.ToString();
+                            rowData["price"] = dataOther.First().Price.ToString();
+                            rowData["typePay"] = "USD";
+                        }    
+
+                        resultList.Add(rowData);
+                    }
+                }
+            }
+            return Json(resultList);
         }
     }
 }

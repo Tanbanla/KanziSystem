@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using OfficeOpenXml.Utils;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Data;
+using System.Data.SqlClient;
 using System.DirectoryServices.AccountManagement;
 using System.Drawing;
 using System.Net;
@@ -561,43 +562,95 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return ctxk;
         }
-        public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi)
+        public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string id_rq)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            var ins = _db.GET_DATA_FROM_SQL($"Insert into [PE_REQUEST_INFORMATION] (NCHR_REQUEST_CODE,NCHR_EMPLOYEE_ADID,NCHR_MATERIAL_CODE,QTY_NEED,NCHR_UNIT,NCHR_WAREHOUSE_NAME,DTM_UPDATE,NCHAR_USER) " +
-                $"values ('{code_request}','{adid_nx}', '{manguyenlieu}','{soluong}',N'{donvi}', '{kho}','{DateTime.Now}', N'{adid_nx}')");
-            _db.GET_DATA_FROM_SQL("Update PE_REQUEST_CONFIRM set INT_STEP = '5' where ID_REQUEST = '" + code_request + "'");
-            // update thông tin vào bảng trong quản lý chi phí
-            _db.GET_DATA_FROM_SQL($"Insert into [KHO_NHAPXUAT] (MaNguyenLieu,Hanhdong,Soluong,Loai,Ngaynhaokho,Thoigian,Nguoicapnhat,Kho,Khoi,Phong,Vitri) " +
-                $"values ('{manguyenlieu}', N'Xuất kho {kho} cho request {code_request}','{soluong}','XUAT','{DateTime.Now}','{DateTime.Now}','{adid_nx}','{kho}','{khoi}','{phong}','{vitri}')");
+            try
+            {
+                // Kiểm tra tồn kho hiện tại trước khi xuất
+                string sqlCheckKho = $"SELECT [Hientai] FROM [KHO] WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
+                DataTable dtKho = _db.GET_DATA_FROM_SQL(sqlCheckKho);
 
-            //update bảng request
-            //string UpdateRequest = "";
-            //UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + Math.Round(Tong, 4) + "'";
-            //UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + drpMoneyKind.SelectedValue + "'";
-            //UpdateRequest = UpdateRequest + ",[Currency_Real] = '" + ((KeyValuePair<string, string>)drpMoneyKind.SelectedItem).Key + "'";
-            //UpdateRequest = UpdateRequest + ",[Total_Real] = '" + Math.Round(USD(Tong), 4) + "' ,[Status] = 'PROGRESS' ";
-            //UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + User + "'";
-            //UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + Code_Request + "'";
-            //con.Excutesql(UpdateRequest);
+                if (dtKho.Rows.Count == 0)
+                    return " Mã hàng không tồn tại trong kho này.";
 
+                double slHienTai = Convert.ToDouble(dtKho.Rows[0]["Hientai"]);
+                double slXuat = Convert.ToDouble(soluong);
 
+                if (slXuat > slHienTai)
+                    return $" Kho không đủ. Hiện có: {slHienTai}";
 
-            //con.Excutesql("UPDATE [KHO] SET [Hientai] = [Hientai] - " + Convert.ToDouble(gvRow.Cells["Amount_Real"].EditedFormattedValue.ToString().Trim()) + " WHERE [MaNguyenLieu] = '" + gvRow.Cells["Material_Code"].EditedFormattedValue.ToString().Trim() + "' AND [Kho] = '" + cmbKho.SelectedValue.ToString().Trim() + "' AND [Group_Code] = '" + Khoi + "' ");
-            //Id_LichsuXuat = con.ReturnString("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Phong],[Vitri],[Ngaynhaokho],[Sotaikhoan],[Soluongtruocthaydoi],[Soluongsauthaydoi]) OUTPUT Inserted.Id_Lichsu  VALUES(N'" + gvRow.Cells["Material_Code"].EditedFormattedValue.ToString().Trim() + "',N'Xuất kho " + cmbKho.SelectedValue.ToString().Trim() + " cho request: " + lbCodeRequest.Text.Trim() + "','" + Convert.ToDouble(gvRow.Cells["Amount_Real"].EditedFormattedValue.ToString().Trim()) + "','XUAT',GETDATE(),'" + User + "','" + cmbKho.SelectedValue.ToString().Trim() + "','" + Khoi + "','" + Dept.SelectedValue.ToString().Trim() + "',N'" + gvRow.Cells["Vitri"].EditedFormattedValue.ToString().Trim() + "','" + txtNgayxuatkho.Value.ToString("MM/dd/yyyy") + "','" + gvRow.Cells["Account_Code"].EditedFormattedValue.ToString().Trim() + "','" + Convert.ToDouble(SlKho) + "','" + (Convert.ToDouble(SlKho) - Convert.ToDouble(gvRow.Cells["Amount_Real"].EditedFormattedValue.ToString().Trim())) + "')");
-            _db.GET_DATA_FROM_SQL($"Update [KHO] set [Hientai] = Hientai - {soluong} where MaNguyenLieu = '{manguyenlieu}' and Kho = '{kho}'");
+                // Thực hiện trừ kho
+                string sqlUpdateKho = $"UPDATE [KHO] SET [Hientai] = [Hientai] - {slXuat} WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
+                _db.GET_DATA_FROM_SQL(sqlUpdateKho);
 
-            return "Thêm thành công !";
+                // Ghi log vào bảng lịch sử KHO_NHAPXUAT
+
+                string hanhdong = $"Xuất kho {kho} cho request: {code_request}";
+                string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
+                    ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi])
+                    VALUES ('{manguyenlieu}', '{hanhdong}', '{slXuat}', 'XUAT', GETDATE(), '{nguoixuatkho}', '{kho}', '{khoi}', '{phong}', N'{vitri}', '{thoigian}', '{slHienTai}', '{slHienTai - slXuat}')";
+
+                _db.GET_DATA_FROM_SQL(sqlLog);
+          
+                // Cập nhật trạng thái trong REQUEST_DETAIL
+                string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
+                            [Amount_Real] = '{slXuat}', 
+                            [Price_Real] = '{giathucte}',
+                            [Total_exchange_real] = '{tongchiphi}',
+                            [Status] = 'DONE',
+                            [Last_Update] = GETDATE(),
+                            [User_Update] = '{nguoixuatkho}'
+                            WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
+
+                _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
+
+                string UpdateRequest = "";
+                UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongchiphi + "'";
+                UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte +"'";
+                UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
+                UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongchiphi + "' ,[Status] = 'PROGRESS' ";
+                UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
+                UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
+
+                _db.GET_DATA_FROM_SQL(UpdateRequest);
+
+                CheckDone(code_request, id_rq);
+                return "OK";
+
+            }
+            catch (Exception ex)
+            {
+                return "ERR: " + ex.Message;
+            }
+        }
+        public static void CheckDone(string Code_Request, string id_rq)
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            bool check = true;
+            var dte = _db.GET_DATA_FROM_SQL("SELECT [Status] FROM [REQUEST_DETAIL] WHERE [Code_Request] = '" + Code_Request + "' ");
+            for(int i = 0; i < dte.Rows.Count; i++)
+            {
+                if (dte.Rows[i]["Status"].ToString()!.Trim() != "DONE")
+                {
+                    check = false;
+                }
+            }    
+            if (check == true)
+            {
+                _db.GET_DATA_FROM_SQL("Update [PE_REQUEST_CONFIRM] set INT_STEP = '7' where ID_REQUEST = '" + id_rq + "'");
+                _db.GET_DATA_FROM_SQL("UPDATE [REQUEST] SET [Status] = 'DONE' WHERE [Code_Request] = '" + Code_Request + "' ");
+            }
         }
         public static List<PE_REQUEST_CONFIRM> _load_tonkhoxuathang(string madonhang, string nguoitao)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
            
-            var list = _db.GET_DATA_FROM_SQL($@"select b.* from [PE_REQUEST_CONFIRM] as a 
+            var list = _db.GET_DATA_FROM_SQL($@"select b.*,a.ID_REQUEST from [PE_REQUEST_CONFIRM] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
-                        WHERE (a.INT_STEP = '4' OR a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
+                        WHERE (a.INT_STEP = '4' OR a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
                         order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)
@@ -619,7 +672,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Last_Update = list.Rows[i]["Last_Update"].ToString()!,
                     User_Update = list.Rows[i]["User_Update"].ToString()!,
                     Group_Code = list.Rows[i]["Group_Code"].ToString()!,
-                    Urgent = list.Rows[i]["Urgent"].ToString()!
+                    Urgent = list.Rows[i]["Urgent"].ToString()!,
+                    ID_REQUEST = int.Parse(list.Rows[i]["ID_REQUEST"].ToString()!),
                 });
             }
             return pe_;
@@ -628,7 +682,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             List<REQUEST_DETAIL> rq_lst = new List<REQUEST_DETAIL>();
-            var lst = db.GET_DATA_FROM_SQL("SELECT * FROM [REQUEST_DETAIL] WHERE [Code_Request] = '" + code_request + "'");
+            var lst = db.GET_DATA_FROM_SQL("SELECT * FROM [REQUEST_DETAIL] WHERE [Code_Request] = '" + code_request + "' and [Status] <> 'DONE'");
             for(int i = 0; i < lst.Rows.Count; i++)
             {
                 var list = db.GET_DATA_FROM_SQL("select Hientai, Kho from KHO where MaNguyenLieu = '" + lst.Rows[i]["Material_Code"].ToString() + "' and Hientai <> '0' ");
@@ -724,5 +778,6 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             return rq_lst;
 
         }
+       
     }
 }

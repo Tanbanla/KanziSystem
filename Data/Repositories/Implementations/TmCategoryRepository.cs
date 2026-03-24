@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -21,10 +21,36 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return (await _conn.QueryAsync<string>(sql)).ToList();
         }
         // Tìm kiếm chủng loại theo tên
-        public async Task<List<TM_Category>> SearchCategoryByName(string name)
+        public async Task<List<TM_Category>> SearchCategoryByName(string name, int? pageIndex, int? pageSize)
         {
-            var sql = "SELECT * FROM TM_Category WHERE (@Name = null or @Name = '') or NVCHR_Category LIKE @Name";
-            return (await _conn.QueryAsync<TM_Category>(sql, new { Name = $"%{name}%" })).ToList();
+            // Parameterize input and handle empty name
+            var param = new DynamicParameters();
+            var nameParam = string.IsNullOrWhiteSpace(name) ? null : $"%{name}%";
+            param.Add("Name", nameParam);
+
+            // If both pageIndex and pageSize provided and valid -> apply pagination
+            if (pageIndex.HasValue && pageSize.HasValue && pageIndex.Value > 0 && pageSize.Value > 0)
+            {
+                var offset = (pageIndex.Value - 1) * pageSize.Value;
+                var sql = @"SELECT *
+                    FROM TM_Category
+                    WHERE (@Name IS NULL OR @Name = '' OR NVCHR_Category LIKE @Name)
+                    ORDER BY NVCHR_Category
+                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+                param.Add("Offset", offset);
+                param.Add("PageSize", pageSize.Value);
+
+                return (await _conn.QueryAsync<TM_Category>(sql, param)).ToList();
+            }
+
+            // No pagination -> return all matching
+            var sqlAll = @"SELECT *
+                FROM TM_Category
+                WHERE (@Name IS NULL OR @Name = '' OR NVCHR_Category LIKE @Name)
+                ORDER BY NVCHR_Category";
+
+            return (await _conn.QueryAsync<TM_Category>(sqlAll, param)).ToList();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -79,6 +79,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 response.Message = $"Error in GetRoleAsync: {ex.Message}";
             }
             return response;
+        }
+        // Inser thông tin và đăng ký user đăng nhập
+        public async Task<GenericResponse<bool>> InsertListUserAsync(List<TM_USER> users)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.InsertListUserAsync(users);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Success = false;
+                result.Message = $"Error in InsertMasterApproverSendMailAsync: {ex.Message}";
+            }
+            return result;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.DTO;
 
 namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
 {
@@ -37,6 +37,9 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public List<dynamic> DanhSachBaoGiaGomNhom { get; set; } = new List<dynamic>();
         // Current request for detail page
         public List<BaoGia_Request_of_QuotationDTO>? CurrentRequest { get; set; }
+
+        // list approvel
+        public List<BaoGia_Master_Approver_Send_MailDTO> ListApprovel { get; set; } = new List<BaoGia_Master_Approver_Send_MailDTO>();
     }
     public class SearchBaoGiaViewModel
     {

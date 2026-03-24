@@ -32,12 +32,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ISendMailService _sendMailService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ITmEmployeeAgentService _tmEmployeeAgentService;
+        private readonly IMasterApproverSendMailService _approverService;
+
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService,
             INhomViTriService nhomViTriService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
-            IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory)
+            IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService)
         {
             _logger = logger;
             _tmNccNewService = tmNccNewService;
@@ -56,14 +58,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _sendMailService = sendMailService;
             _env = env;
             _serviceScopeFactory = serviceScopeFactory;
+            _approverService = approverService;
         }
         // MARK: - Quote
         public async Task<IActionResult> Index()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
+            var listApproval = await _approverService.GetApproverByStepAndSectionAsync(2,GetCurrentUserSection());
+            //await _tmEmployeeAgentService.GetApproverBySection(GetCurrentUserSection() ?? "");
 
             var vm = new QuoteModel
             {
@@ -71,6 +76,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
                 DanhSachNhaCungCap = nccs,
                 DanhSachCategory = categorys,
+                ListApprovel = listApproval.Data,
                 NguoiThaoTac = GetCurrentUserId() ?? ""
             };
             return View(vm);
@@ -79,7 +85,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> Quotation_Results()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
@@ -405,7 +411,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> InputQuote()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
@@ -424,7 +430,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> SelectQuoteSection()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
             var nccNews = await LoadNhaCungCapDataAsync();
             var madons = await LoadMadonAsync();
             var vm = new QuoteModel
@@ -441,7 +447,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> HistoryQuote()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 0, 0);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
             var nccNews = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var statusData = await _baoGiaStatusService.GetListStatusAsync();
@@ -1572,7 +1578,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
 
             // Load supporting reference data
-            var materialsResp = await _materialService.SearchAsync("", "", "", 0, 0);
+            var materialsResp = await _materialService.SearchAsync("", "", "", 1, 1000);
             var nccs = await LoadNhaCungCapDataAsync();
             var categoriesAll = await LoadCategoryDataAsync();
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -49,6 +49,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var result = await _context.TM_AUTHORITY_MENUs.Where(x => x.CHR_USERID == adId && (x.CHR_CODE_MENU == "UserAcc" || x.CHR_CODE_MENU == "UserShip" || x.CHR_CODE_MENU == "UserPUR")).Select(x => x.CHR_CODE_MENU).FirstOrDefaultAsync();
             return result ?? "";
+        }
+        // Insert thông tin và đăng ký user đăng nhập
+        public async Task<bool> InsertListUserAsync(List<TM_USER> users)
+        {
+            if (users == null || users.Count == 0)
+                return false;
+            var existingUserIds = await _context.TM_USERs.Select(u => u.CHR_USERID.ToLower().Trim()).ToListAsync();
+            var newUsers = users.Where(u => !existingUserIds.Contains(u.CHR_USERID.ToLower().Trim())).ToList();
+            if (newUsers.Count == 0)
+                return false;
+            await _context.TM_USERs.AddRangeAsync(newUsers);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

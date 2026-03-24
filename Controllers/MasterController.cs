@@ -1,6 +1,7 @@
 using Azure.Core;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -25,13 +26,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IMaterialService _materialService;
         private readonly ITmEmployeeAgentService _employeeAgentService;
+        private readonly ITmUserService _tmUserService;
 
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
             ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
             IBaoGiaNccCategoryService baoGiaNccCategoryService, IBaoGiaNCCService baoGiaNCCService
-            , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService, ITmEmployeeAgentService employeeAgentService)
+            , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService, ITmEmployeeAgentService employeeAgentService, ITmUserService tmUserService)
         {
             _approverService = approverService;
             _baoGiaStepService = baoGiaStepService;
@@ -45,6 +47,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _tmCategoryService = tmCategoryService;
             _materialService = materialService;
             _employeeAgentService = employeeAgentService;
+            _tmUserService = tmUserService;
         }
 
         public IActionResult Masters()
@@ -720,7 +723,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<JsonResult> SearchCategoryByName([FromBody] string? req)
         {
-            var resp = await _tmCategoryService.SearchCategoryByName(req ?? "");
+            var resp = await _tmCategoryService.SearchCategoryByName(req ?? "", 1, 100);
             if (resp == null || !resp.Success)
             {
                 return Json(new { success = false, message = resp?.Message ?? "Error" });
@@ -858,7 +861,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Nhp file dang cho cac user tu file
         [HttpPost]
-        public async Task<IActionResult> UploadFileUser([FromForm]IFormFile file)
+        public async Task<IActionResult> UploadFileApprovelUser([FromForm]IFormFile file)
         {
             if (file == null || file.Length == 0) return BadRequest("File not Data");
             var stepAsync = await _baoGiaStepService.GetStepsApproverAsync();
@@ -926,8 +929,80 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("File không có dữ liệu hợp lệ");
                 }
-                // Giả sử service có AddListCategory
-                var result = await _approverService.AddMultiAsync(listInsert);
+                var result = await _approverService.InsertMasterApproverSendMailAsync(listInsert);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
+        // Tạo tài khoản cho user theo file excel
+        [HttpPost]
+        public async Task<IActionResult> UploadFileCreateUser([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("File not Data");
+            var stepAsync = await _baoGiaStepService.GetStepsApproverAsync();
+            if (stepAsync == null || !stepAsync.Success || stepAsync.Data == null || stepAsync.Data.Count == 0)
+            {
+                return BadRequest("Không tìm thấy thông tin bước phê duyệt");
+            }
+            var listInsert = new List<TM_USER>();
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                // Dữ liệu bắt đầu từ dòng 1
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 1).GetString() == "" || ws.Cell(r, 1).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột
+                    var seticon = ws.Cell(r, 1).GetString().Trim();
+                    var mailUser = ws.Cell(r, 2).GetString().Trim();
+                    // lay thong tin user
+                    var userInfo = await _employeeAgentService.GetInforEmployeeByMail(mailUser);
+                    if (userInfo == null || !userInfo.Success || userInfo.Data == null)
+                    {
+                        continue; // bỏ qua nếu không tìm thấy thông tin user
+                    }
+                    var infor = userInfo.Data;
+                    var check = listInsert.Where(x => x.CHR_USERID == infor.CHR_EMPLOYEE_ADID).FirstOrDefault();
+                    if (check != null) continue; // tránh trường hợp file có nhiều dòng cùng 1 user 
+                    var user = new TM_USER
+                    {
+                        CHR_USERID = infor.CHR_EMPLOYEE_ADID,
+                        VCHR_PASSWORD = "123456",
+                        DTM_CREATE = DateTime.Now,
+                        CHR_CRT_USERID = GetCurrentUserId() ?? "system",
+                        INT_LOCK = 0,
+                        INT_LOCK_DAY = 30,
+                        INT_USERID_COMMON = 0,
+                        phan_quyen = 0,
+                        FULLNAME = infor.CHR_EMPLOYEE_NAME,
+                        CHR_EMPLOYEE_ID = infor.CHR_EMPLOYEE_ID,
+                        CHR_SECTION = infor.CHR_SEC_CODE,
+                        cho_phep_hoat_dong = true,
+                        thoi_gian_cap_nhat = DateTime.Now
+                    };
+                    listInsert.Add(user);
+
+                }
+                if (listInsert.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                var result = await _tmUserService.InsertListUserAsync(listInsert);
                 if (!result.Success)
                 {
                     return BadRequest(result);

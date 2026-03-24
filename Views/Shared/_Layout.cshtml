@@ -1,4 +1,4 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @using PRJ_WAREHOUSE_BIVN.Language
 <!DOCTYPE html>
 <html lang="@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName">
@@ -88,8 +88,10 @@
                             </a>
                         </li>
                     }
-                    <li><span id="us" hidden>@(User.FindFirst("UserId")?.Value ?? "User")</span></li>
+                    <li><span id="us" hidden>@(User.FindFirst("UserId")?.Value ?? "User")</span></li>                   
                     <li><span id="dept_us" hidden >@(User.FindFirst("Department")?.Value ?? "Chưa xác định")</span></li>
+                   @*  <li><span id="us" hidden>lanlh</span></li>
+                    <li><span id="dept_us" hidden>GA-GA</span></li> *@
                     <li>
                         <span id="email_us" hidden>
                             @(User.FindFirst("Email")?.Value ?? "Chưa xác định")

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -491,5 +491,8 @@
   </data>
   <data name="Of" xml:space="preserve">
     <value>của</value>
+  </data>
+  <data name="SelectApprover" xml:space="preserve">
+    <value>Chọn người phê duyệt</value>
   </data>
 </root>

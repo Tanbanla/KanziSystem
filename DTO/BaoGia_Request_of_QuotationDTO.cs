@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.DTO;
@@ -84,4 +84,6 @@ public partial class BaoGia_Request_of_QuotationDTO
     public DateTime? DTM_Deadline { get; set; }
 
     public bool? BIT_IsTemplate { get; set; }
+
+    public string? CHR_UserApproval { get; set; }
 }

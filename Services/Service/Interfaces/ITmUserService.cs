@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
@@ -10,5 +10,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<TM_USERDTO>> Login(string username, string password);
         // lấy quyền user
         public Task<GenericResponse<string>> GetRoleAsync(string adId);
+        // Inser thông tin và đăng ký user đăng nhập
+        public Task<GenericResponse<bool>> InsertListUserAsync(List<TM_USER> users);
     }
 }

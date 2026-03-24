@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const btnSearch = document.getElementById('btnSearch');
     const btnClear = document.getElementById('btnClear');
@@ -89,7 +89,7 @@
             formData.append('file', file);
             // Gửi request ImportSectionExcel
             try { showLoading((window.i18nSendApprover && window.i18nSendApprover.LoadingData) || 'Đang xử lý...'); } catch { }
-            fetch('/Master/UploadFileUser', {
+            fetch('/Master/UploadFileApprovelUser', {
                 method: 'POST',
                 body: formData
             })

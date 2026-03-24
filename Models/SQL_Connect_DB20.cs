@@ -55,7 +55,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             catch { return ""; }
         }
-
+        // Thêm vào trong lớp SQL_Connect_DB20 của bạn
+ 
         public int ExecuteSP(string spName, object? param = null)
         {
             string connectionString = @"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;";
@@ -63,6 +64,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             using var conn = new SqlConnection(connectionString);
             return conn.Execute(spName, param, commandType: CommandType.StoredProcedure);
         }
+      
     }   
 
 }

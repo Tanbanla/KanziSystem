@@ -1,4 +1,4 @@
-﻿@using PRJ_WAREHOUSE_BIVN.Language
+@using PRJ_WAREHOUSE_BIVN.Language
 @{
     ViewData["Title"] = "Phiếu yêu cầu xuất kho";
 }
@@ -151,11 +151,11 @@
                     </div>                  
                     <div class="form-group col-md-2">
                         <label for="inputCity">Chọn file  </label> <code style="float:right"><b></b></code>
-                        <input type="file" class="form-control" />
+                        <input id="mstFile" accept=".xlsx" type="file" class="form-control" />
                     </div>
                     <div class="form-group col-md-1">
-                        <label for="inputCity"><a href=""> File mẫu excel </a></label> <code style="float:right"><b></b></code>
-                        <button type="button" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Import file</button>                    
+                        <label for="inputCity"><a href="/Import/ExportToExcel"> File mẫu excel </a></label> <code style="float:right"><b></b></code>
+                        <button id="btnUpload" onclick="UploadFileFormat()" type="button" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Import file</button>
                     </div>                  
                 </div>
                 <div class="form-row">
@@ -183,7 +183,7 @@
                                     <th style="width: 50px;"></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="lstMaterial">
                                 <tr class="input-row">
                                     <td class="row-number text-center fw-bold">1</td>
                                     <td>
@@ -215,7 +215,8 @@
                     <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button>
                 </div>
                 <br />
-                <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>
+                <button class="btn btn-info float-right" id="modal-6" @* onclick="getEmployeeData()" *@>✉ @Languages.guiyeucau</button>
+              @*   <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button> *@
             </div>
         </div>
     </div>
@@ -224,7 +225,8 @@
 <script src="~/modules/select2/jquet3.6.0.min.js"></script>
 <script src="~/modules/select2/select2.js"></script>
 <script src="~/scripts/import_process.js"></script>
-<script src="~/scripts/request.js"></script><script src="~/scripts/get_api.js"></script>
+<script src="~/scripts/request.js"></script>
+<script src="~/scripts/get_api.js"></script>
 <script>
 
     window.onload = function()

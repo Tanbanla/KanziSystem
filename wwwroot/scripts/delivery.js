@@ -148,6 +148,9 @@ async function _Load_PO() {
                     else if (solg < lgvekho) {
                         rowClass = "text-danger";
                     }
+                    else if (solg == lgvekho) {
+                        rowClass = "text-dark";
+                    }
                     opt.innerHTML += `<tr class="${rowClass}"><td class="text-center"><input type="checkbox" class="item" value="${value.pO_Detail_Id}" /></td><td>${value.pO_Detail_Id}</td><td>${value.id_Goc}</td><td>${value.benxacnhantruoc}</td><td>${value.soPO}</td><td>${value.code_Request}</td><td>${value.mahang}</td><td>${value.good_Code}</td><td>${value.tentienganh}</td><td>${value.tentiengviet}</td>
                            <td id="soluong_${value.pO_Detail_Id}">${value.soluong}</td>`
                         + `<td><input type='number' style="background-color:lightyellow" class="form-control" id="luongvethucte_${value.pO_Detail_Id}" onblur="Check_luongvethucte('${value.pO_Detail_Id}')" value='${value.luongvekho}'></input></td>
@@ -157,8 +160,6 @@ async function _Load_PO() {
                         + `<td>${value.thoigianthanhtoan}</td><td>${value.loaitien}</td>`
                         + `<td>${value.tygia}</td><td>${value.doisangUSD}</td><td>${value.danhmuc}</td>`
                         + `<td>${value.tenNCC} </td><td>${value.id_LichsuNhap} </td><td>${value.luongvekhoKhonhap}</td><td>${value.invoice}</td><td>${value.tinhtranghaiquanPO}</td></tr>`;
-                    
-                   
                 });
             })
             .catch(err => console.error(err)); 

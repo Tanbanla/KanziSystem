@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -75,7 +75,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
-                var result = await _materialService.SearchAsync("", "", "", 0, 0);
+                var result = await _materialService.SearchAsync("", "", "", 1, 1000);
                 return result.Data;
             }
             catch (Exception ex)

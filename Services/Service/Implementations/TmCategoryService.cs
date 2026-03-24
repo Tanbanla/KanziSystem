@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -33,12 +33,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Tìm kiếm chủng loại theo tên
-        public async Task<GenericResponse<List<TM_CategoryDTO>>> SearchCategoryByName(string name)
+        public async Task<GenericResponse<List<TM_CategoryDTO>>> SearchCategoryByName(string name, int? pageIndex, int? pageSize)
         {
             var result = new GenericResponse<List<TM_CategoryDTO>>();
             try
             {
-                var categories = await _repo.SearchCategoryByName(name);
+                var categories = await _repo.SearchCategoryByName(name, pageIndex, pageSize);
                 result.Data = _mapper.Map<List<TM_CategoryDTO>>(categories);
                 result.Success = true;
             }

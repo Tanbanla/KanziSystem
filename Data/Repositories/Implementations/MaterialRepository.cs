@@ -35,7 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 				)
                   AND (@MaterialType IS NULL OR Category_VN LIKE '%' + @MaterialType 
                     + '%'OR Category_EN LIKE '%' + @MaterialType + '%' OR Category_JP LIKE '%' + @MaterialType + '%' OR @MaterialType = '')
-				  AND(@MaterialCode IS NULL OR Material_Code LIKE '%' + @MaterialCode + '%')
+				  OR (@MaterialCode IS NULL OR Material_Code LIKE '%' + @MaterialCode + '%')
             ";
             if (pageSize > 0 && pageIndex > 0)
             {

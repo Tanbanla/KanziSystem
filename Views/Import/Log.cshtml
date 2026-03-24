@@ -1,4 +1,4 @@
-﻿@using PRJ_WAREHOUSE_BIVN.Language
+@using PRJ_WAREHOUSE_BIVN.Language
 @{
     ViewData["Title"] = "Log Nhập - Xuất";
 }
@@ -26,12 +26,10 @@
         color: white;
         border-bottom: 0;
     }
-
     /* Đảm bảo border không bị mất khi dùng sticky */
     .table-bordered thead th {
         border-top: 0;
     }
-
     .table:not(.table-sm) thead th{
         border-bottom: none;
         background-color: rgb(35 53 183);
@@ -71,6 +69,19 @@
                             <option>CHUYENKHO</option>
                             <option>TAINHAP</option>
                         </select>    
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 20px">
+                    <label>@Languages.Khoi :</label>
+                    <div class="input-group mb-2">
+                        @*   <input type="text" class="form-control" id="loai" list="lst_loai" placeholder="--- Chọn ---"> *@
+                        <select class="form-control" id="khoii">
+                            <option></option>
+                            <option>PROD</option>
+                            <option>GA</option>
+                            <option>IT</option>
+                            <option>PUR</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 20px">

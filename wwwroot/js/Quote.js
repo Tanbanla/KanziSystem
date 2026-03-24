@@ -1,4 +1,4 @@
-﻿// JS for Quote page: handle buttons, validations, row operations, autofill from material selection, and API calls
+// JS for Quote page: handle buttons, validations, row operations, autofill from material selection, and API calls
 (() => {
     const api = {
         insertListBaoGia: '/Quote/InsertDanhSachBaoGia',
@@ -539,6 +539,8 @@
             CHR_CreateBy: getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']) === '' ? src.user : getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']),
             // Sử dụng ISO string với múi giờ +7
             DTM_CreateDate: toVietnamISOString(createDateVN),
+            // Người phê duyệt (lấy từ select trên form)
+            CHR_UserApproval: (document.querySelector('#approverSelect') || {}).value || '',
             ID_StepBaoGia: 2,
             ID_Status: 'CREATE',
             INT_SoLanUpdate: 0,
@@ -1107,25 +1109,17 @@
         sectionSel2.onchange = updateSectionName2;
         updateSectionName2();
 
-        // Populate Material list
+        // Populate Material list with lazy loading (infinite scroll) & server search
         lst.innerHTML = '';
-        //const srcMaterialSel = qs('.maHangNoiBo');
-        const body = { MaHang: '', Name: '', NhomHang: '', PageIndex: 0, PageSize: 0 };
-        const res = await fetch(api.searchMaterials, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const srcMaterialSel = await res.json();
-        const items = [];
-        if (srcMaterialSel) {
-            srcMaterialSel.forEach((o) => {
-                if (!o.material_Code) return;
-                var nd = o.material_Code + ' - ' + o.material_Name_VN
-                items.push({ code: o.material_Code, text: nd || o.material_Code });
-            });
-        }
+        const materialState = {
+            pageIndex: 1,
+            pageSize: 200,
+            loading: false,
+            lastQuery: '',
+            hasMore: true,
+            items: []
+        };
+
         const createItemEl = (it) => {
             const wrap = document.createElement('label');
             wrap.style.display = 'flex';
@@ -1144,16 +1138,62 @@
             wrap.appendChild(span);
             return wrap;
         };
-        items.forEach(it => lst.appendChild(createItemEl(it)));
 
-        // Search filter
+        async function loadMaterialPage(query = '') {
+            if (materialState.loading) return;
+            // new query -> reset
+            if ((query || '') !== (materialState.lastQuery || '')) {
+                materialState.pageIndex = 1;
+                materialState.hasMore = true;
+                materialState.items = [];
+                lst.innerHTML = '';
+            }
+            if (!materialState.hasMore) return;
+            materialState.loading = true;
+            const body = { MaHang: query, Name: query || '', NhomHang: '', PageIndex: materialState.pageIndex, PageSize: materialState.pageSize };
+            try {
+                const res = await fetch(api.searchMaterials, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                const pageItems = Array.isArray(data) ? data.map(o => ({ code: o.material_Code || '', text: (o.material_Code || '') + ' - ' + (o.material_Name_VN || '') })) : [];
+                // append
+                pageItems.forEach(it => {
+                    if (!it.code) return;
+                    materialState.items.push(it);
+                    lst.appendChild(createItemEl(it));
+                });
+                // determine hasMore
+                if (pageItems.length < materialState.pageSize) materialState.hasMore = false;
+                else materialState.pageIndex++;
+                materialState.lastQuery = query || '';
+            } catch (err) {
+                console.warn('Không thể tải danh sách vật tư (paged):', err);
+            } finally {
+                materialState.loading = false;
+            }
+        }
+
+        // initial load first page
+        await loadMaterialPage('');
+
+        // Search filter with debounce
+        let searchTimer = null;
         searchBox.oninput = () => {
-            const q = (searchBox.value || '').toLowerCase();
-            Array.from(lst.children).forEach((el) => {
-                const s = el.dataset.search || '';
-                el.style.display = !q || s.includes(q) ? '' : 'none';
-            });
+            const q = (searchBox.value || '').toString();
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => loadMaterialPage(q), 300);
         };
+
+        // infinite scroll: when near bottom load next page
+        lst.addEventListener('scroll', () => {
+            try {
+                if (lst.scrollTop + lst.clientHeight >= lst.scrollHeight - 40) {
+                    if (!materialState.loading && materialState.hasMore) {
+                        loadMaterialPage(materialState.lastQuery);
+                    }
+                }
+            } catch (e) { }
+        });
 
         // Select All toggle on visible items
         selectAll.onchange = () => {
@@ -1588,8 +1628,8 @@
             const $select = $(this);
             if ($select.data('search-dropdown') === true) return;
 
-            // Cache options
-            const options = $select.find('option').map(function () {
+            // Cache DOM options as initial set
+            const domOptions = $select.find('option').map(function () {
                 return { value: this.value, text: $(this).text(), selected: this.selected };
             }).get();
 
@@ -1598,15 +1638,85 @@
             const $btn = $('<div class="ms-btn"><span class="ms-values"></span><span class="ms-placeholder"></span><span class="ms-caret">▾</span></div>');
             const $dropdown = $('<div class="ms-dropdown"></div>');
             const $search = $('<div class="ms-search"><input type="text" placeholder="Tìm..." /></div>');
-            const $list = $('<div class="ms-list"></div>');
+            const $list = $('<div class="ms-list" style="max-height:320px; overflow:auto"></div>');
 
-            // Populate list
+            // Remote loading state (only used for material selects)
+            const isRemoteMaterial = $select.hasClass('maHangNoiBo');
+            const remoteState = {
+                pageIndex: 1,
+                pageSize: 200,
+                loading: false,
+                lastQuery: '',
+                hasMore: true,
+                options: domOptions.slice() // start with dom options if any
+            };
+
+            // Helper to get category context (NhomHang) from same row
+            const getCategoryForRow = () => {
+                try {
+                    const tr = $select.closest('tr');
+                    const cat = tr.find('select.chungLoaiTb').val() || '';
+                    return cat;
+                } catch (e) { return ''; }
+            };
+
+            async function loadRemote(query, append = false) {
+                if (!isRemoteMaterial) return;
+                if (remoteState.loading) return;
+                remoteState.loading = true;
+                // If new query, reset paging
+                if (query !== remoteState.lastQuery) {
+                    remoteState.pageIndex = 1;
+                    remoteState.hasMore = true;
+                }
+                const page = remoteState.pageIndex;
+                const pageSize = remoteState.pageSize;
+                const body = { MaHang: query || '', Name: query || '', NhomHang: getCategoryForRow() || '', PageIndex: page, PageSize: pageSize };
+                try {
+                    const res = await fetch('/Quote/GetSearchMaterial', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+                    });
+                    if (!res.ok) throw new Error(await res.text());
+                    const data = await res.json();
+                    const items = Array.isArray(data) ? data.map(m => ({ value: m.material_Code || '', text: ((m.material_Code || '') + ' - ' + (m.material_Name_VN || m.material_Name_VN || '')) })) : [];
+                    if (!append) {
+                        remoteState.options = items;
+                    } else {
+                        // avoid duplicates by value
+                        const existing = new Set(remoteState.options.map(o => o.value));
+                        items.forEach(it => { if (!existing.has(it.value)) remoteState.options.push(it); });
+                    }
+                    // Ensure the underlying <select> contains these options so native lookups / other code work
+                    try {
+                        items.forEach(it => {
+                            if (!it || !it.value) return;
+                            if ($select.find('option[value="' + it.value.replace(/"/g, '\\"') + '"]').length === 0) {
+                                const opt = document.createElement('option');
+                                opt.value = it.value;
+                                opt.text = it.text || it.value;
+                                $select.append(opt);
+                            }
+                        });
+                    } catch (e) { /* ignore DOM errors */ }
+                    remoteState.hasMore = items.length === pageSize;
+                    if (remoteState.hasMore) remoteState.pageIndex = page + 1;
+                    remoteState.lastQuery = query;
+                } catch (err) {
+                    console.warn('Error loading remote materials:', err);
+                } finally {
+                    remoteState.loading = false;
+                    renderList(remoteState.lastQuery);
+                }
+            }
+
+            // Populate list (uses remoteState.options for remote selects, otherwise domOptions)
             function renderList(query) {
                 const q = (query || '').toLowerCase();
                 $list.empty();
                 let hasItems = false;
-                options.forEach(function (opt) {
-                    if (!q || opt.text.toLowerCase().includes(q)) {
+                const source = isRemoteMaterial ? remoteState.options : domOptions;
+                source.forEach(function (opt) {
+                    if (!q || (opt.text || '').toLowerCase().includes(q)) {
                         const $item = $('<div class="ms-item"></div>').attr('data-value', opt.value).text(opt.text);
                         if ($select.val() === opt.value || opt.selected) {
                             $item.addClass('selected');
@@ -1619,11 +1729,16 @@
                     const T = window.i18nQuote || {};
                     $list.append('<div class="ms-empty">' + (T.NoResults || 'Không có kết quả') + '</div>');
                 }
+                // If remote and hasMore, show loading sentinel
+                if (isRemoteMaterial && remoteState.hasMore) {
+                    $list.append('<div class="ms-loading">Loading more...</div>');
+                }
             }
 
             function updateButtonText() {
                 const val = $select.val();
-                const found = options.find(o => o.value === val);
+                const source = isRemoteMaterial ? remoteState.options : domOptions;
+                const found = source.find(o => o.value === val);
                 if (found && found.text) {
                     $btn.find('.ms-values').text(found.text);
                     $btn.find('.ms-placeholder').text('');
@@ -1672,7 +1787,12 @@
                     const left = btnRect.left + window.scrollX;
                     $dropdown.appendTo('body').css({ position: 'absolute', top: top + 'px', left: left + 'px', width: $btn.outerWidth() + 'px', zIndex: 3000 }).addClass('open').data('detached', true);
                     $search.find('input').val('');
-                    renderList('');
+                    // if remote and no options loaded yet, load first page
+                    if (isRemoteMaterial && (!remoteState.options || remoteState.options.length === 0)) {
+                        loadRemote('');
+                    } else {
+                        renderList('');
+                    }
                     $search.find('input').focus();
                 }
             });
@@ -1694,6 +1814,16 @@
 
             $list.on('click', '.ms-item', function () {
                 const value = $(this).attr('data-value');
+                // ensure underlying select has this option (for native display and later code)
+                try {
+                    if ($select.find('option[value="' + value.replace(/"/g, '\\"') + '"]').length === 0) {
+                        const txt = (remoteState && remoteState.options ? (remoteState.options.find(o => o.value === value) || {}).text : null) || $(this).text();
+                        const opt = document.createElement('option');
+                        opt.value = value;
+                        opt.text = txt || value;
+                        $select.append(opt);
+                    }
+                } catch (e) { }
                 // set value via jQuery
                 $select.val(value);
                 // trigger both jQuery and native change so listeners attached via addEventListener are invoked
@@ -1711,8 +1841,27 @@
                 }
             });
 
+            // scroll to load more for remote lists
+            $list.on('scroll', function () {
+                if (!isRemoteMaterial) return;
+                const el = this;
+                try {
+                    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+                        if (remoteState.hasMore && !remoteState.loading) {
+                            loadRemote(remoteState.lastQuery || '', true);
+                        }
+                    }
+                } catch (e) { }
+            });
+
             $search.find('input').on('input', function () {
-                renderList($(this).val());
+                const q = $(this).val() || '';
+                if (isRemoteMaterial) {
+                    // fetch filtered results from server
+                    loadRemote(q.toString(), false);
+                } else {
+                    renderList(q.toString());
+                }
             });
 
             // Mark enhanced

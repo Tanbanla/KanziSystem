@@ -48,7 +48,7 @@
                     Material_Name = _cmd.Rows[i]["Material_Name_VN"].ToString(),
                     QTY_NEW = double.Parse(_cmd.Rows[i]["QTY_NEW"].ToString()!),
                     QTY_RE_IMPORT = double.Parse(_cmd.Rows[i]["QTY_RE_IMPORT"].ToString()!),
-                    GIA_TAI_NHAP =_cmd.Rows[i]["GIA_TAI_NHAP"].ToString(),
+                    GIA_TAI_NHAP = _cmd.Rows[i]["GIA_TAI_NHAP"].ToString(),
                     Unit = _cmd.Rows[i]["Unit"].ToString(),
                     Unit_Note = _cmd.Rows[i]["Unit_Note"].ToString(),
                 });
@@ -59,6 +59,18 @@
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
             var _cmd = _context.GET_DATA_FROM_SQL("SELECT distinct(MaNguyenLieu), Material_Name_VN FROM [COST_MANAGEMENT].[dbo].[KHO] as a left join MATERIAL as b on a.MaNguyenLieu = b.Material_Code where a.Group_Code = '" + group_code + "' and a.Hientai > 0");
+            List<string> material = new List<string>();
+
+            for (int i = 0; i < _cmd.Rows.Count; i++)
+            {
+                material.Add(_cmd.Rows[i]["MaNguyenLieu"].ToString() + ":" + _cmd.Rows[i]["Material_Name_VN"].ToString());
+            }
+            return material;
+        }
+        public static List<string> _getname_material()
+        {
+            SQL_Connect_DB20 _context = new SQL_Connect_DB20();
+            var _cmd = _context.GET_DATA_FROM_SQL("SELECT distinct(MaNguyenLieu), Material_Name_VN FROM [COST_MANAGEMENT].[dbo].[KHO] as a left join MATERIAL as b on a.MaNguyenLieu = b.Material_Code where a.Hientai > 0");
             List<string> material = new List<string>();
 
             for (int i = 0; i < _cmd.Rows.Count; i++)
@@ -100,6 +112,31 @@
                 });
             }
             return us_f;
+        }
+        public static List<string> _GetCostCenter()
+        {
+            SQL_Connect_DB20 _db20 = new SQL_Connect_DB20();
+            var _cmd = _db20.GET_DATA_FROM_SQL("SELECT [Cost_Center], [Name] FROM [COST_MANAGEMENT].[dbo].[DEPARTMENT]");
+            List<string> result = new List<string>();
+            for (int i = 0; i < _cmd.Rows.Count; i++)
+            {
+                string data = _cmd.Rows[i]["Cost_Center"].ToString() + ":" + _cmd.Rows[i]["Name"].ToString();
+                result.Add(data);
+            }
+            return result;
+        }
+        public static List<string> _GetLocation()
+        {
+            string command = "SELECT MaChuyen FROM [COST_MANAGEMENT].[dbo].[DEPARTMENT_VITRI] ";
+            SQL_Connect_DB20 _db20 = new SQL_Connect_DB20();
+            List<string> result = new List<string>();
+            var getData = _db20.GET_DATA_FROM_SQL(command);
+            for (int idx = 0; idx < getData.Rows.Count; idx++)
+            {
+                string data = getData.Rows[idx]["MaChuyen"].ToString()!;
+                result.Add(data);
+            }
+            return result;
         }
     }
 }
