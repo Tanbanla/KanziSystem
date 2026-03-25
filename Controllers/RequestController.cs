@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -7,7 +7,7 @@ using System.DirectoryServices.Protocols;
 using System.Net;
 using System.Net.Mail;
 
-namespace PRJ_WAREHOUSE_BIVN.Controllers
+namespace PRJ_WAREHOUSE_BIVN.Controllers 
 {
     public class RequestController : Controller
     {

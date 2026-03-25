@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -57,6 +57,20 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     "SELECT [CHR_CODE_CENTER] FROM [Working_Control].[dbo].[TM_CENTER] WHERE CHR_CODE_SEC = @codeSecion",
                     parameters);
                 return result.ToList();
+            }
+        }
+        // Lay code phong ban
+        public async Task<string> GetCodeSec(string sectionName)
+        {
+             using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new { sectionName };
+                var result = await connection.QueryFirstOrDefaultAsync<string>(
+                    "SELECT [CHR_CODE_SEC] FROM [TM_SECTION] WHERE NVCHR_SEC = @sectionName",
+                    parameters);
+                return result;
             }
         }
     }

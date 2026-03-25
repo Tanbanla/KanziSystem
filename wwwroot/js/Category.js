@@ -1,10 +1,12 @@
 // Category.js
-document.addEventListener('DOMContentLoaded', function () {
+function initCategories() {
     let categories = [];
     let filteredCategories = [];
     let pageIndex = 1;
-    let pageSize = 100;
+    // initialize pageSize to match the select default in the view (10)
+    let pageSize = 10;
     let totalPages = 1;
+    let totalCount = 0;
 
     // Load categories
     async function loadCategories(searchTerm = '') {
@@ -25,13 +27,29 @@ document.addEventListener('DOMContentLoaded', function () {
             if (result.success) {
                 // If API returns a paged result, it may include total count/properties. We expect data array here.
                 categories = result.data || [];
-                filteredCategories = categories;
-                // try to read paging metadata if present
-                if (result.totalPages) totalPages = result.totalPages;
-                else {
-                    // if API doesn't provide totalPages, assume single page for now
-                    totalPages = categories.length < pageSize ? pageIndex : pageIndex; 
+
+                // If server provides totalCount (recommended), compute pages from that.
+                if (typeof result.totalCount === 'number') {
+                    totalCount = result.totalCount;
+                    totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+                    // server likely returned only current page items
+                    filteredCategories = categories;
                 }
+                // If server provides totalPages (less ideal), use it and assume categories are current page
+                else if (typeof result.totalPages === 'number') {
+                    totalPages = result.totalPages;
+                    totalCount = totalPages * pageSize; // best-effort
+                    filteredCategories = categories;
+                }
+                // Otherwise assume server returned the full dataset -> do client-side paging
+                else {
+                    totalCount = categories.length;
+                    totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+                    // ensure pageIndex in range
+                    if (pageIndex > totalPages) pageIndex = totalPages;
+                    filteredCategories = categories.slice((pageIndex - 1) * pageSize, pageIndex * pageSize);
+                }
+
                 updatePaginationUI();
                 renderTable();
             } else {
@@ -231,4 +249,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     loadCategories();
-});
+}
+
+// If DOM is still loading, wait for DOMContentLoaded, otherwise init immediately.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCategories);
+} else {
+    initCategories();
+}

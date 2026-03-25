@@ -915,7 +915,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 NVCHR_NameVN = infor.TenMoThuTuc,
                                 CHR_NameEN = infor.Material_Name_EN,
                                 INT_SoLuong = ParseDouble(ws.Cell(r, 10).GetString()),
-                                NVCHR_DonVi = infor.Unit,
+                                NVCHR_DonVi = infor.Unit ?? ws.Cell(r, 11).GetString(),
                                 NVCHR_ChungLoai = infor.Category_VN,
                                 NVCHR_HinhDang = infor.Shape,
                                 NVCHR_ChatLieu = infor.Material,
@@ -938,7 +938,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
                                 DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
                                 CHR_Gap = ws.Cell(r, 31).GetString(),
-                                CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
+                                CHR_CreateBy = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
                                 DTM_CreateDate = DateTime.Now,
                                 ID_Status = "CREATE"
                             };
@@ -1011,7 +1011,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
                             DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
                             CHR_Gap = ws.Cell(r, 31).GetString(),
-                            CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
+                            CHR_CreateBy = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
                             DTM_CreateDate = DateTime.Now,
                             ID_Status = "CREATE"
                         };

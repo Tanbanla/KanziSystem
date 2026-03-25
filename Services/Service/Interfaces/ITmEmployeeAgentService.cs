@@ -9,5 +9,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<TM_EMPLOYEEDTO>> GetInforEmployeeByMail(string mail);
         // Lấy thông tin nhân viên theo phòng ban
         public Task<GenericResponse<List<dynamic>>> GetApproverBySection(string sectionCode);
+
     }
 }

@@ -57,11 +57,11 @@
 
                 @*Làm dữ liệu test*@
                 <tr>
-                    <td><input type="text" class="form-control" id="ten_duthao" value="Đào Thị Loan" /> </td>
-                    <td><input type="text" class="form-control" id="ten_thamtra" value="Đào Thị Loan"/> </td>
-                    <td><input type="text" class="form-control" id="ten_pheduyet" value="Đào Thị Loan" /> </td>
-                    <td><input type="text" class="form-control" id="ten_dongy" value="Đào Thị Loan" /> </td>
-                    <td><input type="text" class="form-control" id="ten_xuatkho" value="Đào Thị Loan" /> </td>
+                    <td><input type="text" class="form-control" id="ten_duthao" value="Loan, DaoThi (BIVN-PR1 MC)" /> </td>
+                    <td><input type="text" class="form-control" id="ten_thamtra" value="Loan, DaoThi (BIVN-PR1 MC)" /> </td>
+                    <td><input type="text" class="form-control" id="ten_pheduyet" value="Loan, DaoThi (BIVN-PR1 MC)" /> </td>
+                    <td><input type="text" class="form-control" id="ten_dongy" value="Loan, DaoThi (BIVN-PR1 MC)" /> </td>
+                    <td><input type="text" class="form-control" id="ten_xuatkho" value="Loan, DaoThi (BIVN-PR1 MC)" /> </td>
               
                 </tr>
                 <tr>
@@ -209,7 +209,7 @@
             </table>
             <br />
             <button type="submit" class="btn btn-success float-right" onclick="_xuatkho()"> <i class="fa fa-cart-plus"></i> Xuất kho</button>
-
+            @* <button type="submit" class="btn btn-primary float-right" onclick="_exportFileXuatKho()">Tải xuống</button> *@
         </div>
     </div>
 
@@ -441,6 +441,7 @@
                     <td>Kho xuất</td>
                     <td><select class="form-control" id="khoSelect"></select></td>
                     <td><button type="button" class="btn btn-danger" onclick="_xuatkho()"><i class="fa fa-cart-plus"></i> Xuất kho</button></td>
+                    <td><button type="button" class="btn btn-primary" onclick="_dlxuatkho()">Tải xuống</button></td>
                 </tr>
             </table>
             <table class="table table-bordered">

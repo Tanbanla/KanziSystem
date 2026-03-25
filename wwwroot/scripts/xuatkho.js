@@ -1,4 +1,4 @@
-﻿// Load trang xuất kho 
+// Load trang xuất kho 
 function _load_xuatkho() {
     var mayeucau = document.getElementById("mayeucau").value;
     var nguoitao = document.getElementById("nguoitao").value;
@@ -324,6 +324,39 @@ function _xuatkho() {
     }
     
   
+}
+
+function _dlxuatkho() {
+    var code_request = document.getElementById("madonn").innerHTML;
+    const params = new URLSearchParams();
+    params.append('code_request', code_request);
+    fetch('/Import/ExportModalDetail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const timestamp = new Date().getTime();
+            a.download = `HangTrongDanhMuc_${code_request}.xlsm`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            alert("Hoàn thành download dữ liệu");
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
 // Hiển thị chi tiết khi hiện modal
 function _modal_chitietxuatkho(code_request) {

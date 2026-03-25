@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Wordprocessing;
-
 namespace PRJ_WAREHOUSE_BIVN.View_Models.Master
 {
     public class CatergoryVM

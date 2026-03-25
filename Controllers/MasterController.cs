@@ -721,9 +721,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // API tìm kiếm chủng loại hàng theo tên
         [HttpPost]
-        public async Task<JsonResult> SearchCategoryByName([FromBody] string? req)
+        public async Task<JsonResult> SearchCategoryByName([FromBody] SearchCatergory searchCatergory)
         {
-            var resp = await _tmCategoryService.SearchCategoryByName(req ?? "", 1, 100);
+            var resp = await _tmCategoryService.SearchCategoryByName(searchCatergory.Name, searchCatergory.pageIndex, searchCatergory.pageSize);
             if (resp == null || !resp.Success)
             {
                 return Json(new { success = false, message = resp?.Message ?? "Error" });
@@ -869,6 +869,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest("Không tìm thấy thông tin bước phê duyệt");
             }
+            var listStep = stepAsync.Data.Where(c=> c.INT_StepNumber == 1);
             var listInsert = new List<BaoGia_Master_Approver_Send_Mail>();
             try
             {
@@ -887,7 +888,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                     // Map theo thứ tự cột
                     var seticon = ws.Cell(r, 1).GetString().Trim();
-                    var mailUser = ws.Cell(r, 2).GetString().Trim();
+                    var mailUser = ws.Cell(r, 4).GetString().Trim();
                     // lay thong tin user
                     var userInfo = await _employeeAgentService.GetInforEmployeeByMail(mailUser);
                     if (userInfo == null || !userInfo.Success || userInfo.Data == null)
@@ -895,26 +896,27 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         continue; // bỏ qua nếu không tìm thấy thông tin user
                     }
                     // lay thong tin vi tri
-                    var listCodeCenter = await _employeeWorkingService.GetCodeCenterBySec(userInfo.Data.CHR_SEC_CODE ?? "");
+                    var sectionCode = await _employeeWorkingService.GetCodeSec(seticon);
+                    var listCodeCenter = await _employeeWorkingService.GetCodeCenterBySec(sectionCode.Data ?? "");
                     if (listCodeCenter == null || !listCodeCenter.Success || listCodeCenter.Data == null || listCodeCenter.Data.Count == 0)
                     {
                         continue; // bỏ qua nếu không tìm thấy thông tin phòng ban
                     }
                     foreach (var item in listCodeCenter.Data)
                     {
-                        foreach (var step in stepAsync.Data ?? new List<BaoGia_StepDTO>())
-                        {
+                        //foreach (var step in listStep)
+                        //{
                             // nếu tên step trùng với tên step trong file thì mới tạo bản ghi, tránh trường hợp file có nhiều dòng cùng 1 user nhưng các step khác nhau
                             var dto = new BaoGia_Master_Approver_Send_Mail
                             {
                                 ID = 0,
-                                ID_BaoGiaStep = step.INT_StepNumber,
+                                ID_BaoGiaStep = 1,
                                 CHR_UserAdid = userInfo.Data.CHR_EMPLOYEE_ADID,
                                 CHR_CodeSection = item,
                                 CHR_NameSection = "",
                                 NVCHR_UserName = userInfo.Data.CHR_EMPLOYEE_NAME,
                                 NVCHR_Position = userInfo.Data.CHR_POSITION_NAME,
-                                NVCHR_StepName = step.CHR_StepName,
+                                NVCHR_StepName = "Tạo yêu cầu báo giá",
                                 CHR_CreateBy = GetCurrentUserId() ?? "system",
                                 CHR_CreateDate = DateTime.Now,
                                 CHR_Status = "ON",
@@ -922,7 +924,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 CHR_UpdateDate = null
                             };
                             listInsert.Add(dto);
-                        }
+                        //}
                     }
                 }
                 if (listInsert.Count == 0)

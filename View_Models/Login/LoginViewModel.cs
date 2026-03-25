@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace PRJ_WAREHOUSE_BIVN.View_Models.Login
 {
@@ -15,5 +15,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Login
 
         [Display(Name = "Ghi nhớ đăng nhập")]
         public bool RememberMe { get; set; }
+
+        public string ReturnUrl { get; set; } = string.Empty;
     }
 }

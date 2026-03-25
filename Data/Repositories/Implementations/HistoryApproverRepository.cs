@@ -94,7 +94,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 left join BaoGia_Master_Approver_Send_Mail as s  on r.ID_StepBaoGia = s.ID_BaoGiaStep and CHR_SectionCode = s.CHR_CodeSection
 				left join BaoGia_Step as st on r.ID_StepBaoGia = st.INT_StepNumber
 				where st.CHR_Status = 'APPROVAL' and
-                (CHR_UserAdid = @Adid or r.CHR_UserApproval = @Adid)and
+                (CHR_UserAdid = @Adid)and
                 (@SoDon is null or CHR_MaDon like '%' + @SoDon + '%' or @SoDon = '' ) and 
                 (@MaHang is null or CHR_MaHangNoiBo like '%' + @MaHang + '%' or @MaHang = '' ) and 
                 (@Section is null or CHR_SectionCode like '%' + @Section + '%' or @Section = '' ) and 

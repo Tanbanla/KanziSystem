@@ -390,6 +390,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 db.ReturnString($"DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '{dataPO[0].Id_LichsuNhap}'");
+               
                 string Id_Lichsu = db.ReturnString($"INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[NCC],[Donvi],[MaNguoinhap],[Gia],[SoPO],[SoluongPO],[DonviPO],[Soluongconlai],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) OUTPUT Inserted.Id_Lichsu VALUES(N'{dataPO[0].Mahang}',N'Nhập kho {data.KhoNhan} từ PO: {dataPO[0].SoPO} -> {Lydo}','{Luongnhapkho}','NHAP',GETDATE(),'{data.UserName}','{data.KhoNhan}','{khoi}',N'{dataPO[0].Tentienganh}',N'{dataPO[0].TenNCC}',N'{DonviRequest}','{Manhanvien}','{dataPO[0].Dongia}','{dataPO[0].SoPO}','{SoluongPO}',N'{dataPO[0].Dovi}','{Soluongconlai}','{data.NgayNhap}','{SoluongTruocthaydoi}','{Luongnhapkho + SoluongTruocthaydoi}')");
                 db.ReturnString($"UPDATE [IM_PO_DETAIL] SET [Id_LichsuNhap] = '{Id_Lichsu}' WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'");
             }

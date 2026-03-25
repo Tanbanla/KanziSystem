@@ -20,7 +20,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
         public async Task<TM_EMPLOYEE> GetInforEmployeeByMail(string mail)
         {
-            var result = await _context.TM_EMPLOYEE.Where(e => e.CHR_EMPLOYEE_MAIL == mail).FirstOrDefaultAsync();
+            var result = await _context.TM_EMPLOYEE.Where(e => e.CHR_EMPLOYEE_ADID == mail).FirstOrDefaultAsync();
             return result;
         }
         // Lấy thông tin nhân viên theo phòng ban

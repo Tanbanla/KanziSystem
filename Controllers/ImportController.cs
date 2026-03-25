@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Office2021.Drawing.SketchyShapes;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
@@ -171,12 +172,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(soluong);
         }
         public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string tongchiphiold, string id_rq)
-        {           
-            if(tongchiphi == "0")
+        {
+            if (tongchiphi == "0")
             {
                 tongchiphi = tongchiphiold;
             }
-            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho,thoigian,manguyenlieu,soluong, giathucte, donvi,kho, tongchiphi, vitri,phong,khoi, id_rq);
+            var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);
         }
         public JsonResult _load_xuatkhohang(string mayeucau, string nguoitao)
@@ -353,7 +354,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             Material_Code = nameMaterial
                         });
 
-                        if(dataOther.Count == 1)
+                        if (dataOther.Count == 1)
                         {
                             rowData["costKT"] = dataOther.First().Account_Code!.ToString();
                             rowData["warehouse"] = dataOther.First().Inventory!.ToString();
@@ -361,13 +362,74 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             rowData["unit"] = dataOther.First().Unit!.ToString();
                             rowData["price"] = dataOther.First().Price.ToString();
                             rowData["typePay"] = "USD";
-                        }    
+                        }
 
                         resultList.Add(rowData);
                     }
                 }
             }
             return Json(resultList);
+        }
+
+        [HttpPost]
+        public ActionResult ExportModalDetail(string code_request)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            var list = REQUEST_PROCESS._load_body_detail(code_request);
+            var load = REQUEST_PROCESS._load_request(code_request);
+
+            string pathDir = Path.Combine(_env.ContentRootPath, "Data");
+            string templatePath = Path.Combine(pathDir, "Template_HangTrongDanhMuc.xlsm");
+            string tempFileName = $"HangTrongDanhMuc_{Guid.NewGuid()}.xlsm";
+            string tempPath = Path.Combine(pathDir, tempFileName);
+
+            try
+            {
+                System.IO.File.Copy(templatePath, tempPath, true);
+                FileInfo fileInfo = new FileInfo(tempPath);
+                using (var package = new ExcelPackage(fileInfo))
+                {
+                    var ws = package.Workbook.Worksheets[0];
+                    ws.Cells["L2"].Value = load.First().Group_Code;
+                    ws.Cells["A5"].Value = load.First().Cost_Center_Group;
+                    ws.Cells["C5"].Value = load.First().Cost_Center;
+                    ws.Cells["D5"].Value = load.First().Name;
+                    ws.Cells["E5"].Value = load.First().Place;
+                    ws.Cells["F5"].Value = load.First().Create_Date;
+                    ws.Cells["G5"].Value = load.First().Dealine.Split(' ')[0];
+
+                    for (int idx = 1; idx <= 12; idx++)
+                    {
+                        if (list.Count < idx) break;
+                        ws.Cells["B" + (8 + idx)].Value = list[idx - 1].Material_Code;
+                        ws.Cells["C" + (8 + idx)].Value = list[idx - 1].Material_Name;
+                        //ws.Cells["E" + (8 + idx)].Value = list[idx].Unit;
+                        ws.Cells["F" + (8 + idx)].Value = list[idx - 1].Account_Code;
+                        ws.Cells["G" + (8 + idx)].Value = list[idx - 1].Account_Name;
+                        ws.Cells["H" + (8 + idx)].Value = list[idx - 1].Amount;
+                        ws.Cells["I" + (8 + idx)].Value = list[idx - 1].Unit;
+                        ws.Cells["J" + (8 + idx)].Value = list[idx - 1].Price;
+                        ws.Cells["K" + (8 + idx)].Value = load.First().Group_Code.Contains("GA") ? "VND" : "USD";
+                        ws.Cells["M" + (8 + idx)].Value = list[idx - 1].Aim;
+                        //ws.Cells["O" + (8 + idx)].Value = list[idx].;
+                    }
+
+                    package.Save();
+                }
+
+                byte[] fileBytes = System.IO.File.ReadAllBytes(tempPath);
+                System.IO.File.Delete(tempPath);
+                return File(
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"HangTrongDanhMuc_{code_request}.xlsm"
+            );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xử lý: {ex.Message}");
+            }
+
         }
     }
 }

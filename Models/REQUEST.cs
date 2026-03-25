@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Vml;
 using Microsoft.AspNetCore.Http.HttpResults;
 using OfficeOpenXml.Utils;
@@ -215,8 +215,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     {
         public static string Insert_request(string Cost_Center, string Declaration, string Dealine, string Total_exchange, string Exchange_rate, string Currency, string Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk,string adidnguoitao, string mailnguoitao)
         {
-            try
-            {
+            
                 SQL_Connect_DB20 _db = new SQL_Connect_DB20();
                 //  TẠO MÃ REQUEST TĂNG TỰ ĐỘNG VÀ INSERT BẢNG REQUEST ---
                 string _cmdRequest = $@"
@@ -238,21 +237,21 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                         [Kind], [Type], [Status], [Create_Date], [User_Create],[Place], [Loaihinhtokhai], [Group_Code],  [Chophepin], [Urgent] 
                     ) 
                     VALUES (
+                         
                         @NewCode, '{Cost_Center}', '{DateTime.Now.ToString("yyyy-MM-dd HH:ss:mm")}', N'{Declaration}', '{Dealine}', ROUND({Total_exchange},2), '{Exchange_rate}', '{Currency}', ROUND({Total},2),  
                         '{Kind}', '{Type}', '{Status}','{DateTime.Now.ToString("yyyy-MM-dd HH:ss:mm")}', '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
                     );
-
                     SELECT @NewCode AS NextCode, SCOPE_IDENTITY() AS NewID;";
                 var dtBase = _db.GET_DATA_FROM_SQL(_cmdRequest);
                 if (dtBase == null || dtBase.Rows.Count == 0) return "NG";
 
                 string newCode = dtBase.Rows[0]["NextCode"].ToString()!;
                 string newId = dtBase.Rows[0]["NewID"].ToString()!;
-
+             
                 // INSERT BẢNG REQUEST_DETAIL ---
                 foreach (var item in rq_dt!)
                 {
-                    string _cmdDetail = $@"
+                     string _cmdDetail = $@"
                                         INSERT INTO [REQUEST_DETAIL] (
                                         [Code_Request], [Id_Request], [Material_Code], [Material_Name], [Material_Name_EN], [Material_Name_ENJP], 
                                         [Account_Code], [Account_Name], [Unit], [Unit_Real], [Amount], [Price], [Total_exchange], [Rate], 
@@ -269,15 +268,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                                         )";
                     _db.GET_DATA_FROM_SQL(_cmdDetail);
                 }
-                _insert_request_confirm(newId, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd, ten_dy.Split('_')[1], adid_dy, mail_dy, ten_xk.Split('_')[1], adid_xk, mail_xk, adidnguoitao, mailnguoitao);
+                //ten_dy = ten_dy.Split('_')[1];
+                //ten_xk = ten_xk.Split('_')[1];
+                _insert_request_confirm(newId, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd, ten_dy , adid_dy, mail_dy, ten_xk, adid_xk, mail_xk, adidnguoitao, mailnguoitao);
 
-                return newCode;
-            }
-            catch (Exception ex)
-            {
-                // Log lỗi ex.Message nếu cần
-                return "NG";
-            }
+                return newCode;   
         }
         public static string get_rate()
         {

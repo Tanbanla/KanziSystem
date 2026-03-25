@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 
@@ -33,6 +33,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             try
             {
                 result.Data = await _repo.GetCodeCenterBySec(codeSecion);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Lay code phong ban
+        public async Task<GenericResponse<string>> GetCodeSec(string sectionName)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                result.Data = await _repo.GetCodeSec(sectionName);
                 result.Success = true;
             }
             catch(Exception ex)

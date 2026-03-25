@@ -18,6 +18,9 @@
     let currentPage = 1;
     let rowsPerPage = 5;
     let filteredRows = [];
+    // in-memory storage for large dataset to avoid rendering all rows at once
+    let allQuoteItems = [];
+    let filteredQuoteItems = [];
 
     function renumberRows() {
         qsa('#quoteTableBody tr').forEach((tr, idx) => {
@@ -25,7 +28,6 @@
             if (noCell) noCell.textContent = String(idx + 1);
         });
         assignRowIds();
-        applyFiltersAndPagination();
     }
     // Determine if a row is completely empty (no user-entered text/number/date and no meaningful select)
     function isRowEmpty(tr) {
@@ -152,6 +154,21 @@
             return td.textContent.trim();
         }
 
+        // If we have items stored in memory (large dataset), filter in-memory to avoid scanning all DOM rows
+        if (Array.isArray(allQuoteItems) && allQuoteItems.length > 0) {
+            filteredQuoteItems = allQuoteItems.filter(dto => {
+                // combine common searchable fields into one string for simple contains checks
+                const combined = [
+                    dto.chR_MaHangNoiBo, dto.chR_MaHangNCC, dto.nvchR_NameVN, dto.chR_NameEN,
+                    dto.nvchR_DonVi, dto.chR_MaNCC, dto.nvchR_TenNCC, dto.nvchR_ChungLoai, dto.chR_Phanloai
+                ].map(v => (v || '').toString().toLowerCase()).join(' ');
+                return filters.every(filter => !filter || combined.includes(filter));
+            });
+            // render only visible page from filteredQuoteItems
+            renderQuotePage(tbody, filteredQuoteItems);
+            return;
+        }
+
         filteredRows = allRows.filter(tr => {
             const tds = Array.from(tr.querySelectorAll('td'));
             return filters.every((filter, idx) => {
@@ -235,6 +252,7 @@
         try { buildSearchableDropdown($(newRow)); } catch { }
 
         renumberRows();
+        applyFiltersAndPagination();
     }
 
     function removeRow(btn) {
@@ -244,6 +262,7 @@
         if (rows.length > 1 && tr) {
             tr.remove();
             renumberRows();
+            applyFiltersAndPagination();
         }
     }
 
@@ -318,6 +337,7 @@
         catch (ex) { console.error('Error re-initializing searchable dropdowns:', ex); }
 
         renumberRows();
+        applyFiltersAndPagination();
     }
 
     // No header validation: the view does not include header fields
@@ -628,7 +648,7 @@
         const rows = qsa('#quoteTableBody tr');
         let rowsValid = true;
         let rowsCheckReason = true;
-        const payload = [];
+        let payload = [];
         // Only validate and collect rows that contain user-entered data
         rows.forEach((tr) => {
             if (isRowEmpty(tr)) return; // skip empty rows
@@ -636,6 +656,11 @@
             if (!CheckLyDoTuChoi(tr)) rowsCheckReason = false;
             payload.push(collectRow(tr));
         });
+        // If no rows collected from DOM but we have in-memory items (loaded from Excel), submit those
+        if (payload.length === 0 && Array.isArray(allQuoteItems) && allQuoteItems.length > 0) {
+            payload = allQuoteItems.slice();
+        }
+
         // If no rows to submit, inform user and abort
         if (payload.length === 0) {
             const T = window.i18nQuote || {};
@@ -1596,15 +1621,27 @@
             e.preventDefault();
             if (currentPage > 1) {
                 currentPage--;
-                applyFiltersAndPagination();
+                const tbody = qs('#quoteTableBody');
+                // if we have in-memory items use renderQuotePage, otherwise fallback to DOM pagination
+                if (Array.isArray(filteredQuoteItems) && filteredQuoteItems.length > 0) {
+                    renderQuotePage(tbody, filteredQuoteItems);
+                } else {
+                    applyFiltersAndPagination();
+                }
             }
         });
         qs('#nextPage')?.addEventListener('click', (e) => {
             e.preventDefault();
-            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            const totalCount = (Array.isArray(filteredQuoteItems) && filteredQuoteItems.length > 0) ? filteredQuoteItems.length : filteredRows.length;
+            const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
             if (currentPage < totalPages) {
                 currentPage++;
-                applyFiltersAndPagination();
+                const tbody = qs('#quoteTableBody');
+                if (Array.isArray(filteredQuoteItems) && filteredQuoteItems.length > 0) {
+                    renderQuotePage(tbody, filteredQuoteItems);
+                } else {
+                    applyFiltersAndPagination();
+                }
             }
         });
     }
@@ -2030,33 +2067,73 @@
     }
 
     async function populateTableFromItems(items) {
+        // store items in memory and render only the current page to avoid inserting all rows into DOM
+        allQuoteItems = Array.isArray(items) ? items.slice() : [];
+        filteredQuoteItems = allQuoteItems.slice();
+        currentPage = 1;
         const tbody = qs('#quoteTableBody');
         if (!tbody) return;
-        // capture a base row before clearing, so we keep structure
-        const existing = qs('#quoteTableBody tr');
-        // clear existing rows
-        tbody.innerHTML = '';
-        const template = document.createElement('tr');
-        const baseRow = existing ? existing.cloneNode(true) : null;
-        for (let i = 0; i < items.length; i++) {
-            const dto = items[i] || {};
-            const row = baseRow ? baseRow.cloneNode(true) : template.cloneNode(true);
-            if (!baseRow) {
-                continue;
-            }
-            // clean wrappers
-            qsa('.ms-container', row).forEach(w => w.remove());
-            qsa('select.searchable-select', row).forEach(s => { s.style.display = ''; $(s).data('search-dropdown', false); });
-            // reset fields
-            qsa('input', row).forEach(inp => { inp.value = ''; inp.classList.remove('is-invalid'); });
-            qsa('select', row).forEach(sel => { sel.value = ''; sel.classList.remove('is-invalid'); });
+        renderQuotePage(tbody, filteredQuoteItems);
+    }
 
-            // populate với row index (i + 1)
-            populateRowFromDto(row, dto, i + 1);
-            tbody.appendChild(row);
+    // Render only the visible page from the provided items list
+    function renderQuotePage(tbody, sourceItems) {
+        try {
+            const existing = qs('#quoteTableBody tr');
+            const baseRow = existing ? existing.cloneNode(true) : null;
+            const template = document.createElement('tr');
+
+            const total = Array.isArray(sourceItems) ? sourceItems.length : 0;
+            const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+            if (currentPage > totalPages) currentPage = totalPages;
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = Math.min(start + rowsPerPage, total);
+
+            // batch append
+            tbody.innerHTML = '';
+            const frag = document.createDocumentFragment();
+            for (let i = start; i < end; i++) {
+                const dto = sourceItems[i] || {};
+                const row = baseRow ? baseRow.cloneNode(true) : template.cloneNode(true);
+                // clean wrappers and reset
+                qsa('.ms-container', row).forEach(w => w.remove());
+                qsa('select.searchable-select', row).forEach(s => { s.style.display = ''; try { $(s).data('search-dropdown', false); } catch (e) { } });
+                qsa('input', row).forEach(inp => { inp.value = ''; inp.classList.remove('is-invalid'); });
+                qsa('select', row).forEach(sel => { sel.value = ''; sel.classList.remove('is-invalid'); });
+
+                populateRowFromDto(row, dto, i + 1);
+                frag.appendChild(row);
+            }
+            tbody.appendChild(frag);
+
+            // initialize searchable only for visible rows
+            try { buildSearchableDropdown($(tbody)); } catch (e) { }
+
+            // update numbers and ids
+            renumberRows();
+
+            // update pagination UI
+            const pagination = qs('#paginationControls');
+            const prev = qs('#prevPage');
+            const next = qs('#nextPage');
+            if (totalPages > 1) {
+                if (pagination) pagination.style.display = '';
+                if (prev) prev.classList.toggle('disabled', currentPage === 1);
+                if (next) next.classList.toggle('disabled', currentPage === totalPages);
+            } else {
+                if (pagination) pagination.style.display = 'none';
+            }
+            const T = window.i18nQuote || {};
+            const startEntry = total === 0 ? 0 : (start + 1);
+            const endEntry = end;
+            if (qs('#pageInfo')) qs('#pageInfo').textContent = `${T.Showing || 'Showing'} ${startEntry} ~ ${endEntry} ${T.Of || 'Of'} ${total}`;
+            if (qs('#pageNumberInfo')) qs('#pageNumberInfo').textContent = `${currentPage}/${totalPages}`;
+            if (qs('#paginationInfo')) qs('#paginationInfo').style.display = totalPages > 1 ? '' : 'none';
+
+            filteredRows = Array.from(tbody.querySelectorAll('tr'));
+        } catch (e) {
+            console.warn('renderQuotePage error', e);
         }
-        try { buildSearchableDropdown($(tbody)); } catch { }
-        renumberRows();
     }
     // show message dialog
     function getDialogEls() {

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 
@@ -7,7 +7,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     public class SQL_Connect_DB20
     {
         public DataTable GET_DATA_FROM_SQL(string DATASELECT)
-        {
+         {
             try
             {
                 using (SqlConnection cn = new SqlConnection(@"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;"))

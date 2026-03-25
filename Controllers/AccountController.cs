@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using System.Security.Claims;
 using PRJ_WAREHOUSE_BIVN.View_Models.Login;
+using Microsoft.AspNetCore.Localization;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
@@ -19,13 +20,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = null)
         {
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
             }
-            return View();
+            var model = new LoginViewModel
+            {
+                ReturnUrl = returnUrl
+            };
+            return View(model);
         }
 
         [HttpPost]
@@ -33,10 +38,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    return View(model);
+            //}
 
             try
             {
@@ -79,7 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     HttpContext.Session.SetString("SessionActive", "true");
 
                     // Redirect đến trang được yêu cầu hoặc trang chủ
-                    var returnUrl = Request.Query["returnUrl"].FirstOrDefault();
+                    var returnUrl = model.ReturnUrl;
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);
@@ -134,6 +139,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult SetCulture(string culture, string returnUrl)
+        {
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            );
+
+            return LocalRedirect(returnUrl ?? "/Account/Login");
         }
     }
 }

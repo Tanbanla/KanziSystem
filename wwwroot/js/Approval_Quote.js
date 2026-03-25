@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     function initEnhancements(root) {
         try {
             buildSearchableDropdown(root || document);
@@ -804,6 +804,7 @@
                         it.iD_Status = 'WAIT_SEND_MAIL';
                     } else {
                         it.iD_Status = 'APPROVAL';
+                        it.chR_UserApproval = '';
                     }
                     payload.push(it);
                 });
