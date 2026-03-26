@@ -2,7 +2,8 @@
 function _load_xuatkho() {
     var mayeucau = document.getElementById("mayeucau").value;
     var nguoitao = document.getElementById("nguoitao").value;
-    const params = new URLSearchParams({ mayeucau: mayeucau, nguoitao: nguoitao });
+    var khoi = document.getElementById("khoi").value;
+    const params = new URLSearchParams({ mayeucau: mayeucau, nguoitao: nguoitao, khoi: khoi });
     fetch('/Import/_load_xuatkhohang', {
         method: 'POST',
         headers: {
@@ -325,7 +326,6 @@ function _xuatkho() {
     
   
 }
-
 function _dlxuatkho() {
     var code_request = document.getElementById("madonn").innerHTML;
     const params = new URLSearchParams();

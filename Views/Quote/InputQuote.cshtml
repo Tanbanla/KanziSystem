@@ -1,8 +1,8 @@
-﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@using PRJ_WAREHOUSE_BIVN.DTO
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = @Localizer["PageTitle"];
-    List<ACC_NHOMVITRIDTO> nhomViTri = Model.DanhSachNhomViTri;
+    List<DEPARTMENTDTO> nhomViTri = Model.DanhSachNhomViTri;
     List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
     List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
     List<string> categoryS = Model.DanhSachCategory;
@@ -58,7 +58,7 @@
                                 <option value="" selected>@Localizer["SelectDepartment"]</option>
                                 @foreach (var s in nhomViTri)
                                 {
-                                    <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                                    <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
                                 }
                             </select>
                         </div>
@@ -181,7 +181,7 @@
                                 <option value="" selected>@Localizer["SelectDepartment"]</option>
                                 @foreach (var s in nhomViTri)
                                 {
-                                    <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                                    <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
                                 }
                             </select>
                         </div>

@@ -215,8 +215,11 @@
                     <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button>
                 </div>
                 <br />
-                <button class="btn btn-info float-right" id="modal-6" @* onclick="getEmployeeData()" *@>✉ @Languages.guiyeucau</button>
-         @*        <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button> *@
+                <div id="gyc">
+                   @*   <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>   *@
+                     <button class="btn btn-info float-right" id="modal-6" >✉ @Languages.guiyeucau</button>  
+                     <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button> 
+                </div>
             </div>
         </div>
     </div>
@@ -227,6 +230,7 @@
 <script src="~/scripts/import_process.js"></script>
 <script src="~/scripts/request.js"></script>
 <script src="~/scripts/get_api.js"></script>
+<script src="~/scripts/get_api_ga.js"></script>
 <script>
 
     window.onload = function()
@@ -236,6 +240,7 @@
         _load_info_adid();
         _load_rate();
         _load_phongchiuphi();
+        document.getElementById("modal-20").style.display = 'none';
 
         initSelect2($('.select2'));
     }
@@ -346,7 +351,6 @@
 
         // Tính thành tiền cho dòng hiện tại (TCP)
         var tcpValue = parseFloat(pricee) * parseFloat(sl);
-
         // Gán giá trị vào ô TCP (định dạng số thực hoặc 0 nếu NaN)
         document.getElementById("tcp_" + idd).value = (isNaN(tcpValue) ? 0 : tcpValue).toFixed(2);;
 
@@ -377,6 +381,11 @@
         if (displayTotal) {
             displayTotal.value = Math.round(tongMoi,3);
         }
+        if (document.getElementById("group_code").value == "GA") {      
+        var tigia = parseFloat(document.getElementById("rate").value) || 1; // Tránh lỗi chia cho 0
+        var ketQua = tongMoi / tigia;
+        displayTotal.value = ketQua.toFixed(2);
     }
+}
 
 </script>

@@ -20,7 +20,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaService _baoGiaService;
         private readonly IMaterialService _materialService;
         private readonly ITmSectionService _tmSectionService;
-        private readonly INhomViTriService _nhomViTriService;
         private readonly IBaoGiaNCCService _baoGiaNCCService;
         private readonly IBaoGiaHistoryService _baoGiaHistoryService;
         private readonly IBaoGiaStatusService _baoGiaStatusService;
@@ -33,10 +32,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ITmEmployeeAgentService _tmEmployeeAgentService;
         private readonly IMasterApproverSendMailService _approverService;
+        private readonly IDepartmentService _deparmentService;
 
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService,
-            INhomViTriService nhomViTriService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
+           IDepartmentService deparmentService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
             IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService)
@@ -46,7 +46,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaService = baoGiaService;
             _materialService = materialService;
             _tmSectionService = tmSectionService;
-            _nhomViTriService = nhomViTriService;
             _baoGiaNCCService = baoGiaNCCService;
             _baoGiaHistoryService = baoGiaHistoryService;
             _baoGiaStatusService = baoGiaStatusService;
@@ -59,6 +58,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _env = env;
             _serviceScopeFactory = serviceScopeFactory;
             _approverService = approverService;
+            _deparmentService = deparmentService;
         }
         // MARK: - Quote
         public async Task<IActionResult> Index()
@@ -67,7 +67,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
-            var listApproval = await _approverService.GetApproverByStepAndSectionAsync(2,GetCurrentUserSection());
+            //var listApproval = await _approverService.GetApproverByStepAndSectionAsync(2,GetCurrentUserSection());
             //await _tmEmployeeAgentService.GetApproverBySection(GetCurrentUserSection() ?? "");
 
             var vm = new QuoteModel
@@ -76,10 +76,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
                 DanhSachNhaCungCap = nccs,
                 DanhSachCategory = categorys,
-                ListApprovel = listApproval.Data,
                 NguoiThaoTac = GetCurrentUserId() ?? ""
             };
+            // Load approver list for current user's section if available
+            try
+            {
+                var section = GetCurrentUserSection() ?? string.Empty;
+                var approverResp = await _approverService.GetApproverByStepAndSectionAsync(2, section);
+                if (approverResp != null && approverResp.Success && approverResp.Data != null)
+                {
+                    vm.ListApprovel = approverResp.Data;
+                }
+            }
+            catch
+            {
+                // ignore failures here; client JS can request approvers on-demand
+            }
             return View(vm);
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetListApprovel([FromBody] SearchApprovalModel sr)
+        {
+            var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 2, sr.SectionCost ?? "");
+            if (!result.Success)
+            {
+                return BadRequest("Error list Approver: "+result.Message);
+            }
+            return Ok(result.Data);
         }
         // MARK: - Quotation Results
         public async Task<IActionResult> Quotation_Results()
@@ -89,7 +112,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
-            //var danhSach = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync("", "", "", GetCurrentUserId(), 1, 10);
             var vm = new QuoteModel
             {
                 DanhSachNhomViTri = nhomViTri,
@@ -476,11 +498,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var CategoryS = await _tmCategoryService.GetListCategory();
             return CategoryS.Data ?? new List<string>();
         }
-        private async Task<List<ACC_NHOMVITRIDTO>> LoadNhomViTriDataAsync()
+        private async Task<List<DEPARTMENTDTO>> LoadNhomViTriDataAsync()
         {
             //var nhomViTri = await _nhomViTriService.GetAllNhomViTriAsync();
-            var nhomViTri = await _nhomViTriService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId() ?? "");
-            return nhomViTri.Data ?? new List<ACC_NHOMVITRIDTO>();
+            var nhomViTri = await _deparmentService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId() ?? "");
+            return nhomViTri.Data ?? new List<DEPARTMENTDTO>();
         }
         private async Task<List<IM_NCC_NEWDTO>> LoadNhaCungCapDataAsync()
         {
@@ -526,6 +548,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 // Capture user info locally to avoid accessing HttpContext inside background tasks
                 var currentUserId = GetCurrentUserId();
                 var currentUserFullName = GetCurrentUserFullName();
+                var userAppproval = result.Data?.FirstOrDefault()?.CHR_UserApproval ?? "";
                 var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO
                 {
                     ID_RequestQuote = b.ID,
@@ -582,15 +605,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 }
                                 await baoGiaConfirmNameService.AddListAsync(listConfirm);
                                 // gửi mail thông báo có yêu cầu xác nhận tên mới
-                                //var emailResult = await sendMailService.SendMailAsync(
-                                //    "PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn",
-                                //    string.Empty,
-                                //    17,
-                                //    "http://172.26.248.62:8057/Material/ConfirmName",
-                                //    true,
-                                //    string.Empty,
-                                //    string.Empty,
-                                //    currentUserId);
                                 var emailResult = await sendMailService.SendMailToConfirmItemAsync(13, 17, "http://172.26.248.62:8057/Material/ConfirmName", true, "", "", currentUserId);
                             }
                             catch (Exception ex)
@@ -875,6 +889,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest("File không hợp lệ");
 
             var items = new List<BaoGia_Request_of_QuotationDTO>();
+            var listSectionCost = "";
             try
             {
                 using var stream = file.OpenReadStream();
@@ -893,7 +908,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         break; // kết thúc nếu gặp dòng trống ở cột Mã phòng ban
                     }
                     var dto = new BaoGia_Request_of_QuotationDTO();
-                    var a = ws.Cell(r, 6).GetString();
+                    var sectionCode = ws.Cell(r, 2).GetString();
+                    var sectionName = ws.Cell(r, 3).GetString();
                     // case 1 : nếu có mã hàng nội bộ, sẽ tự động check nhà cung cấp và nhân bản theo số lượng nhà cung cấp tìm được
                     if (ws.Cell(r, 6).GetString() != "" && ws.Cell(r, 6).GetString() != null)
                     {
@@ -908,10 +924,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             // Map theo thứ tự cột trong bảng ở giao diện
                             dto = new BaoGia_Request_of_QuotationDTO
                             {
-                                CHR_SectionCode = ws.Cell(r, 2).GetString(), // Mã phòng ban (value)
-                                CHR_SectionName = ws.Cell(r, 3).GetString(), // hiển thị có thể giống mã
+                                CHR_SectionCode = sectionCode, 
+                                CHR_SectionName = sectionName, 
                                 CHR_Phanloai = infor.LoaiHang,
                                 CHR_MaHangNoiBo = infor.Material_Code,
+                                CHR_MaHangNCC = infor.Code_Suppiler,    
                                 NVCHR_NameVN = infor.TenMoThuTuc,
                                 CHR_NameEN = infor.Material_Name_EN,
                                 INT_SoLuong = ParseDouble(ws.Cell(r, 10).GetString()),
@@ -979,8 +996,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         // Map theo thứ tự cột trong bảng ở giao diện
                         dto = new BaoGia_Request_of_QuotationDTO
                         {
-                            CHR_SectionCode = ws.Cell(r, 2).GetString(), // Mã phòng ban (value)
-                            CHR_SectionName = ws.Cell(r, 3).GetString(), // hiển thị có thể giống mã
+                            CHR_SectionCode = sectionCode, 
+                            CHR_SectionName = sectionName,
                             CHR_Phanloai = ParsePhanloai(ws.Cell(r, 4).GetString()),
                             CHR_MaThietBi = ws.Cell(r, 5).GetString(),
                             CHR_MaHangNoiBo = ws.Cell(r, 6).GetString(),

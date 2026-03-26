@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
@@ -13,6 +13,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View();
         }
         public IActionResult ListData()
+        {
+            return View();
+        }
+        public IActionResult ListData_GA()
         {
             return View();
         }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Routing.Constraints;
 using PRJ_WAREHOUSE_BIVN.Models;
 using System.Data;
 using System.DirectoryServices.AccountManagement;
+using System.Globalization;
 using System.Transactions;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -401,5 +402,252 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             UpdateTinhTrangPO(data.PO_Detail_Id!);
             return Json("OK");
         }
+        [HttpPost]
+        public JsonResult Sudungngay([FromBody] ConfirmImport data)
+        {
+            Models.SQL_Connect_DB20 db = new Models.SQL_Connect_DB20();
+
+            // dữ liệu đầu vào ---
+            string ngayNhap = string.IsNullOrWhiteSpace(data.NgayNhap)
+                              ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") : data.NgayNhap;
+
+            double luongVeThucTe = 0;
+            if (!double.TryParse(data.luongvethuctekho, out luongVeThucTe))
+            {
+                double.TryParse(data.Soluong, out luongVeThucTe); // Mặc định lấy theo SL PO nếu trống
+            }
+
+            // Lấy thông tin PO và Khối 
+            string sqlColumn = "[PO_Detail_Id],[Id_Goc],[SoPO],[Code_Request]";
+            sqlColumn += ",[Id_RequestDetail],[Good_Code],[Tentienganh]";
+            sqlColumn += ",[Tentiengviet],[Mahang],[Soluong]";
+            sqlColumn += ",[Dovi],[Dongia],[Dieukiengiaohang]";
+            sqlColumn += ",[Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien]";
+            sqlColumn += ",[Vat],[Maphongyeucau],[Tenphongyeucau]";
+            sqlColumn += ",[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan]";
+            sqlColumn += ",[Loaitien],[Tygia],[DoisangUSD]";
+            sqlColumn += ",[Danhmuc],[Invoice],[InvoiceNgaynhap],[InvoiceNguoinhap],[Luongvethucte]";
+            sqlColumn += ",[LuongvethucteNgaynhap],[LuongvethucteNguoinhap],[Luongvekho],[LuongvekhoNgaynhap] ";
+            sqlColumn += ",[LuongvekhoNguoinhap],[Sotokhai],[Ngaydangkytk]";
+            sqlColumn += ",[Kiemtratk],[SotokhaiNgaynhap],[SotokhaiNguoinhap]";
+            sqlColumn += ",[Tinhtrangtokhai],[Hienthi],[Benxacnhantruoc]";
+            sqlColumn += ",[Ngayphathanh],[TinhtrangPO],[TinhtranghaiquanPO]";
+            sqlColumn += ",[MaNCC],[TenNCC],[Maphongban]";
+            sqlColumn += ",[Nguoixacnhan],[Thoigianxacnhan],[Group_Code]";
+            sqlColumn += ",[InvoicePO],[InvoicePODenghithanhtoan],[InvoicePONgaynhap],[InvoicePONguoinhap]";
+            sqlColumn += ",[Nguoilamdon],[Ngaytao],[TinhtranghaiquanPONguoinhap],[TinhtranghaiquanPONgaynhap]";
+            sqlColumn += ",[Id_LichsuNhap],[LuongvekhoDanhap],[Loaichiphi]";
+            sqlColumn += ",[LuongvekhoKhonhap],[Aim],[Loaihinhtokhai],[Account_Code],[Phongchiuchiphi]";
+
+            string cmdQry = $"SELECT {sqlColumn} FROM [PO] WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'";
+
+            var dataPO = Models.PO.GetPoByPoIdentify(cmdQry);
+            if (dataPO.Count == 0) return Json("Lỗi: Không tìm thấy ID PO trong hệ thống.");
+            var poRow = dataPO[0];
+
+            // lấy ra khối và set kho
+            var get_khoi = db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE  PO_Detail_Id = '" + data.Id_nhapkho + "'");
+            // nếu khối Prod về kho F2, GA về GA, IT về IT, PUR về PUR
+            string khoi = get_khoi.Rows[0][0].ToString()!;
+           
+
+            //Kiểm tra điều kiện
+            if (poRow.Benxacnhantruoc == "STOCK")
+            {
+                bool daTach = db.GET_DATA_FROM_SQL($"SELECT 1 FROM [IM_PO_DETAIL] WHERE [Id_Goc] = '{data.Id_nhapkho}'").Rows.Count > 0;
+                if (daTach) return Json("Lỗi: Dòng hàng đã tách, không thể đổi số lượng. Hãy Reset dòng này.");
+            }
+            if (poRow.LuongvekhoDanhap?.Trim() == "True") return Json("Lỗi: Mục này đã được nhập kho rồi.");
+            if (poRow.TinhtrangPO?.Trim() == "DANGCHOXACNHAN") return Json("Lỗi: PO đang chờ Shipping xác nhận.");
+
+            
+            //Tách Dòng (Nếu nhập thiếu số lượng)
+            double soLuongGoc = 0; double.TryParse(poRow.Soluong, out soLuongGoc);
+            double donGia = poRow.Dongia ?? 0;
+            double tyGia = poRow.Tygia ?? 1;
+            double vatPhanTram = 0; double.TryParse(poRow.Vat, out vatPhanTram);
+
+            if ((string.IsNullOrEmpty(poRow.Benxacnhantruoc) || poRow.Benxacnhantruoc == "STOCK")
+                && luongVeThucTe < soLuongGoc && luongVeThucTe > 0)
+            {
+                double slMoi = soLuongGoc - luongVeThucTe;
+                double tienMoi = (slMoi * donGia) * (1 + vatPhanTram / 100);
+                double usdMoi = Math.Round(tienMoi / tyGia, 2);
+
+                string Insert = "INSERT INTO IM_PO_DETAIL([SoPO],[Tentienganh],[Tentiengviet],[Mahang],[Soluong],[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien],[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],[DoisangUSD],[Danhmuc],[Id_Goc],[Hienthi],[Benxacnhantruoc],[Good_Code]) ";
+                Insert += $" SELECT [SoPO],[Tentienganh],[Tentiengviet],[Mahang],'{slMoi}',[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],'{tienMoi}',[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],'{usdMoi}',[Danhmuc],[PO_Detail_Id],[Hienthi] + 1,'STOCK',[Good_Code]";
+                Insert += $" FROM IM_PO_DETAIL WHERE PO_Detail_Id = '{data.Id_nhapkho}' ";
+                db.GET_DATA_FROM_SQL(Insert);
+              
+            }
+
+            //Cập nhật trạng thái dòng hiện tại 
+            double tienHienTai = (luongVeThucTe * donGia) * (1 + vatPhanTram / 100);
+            double usdHienTai = Math.Round(tienHienTai / tyGia, 2);
+
+            db.GET_DATA_FROM_SQL($@"UPDATE [IM_PO_DETAIL] SET 
+                [Luongvekho] = '{luongVeThucTe}', [LuongvekhoNgaynhap] = '{ngayNhap}', 
+                [LuongvekhoNguoinhap] = '{data.UserName}', [LuongvekhoKhonhap] = '{data.KhoNhan}', 
+                [Sotien] = '{tienHienTai}', [DoisangUSD] = '{usdHienTai}', 
+                [Benxacnhantruoc] = 'STOCK', [LuongvekhoDanhap] = 'True' 
+                WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'");
+
+            // Log và Hoàn tất 
+            db.GET_DATA_FROM_SQL($"INSERT INTO [IM_LOG]([Loai],[SoPO],[PO_Detail_Id],[Hanhdong],[Thogian],[Nguoicapnhat]) VALUES ('DM','{poRow.SoPO}','{data.Id_nhapkho}',N'Nhập kho',Getdate(),'{data.UserName}')");
+            db.GET_DATA_FROM_SQL($"UPDATE [IM_PO] SET [Nguoixacnhan] = '{data.UserName}', [Thoigianxacnhan] = GETDATE() WHERE [SoPO] = '{poRow.SoPO}'");
+           
+            UpdateTinhTrangPO(poRow.SoPO!);
+            return Json("OK");
+           
+        }
+        [HttpPost]
+        public JsonResult NhapKhoAction([FromBody] ConfirmImport data )
+        {
+            Models.SQL_Connect_DB20 db = new Models.SQL_Connect_DB20();
+
+            // dữ liệu đầu vào ---
+            string ngayNhap = string.IsNullOrWhiteSpace(data.NgayNhap)
+                              ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") : data.NgayNhap;
+
+            double luongVeThucTe = 0;
+            if (!double.TryParse(data.luongvethuctekho, out luongVeThucTe))
+            {
+                double.TryParse(data.Soluong, out luongVeThucTe); // Mặc định lấy theo SL PO nếu trống
+            }
+
+            // Lấy thông tin PO và Khối 
+            string sqlColumn = "[PO_Detail_Id],[Id_Goc],[SoPO],[Code_Request]";
+            sqlColumn += ",[Id_RequestDetail],[Good_Code],[Tentienganh]";
+            sqlColumn += ",[Tentiengviet],[Mahang],[Soluong]";
+            sqlColumn += ",[Dovi],[Dongia],[Dieukiengiaohang]";
+            sqlColumn += ",[Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien]";
+            sqlColumn += ",[Vat],[Maphongyeucau],[Tenphongyeucau]";
+            sqlColumn += ",[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan]";
+            sqlColumn += ",[Loaitien],[Tygia],[DoisangUSD]";
+            sqlColumn += ",[Danhmuc],[Invoice],[InvoiceNgaynhap],[InvoiceNguoinhap],[Luongvethucte]";
+            sqlColumn += ",[LuongvethucteNgaynhap],[LuongvethucteNguoinhap],[Luongvekho],[LuongvekhoNgaynhap] ";
+            sqlColumn += ",[LuongvekhoNguoinhap],[Sotokhai],[Ngaydangkytk]";
+            sqlColumn += ",[Kiemtratk],[SotokhaiNgaynhap],[SotokhaiNguoinhap]";
+            sqlColumn += ",[Tinhtrangtokhai],[Hienthi],[Benxacnhantruoc]";
+            sqlColumn += ",[Ngayphathanh],[TinhtrangPO],[TinhtranghaiquanPO]";
+            sqlColumn += ",[MaNCC],[TenNCC],[Maphongban]";
+            sqlColumn += ",[Nguoixacnhan],[Thoigianxacnhan],[Group_Code]";
+            sqlColumn += ",[InvoicePO],[InvoicePODenghithanhtoan],[InvoicePONgaynhap],[InvoicePONguoinhap]";
+            sqlColumn += ",[Nguoilamdon],[Ngaytao],[TinhtranghaiquanPONguoinhap],[TinhtranghaiquanPONgaynhap]";
+            sqlColumn += ",[Id_LichsuNhap],[LuongvekhoDanhap],[Loaichiphi]";
+            sqlColumn += ",[LuongvekhoKhonhap],[Aim],[Loaihinhtokhai],[Account_Code],[Phongchiuchiphi]";
+
+            string cmdQry = $"SELECT {sqlColumn} FROM [PO] WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'";
+
+            var dataPO = Models.PO.GetPoByPoIdentify(cmdQry);
+            if (dataPO.Count == 0) return Json("Lỗi: Không tìm thấy ID PO trong hệ thống.");
+            var poRow = dataPO[0];
+
+            // lấy ra khối và set kho
+            var get_khoi = db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE  PO_Detail_Id = '" + data.Id_nhapkho + "'");
+            // nếu khối Prod về kho F2, GA về GA, IT về IT, PUR về PUR
+            string khoi = get_khoi.Rows[0][0].ToString()!;
+            data.KhoNhan = data.Mahang switch
+            {
+                var s when s!.Contains("E") || s!.Contains("A") => "F2",
+                var s when s!.Contains("I") => "IT",
+                var s when s!.Contains("B") || s!.Contains("C") => "F1",
+                _ => khoi switch // không có mã hàng sẽ gán theo khối
+                {
+                    "PROD" => "F2",
+                    "GA" => "F1",
+                    _ => khoi
+                }
+            };
+
+            //Kiểm tra điều kiện
+            if (poRow.Benxacnhantruoc == "STOCK")
+            {
+                bool daTach = db.GET_DATA_FROM_SQL($"SELECT 1 FROM [IM_PO_DETAIL] WHERE [Id_Goc] = '{data.Id_nhapkho}'").Rows.Count > 0;
+                if (daTach) return Json("Lỗi: Dòng hàng đã tách, không thể đổi số lượng. Hãy Reset dòng này.");
+            }
+            if (poRow.LuongvekhoDanhap?.Trim() == "True") return Json("Lỗi: Mục này đã được nhập kho rồi.");
+            if (poRow.TinhtrangPO?.Trim() == "DANGCHOXACNHAN") return Json("Lỗi: PO đang chờ Shipping xác nhận.");
+
+            try
+            {
+                //Tách Dòng (Nếu nhập thiếu số lượng)
+                double soLuongGoc = 0; double.TryParse(poRow.Soluong, out soLuongGoc);
+                double donGia = poRow.Dongia ?? 0;
+                double tyGia = poRow.Tygia ?? 1;
+                double vatPhanTram = 0; double.TryParse(poRow.Vat, out vatPhanTram);
+
+                if ((string.IsNullOrEmpty(poRow.Benxacnhantruoc) || poRow.Benxacnhantruoc == "STOCK")
+                    && luongVeThucTe < soLuongGoc && luongVeThucTe > 0)
+                {
+                    double slMoi = soLuongGoc - luongVeThucTe;
+                    double tienMoi = (slMoi * donGia) * (1 + vatPhanTram / 100);
+                    double usdMoi = Math.Round(tienMoi / tyGia, 2);
+
+                    string Insert = "INSERT INTO IM_PO_DETAIL([SoPO],[Tentienganh],[Tentiengviet],[Mahang],[Soluong],[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien],[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],[DoisangUSD],[Danhmuc],[Id_Goc],[Hienthi],[Benxacnhantruoc],[Good_Code]) ";
+                    Insert += $" SELECT [SoPO],[Tentienganh],[Tentiengviet],[Mahang],'{slMoi.ToString(CultureInfo.InvariantCulture)}',[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],'{tienMoi.ToString(CultureInfo.InvariantCulture)}',[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],'{usdMoi.ToString(CultureInfo.InvariantCulture)}',[Danhmuc],[PO_Detail_Id],[Hienthi] + 1,'STOCK',[Good_Code]";
+                    Insert += $" FROM IM_PO_DETAIL WHERE PO_Detail_Id = '{data.Id_nhapkho}' ";
+                    db.GET_DATA_FROM_SQL(Insert);
+
+                }
+
+                //Cập nhật trạng thái dòng hiện tại 
+                double tienHienTai = (luongVeThucTe * donGia) * (1 + vatPhanTram / 100);
+                double usdHienTai = Math.Round(tienHienTai / tyGia, 2);
+
+                db.GET_DATA_FROM_SQL($@"UPDATE [IM_PO_DETAIL] SET 
+                    [Luongvekho] = '{luongVeThucTe.ToString(CultureInfo.InvariantCulture)}', [LuongvekhoNgaynhap] = '{ngayNhap}', 
+                    [LuongvekhoNguoinhap] = '{data.UserName}', [LuongvekhoKhonhap] = '{data.KhoNhan}', 
+                    [Sotien] = '{tienHienTai.ToString(CultureInfo.InvariantCulture)}', [DoisangUSD] = '{usdHienTai.ToString(CultureInfo.InvariantCulture)}', 
+                    [Benxacnhantruoc] = 'STOCK', [LuongvekhoDanhap] = 'True' 
+                    WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'");
+
+                // Xử lý tồn kho 
+                if (!string.IsNullOrWhiteSpace(poRow.Mahang))
+                {
+                    double slNhapKho = luongVeThucTe;
+                    // Quy đổi đơn vị 
+                    string donViPO = poRow.Dovi!;
+                    string donViGoc = db.ReturnString($"SELECT [Unit] FROM [MATERIAL] WHERE [Material_Code] = N'{poRow.Mahang}'");
+                    string rate = db.ReturnString($"SELECT [Soluongquydoi] FROM [KHO_DONVIQUYDOI] WHERE [MaNguyenLieu] = '{poRow.Mahang}' AND [DonviRequest] = N'{donViGoc}' AND [DonviPO] = N'{donViPO}'");
+
+                    if (!string.IsNullOrEmpty(rate)) slNhapKho = double.Parse(rate) * luongVeThucTe;
+
+                    // Cập nhật bảng KHO
+                    string slHienTaiStr = db.ReturnString($"SELECT [Hientai] FROM KHO WHERE [MaNguyenLieu] = N'{poRow.Mahang}' AND [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{khoi}'");
+                    double slTruocThayDoi = 0;
+                    if (string.IsNullOrEmpty(slHienTaiStr))
+                    {
+                        db.GET_DATA_FROM_SQL($"INSERT INTO KHO(MaNguyenLieu,Hientai,Group_Code,Kho) VALUES (N'{poRow.Mahang}','{slNhapKho.ToString(CultureInfo.InvariantCulture)}','{khoi}','{data.KhoNhan}')");
+                    }
+                    else
+                    {
+                        slTruocThayDoi = double.Parse(slHienTaiStr);
+                        db.GET_DATA_FROM_SQL($"UPDATE KHO SET [Hientai] = [Hientai] + {slNhapKho.ToString(CultureInfo.InvariantCulture)} WHERE [MaNguyenLieu] = N'{poRow.Mahang}' AND [Kho] = '{data.KhoNhan}' AND [Group_Code] = '{khoi}'");
+                    }
+
+                    // Ghi lịch sử Nhập Xuất
+                    string maNV = db.ReturnString($"SELECT CHR_CRT_USERID FROM [TM_USER] WHERE [CHR_USERID] = '{data.UserName}'");
+                    string sqlLichSu = $@"INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[NCC],[Donvi],[MaNguoinhap],[Gia],[SoPO],[SoluongPO],[DonviPO],[Soluongconlai],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) 
+                                 OUTPUT Inserted.Id_Lichsu
+                                 VALUES(N'{poRow.Mahang}', N'Nhập từ PO: {poRow.SoPO}', '{slNhapKho.ToString(CultureInfo.InvariantCulture)}', 'NHAP', GETDATE(), '{data.UserName}', '{data.KhoNhan}', '{khoi}', N'{poRow.Tentienganh}', N'{poRow.TenNCC}', N'{donViGoc.ToString(CultureInfo.InvariantCulture)}', '{maNV}', '{donGia.ToString(CultureInfo.InvariantCulture)}', '{poRow.SoPO}', '{soLuongGoc.ToString(CultureInfo.InvariantCulture)}', N'{donViPO.ToString(CultureInfo.InvariantCulture)}', '{(soLuongGoc - slNhapKho).ToString(CultureInfo.InvariantCulture)}', '{ngayNhap}', '{slTruocThayDoi.ToString(CultureInfo.InvariantCulture)}', '{(slTruocThayDoi + slNhapKho).ToString(CultureInfo.InvariantCulture)}')";
+                    string idLichSu = db.ReturnString(sqlLichSu);
+                    db.GET_DATA_FROM_SQL($"UPDATE [IM_PO_DETAIL] SET [Id_LichsuNhap] = '{idLichSu}' WHERE [PO_Detail_Id] = '{data.Id_nhapkho}'");
+                }
+
+                // Log và Hoàn tất 
+                db.GET_DATA_FROM_SQL($"INSERT INTO [IM_LOG]([Loai],[SoPO],[PO_Detail_Id],[Hanhdong],[Thogian],[Nguoicapnhat]) VALUES ('DM','{poRow.SoPO}','{data.Id_nhapkho}',N'Nhập kho',Getdate(),'{data.UserName}')");
+                db.GET_DATA_FROM_SQL($"UPDATE [IM_PO] SET [Nguoixacnhan] = '{data.UserName}', [Thoigianxacnhan] = GETDATE() WHERE [SoPO] = '{poRow.SoPO}'");
+
+                UpdateTinhTrangPO(poRow.SoPO!);
+                return Json("OK");
+
+            }
+            catch (Exception ex)
+            {
+                return Json("Lỗi hệ thống: " + ex.Message);
+            }
+        }
+      
     }
 }

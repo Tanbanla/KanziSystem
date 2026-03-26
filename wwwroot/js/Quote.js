@@ -10,6 +10,7 @@
         , getNCCByCategory: '/Quote/GetNCCByCategory'
         , exportRenderOutSide: '/Quote/ExportRenderOutSide'
         , exportTable: '/Quote/ExportTable'
+        , searchApprover: '/Quote/GetListApprovel'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -649,6 +650,13 @@
         let rowsValid = true;
         let rowsCheckReason = true;
         let payload = [];
+        // Require approver selected before submitting
+        const approverVal = (qs('#approverSelect') || {}).value || '';
+        if (!approverVal || approverVal.toString().trim() === '') {
+            const T = window.i18nQuote || {};
+            showDialog({ title: T.ErrorTitle || 'Lỗi', message: (T.SelectApprover || 'Vui lòng chọn người phê duyệt trước khi gửi'), type: 'error' });
+            return;
+        }
         // Only validate and collect rows that contain user-entered data
         rows.forEach((tr) => {
             if (isRowEmpty(tr)) return; // skip empty rows
@@ -1372,6 +1380,57 @@
     function wireEvents() {
         const container = qs('#quote-request');
         if (!container) return;
+        // Track previous value for department selects to allow reverting on invalid change
+        qs('#quoteTableBody')?.addEventListener('focusin', (e) => {
+            try {
+                const t = e.target;
+                if (t && t.classList && t.classList.contains('tenPhongBanTb')) {
+                    t.dataset.prev = t.value || '';
+                }
+            } catch (ex) { }
+        }, true);
+
+        // When department changes ensure all non-empty rows use the same department code
+        qs('#quoteTableBody')?.addEventListener('change', async (e) => {
+            try {
+                const t = e.target;
+                if (!t || !t.classList || !t.classList.contains('tenPhongBanTb')) return;
+                const sel = t;
+                const newVal = (sel.value || '').toString();
+                const prevVal = sel.dataset.prev || '';
+
+                // Collect distinct non-empty section codes after this change
+                const rows = qsa('#quoteTableBody tr');
+                const set = new Set();
+                for (const r of rows) {
+                    const s = (r.querySelector('.tenPhongBanTb') || {}).value || '';
+                    if (s) set.add(s.toString());
+                }
+
+                if (set.size > 1) {
+                    // revert change and show warning
+                    sel.value = prevVal;
+                    try { updateSearchableSelectDisplay(sel); } catch (e) { }
+                    const T = window.i18nQuote || {};
+                    showDialog({ title: T.ErrorTitle || 'Lỗi', message: 'Không được chọn 2 mã phòng khác nhau trong cùng 1 đơn', type: 'error' });
+                    return;
+                }
+
+                // If a single non-empty section exists, load approvers for it
+                const single = set.size === 1 ? Array.from(set)[0] : '';
+                if (single) {
+                    await loadApprovers(single);
+                } else {
+                    // clear approver list if no section selected
+                    const approverSel = qs('#approverSelect');
+                    if (approverSel) {
+                        approverSel.innerHTML = '<option value="">' + ((window.i18nQuote && window.i18nQuote.SelectApprover) || '-- Select --') + '</option>';
+                    }
+                }
+            } catch (ex) {
+                console.warn('Error handling department change', ex);
+            }
+        });
         qs('#btnAddRow')?.addEventListener('click', addRow);
         qs('#btnReset')?.addEventListener('click', resetForm);
         qs('#btnCreate')?.addEventListener('click', submitForm);
@@ -1405,17 +1464,11 @@
             try {
                 showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xuất...');
                 const rows = qsa('#quoteTableBody tr');
-                const payload = [];
-                rows.forEach(tr => {
-                    // use existing collectRow to build DTO-like object
-                    const obj = collectRow(tr);
-                    payload.push(obj);
-                });
 
                 const res = await fetch(api.exportTable, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(allQuoteItems)
                 });
                 if (!res.ok) {
                     const msg = await res.text().catch(() => 'Lỗi không xác định');
@@ -1645,6 +1698,7 @@
             }
         });
     }
+    // search Approver
 
     // Tìm kiếm 
     function buildSearchableDropdown($container) {
@@ -1909,6 +1963,43 @@
     // Initialize for existing selects
     buildSearchableDropdown($(document));
 
+    // Load approvers for a given section code and populate the top approver select
+    async function loadApprovers(sectionCode) {
+        const sel = qs('#approverSelect');
+        if (!sel) return;
+        try {
+            showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xử lý...');
+            const body = { Step: 2, SectionCost: sectionCode || '' };
+            const res = await fetch(api.searchApprover, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            // data expected to be an array of approver DTOs
+            sel.innerHTML = '';
+            const optDefault = document.createElement('option');
+            optDefault.value = '';
+            optDefault.textContent = (window.i18nQuote && window.i18nQuote.SelectApprover) || '-- Select Approver --';
+            sel.appendChild(optDefault);
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(a => {
+                    try {
+                        const o = document.createElement('option');
+                        o.value = a?.chR_UserAdid || '';
+                        o.textContent = (a?.nvchR_UserName ? a.nvchR_UserName + ' (' + (o.value || '') + ')' : (o.value || ''));
+                        sel.appendChild(o);
+                    } catch (ex) { }
+                });
+            }
+        } catch (err) {
+            console.warn('Không thể tải danh sách approver:', err);
+        } finally {
+            hideLoading();
+        }
+    }
+
     function setSelectValueByText(select, textOrValue) {
         if (!select) return;
         const val = textOrValue ?? '';
@@ -2071,6 +2162,53 @@
         allQuoteItems = Array.isArray(items) ? items.slice() : [];
         filteredQuoteItems = allQuoteItems.slice();
         currentPage = 1;
+
+        // Validate that all non-empty rows share the same section code
+        try {
+            const sections = new Set();
+            allQuoteItems.forEach(it => {
+                const s = (it && (it.CHR_SectionCode || it.chR_SectionCode || it.sectionCode)) || '';
+                if (s && s.toString().trim() !== '') sections.add(s.toString().trim());
+            });
+            if (sections.size > 1) {
+                const T = window.i18nQuote || {};
+                showDialog({ title: T.ErrorTitle || 'Lỗi', message: 'Không được upload dữ liệu chứa nhiều mã phòng khác nhau trong cùng 1 đơn. Vui lòng kiểm tra file Excel.', type: 'error' });
+                return;
+            }
+
+            // If a single section present, load approvers for it
+            if (sections.size === 1) {
+                const section = Array.from(sections)[0];
+                await loadApprovers(section);
+            }
+
+            // Ensure any material codes from uploaded items exist as options in the maHangNoiBo selects
+            const materialCodes = new Set();
+            allQuoteItems.forEach(it => {
+                const code = (it && (it.CHR_MaHangNoiBo || it.chR_MaHangNoiBo || it.maHangNoiBo)) || '';
+                if (code && code.toString().trim() !== '') materialCodes.add(code.toString().trim());
+            });
+            if (materialCodes.size > 0) {
+                const allSelects = qsa('.maHangNoiBo');
+                allSelects.forEach(sel => {
+                    materialCodes.forEach(code => {
+                        try {
+                            if (!Array.from(sel.options).some(o => (o.value || '') === code)) {
+                                const o = document.createElement('option');
+                                o.value = code;
+                                o.text = code; // fallback text; searchable dropdown will show this text
+                                sel.appendChild(o);
+                            }
+                        } catch (e) { /* ignore individual failures */ }
+                    });
+                    // mark for rebuild of searchable UI
+                    try { $(sel).data('search-dropdown', false); } catch { }
+                });
+            }
+        } catch (ex) {
+            console.warn('Error validating uploaded items:', ex);
+        }
+
         const tbody = qs('#quoteTableBody');
         if (!tbody) return;
         renderQuotePage(tbody, filteredQuoteItems);
@@ -2079,6 +2217,7 @@
     // Render only the visible page from the provided items list
     function renderQuotePage(tbody, sourceItems) {
         try {
+            showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xử lý...');
             const existing = qs('#quoteTableBody tr');
             const baseRow = existing ? existing.cloneNode(true) : null;
             const template = document.createElement('tr');
@@ -2133,6 +2272,8 @@
             filteredRows = Array.from(tbody.querySelectorAll('tr'));
         } catch (e) {
             console.warn('renderQuotePage error', e);
+        } finally {
+            hideLoading();
         }
     }
     // show message dialog

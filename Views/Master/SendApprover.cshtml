@@ -30,7 +30,7 @@
                                 <option value="">@Localizer["All"]</option>
                                 @foreach (var item in listSections)
                                 {
-                                     <option value="@item.Mahangmuctheovitri">@item.Mahangmuctheovitri - @item.Tenhangmuctheovitri</option>
+                                     <option value="@item.Cost_Center">@item.Cost_Center - @item.Name</option>
                                 }
                             </select>
                         </div>
@@ -104,7 +104,7 @@
                                 <option value="">@Localizer["All"]</option>
                                 @foreach (var item in listSections)
                                 {
-                                     <option value="@item.Mahangmuctheovitri">@item.Mahangmuctheovitri - @item.Tenhangmuctheovitri</option>
+                                     <option value="@item.Cost_Center">@item.Cost_Center - @item.Name</option>
                                 }
                             </select>
                             <div class="invalid-feedback">@Localizer["ValidateSelectSection"]</div>

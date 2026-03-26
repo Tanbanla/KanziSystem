@@ -6,6 +6,7 @@
     .form-control, .input-group-text, .custom-select, .custom-file-label {
         border-color: #6e75c4;
     }
+
     .card .card-header .btn:not(.note-btn) {
         border-radius: 3px;
         height: 41px;
@@ -35,7 +36,7 @@
         margin: 0 !important;
         background-color: #f8f9fa; /* Màu nền nút */
         color: #28a745 !important; /* Màu mũi tên xanh lá */
-        float:right;
+        float: right;
     }
 
         /* Chỉnh kích thước mũi tên nhỏ lại cho cân đối */
@@ -66,20 +67,20 @@
             <div class="card-header" style="padding-left: 0px;">
                 <div class="form-group" style="margin : 10px 0 0 5px">
                     <div class="input-group mb-2">
-                        <button class="btn btn-outline-success" style="border-radius : 0px;" onclick="_dongy_all()"><i class="fa fa-check"></i> @Languages.Dongy</button>
+                        <button class="btn btn-outline-success" style="border-radius : 0px;" onclick="_dongy_all_GA()"><i class="fa fa-check"></i> @Languages.Dongy</button>
                         <button class="btn btn-outline-info ml-1" style="border-radius : 0px;" id="modal-15" onclick="_list_view()"><i class="fa fa-eye-dropper"></i> @Languages.Xem</button>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 50px">
                     <div class="input-group mb-2">
-                       @*  <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon"> *@
+                        @*  <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon"> *@
                         <select class="form-control" id="trangthaidon">
                             <option value=""> -- @Languages.Tinhtrangdon --</option>
                             <option value="1">Gấp</option>
                             <option value="0">Thông thường</option>
                         </select>
                     </div>
-                </div>             
+                </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
                         <select class="form-control" id="tinhtrangdon">
@@ -98,10 +99,10 @@
                     <div class="input-group mb-2">
                         <input type="text" class="form-control" id="mnl" placeholder="@Languages.mayeucau ">
                     </div>
-                </div>                    
+                </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-                      @*   <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- @Languages.Giatien ---" /> *@
+                        @*   <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- @Languages.Giatien ---" /> *@
                         <select class="form-control" id="giadonhang">
                             <option value="">---  @Languages.Giatien  ---</option>
                             <option value="2999">Dưới 3000</option>
@@ -114,14 +115,14 @@
                 <button type="button" class="btn btn-info ml-3" onclick="_reset()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button>
 
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
-            </div>                    
+            </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
                     <table class="table table-bordered">
-                        <thead class="bg-primary">                       
+                        <thead class="bg-primary">
                             <tr>
                                 <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" id="idd" /></th>
-                                <th rowspan="2">@Languages.chitiet</th>                                         
+                                <th rowspan="2">@Languages.chitiet</th>
                                 <th rowspan="2">@Languages.Tinhtrangdon</th>
                                 <th rowspan="2">@Languages.Trangthaidon</th>
                                 <th rowspan="2">@Languages.mayeucau</th>
@@ -131,20 +132,22 @@
                                 <th rowspan="2">@Languages.tongdon</th>
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
-                                <th colspan="2">@Languages.phongtiepnhan</th>
+                                <th colspan="3">@Languages.phongtiepnhan</th>
                                 @* <th rowspan="2">@Languages.nguoinhan</th> *@
                             </tr>
                             <tr>
                                 <th>@Languages.nguoiduthao</th>
                                 <th>@Languages.nguoithamtra</th>
                                 <th>@Languages.nguoipheduyet</th>
-                                <th>@Languages.dongyboi</th>
-                                <th>@Languages.nguoixuatkho</th>
+                               
+                                <th>@Languages.Damnhiem</th>
+                                <th>@Languages.dongyboi QLSC</th>
+                                <th>@Languages.dongyboi QLTC</th>
                             </tr>
                         </thead>
                         <tbody id="list_approve"></tbody>
                     </table>
-                </div>           
+                </div>
             </div>
         </div>
     </div>
@@ -157,7 +160,7 @@
     window.onload = function()
     {
         var us = document.getElementById("us").innerHTML;
-        _load_confirm(us);
+        _load_confirm_GA(us);
     }
     let lst = [];
     const checkAll = document.getElementById('idd');
@@ -191,14 +194,14 @@
 
     function _list_view()
     {
-        
+        //Gán nút button theo khối
    
         document.getElementById('slider').innerHTML = "";
         for(let i = 0; i < lst.length; i++){
             var mayeucau = lst[i].split('_')[0];
             var buoc = lst[i].split('_')[1];
-           
-            // tạo giao diện 
+
+            // tạo giao diện
 
             document.getElementById('slider').innerHTML += `
             <div class="swiper-slide p-3">
@@ -282,7 +285,7 @@
                     <tbody id="load_detail${i}"></tbody>
                 </table>
                 <div class="float-right" id="cls_${i}">
-                    <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
+                    <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_GA('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
                     <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
                 </div>
             </div>`
@@ -293,7 +296,7 @@
             data: {
                 cost_request: mayeucau
             },
-            success: function (response) {       
+            success: function (response) {
                 document.getElementById("load_detail" + i).innerHTML = "";
                 document.getElementById("madonhang" + i).innerHTML = "*" + response[0].code_Request + "*";
                 document.getElementById("mbp" + i).innerHTML = response[0].cost_Center_Group;
@@ -304,9 +307,7 @@
                 document.getElementById("khoi" + i).innerHTML = response[0].group_Code.split(' ')[0];
                 document.getElementById("id_request" + i).innerHTML = response[0].id_Request;
                 document.getElementById("urgent" + i).innerHTML = response[0].urgent;
-                document.getElementById("step" + i
-                
-                ).innerHTML = buoc;
+                document.getElementById("step" + i).innerHTML = buoc;
                 if (buoc == "0") {
                     document.getElementById("regency" + i).innerHTML = "NGUOIYEUCAU";
                 }
@@ -317,18 +318,20 @@
                     document.getElementById("regency"+ i).innerHTML = "NGUOIPHEDUYET";
                 }
                 if (buoc == "3") {
-                    document.getElementById("regency"+ i).innerHTML = "XACNHAN";
+                    document.getElementById("regency"+ i).innerHTML = "XUATKHO";
                 }
                 if (buoc == "4") {
-                    document.getElementById("regency"+ i).innerHTML = "XUATKHO";
+                    document.getElementById("regency"+ i).innerHTML = "QLSC";
+                }
+                 if (buoc == "5") {
+                    document.getElementById("regency"+ i).innerHTML = "QLTC";
                 }
                 for (var a = 0; a < response.length; a++) {
                     var tongtien = response[a].total_exchange;
                     document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount}</td><td>${response[a].unit}</td><td>${response[a].price}</td><td>${response[a].currency}</td><td>${tongtien}</td><td>${response[a].aim}</td><td></td>`;
                 }
             }
-            })
-      
-        }
+        })
     }
+}
 </script>

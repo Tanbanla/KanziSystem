@@ -1,4 +1,4 @@
-﻿@using PRJ_WAREHOUSE_BIVN.Language
+@using PRJ_WAREHOUSE_BIVN.Language
 @{
     ViewData["Title"] = "Xuất kho";
 }
@@ -63,14 +63,21 @@
                     <table class="table table-bordered">
                         <thead >
                             <tr>
-                                <td class="text-center"></td>
+                                <td class="text-center">
+                                    <select class="form-control" id="khoi" >
+                                        <option value="PROD">PROD</option>
+                                        <option value="GA">GA</option>
+                                        <option value="IT">IT</option>
+                                        <option value="PUR">PUR</option>
+                                    </select>
+                                </td>
                                 <td><input type="text" class="form-control" id="mayeucau" placeholder="@Languages.mayeucau "></td>
                                 <td><input type="text" class="form-control" id="nguoitao" placeholder="@Languages.nguoitao"></td>
                                 <td><button type="button" class="btn btn-success ml-3" onclick="_load_xuatkho()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button></td>
                                 <td><button type="button" class="btn btn-info ml-3" onclick="resett()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button></td>
                             </tr>
                             <tr class="bg-primary">                          
-                                <th width="80px"></th>
+                                <th width="100px"></th>
                                 <th>@Languages.Trangthaidon</th>
                                 <th>@Languages.mayeucau</th>
                                 <th>@Languages.Phongban</th>

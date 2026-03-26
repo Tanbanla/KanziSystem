@@ -1215,7 +1215,7 @@ public partial class COST_MANAGEMENTContext : DbContext
 
         modelBuilder.Entity<DEPARTMENT>(entity =>
         {
-            entity.HasKey(e => e.Cost_Center);
+            entity.HasKey(e => e.Id_Dept);
 
             entity.ToTable("DEPARTMENT");
 
@@ -1225,6 +1225,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Id_Dept).ValueGeneratedOnAdd();
             entity.Property(e => e.Name).HasMaxLength(500);
             entity.Property(e => e.Name_Jp).HasMaxLength(500);
+            entity.Property(e => e.CHR_Section_Code).HasMaxLength(25);
         });
 
         modelBuilder.Entity<DEPARTMENT_VITRI>(entity =>
@@ -1279,9 +1280,9 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Kind).HasMaxLength(50);
             entity.Property(e => e.Id_Est).ValueGeneratedOnAdd();
 
-            entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.ESTIMATEs)
-                .HasForeignKey(d => d.Cost_Center)
-                .HasConstraintName("FK_ESTIMATE_DEPARTMENT1");
+            //entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.ESTIMATEs)
+            //    .HasForeignKey(d => d.Cost_Center)
+            //    .HasConstraintName("FK_ESTIMATE_DEPARTMENT1");
         });
 
         modelBuilder.Entity<ESTIMATE_CHANGE>(entity =>
@@ -1313,9 +1314,9 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.TimeEnd).HasColumnType("datetime");
             entity.Property(e => e.TimeStart).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.ESTIMATE_DEADLINE_CHANGEs)
-                .HasForeignKey(d => d.Cost_Center)
-                .HasConstraintName("FK_ESTIMATE_DEADLINE_CHANGE_DEPARTMENT1");
+            //entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.ESTIMATE_DEADLINE_CHANGEs)
+            //    .HasForeignKey(d => d.Cost_Center)
+            //    .HasConstraintName("FK_ESTIMATE_DEADLINE_CHANGE_DEPARTMENT1");
         });
 
         modelBuilder.Entity<ESTIMATE_DEADLINE_CHANGE_DEFAULT>(entity =>
@@ -2128,9 +2129,9 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.ThoigianNhap).HasMaxLength(50);
             entity.Property(e => e.UserNhap).HasMaxLength(50);
 
-            entity.HasOne(d => d.Cost_CenterNavigation).WithMany()
-                .HasForeignKey(d => d.Cost_Center)
-                .HasConstraintName("FK_OUT_INPUT_DEPARTMENT");
+            //entity.HasOne(d => d.Cost_CenterNavigation).WithMany()
+            //    .HasForeignKey(d => d.Cost_Center)
+            //    .HasConstraintName("FK_OUT_INPUT_DEPARTMENT");
         });
 
         modelBuilder.Entity<OUT_INPUT_ACCOUNT>(entity =>
@@ -2366,10 +2367,10 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.User_Create).HasMaxLength(10);
             entity.Property(e => e.User_Update).HasMaxLength(10);
 
-            entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.REQUESTs)
-                .HasForeignKey(d => d.Cost_Center)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_REQUEST_DEPARTMENT");
+            //entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.REQUESTs)
+            //    .HasForeignKey(d => d.Cost_Center)
+            //    .OnDelete(DeleteBehavior.Cascade)
+            //    .HasConstraintName("FK_REQUEST_DEPARTMENT");
         });
 
         modelBuilder.Entity<REQUEST_ACCEPT>(entity =>
@@ -3093,9 +3094,9 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasForeignKey(d => d.CHR_USERID)
                 .HasConstraintName("FK_USER_DEPT_TM_USER");
 
-            entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.USER_DEPTs)
-                .HasForeignKey(d => d.Cost_Center)
-                .HasConstraintName("FK_USER_DEPT_DEPARTMENT");
+            //entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.USER_DEPTs)
+            //    .HasForeignKey(d => d.Cost_Center)
+            //    .HasConstraintName("FK_USER_DEPT_DEPARTMENT");
         });
 
         modelBuilder.Entity<V2_FORM>(entity =>
@@ -3119,10 +3120,10 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.TenPhong).HasMaxLength(500);
             entity.Property(e => e.TinhTrang).HasMaxLength(50);
 
-            entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.V2_FORMs)
-                .HasForeignKey(d => d.Cost_Center)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_V2_FORM_DEPARTMENT");
+            //entity.HasOne(d => d.Cost_CenterNavigation).WithMany(p => p.V2_FORMs)
+            //    .HasForeignKey(d => d.Cost_Center)
+            //    .OnDelete(DeleteBehavior.Cascade)
+            //    .HasConstraintName("FK_V2_FORM_DEPARTMENT");
         });
 
         modelBuilder.Entity<V2_FORM_ALL>(entity =>

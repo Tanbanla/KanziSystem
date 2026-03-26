@@ -1,4 +1,4 @@
-﻿@using PRJ_WAREHOUSE_BIVN.Language
+@using PRJ_WAREHOUSE_BIVN.Language
 @{
     ViewData["Title"] = Languages.NhaphangPO;
 }
@@ -174,7 +174,7 @@
                     <tr class="bg-light">
                         <td colspan="2">
                             <button class="btn btn-success" onclick="ImportWarehouse()"> <i class="ion ion-ios-cart"></i> @Languages.Nhapkho</button>
-                            <button class="btn btn-danger ml-3"> <i class="ion ion-ios-unlocked"></i> @Languages.sudung</button>
+                            <button class="btn btn-danger ml-3" onclick="Usingg()"> <i class="ion ion-ios-unlocked"></i> @Languages.sudung</button>
                         </td>
 
                         <td colspan="2">
@@ -271,8 +271,7 @@
     window.onload = function ()
     {
         _Load_PO();
-        loadListWarehouse();
-       
+        loadListWarehouse();       
     }
     function loadListWarehouse() {
             fetch('/Delivery/GetWareHouse', {

@@ -1,10 +1,10 @@
-﻿using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.DTO;
 
 namespace PRJ_WAREHOUSE_BIVN.View_Models.ApprovalQuote
 {
     public class ApprovalQuoteViewModel
     {
-        public List<ACC_NHOMVITRIDTO> listNhomVitri { get; set; } = new List<ACC_NHOMVITRIDTO>();
+        public List<DEPARTMENTDTO> listNhomVitri { get; set; } = new List<DEPARTMENTDTO>();
         public List<string> listSoDon { get; set; } = new List<string>();
         public List<MATERIALDTO> listMaterial { get; set; } = new List<MATERIALDTO>();
         public List<BaoGia_Request_of_QuotationDTO> listBaoGia { get; set; } = new List<BaoGia_Request_of_QuotationDTO>();

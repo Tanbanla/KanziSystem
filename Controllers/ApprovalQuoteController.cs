@@ -14,7 +14,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     {
         private readonly ILogger<ApprovalQuoteController> _logger;
         private readonly IHistoryApproverServive _historyApproverServive;
-        private readonly INhomViTriService _nhomViTriService;
         private readonly IMaterialService _materialService;
         private readonly IBaoGiaService _baoGiaService;
         private readonly IBaoGiaHistoryService _baoGiaHistoryService;
@@ -22,15 +21,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaStepService _baoGiaStepService;
         private readonly ISendMailService _sendMailService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IDepartmentService _deparmentService;
         private readonly IWebHostEnvironment _env;
         public ApprovalQuoteController(ILogger<ApprovalQuoteController> logger,
-            IHistoryApproverServive historyApproverServive, INhomViTriService nhomViTriService, IMaterialService materialService,
-            IBaoGiaService baoGiaService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStatusService baoGiaStatusService
+            IHistoryApproverServive historyApproverServive, IMaterialService materialService,
+            IBaoGiaService baoGiaService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStatusService baoGiaStatusService, IDepartmentService departmentService
             , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IWebHostEnvironment env)
         {
             _logger = logger;
             _historyApproverServive = historyApproverServive;
-            _nhomViTriService = nhomViTriService;
             _materialService = materialService;
             _env = env;
             _baoGiaService = baoGiaService;
@@ -39,6 +38,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaStepService = baoGiaStepService;
             _sendMailService = sendMailService;
             _serviceScopeFactory = serviceScopeFactory;
+            _deparmentService = departmentService;
         }
         public async Task<IActionResult> Index()
         {
@@ -58,16 +58,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View(vm);
         }
         // Lay thong tin phong ban
-        public async Task<List<ACC_NHOMVITRIDTO>> GetNhomViTriList()
+        public async Task<List<DEPARTMENTDTO>> GetNhomViTriList()
         {
             try
             {
-                var result = await _nhomViTriService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId() ?? "");
+                var result = await _deparmentService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId() ?? "");
                 return result.Data;
             }
             catch (Exception ex)
             {
-                return new List<ACC_NHOMVITRIDTO>();
+                return new List<DEPARTMENTDTO>();
             }
         }
         // Lay thong tin hang hoa

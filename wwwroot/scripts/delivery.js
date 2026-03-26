@@ -1,10 +1,10 @@
-﻿function resett() {
+function resett() {
     document.getElementById("show_kho_iv").innerHTML = "";
     document.getElementById("poNumber").value = "";
     _Load_PO()
 }
 function ImportWarehouse() {
-    const url = '/Delivery/ImportWarehouse';
+    const url = '/Delivery/NhapKhoAction';
 
     let table = document.getElementById('show_kho_iv');
     //Scan table with row selected will import to warehouse
@@ -53,6 +53,56 @@ function ImportWarehouse() {
     }
 }
 
+
+function Usingg() {
+    const url = '/Delivery/Sudungngay';
+
+    let table = document.getElementById('show_kho_iv');
+    //Scan table with row selected will import to warehouse
+    // let dateInput = document.getElementById('idTimeDelivery').value;
+    //let warehouseName = document.getElementById('IdWarehouse').value;
+
+    //if (dateInput == '' || warehouseName == '--') {
+    //    alert("Bạn cần nhập đầy đủ : ngày nhận và kho nhận");
+    //    return;
+    //}
+    let group_code = document.getElementById("IdDept").value;
+    let UserName = document.getElementById("us").innerHTML;
+    //let [year, month, day] = dateInput.split('-');
+    //let formattedDate = `${month}/${day}/${year}`;
+    var ngaynhap = document.getElementById("idTimeDelivery").value;
+    for (let i = 0; i < table.rows.length; i++) {
+        let row = table.rows[i];
+        let cbxSelect = row.cells[0].querySelector('input[type="checkbox"]');
+        let txtLuongVeKho = row.cells[11].querySelector('input[type="number"]');
+        if (cbxSelect && cbxSelect.checked) {
+            let payload = {
+                PO_Detail_Id: row.cells[4].innerHTML,
+                Id_nhapkho: row.cells[1].innerHTML,
+                benXacNhanTruoc: 'STOCK',
+                luongvethuctekho: txtLuongVeKho ? txtLuongVeKho.value : '',
+                NgayNhap: ngaynhap,
+                Mahang: row.cells[6].innerHTML,
+                Soluong: row.cells[10].innerHTML,
+                Group_Code: group_code,
+                UserName: UserName
+            };
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            fetch(url, options)
+                .then(response => response.json())
+                .then(result => {
+                    alert("Sử dụng hàng PO " + row.cells[4].innerHTML + " (Mã " + row.cells[1].innerHTML + "): " + result);
+                    SearchPoDel();
+                })
+                .catch(err => console.error(err));
+        }
+    }
+}
 async function SearchPoDel() {
     let UserName = document.getElementById("us").value;
     let GetPO = document.getElementById('poNumber').value;

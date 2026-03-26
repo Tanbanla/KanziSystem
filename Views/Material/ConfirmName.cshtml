@@ -1,9 +1,9 @@
-﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@using PRJ_WAREHOUSE_BIVN.DTO
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["PageTitle"].Value;
     var role = ViewBag.Role as string ?? "UserPUR"; // UserShip | UserAcc | UserPUR
-    List<ACC_NHOMVITRIDTO> nhomVitris = Model.vitris;
+    List<DEPARTMENTDTO> nhomVitris = Model.vitris;
     List<dynamic> confirmedCodes = Model.confirmedCodes;
 }
 <head>
@@ -63,7 +63,7 @@
                         <option value="" selected>@Localizer["SelectDepartment"]</option>
                         @foreach (var s in nhomVitris)
                         {
-                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                            <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
                         }
                     </select>
                 </div>

@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 // removed unused OpenXML usings
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -32,7 +32,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = @"
                 SELECT distinct q.*
                 FROM BaoGia_Request_of_Quotation as q
-				  inner join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+				  inner join [BaoGia_Master_Approver_Send_Mail] as s 
 				on q.CHR_SectionCode = s.CHR_CodeSection
                 WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
@@ -343,7 +343,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.CHR_MaNCC,
                     r.ID_StepBaoGia
                 FROM [BaoGia_Request_of_Quotation] r
-	            left join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+	            left join [BaoGia_Master_Approver_Send_Mail] as s 
 	            on r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE 1 = 1 
                     AND r.ID_StepBaoGia > 5 ");
@@ -679,7 +679,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<string>> GetMaDonByAdidAsync(string adid)
         {
             var sql = @"  SELECT DISTINCT CHR_MaDon FROM BaoGia_Request_of_Quotation as q
-                  inner join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+                  inner join [BaoGia_Master_Approver_Send_Mail] as s 
                   on q.CHR_SectionCode = s.CHR_CodeSection
                   WHERE s.CHR_UserAdid = @Adid AND ID_StepBaoGia < 9";
             var parameters = new { Adid = adid };

@@ -3,7 +3,7 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Tạo yêu cầu báo giá";
-    List<ACC_NHOMVITRIDTO> nhomViTri = Model.DanhSachNhomViTri;
+    List<DEPARTMENTDTO> nhomViTri = Model.DanhSachNhomViTri;
     List<string> phanLoais = ["A","B","C","E","NO LIST"];
     List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
     List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
@@ -52,7 +52,6 @@
                         <option value="">@Localizer["SelectApprover"]</option>
                         @foreach (var a in listApproval)
                         {
-                            @* <option value="@a.Adid">@a.FullName (@a.Adid) - @a.DepartmentName</option> *@
                             <option value="@a.CHR_UserAdid">@a.NVCHR_UserName (@a.CHR_UserAdid)</option> 
                         }
                     </select>
@@ -159,7 +158,7 @@
                                         <option value="" selected>@Localizer["SelectSection"]</option>
                                         @foreach (var s in nhomViTri)
                                         {
-                                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                                            <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
                                         }
                                     </select>
                                 </td>
@@ -387,7 +386,8 @@
         SelectInternalMaterialCode = Localizer["SelectInternalMaterialCode"].Value,
         Showing = Localizer["Showing"].Value,
         To = Localizer["To"].Value,
-        Of = Localizer["Of"].Value
+        Of = Localizer["Of"].Value,
+        SelectApprover = Localizer["SelectApprover"].Value
     }));
 </script>
 @section Scripts {

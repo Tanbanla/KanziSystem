@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Agent;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -63,6 +63,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
 
             CreateMap<TM_EMPLOYEE, TM_EMPLOYEEDTO>();
             CreateMap<TM_EMPLOYEEDTO, TM_EMPLOYEE>();
+
+            CreateMap<DEPARTMENT, DEPARTMENTDTO>();
+            CreateMap<DEPARTMENTDTO, DEPARTMENT>();
         }
     }
 }

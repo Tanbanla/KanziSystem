@@ -67,6 +67,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ITmEmployeeAgentService, TmEmployeeAgentService>();
         services.AddScoped<ITmEmployeeAgentRepository, TmEmployeeAgentRepository>();
+
+        services.AddScoped<IDeparmentRepository, DeparmentRepository>();
+        services.AddScoped<IDepartmentService, DepartmentService>();
         return services;
     }
 }

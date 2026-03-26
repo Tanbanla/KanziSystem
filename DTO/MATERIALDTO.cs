@@ -82,4 +82,17 @@ public partial class MATERIALDTO
 
     // Expose TenMoThuTuc as a property so it will be included in JSON responses
     public string? TenMoThuTuc => GetTenMoThuTuc();
+    // Name Vi
+    public string? NameVI => GetNameVi();
+    public string? GetNameVi()
+    {
+        if (string.IsNullOrEmpty(Material_Code))
+            return null;
+        switch (Material_Code.Substring(0, 1))
+        {
+            case "O": return Shape + " & " + UsedFor + " & " +Purpose;
+            default:
+                return Material_Name_VN;
+        }
+    }
 }

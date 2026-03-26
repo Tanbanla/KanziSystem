@@ -7,7 +7,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         // danh sach phong ban
         public List<TM_SECTIONDTO> DanhSachPhongBan { get; set; } = new List<TM_SECTIONDTO>();
         // Danh sach nhom vi tri
-        public List<ACC_NHOMVITRIDTO> DanhSachNhomViTri { get; set; } = new List<ACC_NHOMVITRIDTO>();
+        public List<DEPARTMENTDTO> DanhSachNhomViTri { get; set; } = new List<DEPARTMENTDTO>();
         // danh sach vat tu
         public List<MATERIALDTO> DanhSachVatTu { get; set; } = new List<MATERIALDTO>();
         // danh sach nha cung cap
@@ -128,5 +128,11 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string? Status { get; set; }
         public int? PageIndex { get; set; }
         public int? PageSize { get; set; }
+    }
+    // Search Approval
+    public class SearchApprovalModel
+    {
+        public int? Step { get; set; }
+        public string? SectionCost { get; set; }
     }
 }

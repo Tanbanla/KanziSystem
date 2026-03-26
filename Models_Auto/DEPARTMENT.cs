@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -21,13 +21,15 @@ public partial class DEPARTMENT
 
     public string? CHR_WAREHOUSE { get; set; }
 
-    public virtual ICollection<ESTIMATE_DEADLINE_CHANGE> ESTIMATE_DEADLINE_CHANGEs { get; set; } = new List<ESTIMATE_DEADLINE_CHANGE>();
+    public string? CHR_Section_Code { get; set; }
 
-    public virtual ICollection<ESTIMATE> ESTIMATEs { get; set; } = new List<ESTIMATE>();
+    //public virtual ICollection<ESTIMATE_DEADLINE_CHANGE> ESTIMATE_DEADLINE_CHANGEs { get; set; } = new List<ESTIMATE_DEADLINE_CHANGE>();
 
-    public virtual ICollection<REQUEST> REQUESTs { get; set; } = new List<REQUEST>();
+    //public virtual ICollection<ESTIMATE> ESTIMATEs { get; set; } = new List<ESTIMATE>();
 
-    public virtual ICollection<USER_DEPT> USER_DEPTs { get; set; } = new List<USER_DEPT>();
+    //public virtual ICollection<REQUEST> REQUESTs { get; set; } = new List<REQUEST>();
 
-    public virtual ICollection<V2_FORM> V2_FORMs { get; set; } = new List<V2_FORM>();
+    //public virtual ICollection<USER_DEPT> USER_DEPTs { get; set; } = new List<USER_DEPT>();
+
+    //public virtual ICollection<V2_FORM> V2_FORMs { get; set; } = new List<V2_FORM>();
 }

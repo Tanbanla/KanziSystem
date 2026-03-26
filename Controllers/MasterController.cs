@@ -22,17 +22,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IEmployeeWorkingService _employeeWorkingService;
         private readonly ITmNccNewService _tmNccNewService;
         private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
-        private readonly IBaoGiaNCCService _baoGiaNCCService;
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IMaterialService _materialService;
         private readonly ITmEmployeeAgentService _employeeAgentService;
         private readonly ITmUserService _tmUserService;
+        private readonly IDepartmentService _departmentService;
 
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
             ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
-            IBaoGiaNccCategoryService baoGiaNccCategoryService, IBaoGiaNCCService baoGiaNCCService
+            IBaoGiaNccCategoryService baoGiaNccCategoryService, IDepartmentService departmentService
             , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService, ITmEmployeeAgentService employeeAgentService, ITmUserService tmUserService)
         {
             _approverService = approverService;
@@ -41,13 +41,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _employeeWorkingService = employeeWorkingService;
             _nhomViTriService = nhomViTriService;
             _tmNccNewService = tmNccNewService;
-            _baoGiaNCCService = baoGiaNCCService;
             _baoGiaNccCategoryService = baoGiaNccCategoryService;
             _logger = logger;
             _tmCategoryService = tmCategoryService;
             _materialService = materialService;
             _employeeAgentService = employeeAgentService;
             _tmUserService = tmUserService;
+            _departmentService = departmentService;
         }
 
         public IActionResult Masters()
@@ -140,16 +140,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return vm;
         }
         // Lay thong tin phong ban
-        public async Task<List<ACC_NHOMVITRIDTO>> GetNhomViTriList()
+        public async Task<List<DEPARTMENTDTO>> GetNhomViTriList()
         {
             try
             {
-                var result = await _nhomViTriService.GetAllAsync();
-                return (List<ACC_NHOMVITRIDTO>)result.Data;
+                var result = await _departmentService.GetAllDepartmentAsync();
+                return (List<DEPARTMENTDTO>)result.Data;
             }
             catch (Exception ex)
             {
-                return new List<ACC_NHOMVITRIDTO>();
+                return new List<DEPARTMENTDTO>();
             }
         }
         // API: lấy dữ liệu theo điều kiện (section, adid, bước)
@@ -869,7 +869,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest("Không tìm thấy thông tin bước phê duyệt");
             }
-            var listStep = stepAsync.Data.Where(c=> c.INT_StepNumber == 1);
+            var listStep = stepAsync.Data.Where(c=> c.INT_StepNumber == 2);
             var listInsert = new List<BaoGia_Master_Approver_Send_Mail>();
             try
             {
@@ -887,8 +887,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         break;
                     }
                     // Map theo thứ tự cột
-                    var seticon = ws.Cell(r, 1).GetString().Trim();
-                    var mailUser = ws.Cell(r, 4).GetString().Trim();
+                    var seticon = ws.Cell(r, 4).GetString().Trim();
+                    var mailUser = ws.Cell(r, 3).GetString().Trim();
                     // lay thong tin user
                     var userInfo = await _employeeAgentService.GetInforEmployeeByMail(mailUser);
                     if (userInfo == null || !userInfo.Success || userInfo.Data == null)
@@ -896,8 +896,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         continue; // bỏ qua nếu không tìm thấy thông tin user
                     }
                     // lay thong tin vi tri
-                    var sectionCode = await _employeeWorkingService.GetCodeSec(seticon);
-                    var listCodeCenter = await _employeeWorkingService.GetCodeCenterBySec(sectionCode.Data ?? "");
+                    //var sectionCode = await _employeeWorkingService.GetCodeSec(seticon); await _employeeWorkingService.GetCodeCenterBySec(seticon);//
+                    var listCodeCenter = await _departmentService.GetDepartmentBySectionAsync(seticon);
                     if (listCodeCenter == null || !listCodeCenter.Success || listCodeCenter.Data == null || listCodeCenter.Data.Count == 0)
                     {
                         continue; // bỏ qua nếu không tìm thấy thông tin phòng ban
@@ -910,9 +910,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var dto = new BaoGia_Master_Approver_Send_Mail
                             {
                                 ID = 0,
-                                ID_BaoGiaStep = 1,
+                                ID_BaoGiaStep = 3,
                                 CHR_UserAdid = userInfo.Data.CHR_EMPLOYEE_ADID,
-                                CHR_CodeSection = item,
+                                CHR_CodeSection = item.Cost_Center,
                                 CHR_NameSection = "",
                                 NVCHR_UserName = userInfo.Data.CHR_EMPLOYEE_NAME,
                                 NVCHR_Position = userInfo.Data.CHR_POSITION_NAME,
@@ -1005,6 +1005,59 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("File không có dữ liệu hợp lệ");
                 }
                 var result = await _tmUserService.InsertListUserAsync(listInsert);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
+        // Ham cap nhat thong tin phong ban tu file excel
+        [HttpPost]
+        public async Task<IActionResult> UploadFileUpdateDepartment([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("File not Data");
+            var stepAsync = await _baoGiaStepService.GetStepsApproverAsync();
+            if (stepAsync == null || !stepAsync.Success || stepAsync.Data == null || stepAsync.Data.Count == 0)
+            {
+                return BadRequest("Không tìm thấy thông tin bước phê duyệt");
+            }
+            var listUpdate = new List<DEPARTMENT>();
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                // Dữ liệu bắt đầu từ dòng 1
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 1).GetString() == "" || ws.Cell(r, 1).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột
+                    var Section = ws.Cell(r, 3).GetString().Trim();
+                    var CodeCost = ws.Cell(r, 1).GetString().Trim();
+                    var  item = new DEPARTMENT
+                    {
+                        CHR_Section_Code = Section,
+                        Cost_Center = CodeCost
+                    };
+                    listUpdate.Add(item);
+
+                }
+                if (listUpdate.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                var result = await _departmentService.UpdateSectionAsync(listUpdate);
                 if (!result.Success)
                 {
                     return BadRequest(result);

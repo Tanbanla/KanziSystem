@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Data.SqlClient;
@@ -32,8 +32,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                   ,[Mahangmuctheovitri]
                   ,[Tenhangmuctheovitri]
                   ,[Model]
-              FROM [COST_MANAGEMENT].[dbo].[ACC_NHOMVITRI] as a
-              inner join [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] as s 
+              FROM [ACC_NHOMVITRI] as a
+              inner join [BaoGia_Master_Approver_Send_Mail] as s 
               on a.Mahangmuctheovitri = s.CHR_CodeSection
               where s.CHR_UserAdid = @User";
             var parameters = new

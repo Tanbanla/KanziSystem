@@ -1,9 +1,9 @@
-﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@using PRJ_WAREHOUSE_BIVN.DTO
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["PageTitle"].Value;
     // Expect the model to provide lists similar to other Quote pages for consistency
-    List<ACC_NHOMVITRIDTO> nhomViTri = Model?.DanhSachNhomViTri ?? new List<ACC_NHOMVITRIDTO>();
+    List<DEPARTMENTDTO> nhomViTri = Model?.DanhSachNhomViTri ?? new List<DEPARTMENTDTO>();
     List<MATERIALDTO> materials = Model?.DanhSachVatTu ?? new List<MATERIALDTO>();
     List<IM_NCC_NEWDTO> suppliers = Model?.DanhSachNhaCungCap ?? new List<IM_NCC_NEWDTO>();
     List<string> maDons = Model?.DanhSachMaDon ?? new List<string>();
@@ -34,7 +34,7 @@
                         <option value="" selected>@Localizer["SelectDepartment"]</option>
                         @foreach (var s in nhomViTri)
                         {
-                            <option value="@s.Mahangmuctheovitri">@s.Mahangmuctheovitri - @s.Tenhangmuctheovitri</option>
+                            <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
                         }
                     </select>
                 </div>

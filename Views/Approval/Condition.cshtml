@@ -1,4 +1,4 @@
-﻿@using PRJ_WAREHOUSE_BIVN.Language
+@using PRJ_WAREHOUSE_BIVN.Language
 @{
     ViewData["Title"] = "Trạng thái đơn";
 }
@@ -15,11 +15,11 @@
                 <div class="form-group" style="margin : 10px 0 0 0">
                     <label>@Languages.Khoi :</label> <br />
                     <div class="input-group mb-2">
-                        <select class="form-control" id="khoi">
-                            <option>PROD</option>
-                            <option>GA</option>
-                            <option>IT</option>
-                            <option>PUR</option>
+                        <select class="form-control" id="khoi" onchange="checkSelectValue(this.value)">
+                            <option value="PROD">PROD</option>
+                            <option value="GA">GA</option>
+                            <option value="IT">IT</option>
+                            <option value="PUR">PUR</option>
                         </select>
                     </div>
                 </div>
@@ -101,15 +101,11 @@
                                 <th rowspan="2">@Languages.tongdon</th>
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
-                                <th colspan="2">@Languages.phongtiepnhan</th>
-                                <th rowspan="2">@Languages.nguoinhan</th>
+                                <th colspan="3">@Languages.phongtiepnhan</th>
+            
                             </tr>
-                            <tr>
-                                <th>@Languages.nguoiduthao</th>
-                                <th>@Languages.nguoithamtra</th>
-                                <th>@Languages.nguoipheduyet</th>
-                                <th>@Languages.dongyboi</th>
-                                <th>@Languages.nguoixuatkho</th>
+                            <tr id="loadhangmuc">
+                              
                             </tr>
                         </thead>
                         <tbody id="list_approve"></tbody>
@@ -128,6 +124,29 @@
     window.onload = function()
     {
        _load_request_condition();
+    }
+
+    function checkSelectValue(val) {
+        if(val === "GA") {
+                document.getElementById("loadhangmuc").innerHTML = `
+                                    <th>@Languages.nguoiduthao</th>
+                                    <th>@Languages.nguoithamtra</th>
+                                    <th>@Languages.nguoipheduyet</th>                                    
+                                    <th>@Languages.nguoixuatkho</th>
+                                    <th>@Languages.dongyboi QLSC</th>
+                                    <th>@Languages.dongyboi QLTC</th>`
+            _load_request_condition_ga();
+
+        }
+        if(vall == "PROD"){
+                   document.getElementById("loadhangmuc").innerHTML = `
+                                        <th>@Languages.nguoiduthao</th>
+                                        <th>@Languages.nguoithamtra</th>
+                                        <th>@Languages.nguoipheduyet</th>                                        
+                                        <th>@Languages.dongyboi QLSC/QLTC</th>
+                                        <th>@Languages.nguoixuatkho</th>`
+            _load_request_condition();
+        }
     }
 
     const userPagingState = {
@@ -261,8 +280,7 @@
                         <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
                         <td>${item.chR_TEN_NGUOIPHEDUYET} ${dots[2]}</td>
                         <td>${item.chR_TEN_XACNHAN} ${dots[3]}</td>
-                        <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>
-                        <td></td>
+                        <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>                    
                     </tr>`;
         }).join(''); // Nối tất cả các chuỗi thành một chuỗi HTML lớn
 
@@ -328,5 +346,145 @@
         return ` <li class="page-item"><a class="page-link  ${activeClass}"  onclick="goToPage(${pageNumber})">${pageNumber}</a></li>`;
     }
 
-   
+
+ // load cho khối GA
+// 1. Khởi tạo State
+const userPagingState_ga = {
+    fullData: [],
+    currentPage: 1,
+    itemsPerPage: 15,
+    totalPages: 0
+};
+
+// 2. Hàm Tải Dữ liệu
+function _load_request_condition_ga() {
+    // Lấy giá trị (Đảm bảo các ID này tồn tại trong HTML của bạn)
+    const getValue = (id) => document.getElementById(id) ? document.getElementById(id).value : "";
+
+    const params = new URLSearchParams({
+        'Group_Code': getValue("khoi"),
+        'Code_Request': getValue("mnl"),
+        'INT_STEP': getValue("tinhtrangdon"),
+        'Cost_Center': getValue("cost"),
+        'Request_Date': getValue("ngayyc"),
+        'Total': getValue("giadonhang"),
+        'Urgent': getValue("trangthaidon")
+    });
+
+    fetch('/Request/get_requestcondition_ga', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        userPagingState_ga.fullData = data;
+        userPagingState_ga.totalPages = Math.ceil(data.length / userPagingState_ga.itemsPerPage);
+
+        if (data.length === 0) {
+            document.getElementById('list_approve').innerHTML = `<tr><td colspan="15" class="text-center">Không có dữ liệu !</td></tr>`;
+            document.getElementById("pagination-controls").innerHTML = '';
+        } else {
+            goToPage_ga(1);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// 3. Hàm Chuyển Trang
+function goToPage_ga(page) {
+    if (page < 1 || page > userPagingState_ga.totalPages) return;
+    userPagingState_ga.currentPage = page;
+    
+    const startIndex = (page - 1) * userPagingState_ga.itemsPerPage;
+    const pageData = userPagingState_ga.fullData.slice(startIndex, startIndex + userPagingState_ga.itemsPerPage);
+
+    renderUserTable_ga(pageData);
+    renderPaginationControls_ga();
+}
+
+// 4. Hàm Render Bảng
+function renderUserTable_ga(data) {
+    const tbody = document.getElementById('list_approve');
+    const stepMap = {
+        "0": ["Đợi người dự thảo", "warning", 1],
+        "1": ["Đợi người thẩm tra", "info", 2],
+        "2": ["Đợi người phê duyệt", "pink", 3],
+        "3": ["Đợi đảm nhiệm kho", "success", 4],
+        "4": ["Đợi QLSC phòng tiếp nhận", "light", 5],
+        "5": ["Đợi QLTC phòng tiếp nhận", "secondary", 6],
+        "6": ["Bị từ chối", "danger", 1],
+        "7": ["Bị từ chối", "danger", 2],
+        "8": ["Bị từ chối", "danger", 3],
+        "9": ["Bị từ chối", "danger", 4],
+        "10": ["Bị từ chối", "danger", 5]
+    };
+
+    const htmlContent = data.map(item => {
+        const s = String(item.inT_STEP);
+        const config = stepMap[s] || ["Không xác định", "dark", 0];
+        const isReject = parseInt(s) >= 6;
+        const currentStep = config[2];
+
+        const dots = Array.from({ length: 5 }, (_, i) => {
+            const stepIdx = i + 1;
+            if (isReject && stepIdx === currentStep) return "<span class='text-danger'><b>×</b></span>";
+            if (stepIdx < currentStep) return "<span class='text-success'><b>✓</b></span>";
+            if (stepIdx === currentStep) return `<span class='text-warning'>${s === "5" ? "✓" : "◉"}</span>`;
+            return "<span></span>";
+        });
+
+        return `
+            <tr>
+                <td class="text-center" onclick="_modal_info('${item.code_Request}', '${item.inT_STEP}')">
+                    <button class="btn btn-outline-primary"><i class="fa fa-info"></i></button>
+                </td>
+                <td>${item.urgent == "True" ? "<b class='text-danger'><i>* Gấp</i></b>" : "Thông thường"}</td>
+                <td><div class="badge badge-pill badge-${config[1]}">${config[0]}</div></td>
+                <td>${item.code_Request}</td>
+                <td>${item.cost_Center}</td>
+                <td>${item.create_Date}</td>
+                <td>${item.dealine}</td>
+                <td>${item.total}</td>
+                <td>${item.user_Create}</td>
+                <td>${item.chR_TEN_NGUOIYEUCAU || ''} ${dots[0]}</td>
+                <td>${item.chR_TEN_NGUOITHAMTRA || ''} ${dots[1]}</td>
+                <td>${item.chR_TEN_NGUOIPHEDUYET || ''} ${dots[2]}</td>
+                <td>${item.chR_TEN_XUATKHO || ''} ${dots[3]}</td>
+                <td>${item.chR_TEN_QLSC || ''} ${dots[4]}</td>
+                <td>${item.chR_TEN_QLTC || ''} ${dots[4]}</td>
+            </tr>`;
+    }).join('');
+
+    tbody.innerHTML = htmlContent;
+}
+
+// 5. Hàm Render Phân Trang
+function renderPaginationControls_ga() {
+            const container = document.getElementById("pagination-controls");
+            const { currentPage, totalPages } = userPagingState_ga;
+            if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+            let html = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="javascript:void(0)" onclick="goToPage_ga(${currentPage - 1})">«</a>
+                        </li>`;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                                <a class="page-link" href="javascript:void(0)" onclick="goToPage_ga(${i})">${i}</a>
+                            </li>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="javascript:void(0)" onclick="goToPage_ga(${currentPage + 1})">»</a>
+                    </li>`;
+                container.innerHTML = html;
+}
 </script>

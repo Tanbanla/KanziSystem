@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.Models;
@@ -41,6 +42,36 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return Json("OK");
         }
+        [HttpPost]
+        public JsonResult _Insert_request_GA(string Cost_Center, string Declaration, string Dealine, string Total_exchange, string Exchange_rate, string Currency, string Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<Models.REQUEST_DETAIL>? rq, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_qlsc, string adid_qlsc, string mail_qlsc, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao, string ten_qltc, string adid_qltc, string mail_qltc)
+        {
+            var rq_detail = REQUEST_PROCESS_GA.Insert_request_GA(Cost_Center,Declaration,Dealine,Total_exchange,Exchange_rate,Currency,Total,Kind,Type,Status,Place,Loaihinhtokhai,Group_Code,Chophepin,Urgent,User_Create,rq,adid_dt,adid_tt,adid_pd,mail_dt,mail_tt,mail_pd,ten_dt,ten_tt,ten_pd,ten_qlsc,adid_qlsc,mail_qlsc,ten_xk,adid_xk,mail_xk,adidnguoitao,mailnguoitao,ten_qltc,adid_qltc,mail_qltc);
+
+            // gửi mail
+            string body = $@"Xin chào <br />
+               Đơn yêu cầu mã : {rq_detail} đã được tạo <br /><br />
+               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+               <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+               ※このメールは自動的に送付されたので、返事をしないでください。 ";
+
+            string body1 = $@"Xin chào <br />
+               Đơn yêu cầu mã : {rq_detail} đã được gửi đến bạn phê duyệt <br /><br />
+               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+               <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+               ※このメールは自動的に送付されたので、返事をしないでください。 ";
+
+            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+            if (Urgent == "True")
+            {
+                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+            }
+            var sendmail = REQUEST_PROCESS._sendmail(body, mailnguoitao.Replace("\n", "").Replace(" ", ""), subject);
+            var sendmail1 = REQUEST_PROCESS._sendmail(body1, mail_dt.Replace("\n", "").Replace(" ", ""), subject);
+
+            return Json("OK");
+        }
         public JsonResult _get_rate()
         {
             var rate = REQUEST_PROCESS.get_rate();
@@ -58,12 +89,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var cf = REQUEST_PROCESS.get_requestconfirm(us, Urgent, Total, Code_Request, INT_STEP);
             return Json(cf);
         }
+        [HttpPost]
+        public JsonResult _get_confirm_GA(string us, string Urgent, double Total, string Code_Request, string INT_STEP)
+        {
+            var cf = REQUEST_PROCESS_GA.get_requestconfirm(us, Urgent, Total, Code_Request, INT_STEP);
+            return Json(cf);
+        }
         public JsonResult _get_request(string cost_request)
         {
             var rq = REQUEST_PROCESS._get_info_dtrq(cost_request);
             return Json(rq);
         }
-      
+        public JsonResult _get_request_GA(string cost_request)
+        {
+            var rq = REQUEST_PROCESS_GA._get_info_dtrq(cost_request);
+            return Json(rq);
+        }
+
         public JsonResult _update_request(string id_request, string regency, string step, string urgent)
         {
           
@@ -113,6 +155,55 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var up = REQUEST_PROCESS._update_request(id_request, regency, buoc.ToString());
             return Json(up);
         }
+        public JsonResult _update_request_GA(string id_request, string regency, string step, string urgent)
+        {
+
+            string body = $@"Xin chào <br />
+               Đơn yêu cầu mã : {id_request} đã được gửi đến bên xin phê duyệt <br /><br />
+               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+               <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+               ※このメールは自動的に送付されたので、返事をしないでください。 ";
+            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+            if (urgent == "True")
+            {
+                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+            }
+            var buoc = int.Parse(step) + 1;
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            var mail_send = _db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + id_request + "'");
+            // Định nghĩa cột email tương ứng với từng bước
+            string? columnName = buoc switch
+            {
+                1 => "CHR_MAIL_NGUOITHAMTRA",
+                2 => "CHR_MAIL_NGUOIPHEDUYET",
+                3 => "CHR_MAIL_XUATKHO",
+                4 => "CHR_MAIL_QLSC",
+                5 => "CHR_MAIL_QLTC",
+                _ => null
+            };
+
+            if (columnName == null) return Json("Bước không hợp lệ!");
+
+            // Lấy địa chỉ email từ DataTable
+            string mailTo = mail_send.Rows[0][columnName].ToString()!;
+
+            // Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
+            if (buoc == 5)
+            {
+                body = $@"Xin chào <br />
+                     Đơn yêu cầu mã : {id_request} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
+            }
+
+            // Gửi mail 
+            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+            var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());
+            return Json(up);
+        }
         public JsonResult _update_dongytatca(string us, string madon)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
@@ -126,17 +217,103 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ※このメールは自動的に送付されたので, 返事をしないでください。";
 
             var get_if = db.GET_DATA_FROM_SQL("select INT_STEP, CHR_MAIL_NGUOITAO, Urgent from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request where b.Code_Request = '" + madon.Split("_")[0] + "' ");
-            var mailTo = get_if.Rows[0][1].ToString();
+         
             string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
 
             if (get_if.Rows[0][2].ToString() == "True")
             {
                 subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
             }
-            // Gửi mail 
-            REQUEST_PROCESS._sendmail(body, mailTo!, subject);
-            
+            // Gửi mail
+
+            int buoc = int.Parse(get_if.Rows[0][0].ToString()!);
+            var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM where ID_REQUEST = '" + madon.Split("_")[0] + "'");
+            // Định nghĩa cột email tương ứng với từng bước
+            string? columnName = buoc switch
+            {
+                1 => "CHR_MAIL_NGUOITHAMTRA",
+                2 => "CHR_MAIL_NGUOIPHEDUYET",
+                3 => "CHR_MAIL_XACNHAN",
+                4 => "CHR_MAIL_XUATKHO",
+                5 => "CHR_MAIL_NGUOITAO",
+                _ => null
+            };
+
+            if (columnName == null) return Json("Bước không hợp lệ!");
+
+            // Lấy địa chỉ email từ DataTable
+            string mailTo = mail_send.Rows[0][columnName].ToString()!;
+
+            // Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
+            if (buoc == 5)
+            {
+                body = $@"Xin chào <br />
+                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
+            }
+
+            var up = REQUEST_PROCESS._update_request(madon.Split("_")[0], columnName, buoc.ToString());
+            REQUEST_PROCESS._sendmail(body, mailTo!, subject);            
              
+            return Json(kq);
+        }
+        public JsonResult _update_dongytatca_GA(string us, string madon)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var kq = REQUEST_PROCESS_GA._update_all(us);
+
+            string body = $@"Xin chào <br />
+                    Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                    Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                    <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                    ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                    ※このメールは自動的に送付されたので, 返事をしないでください。";
+
+            var get_if = db.GET_DATA_FROM_SQL("select INT_STEP, CHR_MAIL_NGUOITAO, Urgent from [PE_REQUEST_CONFIRM_GA] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request where b.Code_Request = '" + madon.Split("_")[0] + "' ");
+
+            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+
+            if (get_if.Rows[0][2].ToString() == "True")
+            {
+                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+            }
+            // Gửi mail
+
+            int buoc = int.Parse(get_if.Rows[0][0].ToString()!);
+            var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + madon.Split("_")[0] + "'");
+            // Định nghĩa cột email tương ứng với từng bước
+            string? columnName = buoc switch
+            {
+                1 => "CHR_MAIL_NGUOITHAMTRA",
+                2 => "CHR_MAIL_NGUOIPHEDUYET",
+                3 => "CHR_MAIL_XUATKHO",
+                4 => "CHR_MAIL_QLSC",
+                5 => "CHR_MAIL_QLTC",
+                _ => null
+            };
+
+            if (columnName == null) return Json("Bước không hợp lệ!");
+
+            // Lấy địa chỉ email từ DataTable
+            string mailTo = mail_send.Rows[0][columnName].ToString()!;
+
+            // Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
+            if (buoc == 5)
+            {
+                body = $@"Xin chào <br />
+                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
+            }
+
+            var up = REQUEST_PROCESS_GA._update_request(madon.Split("_")[0], columnName, buoc.ToString());
+            REQUEST_PROCESS_GA._sendmail(body, mailTo!, subject);
+
             return Json(kq);
         }
         public JsonResult _reject(string id_request, string reason, string regency, string step, string urgent)
@@ -175,6 +352,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //       : "0";
             double aa = double.Parse(Total);
             var cf = REQUEST_PROCESS.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent);
+            return Json(cf);
+        }
+        public JsonResult get_requestcondition_GA(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent)
+        {
+            //Urgent = (Urgent == "Gấp") ? "1" : (Urgent == "Thông thường" ? "0" : Urgent);
+            //var a =  (Total == "Dưới 3000") ? "2999"                  
+            //       : (Total == "Dưới 10,000") ? "3000"
+            //       : (Total == "Trên 10,000") ? "10000"
+            //       : "0";
+            double aa = double.Parse(Total);
+            var cf = REQUEST_PROCESS_GA.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent);
             return Json(cf);
         }
     }

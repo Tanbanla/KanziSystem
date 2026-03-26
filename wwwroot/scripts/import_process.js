@@ -180,10 +180,17 @@ async function _load_name_inv(group_code) {
     })
         .then(res => res.json())
         .then(data => {
-
+            if (group_code == "GA") {
+                document.getElementById("modal-20").style.display = '';
+                document.getElementById("modal-6").style.display = 'none';
+              
+            }
+            if (group_code == "PROD") {
+                document.getElementById("modal-20").style.display = 'none';
+                document.getElementById("modal-6").style.display = '';
+            }
             globalMaterialData = data; // Lưu lại để dùng sau
             const $allSelects = $('.select2');
-
             // Nạp data cho toàn bộ select2 đang có trên màn hình
             fillDataToSelect($allSelects, data);
         });
@@ -212,11 +219,14 @@ async function _load_info_adid() {
     })
         .then(response => response.json())
         .then(data => {
+            console.log(data);
             document.getElementById("name_dept").innerHTML = "";
             data.forEach(item => {
 
                 document.getElementById("name_dept").innerHTML += `<option>${item.cost_Center}:${item.name}</option>`
             });
+            document.getElementById("dept").value = data[0].name;
+            document.getElementById("secs").value = data[0].cost_Center_Group;
         })
         .catch(error => console.error('Error:', error));
 }
@@ -238,7 +248,6 @@ async function _load_dept(dept) {
             console.log(data);
             document.getElementById("dept").value = dept.split(':')[1];
             document.getElementById("secs").value = data.cost_Center_Group;
-
         })
         .catch(error => console.error('Error:', error));
 }

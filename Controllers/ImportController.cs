@@ -86,9 +86,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             List<PE_USERNAME> _ifor = REQUEST_PROCESS._load_userinventory("", id);
             return Json(_ifor);
         }
-        public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai, string phong)
+        public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai, string phong, string khoii)
         {
-            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai, phong);
+            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai, phong, khoii);
             return Json(lst);
         }
         private readonly IWebHostEnvironment _env;
@@ -96,56 +96,58 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             _env = env;
         }
-        [HttpPost("download_log")]
-        public IActionResult download_log([FromForm] string date_to, [FromForm] string date_from)
+        [HttpGet]
+        public ActionResult ExportToExcel_Log()
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            string path = Path.Combine(_env.ContentRootPath, "Data");
+            string templatePath = Path.Combine(path, "File_export.xlsx");
+            string tempFileName = $"Temp_{Guid.NewGuid()}.xlsx";
+            string tempPath = Path.Combine(path, tempFileName);
 
-            // 1. Sửa đường dẫn Path.Combine
-            string filePath = Path.Combine(_env.ContentRootPath, "Data", "Log_WH.xlsx");
-            if (!System.IO.File.Exists(filePath)) return NotFound("Template file not found");
-
-            // Dùng MemoryStream để không làm hỏng file gốc và tránh tranh chấp file (file in use)
-            using (var stream = new MemoryStream())
+            try
             {
-                using (var fi = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                System.IO.File.Copy(templatePath, tempPath, true);
+                FileInfo fileInfo = new FileInfo(tempPath);
+                using (var package = new ExcelPackage(fileInfo))
                 {
-                    using (var excelPackage = new ExcelPackage(fi))
-                    {
-                        var excelWorksheets = excelPackage.Workbook.Worksheets.First();
+                    var wsMaterial = package.Workbook.Worksheets[1];
+                    List<string> DataListMaterial = MST_INVENTORY._getname_material();
+                    //for (int idx = 0; idx < DataListMaterial.Count; idx++)
+                    //{
+                    //    wsMaterial.Cells["A" + (idx + 2)].Value = DataListMaterial[idx];
+                    //}
 
-                        // Clear dữ liệu cũ (Tối ưu: Chỉ clear vùng có dữ liệu)
-                        int rowcount = excelWorksheets.Dimension?.End.Row ?? 1;
-                        if (rowcount >= 2)
-                        {
-                            excelWorksheets.Cells[2, 1, rowcount, 12].Value = "";
-                        }
+                    //var wsDept = package.Workbook.Worksheets[2];
+                    //List<string> DataForDept = User_Info._GetCostCenter();
+                    //for (int idx = 0; idx < DataForDept.Count; idx++)
+                    //{
+                    //    wsDept.Cells["A" + (idx + 2)].Value = DataForDept[idx];
+                    //}
 
-                        List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg("", date_to, date_from, "", "", "", "");
+                    //var wsLocation = package.Workbook.Worksheets[3];
+                    //List<string> DataLocation = User_Info._GetLocation();
+                    //for (int idx = 0; idx < DataLocation.Count; idx++)
+                    //{
+                    //    wsLocation.Cells["A" + (idx + 2)].Value = DataLocation[idx];
+                    //}
 
-                        int i = 2;
-                        foreach (var item in lst)
-                        {
-                            excelWorksheets.Cells[i, 1].Value = i - 1;
-                            excelWorksheets.Cells[i, 2].Value = item.MaNguyenLieu;
-                            excelWorksheets.Cells[i, 3].Value = item.Hanhdong;
-                            excelWorksheets.Cells[i, 4].Value = item.Soluong;
-                            excelWorksheets.Cells[i, 5].Value = item.Loai;
-                            excelWorksheets.Cells[i, 6].Value = item.Ngaynhaokho;
-                            excelWorksheets.Cells[i, 7].Value = item.Nguoicapnhat;
-                            excelWorksheets.Cells[i, 8].Value = item.Kho;
-                            excelWorksheets.Cells[i, 9].Value = item.Khoi;
-                            excelWorksheets.Cells[i, 10].Value = item.Vitri;
-                            excelWorksheets.Cells[i, 11].Value = item.Phong;
-                            i++;
-                        }
-                        excelPackage.SaveAs(stream);
-                    }
+                    package.Save();
                 }
 
-                string fileName = "Log_" + DateTime.Now.ToString("ddMMyyyy") + ".xlsx";
-                return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                byte[] fileBytes = System.IO.File.ReadAllBytes(tempPath);
+                System.IO.File.Delete(tempPath);
+                return File(
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "FormatTemplateRequest.xlsx"
+            );
             }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xử lý: {ex.Message}");
+            }
+
         }
         public JsonResult chitiet_xuatkho(string mayeucau, string nguoitao)
         {
@@ -180,11 +182,20 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);
         }
-        public JsonResult _load_xuatkhohang(string mayeucau, string nguoitao)
+        public JsonResult _load_xuatkhohang(string mayeucau, string nguoitao, string khoi)
         {
-
-            var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(mayeucau, nguoitao);
-            return Json(list);
+            if(khoi == "GA")
+            {
+                var list = Models.REQUEST_PROCESS_GA._load_tonkhoxuathang(mayeucau, nguoitao, khoi);
+                return Json(list);
+            }
+           
+            if(khoi == "PROD")
+            {
+                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(mayeucau, nguoitao, khoi);
+                return Json(list);
+            }
+            return Json("Không có dữ liệu");
         }
         public JsonResult _load_body_detail(string code_request)
         {

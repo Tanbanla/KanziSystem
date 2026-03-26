@@ -1,10 +1,10 @@
-﻿using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.DTO;
 
 namespace PRJ_WAREHOUSE_BIVN.View_Models.Material
 {
     public class MaterialVM
     {
-        public List<ACC_NHOMVITRIDTO> vitris { get; set; } = new List<ACC_NHOMVITRIDTO>();
+        public List<DEPARTMENTDTO> vitris { get; set; } = new List<DEPARTMENTDTO>();
 
         public List<dynamic> confirmedCodes { get; set; } = new List<dynamic>();
         // Request/Response DTOs for ConfirmName APIs

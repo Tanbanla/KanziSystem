@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     // Global UI state preserved across tab switches
     // store opened supplier groups (key: "MaDon-MaHang") and additional-columns visibility
     window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
@@ -202,8 +202,8 @@
                      <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
 
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNoiBo || ''}</td>
-                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Phanloai || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNCC || ''}</td>
+                    <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Phanloai || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ChungLoai || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_NameVN || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_NameEN || ''}</td>

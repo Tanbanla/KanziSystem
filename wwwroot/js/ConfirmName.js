@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     const root = document.getElementById('confirm-name');
     if (!root) return;
     const role = root.getAttribute('data-role') || 'UserPUR';
@@ -459,7 +459,9 @@
     els.btnExportTable.addEventListener('click', () => { exportTable(); });
     els.btnImportExcel.addEventListener('click', () => itemsExcelFileInput?.click());
     els.itemsExcelFileInput.addEventListener('change', async (e) => { importExcel(e); });
-    els.btnCodeLocalCofirmed.addEventListener('click', () => { exportCodeCofirmed();});
+    if (role == 'UserAcc') {
+        els.btnCodeLocalCofirmed.addEventListener('click', () => { exportCodeCofirmed(); });
+    }
     // cac ham excel
     async function exportTemplate() {
         try {

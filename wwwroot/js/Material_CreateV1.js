@@ -106,3 +106,9 @@ function handleFileSelect(event) {
         });
 }
 
+function downloadSample() {
+    const link = document.createElement('a');
+    link.href = '/template/Template_Import_Material.xlsx'; 
+    link.download = 'Template_Import_Material.xlsx';
+    link.click();
+}

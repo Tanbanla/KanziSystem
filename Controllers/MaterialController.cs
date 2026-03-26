@@ -16,7 +16,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     public class MaterialController : BaseAuthController
     {
         private readonly IBaoGiaConfirmNameService _confirmNameService;
-        private readonly INhomViTriService _nhomViTriService;
         private readonly IBaoGiaService _baoGiaService;
         private readonly IWebHostEnvironment _env;
         private readonly ISendMailService _sendMailService;
@@ -24,12 +23,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IMaterialService _materialService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<MaterialController> _logger;
-        public MaterialController(IBaoGiaConfirmNameService confirmNameService, INhomViTriService nhomViTriService,
+        private readonly IDepartmentService _deparmentService;
+        public MaterialController(IBaoGiaConfirmNameService confirmNameService, IDepartmentService deparmentService,
             IBaoGiaService baoGiaService, IWebHostEnvironment env, ISendMailService sendMailService, 
             ITmUserService tmUserService, IMaterialService materialService, IServiceScopeFactory serviceScopeFactory, ILogger<MaterialController> logger)
         {
             _confirmNameService = confirmNameService;
-            _nhomViTriService = nhomViTriService;
             _baoGiaService = baoGiaService;
             _sendMailService = sendMailService;
             _logger = logger;
@@ -38,6 +37,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _env = env;
             _materialService = materialService;
             _serviceScopeFactory = serviceScopeFactory;
+            _deparmentService = deparmentService;
         }
         // MARK: Confirm Name actions use EF context directly
         public IActionResult Material()
@@ -78,10 +78,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             };
             return View(vm);
         }
-        private async Task<List<ACC_NHOMVITRIDTO>> LoadNhomViTriDataAsync()
+        private async Task<List<DEPARTMENTDTO>> LoadNhomViTriDataAsync()
         {
-            var nhomViTri = await _nhomViTriService.GetAllNhomViTriAsync();
-            return nhomViTri.Data ?? new List<ACC_NHOMVITRIDTO>();
+            var nhomViTri = await _deparmentService.GetAllDepartmentAsync();
+            return nhomViTri.Data ?? new List<DEPARTMENTDTO>();
         }
         private async Task<List<dynamic>> LoadConfirmedCodesAsync()
         {
@@ -123,96 +123,100 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportMaterials(IFormFile file)
+        public async Task<IActionResult> ImportMaterials([FromForm] IFormFile file)
         {
-            if (file == null || file.Length == 0)
-            {
-                return Json(new { success = false, message = "Chọn File." });
-            }
-
-            if (!file.FileName.EndsWith(".xlsx") && !file.FileName.EndsWith(".xls"))
-            {
-                return Json(new { success = false, message = "Chỉ hỗ trợ file excel" });
-            }
-
             try
             {
-                var details = new List<MATERIALDTO>();
-
-                using (var stream = file.OpenReadStream())
-                using (var workbook = new XLWorkbook(stream))
+                if (file == null || file.Length == 0)
                 {
-                    var worksheet = workbook.Worksheets.First();
-                    if (worksheet == null)
+                    return BadRequest("Không có file được tải lên");
+                }
+
+                if (!file.FileName.EndsWith(".xlsx") && !file.FileName.EndsWith(".xls"))
+                {
+                    return BadRequest("Chỉ hỗ trợ file excel");
+                }
+
+                try
+                {
+                    var details = new List<MATERIALDTO>();
+
+                    using (var stream = file.OpenReadStream())
+                    using (var workbook = new XLWorkbook(stream))
                     {
-                        return Json(new { success = false, message = "No worksheets found in the file." });
-                    }
-
-                    var rows = worksheet.RowsUsed().Skip(1);
-                    if (!rows.Any())
-                    {
-                        return Json(new { success = false, message = "File must have at least a header row and one data row." });
-                    }
-
-                    foreach (var row in rows)
-                    {
-                        var Material_Code = row.Cell(6).GetString().Trim();
-                        var Material_Name_VN = row.Cell(7).GetString().Trim();
-                        var Material_Name_EN = row.Cell(8).GetString().Trim();
-                        //var Material_Name_JP = row.Cell(9).GetString().Trim();
-                        var Account_Code = row.Cell(10).GetString().Trim();
-                        var Account_Name_EN = row.Cell(11).GetString().Trim();
-                        var Account_Name_VN = row.Cell(12).GetString().Trim();
-                        var Unit = row.Cell(10).GetString().Trim();
-                        //var Unit_Note = row.Cell(13).GetString().Trim();
-                        //var Price = row.Cell(13).GetString().Trim();
-
-                        var Currency = row.Cell(13).GetString().Trim();
-                        var Group_Code = row.Cell(5).GetString().Trim();
-                        //var GoodKind = row.Cell(13).GetString().Trim();
-                        var Category_VN = row.Cell(11).GetString().Trim();
-                        //var Category_EN = row.Cell(13).GetString().Trim();
-                        //var Category_JP = row.Cell(13).GetString().Trim();
-                        var Shape = row.Cell(12).GetString().Trim();
-                        var Material = row.Cell(13).GetString().Trim();
-                        var Composition = row.Cell(14).GetString().Trim();
-                        var Dimension = row.Cell(15).GetString().Trim();
-                        var UsedFor = row.Cell(16).GetString().Trim();
-                        var Purpose = row.Cell(17).GetString().Trim();
-
-                        if (string.IsNullOrEmpty(Material_Code))
+                        var worksheet = workbook.Worksheets.First();
+                        if (worksheet == null)
                         {
-                            continue; // Skip invalid rows
+                            return BadRequest("Không tìm thấy worksheet trong file");
                         }
 
-                        details.Add(new MATERIALDTO
+
+                        var rows = worksheet.RowsUsed().Skip(4);
+                        if (!rows.Any())
                         {
-                            Material_Code = Material_Code,
-                            Material_Name_VN = Material_Name_VN,
-                            Material_Name_EN = Material_Name_EN,
-                            Account_Code = Account_Code,
-                            Account_Name_VN = Account_Name_VN,
-                            Account_Name_EN = Account_Name_EN,
-                            Unit = Unit,
-                            Currency = Currency,
+                            return Json(new { success = false, message = "File trống không có dữ liệu" });
+                        }
 
-                        });
+                        foreach (var row in rows)
+                        {
+                            var Material_Code = row.Cell(6).GetString().Trim();
+                            var Material_Name_VN = row.Cell(7).GetString().Trim();
+                            var Material_Name_EN = row.Cell(8).GetString().Trim();
+                            var Account_Code = row.Cell(10).GetString().Trim();
+                            var Account_Name_EN = row.Cell(11).GetString().Trim();
+                            var Account_Name_VN = row.Cell(12).GetString().Trim();
+                            var Unit = row.Cell(13).GetString().Trim();  
+                            var Currency = row.Cell(14).GetString().Trim(); 
+                            var Group_Code = row.Cell(5).GetString().Trim();
+                            var Category_VN = row.Cell(15).GetString().Trim();  
+                            var Shape = row.Cell(16).GetString().Trim();  
+                            var Material = row.Cell(17).GetString().Trim();
+                            var Composition = row.Cell(18).GetString().Trim();
+                            var Dimension = row.Cell(19).GetString().Trim();
+                            var UsedFor = row.Cell(20).GetString().Trim();
+                            var Purpose = row.Cell(21).GetString().Trim();
+
+                            if (string.IsNullOrEmpty(Material_Code) || string.IsNullOrEmpty(Material_Name_VN))
+                            {
+                                continue; 
+                            }
+
+                            details.Add(new MATERIALDTO
+                            {
+                                Material_Code = Material_Code,
+                                Material_Name_VN = Material_Name_VN,
+                                Material_Name_EN = Material_Name_EN,
+                                Account_Code = Account_Code,
+                                Account_Name_VN = Account_Name_VN,
+                                Account_Name_EN = Account_Name_EN,
+                                Unit = Unit,
+                                Currency = Currency,
+                                Group_Code = Group_Code,  
+                                Category_VN = Category_VN,
+                                Shape = Shape,
+                                Material = Material,
+                                Composition = Composition,
+                                Dimension = Dimension,
+                                UsedFor = UsedFor,
+                                Purpose = Purpose,
+                            });
+                        }
                     }
-                }
 
-                var result = await _materialService.UpdateListThongTin(details);
-                if (!result.Success)
+                    var result = await _materialService.UpdateListThongTin(details);
+                    if (!result.Success)
+                    {
+                        return BadRequest(result.Message);
+                    }
+                    return Ok(result.Data);
+                }
+                catch (Exception ex)
                 {
-                    return Json(new { success = false, message = result.Message });
+                    _logger.LogError(ex, "Error importing quote details from Excel");
+                    return Json(new { success = false, message = "An error occurred during import. Check the file format." });
                 }
-
-                return Json(new { success = true, message = $"Imported {details.Count} quote details successfully!" });
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error importing quote details from Excel");
-                return Json(new { success = false, message = "An error occurred during import. Check the file format." });
-            }
+            catch(Exception ex) { return BadRequest(ex.Message); }
         }
 
 

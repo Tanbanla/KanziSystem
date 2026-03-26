@@ -2353,20 +2353,22 @@ body.sidebar-mini .main-sidebar {
   overflow: initial !important;
   position: absolute;
   box-shadow: none; }
-  body.sidebar-mini .main-sidebar:after {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
-    content: ' ';
-    position: fixed;
-    background-color: #fff;
-    width: 65px;
-    height: 100%;
-    left: 0;
-    top: 0;
-    z-index: -1;
-    opacity: 0;
-    animation-name: mini-sidebar;
-    animation-duration: 1.5s;
-    animation-fill-mode: forwards; }
+    body.sidebar-mini .main-sidebar:after {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+        content: ' ';
+        position: fixed;
+        background-color: #fff;
+        width: 65px;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: -1;
+        opacity: 0;
+        animation-name: mini-sidebar;
+        animation-duration: 1.5s;
+        animation-fill-mode: forwards;
+        border-right: 1px solid #8181d53d;
+    }
 @keyframes mini-sidebar {
   from {
     opacity: 0; }
@@ -2411,7 +2413,7 @@ body.sidebar-mini .main-sidebar {
       background-color: #fff;
       left: 65px;
       top: 10px;
-      width: 200px;
+      width: 250px;
       display: none;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.03); }
       body.sidebar-mini .main-sidebar .sidebar-menu > li ul.dropdown-menu li > a:focus,

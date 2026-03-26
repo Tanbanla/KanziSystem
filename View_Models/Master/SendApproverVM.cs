@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.DTO;
 
 namespace PRJ_WAREHOUSE_BIVN.View_Models.Master
 {
@@ -8,7 +8,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Master
         public List<TM_SECTIONDTO> SectionCodes { get; set; }
         // danh sách step
         public List<BaoGia_StepDTO> baoGiaSteps { get; set; }
-        public List<ACC_NHOMVITRIDTO> NhomViTris { get; set; }
+        public List<DEPARTMENTDTO> NhomViTris { get; set; }
         // Dữ liệu 
         public List<BaoGia_Master_Approver_Send_MailDTO> listMasterApprover { get; set; }
         // phân trang

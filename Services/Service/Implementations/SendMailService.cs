@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -497,14 +497,14 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             // Chuẩn bị nội dung mail với các tham số
             string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
-            string body = string.Format(mailTemplate.CHR_BODY, "http://172.26.248.62:8057/ApprovalQuote/Index", gapText, sectionName, requestCode);
+            string body = string.Format(mailTemplate.CHR_BODY ?? "", "http://172.26.248.62:8057/ApprovalQuote/Index", gapText, sectionName, requestCode);
             // Gửi mail
             bool sendResult = EmailSender.sendEmailNotify(
-                mailTemplate.CHR_SUBJECT,
-                mailTemplate.CHR_FROM,
-                requesterEmail,//"nguyenduy.khanh@brother-bivn.com.vn",//
-                "", // CC nếu cần
-                mailTemplate.CHR_BCC,
+                mailTemplate.CHR_SUBJECT ?? "",
+                mailTemplate.CHR_FROM ?? "",
+                requesterEmail,
+                "", 
+                mailTemplate.CHR_BCC ?? "",
                 body,
                 0 // Default priority
             );

@@ -66,10 +66,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByStepAndSectionAsync(int idStep, string sectionCode)
         {
             var query = from m in _context.BaoGia_Master_Approver_Send_Mails
-                        join u in _context.TM_USERs on m.CHR_UserAdid equals u.CHR_USERID into uj
-                        from u in uj.DefaultIfEmpty()
                         where m.ID_BaoGiaStep == idStep
-                              && (u != null && u.CHR_SECTION == sectionCode)
+                              && m.CHR_CodeSection == sectionCode
                         group m by m.CHR_UserAdid into g
                         select g.OrderBy(x => x.ID).FirstOrDefault();
 
