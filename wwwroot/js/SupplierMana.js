@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
         addSupplierDetail: '/Master/AddSupplierDetail',
         deleteSupplierDetail: (id) => `/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
         addListSupplierDetail: '/Master/AddListSupplierDetail',
-        ImportSupplierDetail: '/Master/UpdateMaterialInfo'
+        ImportSupplierDetail: '/Master/UpdateMaterialInfo' //UpdateMaterialInfo
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');

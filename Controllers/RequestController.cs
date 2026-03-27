@@ -161,7 +161,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = $@"Xin chào <br />
                Đơn yêu cầu mã : {id_request} đã được gửi đến bên xin phê duyệt <br /><br />
                Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+               <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
                ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                ※このメールは自動的に送付されたので、返事をしないでください。 ";
             string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
@@ -194,7 +194,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {id_request} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
@@ -268,7 +268,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = $@"Xin chào <br />
                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                    <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                    <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                     ※このメールは自動的に送付されたので, 返事をしないでください。";
 
@@ -306,7 +306,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -38,4 +38,6 @@ public partial class IM_NCC_NEW
     public string? nhom { get; set; }
 
     public string? nguoi_cap_nhat { get; set; }
+
+    public string? ShortName { get; set; }
 }

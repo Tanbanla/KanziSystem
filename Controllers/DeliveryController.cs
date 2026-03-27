@@ -112,8 +112,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult SearchDataPo([FromBody] SearchPoPayload data)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
-            string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + data.UserName + "'");
-
+            var khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + data.UserName + "'");
+        
             string WhereCmd = string.Empty;
             if (data.PoNumber!.Contains(','))
             {
@@ -145,7 +145,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             sqlColumn += ",[Id_LichsuNhap],[LuongvekhoDanhap],[Loaichiphi]";
             sqlColumn += ",[LuongvekhoKhonhap],[Aim],[Loaihinhtokhai],[Account_Code],[Phongchiuchiphi]";
 
-            string cmdQry = $"SELECT TOP 200 {sqlColumn} FROM [PO] WHERE {WhereCmd} [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{data.Department}' and Code_Request like '%{data.Mayeucau}%' and Mahang like '%{data.Mahang}%' and Tenphongyeucau like N'%{data.Phongbanyeucau}%'  ORDER BY [SoPO] DESC, Hienthi ASC";
+            string cmdQry = $"SELECT TOP 200 {sqlColumn} FROM [PO] WHERE {WhereCmd} [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{khoi}' and Code_Request like '%{data.Mayeucau}%' and Mahang like '%{data.Mahang}%' and Tenphongyeucau like N'%{data.Phongbanyeucau}%'  ORDER BY [SoPO] DESC, Hienthi ASC";
 
             var dataResult = Models.PO.GetPoByPoNumber(cmdQry);
             return Json(dataResult);

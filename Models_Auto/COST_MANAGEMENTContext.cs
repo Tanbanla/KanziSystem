@@ -904,6 +904,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_ThanhPhan).HasMaxLength(550);
             entity.Property(e => e.NVCHR_TinhNang).HasMaxLength(550);
             entity.Property(e => e.CHR_UserApproval).HasMaxLength(20);
+            entity.Property(e => e.NVCHR_UserRequest).HasMaxLength(200);
         });
 
         modelBuilder.Entity<BaoGia_Status>(entity =>
@@ -1500,6 +1501,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Nhanvienkinhdoand).HasMaxLength(50);
             entity.Property(e => e.nguoi_cap_nhat).HasMaxLength(50);
             entity.Property(e => e.nhom).HasMaxLength(50);
+            entity.Property(e => e.ShortName).HasMaxLength(250);
         });
 
         modelBuilder.Entity<IM_PHUONGTHUCVANCHUYEN>(entity =>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.DTO;
@@ -38,4 +38,5 @@ public partial class IM_NCC_NEWDTO
     public string? nhom { get; set; }
 
     public string? nguoi_cap_nhat { get; set; }
+    public string? ShortName { get; set; }
 }

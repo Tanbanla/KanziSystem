@@ -6,8 +6,9 @@ function _load_log() {
     var kho = document.getElementById("kho").value;
     var manguyenlieu = document.getElementById("manguyenlieu").value;
     var loai = document.getElementById("loai").value;
-    var phong = document.getElementById("phong").value;
-    var khoii = document.getElementById("khoii").value;
+    /*var phong = document.getElementById("phong").value;*/
+    //var khoii = document.getElementById("khoii").value;
+    var us = document.getElementById("us").innerHTML;
 
     const params = new URLSearchParams();
     params.append('madon', madon);
@@ -16,8 +17,10 @@ function _load_log() {
     params.append('kho', kho);
     params.append('manguyenlieu', manguyenlieu);
     params.append('loai', loai);
-    params.append('phong', phong);
-    params.append('khoii', khoii);
+  /*  params.append('phong', phong);*/
+   // params.append('khoii', khoii);
+    params.append('us', us);
+
     fetch('/Import/_get_log', {
         method: 'POST',
         headers: {

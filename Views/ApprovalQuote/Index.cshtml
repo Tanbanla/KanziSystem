@@ -8,6 +8,7 @@
     List<BaoGia_Request_of_QuotationDTO> listData = Model.listBaoGia;
     List<BaoGia_StatusDTO> listStatus = Model.listStatusBaoGia;
     List<BaoGia_StepDTO> listStep = Model.listStepBaoGia;
+    //List<BaoGia_Master_Approver_Send_MailDTO> listApproval = Model.ListApprovel;
 
     // determine UI language and prepare localized display names for steps and status
     var uiLang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? "vi";
@@ -40,6 +41,35 @@
         <div>
             <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
             @* <small class="text-muted">@Localizer["PageSubtitle"]</small> *@
+        </div>
+        <!-- Modal: select next approver -->
+        <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@Localizer["SelectNextApprover"].Value</h5>
+@*                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                            <i class="fas fa-times fa-lg"></i>
+                        </button> *@
+                        <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                            <i class="fas fa-times fa-lg"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label for="selectNextApprover" class="form-label small">@Localizer["NextApproverLabel"].Value</label>
+                            <select id="selectNextApprover" class="form-select">
+                                <option value="">@Localizer["SelectPlaceholder"]</option>
+                            </select>
+                        </div>
+                        <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"].Value</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"].Value</button>
+                        <button type="button" class="btn btn-primary" id="confirmSelectApprover">@Localizer["Confirm"].Value</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="btn-group mb-2" role="group">
             <button class="btn btn-success btn-sm" id="btnApprove" disabled><i class="fas fa-check"></i> @Localizer["Approve"] (<span id="approveCount">0</span>)</button>
@@ -381,6 +411,9 @@
         MSGReturnFailed = Localizer["MSGReturnFailed"].Value,
         MSGReturnOK = Localizer["MSGReturnOK"].Value,
         MSGExportOK = Localizer["MSGExportOK"].Value
+        ,SelectNextApprover = Localizer["SelectNextApprover"].Value
+        ,NextApproverLabel = Localizer["NextApproverLabel"].Value
+        ,SelectApproverRequired = Localizer["SelectApproverRequired"].Value
     }));
 </script>
 @section Scripts {
@@ -391,6 +424,10 @@
             var panel = document.getElementById('detailModal');
             if (panel && panel.parentElement !== document.body) {
                 document.body.appendChild(panel);
+            }
+            var panel1 = document.getElementById('selectApproverModal');
+            if (panel1 && panel1.parentElement !== document.body) {
+                document.body.appendChild(panel1);
             }
         })();
     </script>

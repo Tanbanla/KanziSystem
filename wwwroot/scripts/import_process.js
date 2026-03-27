@@ -13,6 +13,7 @@ async function _load_inv() {
     var kho = document.getElementById("kho").value;
     var cost = document.getElementById("cost").value;
     var Group_Code = document.getElementById("group_code").value;
+    var UserName = document.getElementById("us").innerHTML;
 
     const params = new URLSearchParams();
     params.append('MaNguyenLieu', mnl);
@@ -20,7 +21,7 @@ async function _load_inv() {
     params.append('NVCHR_COST', cost);
     params.append('IS_SAVE_WH', '0');
     params.append('Group_Code', Group_Code);
-
+    params.append('UserName', UserName);
 
     fetch('/Import/_load_inv', {
         method: 'POST',

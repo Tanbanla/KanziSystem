@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -398,6 +398,15 @@
   </data>
   <data name="UnitShort" xml:space="preserve">
     <value>Đơn vị</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>Chọn người phê duyệt tiếp theo</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>Người phê duyệt bước tiếp theo</value>
+  </data>
+  <data name="SelectApproverRequired" xml:space="preserve">
+    <value>Vui lòng chọn người phê duyệt.</value>
   </data>
   <data name="ShapeShort" xml:space="preserve">
     <value>Hình dạng</value>

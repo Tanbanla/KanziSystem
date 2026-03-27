@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -107,6 +107,20 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.IM_NCC_NEWs.AddRangeAsync(listNccNew);
             var result = await _context.SaveChangesAsync();
             return result > 0;
+        }
+        // Update Short Name Suppelier
+        public async Task<bool> UpdateShortNames(List<IM_NCC_NEW> listUpate)
+        {
+            foreach (var item in listUpate)
+            {
+                var result = _context.IM_NCC_NEWs.Where(c => c.Ma == item.Ma).FirstOrDefault();
+                if (result != null)
+                {
+                    result.ShortName = item.ShortName;
+                }
+            }
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

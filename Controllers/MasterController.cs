@@ -482,6 +482,54 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
         }
+        // update short name supperlier to file excel
+        [HttpPost]
+        public async Task<IActionResult> UpdateShortNameSupplier([FromForm] ImportSupplierDetailDTO insertFile)
+        {
+
+            if (insertFile.FileExcel == null || insertFile.FileExcel.Length == 0)
+            {
+                return BadRequest("File không hợp lệ");
+            }
+
+            var items = new List<IM_NCC_NEW>();
+            try
+            {
+                using var stream = insertFile.FileExcel.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                // lấy dữ liệu từ dòng 2
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 2).GetString() == "" || ws.Cell(r, 2).GetString() == null)
+                    {
+                        break;
+                    }
+                    var dto = new IM_NCC_NEW
+                    {
+                          Ma = ws.Cell(r, 2).GetString(),
+                          ShortName = ws.Cell(r, 3).GetString()
+                    };
+
+                    items.Add(dto);
+                }
+                if (items.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                await _tmNccNewService.UpdateShortNames(items);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
         // Nhập danh sách loại hàng nhà cung cấp
         [HttpPost]
         public async Task<IActionResult> AddListSupplierDetail([FromForm] InsertFileExcelSupplierRequestDTO insertFile)
@@ -824,24 +872,28 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public JsonResult Load_tainhap(MST_INVENTORY para)
         {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + para.UserName + "'");
+
             List<MST_INVENTORY> dt = MST_INVENTORY.inventory_process(para);
             dt = dt.Where(x => x.QTY_RE_IMPORT > 0).ToList();
             if (para.Group_Code != null)
             {
-                dt = dt.Where(x => x.Group_Code == para.Group_Code).ToList();
+                dt = dt.Where(x => x.Group_Code == para.Group_Code && x.Group_Code == khoi).ToList();
             }
             if (para.MaNguyenLieu != null)
             {
-                dt = dt.Where(x => x.MaNguyenLieu == para.MaNguyenLieu).ToList();
+                dt = dt.Where(x => x.MaNguyenLieu == para.MaNguyenLieu && x.Group_Code == khoi).ToList();
             }
             if (para.Material_Name != null)
             {
-                dt = dt.Where(x => x.MaNguyenLieu!.Contains(para.MaNguyenLieu!)).ToList();
+                dt = dt.Where(x => x.MaNguyenLieu!.Contains(para.MaNguyenLieu!) && x.Group_Code == khoi).ToList();
             }
             if (para.Kho != null)
             {
-                dt = dt.Where(x => x.Kho == para.Kho).ToList();
+                dt = dt.Where(x => x.Kho == para.Kho && x.Group_Code == khoi).ToList();
             }
+           
             return Json(dt);
         }
         public JsonResult del_tainhap(string id)

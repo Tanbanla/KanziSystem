@@ -52,8 +52,6 @@ function ImportWarehouse() {
         }
     }
 }
-
-
 function Usingg() {
     const url = '/Delivery/Sudungngay';
 
@@ -104,7 +102,7 @@ function Usingg() {
     }
 }
 async function SearchPoDel() {
-    let UserName = document.getElementById("us").value;
+    let UserName = document.getElementById("us").innerHTML;
     let GetPO = document.getElementById('poNumber').value;
     let GetDept = document.getElementById('IdDept').value;
     let mayeucau = document.getElementById('mayeucau').value;

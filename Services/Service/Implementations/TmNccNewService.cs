@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -128,6 +128,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var listNccNewEntity = _mapper.Map<List<IM_NCC_NEW>>(listNccNew);
                 var isAdded = await _repo.AddListNccNew(listNccNewEntity);
                 result.Data = isAdded;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Update Short Name Suppelier
+        public async Task<GenericResponse<bool>> UpdateShortNames(List<IM_NCC_NEW> listUpate)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var listNccNewEntity = _mapper.Map<List<IM_NCC_NEW>>(listUpate);
+                var isUpdated = await _repo.UpdateShortNames(listNccNewEntity);
+                result.Data = isUpdated;
                 result.Success = true;
             }
             catch (Exception ex)

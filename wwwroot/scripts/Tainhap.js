@@ -1,4 +1,4 @@
-﻿async function _Tainhap() {
+async function _Tainhap() {
 
     var khoi = document.getElementById("khoi").value;
     var malinhkien = document.getElementById("MaLinhKien").value;
@@ -175,12 +175,14 @@ async function _load_tainhap() {
     var MaNguyenLieu = document.getElementById("manvl").value;
     var Material_Name = document.getElementById("tennvl").value;
     var Kho = document.getElementById("khoo").value;
+    var UserName = document.getElementById("us").innerHTML;
    
     const params = new URLSearchParams();
     params.append('Group_Code', Group_Code);
     params.append('MaNguyenLieu', MaNguyenLieu);
     params.append('Material_Name', Material_Name);
     params.append('Kho', Kho);
+    params.append('UserName', UserName);
   
 
     fetch('/Master/Load_tainhap', {

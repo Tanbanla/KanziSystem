@@ -7,6 +7,128 @@
         }
 
     }
+    // Open approver selector modal and return a promise resolving to the selected approver object
+    function openApproverSelector(stepNumber, sectionCode) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const modal = document.getElementById('selectApproverModal');
+                const sel = document.getElementById('selectNextApprover');
+                const notice = document.getElementById('selectApproverNotice');
+                if (!modal || !sel) return resolve(null);
+                // clear
+                sel.innerHTML = '';
+                const placeholderOpt = document.createElement('option');
+                placeholderOpt.value = '';
+                placeholderOpt.textContent = (window.i18nApproval && window.i18nApproval.SelectPlaceholder) || '-- Chọn --';
+                sel.appendChild(placeholderOpt);
+
+                // fetch approvers
+                const body = { Step: stepNumber, SectionCost: sectionCode };
+                let list = [];
+                try {
+                    const resp = await fetch('/ApprovalQuote/GetListApprovel', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+                    }
+                } catch (e) { console.warn('Failed to load approvers', e); }
+
+                if (!list || !list.length) {
+                    const emptyOpt = document.createElement('option');
+                    emptyOpt.value = '';
+                    emptyOpt.textContent = (window.i18nApproval && window.i18nApproval.NoResults) || 'Không có kết quả';
+                    sel.appendChild(emptyOpt);
+                } else {
+                    list.forEach(item => {
+                        const o = document.createElement('option');
+                        // normalize keys to accept server DTO naming
+                        const adid = item.chR_UserAdid || '';
+                        const name = item.nvchR_UserName || '';
+                        o.value = adid || (item.chR_UserAdid);
+                        o.textContent = (name ? (name + (adid ? (' (' + adid + ')') : '')) : (adid || ''));
+                        o.dataset.raw = JSON.stringify(item);
+                        sel.appendChild(o);
+                    });
+                }
+
+                // ensure modal is attached to body so it escapes local stacking contexts
+                try {
+                    if (modal.parentElement !== document.body) document.body.appendChild(modal);
+                } catch (e) { }
+                // show modal (bootstrap 5 manual show) and ensure backdrop/z-index are high
+                try {
+                    if (window.bootstrap && bootstrap.Modal) {
+                        const bsModal = new bootstrap.Modal(modal, { backdrop: 'static' });
+                        modal._bsModal = bsModal;
+                        bsModal.show();
+                        // after bootstrap created backdrop, increase z-index to ensure on top
+                        setTimeout(() => {
+                            try {
+                                const createdBackdrop = document.querySelector('.modal-backdrop');
+                                if (createdBackdrop) createdBackdrop.style.zIndex = '10550';
+                                modal.style.zIndex = '10600';
+                            } catch (e) { }
+                        }, 10);
+                    } else {
+                        // create a simple backdrop and set high z-index
+                        const backdrop = document.createElement('div');
+                        backdrop.className = 'modal-backdrop show custom-modal-backdrop';
+                        backdrop.style.zIndex = '10550';
+                        document.body.appendChild(backdrop);
+                        modal._backdrop = backdrop;
+                        modal.style.zIndex = '10600';
+                        modal.style.display = 'block';
+                        modal.classList.add('show');
+                    }
+                } catch (e) { modal.style.display = 'block'; modal.classList.add('show'); }
+
+                // handlers
+                const confirmBtn = document.getElementById('confirmSelectApprover');
+                function cleanup() {
+                    // hide
+                    try {
+                        if (modal._bsModal) modal._bsModal.hide();
+                        else {
+                            modal.style.display = 'none';
+                            modal.classList.remove('show');
+                        }
+                    } catch (e) { try { modal.style.display = 'none'; modal.classList.remove('show'); } catch {} }
+                    // remove any custom backdrop we created
+                    try {
+                        if (modal._backdrop) { document.body.removeChild(modal._backdrop); delete modal._backdrop; }
+                    } catch (e) { }
+                    // cleanup listeners
+                    confirmBtn.removeEventListener('click', onConfirm);
+                    modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel));
+                    if (notice) notice.style.display = 'none';
+                    // reset inline zIndex
+                    try { modal.style.zIndex = ''; } catch (e) { }
+                }
+                function onConfirm(e) {
+                    e && e.preventDefault();
+                    const value = sel.value;
+                    if (!value) {
+                        if (notice) {
+                            notice.style.display = '';
+                        }
+                        return;
+                    }
+                    const raw = sel.selectedOptions && sel.selectedOptions[0] && sel.selectedOptions[0].dataset.raw;
+                    let obj = null;
+                    try { obj = raw ? JSON.parse(raw) : { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; } catch { obj = { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; }
+                    cleanup();
+                    resolve(obj);
+                }
+                function onCancel() { cleanup(); resolve(null); }
+                confirmBtn.addEventListener('click', onConfirm);
+                modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel));
+            } catch (err) { reject(err); }
+        });
+    }
     // Show a custom input dialog.
     function showInputDialog(title, placeholder) {
         return new Promise((resolve, reject) => {
@@ -799,36 +921,80 @@
             Array.from(state.selectedMaDons).forEach(maDon => {
                 const group = state.groupsByMaDon[maDon] || [];
                 group.forEach(it => {
-                    it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
-                    if (it.iD_StepBaoGia == 6) {
-                        it.iD_Status = 'WAIT_SEND_MAIL';
-                    } else {
-                        it.iD_Status = 'APPROVAL';
-                        it.chR_UserApproval = '';
-                    }
+                    //it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
+                    //if (it.iD_StepBaoGia == 6) {
+                    //    it.iD_Status = 'WAIT_SEND_MAIL';
+                    //} else {
+                    //    it.iD_Status = 'APPROVAL';
+                    //}
                     payload.push(it);
                 });
             });
             if (payload.length === 0) return;
-            btnApprove.disabled = true;
-            const btnReturnEl = document.getElementById('btnReturn'); if (btnReturnEl) btnReturnEl.disabled = true;
-            fetch('/ApprovalQuote/UpdateQuotationOK', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            }).then(res => res.json()).then(json => {
-                if (json && json.success) {
-                    showToast('success', T.MsgSusscesAprover);
-                    searchAndRender();
-                } else {
-                    showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
-                }
-            }).catch(err => {
-                console.error('Approval error', err);
-                showToast('danger', T.MSGErrorApprover);
-            }).finally(() => {
-                updateSummaryAndButtons();
-            });
+            // Before sending approval, require selection of next approver
+            // derive next step and section from first item
+            const first = payload[0];
+            const nextStep = (first && typeof first.iD_StepBaoGia === 'number') ? (first.iD_StepBaoGia + 1) : 3;
+            const sectionCode = first.chR_SectionCode || '';
+            // If next step is 6, do not prompt for approver — send immediately
+            if (nextStep === 6 || nextStep === 4) {
+                payload.forEach(p => {
+                    p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
+                    p.iD_Status = 'WAIT_SEND_MAIL';
+                });
+                btnApprove.disabled = true;
+                const btnReturnEl = document.getElementById('btnReturn'); if (btnReturnEl) btnReturnEl.disabled = true;
+                fetch('/ApprovalQuote/UpdateQuotationOK', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(res => res.json()).then(json => {
+                    if (json && json.success) {
+                        showToast('success', T.MsgSusscesAprover);
+                        searchAndRender();
+                    } else {
+                        showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
+                    }
+                }).catch(err => {
+                    console.error('Approval error', err);
+                    showToast('danger', T.MSGErrorApprover);
+                }).finally(() => {
+                    updateSummaryAndButtons();
+                });
+            } else {
+                openApproverSelector(nextStep, sectionCode).then(selected => {
+                    if (!selected) return; // cancelled or none selected
+                    // attach chosen approver adid to each payload item
+                    payload.forEach(p => {
+                        p.chR_UserApproval = selected.chR_UserAdid || '';
+                        p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
+                        if (p.iD_StepBaoGia == 6) {
+                            p.iD_Status = 'WAIT_SEND_MAIL';
+                        } else {
+                            p.iD_Status = 'APPROVAL';
+                        }
+                    });
+                    btnApprove.disabled = true;
+                    const btnReturnEl = document.getElementById('btnReturn'); if (btnReturnEl) btnReturnEl.disabled = true;
+                    fetch('/ApprovalQuote/UpdateQuotationOK', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }).then(res => res.json()).then(json => {
+                        if (json && json.success) {
+                            showToast('success', T.MsgSusscesAprover);
+                            searchAndRender();
+                        } else {
+                            showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
+                        }
+                    }).catch(err => {
+                        console.error('Approval error', err);
+                        showToast('danger', T.MSGErrorApprover);
+                    }).finally(() => {
+                        updateSummaryAndButtons();
+                    });
+                }).catch(err => { console.error(err); });
+            }
         });
         // Xử lý trả lại NG
         const btnReturn = document.getElementById('btnReturn');
@@ -878,7 +1044,14 @@
         if (btnExport) {
             btnExport.addEventListener('click', async function () {
                 try {
-                    const payload = getFilterValues();
+                    const payload = [];
+                    Array.from(state.selectedMaDons).forEach(maDon => {
+                        const group = state.groupsByMaDon[maDon] || [];
+                        group.forEach(it => {
+                            it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
+                            payload.push(it);
+                        });
+                    });
                     const res = await fetch('/ApprovalQuote/ExportToExcel', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -934,26 +1107,64 @@
             if (!group.length) return;
             const payload = [];
             group.forEach(it => {
-                it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
-                it.iD_Status = 'APPROVAL';
+                //it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
+                //it.iD_Status = 'APPROVAL';
                 payload.push(it);
             });
-            fetch('/ApprovalQuote/UpdateQuotationOK', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            }).then(res => res.json()).then(json => {
-                if (json && json.success) {
-                    showToast('success', T.MsgSusscesAprover);
-                    hideDetailModal();
-                    searchAndRender();
-                } else {
-                    showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
-    }
-            }).catch(err => {
-                console.error('Approval error', err);
-                showToast('danger', T.MSGErrorApprover);
-            });
+            // ask user to select next approver for this group
+            const nextStep = (payload[0] && typeof payload[0].iD_StepBaoGia === 'number') ? (payload[0].iD_StepBaoGia + 1) : 3;
+            const sectionCode = payload[0].chR_SectionCode || '';
+            if (nextStep === 6 || nextStep === 4) {
+                payload.forEach(p => {
+                    p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
+                    p.iD_Status = 'WAIT_SEND_MAIL';
+                });
+                fetch('/ApprovalQuote/UpdateQuotationOK', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(res => res.json()).then(json => {
+                    if (json && json.success) {
+                        showToast('success', T.MsgSusscesAprover);
+                        hideDetailModal();
+                        searchAndRender();
+                    } else {
+                        showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
+                    }
+                }).catch(err => {
+                    console.error('Approval error', err);
+                    showToast('danger', T.MSGErrorApprover);
+                });
+            } else {
+                openApproverSelector(nextStep, sectionCode).then(selected => {
+                    if (!selected) return;
+                    payload.forEach(p => {
+                        p.chR_UserApproval = selected.chR_UserAdid || '';
+                        p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
+                        if (p.iD_StepBaoGia == 6) {
+                            p.iD_Status = 'WAIT_SEND_MAIL';
+                        } else {
+                            p.iD_Status = 'APPROVAL';
+                        }
+                    });
+                    fetch('/ApprovalQuote/UpdateQuotationOK', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }).then(res => res.json()).then(json => {
+                        if (json && json.success) {
+                            showToast('success', T.MsgSusscesAprover);
+                            hideDetailModal();
+                            searchAndRender();
+                        } else {
+                            showToast('danger', T.MSGFailedApprover + (json && json.message ? json.message : 'Unknown'));
+                        }
+                    }).catch(err => {
+                        console.error('Approval error', err);
+                        showToast('danger', T.MSGErrorApprover);
+                    });
+                }).catch(err => { console.error(err); });
+            }
         });
 
         const modalReject = document.getElementById('modalReject');

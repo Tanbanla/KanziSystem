@@ -22,6 +22,7 @@
     // in-memory storage for large dataset to avoid rendering all rows at once
     let allQuoteItems = [];
     let filteredQuoteItems = [];
+    let SetionNameFirst = '';
 
     function renumberRows() {
         qsa('#quoteTableBody tr').forEach((tr, idx) => {
@@ -29,6 +30,22 @@
             if (noCell) noCell.textContent = String(idx + 1);
         });
         assignRowIds();
+    }
+
+    // Generate a single request code (CHR_MaDon) for the whole submission
+    function generateMaDonRequest(section) {
+        try {
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const nowVN = new Date(utc + (7 * 60 * 60000));
+            const yyyy = nowVN.getFullYear();
+            const MM = String(nowVN.getMonth() + 1).padStart(2, '0');
+            const dd = String(nowVN.getDate()).padStart(2, '0');
+            const sec = (section || '').toString().trim().replace(/[^a-zA-Z0-9_-]/g, '_') || 'GEN';
+            return `RQ_${sec}_${yyyy}_${MM}_${dd}`;
+        } catch (e) {
+            console.warn('Error merging visible row into full dataset', e);
+        }
     }
     // Determine if a row is completely empty (no user-entered text/number/date and no meaningful select)
     function isRowEmpty(tr) {
@@ -316,6 +333,8 @@
                     inp.classList.remove('is-invalid');
                 });
             });
+            allQuoteItems = [];
+            filteredQuoteItems = [];
         }
 
         // clear validation styles for form-level controls
@@ -463,7 +482,10 @@
                 const wrapper = el.nextElementSibling;
                 if (wrapper && wrapper.classList && wrapper.classList.contains('ms-container')) {
                     const values = wrapper.querySelector('.ms-values');
-                    if (values && values.textContent && values.textContent.trim() !== '') return values.textContent.trim();
+                    if (values && values.textContent && values.textContent.trim() !== '') {
+                        SetionNameFirst = values.textContent.trim();
+                        return values.textContent.trim();
+                    } 
                 }
             } catch (e) { /* ignore */ }
             // fallback to option text
@@ -511,22 +533,12 @@
             return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}+07:00`;
         };
 
-        // Tạo mã đơn tự động dựa trên tên phòng và ngày hiện tại (theo giờ VN)
-        const generateMaDon = () => {
-            const maPhongBan = getSel('.tenPhongBanTb');
-            const nowVN = getVietnamTime();
-            const year = nowVN.getFullYear();
-            const month = String(nowVN.getMonth() + 1).padStart(2, '0');
-            const day = String(nowVN.getDate()).padStart(2, '0');
-            return `RQ_${maPhongBan}_${year}_${month}_${day}`;
-        };
-
         // Lấy ngày tạo theo múi giờ +7
         const createDateVN = getVietnamTime();
 
         const obj = {
             ID: 0,
-            CHR_MaDon: generateMaDon(),
+            CHR_MaDon: '',
             CHR_MaThietBi: getInputBy(['input[id^="maThietBi_"]', 'input[placeholder*="Mã thiết bị"]']),
             CHR_Phanloai: getSel('.tenPhanLoaiTb'),
             CHR_MaHangNoiBo: getSel('.maHangNoiBo'),
@@ -557,7 +569,8 @@
             CHR_Gap: getSel('.gapTb'),
             CHR_SectionCode: getSel('.tenPhongBanTb'),
             CHR_SectionName: getSelDisplay('.tenPhongBanTb'),
-            CHR_CreateBy: getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']) === '' ? src.user : getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']),
+            NVCHR_UserRequest: getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']) === '' ? src.user : getInputBy(['input[id^="nguoiYeuCauRow_"]', 'input[placeholder*="Người yêu cầu"]']),
+            CHR_CreateBy: window.indexQuoteData?.user ?? '',
             // Sử dụng ISO string với múi giờ +7
             DTM_CreateDate: toVietnamISOString(createDateVN),
             // Người phê duyệt (lấy từ select trên form)
@@ -646,7 +659,7 @@
         return true;
     }
     async function submitForm() {
-        const rows = qsa('#quoteTableBody tr');
+
         let rowsValid = true;
         let rowsCheckReason = true;
         let payload = [];
@@ -658,16 +671,79 @@
             return;
         }
         // Only validate and collect rows that contain user-entered data
-        rows.forEach((tr) => {
+        // If we have an in-memory dataset (allQuoteItems) we must merge edits from visible page into it
+        const visibleRows = Array.from(qsa('#quoteTableBody tr'));
+        visibleRows.forEach((tr) => {
             if (isRowEmpty(tr)) return; // skip empty rows
             if (!validateRow(tr)) rowsValid = false;
             if (!CheckLyDoTuChoi(tr)) rowsCheckReason = false;
-            payload.push(collectRow(tr));
         });
-        // If no rows collected from DOM but we have in-memory items (loaded from Excel), submit those
-        if (payload.length === 0 && Array.isArray(allQuoteItems) && allQuoteItems.length > 0) {
+
+        if (Array.isArray(allQuoteItems) && allQuoteItems.length > 0) {
+            // We rendered from filteredQuoteItems when using in-memory dataset.
+            // Compute start index for current page and merge visible row values into the corresponding items.
+            const start = (currentPage - 1) * rowsPerPage;
+            visibleRows.forEach((tr, idx) => {
+                try {
+                    const globalIdx = start + idx;
+                    const collected = collectRow(tr);
+                    // If filteredQuoteItems is present and was used to render, update that item (objects are references to allQuoteItems)
+                    if (Array.isArray(filteredQuoteItems) && filteredQuoteItems.length > globalIdx && filteredQuoteItems[globalIdx]) {
+                        Object.assign(filteredQuoteItems[globalIdx], collected);
+                    }
+                    // Find matching object in allQuoteItems and merge (best-effort by index if same ordering)
+                    if (Array.isArray(allQuoteItems) && allQuoteItems.length > globalIdx && allQuoteItems[globalIdx]) {
+                        Object.assign(allQuoteItems[globalIdx], collected);
+                    } else {
+                        // fallback: append collected if cannot map by index
+                        allQuoteItems.push(collected);
+                    }
+                } catch (e) { console.warn('Error merging visible row into full dataset', e); }
+            });
+
+            // Submit the full in-memory dataset (merged)
             payload = allQuoteItems.slice();
+        } else {
+            // No in-memory dataset: collect directly from DOM rows
+            visibleRows.forEach((tr) => {
+                if (isRowEmpty(tr)) return;
+                payload.push(collectRow(tr));
+            });
         }
+
+        // Ensure every item has CHR_MaDon and CHR_UserApproval — generate one CHR_MaDon for the whole payload
+        try {
+            // find section for payload from first item if available
+            let sectionForPayload = '';
+            for (const it of payload) {
+                const s = it && (it.CHR_SectionCode || it.chR_SectionCode || it.CHR_SectionName || it.chR_SectionName || it.sectionCode || it.sectionName) || '';
+                if (s && s.toString().trim() !== '') {
+                    sectionForPayload = s.toString().trim();
+                    break;
+                }
+            }
+            // fallback: try to read first visible row's section select
+            if (!sectionForPayload) {
+                const firstSel = qs('#quoteTableBody tr .tenPhongBanTb');
+                if (firstSel) sectionForPayload = (firstSel.value || '').toString().trim();
+            }
+
+            const maDon = generateMaDonRequest(sectionForPayload);
+            payload.forEach(item => {
+                try {
+                    if (!item.CHR_UserApproval || item.CHR_UserApproval.toString().trim() === '') {
+                        item.CHR_UserApproval = approverVal;
+                    }
+                    if (!item.CHR_MaDon || item.CHR_MaDon.toString().trim() === '') {
+                        item.CHR_MaDon = maDon;
+                    }
+                    if (!item.CHR_SectionName || item.CHR_SectionName.toString().trim() === '' || item.CHR_SectionName ==='#N/A') {
+                        item.CHR_SectionName = SetionNameFirst;
+                    }
+                    item.ID_StepBaoGia = 2; // set step duyệt báo giá
+                } catch (e) { /* ignore per-item errors */ }
+            });
+        } catch (e) { console.warn('Error ensuring CHR_MaDon/CHR_UserApproval on payload', e); }
 
         // If no rows to submit, inform user and abort
         if (payload.length === 0) {
@@ -1545,90 +1621,77 @@
             }
 
         });
-        // Dừng xử lý khi chọn loại hàng
-        // Autofill when selecting internal material code
-        qs('#quoteTableBody')?.addEventListener('change', (e) => {
-            const t = e.target;
-            if (t.classList && t.classList.contains('maHangNoiBo')) {
-                autofillFromMaterialSelect(t);
-            }
-        });
-        // lấy dữ liệu tự động khi thay đổi chủng loại
-        qs('#quoteTableBody')?.addEventListener('change', (e) => {
-            const t = e.target;
-            if (t.classList && t.classList.contains('chungLoaiTb')) {
-                autoAddRowByCategory(t);
-            }
-        })
-        // When category changes, reload material list from server and update material selects
+        // Consolidated change handler (delegated) for table selects
         qs('#quoteTableBody')?.addEventListener('change', async (e) => {
             const t = e.target;
-            const T18 = window.i18nQuote || {};
-            if (t.classList && t.classList.contains('chungLoaiTb')) {
-                const nhomHang = (t.value || '').toString();
+            if (!t || !t.classList) return;
+
+            // Selecting an internal material code -> autofill fields from material service
+            if (t.classList.contains('maHangNoiBo')) {
                 try {
-                    // call POST /Quote/GetSearchMaterial with JSON body
+                    await autofillFromMaterialSelect(t);
+                } catch (ex) { console.warn('autofillFromMaterialSelect error', ex); }
+                return;
+            }
+
+            // Category changed -> 1) try to auto-add rows for suppliers, 2) refresh material options for the same row
+            if (t.classList.contains('chungLoaiTb')) {
+                const tr = t.closest('tr');
+                // 1) try auto add rows (may insert rows or set supplier on current row)
+                try { await autoAddRowByCategory(t); } catch (ex) { console.warn('autoAddRowByCategory error', ex); }
+
+                // 2) refresh maHangNoiBo options for this row only (avoid updating all rows)
+                try {
+                    const T18 = window.i18nQuote || {};
+                    const nhomHang = (t.value || '').toString();
                     const body = { MaHang: '', Name: '', NhomHang: nhomHang, PageIndex: 0, PageSize: 0 };
                     const res = await fetch(api.searchMaterials, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
                     });
                     if (!res.ok) throw new Error(await res.text());
                     const materials = await res.json();
-                    // Find the row of the changed select
-                    const tr = t.closest('tr');
                     if (!tr) return;
-                    // Update only the maHangNoiBo select in the same row
                     const sel = tr.querySelector('.maHangNoiBo');
-                    if (sel) {
-                        // remove any custom wrapper
-                        try {
-                            const $sel = $(sel);
-                            const next = sel.nextElementSibling;
-                            if (next && next.classList && next.classList.contains('ms-container')) {
-                                next.remove();
-                            }
-                            // preserve current selection if any, then rebuild options
-                            const prevValue = sel.value;
-                            sel.style.display = '';
-                            sel.innerHTML = '';
-                            const optDefault = document.createElement('option');
-                            optDefault.value = '';
-                            optDefault.textContent = T18.SelectInternalMaterialCode;
-                            sel.appendChild(optDefault);
-                            if (Array.isArray(materials)) {
-                                materials.forEach((m) => {
-                                    const code = m.material_Code || '';
-                                    const name = m.material_Name_VN || '';
-                                    if (!code) return;
-                                    const o = document.createElement('option');
-                                    o.value = code;
-                                    o.textContent = `${code} - ${name}`;
-                                    sel.appendChild(o);
-                                });
-                            }
-                            // restore previous selection if it still exists; otherwise keep default
-                            try {
-                                if (prevValue && Array.from(sel.options).some(o => o.value === prevValue)) {
-                                    sel.value = prevValue;
-                                } else {
-                                    sel.selectedIndex = 0;
-                                }
-                            } catch (ex) {
-                                sel.selectedIndex = 0;
-                            }
-                            // mark for rebuild
-                            try { $sel.data('search-dropdown', false); } catch { }
-                        } catch (err) {
-                            console.warn('Error updating material select:', err);
+                    if (!sel) return;
+
+                    // remove any custom wrapper and rebuild only this select
+                    try {
+                        const next = sel.nextElementSibling;
+                        if (next && next.classList && next.classList.contains('ms-container')) next.remove();
+                        const prevValue = sel.value;
+                        sel.style.display = '';
+                        sel.innerHTML = '';
+                        const optDefault = document.createElement('option');
+                        optDefault.value = '';
+                        optDefault.textContent = T18.SelectInternalMaterialCode || '';
+                        sel.appendChild(optDefault);
+                        if (Array.isArray(materials)) {
+                            materials.forEach((m) => {
+                                const code = m.material_Code || '';
+                                const name = m.material_Name_VN || '';
+                                if (!code) return;
+                                const o = document.createElement('option');
+                                o.value = code;
+                                o.textContent = `${code} - ${name}`;
+                                sel.appendChild(o);
+                            });
                         }
+                        // restore previous selection if still present
+                        try {
+                            if (prevValue && Array.from(sel.options).some(o => o.value === prevValue)) sel.value = prevValue;
+                            else sel.selectedIndex = 0;
+                        } catch (ex) { sel.selectedIndex = 0; }
+                        try { $(sel).data('search-dropdown', false); } catch { }
+                    } catch (err) {
+                        console.warn('Error updating material select:', err);
                     }
-                    // reinitialize searchable dropdowns for the updated select
+
                     try { buildSearchableDropdown($(sel)); } catch (ex) { }
                 } catch (err) {
                     console.warn('Không thể tải danh sách vật tư:', err);
                 }
+
+                return;
             }
         });
         function updateTenThuTucHaiQuan(tr) {
@@ -1753,8 +1816,13 @@
 
             async function loadRemote(query, append = false) {
                 if (!isRemoteMaterial) return;
-                if (remoteState.loading) return;
-                remoteState.loading = true;
+                // Debounce callers should prevent concurrent calls, but guard anyway
+                // if this is a new query (not append) cancel any outstanding request
+                if (!append && remoteState.controller) {
+                    try { remoteState.controller.abort(); } catch (e) { }
+                    remoteState.controller = null;
+                }
+                if (remoteState.loading && append) return; // prevent concurrent append loads
                 // If new query, reset paging
                 if (query !== remoteState.lastQuery) {
                     remoteState.pageIndex = 1;
@@ -1763,20 +1831,28 @@
                 const page = remoteState.pageIndex;
                 const pageSize = remoteState.pageSize;
                 const body = { MaHang: query || '', Name: query || '', NhomHang: getCategoryForRow() || '', PageIndex: page, PageSize: pageSize };
+                // show loading sentinel in list
+                $list.find('.ms-loading').remove();
+                $list.append('<div class="ms-loading">Loading...</div>');
+                remoteState.loading = true;
+                // create abort controller for this request
+                try { remoteState.controller = new AbortController(); } catch (e) { remoteState.controller = null; }
                 try {
-                    const res = await fetch('/Quote/GetSearchMaterial', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-                    });
+                    // use configured api endpoint if available
+                    const url = (typeof api !== 'undefined' && api.searchMaterials) ? api.searchMaterials : '/Quote/GetSearchMaterial';
+                    const fetchOpts = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+                    if (remoteState.controller && remoteState.controller.signal) fetchOpts.signal = remoteState.controller.signal;
+                    const res = await fetch(url, fetchOpts);
                     if (!res.ok) throw new Error(await res.text());
                     const data = await res.json();
-                    const items = Array.isArray(data) ? data.map(m => ({ value: m.material_Code || '', text: ((m.material_Code || '') + ' - ' + (m.material_Name_VN || m.material_Name_VN || '')) })) : [];
+                    const items = Array.isArray(data) ? data.map(m => ({ value: m.material_Code || '', text: ((m.material_Code || '') + ' - ' + (m.material_Name_VN || '')) })) : [];
                     if (!append) {
                         remoteState.options = items;
                     } else {
-                        // avoid duplicates by value
                         const existing = new Set(remoteState.options.map(o => o.value));
-                        items.forEach(it => { if (!existing.has(it.value)) remoteState.options.push(it); });
+                        items.forEach(it => { if (it && it.value && !existing.has(it.value)) remoteState.options.push(it); });
                     }
+
                     // Ensure the underlying <select> contains these options so native lookups / other code work
                     try {
                         items.forEach(it => {
@@ -1789,13 +1865,22 @@
                             }
                         });
                     } catch (e) { /* ignore DOM errors */ }
+
                     remoteState.hasMore = items.length === pageSize;
                     if (remoteState.hasMore) remoteState.pageIndex = page + 1;
                     remoteState.lastQuery = query;
                 } catch (err) {
-                    console.warn('Error loading remote materials:', err);
+                    // ignore abort errors silently
+                    if (err && err.name === 'AbortError') {
+                        // aborted by newer request
+                    } else {
+                        console.warn('Error loading remote materials:', err);
+                    }
                 } finally {
                     remoteState.loading = false;
+                    // clear controller for completed or aborted request
+                    try { remoteState.controller = null; } catch (e) { }
+                    $list.find('.ms-loading').remove();
                     renderList(remoteState.lastQuery);
                 }
             }
@@ -1932,24 +2017,34 @@
                 }
             });
 
-            // scroll to load more for remote lists
-            $list.on('scroll', function () {
-                if (!isRemoteMaterial) return;
-                const el = this;
-                try {
-                    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
-                        if (remoteState.hasMore && !remoteState.loading) {
-                            loadRemote(remoteState.lastQuery || '', true);
-                        }
-                    }
-                } catch (e) { }
-            });
+            // scroll to load more for remote lists (throttled)
+            if (isRemoteMaterial) {
+                let listScrollTimer = null;
+                $list.on('scroll', function () {
+                    const el = this;
+                    if (listScrollTimer) clearTimeout(listScrollTimer);
+                    listScrollTimer = setTimeout(() => {
+                        try {
+                            if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+                                if (remoteState.hasMore && !remoteState.loading) {
+                                    loadRemote(remoteState.lastQuery || '', true);
+                                }
+                            }
+                        } catch (e) { }
+                    }, 150);
+                });
+            }
 
+            // debounce remote searches per-dropdown
+            let searchTimerLocal = null;
             $search.find('input').on('input', function () {
-                const q = $(this).val() || '';
+                const q = ($(this).val() || '').toString();
                 if (isRemoteMaterial) {
-                    // fetch filtered results from server
-                    loadRemote(q.toString(), false);
+                    clearTimeout(searchTimerLocal);
+                    searchTimerLocal = setTimeout(() => {
+                        // new query should replace options
+                        loadRemote(q, false);
+                    }, 250);
                 } else {
                     renderList(q.toString());
                 }
@@ -2154,7 +2249,7 @@
         setSelectById('gapTb', dto.chR_Gap);
 
         // Người yêu cầu
-        setInputById('nguoiYeuCauRow', dto.chR_CreateBy || (window.indexQuoteData && window.indexQuoteData.user) || '');
+        setInputById('nguoiYeuCauRow', dto.nvchR_UserRequest || (window.indexQuoteData && window.indexQuoteData.user) || '');
     }
 
     async function populateTableFromItems(items) {

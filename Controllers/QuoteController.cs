@@ -64,7 +64,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> Index()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             //var listApproval = await _approverService.GetApproverByStepAndSectionAsync(2,GetCurrentUserSection());
@@ -108,7 +108,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> Quotation_Results()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
@@ -433,7 +433,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> InputQuote()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var madons = await LoadMadonAsync();
@@ -452,7 +452,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> SelectQuoteSection()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccNews = await LoadNhaCungCapDataAsync();
             var madons = await LoadMadonAsync();
             var vm = new QuoteModel
@@ -469,7 +469,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> HistoryQuote()
         {
             var nhomViTri = await LoadNhomViTriDataAsync();
-            var materials = await _materialService.SearchAsync("", "", "", 1, 1000);
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccNews = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var statusData = await _baoGiaStatusService.GetListStatusAsync();
@@ -617,7 +617,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 // Gui mail phe duyet trong background
                 var SectionApporve = insertedList
                     .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
-                    .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia))
+                    .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia,l.CHR_UserApproval))
                     .ToList();
                 if (SectionApporve != null)
                 {
@@ -630,7 +630,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                 foreach (var item in SectionApporve)
                                 {
-                                    await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
+                                    //await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
+                                    await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", currentUserId+"@brothergroup.net",11, "http://172.26.248.62:8057/ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
                                 }
                             }
                             catch (Exception ex)
@@ -864,7 +865,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 29).SetValue(rq?.DTM_NgayMuonNhan.HasValue == true ? rq.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(row, 30).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(row, 31).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
-                    ws.Cell(row, 32).SetValue(rq?.CHR_CreateBy ?? string.Empty);
+                    ws.Cell(row, 32).SetValue(rq?.NVCHR_UserRequest ?? string.Empty);
                     row++;
                 }
 
@@ -889,7 +890,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest("File không hợp lệ");
 
             var items = new List<BaoGia_Request_of_QuotationDTO>();
-            var listSectionCost = "";
             try
             {
                 using var stream = file.OpenReadStream();
@@ -954,8 +954,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 NVCHR_LyDo = ws.Cell(r, 28).GetString(),
                                 DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
                                 DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
-                                CHR_Gap = ws.Cell(r, 31).GetString(),
-                                CHR_CreateBy = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
+                                CHR_Gap = (ParseBool(ws.Cell(r, 31).GetString()) ?? true) ? "true" : "false",
+                                NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
+                                CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
                                 DTM_CreateDate = DateTime.Now,
                                 ID_Status = "CREATE"
                             };
@@ -1027,7 +1028,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             NVCHR_LyDo = ws.Cell(r, 28).GetString(),
                             DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
                             DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
-                            CHR_Gap = ws.Cell(r, 31).GetString(),
+                            CHR_Gap = (ParseBool(ws.Cell(r, 31).GetString()) ?? true) ? "true" : "false",
                             CHR_CreateBy = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
                             DTM_CreateDate = DateTime.Now,
                             ID_Status = "CREATE"
@@ -1595,7 +1596,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
 
             // Load supporting reference data
-            var materialsResp = await _materialService.SearchAsync("", "", "", 1, 1000);
+            var materialsResp = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccs = await LoadNhaCungCapDataAsync();
             var categoriesAll = await LoadCategoryDataAsync();
 

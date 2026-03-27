@@ -27,38 +27,44 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Tim kiem thong tin hang hoa va phan trang
         public async Task<List<MATERIAL>> SearchAsync(string? MaHang, string? Name, string? NhomHang, int? pageIndex, int? pageSize)
         {
-            var sql = @"
-                SELECT *
-                FROM MATERIAL
-                WHERE (@MaterialName IS NULL OR Material_Name_VN LIKE '%' + @MaterialName + '%' OR Material_Name_EN LIKE '%' + @MaterialName + '%'
-				OR Material_Name_JP LIKE '%' + @MaterialName + '%'
-				)
-                  AND (@MaterialType IS NULL OR Category_VN LIKE '%' + @MaterialType 
-                    + '%'OR Category_EN LIKE '%' + @MaterialType + '%' OR Category_JP LIKE '%' + @MaterialType + '%' OR @MaterialType = '')
-				  OR (@MaterialCode IS NULL OR Material_Code LIKE '%' + @MaterialCode + '%')
-            ";
-            if (pageSize > 0 && pageIndex > 0)
+            var sql = "SELECT * FROM MATERIAL WHERE 1=1";
+            var parameters = new Dapper.DynamicParameters();
+
+            // Filter by code
+            if (!string.IsNullOrWhiteSpace(MaHang))
             {
-                sql += @"
-                    ORDER BY MATERIAL_CODE
-                    OFFSET @Offset ROWS
-                    FETCH NEXT @PageSize ROWS ONLY
-                ";
-            }else
-            {
-                sql += @"
-                    ORDER BY MATERIAL_CODE
-                ";
+                sql += " AND Material_Code LIKE '%' + @MaterialCode + '%'";
+                parameters.Add("MaterialCode", MaHang);
             }
 
-            var parameters = new
-                {
-                    MaterialCode = string.IsNullOrEmpty(MaHang) ? null : MaHang,
-                    MaterialName = string.IsNullOrEmpty(Name) ? null : Name,
-                    MaterialType = string.IsNullOrEmpty(NhomHang) ? null : NhomHang,
-                    Offset = (pageIndex - 1) * pageSize,
-                    PageSize = pageSize
-                };
+            // Filter by name (search across multiple name columns)
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                sql += " OR (Material_Name_VN LIKE '%' + @MaterialName + '%' OR Material_Name_EN LIKE '%' + @MaterialName + '%' OR Material_Name_JP LIKE '%' + @MaterialName + '%')";
+                parameters.Add("MaterialName", Name);
+            }
+
+            // Filter by category/type
+            if (!string.IsNullOrWhiteSpace(NhomHang))
+            {
+                sql += " AND (Category_VN LIKE @MaterialType + '%' OR Category_EN LIKE '%' + @MaterialType + '%' OR Category_JP LIKE '%' + @MaterialType + '%')";
+                parameters.Add("MaterialType", NhomHang);
+            }
+
+            // Pagination
+            if (pageSize.HasValue && pageSize.Value > 0)
+            {
+                var page = pageIndex.GetValueOrDefault(1);
+                var offset = (page - 1) * pageSize.Value;
+                sql += " ORDER BY Material_Code OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+                parameters.Add("Offset", offset);
+                parameters.Add("PageSize", pageSize.Value);
+            }
+            else
+            {
+                sql += " ORDER BY Material_Code";
+            }
+
             return (await _conn.QueryAsync<MATERIAL>(sql, parameters)).ToList();
         }
         // Lay danh sach hang hoa theo ten hoac ma

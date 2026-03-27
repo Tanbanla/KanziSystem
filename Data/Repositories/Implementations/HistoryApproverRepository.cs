@@ -91,10 +91,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
 
             var sql = @"SELECT DISTINCT r.* FROM [BaoGia_Request_of_Quotation] as r 
-                left join BaoGia_Master_Approver_Send_Mail as s  on r.ID_StepBaoGia = s.ID_BaoGiaStep and CHR_SectionCode = s.CHR_CodeSection
-				left join BaoGia_Step as st on r.ID_StepBaoGia = st.INT_StepNumber
-				where st.CHR_Status = 'APPROVAL' and
-                (CHR_UserAdid = @Adid)and
+                --left join BaoGia_Master_Approver_Send_Mail as s  on r.ID_StepBaoGia = s.ID_BaoGiaStep and CHR_SectionCode = s.CHR_CodeSection
+				--left join BaoGia_Step as st on r.ID_StepBaoGia = st.INT_StepNumber
+				--where st.CHR_Status = 'APPROVAL' and
+                --(CHR_UserAdid = @Adid) and
+                where r.CHR_UserApproval = @Adid and r.ID_StepBaoGia < 6 and r.ID_StepBaoGia > 1 and
                 (@SoDon is null or CHR_MaDon like '%' + @SoDon + '%' or @SoDon = '' ) and 
                 (@MaHang is null or CHR_MaHangNoiBo like '%' + @MaHang + '%' or @MaHang = '' ) and 
                 (@Section is null or CHR_SectionCode like '%' + @Section + '%' or @Section = '' ) and 

@@ -230,7 +230,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 rr.CHR_Phanloai,
                 rr.NVCHR_NameVN,
                 rr.NVCHR_ChungLoai,
-                rr.DTM_NgayMuonNhan,
+                --rr.DTM_NgayMuonNhan,
                 rr.ID_StepBaoGia,
                 CASE 
                     WHEN rr.ID_StepBaoGia = 6 THEN N'WAITING_NCC'

@@ -86,9 +86,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             List<PE_USERNAME> _ifor = REQUEST_PROCESS._load_userinventory("", id);
             return Json(_ifor);
         }
-        public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai, string phong, string khoii)
+        public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai,  string us)
         {
-            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai, phong, khoii);
+            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai,  us);
             return Json(lst);
         }
         private readonly IWebHostEnvironment _env;

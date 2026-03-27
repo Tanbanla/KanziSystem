@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -18,5 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<bool> UpdateNccNew(IM_NCC_NEW nccNew);
         // thêm danh sách nhà cung cấp
         Task<bool> AddListNccNew(List<IM_NCC_NEW> listNccNew);
+        // Update Short Name Suppelier
+        Task<bool> UpdateShortNames(List<IM_NCC_NEW> listUpate);
     }
 }

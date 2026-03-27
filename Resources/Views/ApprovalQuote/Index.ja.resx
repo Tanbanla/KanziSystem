@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -398,6 +398,15 @@
   </data>
   <data name="UnitShort" xml:space="preserve">
     <value>単位</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>次の承認者を選択</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>次の承認者</value>
+  </data>
+  <data name="SelectApproverRequired" xml:space="preserve">
+    <value>承認者を選択してください。</value>
   </data>
   <data name="ShapeShort" xml:space="preserve">
     <value>形状</value>

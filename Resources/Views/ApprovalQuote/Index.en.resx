@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -398,6 +398,15 @@
   </data>
   <data name="UnitShort" xml:space="preserve">
     <value>Unit</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>Select next approver</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>Next approver</value>
+  </data>
+  <data name="SelectApproverRequired" xml:space="preserve">
+    <value>Please select an approver.</value>
   </data>
   <data name="ShapeShort" xml:space="preserve">
     <value>Shape</value>

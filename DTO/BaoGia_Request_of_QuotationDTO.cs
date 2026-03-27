@@ -86,4 +86,6 @@ public partial class BaoGia_Request_of_QuotationDTO
     public bool? BIT_IsTemplate { get; set; }
 
     public string? CHR_UserApproval { get; set; }
+
+    public string? NVCHR_UserRequest { get; set; }
 }

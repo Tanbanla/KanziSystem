@@ -216,9 +216,10 @@
                 </div>
                 <br />
                 <div id="gyc">
-                   @*   <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>   *@
-                     <button class="btn btn-info float-right" id="modal-6" >✉ @Languages.guiyeucau</button>  
-                     <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button> 
+                   @*   <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>
+                        <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>                   *@
+                     <button class="btn btn-info float-right" id="modal-6" >✉ @Languages.guiyeucau</button>
+                    <button class="btn btn-info float-right" id="modal-20">✉ @Languages.guiyeucau</button>
                 </div>
             </div>
         </div>
@@ -242,7 +243,7 @@
         _load_phongchiuphi();
         document.getElementById("modal-20").style.display = 'none';
 
-        initSelect2($('.select2'));
+        //initSelect2($('.select2'));
     }
         function updateRowNumbers() {
         const rows = document.querySelectorAll('#dynamic-table tbody tr');
