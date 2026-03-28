@@ -962,7 +962,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var dto = new BaoGia_Master_Approver_Send_Mail
                             {
                                 ID = 0,
-                                ID_BaoGiaStep = 3,
+                                ID_BaoGiaStep = 2,
                                 CHR_UserAdid = userInfo.Data.CHR_EMPLOYEE_ADID,
                                 CHR_CodeSection = item.Cost_Center,
                                 CHR_NameSection = "",

@@ -89,18 +89,35 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lấy danh sách phê duyệt của người dùng
         public async Task<List<BaoGia_Request_of_Quotation>> GetListApprover(string adid, string? soDon, string? maHang, string? section, string? statusApprover)
         {
-
-            var sql = @"SELECT DISTINCT r.* FROM [BaoGia_Request_of_Quotation] as r 
-                --left join BaoGia_Master_Approver_Send_Mail as s  on r.ID_StepBaoGia = s.ID_BaoGiaStep and CHR_SectionCode = s.CHR_CodeSection
-				--left join BaoGia_Step as st on r.ID_StepBaoGia = st.INT_StepNumber
-				--where st.CHR_Status = 'APPROVAL' and
-                --(CHR_UserAdid = @Adid) and
-                where r.CHR_UserApproval = @Adid and r.ID_StepBaoGia < 6 and r.ID_StepBaoGia > 1 and
-                (@SoDon is null or CHR_MaDon like '%' + @SoDon + '%' or @SoDon = '' ) and 
-                (@MaHang is null or CHR_MaHangNoiBo like '%' + @MaHang + '%' or @MaHang = '' ) and 
-                (@Section is null or CHR_SectionCode like '%' + @Section + '%' or @Section = '' ) and 
-                (@Status is null or ID_StepBaoGia = @Status or @Status = '' )
+            var sql = @"SELECT DISTINCT r.* FROM [BaoGia_Request_of_Quotation] as r
+                LEFT JOIN BaoGia_Master_Approver_Send_Mail as m ON m.ID_BaoGiaStep = r.ID_StepBaoGia
+                WHERE (r.CHR_UserApproval = @Adid OR (r.ID_StepBaoGia = 4 AND m.CHR_UserAdid = @Adid)) 
+                  AND r.ID_StepBaoGia < 6 
+                  AND r.ID_StepBaoGia > 1
                 ";
+            // Thêm điều kiện tìm theo số đơn
+            if (!string.IsNullOrEmpty(soDon))
+            {
+                sql += @" AND r.CHR_MaDon LIKE '%' + @SoDon + '%'";
+            }
+
+            // Thêm điều kiện tìm theo mã hàng
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                sql += @" AND r.CHR_MaHangNoiBo LIKE '%' + @MaHang + '%'";
+            }
+
+            // Thêm điều kiện tìm theo section
+            if (!string.IsNullOrEmpty(section))
+            {
+                sql += @" AND r.CHR_SectionCode LIKE '%' + @Section + '%'";
+            }
+
+            // Thêm điều kiện tìm theo status
+            if (!string.IsNullOrEmpty(statusApprover) && int.TryParse(statusApprover, out int status))
+            {
+                sql += @" AND r.ID_StepBaoGia = @Status";
+            }
             var parameter = new
             {
                 Adid = adid,
@@ -109,6 +126,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Section = section,
                 Status = statusApprover
             };
+
             var re = (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameter)).ToList();
             return re;
         }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -184,22 +185,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
 
                         // phần của file dữ liệu đính kèm 
-                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaDon;
-                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaThietBi;
-                        worksheet.Cell(rowIndex, 24).Value = rq.CHR_MaHangNoiBo;
-                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_MaHangNCC;
-                        worksheet.Cell(rowIndex, 26).Value = rq.NVCHR_NameVN;
-                        worksheet.Cell(rowIndex, 27).Value = rq.CHR_NameEN;
-                        worksheet.Cell(rowIndex, 28).Value = rq.INT_SoLuong;
-                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_DonVi;
-                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_Rohs; 
-                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_COCQ;
-                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_MSDS; 
-                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_AnToan;
-                        worksheet.Cell(rowIndex, 34).Value = rq.NVCHR_FileThietKe;
-                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_NhaSanXuat;
-                        worksheet.Cell(rowIndex, 36).Value = rq.CHR_MaNCC;
-                        worksheet.Cell(rowIndex, 37).Value = rq.NVCHR_TenNCC;
+                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaDon ?? string.Empty;
+                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaThietBi ?? string.Empty;
+                        worksheet.Cell(rowIndex, 24).Value = rq.CHR_MaHangNoiBo ?? string.Empty;
+                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_MaHangNCC ?? string.Empty;
+                        worksheet.Cell(rowIndex, 26).Value = rq.NVCHR_NameVN ?? string.Empty;
+                        worksheet.Cell(rowIndex, 27).Value = rq.CHR_NameEN ?? string.Empty;
+                        worksheet.Cell(rowIndex, 28).Value = rq.INT_SoLuong ?? string.Empty;
+                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_DonVi ?? string.Empty;
+                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_Rohs ?? string.Empty; 
+                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_COCQ ?? string.Empty;
+                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_MSDS ?? string.Empty; 
+                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_AnToan ?? string.Empty;
+                        worksheet.Cell(rowIndex, 34).Value = rq.NVCHR_FileThietKe ?? string.Empty;
+                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_NhaSanXuat ?? string.Empty;
+                        worksheet.Cell(rowIndex, 36).Value = rq.CHR_MaNCC ?? string.Empty;
+                        worksheet.Cell(rowIndex, 37).Value = rq.NVCHR_TenNCC ?? string.Empty;
                         worksheet.Cell(rowIndex, 38).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? "";
                         worksheet.Cell(rowIndex, 39).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";
                         // Add thin border to the data row
@@ -231,8 +232,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                             NVCHR_PaymentTerm = "",
                             NVCHR_File = ""
                         };
-                        dearMail = "nhà cung cấp " + rq.NVCHR_TenNCC + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
-                        titleMail = rq.NVCHR_TenNCC + " - Yêu cầu báo giá đến ngày " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: "+rq.CHR_MaDon;
+                        dearMail = "nhà cung cấp " + rq.Ten + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
+                        titleMail = (rq.ShortName ?? rq.Ten) + " - Yêu cầu báo giá đến ngày " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: "+rq.CHR_MaDon;
                         listBaoGiaDetail.Add(itemDetail);
                         rowIndex++;
                     }
@@ -244,7 +245,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var bodyTable = mail.CHR_BODY + tableHtml;
                 var body =  string.Format(bodyTable, dearMail);
                 var email = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;" +
-                    "nguyenthilan.huong2@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn;nganng@brothergroup.net;thuongti@brothergroup.net;phuongxq@brothergroup.net";
+                    "nguyenthilan.huong2@brother-bivn.com.vn;nganng@brothergroup.net;thuongti@brothergroup.net;phuongxq@brothergroup.net";
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {//nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn
                     mail_from = mail.CHR_FROM,
@@ -258,7 +259,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
                 if (sendResult.Success)
                 {
-                    listSended.AddRange(listRq.Select(r => r.ID));
+                    listSended.AddRange(listRq.Select(r => (int)r.ID));
                 }
             }
             // cap nhat trang thai da gui mail
@@ -317,11 +318,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             foreach (var item in suppliers)
             {
                 // lay email nha cung cap
-                var toEmail = await _repo.GetSupplierEmailAsync(item);
-                if (string.IsNullOrEmpty(toEmail))
-                {
-                    continue;
-                }
+
+                //var toEmail = await _repo.GetSupplierEmailAsync(item);
+                //if (string.IsNullOrEmpty(toEmail))
+                //{
+                //    continue;
+                //}
+
                 // tao bang html
                 var tableHtml = "<table border='1' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;'>";
 
@@ -410,29 +413,29 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         // phần của file dữ liệu đính kèm 
 
 
-                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaDon;
-                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaThietBi;
-                        worksheet.Cell(rowIndex, 24).Value = rq.CHR_MaHangNoiBo;
-                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_MaHangNCC;
-                        worksheet.Cell(rowIndex, 26).Value = rq.NVCHR_NameVN;
-                        worksheet.Cell(rowIndex, 27).Value = rq.CHR_NameEN;
-                        worksheet.Cell(rowIndex, 28).Value = rq.INT_SoLuong;
-                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_DonVi;
-                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_Rohs;
-                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_COCQ;
-                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_MSDS;
-                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_AnToan;
-                        worksheet.Cell(rowIndex, 34).Value = rq.NVCHR_FileThietKe;
-                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_NhaSanXuat;
-                        worksheet.Cell(rowIndex, 36).Value = rq.CHR_MaNCC;
-                        worksheet.Cell(rowIndex, 37).Value = rq.NVCHR_TenNCC;
+                        worksheet.Cell(rowIndex, 22).Value = rq.CHR_MaDon ?? string.Empty;
+                        worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaThietBi ?? string.Empty;
+                        worksheet.Cell(rowIndex, 24).Value = rq.CHR_MaHangNoiBo ?? string.Empty;
+                        worksheet.Cell(rowIndex, 25).Value = rq.CHR_MaHangNCC ?? string.Empty;
+                        worksheet.Cell(rowIndex, 26).Value = rq.NVCHR_NameVN ?? string.Empty;
+                        worksheet.Cell(rowIndex, 27).Value = rq.CHR_NameEN ?? string.Empty;
+                        worksheet.Cell(rowIndex, 28).Value = rq.INT_SoLuong ?? string.Empty;
+                        worksheet.Cell(rowIndex, 29).Value = rq.NVCHR_DonVi ?? string.Empty;
+                        worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_Rohs ?? string.Empty;
+                        worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_COCQ ?? string.Empty;
+                        worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_MSDS ?? string.Empty;
+                        worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_AnToan ?? string.Empty;
+                        worksheet.Cell(rowIndex, 34).Value = rq.NVCHR_FileThietKe ?? string.Empty;
+                        worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_NhaSanXuat ?? string.Empty;
+                        worksheet.Cell(rowIndex, 36).Value = rq.CHR_MaNCC ?? string.Empty;
+                        worksheet.Cell(rowIndex, 37).Value = rq.NVCHR_TenNCC ?? string.Empty;
                         worksheet.Cell(rowIndex, 38).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? "";
                         worksheet.Cell(rowIndex, 39).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";
                         // Add thin border to the data row
                         worksheet.Range(rowIndex, 1, rowIndex, 10).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 
-                        dearMail = "nhà cung cấp " + rq.NVCHR_TenNCC + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
-                        titleMail = rq.NVCHR_TenNCC + " - Yêu cầu báo giá đến ngày " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
+                        dearMail = "nhà cung cấp " + rq.Ten + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
+                        titleMail = (rq.ShortName ?? rq.Ten) + " - Yêu cầu báo giá đến ngày " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
                         rowIndex++;
                     }
                     workbook.SaveAs(tempFilePath);
@@ -443,7 +446,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var bodyTable = mail.CHR_BODY + tableHtml;
                 var body = string.Format(bodyTable, dearMail);
                 var email = "nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;" +
-                 "nguyenthilan.huong2@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn;nganng@brothergroup.net;thuongti@brothergroup.net;phuongxq@brothergroup.net";
+                 "nguyenthilan.huong2@brother-bivn.com.vn;nganng@brothergroup.net;thuongti@brothergroup.net;phuongxq@brothergroup.net";
                 //nguyenduy.khanh@brother-bivn.com.vn;PhuongThuy.VuThi@brother-bivn.com.vn;nguyenthi.tam@brother-bivn.com.vn;chuthuan.anh@brother-bivn.com.vn;VuThi.Toan@brother-bivn.com.vn
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {
@@ -458,7 +461,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
                 if (sendResult.Success)
                 {
-                    listSended.AddRange(listRq.Select(r => r.ID));
+                    listSended.AddRange(listRq.Select(r => (int)r.ID));
                 }
             }
             // cap nhat trang thai da gui mail

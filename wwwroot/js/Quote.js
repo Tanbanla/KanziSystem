@@ -954,7 +954,9 @@
             if (unitInput && (material.unit || material.material_Unit)) unitInput.value = material.unit || material.material_Unit;
             // Fill tên mở thủ tục hải quan
             const vnInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('thủ tục hải quan'));
-            const tenMoThuTucValue = material.tenMoThuTuc || material.TenMoThuTuc || (typeof material.GetTenMoThuTuc === 'function' ? material.GetTenMoThuTuc() : null);
+            //const tenMoThuTucValue = material.tenMoThuTuc || material.TenMoThuTuc || (typeof material.GetTenMoThuTuc === 'function' ? material.GetTenMoThuTuc() : null);
+            //if (vnInput && tenMoThuTucValue) vnInput.value = tenMoThuTucValue;
+            const tenMoThuTucValue = material.nameVI || "" ;
             if (vnInput && tenMoThuTucValue) vnInput.value = tenMoThuTucValue;
             // Fill hinh dang
             const shapeInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('hình dáng'));
@@ -1695,6 +1697,7 @@
             }
         });
         function updateTenThuTucHaiQuan(tr) {
+            const classMaterial = tr.querySelector('.tenPhanLoaiTb')?.value || '';
             const categorySel = tr.querySelector('.chungLoaiTb');
             const categoryVN = categorySel ? (categorySel.options[categorySel.selectedIndex]?.text || '') : '';
             const shape = getInputValue(tr, 'hinhDang');
@@ -1703,7 +1706,19 @@
             const dimension = getInputValue(tr, 'kichThuoc');
             const usedFor = getInputValue(tr, 'viTriSuDung');
             const purpose = getInputValue(tr, 'tinhNang');
-            const tenHangVN = categoryVN + " có hình dáng dạng " + shape + " chất liệu " + material + " thành phần hóa chất " + composition + " có kích thước " + dimension + " dung để " + usedFor + " cho " + purpose;
+            let tenHangVN = "";
+            switch (classMaterial) {
+                case "NO LIST": tenHangVN ="Có hình dáng dạng "+ shape + " & " + usedFor + " & " + purpose;
+                    break;
+                case "A":
+                case "E":
+                case "I":
+                    break;
+                default:
+                    tenHangVN = categoryVN + " có hình dáng dạng " + shape + " chất liệu " + material + " thành phần hóa chất " + composition + " có kích thước " + dimension + " dung để " + usedFor + " cho " + purpose;
+                    break;
+            };
+
             const vnInput = tr.querySelector('input[id^="tenHangVN_"]');
             if (vnInput) vnInput.value = tenHangVN;
         }

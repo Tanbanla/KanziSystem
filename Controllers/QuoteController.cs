@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -67,8 +68,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
-            //var listApproval = await _approverService.GetApproverByStepAndSectionAsync(2,GetCurrentUserSection());
-            //await _tmEmployeeAgentService.GetApproverBySection(GetCurrentUserSection() ?? "");
+            var sendMail = await _sendMailService.SendMailToSupplierAsync();
 
             var vm = new QuoteModel
             {
@@ -837,6 +837,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // Map fields into template columns similar to ExportSelection
                     ws.Cell(row, 1).SetValue(row - 9); // status placeholder
                     ws.Cell(row, 2).SetValue(rq?.CHR_SectionCode ?? string.Empty);
+                    ws.Cell(row, 3).SetValue(rq?.CHR_SectionName ?? string.Empty);
                     ws.Cell(row, 4).SetValue(rq?.CHR_Phanloai ?? string.Empty);
                     ws.Cell(row, 5).SetValue(rq?.CHR_MaThietBi ?? string.Empty);
                     ws.Cell(row, 6).SetValue(rq?.CHR_MaHangNoiBo ?? string.Empty);
@@ -924,12 +925,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             // Map theo thứ tự cột trong bảng ở giao diện
                             dto = new BaoGia_Request_of_QuotationDTO
                             {
-                                CHR_SectionCode = sectionCode, 
-                                CHR_SectionName = sectionName, 
+                                CHR_SectionCode = sectionCode,
+                                CHR_SectionName = sectionName,
                                 CHR_Phanloai = infor.LoaiHang,
                                 CHR_MaHangNoiBo = infor.Material_Code,
-                                CHR_MaHangNCC = infor.Code_Suppiler,    
-                                NVCHR_NameVN = infor.TenMoThuTuc,
+                                CHR_MaHangNCC = infor.Code_Suppiler,
+                                NVCHR_NameVN = infor.NameVI,//infor.TenMoThuTuc,
                                 CHR_NameEN = infor.Material_Name_EN,
                                 INT_SoLuong = ParseDouble(ws.Cell(r, 10).GetString()),
                                 NVCHR_DonVi = infor.Unit ?? ws.Cell(r, 11).GetString(),
@@ -979,6 +980,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     //dto.CHR_MaThietBi = "";
 
                                     //dto.CHR_MaHangNCC = sup.NVCHR_CodeByNCC;
+                                    copy.NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty;
                                     copy.CHR_MaNCC = sup.CHR_MaNCC;
                                     copy.NVCHR_TenNCC = sup.NVCHR_TenNCC;
                                     items.Add(copy);
@@ -1029,7 +1031,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
                             DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
                             CHR_Gap = (ParseBool(ws.Cell(r, 31).GetString()) ?? true) ? "true" : "false",
-                            CHR_CreateBy = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
+                            NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
+                            CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
                             DTM_CreateDate = DateTime.Now,
                             ID_Status = "CREATE"
                         };
@@ -1048,9 +1051,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             foreach (var sup in suppliersResp.Data)
                             {
                                 var copy = first ? dto : CloneDto(dto);
+                                copy.NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty;
                                 copy.CHR_MaNCC = sup.CHR_MaNCC;
                                 copy.NVCHR_TenNCC = sup.NVCHR_TenNCC;
-                                copy.NVCHR_NhaSanXuat = sup.NVCHR_SanXuat;
+                                copy.NVCHR_NhaSanXuat = ws.Cell(r, 24).GetString();
 
                                 items.Add(copy);
                                 first = false;
@@ -1099,6 +1103,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (string.IsNullOrWhiteSpace(s)) return null;
             var v = s.Trim().ToLowerInvariant();
             return v.ToUpper().Contains("O") ? true : false;
+        }
+        private static string? ParseNameHQ(string Catergory,string Shape, string Material, string Composition, string Dimension, string UsedFor, string Purpose)
+        {
+            return Catergory+"có hình dáng " + Shape + " chất liệu " + Material + " thành phần hóa chất " + Composition + " có kích thước " + Dimension + " dùng để " + UsedFor + " cho " + Purpose;
         }
         private static BaoGia_Request_of_QuotationDTO CloneDto(BaoGia_Request_of_QuotationDTO src)
         {

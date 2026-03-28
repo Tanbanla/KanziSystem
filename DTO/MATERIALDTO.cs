@@ -90,7 +90,7 @@ public partial class MATERIALDTO
             return null;
         switch (Material_Code.Substring(0, 1))
         {
-            case "O": return Shape + " & " + UsedFor + " & " +Purpose;
+            case "O": return "Có hình dáng dạng " + Shape + " & " + UsedFor + " & " +Purpose;
             default:
                 return Material_Name_VN;
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Dapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -37,16 +38,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
            return res;
         }
         // Lay thong tin don bao gia cua nha cung cap
-        public async Task<List<BaoGia_Request_of_Quotation>> GetBaoGiaRequestBySupplierAsync(string supplierCode)
+        public async Task<List<dynamic>> GetBaoGiaRequestBySupplierAsync(string supplierCode)
         {
-            var res = await _context.BaoGia_Request_of_Quotations
-                .Where(m => m.CHR_MaNCC == supplierCode && (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false) && m.BIT_LayBaoGia == true )
-                .ToListAsync();
-            if (res == null || res.Count == 0)
-            {
-                return new List<BaoGia_Request_of_Quotation>();
-            }
-            return res;
+            var sql = @"SELECT q.*, n.ShortName , n.Ten
+                FROM BaoGia_Request_of_Quotation AS q
+                LEFT JOIN IM_NCC_NEW AS n ON q.CHR_MaNCC = n.Ma
+                WHERE q.CHR_MaNCC = @SupplierCode 
+                  AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
+                  AND q.BIT_LayBaoGia = 1";
+
+            var parameter = new { SupplierCode = supplierCode };
+
+            return (await _conn.QueryAsync<dynamic>(sql, parameter)).ToList();
         }
         // Lay email nha cung cap
         public async Task<string?> GetSupplierEmailAsync(string supplierCode)
@@ -78,16 +81,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
 
         // Lay thong tin nha cung cap theo ma don hang
-        public async Task<List<BaoGia_Request_of_Quotation>> GetNotifyRequestCodeAsync(string requestCode)
+        public async Task<List<dynamic>> GetNotifyRequestCodeAsync(string requestCode)
         {
-            var res = await _context.BaoGia_Request_of_Quotations
-              .Where(m => (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false) && m.BIT_LayBaoGia == true && m.CHR_MaDon == requestCode)
-              .ToListAsync();
-            if (res == null || res.Count == 0)
-            {
-                return new List<BaoGia_Request_of_Quotation>();
-            }
-            return res;
+            var sql = @"SELECT q.*, n.ShortName , n.Ten
+                FROM BaoGia_Request_of_Quotation AS q
+                LEFT JOIN IM_NCC_NEW AS n ON q.CHR_MaNCC = n.Ma
+                WHERE q.CHR_MaDon = @RequestCode 
+                  AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
+                  AND q.BIT_LayBaoGia = 1";
+
+            var parameter = new { RequestCode = requestCode };
+
+            return (await _conn.QueryAsync<dynamic>(sql, parameter)).ToList();
         }
         // lay thông tin phê duyệt theo phòng ban
         public async Task<string> GetRequesterEmailAsync(string section, int step)
