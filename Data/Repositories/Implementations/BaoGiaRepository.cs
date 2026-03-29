@@ -191,8 +191,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             WITH rq AS (
                 SELECT r.*
                 FROM [BaoGia_Request_of_Quotation] AS r
-                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s 
-                    ON r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE 1 = 1 
                     AND r.ID_StepBaoGia BETWEEN 6 AND 11
                     AND r.BIT_LayBaoGia = 1");
@@ -201,7 +199,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             if (!string.IsNullOrEmpty(user))
             {
-                sql.Append(" AND s.CHR_UserAdid = @Adid");
+                sql.Append(" AND r.CHR_UserApproval = @Adid");
                 parameters.Add("Adid", user);
             }
             if (!string.IsNullOrEmpty(maDon))
@@ -259,7 +257,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(@"
                 ORDER BY 
-                    rr.DTM_NgayMuonNhan DESC
+                    rr.CHR_MaDon DESC
                 OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
                 parameters.Add("Offset", (pageIndex - 1) * pageSize);
                 parameters.Add("PageSize", pageSize);
@@ -268,7 +266,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(@"
                 ORDER BY 
-                    rr.DTM_NgayMuonNhan DESC");
+                    rr.CHR_MaDon DESC");
             }
 
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();

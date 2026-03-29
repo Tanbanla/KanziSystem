@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -120,13 +120,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // update thông tin lựa chọn nhà  cung cấp
-        public async Task<GenericResponse<bool>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos)
+        public async Task<GenericResponse<bool>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos, string userApproverNext)
         {
             var result = new GenericResponse<bool>();
             try
             {
                 var data = _mapper.Map<List<BaoGia_Detail_of_Quotation>>(dtos);
-                result.Data = await _repo.UpdatePickSupplierDetailAsync(data);
+                result.Data = await _repo.UpdatePickSupplierDetailAsync(data, userApproverNext);
                 result.Success = true;
             }
             catch (Exception ex)

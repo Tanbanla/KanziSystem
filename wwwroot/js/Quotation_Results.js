@@ -342,9 +342,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (btnConfirmTop) btnConfirmTop.addEventListener('click', this.confirmSelection.bind(this));
             if (btnConfirmBottom) btnConfirmBottom.addEventListener('click', this.confirmSelection.bind(this));
 
-            // Save tab2 selections
+            // Save tab2 selections - open approver selection first
             const btnSaveTab2 = document.getElementById('SaveTab2');
-            if (btnSaveTab2) btnSaveTab2.addEventListener('click', this.saveTab2.bind(this));
+            if (btnSaveTab2) btnSaveTab2.addEventListener('click', this.openApproverSelectionAndSave.bind(this));
 
             // Hủy
             const btnCancel = document.getElementById('btnCancel');
@@ -480,19 +480,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     const reason = (row.querySelector('.reason-input')?.value || '').toString();
                     const maDon = row.getAttribute('data-madon') || '';
                     const maHang = row.getAttribute('data-mahang') || '';
-                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, CHR_MaDon: maDon, CHR_MaHangNoiBo: maHang });
+                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, CHR_MaDon: maDon, CHR_MaHangNoiBo: maHang});
                 });
-
+                const approverNext = window.__selectedNextApprover || '';
                 if (!payload.length) {
                     showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgWarnSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp.'), type: 'info' });
                     return;
                 }
-
+                var payloadWithApprover = { UserApproverNext: approverNext, listPick: payload };
                 showLoading((T && T.LoadingData) ? T.LoadingData : 'Đang lưu...');
                 const res = await fetch('/Quote/SavePickSupplier', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payloadWithApprover)
                 });
                 hideLoading();
                 if (!res.ok) {
@@ -504,12 +504,139 @@ document.addEventListener('DOMContentLoaded', function () {
                 showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveSuccess || 'Lưu thành công'), type: 'success' });
                 // refresh supplier data to reflect saved selections
                 this.loadSupplierData();
+                // reset selected approver after save
+                try { window.__selectedNextApprover = null; } catch { }
             } catch (err) {
                 hideLoading();
                 const T = window.i18nQuotationResults || {};
                 showDialog({ title: T.Notification || 'Thông báo', message: (err && err.message) ? err.message : (T.MsgSaveError || 'Lưu thất bại'), type: 'error' });
             } finally {
                 if (btn) btn.disabled = false;
+            }
+        },
+
+        // Open approver selection modal, fetch approvers and on confirm call saveTab2 with approver
+        openApproverSelector: function (stepNumber, sectionCode) {
+            // follow the same pattern used in Approval_Quote.js: return a Promise resolving to selected approver object or null
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const modal = document.getElementById('selectApproverModal');
+                    const sel = document.getElementById('selectNextApprover');
+                    const notice = document.getElementById('selectApproverNotice');
+                    if (!modal || !sel) return resolve(null);
+                    // clear
+                    sel.innerHTML = '';
+                    const placeholderOpt = document.createElement('option');
+                    placeholderOpt.value = '';
+                    placeholderOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.SelectPlaceholder) || '-- Chọn --';
+                    sel.appendChild(placeholderOpt);
+
+                    // fetch approvers from Quote controller
+                    const body = { Step: stepNumber, SectionCost: sectionCode };
+                    let list = [];
+                    try {
+                        const resp = await fetch('/Quote/GetListApprovel', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify(body)
+                        });
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            // controller returns data (could be array or wrapper)
+                            list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+                        }
+                    } catch (e) { console.warn('Failed to load approvers', e); }
+
+                    if (!list || !list.length) {
+                        const emptyOpt = document.createElement('option');
+                        emptyOpt.value = '';
+                        emptyOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.NoResults) || 'Không có kết quả';
+                        sel.appendChild(emptyOpt);
+                    } else {
+                        list.forEach(item => {
+                            const o = document.createElement('option');
+                            // normalize likely server keys
+                            const adid = item.chR_UserAdid || item.CHR_UserAdid || item.ADID || item.Id || item.id || '';
+                            const name = item.nvchR_UserName || item.NVCHR_UserName || item.Name || item.FullName || item.nvchR_FullName || '';
+                            o.value = adid || '';
+                            o.textContent = (name ? (name + (adid ? (' (' + adid + ')') : '')) : (adid || ''));
+                            try { o.dataset.raw = JSON.stringify(item); } catch { }
+                            sel.appendChild(o);
+                        });
+                    }
+
+                    // ensure modal attached to body
+                    try { if (modal.parentElement !== document.body) document.body.appendChild(modal); } catch (e) { }
+                    // show modal
+                    try {
+                        if (window.bootstrap && bootstrap.Modal) {
+                            const bsModal = new bootstrap.Modal(modal, { backdrop: 'static' });
+                            modal._bsModal = bsModal;
+                            bsModal.show();
+                            setTimeout(() => {
+                                try { const createdBackdrop = document.querySelector('.modal-backdrop'); if (createdBackdrop) createdBackdrop.style.zIndex = '10550'; modal.style.zIndex = '10600'; } catch (e) { }
+                            }, 10);
+                        } else {
+                            const backdrop = document.createElement('div');
+                            backdrop.className = 'modal-backdrop show custom-modal-backdrop';
+                            backdrop.style.zIndex = '10550';
+                            document.body.appendChild(backdrop);
+                            modal._backdrop = backdrop;
+                            modal.style.zIndex = '10600';
+                            modal.style.display = 'block';
+                            modal.classList.add('show');
+                        }
+                    } catch (e) { modal.style.display = 'block'; modal.classList.add('show'); }
+
+                    const confirmBtn = document.getElementById('confirmSelectApprover');
+                    function cleanup() {
+                        try { if (modal._bsModal) modal._bsModal.hide(); else { modal.style.display = 'none'; modal.classList.remove('show'); } } catch (e) { try { modal.style.display = 'none'; modal.classList.remove('show'); } catch { } }
+                        try { if (modal._backdrop) { document.body.removeChild(modal._backdrop); delete modal._backdrop; } } catch (e) { }
+                        try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) { }
+                        try { modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) { }
+                        if (notice) notice.style.display = 'none';
+                        try { modal.style.zIndex = ''; } catch (e) { }
+                    }
+                    function onConfirm(e) {
+                        e && e.preventDefault();
+                        const value = sel.value;
+                        if (!value) {
+                            if (notice) notice.style.display = '';
+                            return;
+                        }
+                        const raw = sel.selectedOptions && sel.selectedOptions[0] && sel.selectedOptions[0].dataset.raw;
+                        let obj = null;
+                        try { obj = raw ? JSON.parse(raw) : { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; } catch { obj = { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; }
+                        cleanup();
+                        resolve(obj);
+                    }
+                    function onCancel() { cleanup(); resolve(null); }
+                    if (confirmBtn) confirmBtn.addEventListener('click', onConfirm);
+                    try { modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) { }
+                } catch (err) { reject(err); }
+            });
+        },
+
+        openApproverSelectionAndSave: async function () {
+            try {
+                const step = 7;
+                const section = document.getElementById('supplierSearchSection')?.value || document.getElementById('searchPhongBan')?.value || '';
+                const selected = await this.openApproverSelector(step, section);
+                if (!selected) return; // cancelled
+                // normalize selected id field
+                const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? ''; // robust fallback
+                // fallback to value if object has none
+                const finalId = approverId || (selected.value || selected.Value || '');
+                if (!finalId) {
+                    // still save without approver
+                    await this.saveTab2();
+                    return;
+                }
+                window.__selectedNextApprover = finalId;
+                await this.saveTab2();
+            } catch (err) {
+                console.error('openApproverSelectionAndSave error', err);
+                showDialog({ message: 'Lỗi khi lấy danh sách người phê duyệt', type: 'error' });
             }
         },
 

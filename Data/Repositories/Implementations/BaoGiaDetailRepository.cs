@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
@@ -320,7 +320,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result;
         }
         // update thông tin lựa chọn nhà  cung cấp
-        public async Task<bool> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos)
+        public async Task<bool> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos, string userApproverNext)
         {
             if (dtos == null || dtos.Count == 0)
             {
@@ -341,6 +341,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     {
                         rq.ID_StepBaoGia = 9;
                         rq.ID_Status = "WAIT_APPROVE";
+                        rq.NVCHR_UserRequest = userApproverNext;
                     }
                     // luu lịch sử thay đổi
                     var history = new BaoGia_History_Detail_Request

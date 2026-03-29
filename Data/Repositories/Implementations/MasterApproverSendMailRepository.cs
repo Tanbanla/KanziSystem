@@ -67,7 +67,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var query = from m in _context.BaoGia_Master_Approver_Send_Mails
                         where m.ID_BaoGiaStep == idStep
-                              && m.CHR_CodeSection == sectionCode
+                              && (m.CHR_CodeSection == sectionCode || string.IsNullOrEmpty(sectionCode))
                         group m by m.CHR_UserAdid into g
                         select g.OrderBy(x => x.ID).FirstOrDefault();
 

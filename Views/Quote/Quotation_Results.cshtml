@@ -19,6 +19,32 @@
         <div class="spinner" aria-hidden="true"></div>
         <div class="loader-msg">Đang xử lý...</div>
     </div>
+    <!-- Modal: select next approver -->
+    <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["SelectNextApprover"].Value</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="selectNextApprover" class="form-label small">@Localizer["NextApproverLabel"].Value</label>
+                        <select id="selectNextApprover" class="form-select">
+                            <option value="">@Localizer["SelectPlaceholder"]</option>
+                        </select>
+                    </div>
+                    <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"].Value</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"].Value</button>
+                    <button type="button" class="btn btn-primary" id="confirmSelectApprover">@Localizer["Confirm"].Value</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Detail modal -->
     <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
@@ -562,10 +588,14 @@
     <script src="~/js/Quotation_Results.js"></script>
     <script>
         (function() {
-            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
+            // Ensure modal panels and overlays are appended to body to avoid being under navbar stacking contexts
             var panel = document.getElementById('detailModal');
             if (panel && panel.parentElement !== document.body) {
                 document.body.appendChild(panel);
+            }
+            var approverModal = document.getElementById('selectApproverModal');
+            if (approverModal && approverModal.parentElement !== document.body) {
+                document.body.appendChild(approverModal);
             }
         })();
         window.i18nQuotationResults = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {

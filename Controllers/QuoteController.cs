@@ -68,7 +68,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
-            var sendMail = await _sendMailService.SendMailToSupplierAsync();
+            //var sendMail = await _sendMailService.SendMailToSupplierAsync();
 
             var vm = new QuoteModel
             {
@@ -402,7 +402,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         BIT_Select = (bool)i.BIT_Select,
                         NVCHR_ReasonPick = i.NVCHR_ReasonPick.ToString(),
                     }).ToList();
-                    var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(dtoList);
+                    var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(dtoList, "");
                     if (!result.Success)
                     {
                         return BadRequest(result.Message);
@@ -417,9 +417,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Save pick supplier
         [HttpPost]
-        public async Task<IActionResult> SavePickSupplier([FromBody] List<BaoGia_Detail_of_QuotationDTO> listPick)
+        public async Task<IActionResult> SavePickSupplier([FromBody] SaveQuotationResultsModel vm)
         {
-            var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(listPick);
+            var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(vm.listPick, vm.UserApproverNext);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

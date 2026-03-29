@@ -135,4 +135,10 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public int? Step { get; set; }
         public string? SectionCost { get; set; }
     }
+    // Save Quotiation Results
+    public class SaveQuotationResultsModel
+    {
+        public string UserApproverNext { get; set; } = string.Empty;
+        public List<BaoGia_Detail_of_QuotationDTO> listPick { get; set; } = new List<BaoGia_Detail_of_QuotationDTO>();
+    }
 }

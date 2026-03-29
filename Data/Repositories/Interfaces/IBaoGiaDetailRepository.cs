@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
@@ -19,6 +19,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // lấy id của đơn báo giá
         public Task<int?> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNcc, string NameHQ);
         // update thông tin lựa chọn nhà  cung cấp
-        public Task<bool> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos);
+        public Task<bool> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos, string userApproverNext);
     }
 }
