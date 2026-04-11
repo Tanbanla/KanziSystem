@@ -1,5 +1,7 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -32,10 +34,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize);
 
         // lấy mã đơn theo Adid
-        public Task<List<string>> GetMaDonByAdidAsync(string adid);
+        public Task<List<string>> GetMaDonByAdidAsync(string adid, int step);
         // update thông tin màn hình lịch sử báo giá
-        public Task<bool> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_Quotation> baoGias);
+        public Task<UpdateHistoryResult> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_Quotation> baoGias);
         // Get thông tin đơn phê duyệt lựa chọn ncc
         public Task<List<dynamic>> GetSupplierApprovalInfoAsync(string maDon);
+        // Xuất file phê duyệt báo giá 
+        public Task<List<dynamic>> GetExportApprovalInfoAsync(List<string> listMaDon);
+        // Phê duyệt thông tin lựa chọn nhà cung cấp
+        public Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarOK(string maDon, string userNext, string userUpdate);
+        public Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarNG(string maDon, string Reason, string userUpdate);
+        public Task<ListRequest<dynamic>> SearchRequestDone(string? maDon, string? section, string? maHang, string? maNCC, string user, int pageIndex, int pageSize);
+
+        // update người phê duyệt cho đơn
+        public Task<List<BaoGia_Request_of_Quotation>> UpdateUserApprovalHistory(UpdateHistoryResult update);
+        // update ma hang noi bo
+        public Task<bool> UpdateCodeMaterialBIVN(List<ConfirmNameDTO> list);
     }
 }

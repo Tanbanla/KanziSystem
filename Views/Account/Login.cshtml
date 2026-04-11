@@ -64,7 +64,7 @@
                 <input type="hidden" asp-for="ReturnUrl" />
 
                 <div class="mb-3 form-floating">
-                    <input asp-for="Username" class="form-control" id="username" placeholder="@Localizer["Username"]" autocomplete="username" />
+                    <input asp-for="Username" class="form-control" id="username" placeholder="@Localizer["Username"]" autocomplete="username" autocomplete="off" />
                     <label for="username">@Localizer["Username"]</label>
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>

@@ -24,8 +24,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<MaterialController> _logger;
         private readonly IDepartmentService _deparmentService;
+        private readonly IConfiguration _configuration;
         public MaterialController(IBaoGiaConfirmNameService confirmNameService, IDepartmentService deparmentService,
-            IBaoGiaService baoGiaService, IWebHostEnvironment env, ISendMailService sendMailService, 
+            IBaoGiaService baoGiaService, IWebHostEnvironment env, ISendMailService sendMailService, IConfiguration configuration,
             ITmUserService tmUserService, IMaterialService materialService, IServiceScopeFactory serviceScopeFactory, ILogger<MaterialController> logger)
         {
             _confirmNameService = confirmNameService;
@@ -38,6 +39,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _materialService = materialService;
             _serviceScopeFactory = serviceScopeFactory;
             _deparmentService = deparmentService;
+            _configuration = configuration;
         }
         // MARK: Confirm Name actions use EF context directly
         public IActionResult Material()
@@ -61,6 +63,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // Determine role from query or default to UserPUR
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
             //(Request.Query["role"].ToString() ?? string.Empty).Trim();
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             if (!role.Success)
             {
                 return BadRequest(role.Message);
@@ -301,8 +304,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         var emailResult = await sendMailService.SendMailAsync(
                             "nguyenduy.khanh@brother-bivn.com.vn",
                             string.Empty,
-                            21,
-                            "http://172.26.248.62:8057/Material/ConfirmName",
+                            20,
+                            "Material/ConfirmName",
                             true,
                             reject,
                             string.Empty,
@@ -415,20 +418,20 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 continue;
                             }
                             // kiểm tra mã hàng đã tồn tại trong hệ thống chưa
-                            var checkMaHang = await _materialService.CheckMaHangExistsAsync(mahang);
-                            if (checkMaHang.Data)
-                            {
-                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong hệ thống");
-                                hasErrors = true;
-                                continue;
-                            }
-                            var checkList = item.Where(x => x.VCHR_MaHangNoiBo == mahang).ToList();
-                            if (checkList.Any())
-                            {
-                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong file");
-                                hasErrors = true;
-                                continue;
-                            }
+                            //var checkMaHang = await _materialService.CheckMaHangExistsAsync(mahang);
+                            //if (checkMaHang.Data)
+                            //{
+                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong hệ thống");
+                            //    hasErrors = true;
+                            //    continue;
+                            //}
+                            //var checkList = item.Where(x => x.VCHR_MaHangNoiBo == mahang).ToList();
+                            //if (checkList.Any())
+                            //{
+                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong file");
+                            //    hasErrors = true;
+                            //    continue;
+                            //}
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
@@ -441,20 +444,20 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var tenHaiQuanPUR = ws.Cell(r, 22).GetString();
                             var mahangPUR = ws.Cell(r, 9).GetString();
                             // kiểm tra mã hàng đã tồn tại trong hệ thống chưa
-                            var checkMaHangPUR = await _materialService.CheckMaHangExistsAsync(mahangPUR);
-                            if (checkMaHangPUR.Data)
-                            {
-                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong hệ thống");
-                                hasErrors = true;
-                                continue;
-                            }
-                            var checkListPUR = item.Where(x => x.VCHR_MaHangNoiBo == mahangPUR).ToList();
-                            if (checkListPUR.Any())
-                            {
-                                ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong file");
-                                hasErrors = true;
-                                continue;
-                            }
+                            //var checkMaHangPUR = await _materialService.CheckMaHangExistsAsync(mahangPUR);
+                            //if (checkMaHangPUR.Data)
+                            //{
+                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong hệ thống");
+                            //    hasErrors = true;
+                            //    continue;
+                            //}
+                            //var checkListPUR = item.Where(x => x.VCHR_MaHangNoiBo == mahangPUR).ToList();
+                            //if (checkListPUR.Any())
+                            //{
+                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong file");
+                            //    hasErrors = true;
+                            //    continue;
+                            //}
                             item.Add(new BaoGia_Confirm_Name_Quotation
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
@@ -528,7 +531,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 // Determine which columns to show based on role
-                var showMaNB = (role == "UserAcc" || role == "UserPUR"); // VCHR_MaHangNoiBo (col 9)
+                var showMaNB = (role == "UserShip" || role == "UserAcc" || role == "UserPUR"); // VCHR_MaHangNoiBo (col 9)
                 var showTenHQ = (role == "UserShip" || role == "UserPUR"); // VCHR_TenHaiQuan (col 22)
                 var showUserShip = (role == "UserShip" || role == "UserPUR"); // VCHR_UserShip (col 23)
                 var showUserAcc = (role == "UserAcc" || role == "UserPUR"); // VCHR_UserAcc (col 24)
@@ -547,6 +550,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 int idx = 1;
                 foreach (var rq in items)
                 {
+                    var maHangNb = "";
+                    if (showUserShip)
+                    {
+                        maHangNb = rq.VCHR_MaHangNoiBo ?? (rq.CHR_MaHangNoiBo ?? "");
+                    }
+                    else
+                    {
+                        maHangNb = rq.VCHR_MaHangNoiBo ?? "";
+                    }
                     // Map fields into template columns similar to ExportSelection
                     ws.Cell(row, 2).SetValue(rq.CHR_Status ?? "");
                     ws.Cell(row, 3).SetValue(rq.ID ?? 0);
@@ -555,7 +567,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 6).SetValue(rq.CHR_SectionName ?? "");
                     ws.Cell(row, 7).SetValue(rq.CHR_Phanloai ?? "");
                     ws.Cell(row, 8).SetValue(rq.CHR_MaThietBi ?? "");
-                    ws.Cell(row, 9).SetValue(showMaNB ? (rq.VCHR_MaHangNoiBo ?? "") : "");
+                    ws.Cell(row, 9).SetValue(showMaNB ? maHangNb : "");
                     ws.Cell(row, 10).SetValue(rq.CHR_MaHangNCC ?? "");
                     ws.Cell(row, 11).SetValue(rq.VCHR_TenRecomment ?? "");
                     ws.Cell(row, 12).SetValue(rq.CHR_NameEN ?? "");

@@ -1,4 +1,4 @@
-﻿@using PRJ_WAREHOUSE_BIVN.DTO
+@using PRJ_WAREHOUSE_BIVN.DTO
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 
 @{
@@ -247,6 +247,7 @@
         materials: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(mATERIAs)),
         nccNews: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(nccNews))
     };
+    window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     window.i18nInputQuoteDetail = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         InputQuoteTitle = Localizer["InputQuoteTitle"].Value,
         DepartmentLabel = Localizer["DepartmentLabel"].Value,

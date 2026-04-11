@@ -73,11 +73,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             return lis_kho;
         }
         
-        public static List<KHO_NHAPXUAT> _truyxuat(string malinhkien)
+        public static List<KHO_NHAPXUAT> _truyxuat(string malinhkien, string kho)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<KHO_NHAPXUAT> lis_kho = new List<KHO_NHAPXUAT>();
-            var lst = _db.GET_DATA_FROM_SQL($"SELECT TOP (200) * FROM [COST_MANAGEMENT].[dbo].[KHO_NHAPXUAT] where MaNguyenLieu = '{malinhkien}' order by Id_Lichsu desc");
+            var lst = _db.GET_DATA_FROM_SQL($"SELECT TOP (200) * FROM [COST_MANAGEMENT].[dbo].[KHO_NHAPXUAT] where MaNguyenLieu = '{malinhkien}' and Kho = '{kho}' order by Id_Lichsu desc");
             for (int i = 0; i < lst.Rows.Count; i++)
             {
                 lis_kho.Add(new KHO_NHAPXUAT

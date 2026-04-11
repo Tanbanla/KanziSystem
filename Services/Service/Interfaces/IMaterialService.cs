@@ -23,5 +23,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> UpdateListThongTin(List<MATERIALDTO> listDTO);
         // Insert nhiều cho ma hang No list
         public Task<GenericResponse<bool>> UpdateListThongTinNoList(List<MATERIALDTO> listMT);
+        // lay ma hang hien tai
+        public Task<GenericResponse<string>> MaterialCodeLater(string type);
+        // check ma hang
+        public Task<GenericResponse<string>> CheckMaterialCode(string keyword, string category);
+
     }
 }

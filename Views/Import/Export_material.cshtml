@@ -58,15 +58,18 @@
         min-width: 2.375rem;
         line-height: 36px;
     }
+    .form-group {
+        margin-bottom : 10px;
+    }
 </style>
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-body">
+            <div class="card-body p-0">
                 <div class="form-row">
                     <div class="form-group col-md-1">
                         <label for="inputEmail4"> @Languages.Khoi :</label>
-                        <select class="form-control" id="group_code" onchange="_load_name_inv(this.value)">
+                        <select class="form-control" id="group_code" onchange="_load_name_inv(this.value)" style="background-color:#ffff0029">
                             <option>PROD</option>
                             <option>GA</option>
                             <option>IT</option>
@@ -79,7 +82,7 @@
                     </div>
                     <div class="form-group col-md-2">
                         <label>@Languages.Phongban</label>
-                        <select class="form-control" id="name_dept" onchange="_load_dept(this.value)"></select>
+                        <select class="form-control" id="name_dept" onchange="_load_dept(this.value)" style="background-color:#ffff0029"></select>
                     </div>
                     <div class="form-group col-md-2">
                         <label>@Languages.tenphongyeucau</label>
@@ -91,7 +94,7 @@
                     </div>
                     <div class="form-group col-md-1">
                         <label>@Languages.vitri</label>
-                        <input type="text" class="form-control">
+                        <input type="text" class="form-control" style="background-color:#ffff0029">
                     </div>
                     <div class="form-group">
                         <label class="d-block"><b class="text-danger">@Languages.dathang :</b></label>
@@ -114,7 +117,7 @@
                 <div class="form-row">
                     <div class="form-group col-md-2">
                         <label for="inputAddress">@Languages.loaichiphi</label>
-                        <select class="form-control" id="loaichiphi">
+                        <select class="form-control" id="loaichiphi" style="background-color:#ffff0029" onchange="_load_name_inv(document.getElementById('group_code').value)">
                             <option value="AUXILIARY">@Languages.cpbiendoitheosanluong</option>
                             <option value="EUQIMENT">@Languages.chiphicodinh</option>
                             <option value="FIXED">@Languages.taisancodinh</option>
@@ -128,11 +131,11 @@
                     </div>
                     <div class="form-group col-md-1">
                         <label class="text-danger">@Languages.thoihanmuonnhan</label>
-                        <input type="date" class="form-control" id="thoihan" required/>
+                        <input type="date" class="form-control" id="thoihan" style="background-color:#ffff0029" required/>
                     </div>
                     <div class="form-group col-md-1"> 
                         <label>@Languages.loaihang </label>
-                        <select class="form-control" id="typee">
+                        <select class="form-control" id="typee" style="background-color:#ffff0029">
                             <option>NEW</option>
                             <option>REUSE</option>
                         </select>
@@ -162,8 +165,8 @@
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle" id="dynamic-table">
                             <thead>
-                                <tr>
-                                    <td colspan="15" class="fw-bold">Hàng trong danh mục</td>
+                                <tr style="border-top:1px solid #e9e9e9">
+                                    <td colspan="15"><input type="checkbox" onclick="check_mucdichkhac()" /> &nbsp; Mục đích khác </td>
                                 </tr>
                                 <tr class="bg-primary text-white text-center">
                                     <th style="width: 50px;">No.</th>
@@ -204,7 +207,7 @@
                                         <select class="form-control pcp" onchange="" id="pcp_1"></select>
                                     </td>
                                     <td><input type="text" class="form-control vt" id="vt_1"></td>
-                                    <td><input type="text" class="form-control" id="gc_1"></td>
+                                    <td><input type="text" class="form-control gc" id="gc_1"></td>
                                     <td>
                                         <button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>
                                     </td>
@@ -214,13 +217,14 @@
                     </div>
                     <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button>
                 </div>
-                <br />
+               
                 <div id="gyc">
-                   @*   <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>
-                        <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>                   *@
-                     <button class="btn btn-info float-right" id="modal-6" >✉ @Languages.guiyeucau</button>
-                    <button class="btn btn-info float-right" id="modal-20">✉ @Languages.guiyeucau</button>
+                    <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>
+                      <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>                  
+                 @*     <button class="btn btn-info float-right" id="modal-6" >✉ @Languages.guiyeucau</button>
+                    <button class="btn btn-info float-right" id="modal-20">✉ @Languages.guiyeucau</button> *@
                 </div>
+                <br />
             </div>
         </div>
     </div>
@@ -233,7 +237,6 @@
 <script src="~/scripts/get_api.js"></script>
 <script src="~/scripts/get_api_ga.js"></script>
 <script>
-
     window.onload = function()
     {
         let group_code = document.getElementById("group_code").value;
@@ -245,6 +248,73 @@
 
         //initSelect2($('.select2'));
     }
+        function check_mucdichkhac() {
+        // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
+        const lstMaterial = document.getElementById("lstMaterial");
+        if (lstMaterial) lstMaterial.innerHTML = "";
+
+        // 2. Định nghĩa dòng mẫu mới (Cột STK có thể thay đổi tùy ý ở đây)
+        const tbody = document.querySelector('#dynamic-table tbody');
+        const templateRow = `
+            <tr class="input-row">
+                <td class="row-number text-center fw-bold">1</td>
+                <td>
+                    <select class="form-control select2 tenhang" onchange="_load_material(this.value, this.id)" id="tenhang_1">
+                        <option value=""></option>
+                    </select>
+                </td>
+                <td>
+                    <select id="stk_1" class="form-control stk" ></select>
+                </td>
+                <td><input type="text" class="form-control kho" id="kho_1" readonly /></td>
+                <td><input type="text" class="form-control tk" id="tk_1" readonly /></td>
+                <td><input type="number" class="form-control sl" id="sl_1" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)"></td>
+                <td><input type="text" class="form-control dv" id="dv_1" readonly></td>
+                <td><input type="number" class="form-control dg" id="dg_1" readonly></td>
+                <td><input type="text" class="form-control nt" id="nt_1" readonly></td>
+                <td><input type="text" class="form-control tcp" id="tcp_1" readonly></td>
+                <td><input type="text" class="form-control md" id="md_1"></td>
+                <td><select class="form-control pcp" id="pcp_1"></select></td>
+                <td><input type="text" class="form-control vt" id="vt_1"></td>
+                <td><input type="text" class="form-control" id="gc_1"></td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>
+                </td>
+            </tr>`;
+
+        // 3. Thay thế nội dung bảng
+        tbody.innerHTML = templateRow;
+         let group_code = document.getElementById("group_code").value;
+        _load_name_inv(group_code);
+        _load_phongchiuphi();
+        _load_account();
+        // 5. Tính toán lại tổng tiền (về 0)
+        tinhTongTatCa();
+    }
+    //     function reinitSelect2(rowId) {
+    //     const $select = $(`#tenhang_${rowId}`);
+
+    //     // Khởi tạo Select2 với dữ liệu từ Server
+    //     $select.select2({
+    //         width: '100%',
+    //         ajax: {
+    //             url: '/YourController/GetMaterials', // Đường dẫn lấy dữ liệu theo mục đích mới
+    //             dataType: 'json',
+    //             data: function (params) {
+    //                 return {
+    //                     searchTerm: params.term,
+    //                     mucDich: document.getElementById("mucdich_id").value // Gửi kèm điều kiện lọc
+    //                 };
+    //             },
+    //             processResults: function (data) {
+    //                 return { results: data };
+    //             }
+    //         }
+    //     });
+
+    //     // Khởi tạo select pcp nếu cần
+    //     $(`#pcp_${rowId}`).select2({ width: '100%' });
+    // }
         function updateRowNumbers() {
         const rows = document.querySelectorAll('#dynamic-table tbody tr');
         rows.forEach((row, index) => {
@@ -256,7 +326,7 @@
 
             // 2. Danh sách các ID cần cập nhật theo đúng hậu tố _i
             const idList = ['tenhang', 'stk', 'kho', 'tk', 'sl', 'dv', 'dg', 'nt', 'tcp', 'md', 'pcp', 'vt', 'gc'];
-
+           
             idList.forEach(name => {
                 const el = row.querySelector(`[id^="${name}_"]`); // Tìm phần tử có id bắt đầu bằng name_
                 if (el) {
@@ -281,44 +351,41 @@
         document.getElementById('btn-add-row').addEventListener('click', function() {
             const tbody = document.querySelector('#dynamic-table tbody');
             const firstRow = tbody.querySelector('.input-row');
-
+               
             // 1. Clone dòng đầu tiên
             const newRow = firstRow.cloneNode(true);
-
+            const lastRow = tbody.querySelector('.input-row:last-child');
             // Xóa bỏ container giao diện của Select2 đã bị clone theo
-            $(newRow).find('.select2-container').remove();
+            //$(newRow).find('.select2-container').remove();
 
-            // Tìm tất cả select và input trong dòng mới
+            if (lastRow) {
+            const lastPcpValue = $(lastRow).find('.pcp').val();
+            $(newRow).find('.pcp').val(lastPcpValue);
+
+             const lastmdValue = $(lastRow).find('.md').val();
+            $(newRow).find('.md').val(lastmdValue);
+        }
+
+            //Tìm tất cả select và input trong dòng mới
             const $elements = $(newRow).find('select, input, textarea');
-
-            $elements.each(function() {
+              $elements.each(function() {
                 const $el = $(this);
-
-                // Xóa giá trị cũ
-                $el.val('');
-
-                // Loại bỏ hoàn toàn các class và thuộc tính mà Select2 đã thêm vào trước đó
-                if ($el.hasClass('select2-hidden-accessible')) {
-                    $el.removeClass('select2-hidden-accessible')
-                       .removeAttr('data-select2-id')
-                       .removeAttr('aria-hidden')
-                       .removeAttr('tabindex')
-                       .find('option').removeAttr('data-select2-id');
+                const id = $el.attr('id') || '';
+                if (id.includes('stk_') || id.includes('kho_' ) || id.includes('tk_' )|| id.includes('sl_' )|| id.includes('dv_' )|| id.includes('dg_' )|| id.includes('nt_' )  || id.includes('tcp_' )) {
+                // Bạn có thể xóa giá trị (đã làm ở trên)         
+                    $el.val('');            
                 }
             });
-
+              
             // 3. Hiển thị nút xóa cho dòng mới
             const removeBtn = newRow.querySelector('.btn-remove');
             if (removeBtn) {
                 removeBtn.style.display = 'inline-block';
             }
-
             // 4. Thêm dòng mới vào bảng
             tbody.appendChild(newRow);
-
             // 5. Cập nhật STT và ID trước (để Select2 nhận diện ID mới duy nhất)
             updateRowNumbers();
-
             // 6. Khởi tạo lại Select2 RIÊNG cho dòng vừa mới thêm
             if ($.fn.select2) {
                 $(newRow).find('.select2, .pcp').select2({
@@ -333,7 +400,6 @@
             if (e.target && e.target.classList.contains('btn-remove')) {
                 const row = e.target.closest('tr');
                 const rowCount = document.querySelectorAll('#dynamic-table tbody tr').length;
-
                 if (rowCount > 1) {
                     row.remove();
                     updateRowNumbers(); // Cập nhật lại số thứ tự sau khi xóa
@@ -353,7 +419,7 @@
         // Tính thành tiền cho dòng hiện tại (TCP)
         var tcpValue = parseFloat(pricee) * parseFloat(sl);
         // Gán giá trị vào ô TCP (định dạng số thực hoặc 0 nếu NaN)
-        document.getElementById("tcp_" + idd).value = (isNaN(tcpValue) ? 0 : tcpValue).toFixed(2);;
+        document.getElementById("tcp_" + idd).value = (isNaN(tcpValue) ? 0 : tcpValue).toFixed(2);
 
         document.getElementById("sl_" + idd).setAttribute('max', parseFloat(document.getElementById("tk_" + idd).value));
         var currentVal = parseFloat(document.getElementById("sl_" + idd).value);
@@ -367,9 +433,8 @@
         tinhTongTatCa();
     }
 
-       function tinhTongTatCa() {
+        function tinhTongTatCa() {
         let tongMoi = 0;
-        // Tìm tất cả các ô input có class 'tcp'
         const allTcp = document.querySelectorAll('.tcp');
 
         allTcp.forEach(input => {
@@ -377,16 +442,20 @@
             tongMoi += val;
         });
 
-        // Cập nhật vào ô tổng thành tiền phía dưới (đảm bảo ID này tồn tại)
+        // Nếu có tỷ giá GA
+        const groupCode = document.getElementById("group_code").value;
+        if (groupCode === "GA") {
+            var tigia = parseFloat(document.getElementById("rate").value) || 1;
+            tongMoi = tongMoi / tigia;
+        }
+
         const displayTotal = document.getElementById("thanhtien");
         if (displayTotal) {
-            displayTotal.value = Math.round(tongMoi,3);
+            // Hiển thị số có dấu phẩy ngăn cách hàng nghìn
+            displayTotal.value = tongMoi.toFixed(2);
         }
-        if (document.getElementById("group_code").value == "GA") {      
-        var tigia = parseFloat(document.getElementById("rate").value) || 1; // Tránh lỗi chia cho 0
-        var ketQua = tongMoi / tigia;
-        displayTotal.value = ketQua.toFixed(2);
     }
-}
 
+
+   
 </script>

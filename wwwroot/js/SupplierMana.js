@@ -1,18 +1,18 @@
 // Supplier management page script
 document.addEventListener('DOMContentLoaded', function () {
     const api = {
-        supplierSearch: '/Master/SearchSupplier',
-        supplierCreate: '/Master/AddSupplier',
-        supplierUpdate: `/Master/UpdateSupplier`,
-        supplierDelete: `/Master/DeleteSupplier`,
-        supplierExport: '/Master/ExportExcel',
-        supplierImport: '/Master/ImportSupplierExcel',
+        supplierSearch: (window.apiBaseUrl || '') + '/Master/SearchSupplier',
+        supplierCreate: (window.apiBaseUrl || '') + '/Master/AddSupplier',
+        supplierUpdate: (window.apiBaseUrl || '') + `/Master/UpdateSupplier`,
+        supplierDelete: (window.apiBaseUrl || '') + `/Master/DeleteSupplier`,
+        supplierExport: (window.apiBaseUrl || '') + '/Master/ExportExcel',
+        supplierImport: (window.apiBaseUrl || '') + '/Master/ImportSupplierExcel',
         // Supplier Category Items API (BaoGia_NCC_CategoryDTO)
-        getSupplierDetail: (codeNcc) => `/Master/GetSupplierDetail?codeNcc=${encodeURIComponent(codeNcc)}`,
-        addSupplierDetail: '/Master/AddSupplierDetail',
-        deleteSupplierDetail: (id) => `/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
-        addListSupplierDetail: '/Master/AddListSupplierDetail',
-        ImportSupplierDetail: '/Master/UpdateMaterialInfo' //UpdateMaterialInfo
+        getSupplierDetail: (codeNcc) => (window.apiBaseUrl || '') +`/Master/GetSupplierDetail?codeNcc=${encodeURIComponent(codeNcc)}`,
+        addSupplierDetail: (window.apiBaseUrl || '') + '/Master/AddSupplierDetail',
+        deleteSupplierDetail: (id) => (window.apiBaseUrl || '') +`/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
+        addListSupplierDetail: (window.apiBaseUrl || '') + '/Master/AddListSupplierDetail',
+        ImportSupplierDetail: (window.apiBaseUrl || '') + '/Master/ImportSupplierDetail' //UpdateMaterialInfo
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');
@@ -26,7 +26,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnNextPage = document.getElementById('btnNextPage');
     const pageInfo = document.getElementById('pageInfo');
     const pageSizeSelect = document.getElementById('pageSizeSelect');
+    const downloadMaster = document.getElementById('btnExportMaster');
 
+    downloadMaster.addEventListener('click', () => {
+
+
+    });
     document.getElementById('btnSearch')?.addEventListener('click', () => { currentPage = 1; loadSuppliers(); });
     document.getElementById('btnReset')?.addEventListener('click', () => {
         document.getElementById('searchMa').value = '';
@@ -124,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // xuất file mẫu
     document.getElementById('btnExportTemplateExcel')?.addEventListener('click', async () => {
         try {
-            const url = '/template/TemplateNCC.xlsx';
+            const url = (window.apiBaseUrl || '') + '/template/TemplateNCC.xlsx';
             const a = document.createElement('a');
             a.href = url;
             a.download = 'Mau_ChungLoai_NCC.xlsx';

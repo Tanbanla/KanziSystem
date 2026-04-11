@@ -17,5 +17,5 @@ public partial class ESTIMATE_DEADLINE_CHANGE
 
     public DateTime? TimeEnd { get; set; }
 
-    public virtual DEPARTMENT Cost_CenterNavigation { get; set; } = null!;
+    public virtual DEPARTMENT_1 Cost_CenterNavigation { get; set; } = null!;
 }

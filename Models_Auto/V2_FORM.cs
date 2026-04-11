@@ -49,7 +49,7 @@ public partial class V2_FORM
 
     public bool? Tygiangoai { get; set; }
 
-    public virtual DEPARTMENT? Cost_CenterNavigation { get; set; }
+    public virtual DEPARTMENT_1? Cost_CenterNavigation { get; set; }
 
     public virtual ICollection<V2_FORM_CHITIET> V2_FORM_CHITIETs { get; set; } = new List<V2_FORM_CHITIET>();
 }

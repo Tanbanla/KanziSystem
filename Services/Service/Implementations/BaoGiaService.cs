@@ -1,10 +1,12 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.Configuration.Annotations;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
@@ -225,12 +227,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // lấy mã đơn theo Adid
-        public async Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid)
+        public async Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid, int step)
         {
             var result = new GenericResponse<List<string>>();
             try
             {
-                result.Data = await _repo.GetMaDonByAdidAsync(adid);
+                result.Data = await _repo.GetMaDonByAdidAsync(adid, step);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -241,9 +243,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // update thông tin màn hình lịch sử báo giá
-        public async Task<GenericResponse<bool>> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias)
+        public async Task<GenericResponse<UpdateHistoryResult>> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias)
         {
-            var result = new GenericResponse<bool>();
+            var result = new GenericResponse<UpdateHistoryResult>();
             try
             {
                 result.Data = await _repo.UpdateThongTinLichSuBaoGiaAsync(_mapper.Map<List<BaoGia_Request_of_Quotation>>(baoGias));
@@ -272,6 +274,102 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Xuất file phê duyệt báo giá 
+        public async Task<GenericResponse<List<dynamic>>> GetExportApprovalInfoAsync(List<string> listMaDon)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetExportApprovalInfoAsync(listMaDon);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message= ex.Message;
+                result.Success = false;
+            }
 
+            return result;
+        }
+        // Phê duyệt thông tin lựa chọn nhà cung cấp
+        public async Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprovarOK(string maDon, string userNext, string userUpdate)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_Quotation>>();
+            try
+            {
+                result.Data = await _repo.UpdateApprovarOK(maDon, userNext, userUpdate);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Phê duyệt thông tin lựa chọn nhà cung cấp
+        public async Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprovarNG(string maDon, string Reason,string userUpdate)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_Quotation>>();
+            try
+            {
+                result.Data = await _repo.UpdateApprovarNG(maDon, Reason, userUpdate);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchRequestDone(string? maDon, string? section, string? maHang, string? maNCC, string user, int pageIndex, int pageSize)
+        {
+            var result =  new GenericResponse<ListRequest<dynamic>>();
+            try
+            {
+                result.Data = await _repo.SearchRequestDone(maDon,section, maHang,maNCC,user,pageIndex,pageSize);
+                result.Success = true;
+            }catch(Exception ex)
+            {
+                result.Message=ex.Message;
+                result.Success = false;
+            }
+
+            return result;
+        }
+        // update người phê duyệt cho đơn
+        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdateUserApprovalHistory(UpdateHistoryResult update)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>> ();
+            try
+            {
+                var Data = await _repo.UpdateUserApprovalHistory(update);
+                result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(Data);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // update ma hang noi bo
+        public async Task<GenericResponse<bool>> UpdateCodeMaterialBIVN(List<ConfirmNameDTO> list)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.UpdateCodeMaterialBIVN(list);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

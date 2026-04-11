@@ -33,6 +33,32 @@
             <div class="loader-msg">Đang xử lý...</div>
         </div>
     </div>
+    <!-- Modal: select next approver -->
+    <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["SelectNextApprover"].Value</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="selectNextApprover" class="form-label small">@Localizer["NextApproverLabel"].Value</label>
+                        <select id="selectNextApprover" class="form-select">
+                            <option value="">@Localizer["SelectPlaceholder"]</option>
+                        </select>
+                    </div>
+                    <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"].Value</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"].Value</button>
+                    <button type="button" class="btn btn-primary" id="confirmSelectApprover">@Localizer["Confirm"].Value</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
@@ -268,13 +294,14 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@Localizer["InternalMaterialCode"]</label>
-                        <select id="editMaHangNoiBo" name="editMaHangNoiBo" class="form-select editMaHangNoiBo searchable-select">
+                        @* <select id="editMaHangNoiBo" name="editMaHangNoiBo" class="form-select editMaHangNoiBo searchable-select">
                             <option value="">--</option>
                             @foreach (var m in listMaterials)
                             {
                                 <option value="@m.Material_Code">@m.Material_Code - @m.Material_Name_VN</option>
                             }
-                        </select>
+                        </select> *@
+                          <input type="text" class="form-control" id="editMaHangNoiBo" readonly/>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">@Localizer["EquipmentCode"]</label>
@@ -360,7 +387,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">@Localizer["Supplier"]</label>
-                        <select id="editNhaCungCap" name="editNhaCungCap" class="form-select searchNhaCungCap searchable-select">
+                        <select id="editNhaCungCap" name="editNhaCungCap" class="form-select searchNhaCungCap searchable-select"> 
                             <option value="">--</option>
                             @foreach (var n in listNCC)
                             {
@@ -432,6 +459,7 @@
     window.HistoryData = {
         status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(localizedStatus))
     };
+    window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     window.i18nHistoryQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         PageTitle = Localizer["PageTitle"].Value,
         PageSubtitle = Localizer["PageSubtitle"].Value,

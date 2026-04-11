@@ -120,9 +120,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // update thông tin lựa chọn nhà  cung cấp
-        public async Task<GenericResponse<bool>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos, string userApproverNext)
+        public async Task<GenericResponse<BaoGia_Request_of_Quotation>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos, string userApproverNext)
         {
-            var result = new GenericResponse<bool>();
+            var result = new GenericResponse<BaoGia_Request_of_Quotation>();
             try
             {
                 var data = _mapper.Map<List<BaoGia_Detail_of_Quotation>>(dtos);

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -539,5 +539,8 @@
   </data>
   <data name="danhanhang" xml:space="preserve">
     <value>Order Received</value>
+  </data>
+  <data name="hethongquanlyhanggiantiep" xml:space="preserve">
+    <value>Indirect part control system (IPCS) </value>
   </data>
 </root>

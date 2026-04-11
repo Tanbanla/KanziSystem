@@ -20,16 +20,4 @@ public partial class KHO
     public string Kho1 { get; set; } = null!;
 
     public string? nvchr_note { get; set; }
-
-    public string? NVCHR_COST { get; set; }
-
-    public DateTime DTM_UPDATE { get; set; }
-
-    public bool IS_SAVE_WH { get; set; }
-
-    public double QTY_NEW { get; set; }
-
-    public double QTY_RE_IMPORT { get; set; }
-
-    public double? GIA_TAI_NHAP { get; set; }
 }

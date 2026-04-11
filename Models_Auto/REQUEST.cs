@@ -73,7 +73,7 @@ public partial class REQUEST
 
     public string? CostCenter { get; set; }
 
-    public virtual DEPARTMENT? Cost_CenterNavigation { get; set; }
+    public virtual DEPARTMENT_1? Cost_CenterNavigation { get; set; }
 
     public virtual ICollection<WF_PROCESS> WF_PROCESSes { get; set; } = new List<WF_PROCESS>();
 }

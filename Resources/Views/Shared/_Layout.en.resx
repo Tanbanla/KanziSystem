@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="AppTitle" xml:space="preserve"><value>PRJ WAREHOUSE BIVN</value></data>
-  <data name="HeaderAppName" xml:space="preserve"><value>BIVN Warehouse Management System (BWMS)</value></data>
+  <data name="AppTitle" xml:space="preserve"><value>PRJ IPCS BIVN</value></data>
+  <data name="HeaderAppName" xml:space="preserve"><value>PRJ IPCS BIVN </value></data>
   <data name="LangVietnamese" xml:space="preserve"><value>Vietnamese</value></data>
   <data name="LangEnglish" xml:space="preserve"><value>English</value></data>
   <data name="LangJapanese" xml:space="preserve"><value>Japanese</value></data>
@@ -10,8 +10,8 @@
   <data name="Profile" xml:space="preserve"><value>Profile</value></data>
   <data name="Logout" xml:space="preserve"><value>Logout</value></data>
   <data name="Login" xml:space="preserve"><value>Login</value></data>
-  <data name="BrandWarehouse" xml:space="preserve"><value>WAREHOUSE</value></data>
-  <data name="BrandWarehouseShort" xml:space="preserve"><value>WH</value></data>
+  <data name="BrandWarehouse" xml:space="preserve"><value>IPCS</value></data>
+  <data name="BrandWarehouseShort" xml:space="preserve"><value>IPCS</value></data>
   <data name="MenuDashboard" xml:space="preserve"><value>Dashboard</value></data>
   <data name="MenuUser" xml:space="preserve"><value>User</value></data>
   <data name="MenuQuote" xml:space="preserve"><value>Quote</value></data>
@@ -42,7 +42,7 @@
   <data name="MenuMasterMaterial" xml:space="preserve"><value>Material</value></data>
   <data name="MenuMasterSendMail" xml:space="preserve"><value>Master Send Mail</value></data>
   <data name="MenuMasterSupplierManage" xml:space="preserve"><value>Supplier management</value></data>
-  <data name="BreadcrumbHome" xml:space="preserve"><value>Warehouse BIVN</value></data>
+  <data name="BreadcrumbHome" xml:space="preserve"><value>Indirect part control </value></data>
   <data name="FooterCopyright" xml:space="preserve"><value>Brother Industries (Vietnam) Ltd. All Rights Reserved</value></data>
 	<data name="MenuMasterCategory" xml:space="preserve"><value>Product Categories</value></data>
 </root>

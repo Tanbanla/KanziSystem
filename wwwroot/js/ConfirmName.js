@@ -75,7 +75,7 @@
         if (!items.length) { showDialog({ title: 'Thông báo', message: 'Chưa chọn bản ghi nào', type: 'info' }); return; }
         try {
             showLoading('Đang lưu...');
-            const res = await fetch('/Material/SaveSelectedConfirmName?role=' + encodeURIComponent(role), {
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/SaveSelectedConfirmName?role=' + encodeURIComponent(role), {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
             });
             if (!res.ok) {
@@ -97,7 +97,7 @@
         if (!ok) return;
         try {
             showLoading('Đang phê duyệt...');
-            const res = await fetch('/Material/ApproveSelectedConfirmName?role=' + encodeURIComponent(role), {
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/ApproveSelectedConfirmName?role=' + encodeURIComponent(role), {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
             });
             if (!res.ok) {
@@ -119,7 +119,7 @@
         for (const i of items) { i.pheDuyet = false; i.lyDo = lyDo; }
         try {
             showLoading('Đang phê duyệt...');
-            const res = await fetch('/Material/ApproveSelectedConfirmName?role=' + encodeURIComponent(role), {
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/ApproveSelectedConfirmName?role=' + encodeURIComponent(role), {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
             });
             if (!res.ok) {
@@ -141,7 +141,7 @@
         for (const i of items) { i.pheDuyet = false; i.lyDo = lyDo; }
         try {
             showLoading('Đang phê duyệt...');
-            const res = await fetch('/Material/RejectAccSelectedConfirmName?role=' + encodeURIComponent(role), {
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/RejectAccSelectedConfirmName?role=' + encodeURIComponent(role), {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
             });
             if (!res.ok) {
@@ -392,7 +392,7 @@
             pageIndex: state.pageIndex,
             pageSize: state.pageSize
         };
-        const res = await fetch('/Material/SearchConfirmName', {
+        const res = await fetch((window.apiBaseUrl || '') + '/Material/SearchConfirmName', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
         });
         if (!res.ok) { const T = window.i18nConfirmName || {}; console.error(T.MsgSearchFailed || 'Search failed'); return; }
@@ -409,7 +409,7 @@
 
     async function saveInline(id, payload) {
         const body = Object.assign({ id, role }, payload);
-        const res = await fetch('/Material/SaveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetch((window.apiBaseUrl || '') + '/Material/SaveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!res.ok) { const T = window.i18nConfirmName || {}; alert(T.MsgSaveFailed || 'Lưu thất bại'); }
     }
 
@@ -417,7 +417,7 @@
         const T = window.i18nConfirmName || {};
         const ok = await showConfirmDialog(T.ConfirmApproveTitle || 'Xác nhận đồng ý?', T.ConfirmApproveMessage || 'Bạn có chắc chắn muốn phê duyệt yêu cầu này?');
         if (!ok) return;
-        const res = await fetch('/Material/ApproveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        const res = await fetch((window.apiBaseUrl || '') + '/Material/ApproveConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
         if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
     }
 
@@ -425,7 +425,7 @@
         const T = window.i18nConfirmName || {};
         const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do từ chối', T.ReasonMessage || 'Vui lòng nhập lý do từ chối xử lý yêu cầu này:');
         if (lyDo === null) return;
-        const res = await fetch('/Material/RejectConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, lyDo }) });
+        const res = await fetch((window.apiBaseUrl || '') + '/Material/RejectConfirmName', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, lyDo }) });
         if (res.ok) { search(); } else { alert(T.MsgGenericError || 'Thao tác thất bại'); }
     }
 
@@ -465,7 +465,7 @@
     // cac ham excel
     async function exportTemplate() {
         try {
-            const url = '/template/TemplateCofirmName.xlsx';
+            const url = (window.apiBaseUrl || '') + '/template/TemplateCofirmName.xlsx';
             const a = document.createElement('a');
             a.href = url;
             a.download = 'TemplateCofirmName.xlsx';
@@ -484,7 +484,7 @@
             showLoading(T.LoadingMessage || 'Đang xử lý...');
             const fd = new FormData();
             fd.append('file', file);
-            const res = await fetch('/Material/ImportFromExcel', { method: 'POST', body: fd });
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/ImportFromExcel', { method: 'POST', body: fd });
 
             // Detect if server returned an Excel file (validation errors)
             const contentType = (res.headers.get('content-type') || '').toLowerCase();
@@ -546,7 +546,7 @@
                 pageSize: 1000//state.pageSize
             };
 
-            const res = await fetch('/Material/ExportToExcel', {
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/ExportToExcel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -581,7 +581,7 @@
         try {
             showLoading(T.Processing || 'Đang xuất...');
 
-            const res = await fetch('/Material/ExportCodeCofirmed', {
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/ExportCodeCofirmed', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: null

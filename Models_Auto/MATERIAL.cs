@@ -35,11 +35,13 @@ public partial class MATERIAL
 
     public string? Category_VN { get; set; }
 
+    public string? Category_EN { get; set; }
+
     public string? Category_JP { get; set; }
 
     public string? Shape { get; set; }
 
-    public string? Material { get; set; }
+    public string? Material1 { get; set; }
 
     public string? Composition { get; set; }
 
@@ -49,6 +51,6 @@ public partial class MATERIAL
 
     public string? Purpose { get; set; }
 
-    public string? Category_EN { get; set; }
     public string? Code_Suppiler { get; set; }
+    public string? CHR_MaterialOutSide { get; set; }
 }

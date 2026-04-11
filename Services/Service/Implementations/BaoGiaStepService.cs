@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -48,6 +48,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return response;
         }
-
+        public async Task<GenericResponse<List<BaoGia_StepDTO>>> GetAll()
+        {
+            var response = new GenericResponse<List<BaoGia_StepDTO>>();
+            try
+            {
+                var data = await _repo.GetAllAsync();
+                response.Data = _mapper.Map<List<BaoGia_StepDTO>>(data);
+                response.Success = true;
+            }
+            catch(Exception ex)
+            {
+                response.Success= false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
     }
 }

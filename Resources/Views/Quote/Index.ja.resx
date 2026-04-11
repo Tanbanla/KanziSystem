@@ -151,7 +151,7 @@
     <value>カテゴリ</value>
   </data>
   <data name="Classification" xml:space="preserve">
-    <value>分類 (A/B/C/E/非リスト)</value>
+    <value>分類 (A/B/C/E/I/非リスト)</value>
   </data>
   <data name="EquipmentCode" xml:space="preserve">
     <value>設備コード</value>

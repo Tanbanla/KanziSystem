@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-	<data name="AppTitle" xml:space="preserve"><value>PRJ WAREHOUSE BIVN</value></data>
-	<data name="HeaderAppName" xml:space="preserve"><value>BIVN倉庫管理システム (BWMS)</value></data>
+	<data name="AppTitle" xml:space="preserve"><value>PRJ IPCS BIVN</value></data>
+	<data name="HeaderAppName" xml:space="preserve"><value>間接部品管理システム (IPCS))</value></data>
 	<data name="LangVietnamese" xml:space="preserve"><value>ベトナム語</value></data>
 	<data name="LangEnglish" xml:space="preserve"><value>英語</value></data>
 	<data name="LangJapanese" xml:space="preserve"><value>日本語</value></data>
@@ -42,7 +42,7 @@
 	<data name="MenuMasterMaterial" xml:space="preserve"><value>材料</value></data>
 	<data name="MenuMasterSendMail" xml:space="preserve"><value>メール送信マスタ</value></data>
 	<data name="MenuMasterSupplierManage" xml:space="preserve"><value>サプライヤー管理</value></data>
-	<data name="BreadcrumbHome" xml:space="preserve"><value>BIVN倉庫</value></data>
+	<data name="BreadcrumbHome" xml:space="preserve"><value>間接部品管理システム</value></data>
 	<data name="FooterCopyright" xml:space="preserve"><value>ブラザー工業(ベトナム)株式会社 著作権所有</value></data>
 	<data name="MenuMasterCategory" xml:space="preserve"><value>商品カテゴリ</value></data>
 </root>

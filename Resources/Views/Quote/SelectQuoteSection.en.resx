@@ -1,126 +1,432 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-	<!-- 
-		Microsoft ResX Schema
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
 
-		Version 1.3
-
-		The primary goals of this format is to allow a simple XML format 
-		that is mostly human readable. The generation and parsing of the 
-		various data types are done through the TypeConverter classes 
-		associated with the data types.
-
-		Example:
-
-		... ado.net/XML headers & schema ...
-		<resheader name="resmimetype">text/microsoft-resx</resheader>
-		<resheader name="version">1.3</resheader>
-		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-		<data name="Name1">this is my long string</data>
-		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-			[base64 mime encoded serialized .NET Framework object]
-		</data>
-		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-			[base64 mime encoded string representing a byte array form of the .NET Framework object]
-		</data>
-
-		There are any number of "resheader" rows that contain simple 
-		name/value pairs.
-
-		Each data row contains a name, and value. The row also contains a 
-		type or mimetype. Type corresponds to a .NET class that support 
-		text/value conversion through the TypeConverter architecture. 
-		Classes that don't support this are serialized and stored with the 
-		mimetype set.
-
-		The mimetype is used for serialized objects, and tells the 
-		ResXResourceReader how to depersist the object. This is currently not 
-		extensible. For a given mimetype the value must be set accordingly:
-
-		Note - application/x-microsoft.net.object.binary.base64 is the format 
-		that the ResXResourceWriter will generate, however the reader can 
-		read any of the formats listed below.
-
-		mimetype: application/x-microsoft.net.object.binary.base64
-		value   : The object must be serialized with 
-			: System.Serialization.Formatters.Binary.BinaryFormatter
-			: and then encoded with base64 encoding.
-
-		mimetype: application/x-microsoft.net.object.soap.base64
-		value   : The object must be serialized with 
-			: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-			: and then encoded with base64 encoding.
-
-		mimetype: application/x-microsoft.net.object.bytearray.base64
-		value   : The object must be serialized into a byte array 
-			: using a System.ComponentModel.TypeConverter
-			: and then encoded with base64 encoding.
-	-->
-	
-	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-		<xsd:element name="root" msdata:IsDataSet="true">
-			<xsd:complexType>
-				<xsd:choice maxOccurs="unbounded">
-					<xsd:element name="data">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
-							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-						</xsd:complexType>
-					</xsd:element>
-					<xsd:element name="resheader">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" />
-						</xsd:complexType>
-					</xsd:element>
-				</xsd:choice>
-			</xsd:complexType>
-		</xsd:element>
-	</xsd:schema>
-	<resheader name="resmimetype">
-		<value>text/microsoft-resx</value>
-	</resheader>
-	<resheader name="version">
-		<value>1.3</value>
-	</resheader>
-	<resheader name="reader">
-		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-	<resheader name="writer">
-		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-  <data name="PageTitle" xml:space="preserve"><value>Item request</value></data>
-  <data name="HeaderTitle" xml:space="preserve"><value>REQUEST ITEMS BY SECTION</value></data>
-  <data name="HeaderSubtitle" xml:space="preserve"><value>Request items by section</value></data>
-  <data name="Filters" xml:space="preserve"><value>Filters</value></data>
-  <data name="DepartmentCode" xml:space="preserve"><value>Department code</value></data>
-  <data name="SelectDepartment" xml:space="preserve"><value>Select department</value></data>
-  <data name="OrderCode" xml:space="preserve"><value>Order code</value></data>
-  <data name="SelectOrderCode" xml:space="preserve"><value>Select order code</value></data>
-  <data name="InternalMaterialCode" xml:space="preserve"><value>Internal material code</value></data>
-  <data name="SelectInternalMaterialCode" xml:space="preserve"><value>Select internal material code</value></data>
-  <data name="Supplier" xml:space="preserve"><value>Supplier</value></data>
-  <data name="SelectSupplier" xml:space="preserve"><value>Select supplier</value></data>
-  <data name="Search" xml:space="preserve"><value>Search</value></data>
-  <data name="ClearFilters" xml:space="preserve"><value>Clear filters</value></data>
-  <data name="SectionRequestList" xml:space="preserve"><value>Requests by section</value></data>
-  <data name="SummaryRecords" xml:space="preserve"><value>{0} records</value></data>
-  <data name="SelectAll" xml:space="preserve"><value>Select all</value></data>
-  <data name="RequestSection" xml:space="preserve"><value>Request section</value></data>
-  <data name="ItemName" xml:space="preserve"><value>Item name</value></data>
-  <data name="Quantity" xml:space="preserve"><value>Quantity</value></data>
-  <data name="Unit" xml:space="preserve"><value>Unit</value></data>
-  <data name="DesiredReceiveDate" xml:space="preserve"><value>Desired receive date</value></data>
-  <data name="Status" xml:space="preserve"><value>Status</value></data>
-  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="Confirm" xml:space="preserve"><value>Confirm</value></data>
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Item request</value>
+  </data>
+  <data name="HeaderTitle" xml:space="preserve">
+    <value>REQUEST ITEMS BY SECTION</value>
+  </data>
+  <data name="HeaderSubtitle" xml:space="preserve">
+    <value>Request items by section</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="DepartmentCode" xml:space="preserve">
+    <value>Department code</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>Select department</value>
+  </data>
+  <data name="OrderCode" xml:space="preserve">
+    <value>Order code</value>
+  </data>
+  <data name="SelectOrderCode" xml:space="preserve">
+    <value>Select order code</value>
+  </data>
+  <data name="InternalMaterialCode" xml:space="preserve">
+    <value>Internal material code</value>
+  </data>
+  <data name="SelectInternalMaterialCode" xml:space="preserve">
+    <value>Select internal material code</value>
+  </data>
+  <data name="Supplier" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="SelectSupplier" xml:space="preserve">
+    <value>Select supplier</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="ClearFilters" xml:space="preserve">
+    <value>Clear filters</value>
+  </data>
+  <data name="SectionRequestList" xml:space="preserve">
+    <value>Requests by section</value>
+  </data>
+  <data name="SummaryRecords" xml:space="preserve">
+    <value>{0} records</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="RequestSection" xml:space="preserve">
+    <value>Request section</value>
+  </data>
+  <data name="ItemName" xml:space="preserve">
+    <value>Item name</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="DesiredReceiveDate" xml:space="preserve">
+    <value>Desired receive date</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="ExportSelected" xml:space="preserve">
+    <value>Export Selected</value>
+  </data>
+  <data name="DetailModalTitle" xml:space="preserve">
+    <value>Quotation request details</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>Receiving department</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>Department cost center</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>Department name</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>Request date</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>Desired deadline</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>Goods details</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>System code</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>Internal material code</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>Item name VN/EN</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>Composition</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>Used position</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>Purpose/Feature</value>
+  </data>
+  <data name="VendorCode" xml:space="preserve">
+    <value>Vendor code</value>
+  </data>
+  <data name="ROHSRequirement" xml:space="preserve">
+    <value>ROHS requirement</value>
+  </data>
+  <data name="COCQRequirement" xml:space="preserve">
+    <value>CO/CQ requirement</value>
+  </data>
+  <data name="MSDSRequirement" xml:space="preserve">
+    <value>MSDS requirement</value>
+  </data>
+  <data name="SafetyStandardRequirement" xml:space="preserve">
+    <value>Safety standard requirement</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="ApprovalFlowTitle" xml:space="preserve">
+    <value>Approval flow</value>
+  </data>
+  <data name="ApprovalFlowLine1" xml:space="preserve">
+    <value>• Under 3,000 USD (66M VND): PIC → Middle manager → Deputy section manager.</value>
+  </data>
+  <data name="ApprovalFlowLine2" xml:space="preserve">
+    <value>• Under 10,000 USD (220M VND): PIC → Middle manager → Section manager.</value>
+  </data>
+  <data name="ApprovalFlowLine3" xml:space="preserve">
+    <value>• From 10,000 USD (220M VND) and above: Middle manager → Section/Deputy manager → General Director/Director.</value>
+  </data>
+  <data name="ApprovalFlowLine4" xml:space="preserve">
+    <value>→ Warehouse issue approval (PR1-MC): Junior/Middle manager → Kanzai warehouse</value>
+  </data>
+  <data name="AdditionalInfoTitle" xml:space="preserve">
+    <value>Additional information</value>
+  </data>
+  <data name="RequesterLabel" xml:space="preserve">
+    <value>Requester</value>
+  </data>
+  <data name="ApproveButton" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="RejectButton" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="DetailModalTitleFormat" xml:space="preserve">
+    <value>Quotation request details - {0}</value>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Classification" xml:space="preserve">
+    <value>Classification</value>
+  </data>
+  <data name="SupplierItemCode" xml:space="preserve">
+    <value>Supplier item code</value>
+  </data>
+  <data name="SupplierItemCodeShort" xml:space="preserve">
+    <value>Supplier item code</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>Supplier name</value>
+  </data>
+  <data name="CustomsItemName" xml:space="preserve">
+    <value>Customs item name</value>
+  </data>
+  <data name="EnglishName" xml:space="preserve">
+    <value>English name</value>
+  </data>
+  <data name="DescriptionGroup" xml:space="preserve">
+    <value>Description group</value>
+  </data>
+  <data name="DesignFile" xml:space="preserve">
+    <value>Design file</value>
+  </data>
+  <data name="Manufacturer" xml:space="preserve">
+    <value>Manufacturer</value>
+  </data>
+  <data name="PriceUSD" xml:space="preserve">
+    <value>Price (USD)</value>
+  </data>
+  <data name="PriceVND" xml:space="preserve">
+    <value>Price (VND)</value>
+  </data>
+  <data name="MOQ" xml:space="preserve">
+    <value>MOQ</value>
+  </data>
+  <data name="LeadTime" xml:space="preserve">
+    <value>Lead time</value>
+  </data>
+  <data name="DeliveryDate" xml:space="preserve">
+    <value>Delivery date</value>
+  </data>
+  <data name="Rohs" xml:space="preserve">
+    <value>RoHS</value>
+  </data>
+  <data name="COCQ" xml:space="preserve">
+    <value>CO/CQ</value>
+  </data>
+  <data name="MSDS" xml:space="preserve">
+    <value>MSDS</value>
+  </data>
+  <data name="Safety" xml:space="preserve">
+    <value>Safety standard</value>
+  </data>
+  <data name="CommitRequirement" xml:space="preserve">
+    <value>Commit requirement</value>
+  </data>
+  <data name="DeliveryMethod" xml:space="preserve">
+    <value>Delivery method</value>
+  </data>
+  <data name="PaymentTerms" xml:space="preserve">
+    <value>Payment terms</value>
+  </data>
+  <data name="Attachment" xml:space="preserve">
+    <value>Attachment</value>
+  </data>
+  <data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Supplier selection deadline</value>
+  </data>
+  <data name="ApplyDay" xml:space="preserve">
+    <value>Apply day</value>
+  </data>
+  <data name="DueDay" xml:space="preserve">
+    <value>Due day</value>
+  </data>
+  <data name="GetQuotation" xml:space="preserve">
+    <value>Get quotation</value>
+  </data>
+  <data name="SystemCalculatedTotal" xml:space="preserve">
+    <value>System calculated total</value>
+  </data>
+  <data name="SupplierSelection" xml:space="preserve">
+    <value>Supplier selection</value>
+  </data>
+  <data name="SelectionReason" xml:space="preserve">
+    <value>Selection reason</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="FooterRegency" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="FooterStep" xml:space="preserve">
+    <value>Step</value>
+  </data>
+  <data name="FooterID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Show</value>
+  </data>
+    <data name="PrimaryManager" xml:space="preserve">
+    <value>Primary manager</value>
+</data>
+    <data name="Result" xml:space="preserve">
+    <value>Result</value>
+</data>
+    <data name="MiddleManager" xml:space="preserve">
+    <value>Middle manager</value>
+</data>
+    <data name="DepartmentHead" xml:space="preserve">
+    <value>Department head</value>
+</data>
 </root>

@@ -6,6 +6,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Net.Mail;
+using System.Net.NetworkInformation;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -20,14 +21,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // lấy mail theo ID
         public async Task<TM_MASTER_MAIL?> GetMailByIdAsync(int id)
         {
-            return await _context.TM_MASTER_MAILs.FindAsync(id);
+            return await _context.TM_MASTER_MAILs.Where(c => c.INT_Mail == id).FirstOrDefaultAsync();
         }
         // Lay danh sach NCC can gui mail
         public async Task<List<string>> GetSuppliersToNotifyAsync()
         {
 
           var res =  await _context.BaoGia_Request_of_Quotations
-                .Where(m => (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false) && m.BIT_LayBaoGia == true)
+                .Where(m => (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false)
+                && m.BIT_LayBaoGia == true && m.CHR_MaNCC != "" && m.ID_StepBaoGia == 6 && m.ID_Status == "WAIT_SEND_MAIL")
                 .Select(m => m.CHR_MaNCC)
                 .Distinct()
                 .ToListAsync();
@@ -40,18 +42,26 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lay thong tin don bao gia cua nha cung cap
         public async Task<List<dynamic>> GetBaoGiaRequestBySupplierAsync(string supplierCode)
         {
-            var sql = @"SELECT q.*, n.ShortName , n.Ten
+            var sql = @"SELECT q.*, n.ShortName , n.Ten, n.Diachi
                 FROM BaoGia_Request_of_Quotation AS q
                 LEFT JOIN IM_NCC_NEW AS n ON q.CHR_MaNCC = n.Ma
                 WHERE q.CHR_MaNCC = @SupplierCode 
                   AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
-                  AND q.BIT_LayBaoGia = 1";
+                  AND q.BIT_LayBaoGia = 1 and q.ID_StepBaoGia = 6 and ID_Status = 'WAIT_SEND_MAIL'";
 
             var parameter = new { SupplierCode = supplierCode };
 
             return (await _conn.QueryAsync<dynamic>(sql, parameter)).ToList();
         }
         // Lay email nha cung cap
+        public async Task<string?> GetSupplierEmaiCategorylAsync(string supplierCode, string catergory)
+        {
+            var email = await _context.BaoGia_NCC_Categories
+                .Where(m => m.CHR_MaNCC == supplierCode && m.NVCHR_ChungLoai == catergory)
+                .Select(m => m.CHR_Mail)
+                .FirstOrDefaultAsync();
+            return email;
+        }
         public async Task<string?> GetSupplierEmailAsync(string supplierCode)
         {
             var email = await _context.BaoGia_NCC_Categories
@@ -83,7 +93,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lay thong tin nha cung cap theo ma don hang
         public async Task<List<dynamic>> GetNotifyRequestCodeAsync(string requestCode)
         {
-            var sql = @"SELECT q.*, n.ShortName , n.Ten
+            var sql = @"SELECT q.*, n.ShortName , n.Ten, n.Diachi
                 FROM BaoGia_Request_of_Quotation AS q
                 LEFT JOIN IM_NCC_NEW AS n ON q.CHR_MaNCC = n.Ma
                 WHERE q.CHR_MaDon = @RequestCode 

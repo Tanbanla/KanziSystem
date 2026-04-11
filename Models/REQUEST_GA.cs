@@ -1,3 +1,4 @@
+using Azure.Core;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Vml;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -7,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.DirectoryServices.AccountManagement;
 using System.Drawing;
+using System.Globalization;
 using System.Net;
 using System.Net.Mail;
 using System.Net.WebSockets;
@@ -40,14 +42,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? Declaration { get; set; }
         public string? Dealine { get; set; }
         public DateTime? Dealine_Real { get; set; }
-        public double? Total_exchange { get; set; }
-        public double? Exchange_rate { get; set; }
+        public float? Total_exchange { get; set; }
+        public float? Exchange_rate { get; set; }
         public string? Currency { get; set; }
-        public double? Total { get; set; }
-        public double? Total_exchange_real { get; set; }
-        public double? Exchange_rate_Real { get; set; }
+        public float? Total { get; set; }
+        public float? Total_exchange_real { get; set; }
+        public float? Exchange_rate_Real { get; set; }
         public string? Currency_Real { get; set; }
-        public double? Total_Real { get; set; }
+        public float? Total_Real { get; set; }
         public string? Kind { get; set; }
         public string? Type { get; set; }
         public string? Status { get; set; }
@@ -80,8 +82,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     }
     public class REQUEST_PROCESS_GA
     {
-       public static string Insert_request_GA(string Cost_Center, string Declaration, string Dealine, string Total_exchange, string Exchange_rate, string Currency, string Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_qlsc, string adid_qlsc, string mail_qlsc, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao, string ten_qltc, string adid_qltc, string mail_qltc)
+       public static string Insert_request_GA(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_qlsc, string adid_qlsc, string mail_qlsc, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao, string ten_qltc, string adid_qltc, string mail_qltc)
         {
+            //string pathLog = @"\\apbivndb20\21_WAREHOUSE_BIVN\LogFile.txt";
+            //if (!File.Exists(pathLog)) File.Create(pathLog);
 
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             //  TẠO MÃ REQUEST TĂNG TỰ ĐỘNG VÀ INSERT BẢNG REQUEST ---
@@ -105,8 +109,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     ) 
                     VALUES (
                          
-                        @NewCode, '{Cost_Center}', '{DateTime.Now.ToString("yyyy-MM-dd HH:ss:mm")}', N'{Declaration}', '{Dealine}', ROUND({Total_exchange},2), '{Exchange_rate}', '{Currency}', ROUND({Total},2),  
-                        '{Kind}', '{Type}', '{Status}','{DateTime.Now.ToString("yyyy-MM-dd HH:ss:mm")}', '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
+                        @NewCode, '{Cost_Center}', GETDATE(), N'{Declaration}', '{Dealine}','{Total_exchange}', '{Exchange_rate}', '{Currency}', '{Total }',  
+                        '{Kind}', '{Type}', '{Status}',GETDATE(), '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
                     );
                     SELECT @NewCode AS NextCode, SCOPE_IDENTITY() AS NewID;";
             var dtBase = _db.GET_DATA_FROM_SQL(_cmdRequest);
@@ -127,18 +131,20 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                                         [User_Update], [PO], [Unit_Note], [Phongchiuchiphi], [Vitri], [Id_LichsuXuat], [Kho] )
                                         VALUES (
                                             '{newCode}', {newId}, '{item.Material_Code}', N'{item.Material_Name}', N'{item.Material_Name_EN}', N'{item.Material_Name_ENJP}', 
-                                            '{item.Account_Code}', N'{item.Account_Name}', N'{item.Unit}', '{item.Unit_Real}', '{item.Amount}', '{item.Price}', 
-                                             ROUND({item.Total_exchange},2), '{item.Rate}', '{item.Currency}', ROUND({item.Total},2), '{item.Amount_Real}', '{item.Price_Real}', 
+                                            '{item.Account_Code}', N'{item.Account_Name}', N'{item.Unit}', '{item.Unit_Real}', '{item.Amount}', {item.Price}, 
+                                             {item.Total_exchange}, '{item.Rate}', '{item.Currency}', {item.Total}, '{item.Amount_Real}', '{item.Price_Real}', 
                                             '{item.VAT}', '{item.Total_exchange_real}', '{item.Rate_Real}', '{item.Currency_Real}', '{item.Total_Real}', 
                                             '{item.Dealine_Real}', N'{item.Poisition}', N'{item.Aim}', '{item.Status}', GETDATE(), 
                                             '{item.User_Update}', '{item.PO}', N'{item.Unit_Note}', N'{item.Phongchiuchiphi}', N'{item.Vitri}', '{item.Id_LichsuXuat}', '{item.Kho}'
                                         )";
                 _db.GET_DATA_FROM_SQL(_cmdDetail);
+                //File.AppendAllText(pathLog, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] SQL Command for Request: {Environment.NewLine}{_cmdRequest}{Environment.NewLine}");
+
             }
-            //ten_qlsc = ten_qlsc.Split('_')[1];
-            //ten_qltc = ten_qltc.Split('_')[1];
-            //ten_xk = ten_xk.Split('_')[1];
-            _insert_request_confirm_GA(newId, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd, ten_qlsc, adid_qlsc, mail_qlsc, ten_xk, adid_xk, mail_xk, adidnguoitao, mailnguoitao.Trim(), adid_qltc, mail_qltc,ten_qltc);
+            ten_qlsc = ten_qlsc.Split('_')[1];
+            ten_qltc = ten_qltc.Split('_')[1];
+            ten_xk = ten_xk.Split('_')[1];
+            _insert_request_confirm_GA(newId, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd, ten_qlsc, adid_qlsc, mail_qlsc, ten_xk, adid_xk, mail_xk, adidnguoitao, mailnguoitao, adid_qltc, mail_qltc,ten_qltc);
 
             return newCode;
         }
@@ -214,7 +220,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Code_Request = list.Rows[i]["Code_Request"].ToString()!,
                     Cost_Center = list.Rows[i]["Cost_Center"].ToString()!,
                     Dealine = list.Rows[i]["Dealine"].ToString()!,
-                    Total = Math.Round(double.Parse(list.Rows[i]["Total"].ToString()!), 2),
+                    Total = float.Parse(list.Rows[i]["Total"].ToString()!),
                     User_Create = list.Rows[i]["User_Create"].ToString()!,
                     Create_Date = list.Rows[i]["Create_Date"].ToString()!,
                     CHR_TEN_NGUOIYEUCAU = list.Rows[i]["CHR_TEN_NGUOIYEUCAU"].ToString()!,
@@ -277,7 +283,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Code_Request = list.Rows[i]["Code_Request"].ToString()!,
                     Cost_Center = list.Rows[i]["Cost_Center"].ToString()!,
                     Dealine = list.Rows[i]["Dealine"].ToString()!.Split(" ")[0],
-                    Total = Math.Round(double.Parse(list.Rows[i]["Total"].ToString()!), 2),
+                    Total = float.Parse(list.Rows[i]["Total"].ToString()!),
                     User_Create = list.Rows[i]["User_Create"].ToString()!,
                     Create_Date = list.Rows[i]["Create_Date"].ToString()!,
                     CHR_TEN_NGUOIYEUCAU = list.Rows[i]["CHR_TEN_NGUOIYEUCAU"].ToString()!,
@@ -301,6 +307,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             var get_if = _db.GET_DATA_FROM_SQL("select * from REQUEST_DETAIL as a left join DEPARTMENT as b on a.Phongchiuchiphi = b.Cost_Center where a.Code_Request = '" + cost_request + "'");
             var dtm = _db.GET_DATA_FROM_SQL("SELECT * FROM [COST_MANAGEMENT].[dbo].[REQUEST] where Code_Request = '" + cost_request + "'");
+            var requestt = _db.GET_DATA_FROM_SQL("select Code_Request,a.Cost_Center, Request_Date, Declaration, Dealine,Dealine_Real, Total_exchange, Exchange_rate, Currency, Total, Total_exchange_real,Exchange_rate_Real,Currency_Real, Total_Real,Kind,[Type],Status,Create_Date, User_Create, Last_Update,User_Update,Reason,Place, Loaihinhtokhai, Phuongthucvanchuyen, Group_Code, b.[Name], Name_Jp,Cost_Center_Group,Note, Urgent from [REQUEST] as a left join DEPARTMENT as b on a.Cost_Center =  b.Cost_Center where a.Code_Request = '" + cost_request + "'");
+
             List<REQUEST_DETAIL> rq = new List<REQUEST_DETAIL>();
             for (int i = 0; i < get_if.Rows.Count; i++)
             {
@@ -314,18 +322,19 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Account_Code = get_if.Rows[i]["Account_Code"].ToString(),
                     Account_Name = get_if.Rows[i]["Account_Name"].ToString(),
                     Unit = get_if.Rows[i]["Unit"].ToString(),
-                    Amount = Math.Round(double.Parse(get_if.Rows[i]["Amount"].ToString()!)),
-                    Price = Math.Round(double.Parse(get_if.Rows[i]["Price"].ToString()!), 2),
-                    Total_exchange = Math.Round(double.Parse(get_if.Rows[i]["Total_exchange"].ToString()!)),
+                    Amount = float.Parse(get_if.Rows[i]["Amount"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Price = float.Parse(get_if.Rows[i]["Price"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Total_exchange = float.Parse(get_if.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
                     Currency = get_if.Rows[i]["Currency"].ToString(),
-                    Cost_Center_Group = get_if.Rows[i]["Cost_Center_Group"].ToString(),
-                    Name_Dept = get_if.Rows[i]["Name"].ToString(),
+                    Cost_Center_Group = requestt.Rows[0]["Cost_Center_Group"].ToString(),
+                    Name_Dept = requestt.Rows[0]["Name"].ToString(),
                     Creat_Date = dtm.Rows[0]["Request_Date"].ToString(),
                     Dealine = dtm.Rows[0]["Dealine"].ToString(),
                     Cost_Center = dtm.Rows[0]["Cost_Center"].ToString(),
                     Group_Code = dtm.Rows[0]["Group_Code"].ToString(),
                     Urgent = dtm.Rows[0]["Urgent"].ToString(),
                     Aim = get_if.Rows[0]["Aim"].ToString(),
+                    Place = requestt.Rows[0]["Place"].ToString()
                 });
             }
             return rq;
@@ -336,9 +345,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '" + step + "' , CONFIRM_" + regency + " = '1', DTM_" + regency + " = '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' where ID_REQUEST = '" + id_request + "'");
             return "Xác nhận thành công !";
         }
-        public static string _update_all(string us)
+        public static string _update_all(string us, string madon)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var id_rq = db.ReturnString("select Id_Request from REQUEST where Code_Request = '" + madon.Split('_')[0] + "'");
             db.GET_DATA_FROM_SQL($@"
                                 UPDATE [COST_MANAGEMENT].[dbo].[PE_REQUEST_CONFIRM_GA]
                                 SET 
@@ -363,6 +373,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
                                 WHERE 
                                     -- Điều kiện lọc: User có tên trong danh sách và cột đó phải đang ở trạng thái '0'
+                                     ID_REQUEST = '{id_rq}' AND
                                     ( [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' ) OR
                                     ( [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' ) OR
                                     ( [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' ) OR
@@ -542,8 +553,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Request_Date = list.Rows[i]["Request_Date"].ToString()!,
                     Declaration = list.Rows[i]["Declaration"].ToString()!,
                     Dealine = list.Rows[i]["Dealine"].ToString()!,
-                    Total_exchange = Math.Round(double.Parse(list.Rows[i]["Total_exchange"].ToString()!), 2),
-                    Total = Math.Round(double.Parse(list.Rows[i]["Total"].ToString()!), 2),
+                    Total_exchange = float.Parse(list.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Total = float.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
                     Kind = list.Rows[i]["Kind"].ToString()!,
                     Type = list.Rows[i]["Type"].ToString()!,
                     Status = list.Rows[i]["Status"].ToString()!,
@@ -587,14 +598,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Good_Code = lst.Rows[i]["Good_Code"].ToString()!,
                     Account_Code = lst.Rows[i]["Account_Code"].ToString()!,
                     Account_Name = lst.Rows[i]["Account_Name"].ToString()!,
-                    Amount = double.Parse(lst.Rows[i]["Amount"].ToString()!),
-                    Amount_Real = double.Parse(lst.Rows[i]["Amount_Real"].ToString()!),
+                    Amount = float.Parse(lst.Rows[i]["Amount"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Amount_Real = float.Parse(lst.Rows[i]["Amount_Real"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
                     Unit = lst.Rows[i]["Unit"].ToString()!,
                     Unit_Note = lst.Rows[i]["Unit_Note"].ToString()!,
-                    Price = Math.Round(double.Parse(lst.Rows[i]["Price"].ToString()!), 2),
+                    Price = float.Parse(lst.Rows[i]["Price"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
                     Price_Real = lst.Rows[i]["Price_Real"].ToString()!,
                     VAT = lst.Rows[i]["VAT"].ToString()!,
-                    Total_exchange = double.Parse(lst.Rows[i]["Total_exchange"].ToString()!),
+                    Total_exchange = float.Parse(lst.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
                     Total_exchange_real = lst.Rows[i]["Total_exchange_real"].ToString()!,
                     PO = lst.Rows[i]["PO"].ToString()!,
                     Dealine_Real = lst.Rows[i]["Dealine_Real"].ToString()!,
@@ -627,10 +638,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Declaration = lst.Rows[i]["Declaration"].ToString(),
                     Dealine = lst.Rows[i]["Dealine"].ToString(),
                     Dealine_Real = lst.Rows[i]["Dealine_Real"].ToString(),
-                    Total_exchange = double.Parse(lst.Rows[i]["Total_exchange"].ToString()!),
+                    Total_exchange = float.Parse(lst.Rows[i]["Total_exchange"].ToString()!),
                     Exchange_rate = lst.Rows[i]["Exchange_rate"].ToString()!,
                     Currency = lst.Rows[i]["Currency"].ToString(),
-                    Total = double.Parse(lst.Rows[i]["Total"].ToString()!),
+                    Total = float.Parse(lst.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
                     Total_exchange_real = lst.Rows[i]["Total_exchange_real"].ToString()!,
                     Exchange_rate_Real = lst.Rows[i]["Exchange_rate_Real"].ToString()!,
                     Currency_Real = lst.Rows[i]["Currency_Real"].ToString(),
@@ -655,7 +666,6 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 });
             }
             return rq_lst;
-
         }
 
     }

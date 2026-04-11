@@ -19,5 +19,5 @@ public partial class ESTIMATE
 
     public string Kind { get; set; } = null!;
 
-    public virtual DEPARTMENT Cost_CenterNavigation { get; set; } = null!;
+    public virtual DEPARTMENT_1 Cost_CenterNavigation { get; set; } = null!;
 }

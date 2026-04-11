@@ -13,28 +13,29 @@ function _insert_request() {
             Account_Name: (row.querySelector('.stk').value).split(':')[1],
             Amount: row.querySelector('.sl').value,
             Unit: row.querySelector('.dv').value,
-            Price: row.querySelector('.dg').value,
+            Price: parseFloat(row.querySelector('.dg').value),
             Currency: row.querySelector('.nt').value,
-            Total_exchange: row.querySelector('.tcp').value,
-            Total: row.querySelector('.tcp').value,
+            Total_exchange: parseFloat(row.querySelector('.tcp').value),
+            Total: parseFloat( row.querySelector('.tcp').value),
             Aim: row.querySelector('.md').value,
             Phongchiuchiphi: (row.querySelector('.pcp').value).split(':')[0],
-            //vt: row.querySelector('.vt').value,
-            //gc: row.querySelector('.gc').value
+            Vitri: row.querySelector('.vt').value,
+            Poisition: row.querySelector('.gc').value
+          
         };
-
         // Thêm đối tượng vào danh sách tổng
+
         dataList.push(rowData);
     });
-
+   
     var name_dept = document.getElementById("name_dept").value;
     var Cost_Center = name_dept.split(':')[0];
     var Declaration = document.getElementById("loaichiphi").value;
     var Dealine = document.getElementById("thoihan").value;
-    var Total_exchange = document.getElementById("thanhtien").value;
+    var Total_exchange = parseFloat(document.getElementById("thanhtien").value);
     var Exchange_rate = document.getElementById("rate").value;
     var Currency = "USD";
-    var Total = document.getElementById("thanhtien").value;
+    var Total = parseFloat(document.getElementById("thanhtien").value);
     var Kind = "IN";
     var Type = document.getElementById("typee").value;
     var Status = "WAITCONFIRM";
@@ -65,14 +66,19 @@ function _insert_request() {
     var mail_xk = document.getElementById("mail_xuatkho").value;
     var adidnguoitao = document.getElementById("us").innerHTML;
     var mailnguoitao = document.getElementById("email_us").textContent;
+
+
+
     if (Place == "" || name_dept == "" || Dealine == "") {
         alert("Vui lòng điền đủ thông tin vào đơn !");
+        document.querySelectorAll('.close').forEach(button => button.click());
     }
     else {
         $.ajax({
             url: '/Request/_Insert_request',
             type: 'POST',
             dataType: 'JSON',
+            //contentType: 'application/json',
             data: {
                 Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
                 Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
@@ -87,6 +93,7 @@ function _insert_request() {
                 _load_confirm();
             }
         })
+       
     }
   
 }
@@ -111,8 +118,8 @@ function _insert_request_GA() {
             Total: row.querySelector('.tcp').value,
             Aim: row.querySelector('.md').value,
             Phongchiuchiphi: (row.querySelector('.pcp').value).split(':')[0],
-            //vt: row.querySelector('.vt').value,
-            //gc: row.querySelector('.gc').value
+            Vitri: row.querySelector('.vt').value,
+            Poisition: row.querySelector('.gc').value
         };
 
         // Thêm đối tượng vào danh sách tổng
@@ -164,6 +171,50 @@ function _insert_request_GA() {
 
     var adidnguoitao = document.getElementById("us").innerHTML;
     var mailnguoitao = document.getElementById("email_us").textContent;
+
+
+    //const formData = new URLSearchParams();
+    //formData.append('Cost_Center', Cost_Center);
+    //formData.append('Declaration', Declaration);
+    //formData.append('Dealine', Dealine);
+    //formData.append('Total_exchange', Total_exchange);
+    //formData.append('Exchange_rate', Exchange_rate);
+    //formData.append('Currency', Currency);
+    //formData.append('Total', Total);
+    //formData.append('Kind', Kind);
+    //formData.append('Type', Type);
+    //formData.append('Status', Status);
+    //formData.append('Place', Place);
+    //formData.append('Loaihinhtokhai', Loaihinhtokhai);
+    //formData.append('Group_Code', Group_Code);
+    //formData.append('Chophepin', Chophepin);
+    //formData.append('Urgent', Urgent);
+    //formData.append('User_Create', User_Create);
+    //formData.append('rq', dataList);
+    //formData.append('adid_dt', adid_dt);
+    //formData.append('adid_tt', adid_tt);
+    //formData.append('adid_pd', adid_pd);
+    //formData.append('mail_dt', mail_dt);
+    //formData.append('mail_tt', mail_tt);
+    //formData.append('mail_pd', mail_pd);
+    //formData.append('ten_dt', ten_dt);
+    //formData.append('ten_tt', ten_tt);
+    //formData.append('ten_pd', ten_pd);
+    ////formData.append('ten_dy', ten_dy);
+    ////formData.append('adid_dy', adid_dy);
+    ////formData.append('mail_dy', mail_dy);
+    //formData.append('ten_xk', ten_xk);
+    //formData.append('ten_qlsc', ten_qlsc);
+    //formData.append('ten_qltc', ten_qltc);
+    //formData.append('adid_xk', adid_xk);
+    //formData.append('adid_qlsc', adid_qlsc);
+    //formData.append('adid_qltc', adid_qltc);
+    //formData.append('mail_xk', mail_xk);
+    //formData.append('mail_qlscmail_qlsc', mail_qlsc);
+    //formData.append('mail_qltc', mail_qltc);
+    //formData.append('adidnguoitao', adidnguoitao);
+    //formData.append('mailnguoitao', mailnguoitao);
+
     if (Place == "" || name_dept == "" || Dealine == "") {
         alert("Vui lòng điền đủ thông tin vào đơn !");
     }
@@ -172,12 +223,12 @@ function _insert_request_GA() {
             url: '/Request/_Insert_request_GA',
             type: 'POST',
             dataType: 'JSON',
+            //contentType: 'application/json',
             data: {
                 Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
                 Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
-                adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, ten_qlsc: ten_qlsc,
-                adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk, adidnguoitao: adidnguoitao, mailnguoitao: mailnguoitao, adid_qlsc: adid_qlsc, adid_qltc: adid_qltc, ten_qltc: ten_qltc,
-                mail_qlsc: mail_qlsc, mail_qltc: mail_qltc
+                adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, 
+                ten_qlsc: ten_qlsc, ten_qltc: ten_qltc, adid_qlsc: adid_qlsc, adid_qltc: adid_qltc, mail_qlsc: mail_qlsc, mail_qltc: mail_qltc, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk, adidnguoitao: adidnguoitao, mailnguoitao: mailnguoitao
             },
             success: function (response) {
                 /*    send_mail(mail_dt, Urgent);*/
@@ -187,8 +238,30 @@ function _insert_request_GA() {
                 _load_confirm();
             }
         })
-    }
 
+        //fetch('/Request/_Insert_request_GA', {
+        //    method: 'POST',
+        //    headers: {
+        //        'Content-Type': 'application/x-www-form-urlencoded',
+        //    },
+        //    body: formData.toString()
+        //}).then(response => {
+        //    if (!response.ok) {
+        //        throw new Error(`HTTP error! status: ${response.status}`);
+        //    }
+        //    return response.json();
+        //})
+        //    .then(data => {
+        //        alert(data);
+        //        location.reload();
+        //        document.querySelectorAll('.close').forEach(button => button.click());
+        //        _load_confirm();
+        //    })
+        //    .catch(error => {
+        //        console.error('There was a problem with the fetch operation:', error);
+        //    });
+       
+    }
 }
 async function _load_rate() {
     fetch('/Request/_get_rate', {
@@ -430,7 +503,7 @@ async function _load_confirm_GA() {
                     <td>${item.cost_Center}</td>
                     <td>${item.create_Date}</td>
                     <td>${item.dealine}</td>
-                    <td>${item.total}</td>
+                    <td>${item.total.toLocaleString('en-US') }</td>
                     <td>${item.user_Create}</td>
                     <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
                     <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
@@ -438,10 +511,9 @@ async function _load_confirm_GA() {
                      <td>${item.chR_TEN_XUATKHO} ${dots[3]}</td>
                     <td>${item.chR_TEN_QLSC} ${dots[4]}</td>
                     <td>${item.chR_TEN_QLTC} ${dots[5]}</td>
-                   
-                  
                 </tr>`;
             }).join('');
+
         })
         .catch(err => console.error('Fetch error:', err));
 }
@@ -454,6 +526,7 @@ function _modal_info(cost_request, step) {
             cost_request: cost_request
         },
         success: function (response) {
+            console.log(response);
             document.getElementById("modal-7").click();
             document.getElementById("load_detail_0").innerHTML = "";
             document.getElementById("madonhang_0").innerHTML = "*" + response[0].code_Request + "*";
@@ -466,6 +539,8 @@ function _modal_info(cost_request, step) {
             document.getElementById("id_request_0").innerHTML = response[0].id_Request;
             document.getElementById("urgent_0").innerHTML = response[0].urgent;
             document.getElementById("step_0").innerHTML = step;
+            document.getElementById("chuyen_0").innerHTML = response[0].place;
+           
             if (step == "0") {
                 document.getElementById("regency_0").innerHTML = "NGUOIYEUCAU";
             }
@@ -481,12 +556,62 @@ function _modal_info(cost_request, step) {
             if (step == "4") {
                 document.getElementById("regency_0").innerHTML = "XUATKHO";
             }
+            var tongdon = 0;
             for (var i = 0; i < response.length; i++) {
                 var tongtien = response[i].total_exchange;
-                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount}</td><td>${response[i].unit}</td><td>${response[i].price}</td><td>${response[i].currency}</td><td>${tongtien}</td><td>${response[i].aim}</td>`;
+                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount.toLocaleString('en-US')}</td><td>${response[i].unit}</td><td>${response[i].price.toLocaleString('en-US')}</td><td>${response[i].currency}</td><td>${tongtien.toLocaleString('en-US') }</td><td>${response[i].aim}</td>`;
+                tongdon += parseFloat(tongtien);
             }
+            document.getElementById("tongtientrongdon_0").innerHTML = tongdon.toLocaleString('en-US');
+
+            // Gán nút hiển thị theo khối
+            try {
+                if (response[0].group_Code.split(' ')[0] == "PROD") {
+                    document.getElementById("hiennutGA").style.display = 'none';
+                    document.getElementById("hiennutPROD").style.display = '';
+                }
+                if (response[0].group_Code.split(' ')[0] == "GA") {
+                    document.getElementById("hiennutPROD").style.display = 'none';
+                    document.getElementById("hiennutGA").style.display = '';
+                }
+            }
+            catch { }
+          
         }
     })
+}
+
+async function _dlxuatkho_trangthai(id) {
+    var code_request = document.getElementById("madonhang" + id).innerHTML;
+    const params = new URLSearchParams();
+    params.append('code_request', code_request);
+    fetch('/Import/ExportModalDetail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const timestamp = new Date().getTime();
+            a.download = `HangTrongDanhMuc_${code_request}.xlsm`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            alert("Hoàn thành download dữ liệu");
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
 function _update_request(id) {
 
@@ -644,12 +769,12 @@ function _reject(id) {
     var reason = document.getElementById("reason" + id).value;
 
     const params = new URLSearchParams();
-    params.append('id_request' + id, id_request);
-    params.append('regency' + id, regency);
-    params.append('step' + id, step);
-    params.append('urgent' + id, urgent);
-    params.append('reason' + id, reason);
-
+    params.append('id_request', id_request);
+    params.append('regency', regency);
+    params.append('step', step);
+    params.append('urgent', urgent);
+    params.append('reason', reason);
+    alert(id);
     fetch('/Request/_reject', {
         method: 'POST',
         headers: {
@@ -664,8 +789,50 @@ function _reject(id) {
     })
         .then(data => {
             alert("Từ chối đơn yêu cầu !");
+
+            document.getElementById("cls_" + id).innerHTML = "";
+            document.querySelectorAll('.close').forEach(button => button.click());
+            var us = document.getElementById("us").innerHTML;
+          
+            _load_confirm(us);
+
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+function _reject2(id) {
+    var id_request = document.getElementById("id_request" + id).innerHTML;
+    var regency = document.getElementById("regency" + id).innerHTML;
+    var step = document.getElementById("step" + id).innerHTML;
+    var urgent = document.getElementById("urgent" + id).innerHTML;
+    var reason = document.getElementById("reason_" + id).value;
+
+    const params = new URLSearchParams();
+    params.append('id_request', id_request);
+    params.append('regency', regency);
+    params.append('step', step);
+    params.append('urgent', urgent);
+    params.append('reason', reason);
+
+    fetch('/Request/_reject_GA', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then(data => {
+            alert("Từ chối đơn yêu cầu !");
+            document.querySelectorAll('.close').forEach(button => button.click());
             document.getElementById("cls_" + id).innerHTML = "";
             var us = document.getElementById("us").innerHTML;
+           
             _load_confirm(us);
 
         })
@@ -679,5 +846,30 @@ function _reset() {
     document.getElementById("mnl").value = "";
     document.getElementById("tinhtrangdon").value = "";
     _load_confirm();
+}
+function _load_account() {
+   
+    fetch('/Import/_load_account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then(data => {
+            console.log(data);
+            document.getElementById("stk_1").innerHTML = "";
+            for (var i = 0; i < data.length; i++) {
+                document.getElementById("stk_1").innerHTML += `<option>${data[i]}</option>`;
+            }
+
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
 

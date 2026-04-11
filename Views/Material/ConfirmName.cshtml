@@ -223,6 +223,7 @@
     <script src="~/js/utils/date.js"></script>
     <script src="~/js/ConfirmName.js"></script>
     <script>
+        window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
         window.i18nConfirmName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
             NoData = Localizer["NoData"].Value,
             Total = Localizer["Total"].Value,

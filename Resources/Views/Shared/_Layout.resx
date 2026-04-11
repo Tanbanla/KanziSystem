@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-	<data name="AppTitle" xml:space="preserve"><value>PRJ WAREHOUSE BIVN</value></data>
-	<data name="HeaderAppName" xml:space="preserve"><value>Hệ thống Quản lý Kho BIVN (BWMS)</value></data>
+	<data name="AppTitle" xml:space="preserve"><value>PRJ IPCS BIVN</value></data>
+	<data name="HeaderAppName" xml:space="preserve"><value>Hệ thống Quản lý hàng gián tiếp BIVN (IPCS)</value></data>
 	<data name="LangVietnamese" xml:space="preserve"><value>Tiếng Việt</value></data>
 	<data name="LangEnglish" xml:space="preserve"><value>Tiếng Anh</value></data>
 	<data name="LangJapanese" xml:space="preserve"><value>Tiếng Nhật</value></data>
@@ -10,8 +10,8 @@
 	<data name="Profile" xml:space="preserve"><value>Hồ sơ</value></data>
 	<data name="Logout" xml:space="preserve"><value>Đăng xuất</value></data>
 	<data name="Login" xml:space="preserve"><value>Đăng nhập</value></data>
-	<data name="BrandWarehouse" xml:space="preserve"><value>KHO</value></data>
-	<data name="BrandWarehouseShort" xml:space="preserve"><value>WH</value></data>
+	<data name="BrandWarehouse" xml:space="preserve"><value>IPCS</value></data>
+	<data name="BrandWarehouseShort" xml:space="preserve"><value>IPCS</value></data>
 	<data name="MenuDashboard" xml:space="preserve"><value>Bảng điều khiển</value></data>
 	<data name="MenuUser" xml:space="preserve"><value>Người dùng</value></data>
 	<data name="MenuQuote" xml:space="preserve"><value>Báo giá</value></data>
@@ -42,7 +42,7 @@
 	<data name="MenuMasterMaterial" xml:space="preserve"><value>Vật tư</value></data>
 	<data name="MenuMasterSendMail" xml:space="preserve"><value>Danh mục gửi email</value></data>
 	<data name="MenuMasterSupplierManage" xml:space="preserve"><value>Quản lý nhà cung cấp</value></data>
-	<data name="BreadcrumbHome" xml:space="preserve"><value>Kho BIVN</value></data>
+	<data name="BreadcrumbHome" xml:space="preserve"><value>Quản lý hàng gián tiếp</value></data>
 	<data name="FooterCopyright" xml:space="preserve"><value>Công ty TNHH Brother Industries (Việt Nam). Bảo lưu mọi quyền.</value></data>
 	<data name="MenuMasterCategory" xml:space="preserve"><value>Danh mục hàng hóa</value></data>
 </root>

@@ -12,10 +12,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     public class AccountController : Controller
     {
         private readonly ITmUserService _userService;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(ITmUserService userService)
+        public AccountController(ITmUserService userService, IConfiguration configuration)
         {
             _userService = userService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -49,6 +51,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 
                 if (loginResult.Success && loginResult.Data != null)
                 {
+                    // lấy role
+                    var roleAsync = await _userService.GetRoleAsync(model.Username);
+
                     // Tạo claims cho user
                     var claims = new List<Claim>
                     {
@@ -59,7 +64,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         new Claim("Section", loginResult.Data.CHR_SECTION ?? ""),
                         new Claim("Email", loginResult.Data.dia_chi_mail ?? ""),
                         new Claim("Permission", loginResult.Data.phan_quyen.ToString()),
-                        new Claim("Department", loginResult.Data.phong_ban ?? "")
+                        new Claim("Department", loginResult.Data.phong_ban ?? ""),
+                        new Claim("Roles", roleAsync.Data ?? "")
                     };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -100,7 +106,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại");
+                ModelState.AddModelError("", "Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại :"+ ex.Message);
                 return View(model);
             }
         }
@@ -150,8 +156,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                 new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
             );
-
-            return LocalRedirect(returnUrl ?? "/Account/Login");
+             var ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
+            return LocalRedirect(returnUrl ?? ApiBaseUrl+"/Account/Login");
         }
     }
 }

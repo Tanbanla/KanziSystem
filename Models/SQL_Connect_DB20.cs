@@ -6,11 +6,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 {
     public class SQL_Connect_DB20
     {
+        public readonly string connectString = @"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;";
         public DataTable GET_DATA_FROM_SQL(string DATASELECT)
          {
             try
             {
-                using (SqlConnection cn = new SqlConnection(@"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;"))
+                using ( SqlConnection cn = new SqlConnection(connectString))
                 {
                     if (cn.State != ConnectionState.Open) { cn.Open(); }
                     string CommandText = DATASELECT;
@@ -34,7 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         {
             try
             {
-                using (SqlConnection cn = new SqlConnection(@"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;"))
+                using (SqlConnection cn = new SqlConnection(connectString))
                 {
                     if (cn.State != ConnectionState.Open) { cn.Open(); }
                     string CommandText = command;
@@ -59,12 +60,32 @@ namespace PRJ_WAREHOUSE_BIVN.Models
  
         public int ExecuteSP(string spName, object? param = null)
         {
-            string connectionString = @"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;";
-
-            using var conn = new SqlConnection(connectionString);
+            using var conn = new SqlConnection(connectString);
             return conn.Execute(spName, param, commandType: CommandType.StoredProcedure);
         }
-      
+
+        public SqlDataReader sqlreader;
+        public System.Data.DataTable Getdatatable(string strsql, string name)
+        {
+            System.Data.DataTable dataTable = new System.Data.DataTable();
+            dataTable.TableName = name;
+            using (SqlConnection connection = new SqlConnection(connectString))
+            {
+                connection.Open();
+                SqlCommand sqlCommand = new SqlCommand(strsql, connection);
+                sqlCommand.CommandTimeout = 18000;
+                try
+                {
+                    this.sqlreader = sqlCommand.ExecuteReader();
+                    dataTable.Load((IDataReader)this.sqlreader);
+                }
+                catch
+                {
+                }
+                connection.Close();
+                return dataTable;
+            }
+        }
     }   
 
 }

@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 PageSize: supplierState.pageSize,
             };
             //SearchInputQuote
-            fetch('/Quote/SearchSupplierQuoteBody', {
+            fetch((window.apiBaseUrl || '') + '/Quote/SearchSupplierQuoteBody', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -143,6 +143,142 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(err => console.error('Load supplier data failed', err));
         },
+        //renderSupplierTable: function (data) {
+        //    const tbody = document.getElementById('supplierQuoteBody');
+        //    if (!tbody) return;
+        //    // Make table more compact
+        //    const table = document.getElementById('supplierQuoteTable');
+        //    if (table) {
+        //        table.style.fontSize = '10px';
+        //        table.style.lineHeight = '1.2';
+        //    }
+        //    // Helper function to apply mismatch styling
+        //    const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
+
+        //    // Pre-calc totals grouped by MaDon + MaThietBi + MaNCC
+        //    const totals = {};
+        //    const counts = {}; // number of rows per group (for rowspan)
+        //    data.forEach(d => {
+        //        const maDon = d.CHR_MaDon || '';
+        //        const maThietBi = d.CHR_MaThietBi || '';
+        //        const maNcc = d.CHR_MaNCC || '';
+        //        const key = `${maDon}|${maThietBi}|${maNcc}`;
+        //        const vnd = (d.FL_VND != null && !isNaN(Number(d.FL_VND))) ? Number(d.FL_VND) : 0;
+        //        const usd = (d.FL_USD != null && !isNaN(Number(d.FL_USD))) ? Number(d.FL_USD) : 0;
+        //        if (!totals[key]) totals[key] = { vnd: 0, usd: 0 };
+        //        // As per requirement: mỗi loại lấy số lượng = 1 rồi nhân với giá -> tương đương cộng mỗi giá 1 lần
+        //        totals[key].vnd += vnd;
+        //        totals[key].usd += usd;
+        //        counts[key] = (counts[key] || 0) + 1;
+        //    });
+
+        //    // Track which group total has been rendered (so we render only once per group using rowspan)
+        //    const renderedTotals = new Set();
+
+        //    const rowsHtml = data.map((d, index) => {
+        //        // compute whether to show group total here
+        //        const maDon = d.CHR_MaDon || '';
+        //        const maThietBi = d.CHR_MaThietBi || '';
+        //        const maNcc = d.CHR_MaNCC || '';
+        //        const key = `${maDon}|${maThietBi}|${maNcc}`;
+        //        let totalCell = '';
+        //        if (!renderedTotals.has(key)) {
+        //            renderedTotals.add(key);
+        //            const tot = totals[key] || { vnd: 0, usd: 0 };
+        //            if (tot.vnd && tot.vnd !== 0) {
+        //                try { totalCell = Number(tot.vnd).toLocaleString(); } catch { totalCell = tot.vnd; }
+        //                totalCell = totalCell + ' VND';
+        //            } else if (tot.usd && tot.usd !== 0) {
+        //                try { totalCell = Number(tot.usd).toLocaleString(); } catch { totalCell = tot.usd; }
+        //                totalCell = totalCell + ' USD';
+        //            }
+        //        }
+
+        //        return `
+        //        <tr class="text-center" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
+        //            <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${this.MappingStatusSupplier(d.status || '')}</td>
+        //             <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
+
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNoiBo || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNCC || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Phanloai || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ChungLoai || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_NameVN || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_NameEN || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.INT_SoLuong || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_DonVi || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_HinhDang || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ChatLieu || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ThanhPhan || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_KichThuoc || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_DongMay || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_TinhNang || ''}</td>
+
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_Rohs || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_COCQ || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_MSDS || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_AnToan || ''}</td>
+
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_FileThietKe || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.DTM_KyHan ? new Date(d.DTM_KyHan).toLocaleDateString() : ''}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Gap === 'true' || d.CHR_Gap === true ? 'O' : 'X'}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.BIT_LayBaoGia === true ? 'O' : 'X'}</td>
+        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_LyDo || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
+        //            <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NVCHR_NameNCC || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.CodeEquipmentNCC || ''}</td>
+        //            <td class="text-start" style="padding: 2px 4px; text-align: left; ${getMismatchStyle(d.IsMatch_NameVN)}">${d.NVCHR_TenHangHQ || ''}</td>
+        //             <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_SoLuong)}">${d.soluong || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_DonVi)}">${d.donvi || ''}</td>
+        //            <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
+        //            <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_MOQ || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.DTM_LeadTime || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Ngay)}">${d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Rohs)}">${d.VCHR_Rohs || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_COCQ)}">${d.VCHR_COCQ || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_MSDS)}">${d.VCHR_MSDS || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_AnToan)}">${d.VCHR_AnToan || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatchCamKet)}">${d.VCHR_CamKet || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_DeliveryTerm || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_PaymentTerm || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_File || ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.DTM_EffectiveDate ? new Date(d.DTM_EffectiveDate).toLocaleDateString() : ''}</td>
+        //            <td style="padding: 2px 4px; text-align: center;">${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
+        //            ${(() => {
+        //                // If this is first row for group, render TD with rowspan equal to counts[key]
+        //                if (totalCell) {
+        //                    const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
+        //                    return `<td style="padding: 2px 4px; text-align: center;"${span}>${totalCell}</td>`;
+        //                }
+        //                // If totalCell empty (no value) still render empty cell once
+        //                if (!renderedTotals.has(key)) {
+        //                    // mark as rendered to avoid further empty TDs
+        //                    renderedTotals.add(key);
+        //                    const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
+        //                    return `<td style="padding: 2px 4px; text-align: center;"${span}></td>`;
+        //                }
+        //                // For subsequent rows in group, omit the TD so rowspan covers them
+        //                return `<td style="padding: 2px 4px; text-align: center;"></td>`;
+        //            })()}
+        //            <td style="padding: 2px 4px; text-align: center;">
+        //                 <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
+        //                    <option value="" ${(!d.BIT_Select && d.BIT_Select !== false) ? 'selected' : ''}></option>
+        //                    <option value="true" ${d.BIT_Select === true ? 'selected' : ''}>O</option>
+        //                    <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
+        //                </select>
+        //            </td>
+        //            <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_ReasonPick || ''}"></td>
+        //        </tr>
+        //    `}).join('');
+        //    tbody.innerHTML = rowsHtml;
+        //    // reapply columns visibility for newly rendered rows
+        //    this.applyAdditionalColumnsVisibility();
+        //},
         renderSupplierTable: function (data) {
             const tbody = document.getElementById('supplierQuoteBody');
             if (!tbody) return;
@@ -155,43 +291,18 @@ document.addEventListener('DOMContentLoaded', function () {
             // Helper function to apply mismatch styling
             const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
 
-            // Pre-calc totals grouped by MaDon + MaThietBi + MaNCC
-            const totals = {};
-            const counts = {}; // number of rows per group (for rowspan)
-            data.forEach(d => {
-                const maDon = d.CHR_MaDon || '';
-                const maThietBi = d.CHR_MaThietBi || '';
-                const maNcc = d.CHR_MaNCC || '';
-                const key = `${maDon}|${maThietBi}|${maNcc}`;
+            const rowsHtml = data.map((d, index) => {
+                // Tính tổng cho từng dòng riêng lẻ (vẫn tính nhưng không gom nhóm)
                 const vnd = (d.FL_VND != null && !isNaN(Number(d.FL_VND))) ? Number(d.FL_VND) : 0;
                 const usd = (d.FL_USD != null && !isNaN(Number(d.FL_USD))) ? Number(d.FL_USD) : 0;
-                if (!totals[key]) totals[key] = { vnd: 0, usd: 0 };
-                // As per requirement: mỗi loại lấy số lượng = 1 rồi nhân với giá -> tương đương cộng mỗi giá 1 lần
-                totals[key].vnd += vnd;
-                totals[key].usd += usd;
-                counts[key] = (counts[key] || 0) + 1;
-            });
-
-            // Track which group total has been rendered (so we render only once per group using rowspan)
-            const renderedTotals = new Set();
-
-            const rowsHtml = data.map((d, index) => {
-                // compute whether to show group total here
-                const maDon = d.CHR_MaDon || '';
-                const maThietBi = d.CHR_MaThietBi || '';
-                const maNcc = d.CHR_MaNCC || '';
-                const key = `${maDon}|${maThietBi}|${maNcc}`;
+                const sl = (d.soluong != null && !isNaN(Number(d.soluong))) ? Number(d.soluong) : 0;
                 let totalCell = '';
-                if (!renderedTotals.has(key)) {
-                    renderedTotals.add(key);
-                    const tot = totals[key] || { vnd: 0, usd: 0 };
-                    if (tot.vnd && tot.vnd !== 0) {
-                        try { totalCell = Number(tot.vnd).toLocaleString(); } catch { totalCell = tot.vnd; }
-                        totalCell = totalCell + ' VND';
-                    } else if (tot.usd && tot.usd !== 0) {
-                        try { totalCell = Number(tot.usd).toLocaleString(); } catch { totalCell = tot.usd; }
-                        totalCell = totalCell + ' USD';
-                    }
+                if (vnd && vnd !== 0) {
+                    try { totalCell = Number(vnd * sl).toLocaleString(); } catch { totalCell = vnd * sl; }
+                    totalCell = totalCell + ' VND';
+                } else if (usd && usd !== 0) {
+                    try { totalCell = Number(usd *sl).toLocaleString(); } catch { totalCell = usd * sl; }
+                    totalCell = totalCell + ' USD';
                 }
 
                 return `
@@ -199,8 +310,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${this.MappingStatusSupplier(d.status || '')}</td>
-                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
-
+                    <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNoiBo || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNCC || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Phanloai || ''}</td>
@@ -215,12 +325,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_KichThuoc || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_DongMay || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_TinhNang || ''}</td>
-
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_Rohs || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_COCQ || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_MSDS || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_AnToan || ''}</td>
-
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_FileThietKe || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.DTM_KyHan ? new Date(d.DTM_KyHan).toLocaleDateString() : ''}</td>
@@ -231,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NVCHR_NameNCC || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CodeEquipmentNCC || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left; ${getMismatchStyle(d.IsMatch_NameVN)}">${d.NVCHR_TenHangHQ || ''}</td>
-                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
+                    <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_SoLuong)}">${d.soluong || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_DonVi)}">${d.donvi || ''}</td>
                     <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
@@ -249,24 +357,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_File || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_EffectiveDate ? new Date(d.DTM_EffectiveDate).toLocaleDateString() : ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
-                    ${(() => {
-                        // If this is first row for group, render TD with rowspan equal to counts[key]
-                        if (totalCell) {
-                            const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
-                            return `<td style="padding: 2px 4px; text-align: center;"${span}>${totalCell}</td>`;
-                        }
-                        // If totalCell empty (no value) still render empty cell once
-                        if (!renderedTotals.has(key)) {
-                            // mark as rendered to avoid further empty TDs
-                            renderedTotals.add(key);
-                            const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
-                            return `<td style="padding: 2px 4px; text-align: center;"${span}></td>`;
-                        }
-                        // For subsequent rows in group, omit the TD so rowspan covers them
-                        return `<td style="padding: 2px 4px; text-align: center;"></td>`;
-                    })()}
+                    <td style="padding: 2px 4px; text-align: center;">${totalCell || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">
-                         <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
+                        <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
                             <option value="" ${(!d.BIT_Select && d.BIT_Select !== false) ? 'selected' : ''}></option>
                             <option value="true" ${d.BIT_Select === true ? 'selected' : ''}>O</option>
                             <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
@@ -274,7 +367,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     </td>
                     <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_ReasonPick || ''}"></td>
                 </tr>
-            `}).join('');
+            `;
+            }).join('');
+
             tbody.innerHTML = rowsHtml;
             // reapply columns visibility for newly rendered rows
             this.applyAdditionalColumnsVisibility();
@@ -332,6 +427,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const btnClear = document.getElementById('btnClear');
             if (btnClear) btnClear.addEventListener('click', this.resetFilters.bind(this));
 
+            // Export File excel
+            const btnExportFileTab1 = document.getElementById('btnExcelExport');
+            if (btnExportFileTab1) btnExportFileTab1.addEventListener('click', this.ExportFileTab1.bind(this));
+
             // Reset supplier search filters
             const btnResetSupplierSearch = document.getElementById('btnClearnTAB2');
             if (btnResetSupplierSearch) btnResetSupplierSearch.addEventListener('click', this.resetFiltersTab2.bind(this));
@@ -351,7 +450,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (btnCancel) {
                 btnCancel.addEventListener('click', this.cancelSelection.bind(this));
             }
-
+            // nhap excel
+            const btnUploadExcel = document.getElementById('btnUploadExcel');
+            if (btnUploadExcel) {
+                btnUploadExcel.addEventListener('click', this.ImportExcelApproval.bind(this));
+            }
             // Xuất danh sách
             const btnExport = document.getElementById('btnExport');
             if (btnExport) {
@@ -480,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const reason = (row.querySelector('.reason-input')?.value || '').toString();
                     const maDon = row.getAttribute('data-madon') || '';
                     const maHang = row.getAttribute('data-mahang') || '';
-                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, CHR_MaDon: maDon, CHR_MaHangNoiBo: maHang});
+                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, CHR_MaDon: maDon, CHR_MaHangNoiBo: maHang });
                 });
                 const approverNext = window.__selectedNextApprover || '';
                 if (!payload.length) {
@@ -489,7 +592,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 var payloadWithApprover = { UserApproverNext: approverNext, listPick: payload };
                 showLoading((T && T.LoadingData) ? T.LoadingData : 'Đang lưu...');
-                const res = await fetch('/Quote/SavePickSupplier', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/SavePickSupplier', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadWithApprover)
@@ -535,7 +638,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const body = { Step: stepNumber, SectionCost: sectionCode };
                     let list = [];
                     try {
-                        const resp = await fetch('/Quote/GetListApprovel', {
+                        const resp = await fetch((window.apiBaseUrl || '') + '/Quote/GetListApprovel', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                             body: JSON.stringify(body)
@@ -619,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         openApproverSelectionAndSave: async function () {
             try {
-                const step = 7;
+                const step = 9;
                 const section = document.getElementById('supplierSearchSection')?.value || document.getElementById('searchPhongBan')?.value || '';
                 const selected = await this.openApproverSelector(step, section);
                 if (!selected) return; // cancelled
@@ -707,7 +810,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         openEditRequestModal: async function (id) {
             try {
-                const res = await fetch('/Quote/SearchID', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/SearchID', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(id)
@@ -792,7 +895,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             try {
                 showLoading('Loading...');
-                const res = await fetch('/Quote/ExportFileExcelQuotationResult', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelQuotationResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -823,8 +926,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 hideLoading();
             }
         },
-        // function Import tab 2
-        ImportSupplier: async function () {
+        // nhap file excel
+        ImportExcelApproval: async function () {
             // Tạo input file ẩn
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
@@ -849,7 +952,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('file', file);
                 // Gửi request
                 try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
-                fetch('/Quote/ImportQuotianExcel', {
+                fetch((window.apiBaseUrl || '') + '/Quote/ImportApprovalQuotianExcel', {
                     method: 'POST',
                     body: formData
                 })
@@ -896,6 +999,87 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Could not open file dialog', e);
             }
         },
+        // function Import tab 2
+        ImportSupplier: async function () {
+            // Tạo input file ẩn
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.xlsx, .xls';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+            // chọn người phê duyệt
+            const selectedApproverTab2 = await this.openApproverSelector(10, "");
+            // Nếu không chọn người phê duyệt, thoát
+            if (!selectedApproverTab2) {
+                return;
+            }
+            fileInput.addEventListener('change', function () {
+                const file = fileInput.files[0];
+                if (!file) return;
+                const T = window.i18nQuotationResults || {};
+                // Kiểm tra loại file
+                const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+                if (!allowedTypes.includes(file.type)) {
+                    showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidFileType || 'Không thể xuất file'), type: 'error' });
+                    document.body.removeChild(fileInput);
+                    return;
+                }
+
+                // Tạo FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                const fd = new FormData();
+                fd.append('fileSend', file);
+                fd.append('userNextApproval', selectedApproverTab2?.chR_UserAdid || '');
+                // Gửi request
+                try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
+                fetch((window.apiBaseUrl || '') + '/Quote/ImportQuotianExcel', {
+                    method: 'POST',
+                    body: fd
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                    }
+
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                        // Trả về file lỗi
+                        return response.blob().then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                            showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
+                        });
+                    } else {
+                        // Thành công
+                        return response.json().then(data => {
+                            showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                        });
+                    }
+                })
+                .catch(error => {
+                    const T = window.i18nQuotationResults || {};
+                    showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
+                })
+                .finally(() => {
+                    try { hideLoading(); } catch { }
+                    document.body.removeChild(fileInput);
+                });
+            });
+            this.loadSupplierData(); // refresh data before opening file dialog
+            try {
+                // open native file dialog
+                fileInput.click();
+            } catch (e) {
+                console.error('Could not open file dialog', e);
+            }
+        },
         toggleSupplierDetails: async function (button) {
             const targetSel = button.getAttribute('data-target');
             const targetRow = document.querySelector(targetSel);
@@ -930,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         pageSize: 30,
                         pageIndex: 0
                     };
-                    const res = await fetch('/Quote/SearchInputQuote', {
+                    const res = await fetch((window.apiBaseUrl || '') + '/Quote/SearchInputQuote', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1033,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 pageSize: requestListState.pageSize
             };
             try {
-                const res = await fetch('/Quote/GetThongTinBaoGiaGomNhom', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetThongTinBaoGiaGomNhom', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1069,18 +1253,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     const groupId = `${i.CHR_MaDon}-${i.CHR_MaHangNoiBo}`;
                     return `
                         <tr class="item-row" data-status="${i.Status || ''}" data-id="${i.CHR_MaDon || ''}">
-                            <td class="text-center"><input type="checkbox" class="form-check-input item-select" /></td>
+                            <td class="text-center align-middle"><input type="checkbox" class="row-select" data-madon-select=${i.CHR_MaDon} /></td>
                             <td class="detail-cell text-center">
                                 <button type="button" class="btn btn-sm btn-outline-primary toggle-sup" data-target="#sup-rows-${groupId}" data-madon="${i.CHR_MaDon || ''}" data-mahang="${i.CHR_MaHangNoiBo || ''}" data-ngay="${ngayAttr}" aria-expanded="false" title="Xem chi tiết">
                                     <i class="fas fa-info-circle"></i>
                                 </button>
                             </td>
                             <td class="text-start"><span class="ms-1 fw-semibold">${i.CHR_MaDon || ''}</span></td>
-                            <td>${i.DTM_CreateDate ? new Date(i.DTM_CreateDate).toLocaleDateString('vi-VN') : ''}</td>
                             <td class="text-start">${i.CHR_SectionName || ''}</td>
-                            <td>${i.CHR_CreateBy || ''}</td>
-                            <td>${i.INT_CountMaterial || ''}</td>
-                            <td>${i.DTM_KyHan ? new Date(i.DTM_KyHan).toLocaleDateString('vi-VN') : ''}</td>
+                            <td class="text-center">${i.CHR_CreateBy || ''}</td>
+                            <td>${i.suppliesList || ''}</td>
+                            <td>${i.categoryList || ''}</td>
+                            <td class="text-center">${i.DTM_KyHan ? new Date(i.DTM_KyHan).toLocaleDateString('vi-VN') : ''}</td>
+                            <td class="text-center">${i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toLocaleDateString('vi-VN') : ''}</td>
                             <td class="text-center"><span class="badge status-badge ${statusClass}">${mapNameStatus}</span></td>
                         </tr>
                      `;
@@ -1094,6 +1279,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     const endOne = requestListState.returnedCount === 0 ? 0 : ((requestListState.pageIndex - 1) * requestListState.pageSize + requestListState.returnedCount);
                     summaryText.textContent = `Tổng số: ${startOne}-${endOne} / ${requestListState.totalCount}`;
                 }
+
+                // Xử lý select all checkbox
+                const selectAllCheckbox = document.getElementById('selectAll');
+                if (selectAllCheckbox) {
+                    // Xóa event cũ nếu có
+                    selectAllCheckbox.removeEventListener('change', this.handleSelectAll);
+                    // Thêm event mới
+                    selectAllCheckbox.addEventListener('change', this.handleSelectAll.bind(this));
+                }
+
+                // Thêm event cho từng checkbox row-select
+                document.querySelectorAll('#quotationResultsTableBody .row-select').forEach(checkbox => {
+                    checkbox.removeEventListener('change', this.handleRowCheckboxChange);
+                    checkbox.addEventListener('change', this.handleRowCheckboxChange.bind(this));
+                });
+
 
                 // Render pagination
                 this.renderRequestListPaginationControls();
@@ -1127,19 +1328,94 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.applyAdditionalColumnsVisibility();
                 // Wire up click on row to open approval modal (avoid clicks on toggle button / checkbox)
                 document.querySelectorAll('#quotationResultsTableBody .item-row').forEach(row => {
-                    row.addEventListener('click', (ev) => {
-                        // ignore if clicking on control elements
-                        //const ignore = ev.target.closest('.toggle-sup, .item-select, button, a, input, .detail-cell');
-                        //if (ignore && !ev.target.classList.contains('item-row')) return;
-                        const maDon = row.getAttribute('data-id');
-                        if (!maDon) return;
-                        // open modal to view and approve
-                        quotationApp.openApprovalModal(maDon);
-                    });
+                    const detailBtn = row.querySelector('.toggle-sup');
+                    if (detailBtn) {
+                        detailBtn.removeEventListener('click', this.handleDetailClick);
+                        // Gắn event mới với bind this
+                        detailBtn.addEventListener('click', (ev) => {
+                            ev.stopPropagation(); 
+                            const maDon = row.getAttribute('data-id');
+                            if (maDon) {
+                                quotationApp.openApprovalModal(maDon);
+                            }
+                        });
+                    }
                 });
             } catch (err) {
                 console.error('Error calling GetThongTinBaoGiaGomNhom', err);
             }
+        },
+
+        // Xử lý khi click vào checkbox select all
+        handleSelectAll: function (event) {
+            const isChecked = event.target.checked;
+            const allRowCheckboxes = document.querySelectorAll('#quotationResultsTableBody .row-select');
+
+            allRowCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+
+            // Cập nhật trạng thái select all (nếu cần)
+            this.updateSelectAllState();
+
+            // Gọi callback khi có sự thay đổi (nếu cần)
+            this.onSelectionChange();
+        },
+
+        // Xử lý khi click vào từng checkbox row
+        handleRowCheckboxChange: function (event) {
+            // Cập nhật trạng thái của select all checkbox
+            this.updateSelectAllState();
+
+            // Gọi callback khi có sự thay đổi
+            this.onSelectionChange();
+        },
+
+        // Cập nhật trạng thái của checkbox select all
+        updateSelectAllState: function () {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (!selectAllCheckbox) return;
+
+            const allRowCheckboxes = document.querySelectorAll('#quotationResultsTableBody .row-select');
+            const checkedCheckboxes = document.querySelectorAll('#quotationResultsTableBody .row-select:checked');
+
+            if (allRowCheckboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length === allRowCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true; // Trạng thái chưa chọn hết
+            }
+        },
+
+        // Hàm callback khi có thay đổi selection (tùy chọn)
+        onSelectionChange: function () {
+            const selectedMaDons = this.getSelectedMaDon();
+
+            // Cập nhật UI hiển thị số lượng đã chọn
+            const selectedCountSpan = document.getElementById('selectedCount');
+            if (selectedCountSpan) {
+                selectedCountSpan.textContent = selectedMaDons.length;
+            }
+
+            // Enable/disable button xuất dữ liệu dựa trên số lượng chọn
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.disabled = selectedMaDons.length === 0;
+            }
+        },
+
+        // Lấy danh sách mã đơn đã chọn
+        getSelectedMaDon: function () {
+            return Array.from(document.querySelectorAll('#quotationResultsTableBody .row-select:checked'))
+                .map(cb => cb.getAttribute('data-madon-select'))
+                .filter(maDon => maDon);
         },
         // mapping status Approver supplier tab
         MappingStatusApproverSupplier: function (codeStatus) {
@@ -1152,11 +1428,67 @@ document.addEventListener('DOMContentLoaded', function () {
                 default: return '';
             }
         },
+
+        // Export File Excel tab 1
+        ExportFileTab1: async function () {
+            const selectedMaDons = [];
+
+            // Lấy tất cả checkbox có class 'row-select' và đã được checked
+            const checkboxes = document.querySelectorAll('#quotationResultsTableBody .row-select:checked');
+
+            checkboxes.forEach(checkbox => {
+                const maDon = checkbox.getAttribute('data-madon-select');
+                if (maDon) {
+                    selectedMaDons.push(maDon);
+                }
+            });
+            if (selectedMaDons.length === 0) {
+                const T = window.i18nQuotationResults || {};
+                showDialog({
+                    title: T.Notification || 'Thông báo',
+                    message: T.MsgNoRowSelected || 'Vui lòng chọn ít nhất một dòng để xuất file',
+                    type: 'warning'
+                });
+                return;
+            }
+            try {
+                showLoading('Loading...');
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelApproverResult', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(selectedMaDons)
+                });
+                if (!res.ok) {
+                    const msg = await res.text().catch(() => 'Lỗi không xác định');
+                    throw new Error(msg || 'Xuất file thất bại');
+                }
+                const blob = await res.blob();
+                let fileName = 'ResultQuotationApprover.xlsx';
+                const cd = res.headers.get('content-disposition');
+                if (cd) {
+                    const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                }
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                const T = window.i18nQuotationResults || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (err && err.message) ? err.message : (T.MsgExportError || 'Không thể xuất file'), type: 'error' });
+            } finally {
+                hideLoading();
+            }
+        },
         // Open approval modal by request id and populate fields
         openApprovalModal: async function (maDon) {
             if (!maDon) return;
             try {
-                const res = await fetch('/Quote/GetSupplierApprovalInfor', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetSupplierApprovalInfor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(maDon)
@@ -1242,10 +1574,32 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     return '';
                 };
+
+                // ========== THÊM HÀM KIỂM TRA BIT_Select ==========
+                const isBitSelectFalse = (d) => {
+                    const bitSelect = getVal(d, 'BIT_Select', 'bit_Select');
+                    // Nếu BIT_Select = false hoặc 0 thì trả về true
+                    return bitSelect === false || bitSelect === 0 || String(bitSelect).toLowerCase() === 'false';
+                };
+
                 details.forEach((d, idx) => {
                     const tr = document.createElement('tr');
                     tr.className = 'text-center';
-                    const addTd = (txt, cls, style) => { const td = document.createElement('td'); td.textContent = txt == null ? '' : String(txt); if (cls) td.className = cls; if (style) td.style.cssText = style; return td; };
+
+                    // ========== THÊM CLASS NỀN XÁM NẾU BIT_Select = false ==========
+                    if (isBitSelectFalse(d)) {
+                        tr.style.backgroundColor = '#f5f5f5'; // Màu xám nhạt
+                        // Hoặc thêm class nếu bạn có class CSS
+                        // tr.classList.add('bg-secondary-light');
+                    }
+
+                    const addTd = (txt, cls, style) => {
+                        const td = document.createElement('td');
+                        td.textContent = txt == null ? '' : String(txt);
+                        if (cls) td.className = cls;
+                        if (style) td.style.cssText = style;
+                        return td;
+                    };
 
                     tr.appendChild(addTd(idx + 1));
                     tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
@@ -1286,7 +1640,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     tr.appendChild(addTd(getVal(d, 'nvchR_LyDo', 'NVCHR_LyDo')));
 
                     // Vendor input columns (read-only)
-                    const fmtNum = v => { try { return v != null && v !== '' ? Number(v).toLocaleString() : ''; } catch { return v || ''; } };
+                    const fmtNum = (price, qty) => {
+                        try {
+                            const numPrice = parseFloat(price);
+                            const numQty = parseFloat(qty);
+                            if (isNaN(numPrice)) return '';
+                            const total = isNaN(numQty) ? numPrice : numPrice * numQty;
+                            return total.toLocaleString();
+                        } catch {
+                            return '';
+                        }
+                    };
                     tr.appendChild(addTd(getVal(d, 'CHR_MaNCC', 'chR_MaNCC')));
                     tr.appendChild(addTd(getVal(d, 'NVCHR_NameNCC', 'nvchR_NameNCC'), 'text-start'));
                     tr.appendChild(addTd(getVal(d, 'CHR_MaHangNCC', 'chR_MaHangNCC'), null, mismatchStyle(getVal(d, 'IsMatch_MaHangNCC', 'IsMatch_MaHangNCC'))));
@@ -1311,7 +1675,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ExpiryDate', 'dtm_ExpiryDate'))));
 
                     // System total (try VND then USD)
-                    const totalSys = (getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) ? (fmtNum(getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) + ' VND') : (getVal(d, 'FL_USD', 'fl_usd') ? (fmtNum(getVal(d, 'FL_USD', 'fl_usd')) + ' USD') : '');
+                    const totalSys = (getVal(d, 'FL_VND')) ? (fmtNum(getVal(d, 'FL_VND'), getVal(d, 'soluong')) + ' VND') : (getVal(d, 'FL_USD') ? (fmtNum(getVal(d, 'FL_USD'),getVal(d, 'soluong')) + ' USD') : '');
                     tr.appendChild(addTd(totalSys, 'text-center'));
 
                     // PIC selection and reason (display only)
@@ -1329,22 +1693,58 @@ document.addEventListener('DOMContentLoaded', function () {
                 const btnReject = document.getElementById('modalReject');
                 if (btnApprove) {
                     btnApprove.onclick = async () => {
-                        try {
-                            btnApprove.disabled = true;
-                            const r = await fetch('/Quote/PheDuyetBaoGia', {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(maDon)
-                            });
-                            if (!r.ok) {
-                                const txt = await r.text().catch(() => null);
-                                showDialog({ message: txt || 'Phê duyệt thất bại', type: 'error' });
+                        var nextStep = master.ID_StepBaoGia;
+                        if (nextStep === 9) {
+
+                            const selectedApprover = await this.openApproverSelector(10, "");
+                            // Nếu không chọn người phê duyệt, thoát
+                            if (!selectedApprover) {
                                 return;
                             }
-                            showDialog({ message: 'Phê duyệt thành công', type: 'success' });
-                            quotationApp.searchItems();
-                            hideEditModal();
-                        } catch (e) {
-                            showDialog({ message: 'Lỗi phê duyệt', type: 'error' });
-                        } finally { btnApprove.disabled = false; }
+                            try {
+                                const payload = {
+                                    maDon: maDon,
+                                    UserApproverNext: selectedApprover.chR_UserAdid,
+                                    Reason: ''
+                                };
+                                btnApprove.disabled = true;
+                                const r = await fetch((window.apiBaseUrl || '') + '/Quote/PheDuyetOKBaoGia', {
+                                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                                });
+                                if (!r.ok) {
+                                    const txt = r.text().catch(() => null);
+                                    showDialog({ message: txt || 'Phê duyệt thất bại', type: 'error' });
+                                    return;
+                                }
+                                showDialog({ message: 'Phê duyệt thành công', type: 'success' });
+                                quotationApp.searchItems();
+                                hideEditModal();
+                            } catch (e) {
+                                showDialog({ message: 'Lỗi phê duyệt', type: 'error' });
+                            } finally { btnApprove.disabled = false; }
+                        } else {
+                            try {
+                                const payload = {
+                                    maDon: maDon,
+                                    UserApproverNext: '',
+                                    Reason: ''
+                                };
+                                btnApprove.disabled = true;
+                                const r = await fetch((window.apiBaseUrl || '') + '/Quote/PheDuyetOKBaoGia', {
+                                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                                });
+                                if (!r.ok) {
+                                    const txt = await r.text().catch(() => null);
+                                    showDialog({ message: txt || 'Phê duyệt thất bại', type: 'error' });
+                                    return;
+                                }
+                                showDialog({ message: 'Phê duyệt thành công', type: 'success' });
+                                quotationApp.searchItems();
+                                hideEditModal();
+                            } catch (e) {
+                                showDialog({ message: 'Lỗi phê duyệt', type: 'error' });
+                            } finally { btnApprove.disabled = false; }
+                        }
                     };
                 }
                 if (btnReject) {
@@ -1353,8 +1753,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (reason == null) return;
                         try {
                             btnReject.disabled = true;
-                            const payload = { ID: maDon, NVCHR_LyDo: reason, ID_Status: 'RETURN' };
-                            const r = await fetch('/Quote/UpdateBaoGiaById', {
+                            const payload = { maDon: maDon, UserApproverNext: '', Reason: reason };
+                            const r = await fetch((window.apiBaseUrl || '') + '/Quote/PheDuyetNGBaoGia', {
                                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                             });
                             if (!r.ok) { const txt = await r.text().catch(() => null); showDialog({ message: txt || 'Trả về thất bại', type: 'error' }); return; }
@@ -1662,7 +2062,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             try {
-                const res = await fetch('/Quote/ChonNhaCungCapBaoGia', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ChonNhaCungCapBaoGia', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(selections)
@@ -1700,7 +2100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgExportSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp hoặc sản phẩm để xuất.'), type: 'info' });
                 return;
             }
-            fetch('/Quote/ExportSelection', {
+            fetch((window.apiBaseUrl || '') + '/Quote/ExportSelection', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selected)

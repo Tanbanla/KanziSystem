@@ -36,6 +36,8 @@
             <button type="button" id="btnSearch" class="btn btn-primary"><i class="fas fa-search"></i> @Localizer["Search"]</button>
             <div style="width: 6px"></div>
             <button type="button" id="btnAddSupplier" class="btn btn-success"><i class="fas fa-plus"></i> @Localizer["Add"]</button>
+            <div style="width: 6px"></div>
+            <button type="button" id="btnExportMaster" class="btn btn-danger"><i class="fas fa-download"></i> Xuất dữ liệu master</button>
         </div>
     </form>
 
@@ -159,7 +161,7 @@
         </div>
     </div>
 </div>
-<!-- Dialogs mặt hàng nhà cung cấp -->
+<!-- Dialogs máº·t hÃ ng nhÃ  cung cáº¥p -->
 <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -216,7 +218,7 @@
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
         <div class="cm-dialog-header">
             <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
-            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">âœ•</button>
         </div>
         <div id="cmDialogBody" class="cm-dialog-body"></div>
         <div id="cmDialogFooter" class="cm-dialog-footer"></div>
@@ -228,7 +230,7 @@
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmConfirmTitle">
         <div class="cm-dialog-header">
             <h6 id="cmConfirmTitle" class="cm-dialog-title cm-confirm-title">@Localizer["Confirm"]</h6>
-            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="cancel" aria-label="@Localizer["Close"]">✕</button>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="cancel" aria-label="@Localizer["Close"]">âœ•</button>
         </div>
         <div class="cm-dialog-body cm-confirm-body">@Localizer["AreYouSure"]</div>
         <div class="cm-dialog-footer">
@@ -255,6 +257,7 @@
     </script>
 }
 <script>
+    window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     window.i18nSupplierMana = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         DownloadExcel = Localizer["DownloadExcel"].Value,
         UploadExcel = Localizer["UploadExcel"].Value,

@@ -33,6 +33,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return User.FindFirst("Department")?.Value ?? "";
         }
+        protected string GetRolesUser()
+        {
+            return User.FindFirst("Roles")?.Value ?? "";
+        }
 
         protected int GetCurrentUserPermission()
         {

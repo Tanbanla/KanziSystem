@@ -1,16 +1,16 @@
 // JS for Quote page: handle buttons, validations, row operations, autofill from material selection, and API calls
 (() => {
     const api = {
-        insertListBaoGia: '/Quote/InsertDanhSachBaoGia',
-        getMaterials: (keyword) => `/Quote/GetMaterialsByNameOrCode?keyword=${encodeURIComponent(keyword || '')}`,
-        searchMaterials: '/Quote/GetSearchMaterial'
-        , getSuppliersByMaHang: '/Quote/GetNhaCungCapByMaHang'
-        , uploadQuoteExcel: '/Quote/UploadQuoteExcel'
-        , exportAutoRender: '/Quote/ExportAutoRender'
-        , getNCCByCategory: '/Quote/GetNCCByCategory'
-        , exportRenderOutSide: '/Quote/ExportRenderOutSide'
-        , exportTable: '/Quote/ExportTable'
-        , searchApprover: '/Quote/GetListApprovel'
+        insertListBaoGia: (window.apiBaseUrl || '') + '/Quote/InsertDanhSachBaoGia',
+        getMaterials: (keyword) => (window.apiBaseUrl || '') + `/Quote/GetMaterialsByNameOrCode?keyword=${encodeURIComponent(keyword || '')}`,
+        searchMaterials: (window.apiBaseUrl || '') + '/Quote/GetSearchMaterial'
+        , getSuppliersByMaHang: (window.apiBaseUrl || '') + '/Quote/GetNhaCungCapByMaHang'
+        , uploadQuoteExcel: (window.apiBaseUrl || '') + '/Quote/UploadQuoteExcel'//UploadQuoteExcelBackup
+        , exportAutoRender: (window.apiBaseUrl || '') + '/Quote/ExportAutoRender'
+        , getNCCByCategory: (window.apiBaseUrl || '') + '/Quote/GetNCCByCategory'
+        , exportRenderOutSide: (window.apiBaseUrl || '') + '/Quote/ExportRenderOutSide'
+        , exportTable: (window.apiBaseUrl || '') + '/Quote/ExportTable'
+        , searchApprover: (window.apiBaseUrl || '') + '/Quote/GetListApprovel'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -1609,7 +1609,7 @@
         qs('#btnDownloadExcel')?.addEventListener('click', () => {
             try {
                 showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xử lý...');
-                const url = '/template/TemPlateQuote.xlsx';
+                const url = (window.apiBaseUrl || '') + '/template/TemPlateQuote.xlsx';
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'Mau_Quote.xlsx';

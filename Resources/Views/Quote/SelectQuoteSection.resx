@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -192,4 +192,241 @@
   <data name="Confirm" xml:space="preserve">
     <value>Xác nhận</value>
   </data>
+  <data name="ExportSelected" xml:space="preserve">
+    <value>Xuất dữ liệu đã chọn</value>
+  </data>
+  <data name="DetailModalTitle" xml:space="preserve">
+    <value>Chi tiết yêu cầu báo giá</value>
+  </data>
+  <data name="ReceivingDepartmentLabel" xml:space="preserve">
+    <value>Phòng ban nhận</value>
+  </data>
+  <data name="UrgentBadgeText" xml:space="preserve">
+    <value>Khẩn cấp</value>
+  </data>
+  <data name="DeptCostCenterLabel" xml:space="preserve">
+    <value>Mã chi phí phòng ban</value>
+  </data>
+  <data name="DeptNameLabel" xml:space="preserve">
+    <value>Tên phòng ban</value>
+  </data>
+  <data name="RequestDateLabel" xml:space="preserve">
+    <value>Ngày yêu cầu</value>
+  </data>
+  <data name="DesiredDeadlineLabel" xml:space="preserve">
+    <value>Hạn mong muốn</value>
+  </data>
+  <data name="GoodsDetailTitle" xml:space="preserve">
+    <value>Chi tiết hàng hóa</value>
+  </data>
+  <data name="STT" xml:space="preserve">
+    <value>STT</value>
+  </data>
+  <data name="SystemCode" xml:space="preserve">
+    <value>Mã hệ thống</value>
+  </data>
+  <data name="InternalMaterialCodeShort" xml:space="preserve">
+    <value>Mã hàng nội bộ</value>
+  </data>
+  <data name="ItemNameVNEN" xml:space="preserve">
+    <value>Tên hàng VN/EN</value>
+  </data>
+  <data name="QuantityShort" xml:space="preserve">
+    <value>SL</value>
+  </data>
+  <data name="UnitShort" xml:space="preserve">
+    <value>ĐV</value>
+  </data>
+  <data name="ShapeShort" xml:space="preserve">
+    <value>Hình dáng</value>
+  </data>
+  <data name="MaterialShort" xml:space="preserve">
+    <value>Chất liệu</value>
+  </data>
+  <data name="CompositionShort" xml:space="preserve">
+    <value>Thành phần</value>
+  </data>
+  <data name="DimensionsShort" xml:space="preserve">
+    <value>Kích thước</value>
+  </data>
+  <data name="UsedPositionShort" xml:space="preserve">
+    <value>Vị trí sử dụng</value>
+  </data>
+  <data name="PurposeFeatureShort" xml:space="preserve">
+    <value>Mục đích/Tính năng</value>
+  </data>
+  <data name="VendorCode" xml:space="preserve">
+    <value>Mã nhà cung cấp</value>
+  </data>
+  <data name="ROHSRequirement" xml:space="preserve">
+    <value>Yêu cầu ROHS</value>
+  </data>
+  <data name="COCQRequirement" xml:space="preserve">
+    <value>Yêu cầu CO/CQ</value>
+  </data>
+  <data name="MSDSRequirement" xml:space="preserve">
+    <value>Yêu cầu MSDS</value>
+  </data>
+  <data name="SafetyStandardRequirement" xml:space="preserve">
+    <value>Yêu cầu tiêu chuẩn an toàn</value>
+  </data>
+  <data name="UrgentShort" xml:space="preserve">
+    <value>Gấp</value>
+  </data>
+  <data name="ApprovalFlowTitle" xml:space="preserve">
+    <value>Quy trình phê duyệt</value>
+  </data>
+  <data name="ApprovalFlowLine1" xml:space="preserve">
+    <value>• Dưới 3,000 USD (66 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Phó trưởng bộ phận.</value>
+  </data>
+  <data name="ApprovalFlowLine2" xml:space="preserve">
+    <value>• Dưới 10,000 USD (220 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Trưởng bộ phận.</value>
+  </data>
+  <data name="ApprovalFlowLine3" xml:space="preserve">
+    <value>• Từ 10,000 USD (220 triệu VNĐ) trở lên : Quản lý trung cấp → Trưởng bộ phận/Phó trưởng bộ phận → Tổng Giám đốc/Giám đốc.</value>
+  </data>
+  <data name="ApprovalFlowLine4" xml:space="preserve">
+    <value>→ Phê duyệt xuất kho (PR1-MC): Quản lý sơ cấp/quản lý trung cấp → Kho Kanzai</value>
+  </data>
+  <data name="AdditionalInfoTitle" xml:space="preserve">
+    <value>Thông tin bổ sung</value>
+  </data>
+  <data name="RequesterLabel" xml:space="preserve">
+    <value>Người yêu cầu</value>
+  </data>
+  <data name="ApproveButton" xml:space="preserve">
+    <value>Phê duyệt</value>
+  </data>
+  <data name="RejectButton" xml:space="preserve">
+    <value>Từ chối</value>
+  </data>
+  <data name="DetailModalTitleFormat" xml:space="preserve">
+    <value>Chi tiết yêu cầu báo giá - {0}</value>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Hủy</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Danh mục</value>
+  </data>
+  <data name="Classification" xml:space="preserve">
+    <value>Phân loại</value>
+  </data>
+  <data name="SupplierItemCode" xml:space="preserve">
+    <value>Mã hàng nhà cung cấp</value>
+  </data>
+  <data name="SupplierItemCodeShort" xml:space="preserve">
+    <value>Mã NCC</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>Tên nhà cung cấp</value>
+  </data>
+  <data name="CustomsItemName" xml:space="preserve">
+    <value>Tên hàng hải quan</value>
+  </data>
+  <data name="EnglishName" xml:space="preserve">
+    <value>Tên tiếng Anh</value>
+  </data>
+  <data name="DescriptionGroup" xml:space="preserve">
+    <value>Nhóm mô tả</value>
+  </data>
+  <data name="DesignFile" xml:space="preserve">
+    <value>File thiết kế</value>
+  </data>
+  <data name="Manufacturer" xml:space="preserve">
+    <value>Nhà sản xuất</value>
+  </data>
+  <data name="PriceUSD" xml:space="preserve">
+    <value>Giá (USD)</value>
+  </data>
+  <data name="PriceVND" xml:space="preserve">
+    <value>Giá (VND)</value>
+  </data>
+  <data name="MOQ" xml:space="preserve">
+    <value>Số lượng đặt hàng tối thiểu</value>
+  </data>
+  <data name="LeadTime" xml:space="preserve">
+    <value>Thời gian giao hàng</value>
+  </data>
+  <data name="DeliveryDate" xml:space="preserve">
+    <value>Ngày giao hàng</value>
+  </data>
+  <data name="Rohs" xml:space="preserve">
+    <value>RoHS</value>
+  </data>
+  <data name="COCQ" xml:space="preserve">
+    <value>CO/CQ</value>
+  </data>
+  <data name="MSDS" xml:space="preserve">
+    <value>MSDS</value>
+  </data>
+  <data name="Safety" xml:space="preserve">
+    <value>Tiêu chuẩn an toàn</value>
+  </data>
+  <data name="CommitRequirement" xml:space="preserve">
+    <value>Yêu cầu cam kết</value>
+  </data>
+  <data name="DeliveryMethod" xml:space="preserve">
+    <value>Phương thức giao hàng</value>
+  </data>
+  <data name="PaymentTerms" xml:space="preserve">
+    <value>Điều khoản thanh toán</value>
+  </data>
+  <data name="Attachment" xml:space="preserve">
+    <value>Tệp đính kèm</value>
+  </data>
+  <data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Hạn chọn nhà cung cấp</value>
+  </data>
+  <data name="ApplyDay" xml:space="preserve">
+    <value>Ngày áp dụng</value>
+  </data>
+  <data name="DueDay" xml:space="preserve">
+    <value>Ngày hết hạn</value>
+  </data>
+  <data name="GetQuotation" xml:space="preserve">
+    <value>Lấy báo giá</value>
+  </data>
+  <data name="SystemCalculatedTotal" xml:space="preserve">
+    <value>Tổng hệ thống tính</value>
+  </data>
+  <data name="SupplierSelection" xml:space="preserve">
+    <value>Lựa chọn nhà cung cấp</value>
+  </data>
+  <data name="SelectionReason" xml:space="preserve">
+    <value>Lý do lựa chọn</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Lý do</value>
+  </data>
+  <data name="FooterRegency" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+  <data name="FooterStep" xml:space="preserve">
+    <value>Bước</value>
+  </data>
+  <data name="FooterID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Hiển thị</value>
+  </data>
+    <data name="PrimaryManager" xml:space="preserve">
+    <value>Quản lý sơ cấp</value>
+</data>
+    <data name="Result" xml:space="preserve">
+    <value>Kết quả</value>
+</data>
+    <data name="MiddleManager" xml:space="preserve">
+    <value>Quản lý trung cấp</value>
+</data>
+    <data name="DepartmentHead" xml:space="preserve">
+    <value>Trưởng bộ phận</value>
+</data>
 </root>

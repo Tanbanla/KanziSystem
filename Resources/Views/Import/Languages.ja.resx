@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -539,5 +539,8 @@
   </data>
   <data name="danhanhang" xml:space="preserve">
     <value>受領済み</value>
+  </data>
+  <data name="hethongquanlyhanggiantiep" xml:space="preserve">
+    <value>間接部品管理システム (IPCS)</value>
   </data>
 </root>

@@ -172,5 +172,36 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // lay ma hang hien tai
+        public async Task<GenericResponse<string>> MaterialCodeLater(string type)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                result.Data = await _repo.MaterialCodeLater(type);
+                result.Success = true;
+            }catch(Exception ex)
+            {
+                result.Message =ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // check ma hang
+        public async Task<GenericResponse<string>> CheckMaterialCode(string keyword, string category)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                result.Data = await _repo.CheckMaterialCode(keyword, category);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

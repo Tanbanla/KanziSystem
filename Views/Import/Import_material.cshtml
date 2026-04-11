@@ -52,7 +52,8 @@
                     </div>
                 </div>
                 <button type="button" class="btn btn-primary" style=" margin-left: 30px; float:right" onclick="_load_inv()"><i class="ion ion-ios-search-strong"></i></button>
-                <a href="~/"><button type="button" class="btn btn-success" style=" margin-left: 30px; float:right"><i class="fa fa-file-excel"></i> Xuất file excel</button></a>
+                <a href="/Import/ExportToExcel_Log"> <button type="button" class="btn btn-success" style=" margin-left: 30px; float:right"><i class="fa fa-file-excel"></i> Xuất file excel</button></a>
+                <button type="button" class="btn btn-danger" style=" margin-left: 30px; float:right" id="modal-21"><i class="ion ion-ios-arrow-thin-right"></i> Chuyển kho</button>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer" id="table-1_wrapper">
                 <div class="table-responsive">
@@ -94,6 +95,8 @@
     window.onload = function(){
         _load_inv();
         loadListWarehouse();
+        load_ma();
+        _load_phongchiuphi();
     }
     function loadListWarehouse() {
             fetch('/Delivery/GetWareHouse', {
@@ -110,7 +113,6 @@
             })
             .then(data => {
                 document.getElementById('kho').innerHTML = "";
-                console.log(data);
                 data.forEach((wh) => {
                        document.getElementById('kho').innerHTML  += `<option>${wh}</option>`;
                 })
@@ -118,6 +120,120 @@
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
             });
-
     }
+
+    let listLinhKien = [];
+    function load_ma(){
+        let us = document.getElementById("us").innerHTML;
+        const params = new URLSearchParams();
+        params.append('us', us);
+
+            fetch('/Master/load_ma', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                listLinhKien = data;
+                document.getElementById("malinhkien").innerHTML = "";
+                data.forEach((item) =>{
+                        document.getElementById("malinhkien").innerHTML += "<option>" + item.ma + "</option>";
+                })
+            })
+            .catch(error => {
+                console.error('Lỗi phán định:', error);
+                alert("Phán định thất bại: " + error.message);
+            });
+    }
+
+    let listKho = []; // Biến toàn cục để lưu trữ danh sách kho sau khi load
+
+    function changeLinhKien(selectElement) {
+        const maDuocChon = selectElement.value;
+        const inputTen = document.getElementById("tenlinhkien");
+
+        // 1. Hiển thị tên linh kiện từ list có sẵn
+        const itemFound = listLinhKien.find(x => x.ma === maDuocChon);
+        inputTen.value = itemFound ? itemFound.ten : "";
+
+        if (!maDuocChon) return;
+
+        // 2. Gọi API lấy danh sách kho theo mã linh kiện
+        const params = new URLSearchParams();
+        params.append('manguyenlieu', maDuocChon);
+
+        fetch('/Master/load_kho_theo_ma', {
+            method: 'POST',
+            headers: {
+                // Quan trọng: Sử dụng x-www-form-urlencoded nếu dùng URLSearchParams
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`Lỗi: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            // GÁN DỮ LIỆU VÀO BIẾN listKho ĐỂ DÙNG CHO HÀM changeKho
+            listKho = data;
+
+            const selectKho = document.getElementById('khochuyen');
+            selectKho.innerHTML = '<option value=""></option>';
+
+            data.forEach((wh) => {
+                // Phải có value="${wh.ma}" để hàm changeKho lấy được giá trị
+                selectKho.innerHTML += `<option value="${wh.ma}">${wh.ma}</option>`;
+            });
+
+            // Reset ô hiển thị tên kho/số lượng khi đổi mã linh kiện
+            document.getElementById("soluongkho").value = "";
+        })
+        .catch(error => {
+            console.error('Lỗi load kho:', error);
+        });
+    }
+    function changeKho(selectElement) {
+        const maKhoChon = selectElement.value;
+        const inputTenKho = document.getElementById("soluongkho");
+
+        // Tìm trong listKho đã lưu ở bước trên
+        const khoFound = listKho.find(x => x.ma === maKhoChon);
+
+        // Đổ wh.ten vào ô input
+        inputTenKho.value = khoFound ? khoFound.ten : "";
+    }
+    function _load_phongchiuphi() {
+    fetch('/Request/_get_phongchiuphi', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+                document.getElementById('vitrichuyenkho').innerHTML = "";
+
+                data.forEach(item => {
+                     document.getElementById('vitrichuyenkho').innerHTML += `<option value="${item}">${item}</option>`;
+            });
+           
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
 </script>

@@ -1,4 +1,5 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @using PRJ_WAREHOUSE_BIVN.Language
 <!DOCTYPE html>
 <html lang="@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName">
@@ -14,7 +15,7 @@
     <!-- CSS Libraries -->
     <link rel="stylesheet" href="~/modules/jqvmap/dist/jqvmap.min.css" asp-append-version="true">
     <link rel="stylesheet" href="~/modules/summernote/summernote-bs4.css" asp-append-version="true">
-@*     <link rel="stylesheet" href="~/modules/owlcarousel2/dist/css/owl.carousel.min.css" asp-append-version="true">
+    @*     <link rel="stylesheet" href="~/modules/owlcarousel2/dist/css/owl.carousel.min.css" asp-append-version="true">
     <link rel="stylesheet" href="~/modules/owlcarousel2/dist/css/owl.theme.default.min.css" asp-append-version="true"> *@
 
     <link rel="stylesheet" href="~/modules/datatables/datatables.min.css">
@@ -30,7 +31,7 @@
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'UA-94034622-3');</script>
-    <!-- /END GA -->  
+    <!-- /END GA -->
 </head>
 <body class="sidebar-mini" data-authenticated="@(User.Identity.IsAuthenticated ? "true" : "false")">
     <div id="app">
@@ -40,8 +41,8 @@
                 <form class="form-inline mr-auto">
                     <ul class="navbar-nav mr-3">
                         <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
-                        <li><h4 class="text-white">@Localizer["HeaderAppName"]</h4></li>
-                    </ul>                  
+                        <li><h4 class="text-white">@Languages.hethongquanlyhanggiantiep</h4></li>
+                    </ul>
                 </form>
                 <ul class="navbar-nav navbar-right">
                     <li>
@@ -52,7 +53,7 @@
                             <img src="~/img/anh.png" height="20" />
                         </a>
                         <a href="#" class="m-1" title="@Localizer["LangJapanese"]" data-culture="ja" onclick="setAppCulture(event)">
-                            <img src="~/img/jp.svg" height="20" /> 
+                            <img src="~/img/jp.svg" height="20" />
                         </a>
                     </li>
                     @if (User.Identity.IsAuthenticated)
@@ -88,22 +89,22 @@
                             </a>
                         </li>
                     }
-                    <li><span id="us" hidden>@(User.FindFirst("UserId")?.Value ?? "User")</span></li>                   
+                    <li><span id="us" hidden>@(User.FindFirst("UserId")?.Value ?? "User")</span></li>
                     <li><span id="dept_us" hidden >@(User.FindFirst("Department")?.Value ?? "Chưa xác định")</span></li>
-                   @*  <li><span id="us" hidden>lanlh</span></li>
-                    <li><span id="dept_us" hidden>GA-GA</span></li> *@
+                    @*  <li><span id="us" hidden>loandt</span></li>
+                    <li><span id="dept_us" hidden>R&D PE</span></li> *@
                     <li>
                         <span id="email_us" hidden>
                             @(User.FindFirst("Email")?.Value ?? "Chưa xác định")
                         </span>
                     </li>
-                 
+
                 </ul>
             </nav>
             <div class="main-sidebar sidebar-style-2" tabindex="1" style="overflow: auto visible; outline: none;">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <a href="~/Home/Index" class="text-white">@Localizer["BrandWarehouse"]</a>
+                        <a href="~/Home/Index" class="text-white">IPCS</a>
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
                         <a href="~/Home/Index">@Localizer["BrandWarehouseShort"]</a>
@@ -115,7 +116,7 @@
                                 <li><a href="~/Home/Index" class="nav-link"><i class="fa fa-home"></i> <span>@Localizer["MenuDashboard"]</span></a></li>
                             </ul>
                         </li>
-                        <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")">
+                        <li hidden class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")" >
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-people"></i> <span>@Localizer["MenuUser"]</span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="~/User/Index" class="nav-link"><i class="far fa-user"></i> <span>@Localizer["MenuUser"]</span></a></li>
@@ -138,7 +139,6 @@
                                         <span class="small">@Localizer["MenuQuoteApprove"]</span>
                                     </a>
                                 </li>
-
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Quote/InputQuote">
                                         <i class="fas fa-inbox me-2"></i>
@@ -178,24 +178,24 @@
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Import" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cloud-upload"></i> <span>@Localizer["MenuWarehouse"]</span></a>
                             <ul class="dropdown-menu">
-                              @*   <li><a class="nav-link" href="~/Delivery/PO_Info"><i class="ion ion-ios-information"></i> Thông tin PO</a></li> @* thông tin PO *@
-                               @*  <li><a class="nav-link" href="~/Approval/Approval"><i class="ion ion-social-dropbox"></i> Nhận hàng PO</a></li> *@ @* Nhập hàng PO 
+                                @*   <li><a class="nav-link" href="~/Delivery/PO_Info"><i class="ion ion-ios-information"></i> Thông tin PO</a></li> @* thông tin PO *@
+                                @*  <li><a class="nav-link" href="~/Approval/Approval"><i class="ion ion-social-dropbox"></i> Nhận hàng PO</a></li> *@ @* Nhập hàng PO 
                              @*    <li><a class="nav-link" href="~/Delivery/Giaohang"><i class="ion ion-ios-cart"></i>Giao hàng PO</a></li> @* Nhập kho *@ 
                                 <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="ion ion-ios-cart"></i> @Languages.NhaphangPO</a></li> @* Nhập hàng PO  *@
-                              @*   <li><a class="nav-link" href="~/Delivery/"><i class="ion ion-ios-home-outline"></i> @Languages.Nhapkho</a></li>   *@
+                                @*   <li><a class="nav-link" href="~/Delivery/"><i class="ion ion-ios-home-outline"></i> @Languages.Nhapkho</a></li>   *@
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExportRequest"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Tainhap"><i class="fas fa-donate"></i> @Localizer["MenuWarehouseReimport"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Log"><i class="fas fa-info"></i> @Localizer["MenuWarehouseLog"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Xuatkho"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExport"]</a></li>
                             </ul>
-                        </li>                     
+                        </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Approval" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-android-checkmark-circle"></i> <span>@Localizer["MenuApproval"]</span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="~/Approval/ListData"><i class="fas fa-check"></i> @Localizer["MenuApprovalApprove"] PROD</a></li>
                                 <li><a href="~/Approval/ListData_GA"><i class="fas fa-check"></i> @Localizer["MenuApprovalApprove"] GA</a></li>
-                                <li><a class="nav-link" href="~/Approval/Condition"><i class="fas fa-info-circle"></i> @Localizer["MenuApprovalStatus"]</a></li>                            
+                                <li><a class="nav-link" href="~/Approval/Condition"><i class="fas fa-info-circle"></i> @Localizer["MenuApprovalStatus"]</a></li>
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Master" ? "active" : "")">
@@ -204,9 +204,12 @@
                                 <li><a class="dropdown-item py-2" href="~/Master/Masters"><i class="ion ion-ios-home"></i> @Localizer["MenuMasterWarehouse"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/Master/master_vender"><i class="ion ion-social-snapchat"></i> @Localizer["MenuMasterVendor"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/Master/master_material"><i class="ion ion-android-options"></i> @Localizer["MenuMasterMaterial"]</a></li>
-                                <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>
-                                <li><a class="dropdown-item py-2" href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> @Localizer["MenuMasterSendMail"]</a></li>
-                                <li><a class="dropdown-item py-2" href="~/Master/SupplierMana"><i class="fas fa-handshake"></i> @Localizer["MenuMasterSupplierManage"]</a></li>
+                                @if (User.FindFirst("Roles")?.Value == "UserPUR")
+                                {
+                                    <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>
+                                    <li><a class="dropdown-item py-2" href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> @Localizer["MenuMasterSendMail"]</a></li>
+                                    <li><a class="dropdown-item py-2" href="~/Master/SupplierMana"><i class="fas fa-handshake"></i> @Localizer["MenuMasterSupplierManage"]</a></li>
+                                }
                             </ul>
                         </li>
                     </ul>
@@ -235,7 +238,7 @@
     </div>
 
     <!-- General JS Scripts -->
-  
+
     <script src="~/modules/jquery.min.js"></script>
     <script src="~/modules/popper.js"></script>
     <script src="~/modules/tooltip.js"></script>
@@ -264,31 +267,42 @@
     <!-- Template JS File -->
     <script src="~/js/scripts.js"></script>
     <script src="~/js/custom.js"></script>
-   @*  <script src="~/wwwroot/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script> *@
- @*    <script src="~/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script> *@
+    @*  <script src="~/wwwroot/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script> *@
+    @*    <script src="~/modules/cleave-js/dist/addons/cleave-phone.td.min.js"></script> *@
     <!-- or use CDN -->
-  
     @if (User.Identity.IsAuthenticated)
     {
         <script src="~/js/session-manager.js" asp-append-version="true"></script>
     }
-    
+
     @RenderSection("Scripts", required: false)
     <script>
+        // Get BaseUrl from appsettings
+        window.apiBaseUrl = '@Configuration["ApiSettings:BaseUrl"]';
+
         function setAppCulture(e) {
             e.preventDefault();
             var culture = e.currentTarget.getAttribute('data-culture');
             if (!culture) return;
+
             // Set ASP.NET Core localization cookie for entire app
             var cookieName = '.AspNetCore.Culture';
             var cookieValue = 'c=' + culture + '|uic=' + culture;
             var expires = new Date();
             expires.setFullYear(expires.getFullYear() + 1); // 1 year
             document.cookie = cookieName + '=' + encodeURIComponent(cookieValue) + '; expires=' + expires.toUTCString() + '; path=/';
-            // Reload current page to apply culture
-            window.location.reload();
+
+            // Reload current page with apiBaseUrl if available
+            var baseUrl = window.apiBaseUrl || '';
+            var currentPath = window.location.pathname + window.location.search + window.location.hash;
+
+            // Remove baseUrl from currentPath if it already exists to avoid duplication
+            if (baseUrl && currentPath.startsWith(baseUrl)) {
+                currentPath = currentPath.substring(baseUrl.length);
+            }
+            var newUrl = baseUrl + currentPath;
+            window.location.href = newUrl;
         }
     </script>
- 
 </body>
 </html>

@@ -8,13 +8,13 @@ function ImportWarehouse() {
 
     let table = document.getElementById('show_kho_iv');
     //Scan table with row selected will import to warehouse
-   // let dateInput = document.getElementById('idTimeDelivery').value;
+    // let dateInput = document.getElementById('idTimeDelivery').value;
     //let warehouseName = document.getElementById('IdWarehouse').value;
 
     //if (dateInput == '' || warehouseName == '--') {
     //    alert("Bạn cần nhập đầy đủ : ngày nhận và kho nhận");
     //    return;
-    //}
+    // }
     let group_code = document.getElementById("IdDept").value;
     let UserName = document.getElementById("us").innerHTML;
     //let [year, month, day] = dateInput.split('-');
@@ -63,7 +63,7 @@ function Usingg() {
     //if (dateInput == '' || warehouseName == '--') {
     //    alert("Bạn cần nhập đầy đủ : ngày nhận và kho nhận");
     //    return;
-    //}
+    // }
     let group_code = document.getElementById("IdDept").value;
     let UserName = document.getElementById("us").innerHTML;
     //let [year, month, day] = dateInput.split('-');
@@ -210,9 +210,53 @@ async function _Load_PO() {
                         + `<td>${value.tenNCC} </td><td>${value.id_LichsuNhap} </td><td>${value.luongvekhoKhonhap}</td><td>${value.invoice}</td><td>${value.tinhtranghaiquanPO}</td></tr>`;
                 });
             })
-            .catch(err => console.error(err)); 
+            .catch(err => console.error(err));
     }
     catch (error) {
         console.error('Error : ', error);
+    }
+}
+function ResetWarehouse() {
+    const url = '/Delivery/ResetImportRow';
+
+    let table = document.getElementById('show_kho_iv');
+
+    let group_code = document.getElementById("IdDept").value;
+    let UserName = document.getElementById("us").innerHTML;
+
+    var ngaynhap = document.getElementById("idTimeDelivery").value;
+    for (let i = 0; i < table.rows.length; i++) {
+        let row = table.rows[i];
+        let cbxSelect = row.cells[0].querySelector('input[type="checkbox"]');
+        let txtLuongVeKho = row.cells[11].querySelector('input[type="number"]');
+        if (cbxSelect && cbxSelect.checked) {
+            let payload = {
+                PO_Detail_Id: row.cells[4].innerHTML,
+                Id_nhapkho: row.cells[1].innerHTML,
+                benXacNhanTruoc: 'STOCK',
+                luongvethuctekho: txtLuongVeKho ? txtLuongVeKho.value : '',
+                NgayNhap: ngaynhap,
+                Mahang: row.cells[6].innerHTML,
+                Soluong: row.cells[10].innerHTML,
+                Group_Code: group_code,
+                UserName: UserName,
+                Id_Lichsu: row.cells[31].innerHTML,
+                Donvi: row.cells[14].innerHTML,
+                Id_Goc: row.cells[2].innerHTML,
+            };
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            fetch(url, options)
+                .then(response => response.json())
+                .then(result => {
+                    alert("Reset hàng PO " + row.cells[4].innerHTML + " (Mã " + row.cells[1].innerHTML + "): " + result);
+                    SearchPoDel();
+                })
+                .catch(err => console.error(err));
+        }
     }
 }

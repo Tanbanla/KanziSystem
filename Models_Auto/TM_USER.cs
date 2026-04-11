@@ -35,13 +35,13 @@ public partial class TM_USER
 
     public string? dia_chi_mail { get; set; }
 
-    public int phan_quyen { get; set; }
+    public int? phan_quyen { get; set; }
 
     public string? phong_ban { get; set; }
 
-    public DateTime thoi_gian_cap_nhat { get; set; }
+    public DateTime? thoi_gian_cap_nhat { get; set; }
 
-    public bool cho_phep_hoat_dong { get; set; }
+    public bool? cho_phep_hoat_dong { get; set; }
 
     public virtual ICollection<EMAIL> EMAILs { get; set; } = new List<EMAIL>();
 

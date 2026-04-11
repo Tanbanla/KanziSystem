@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     const tblBody = document.getElementById('historyGroupTableBody');
     const statusFilter = document.getElementById('statusFilter');
     const btnApply = document.getElementById('btnApplyFilters');
@@ -7,9 +7,24 @@
     const paginationInfoEl = document.getElementById('historyPaginationInfo');
     const btnExportHistory = document.getElementById('btnExportHistory');
     const btnImportHistory = document.getElementById('btnImportHistory');
+    const supplierSelect = document.getElementById('editNhaCungCap');
+    const hiddenTenNCC = document.getElementById('editTenNCC');
     let currentPage = 1;
     const pageSize = 20;
     let currentGroups = [];
+
+
+    function updateHiddenValue() {
+        const selectedOption = supplierSelect.options[supplierSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            hiddenTenNCC.value = selectedOption.text;
+        } else {
+            hiddenTenNCC.value = ''; 
+        }
+    }
+
+    // Gán sự kiện change cho select
+    supplierSelect.addEventListener('change', updateHiddenValue);
 
     function applyFilters() {
         const maDon = (document.getElementById('searchMaDon').value || '').trim();
@@ -33,7 +48,7 @@
             PageSize: 10000,
             Date: (from && to) ? { From: from, To: to } : null
         };
-        fetch('/Quote/SearchBaoGia', {
+        fetch((window.apiBaseUrl || '') + '/Quote/SearchBaoGia', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -93,7 +108,7 @@
         const T = window.i18nHistoryQuote || {};
         try {
             showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch('/Quote/ExportHistory', {
+            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportHistory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -124,55 +139,113 @@
             hideLoading();
         }
     });
-    btnImportHistory?.addEventListener('click', async => {
-        // Tạo input file ẩn
+    btnImportHistory?.addEventListener('click', async () => {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.xlsx, .xls';
         fileInput.style.display = 'none';
         document.body.appendChild(fileInput);
 
-        fileInput.addEventListener('change', function () {
+        fileInput.addEventListener('change', async function () {
             const file = fileInput.files[0];
             if (!file) return;
             const T = window.i18nHistoryQuote || {};
-            // Kiểm tra loại file
+
             const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
             if (!allowedTypes.includes(file.type)) {
-                showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidFileType || 'Không thể xuất file'), type: 'error' });
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidFileType || 'Loại file không hợp lệ'), type: 'error' });
                 document.body.removeChild(fileInput);
                 return;
             }
 
-            // Tạo FormData
             const formData = new FormData();
             formData.append('file', file);
-            // Gửi request ImportSectionExcel
-            try { showLoading((window.i18nHistoryQuote && window.i18nHistoryQuote.LoadingData) || 'Đang xử lý...'); } catch { }
-            fetch('/Quote/ImportFileExcelEditHistory', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
-                    }
-                    // Thành công
-                    return response.json().then(data => {
-                        showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
-                    });
-                })
-                .catch(error => {
-                    const T = window.i18nHistoryQuote || {};
-                    showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
-                })
-                .finally(() => {
-                    try { hideLoading(); } catch { }
-                    document.body.removeChild(fileInput);
+
+            try {
+                showLoading((window.i18nHistoryQuote && window.i18nHistoryQuote.LoadingData) || 'Đang xử lý...');
+            } catch (e) { }
+
+            try {
+                const response = await fetch((window.apiBaseUrl || '') + '/Quote/ImportFileExcelEditHistory', {
+                    method: 'POST',
+                    body: formData
                 });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Lỗi server');
+                }
+
+                const importResult = await response.json();
+
+                // Import thành công, hiển thị dialog và CHỜ người dùng chọn
+                const step = 2;
+                const section = importResult?.sectionCode || '';
+
+                const selected = await openApproverSelector(step, section);
+
+                if (!selected) {
+                    showDialog({
+                        title: T.Notification || 'Thông báo',
+                        message: (T.ImportSuccessButNoApprover || 'Nhập file thành công, nhưng chưa chọn người phê duyệt'),
+                        type: 'warning'
+                    });
+                    return;
+                }
+
+                const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? '';
+                const finalId = approverId || (selected.value || selected.Value || '');
+
+                if (!finalId) {
+                    showDialog({
+                        title: T.Notification || 'Thông báo',
+                        message: (T.InvalidApprover || 'Người phê duyệt không hợp lệ'),
+                        type: 'error'
+                    });
+                    return;
+                }
+
+                var payload = {
+                    listUpdate: importResult?.listUpdate,
+                    sectionCode: finalId
+                };
+
+                // Gọi API lưu người phê duyệt
+                const updateResponse = await fetch((window.apiBaseUrl || '') + '/Quote/UpdateUserApprovalHistory', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload) 
+                });
+
+                if (!updateResponse.ok) {
+                    const errorText = await updateResponse.text();
+                    throw new Error(errorText || 'Lỗi server khi cập nhật người phê duyệt');
+                }
+
+                const updateResult = await updateResponse.json();
+
+                //showDialog({
+                //    title: T.Notification || 'Thông báo',
+                //    message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'),
+                //    type: 'success'
+                //});
+
+            } catch (error) {
+                const T = window.i18nHistoryQuote || {};
+                showDialog({
+                    title: T.Notification || 'Thông báo',
+                    message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể import file'),
+                    type: 'error'
+                });
+            } finally {
+                try { hideLoading(); } catch (e) { }
+                document.body.removeChild(fileInput);
+            }
         });
 
-        // Trigger the file picker
+
         fileInput.click();
     });
     tblBody?.addEventListener('click', (e) => {
@@ -182,7 +255,7 @@
         if (t.dataset.action === 'view-history') {
             const id = Number(t.dataset.id);
             if (!id) return;
-            fetch('/Quote/GetHistoryDataByID', {
+            fetch((window.apiBaseUrl || '') + '/Quote/GetHistoryDataByID', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(id)
@@ -230,7 +303,7 @@
             const soDon = group?.code || groupId;
             if (!soDon) return;
             // View history for the whole group (by SoDon)
-            fetch('/Quote/GetHistoryDataBySoDon', {
+            fetch((window.apiBaseUrl || '') + '/Quote/GetHistoryDataBySoDon', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(soDon)
@@ -255,6 +328,129 @@
             document.dispatchEvent(new CustomEvent('quote-history:viewApprovals', { detail: { groupId } }));
         }
     });
+
+    // Open approver selection modal, fetch approvers and on confirm call saveTab2 with approver
+    function openApproverSelector(stepNumber, sectionCode) {
+        // follow the same pattern used in Approval_Quote.js: return a Promise resolving to selected approver object or null
+        return new Promise(async (resolve, reject) => {
+            try {
+                const modal = document.getElementById('selectApproverModal');
+                const sel = document.getElementById('selectNextApprover');
+                const notice = document.getElementById('selectApproverNotice');
+                if (!modal || !sel) return resolve(null);
+                // clear
+                sel.innerHTML = '';
+                const placeholderOpt = document.createElement('option');
+                placeholderOpt.value = '';
+                placeholderOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.SelectPlaceholder) || '-- Chọn --';
+                sel.appendChild(placeholderOpt);
+
+                // fetch approvers from Quote controller
+                const body = { Step: stepNumber, SectionCost: sectionCode };
+                let list = [];
+                try {
+                    const resp = await fetch((window.apiBaseUrl || '') + '/Quote/GetListApprovel', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        // controller returns data (could be array or wrapper)
+                        list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+                    }
+                } catch (e) { console.warn('Failed to load approvers', e); }
+
+                if (!list || !list.length) {
+                    const emptyOpt = document.createElement('option');
+                    emptyOpt.value = '';
+                    emptyOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.NoResults) || 'Không có kết quả';
+                    sel.appendChild(emptyOpt);
+                } else {
+                    list.forEach(item => {
+                        const o = document.createElement('option');
+                        // normalize likely server keys
+                        const adid = item.chR_UserAdid || item.CHR_UserAdid || item.ADID || item.Id || item.id || '';
+                        const name = item.nvchR_UserName || item.NVCHR_UserName || item.Name || item.FullName || item.nvchR_FullName || '';
+                        o.value = adid || '';
+                        o.textContent = (name ? (name + (adid ? (' (' + adid + ')') : '')) : (adid || ''));
+                        try { o.dataset.raw = JSON.stringify(item); } catch { }
+                        sel.appendChild(o);
+                    });
+                }
+
+                // ensure modal attached to body
+                try { if (modal.parentElement !== document.body) document.body.appendChild(modal); } catch (e) { }
+                // show modal
+                try {
+                    if (window.bootstrap && bootstrap.Modal) {
+                        const bsModal = new bootstrap.Modal(modal, { backdrop: 'static' });
+                        modal._bsModal = bsModal;
+                        bsModal.show();
+                        setTimeout(() => {
+                            try { const createdBackdrop = document.querySelector('.modal-backdrop'); if (createdBackdrop) createdBackdrop.style.zIndex = '10550'; modal.style.zIndex = '10600'; } catch (e) { }
+                        }, 10);
+                    } else {
+                        const backdrop = document.createElement('div');
+                        backdrop.className = 'modal-backdrop show custom-modal-backdrop';
+                        backdrop.style.zIndex = '10550';
+                        document.body.appendChild(backdrop);
+                        modal._backdrop = backdrop;
+                        modal.style.zIndex = '10600';
+                        modal.style.display = 'block';
+                        modal.classList.add('show');
+                    }
+                } catch (e) { modal.style.display = 'block'; modal.classList.add('show'); }
+
+                const confirmBtn = document.getElementById('confirmSelectApprover');
+                function cleanup() {
+                    try { if (modal._bsModal) modal._bsModal.hide(); else { modal.style.display = 'none'; modal.classList.remove('show'); } } catch (e) { try { modal.style.display = 'none'; modal.classList.remove('show'); } catch { } }
+                    try { if (modal._backdrop) { document.body.removeChild(modal._backdrop); delete modal._backdrop; } } catch (e) { }
+                    try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) { }
+                    try { modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) { }
+                    if (notice) notice.style.display = 'none';
+                    try { modal.style.zIndex = ''; } catch (e) { }
+                }
+                function onConfirm(e) {
+                    e && e.preventDefault();
+                    const value = sel.value;
+                    if (!value) {
+                        if (notice) notice.style.display = '';
+                        return;
+                    }
+                    const raw = sel.selectedOptions && sel.selectedOptions[0] && sel.selectedOptions[0].dataset.raw;
+                    let obj = null;
+                    try { obj = raw ? JSON.parse(raw) : { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; } catch { obj = { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; }
+                    cleanup();
+                    resolve(obj);
+                }
+                function onCancel() { cleanup(); resolve(null); }
+                if (confirmBtn) confirmBtn.addEventListener('click', onConfirm);
+                try { modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) { }
+            } catch (err) { reject(err); }
+        });
+    }
+
+    async function  openApproverSelectionAndSave() {
+        try {
+            const step = 2;
+            const section = document.getElementById('searchNhaCungCap')?.value || '';
+            const selected = await this.openApproverSelector(step, section);
+            if (!selected) return; // cancelled
+            // normalize selected id field
+            const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? ''; // robust fallback
+            // fallback to value if object has none
+            const finalId = approverId || (selected.value || selected.Value || '');
+            if (!finalId) {
+                return;
+            }
+            window.__selectedNextApprover = finalId;
+        } catch (err) {
+            console.error('openApproverSelectionAndSave error', err);
+            showDialog({ message: 'Lỗi khi lấy danh sách người phê duyệt', type: 'error' });
+        }
+    }
+
     // Tìm kiếm - support both jQuery and plain DOM
     function buildSearchableDropdown(container) {
         // Accept either a jQuery object or a DOM node
@@ -655,7 +851,7 @@
 
     // Open edit modal using latest history CHR_NewData
     function openEditModal(requestId) {
-        fetch('/Quote/SearchID', {
+        fetch((window.apiBaseUrl || '') + '/Quote/SearchID', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(parseInt(requestId))
@@ -816,7 +1012,7 @@
         const dto = collectEditFormDto();
         if (!dto) return;
         // UpdateBaoGiaById expects a list
-        fetch('/Quote/UpdateBaoGiaById', {
+        fetch((window.apiBaseUrl || '') + '/Quote/UpdateBaoGiaById', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dto)
@@ -830,10 +1026,12 @@
             showDialog(T2.Notification || 'Thông báo', '<div class="text-success">' + (T2.MsgSaveSuccess || 'Đã lưu thành công.') + '</div>');
             applyFilters();
         })
-        .catch(err => {
+         .catch(err => {
+                hideEditModal();
             console.error(err);
             const T = window.i18nHistoryQuote || {};
             showDialog(T.Notification || 'Thông báo', `<div class="text-danger">${err.message}</div>`);
+
         });
     });
 

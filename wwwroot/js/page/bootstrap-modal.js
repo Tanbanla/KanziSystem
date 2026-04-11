@@ -461,6 +461,94 @@ $("#modal-20").fireModal({
         console.log(form)
     },
 });
+$("#modal-21").fireModal({
+    title: '',
+    body: $("#modal-chuyenkhoall"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '800px');
+        modal.find('.modal-dialog').css('padding-top', '200px');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+        // Form Data
+        let form_data = $(e.target).serialize();
+        console.log(form_data)
+
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+            modal.find('.modal-body').prepend('<div class="alert alert-info">Please check your browser console</div>')
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
+$("#modal-22").fireModal({
+    title: 'Lý do từ chối :',
+    body: $("#modal-reject2"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '380px');
+        modal.find('.modal-dialog').css('padding-top', '300px');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+        // Form Data
+        let form_data = $(e.target).serialize();
+        console.log(form_data)
+
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+            modal.find('.modal-body').prepend('<div class="alert alert-info">Please check your browser console</div>')
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
+$("#modal-23").fireModal({
+    title: '',
+    body: $("#modal-suadon"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '86%');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
 $('.oh-my-modal').fireModal({
   title: 'My Modal',
   body: 'This is cool plugin!'

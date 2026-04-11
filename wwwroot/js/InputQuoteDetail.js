@@ -1,4 +1,4 @@
-﻿// InputQuoteDetail.js - JavaScript cho màn hình chi tiết nhập báo giá
+// InputQuoteDetail.js - JavaScript cho màn hình chi tiết nhập báo giá
 (function () {
     'use strict';
 
@@ -66,7 +66,7 @@
     // Load detail data for the current request
     async function loadDetailData() {
         // Load request details
-        await callApi('/Quote/SearchBaoGia', {
+        await callApi((window.apiBaseUrl || '') + '/Quote/SearchBaoGia', {
             idRequestQuote: 0,
             maDon: window.inputQuoteDetailData?.maDon,
             MaHang: document.getElementById('pageInternalItemCodeSelect')?.value || '',
@@ -86,7 +86,7 @@
             .catch(err => showAlert('danger', window.i18nInputQuoteDetail.ErrorLoadingDetails + err));
 
         // Load detail items
-        callApi('/Quote/SearchInputQuote', {
+        callApi((window.apiBaseUrl || '') + '/Quote/SearchInputQuote', {
             idRequestQuote: 0,
             maDon: window.inputQuoteDetailData?.maDon,
             maVatTu: document.getElementById('pageInternalItemCodeSelect')?.value || '',
@@ -300,7 +300,7 @@
 
         const items = collectQuoteItems();
         // Call API to save
-        callApi('/Quote/UpdateQuoteDetail', items)
+        callApi((window.apiBaseUrl || '') + '/Quote/UpdateQuoteDetail', items)
             .then(data => {
                 showAlert('success', window.i18nInputQuoteDetail.DataFilteredSuccessfully);
             })
@@ -366,7 +366,7 @@
             baoGiaDetail: items
         };
         // Call API to insert
-        callApi('/Quote/InsertInputQuote', body)
+        callApi((window.apiBaseUrl || '') + '/Quote/InsertInputQuote', body)
             .then(data => {
                 showAlert('success', window.i18nInputQuoteDetail.SendMailSuccess);
                 // Reload the quote input table

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PRJ_WAREHOUSE_BIVN.Models;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
@@ -6,16 +8,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     {
         public IActionResult Approval()
         {
+         
             return View();
         }
         public IActionResult Condition()
         {
             return View();
         }
+        [AllowAnonymous]
         public IActionResult ListData()
         {
             return View();
         }
+        [AllowAnonymous]
         public IActionResult ListData_GA()
         {
             return View();

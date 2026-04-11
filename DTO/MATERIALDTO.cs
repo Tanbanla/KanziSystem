@@ -53,6 +53,8 @@ public partial class MATERIALDTO
 
     public string? Code_Suppiler { get; set; }
 
+    public string? CHR_MaterialOutSide { get; set; }
+
     public string? GetLoaiHang()
     {
         if (string.IsNullOrEmpty(Material_Code))
@@ -67,6 +69,8 @@ public partial class MATERIALDTO
                 return "C";
             case "E":
                 return "E";
+            case "I":
+                return "I";
             default:
                 return "NO LIST";
         }
@@ -90,7 +94,7 @@ public partial class MATERIALDTO
             return null;
         switch (Material_Code.Substring(0, 1))
         {
-            case "O": return "Có hình dáng dạng " + Shape + " & " + UsedFor + " & " +Purpose;
+            case "O":  return (Material_Name_VN =="" || Material_Name_VN == null)  ? "Có hình dáng dạng " + Shape + " & " + UsedFor + " & " +Purpose : Material_Name_VN;
             default:
                 return Material_Name_VN;
         }

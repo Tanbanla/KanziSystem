@@ -1,8 +1,28 @@
 
 let phongban_GA = "";
 let centercode_GA = "";
+let cost_GA = "";
 // thông tin người dùng GA
 async function getEmployeeData_GA() {
+    // lấy thông tin phòng ban
+    var ph = document.getElementById("name_dept").value;
+    const formData = new URLSearchParams();
+    formData.append('ph', ph);
+
+    fetch('/Request/_layphongban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+        .then(response => response.ok ? response.json() : Promise.reject(response))
+        .then(data => {
+            // tìm cost phòng theo like
+            cost_GA = data + "%";
+
+        })
+        .catch(err => console.error('Fetch error:', err));
+
+
     let us = document.getElementById("us").innerHTML;
     const employeeId = us.trim();
     const url = `http://172.26.248.62:8507/api/Employee/by-adid/${employeeId}`;
@@ -18,7 +38,7 @@ async function getEmployeeData_GA() {
 
         // lấy người phê duyệt theo quy trình
         let giatien = parseFloat(document.getElementById("thanhtien").value);
-        document.getElementById("tongtienpheduyet").innerHTML = Math.round(giatien, 3);
+        document.getElementById("tongtienpheduyet").innerHTML = giatien.toFixed(2);
         if (giatien < 3000) {
 
             document.getElementById("GA_ten_duthao").innerHTML = `<option>${data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
@@ -34,7 +54,7 @@ async function getEmployeeData_GA() {
             document.getElementById("GA_mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
 
             loadToCombo_GA("Section Manager", "thamtra");
-            loadToCombo_TBP_GA("General Manager", "pheduyet");
+            loadToCombo_TBP_GA("Dept Manager", "pheduyet");
         }
         if (giatien >= 10000) {
 
@@ -138,29 +158,40 @@ const createSearchData_GA = (position) => ({
     "SearchFields": ["CHR_EMPLOYEE_NAME"],
     "PageNumber": 1, "PageSize": 10,
     "Filters": [
-        { "Field": "CHR_DEPT", "Value": phongban_GA, "Operator": "=", "LogicType": "AND" },
-        { "Field": "CHR_COST_CENTER_CODE", "Value": centercode_GA, "Operator": "=", "LogicType": "AND" },
-        { "Field": "CHR_POSITION_GROUP", "Value": position, "Operator": "=", "LogicType": "AND" }
+
+        { "Field": "CHR_SECTION", "Value": cost_GA, "Operator": "like", "LogicType": "AND" },
+        { "Field": "CHR_POSITION_GROUP", "Value": position, "Operator": "=", "LogicType": "AND" },
+        { "Field": "DTM_LEAVE_DATE", "Value": "", "Operator": "is null", "LogicType": "AND" }
     ],
     "SortOptions": [{ "Field": "ID", "SortDirection": "DESC" }]
 });
 // Hàm gọi API và gán vào Combobox
 async function loadToCombo_GA(position, comboId) {
-
+ 
     const response = await fetch('http://172.26.248.62:8507/api/Employee/search-by-condition', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createSearchData_GA(position))
     });
 
-
     const result = await response.json();
+    if (result.Data.Data.length == 0) {
+        //loadToCombo_TBP_GA("Section Manager", "thamtra");
+        loadToCombo_TBP_GA("Dept Manager", "pheduyet");      
+    }
     try {
-        document.getElementById("GA_ten_" + comboId).innerHTML = `<option>${result.Data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
+        document.getElementById("GA_ten_" + comboId).innerHTML = "";
+        for (var i = 0; i < result.Data.Data.length; i++) {
+            document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+        }
+        //document.getElementById("ten_" + comboId).innerHTML = `<option>${result.Data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
         document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
         document.getElementById("GA_mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
+
     }
-    catch { }
+    catch {
+        
+    }
 }
 
 // Hàm tạo Payload (dữ liệu gửi đi)
@@ -169,7 +200,8 @@ const createSearchData_GD_GA = (position) => ({
     "SearchFields": ["CHR_EMPLOYEE_NAME"],
     "PageNumber": 1, "PageSize": 10,
     "Filters": [
-        { "Field": "CHR_POSITION", "Value": "Director", "Operator": "=", "LogicType": "AND" }
+        { "Field": "CHR_POSITION_GROUP", "Value": position, "Operator": "=", "LogicType": "AND" },    
+        { "Field": "DTM_LEAVE_DATE", "Value": "", "Operator": "is null", "LogicType": "AND" }
     ],
     "SortOptions": [{ "Field": "ID", "SortDirection": "DESC" }]
 });
@@ -182,6 +214,7 @@ async function loadToCombo_GD_GA(position, comboId) {
     });
 
     const result = await response.json();
+    document.getElementById("GA_ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
         document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
     }
@@ -195,7 +228,9 @@ const createSearchData_TBP_GA = (position) => ({
     "SearchFields": ["CHR_EMPLOYEE_NAME"],
     "PageNumber": 1, "PageSize": 10,
     "Filters": [
-        { "Field": "CHR_POSITION", "Value": "General Manager", "Operator": "=", "LogicType": "AND" }
+        { "Field": "CHR_POSITION_GROUP", "Value": position, "Operator": "=", "LogicType": "AND" },
+        { "Field": "CHR_DEPT", "Value": phongban_GA, "Operator": "=", "LogicType": "AND" },
+        { "Field": "DTM_LEAVE_DATE", "Value": "", "Operator": "is null", "LogicType": "AND" }
     ],
     "SortOptions": [{ "Field": "ID", "SortDirection": "DESC" }]
 });
@@ -207,10 +242,11 @@ async function loadToCombo_TBP_GA(position, comboId) {
         body: JSON.stringify(createSearchData_TBP_GA(position))
     });
     const result = await response.json();
+    document.getElementById("GA_ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
         document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
     }
-
+     
     document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
     document.getElementById("GA_mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
 }

@@ -20,4 +20,6 @@ public partial class TM_MASTER_MAIL
     public string? CHR_BCC { get; set; }
 
     public string? CHR_BODY { get; set; }
+
+    public int? INT_Mail { get; set; }
 }

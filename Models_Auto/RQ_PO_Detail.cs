@@ -17,6 +17,8 @@ public partial class RQ_PO_Detail
 
     public string? Phongchiuchiphi { get; set; }
 
+    public string? Brand { get; set; }
+
     public string? Loaihinhtokhai { get; set; }
 
     public int? PO_Detail_Id { get; set; }

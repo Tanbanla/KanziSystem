@@ -13,7 +13,8 @@
                         Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                         物品依頼書（共通間材・比例間材用・消耗品）　
                     </th>
-                    <th colspan="2" id="madonhang_0" style="background-color:#fff9e1; font-size:18px"></th>
+                    <th id="madonhang_0" style="background-color:#fff9e1; font-size:18px"></th>
+                    <th><button type="button" class="btn btn-primary" onclick="_dlxuatkho_trangthai('_0')">Tải xuống</button></th>
                 </tr>
                 <tr>
                     <th>
@@ -47,7 +48,7 @@
                         希望期限
                     </td>
                 </tr>
-                <tr style="height:120px; background-color : #fff9e1">
+                <tr style="height:60px; background-color : #fff9e1">
                     <td id="mbp_0"></td>
                     <td id="mpb_yc_0"></td>
                     <td id="tenphongban_0"></td>
@@ -79,6 +80,10 @@
                     </tr>
                 </thead>
                 <tbody id="load_detail_0"></tbody>
+                  <td colspan="10" class="text-center">
+                    Tổng tiền 合計
+                </td>
+                <td id="tongtientrongdon_0"></td>
             </table>
             <div class="col-12" style="font-size:11px">
                 Qui trình:
@@ -95,10 +100,13 @@
             </div>
             <br /><br />
 
-
-            <div class="float-right">
-                <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
-                <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
+            <div class="float-right" id="hiennutGA">
+               <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
+               <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-22"><i class="ion ion-android-close"></i> Từ chối </button>
+            </div>
+            <div class="float-right" id="hiennutPROD">
+               <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
+               <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
             </div>
         </div>
     </div>
@@ -111,7 +119,13 @@
         <button type="button" class="btn btn-danger float-right mt-4" onclick="_reject('_0')">Từ chối</button>
     </div>
 </form>
-
+<form class="modal-part" id="modal-reject2">
+    <div class="row">
+        <textarea class="form-control" id="reason__0"></textarea>
+        <hr />
+        <button type="button" class="btn btn-danger float-right mt-4" onclick="_reject2('_0')">Từ chối</button>
+    </div>
+</form>
 <div class="swiper mySwiper" id="modal-silder">
     <div class="swiper-wrapper" id="slider">
         <div class="swiper-slide p-3">
@@ -161,7 +175,7 @@
                         希望期限
                     </td>
                 </tr>
-                <tr style="height:120px; background-color : #fff9e1">
+                <tr style="height:60px; background-color : #fff9e1">
                     <td id="mbp"></td>
                     <td id="mpb_yc"></td>
                     <td id="tenphongban"></td>
@@ -196,7 +210,7 @@
             </table>
             <div class="float-right">
                 <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request()"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
-                <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
+                <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-22"><i class="ion ion-android-close"></i> Từ chối </button>
             </div>
         </div>
     </div>

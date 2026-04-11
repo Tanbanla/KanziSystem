@@ -43,6 +43,7 @@ public partial class BaoGia_Confirm_Name_Quotation
 
     public string? VCHR_TenRecomment { get; set; }
 
-    public string? CHR_StatusACC { get; set; }
     public string? CHR_StatusShip { get; set; }
+
+    public string? CHR_StatusACC { get; set; }
 }

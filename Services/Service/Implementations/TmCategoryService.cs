@@ -75,7 +75,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 var categories = _mapper.Map<List<TM_Category>>(categoryDTOs);
                 var addedCategories = await _repo.AddMultiAsync(categories);
-                result.Data = _mapper.Map<List<TM_CategoryDTO>>(addedCategories);
+                result.Data = categoryDTOs;
                 result.Success = true;
             }
             catch(Exception ex)

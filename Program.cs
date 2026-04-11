@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using PRJ_WAREHOUSE_BIVN.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using PRJ_WAREHOUSE_BIVN.Models_Agent;
+using System.Globalization; 
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -21,9 +22,11 @@ builder.Services.AddControllersWithViews()
     .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
     .AddDataAnnotationsLocalization();
 
+
 var costManagerConnection = builder.Configuration.GetConnectionString("CostManagerConnection");
 var workingControlConnection = builder.Configuration.GetConnectionString("WorkingControlConnection");
 var agentConnection = builder.Configuration.GetConnectionString("AgentConnection");
+var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "";
 // Add services to the container and require authentication globally by default.
 
 builder.Services.AddControllersWithViews(options =>
@@ -94,14 +97,15 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // Localization middleware
-var supportedCultures = new[] { "vi", "en", "ja" };
+var supportedCultures = new[] { "vi", "en", "ja" }; // Tạo một Culture chung dựa trên tiếng Việt nhưng ép dấu chấm làm thập phân
+var viCulture = new CultureInfo("vi-VN");
+viCulture.NumberFormat.NumberDecimalSeparator = ".";
+viCulture.NumberFormat.CurrencyDecimalSeparator = ".";
 var localizationOptions = new RequestLocalizationOptions()
     .SetDefaultCulture("vi")
     .AddSupportedCultures(supportedCultures)
-    .AddSupportedUICultures(supportedCultures);
-localizationOptions.RequestCultureProviders.Insert(0,
-    new Microsoft.AspNetCore.Localization.QueryStringRequestCultureProvider());
-app.UseRequestLocalization(localizationOptions);
+    .AddSupportedUICultures(supportedCultures); // Quan trọng: Ghi đè quy tắc định dạng số cho tất cả Culture được hỗ trợ
+     foreach (var culture in localizationOptions.SupportedCultures) {     culture.NumberFormat.NumberDecimalSeparator = ".";     culture.NumberFormat.CurrencyDecimalSeparator = "."; } app.UseRequestLocalization(localizationOptions);
 
 // Thêm middleware cho session và authentication
 app.UseSession();
@@ -119,7 +123,8 @@ app.Use(async (context, next) =>
             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             // Đưa người dùng về trang đăng nhập
-            context.Response.Redirect("/Account/Login");
+            var loginUrl = $"{baseUrl}/Account/Login";
+            context.Response.Redirect(loginUrl);
             return;
         }
     }

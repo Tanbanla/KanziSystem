@@ -1,4 +1,5 @@
 using Azure.Core;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -7,6 +8,8 @@ using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Master;
+using System.DirectoryServices.AccountManagement;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -27,12 +30,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ITmEmployeeAgentService _employeeAgentService;
         private readonly ITmUserService _tmUserService;
         private readonly IDepartmentService _departmentService;
+        private readonly IConfiguration _configuration;
 
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
             ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
-            IBaoGiaNccCategoryService baoGiaNccCategoryService, IDepartmentService departmentService
+            IBaoGiaNccCategoryService baoGiaNccCategoryService, IDepartmentService departmentService, IConfiguration configuration
             , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService, ITmEmployeeAgentService employeeAgentService, ITmUserService tmUserService)
         {
             _approverService = approverService;
@@ -48,6 +52,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _employeeAgentService = employeeAgentService;
             _tmUserService = tmUserService;
             _departmentService = departmentService;
+            _configuration = configuration;
         }
 
         public IActionResult Masters()
@@ -96,6 +101,46 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             dt = dt.Where(x => x.CHR_FACTORY == fac && x.CHR_DEPT_USE == sec).ToList();
             return Json(dt);
         }
+        public JsonResult load_ma(string us)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+
+            string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
+            List<string> materials = MST_INVENTORY._getname_material(khoi, "");
+            var checklistData = new List<object>();
+
+            foreach (var item in materials)
+            {
+                checklistData.Add(new
+                {
+                  
+                    Ma = item.Split(":")[0],
+                    Ten = item.Split(":")[1]
+                });
+            }
+            return Json(checklistData);
+        }
+        public JsonResult load_kho_theo_ma(string manguyenlieu)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var kho = db.GET_DATA_FROM_SQL("select Kho, Hientai from [KHO] where [MaNguyenLieu] = '" + manguyenlieu + "'");
+            var kh = new List<object>();
+            for (int i = 0; i < kho.Rows.Count; i++)
+            {
+                kh.Add(new
+                {
+                    Ma = kho.Rows[i]["Kho"].ToString()!,
+                    Ten = kho.Rows[i]["Hientai"].ToString()!
+                });
+            }
+            return Json(kh);
+        }
+        //public JsonResult load_soluonghientai(string manguyenlieu, string us, string khochuyen)
+        //{
+        //    SQL_Connect_DB20 db = new SQL_Connect_DB20();
+        //    string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
+        //    var sl = db.ReturnString("SELECT [Hientai] FROM [KHO] WHERE [MaNguyenLieu] = '" + manguyenlieu) + "' AND [Group_Code] = '" + khoi + "' AND [Kho] = '" + khochuyen + "'");
+        //}
         public PartialViewResult _modal()
         {
             return PartialView();
@@ -106,6 +151,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var vm = await LoadDataSendApprover();
             var nhomViTris = await GetNhomViTriList();
             vm.NhomViTris = nhomViTris;
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             return View(vm);
 
         }
@@ -114,7 +160,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var vm = new SendApproverVM();
             var sectionsTask = _tmSectionService.GetAllSectionsAsync();
-            var stepsTask = _baoGiaStepService.GetStepsApproverAsync();
+            var stepsTask = _baoGiaStepService.GetAll();
 
             await Task.WhenAll(sectionsTask, stepsTask);
             // Phòng ban
@@ -131,7 +177,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var stepsResp = stepsTask.Result;
             try
             {
-                vm.baoGiaSteps = stepsResp.Success ? stepsResp.Data : new List<BaoGia_StepDTO>();
+                vm.baoGiaSteps = stepsResp.Success ? stepsResp.Data.OrderBy(c=>c.INT_StepNumber).ToList() : new List<BaoGia_StepDTO>();
             }
             catch (Exception ex)
             {
@@ -211,6 +257,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // MARK: Quản lý thông tin nhà cung cấp
         public async Task<IActionResult> SupplierMana()
         {
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             return View();
         }
         // Lấy danh sách chủng loại hàng
@@ -475,6 +522,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("File không có dữ liệu hợp lệ");
                 }
                 await _materialService.UpdateListThongTinNoList(items);
+                //await _materialService.UpdateListThongTin(items);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -764,7 +812,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // MARK: Màn hình quản lý chủng loại hàng
         public async Task<IActionResult> Category()
         {
-
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             return View();
         }
         // API tìm kiếm chủng loại hàng theo tên
@@ -840,7 +888,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("File không có dữ liệu hợp lệ");
                 }
-                // Giả sử service có AddListCategory
+                //service có AddListCategory
                 var result = await _tmCategoryService.AddListCategory(categories);
                 if (!result.Success)
                 {
@@ -906,9 +954,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var edit = Models.MST_WAREHOUSE.edit_tainhap(id, soluong, donvi, giatien, kho);
             return Json(edit);
         }
-        public JsonResult _truyxuatlylich(string malinhkien)
+        public JsonResult _truyxuatlylich(string malinhkien, string kho)
         {
-            var log = Models.KHO_NHAPXUAT._truyxuat(malinhkien);
+            var log = Models.KHO_NHAPXUAT._truyxuat(malinhkien,kho);
             return Json(log);
         }
         // Nhp file dang cho cac user tu file
@@ -929,8 +977,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
                 var ws = workbook.Worksheets.FirstOrDefault();
                 if (ws == null) return BadRequest("Không tìm thấy worksheet");
-                // Dữ liệu bắt đầu từ dòng 1
-                int startRow = 1;
+                // Dữ liệu bắt đầu từ dòng 2
+                int startRow = 2;
                 int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
                 for (int r = startRow; r <= lastRow; r++)
                 {
@@ -962,7 +1010,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var dto = new BaoGia_Master_Approver_Send_Mail
                             {
                                 ID = 0,
-                                ID_BaoGiaStep = 2,
+                                ID_BaoGiaStep = 1,
                                 CHR_UserAdid = userInfo.Data.CHR_EMPLOYEE_ADID,
                                 CHR_CodeSection = item.Cost_Center,
                                 CHR_NameSection = "",
@@ -1022,8 +1070,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         break;
                     }
                     // Map theo thứ tự cột
-                    var seticon = ws.Cell(r, 1).GetString().Trim();
-                    var mailUser = ws.Cell(r, 2).GetString().Trim();
+                    var seticon = ws.Cell(r, 4).GetString().Trim();
+                    var mailUser = ws.Cell(r, 3).GetString().Trim();
                     // lay thong tin user
                     var userInfo = await _employeeAgentService.GetInforEmployeeByMail(mailUser);
                     if (userInfo == null || !userInfo.Success || userInfo.Data == null)
@@ -1119,6 +1167,44 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
+        // Xuất dữ liệu master nhà cung cấp
+        [HttpGet]
+        public async Task<IActionResult> ExportExcelMasterVendor()
+        {
+            try
+            {
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+
+
+
+
+
+
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"ExportMasterVendor_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

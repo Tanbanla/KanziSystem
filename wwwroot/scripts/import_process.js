@@ -78,7 +78,7 @@ function renderUserTable(data) {
     const tbody = document.getElementById("show_kho");
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(vd => {
-        const btn = `<td class="text-center"><button class=" btn btn-outline-danger" onclick="_log_material('${vd.maNguyenLieu}')"><i class="ion ion-ios-eye-outline"></i> Xem lịch sử</button></td>
+        const btn = `<td class="text-center"><button class=" btn btn-outline-danger" onclick="_log_material('${vd.maNguyenLieu}','${ vd.kho }')"><i class="ion ion-ios-eye-outline"></i> Xem lịch sử</button></td>
                      <td class="text-center"><button class=" btn btn-outline-success" onclick="_modal11('${vd.maNguyenLieu}','${vd.kho}','${vd.hientai}','${vd.material_Name}','${vd.group_Code}')"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
         return `<tr>
                     <td>${vd.maNguyenLieu}</td>
@@ -174,7 +174,7 @@ function initSelect2($element) {
 
 // Cập nhật lại hàm load trong import_process.js hoặc tại đây
 async function _load_name_inv(group_code) {
-    const params = new URLSearchParams({ group_code: group_code });
+    const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
     fetch('/Import/_load_material', {
         method: 'POST',
         body: params
@@ -184,11 +184,12 @@ async function _load_name_inv(group_code) {
             if (group_code == "GA") {
                 document.getElementById("modal-20").style.display = '';
                 document.getElementById("modal-6").style.display = 'none';
-              
+               
             }
             if (group_code == "PROD") {
                 document.getElementById("modal-20").style.display = 'none';
                 document.getElementById("modal-6").style.display = '';
+               
             }
             globalMaterialData = data; // Lưu lại để dùng sau
             const $allSelects = $('.select2');
@@ -385,10 +386,10 @@ async function _WH() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-async function _log_material(malinhkien) {
+async function _log_material(malinhkien, kho) {
 
     document.getElementById("modal-17").click();
-    const params = new URLSearchParams({ malinhkien: malinhkien });
+    const params = new URLSearchParams({ malinhkien: malinhkien, kho: kho });
     fetch('/Master/_truyxuatlylich', {
         method: 'POST',
         headers: {
@@ -450,10 +451,10 @@ async function _log_material(malinhkien) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-
 //Chuẩn bị dữ liệu và download master
 async function UploadFileFormat() {
     const fileInput = document.getElementById('mstFile');
+    const us = document.getElementById('us').innerHTML;
     const file = fileInput.files[0];
     if (!file) {
         alert("Vui lòng chọn một file Excel trước!");
@@ -462,6 +463,7 @@ async function UploadFileFormat() {
     console.log("Đang tải file: " + file.name);
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("us", us);
     try {
         const response = await fetch('/Import/ImportFileExcel', {
             method: 'POST',
@@ -477,7 +479,7 @@ async function UploadFileFormat() {
         table.innerHTML = "";
         data.forEach((item, index) => {
             let data = `<tr class="input-row">`;
-            data += `<td class="row-number text-center fw-bold">${item.id}</td>`;
+            data += `<td class="row-number text-center fw-bold">${index+1}</td>`;
             data += `<td>`;
             data += `<select class="form-control select2 tenhang" onchange="_load_material(this.value, this.id)" id="tenhang_${index}">`;
             data += `<option selected>${item.nameMaterial}</option>`;
@@ -488,9 +490,9 @@ async function UploadFileFormat() {
             data += `<td><input type="text" class="form-control tk" id="tk_${index}" readonly value="${item.stock}"></td>`;
             data += `<td><input type="number" class="form-control sl" id="sl_${index}" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)" value="${item.quantity}"></td>`;
             data += `<td><input type="text" class="form-control dv" id="dv_${index}" readonly value="${item.unit}"></td>`;
-            data += `<td><input type="number" class="form-control dg" id="dg_${index}" readonly value="${item.price}"></td>`;
+            data += `<td><input type="number" class="form-control dg" id="dg_${index}" readonly value="${item.price.replace(',', '.') }"></td>`;
             data += `<td><input type="text" class="form-control nt" id="nt_${index}" readonly value="${item.typePay}"></td>`;
-            data += `<td><input type="text" class="form-control tcp" id="tcp_${index}" readonly value="${item.deptCost}"></td>`;
+            data += `<td><input type="text" class="form-control tcp" id="tcp_${index}" readonly value="${(parseFloat(item.price.replace(',', '.')) * parseFloat(item.quantity)) }"></td>`;
             data += `<td><input type="text" class="form-control md" id="md_${index}" value="${item.purpose}"></td>`;
             data += `<td>`;
             data += `<select class="form-control pcp" onchange="" id="pcp_${index}"><option selected>${item.deptCost}</option></select>`;
@@ -505,8 +507,45 @@ async function UploadFileFormat() {
             data += `</tr>`;
             table.innerHTML += data;
         });
+        tinhTongTatCa();
     } catch (error) {
         console.error(error);
         alert("Lỗi: " + error.message);
     }
+}
+
+async function chuyenkhoo() {
+    
+    var malinhkien = document.getElementById('malkchuyen').value.trim();
+    var khochuyen = document.getElementById('khochuyen').value;
+    var soluonghientai = document.getElementById('soluongkho').value;
+    var khonhan = document.getElementById('khonhan').value;
+    var vitri = document.getElementById('vitrichuyenkho').value;
+    var soluongchuyen = document.getElementById('soluongchuyen').value;
+    var ngaychuyen = document.getElementById('ngaychuyen').value;
+    var us = document.getElementById('us').innerHTML
+      
+   
+    const params = new URLSearchParams();
+    params.append('malinhkien', malinhkien);
+    params.append('khochuyen', khochuyen);
+    params.append('soluonghientai', soluonghientai);
+    params.append('khonhan', khonhan);
+    params.append('vitri', vitri);
+    params.append('soluongchuyen', soluongchuyen);
+    params.append('ngaychuyen', ngaychuyen);
+    params.append('us', us);
+
+    fetch('/Import/chuyenkho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert(data);
+            _load_xuatkho();
+        })
+        .catch(error => console.error('Error:', error));
+
 }

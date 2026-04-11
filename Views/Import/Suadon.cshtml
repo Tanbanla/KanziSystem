@@ -1,0 +1,764 @@
+@using PRJ_WAREHOUSE_BIVN.Language
+@model IEnumerable<PRJ_WAREHOUSE_BIVN.Models.REQUEST_DETAIL>
+@{
+    ViewData["Title"] = "Sửa phiếu yêu cầu xuất kho";
+}
+<link href="~/modules/select2/select.css" rel="stylesheet" />
+<style>
+    .card .card-header .form-control {
+        height: 42px;
+        font-size: 13px;
+        border-radius: 2px;
+    }
+    /* Nhắm trực tiếp vào phần hiển thị chữ của Select2 */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        white-space: normal !important; /* Cho phép xuống dòng */
+        word-wrap: break-word !important; /* Ngắt từ nếu quá dài */
+        line-height: 1.4 !important; /* Tạo khoảng cách dòng */
+        display: block !important; /* Chuyển từ inline sang block */
+    }
+    /* Tự động tăng chiều cao ô khi chữ xuống dòng */
+    .select2-container .select2-selection--single {
+        height: auto !important;
+        min-height: 38px !important; /* Độ cao mặc định của Bootstrap */
+        display: flex !important;
+        align-items: center;
+    }
+    /* Điều chỉnh vị trí mũi tên để không bị lệch khi ô cao lên */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100% !important;
+        top: 0 !important;
+    }
+
+    .selectgroup-input:focus + .selectgroup-button, .selectgroup-input:checked + .selectgroup-button {
+        background-color: mediumblue
+    }
+
+    .selectgroup-input:focus + .selectgroup-button-gap, .selectgroup-input:checked + .selectgroup-button-gap {
+        background-color: red;
+        color: white
+    }
+
+    .selectgroup-button-gap {
+        background-color: #fdfdff;
+        border-color: #e4e6fc;
+        border-width: 1px;
+        border-style: solid;
+        display: block;
+        text-align: center;
+        padding: 0 1rem;
+        height: 42px;
+        position: relative;
+        cursor: pointer;
+        border-radius: 3px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        font-size: 13px;
+        min-width: 2.375rem;
+        line-height: 36px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+</style>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="form-row">
+                    <p hidden id="idrq">@ViewBag.MasterData</p>
+                    <div class="form-group col-md-1">
+                        <label for="inputEmail4"> @Languages.Khoi :</label>
+                        <input type="text" class="form-control" id="group_code" readonly>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>@Languages.mayeucau</label>
+                        <input type="text" class="form-control" value="" id="madon" readonly>
+                    </div>
+                    <div class="form-group col-md-2" hidden>
+                        <label>@Languages.Phongban</label>
+                        <input type="text" class="form-control" id="name_dept" readonly>
+                    </div>
+                    <div class="form-group col-md-2" hidden>
+                        <label>@Languages.tenphongyeucau</label>
+                        <input type="text" class="form-control" id="dept" readonly required>
+                    </div>
+                    <div class="form-group col-md-2" hidden>
+                        <label>@Languages.Bophan</label>
+                        <input type="text" class="form-control" id="secs" readonly required>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label>@Languages.phongchiuphi</label>
+                        <input type="text" class="form-control" id="cost_center" readonly>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label>@Languages.vitri</label>
+                        <input type="text" class="form-control" id="place" style="background-color:#ffff0029">
+                    </div>                  
+                    <div class="form-group">
+                        <label class="d-block"><b class="text-danger">@Languages.dathang :</b></label>
+                        <div class="form-group row">
+                            <div class="col-lg-12 col-md-12">
+                                <div class="selectgroup w-100">
+                                    <label class="selectgroup-item">
+                                        <input type="radio" name="value" value="0" class="selectgroup-input" checked>
+                                        <span class="selectgroup-button">@Languages.Thongthuong</span>
+                                    </label>
+                                    <label class="selectgroup-item">
+                                        <input type="radio" name="value" value="1" class="selectgroup-input" id="gap">
+                                        <span class="selectgroup-button-gap"><b>@Languages.Gap</b></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label for="inputAddress">@Languages.loaichiphi</label>
+                        <input type="text" class="form-control" id="loaichiphi" readonly />
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label>@Languages.Ngayyeucau</label>
+                        <input type="text" class="form-control" readonly id="ngayyeucau" />
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label class="text-danger">@Languages.thoihanmuonnhan</label>
+                        <input type="text" class="form-control" id="thoihan" style="background-color:#ffff0029" required />
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label>@Languages.loaihang </label>
+                        <input type="text" id="typee" class="form-control" readonly />
+                      
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label>@Languages.loaihinhtokhai </label>
+                        <input type="text" class="form-control" value="Loại khác" readonly />
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="inputCity">@Languages.tygia :  </label> <code style="float:right"><b> USD ↔ VND</b></code>
+                        <input type="text" class="form-control" id="rate" readonly>
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label for="inputCity">@Languages.thanhtien  </label> <code style="float:right"><b>USD</b></code>
+                        <input type="text" class="form-control" id="thanhtien" value="0" readonly>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="inputCity">Chọn file  </label> <code style="float:right"><b></b></code>
+                        <input id="mstFile" accept=".xlsx" type="file" class="form-control" />
+                    </div>
+                    <div class="form-group col-md-1">
+                        <label for="inputCity"><a href="/Import/ExportToExcel"> File mẫu excel </a></label> <code style="float:right"><b></b></code>
+                        <button id="btnUpload" onclick="UploadFileFormat()" type="button" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Import file</button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle" id="dynamic-table">
+                            <thead>
+                                <tr style="border-top:1px solid #e9e9e9">
+                                    <td colspan="15"><input type="checkbox" onclick="check_mucdichkhac()" /> &nbsp; Mục đích khác </td>
+                                </tr>
+                                <tr class="bg-primary text-white text-center">
+                                    <th style="width: 50px;">No.</th>
+                                    <th width="380px">@Languages.TenNVL</th>
+                                    <th width="150px">@Languages.Maketoan</th>
+                                    <th width="80">@Languages.soluong</th>
+                                    <th width="150px">@Languages.Donvi</th>
+                                    <th>@Languages.Giatien</th>
+                                    <th width="70px">@Languages.Ngoaite</th>
+                                    <th>@Languages.tongdon</th>
+                                    <th>@Languages.Mucdich</th>
+                                    <th>@Languages.phongchiuphi</th>
+                                    <th>@Languages.vitri</th>
+                                    <th>@Languages.Ghichu</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                          
+                            <tbody id="lstMaterial">
+                                @foreach (var item in Model)
+                                {
+                                    <tr class="input-row">
+                                        <td class="row-number text-center fw-bold">@item.Id_RequestDetail</td>
+                                        <td>
+                                            <select class="form-control select2 tenhang" id="tenhang_1" onchange="_load_material_1(this.value, this.id)">
+                                                <option>@item.Material_Name</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control stk" id="stk_1">
+                                                <option>@item.Account_Code</option>
+                                            </select> 
+                                        </td>                                      
+                                        <td><input type="number" class="form-control sl" value="@item.Amount"  id="sl_1" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)"></td>
+                                        <td><input type="text" class="form-control dv" id="dv_1" value="@item.Unit" readonly></td>
+                                        <td><input type="number" class="form-control dg" id="dg_1" value="@item.Price" readonly></td>
+                                        <td><input type="text" class="form-control nt" id="nt_1" value="@item.Currency" readonly></td>
+                                        <td><input type="text" class="form-control tcp" id="tcp_1" value="@item.Total_exchange" readonly></td>
+                                        <td><input type="text" class="form-control md" id="md_1" value="@item.Aim"></td>
+                                        <td>            
+                                            <select class="form-control pcp" id="pcp_1">
+                                                <option>@item.Phongchiuchiphi</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control vt" id="vt_1" value="@item.Vitri"></td>
+                                        <td><input type="text" class="form-control" id="gc_1" value="@item.Poisition"></td>
+                                        <td>
+                                            <button type="button" id="xoa_1" onclick="_xoadong('@item.Id_RequestDetail')" class="btn btn-outline-danger btn-remove">&times;</button>
+                                        </td>                                      
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button>
+                </div>
+             
+                <button class="btn btn-info float-right" onclick="_luu()"><i class="fa fa-save"></i> Sửa đơn</button>
+                <br />
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_modal", "Import")
+<script src="~/modules/select2/jquet3.6.0.min.js"></script>
+<script src="~/modules/select2/select2.js"></script>
+<script src="~/scripts/import_process.js"></script>
+<script src="~/scripts/request.js"></script>
+<script src="~/scripts/get_api.js"></script>
+<script src="~/scripts/get_api_ga.js"></script>
+<script>
+    window.onload = function(){
+        _load_rate();
+        _load_phongchiuphi_1();
+        _load_account_1();
+        _load_request();
+    }
+        function check_mucdichkhac() {
+        // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
+        const lstMaterial = document.getElementById("lstMaterial");
+        if (lstMaterial) lstMaterial.innerHTML = "";
+
+        // 2. Định nghĩa dòng mẫu mới (Cột STK có thể thay đổi tùy ý ở đây)
+        const tbody = document.querySelector('#dynamic-table tbody');
+        const templateRow = `
+            <tr class="input-row">
+                <td class="row-number text-center fw-bold">1</td>
+                <td>
+                    <select class="form-control select2 tenhang" id="tenhang_1">
+                        <option value=""></option>
+                    </select>
+                </td>
+                <td>
+                    <select id="stk_1" class="form-control stk" ></select>
+                </td>
+
+                <td><input type="number" class="form-control sl" id="sl_1" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)"></td>
+                <td><input type="text" class="form-control dv" id="dv_1" readonly></td>
+                <td><input type="number" class="form-control dg" id="dg_1" readonly></td>
+                <td><input type="text" class="form-control nt" id="nt_1" readonly></td>
+                <td><input type="text" class="form-control tcp" id="tcp_1" readonly></td>
+                <td><input type="text" class="form-control md" id="md_1"></td>
+                <td><select class="form-control pcp" id="pcp_1"></select></td>
+                <td><input type="text" class="form-control vt" id="vt_1"></td>
+                <td><input type="text" class="form-control" id="gc_1"></td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>
+                </td>
+            </tr>`;
+
+        // 3. Thay thế nội dung bảng
+        tbody.innerHTML = templateRow;
+        _load_phongchiuphi_1();
+        _load_account_1();
+        // 5. Tính toán lại tổng tiền (về 0)
+        tinhTongTatCa();
+    }
+    //     function reinitSelect2(rowId) {
+    //     const $select = $(`#tenhang_${rowId}`);
+
+    //     // Khởi tạo Select2 với dữ liệu từ Server
+    //     $select.select2({
+    //         width: '100%',
+    //         ajax: {
+    //             url: '/YourController/GetMaterials', // Đường dẫn lấy dữ liệu theo mục đích mới
+    //             dataType: 'json',
+    //             data: function (params) {
+    //                 return {
+    //                     searchTerm: params.term,
+    //                     mucDich: document.getElementById("mucdich_id").value // Gửi kèm điều kiện lọc
+    //                 };
+    //             },
+    //             processResults: function (data) {
+    //                 return { results: data };
+    //             }
+    //         }
+    //     });
+
+    //     // Khởi tạo select pcp nếu cần
+    //     $(`#pcp_${rowId}`).select2({ width: '100%' });
+    // }
+        function updateRowNumbers() {
+        const rows = document.querySelectorAll('#dynamic-table tbody tr');
+        rows.forEach((row, index) => {
+            const i = index + 1; // Số thứ tự mới
+
+            // 1. Cập nhật số hiển thị
+            const stt = row.querySelector('.row-number');
+            if (stt) stt.innerText = i;
+
+            // 2. Danh sách các ID cần cập nhật theo đúng hậu tố _i
+            const idList = ['tenhang', 'stk', 'sl', 'dv', 'dg', 'nt', 'tcp', 'md', 'pcp', 'vt', 'gc'];
+
+            idList.forEach(name => {
+                const el = row.querySelector(`[id^="${name}_"]`); // Tìm phần tử có id bắt đầu bằng name_
+                if (el) {
+                    el.id = `${name}_${i}`;
+
+                    // Cập nhật hàm sự kiện inline nếu có
+                    if (name === 'tenhang') {
+                        el.setAttribute('onchange', `_load_material_1(this.value, this.id)`);
+                    }
+                    if (name === 'sl') {
+                        el.setAttribute('onblur', `caculator(this.id)`);
+                        el.setAttribute('onchange', `caculator(this.id)`);
+                    }
+                }
+            });
+        });
+    }
+         // Đảm bảo dùng jQuery chính xác
+        (function($) {
+        "use strict";
+
+        document.getElementById('btn-add-row').addEventListener('click', function() {
+            const tbody = document.querySelector('#dynamic-table tbody');
+            const firstRow = tbody.querySelector('.input-row');
+
+            // 1. Clone dòng đầu tiên
+            const newRow = firstRow.cloneNode(true);
+            const lastRow = tbody.querySelector('.input-row:last-child');
+            // Xóa bỏ container giao diện của Select2 đã bị clone theo
+            //$(newRow).find('.select2-container').remove();
+
+            if (lastRow) {
+            const lastPcpValue = $(lastRow).find('.pcp').val();
+            $(newRow).find('.pcp').val(lastPcpValue);
+
+             const lastmdValue = $(lastRow).find('.md').val();
+            $(newRow).find('.md').val(lastmdValue);
+        }
+
+            //Tìm tất cả select và input trong dòng mới
+            const $elements = $(newRow).find('select, input, textarea');
+              $elements.each(function() {
+                const $el = $(this);
+                const id = $el.attr('id') || '';
+                if (id.includes('stk_') || id.includes('sl_' )|| id.includes('dv_' )|| id.includes('dg_' )|| id.includes('nt_' )  || id.includes('tcp_' )) {
+                // Bạn có thể xóa giá trị (đã làm ở trên)
+                    $el.val('');
+                }
+            });
+
+            // 3. Hiển thị nút xóa cho dòng mới
+            const removeBtn = newRow.querySelector('.btn-remove');
+            if (removeBtn) {
+                removeBtn.style.display = 'inline-block';
+            }
+            // 4. Thêm dòng mới vào bảng
+            tbody.appendChild(newRow);
+            // 5. Cập nhật STT và ID trước (để Select2 nhận diện ID mới duy nhất)
+            updateRowNumbers();
+            // 6. Khởi tạo lại Select2 RIÊNG cho dòng vừa mới thêm
+            if ($.fn.select2) {
+                $(newRow).find('.select2, .pcp').select2({
+                    width: '100%',
+                });
+            }
+        });
+
+    })(jQuery);
+        // Xử lý xóa dòng
+        document.querySelector('#dynamic-table').addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('btn-remove')) {
+                const row = e.target.closest('tr');
+                const rowCount = document.querySelectorAll('#dynamic-table tbody tr').length;
+                if (rowCount > 1) {
+                    row.remove();
+                    updateRowNumbers(); // Cập nhật lại số thứ tự sau khi xóa
+                    tinhTongTatCa();
+                }
+            }
+        });
+
+    function caculator(id) {
+        // Lấy số thứ tự dòng từ ID (ví dụ: sl_1 -> 1)
+        var idd = id.split('_')[1];
+
+        // Lấy giá trị đơn giá và số lượng
+        var pricee = document.getElementById("dg_" + idd).value || 0;
+        var sl = document.getElementById("sl_" + idd).value || 0;
+
+        // Tính thành tiền cho dòng hiện tại (TCP)
+        var tcpValue = parseFloat(pricee) * parseFloat(sl);
+        // Gán giá trị vào ô TCP (định dạng số thực hoặc 0 nếu NaN)
+        document.getElementById("tcp_" + idd).value = (isNaN(tcpValue) ? 0 : tcpValue).toFixed(2);
+
+        // Gọi hàm tính tổng tất cả các dòng
+        tinhTongTatCa();
+    }
+
+    function tinhTongTatCa() {
+        let tongMoi = 0;
+        const allTcp = document.querySelectorAll('.tcp');
+
+        allTcp.forEach(input => {
+            let val = parseFloat(input.value) || 0;
+            tongMoi += val;
+        });
+
+        // If group_code indicates GA, apply rate
+        const groupCode = (document.getElementById("group_code") && document.getElementById("group_code").value) || '';
+        if (groupCode === "GA") {
+            var tigia = parseFloat((document.getElementById("rate") && document.getElementById("rate").value) || 1) || 1;
+            tongMoi = tongMoi / tigia;
+        }
+
+        const displayTotal = document.getElementById("thanhtien");
+        if (displayTotal) {
+            // Hiển thị số có dấu phẩy ngăn cách hàng nghìn
+            displayTotal.value = tongMoi.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        }
+    }
+    function _load_phongchiuphi_1() {
+    fetch('/Request/_get_phongchiuphi', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const selectElements = document.querySelectorAll('.pcp'); // Khuyên dùng querySelectorAll
+            selectElements.forEach(select => {
+                // Xóa trắng hoặc giữ lại option mặc định trước khi gán
+                   
+                data.forEach(item => {
+                    select.innerHTML += `<option value="${item}">${item}</option>`;
+                });
+            });
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+    function _load_account_1() {
+
+    fetch('/Import/_load_account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then(data => {
+            console.log(data);
+               
+            for (var i = 0; i < data.length; i++) {
+                document.getElementById("stk_1").innerHTML += `<option>${data[i]}</option>`;
+            }
+
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+    function _load_request(){
+        var iD_REQUEST = document.getElementById("idrq").innerHTML;
+
+        var lcp = "";
+        var gr = "";
+        const params = new URLSearchParams();
+            params.append('iD_REQUEST', iD_REQUEST);
+  
+            fetch('/Import/request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('request data', data);
+                document.getElementById("group_code").value = data[0].group_Code;
+                document.getElementById("madon").value = data[0].code_Request;
+                document.getElementById("name_dept").value = data[0].cost_Center;
+                document.getElementById("ngayyeucau").value = data[0].request_Date.split(' ')[0];
+                document.getElementById("thoihan").value = new Date(data[0].request_Date).toISOString().split('T')[0];
+                document.getElementById("typee").value = data[0].typee;
+                document.getElementById("thanhtien").value = data[0].total;
+                document.getElementById("loaichiphi").value = data[0].declaration;
+                document.getElementById("cost_center").value = data[0].cost_Center;
+                lcp = data[0].declaration;
+                gr = data[0].group_Code;
+                if (data[0].urgent == true) {
+                    document.getElementById("gap").checked = true;
+                }
+
+                // Gọi _load_material sau khi gr và lcp đã có giá trị
+                $.ajax({
+                    url: '/Import/_load_material',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: {
+                        group_code: gr,
+                        loaichiphi: lcp
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        for(var i = 0 ; i < response.length; i++){
+                                    document.getElementById("tenhang_1").innerHTML += `<option>${response[i]}</option>`;
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error('AJAX error', status, err);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+  
+    async function UploadFileFormat() {
+    const fileInput = document.getElementById('mstFile');
+    const us = document.getElementById('us').innerHTML;
+    const file = fileInput.files[0];
+    if (!file) {
+        alert("Vui lòng chọn một file Excel trước!");
+        return;
+    }
+    console.log("Đang tải file: " + file.name);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("us", us);
+    try {
+        const response = await fetch('/Import/ImportFileExcel', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("Có lỗi xảy ra khi upload!");
+        }
+        const data = await response.json();
+        console.log(data);
+        const table = document.getElementById('lstMaterial');
+        table.innerHTML = "";
+        data.forEach((item, index) => {
+            let data = `<tr class="input-row">`;
+            data += `<td class="row-number text-center fw-bold">${index+1}</td>`;
+            data += `<td>`;
+            data += `<select class="form-control select2 tenhang" onchange="_load_material_1(this.value, this.id)" id="tenhang_${index}">`;
+            data += `<option selected>${item.nameMaterial}</option>`;
+            data += `</select>`;
+            data += `</td>`;
+            data += `<td><input type="text" class="form-control stk" id="stk_${index}" readonly value="${item.costKT}"></td>`;
+            data += `<td><input type="number" class="form-control sl" id="sl_${index}" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)" value="${item.quantity}"></td>`;
+            data += `<td><input type="text" class="form-control dv" id="dv_${index}" readonly value="${item.unit}"></td>`;
+            data += `<td><input type="number" class="form-control dg" id="dg_${index}" readonly value="${item.price.replace(',', '.') }"></td>`;
+            data += `<td><input type="text" class="form-control nt" id="nt_${index}" readonly value="${item.typePay}"></td>`;
+            data += `<td><input type="text" class="form-control tcp" id="tcp_${index}" readonly value="${(parseFloat(item.price.replace(',', '.')) * parseFloat(item.quantity)) }"></td>`;
+            data += `<td><input type="text" class="form-control md" id="md_${index}" value="${item.purpose}"></td>`;
+            data += `<td>`;
+            data += `<select class="form-control pcp" onchange="" id="pcp_${index}"><option selected>${item.deptCost}</option></select>`;
+            data += `</td>`;
+            data += `<td><input type="text" class="form-control vt" id="vt_${index}" value="${item.location}"></td>`;
+            data += `<td><input type="text" class="form-control" id="gc_${index}" value="${item.notetake}"></td>`;
+            data += `<td>`;
+            data += `<button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>`;
+            data += `</td>`;
+            data += `</tr>`;
+            table.innerHTML += data;
+        });
+        tinhTongTatCa();
+    } catch (error) {
+        console.error(error);
+        alert("Lỗi: " + error.message);
+    }
+}
+
+    async function _load_material_1(Material_Code, id) {
+
+    let idd = id.split('_')[1];
+    var groupcode = document.getElementById("group_code").value;
+    const params = new URLSearchParams();
+    params.append('Material_Code', Material_Code);
+    params.append('Material_Name_VN', '');
+    params.append('Account_Name_VN', '');
+    params.append('Group_Code', groupcode);
+
+    fetch('/Import/_info_material', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            console.log(id);
+            document.getElementById("stk_" + idd).value = data[0].account_Code + ":" + data[0].account_Name_EN;
+            if (data[0].unit_Note == "" || data[0].unit_Note == "-") {
+                document.getElementById("dv_" + idd).value = data[0].unit;
+            }
+            else {
+                document.getElementById("dv_" + idd).value = data[0].unit + "(" + data[0].unit_Note + ")";
+            }
+            document.getElementById("dg_" + idd).value = data[0].price;
+            document.getElementById("nt_" + idd).value = data[0].currency;
+            if (document.getElementById("sl_" + idd).value != "") {
+                document.getElementById("tcp_" + idd).value = parseFloat(data[0].price) * parseFloat(document.getElementById("sl_" + idd).value);
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+
+    function _luu(){
+    var x = confirm("Bạn có muốn sửa đơn không ?");
+    if(x) {
+        let dataList = [];
+        // Chọn tất cả các dòng có class 'input-row'
+        const rows = document.querySelectorAll('.input-row');
+        rows.forEach((row) => {
+            // Safely query elements inside row
+            const tenhangEl = row.querySelector('.tenhang');
+            const stkEl = row.querySelector('.stk');
+            const slEl = row.querySelector('.sl');
+            const dvEl = row.querySelector('.dv');
+            const dgEl = row.querySelector('.dg');
+            const ntEl = row.querySelector('.nt');
+            const tcpEl = row.querySelector('.tcp');
+            const mdEl = row.querySelector('.md');
+            const pcpEl = row.querySelector('.pcp');
+            const vtEl = row.querySelector('.vt');
+            const gcEl = row.querySelector('.gc');
+
+            // Helper to safely split value into two parts
+            const splitPair = (val) => {
+                const s = (val || '').toString().split(':');
+                return [s[0] || '', s.slice(1).join(':') || ''];
+            };
+
+            const [materialCode, materialName] = splitPair(tenhangEl ? tenhangEl.value : '');
+            const [accountCode, accountName] = splitPair(stkEl ? stkEl.value : '');
+
+            // Lấy dữ liệu từ các phần tử bên trong dòng hiện tại
+            let rowData = {
+                    Material_Code: materialCode,
+                    Material_Name: materialName,
+                    Account_Code: accountCode,
+                    Account_Name: accountName,
+                    Amount: slEl ? slEl.value : 0,
+                    Unit: dvEl ? dvEl.value : '',
+                    Price: dgEl ? parseFloat(dgEl.value) || 0 : 0,
+                    Currency: ntEl ? ntEl.value : '',
+                    Total_exchange: tcpEl ? parseFloat(tcpEl.value) || 0 : 0,
+                    Total: tcpEl ? parseFloat(tcpEl.value) || 0 : 0,
+                    Aim: mdEl ? mdEl.value : '',
+                    Phongchiuchiphi: (pcpEl ? pcpEl.value : ''),
+                    Vitri: vtEl ? vtEl.value : '',
+                    Poisition: gcEl ? gcEl.value : ''
+                };
+            // Thêm đối tượng vào danh sách tổng
+
+            dataList.push(rowData);
+        });
+        var iD_REQUEST = document.getElementById("idrq").innerHTML;
+        var Code_Request = document.getElementById("madon").value;
+        var Dealine = document.getElementById("thoihan").value;
+        // Remove thousand separators before parsing
+        var Total_exchange = parseFloat((document.getElementById("thanhtien").value || "0").toString().replace(/,/g,'')) || 0;
+        var Exchange_rate = document.getElementById("rate").value;
+        var Total = parseFloat((document.getElementById("thanhtien").value || "0").toString().replace(/,/g,'')) || 0;
+        var urgentValue = (document.querySelector('input[name="value"]:checked') && document.querySelector('input[name="value"]:checked').value) || 0;
+        var Urgent = urgentValue;
+        var User_Create = document.getElementById("us").innerHTML;
+        var Place = document.getElementById("place").value;
+        var Declaration = document.getElementById("loaichiphi").value;
+        var cost_center = document.getElementById("cost_center").value;
+        if (Dealine == "") {
+            alert("Vui lòng điền đủ thông tin vào đơn !")
+        }
+        else {
+            $.ajax({
+                url: '/Request/_Update_request',
+                type: 'POST',
+                dataType: 'JSON',
+                //contentType: 'application/json',
+                data: {
+                    iD_REQUEST: iD_REQUEST,
+                    Dealine : Dealine,
+                    Total_exchange : Total_exchange,
+                    Exchange_rate : Exchange_rate,
+                    Total : Total,
+                    Place : Place,
+                    Urgent : Urgent,
+                    User_Create : User_Create,
+                    rq : dataList,
+                    Code_Request : Code_Request,
+                    Declaration : Declaration,
+                    Cost_Center : cost_center
+                },
+                success: function (response) {
+                    alert(response);
+                        location.href = "/Approval/Condition"
+                }
+            })
+
+        }
+    }
+}
+    function _xoadong(id_rq){        
+            $.ajax({
+                url: '/Request/_Xoadong',
+                type: 'POST',
+                dataType: 'JSON',
+                      
+                data: {
+                        id: id_rq,                           
+                },
+                success: function (response) {
+         
+                }
+            })           
+    }
+</script>

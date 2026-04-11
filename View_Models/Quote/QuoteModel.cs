@@ -141,4 +141,24 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string UserApproverNext { get; set; } = string.Empty;
         public List<BaoGia_Detail_of_QuotationDTO> listPick { get; set; } = new List<BaoGia_Detail_of_QuotationDTO>();
     }
+    // Approval select
+    public class ApprovalSelectModel
+    {
+        public string maDon { get; set; } = string.Empty;
+        public string UserApproverNext { get; set; } = string.Empty;
+        public string? Reason { get; set; }
+    }
+    // input file chon ncc
+    public class ImportPickSupplier
+    {
+        public IFormFile fileSend { get; set; }
+        public string userNextApproval { get; set; }
+    }
+    // history result update
+    public class UpdateHistoryResult
+    {
+        public string? sectionCode { get; set; }
+
+        public List<int>? listUpdate { get; set; }
+    }
 }

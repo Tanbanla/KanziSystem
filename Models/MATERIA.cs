@@ -18,6 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? GoodKind { get; set; }
         public string? Num_Inventory { get; set; }
         public string? Inventory { get; set; }
+        public string? UserName { get; set; }
     }
     public class MATERIA
     {
@@ -31,9 +32,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 code_mt = para.Material_Code!.Split(":")[0].Length > 0 ? para.Material_Code!.Split(":")[0] : para.Material_Code!;
                 timcode = "a.Material_Code = '" + code_mt + "' and";
             }
-           
-           
-            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode} a.Material_Name_VN like N'%" + para.Material_Name_VN + "%' and a.Account_Name_VN like N'%" + para.Account_Name_VN + "%' and a.Group_Code like '%" + para.Group_Code + "%' and b.Hientai > 0");
+                    
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode} a.Material_Name_VN like N'%" + para.Material_Name_VN + "%' and a.Account_Name_VN like N'%" + para.Account_Name_VN + "%' and a.Group_Code like '%" + para.Group_Code + "%' ");
             List<PARAS> _material = new List<PARAS>();
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {

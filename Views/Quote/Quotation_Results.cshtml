@@ -260,6 +260,8 @@
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white py-2">
                     <h6 class="mb-0 text-secondary" style="color:black !important; margin-bottom: 0.5rem; padding: 0.25rem 0; font-weight: 600;">@Localizer["Filters"]</h6>
+                    <div style="margin-left: 8px;"></div>
+                    <button type="button" class="btn btn-outline-primary" id="btnUploadExcel"><i class="fas fa-upload"></i> @Localizer["ImportExcel"]</button>
                 </div>
                 <div class="card-body pt-3 pb-2">
                     <form id="filterForm" class="row g-4 align-items-end">
@@ -305,6 +307,8 @@
                         <div class="col-12 d-flex gap-2 mt-2">
                             <button type="button" id="btnSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> @Localizer["Search"]</button>
                             <div style="min-width: 12px;"></div>
+                            <button type="button" id="btnExcelExport" class="btn btn-success btn-sm"><i class="fas fa-file-excel"></i> @Localizer["ExportToExcel"]</button>
+                            <div style="min-width: 12px;"></div>
                             <button type="button" id="btnClear" class="btn btn-outline-secondary btn-sm"><i class="fas fa-eraser"></i> @Localizer["ClearFilters"]</button>
                         </div>
                     </form>
@@ -318,18 +322,19 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 480px;">
-                        <table class="table table-sm table-hover table-bordered align-middle mb-0" id="quotationResultsTable" style="font-size:13px;">
+                        <table class="table table-sm table-hover table-bordered align-middle mb-0" id="quotationResultsTable" style="font-size:11px;">
                             <thead class="table-header-custom">
                                 <tr class="text-center align-middle">
                                     <th style="width:40px; color: #fff !important;"><input type="checkbox" id="selectAll" title="@Localizer["SelectAll"]" /></th>
                                     <th style="min-width:80px; color: #fff !important;">@Localizer["Detail"]</th>
                                     <th style="min-width:140px; color: #fff !important;">@Localizer["OrderCode"]</th>
-                                    <th style="min-width:110px; color: #fff !important;">@Localizer["RequestDateLabel"]<br></th>
-                                    <th style="min-width:140px; color: #fff !important;">@Localizer["DepartmentName"]<br></th>
+                                    <th style="min-width:140px; color: #fff !important;">@Localizer["DepartmentName"]</th>
                                     <th style="min-width:130px; color: #fff !important;">@Localizer["CreatorPIC"]</th>
-                                    <th style="min-width:150px; color: #fff !important;">@Localizer["NumberMaterial"]<br></th>
-                                    <th style="min-width:170px; color: #fff !important;">@Localizer["SupplierSelectionDeadline"]<br></th>
-                                    <th style="min-width:70px; color: #fff !important;">@Localizer["Status"]<br></th>
+                                    <th style="min-width:110px; color: #fff !important;">@Localizer["Supplier"]</th>
+                                    <th style="min-width:150px; color: #fff !important;">@Localizer["Category"]</th>
+                                    <th style="min-width:110px; color: #fff !important;">@Localizer["SupplierSelectionDeadline"]</th>
+                                    <th style="min-width:110px; color: #fff !important;">@Localizer["DesiredReceiveDate"]</th>
+                                    <th style="min-width:70px; color: #fff !important;">@Localizer["Status"]</th>
                                 </tr>
                             </thead>
                             <tbody id="quotationResultsTableBody">
@@ -341,6 +346,7 @@
                 <div class="p-2 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
                         <label class="small mb-0" style="margin-right:4px;">@Localizer["RowsPerPage"]</label>
+                        <div style="margin-left:4px;"></div>
                         <select id="pageSizeSelect">
                             <option value="10">10</option>
                             <option value="20">20</option>
@@ -598,6 +604,7 @@
                 document.body.appendChild(approverModal);
             }
         })();
+        window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
         window.i18nQuotationResults = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
             PageTitle = Localizer["PageTitle"].Value,
             ImportFromExcel = Localizer["ImportFromExcel"].Value,
@@ -746,6 +753,10 @@
             SearchEllipsis = Localizer["SearchEllipsis"].Value,
             NoResults = Localizer["NoResults"].Value,
             SelectPlaceholder = Localizer["SelectPlaceholder"].Value
+            ,SelectNextApprover = Localizer["SelectNextApprover"].Value
+            ,NextApproverLabel = Localizer["NextApproverLabel"].Value
+            ,SelectApproverRequired = Localizer["SelectApproverRequired"].Value
+            ,MsgNoRowSelected = Localizer["MsgNoRowSelected"].Value
         }));
     </script>
 }

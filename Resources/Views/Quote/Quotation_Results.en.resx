@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -715,7 +715,8 @@
     <value>Select supplier</value>
   </data>
   <data name="SystemCalculatedTotal" xml:space="preserve">
-    <value>System calculated total</value>
+    <value>Total equipment cost
+(calculated by equipment code/order number/supplier)</value>
   </data>
   <data name="SupplierSelection" xml:space="preserve">
     <value>Supplier selection</value>
@@ -761,5 +762,23 @@
   </data>
   <data name="undefined" xml:space="preserve">
     <value>Undefined</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>Select next approver</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>Next approver</value>
+  </data>
+  <data name="SelectApproverRequired" xml:space="preserve">
+    <value>Please select an approver.</value>
+  </data>
+  <data name="MaterialType" xml:space="preserve">
+    <value>Material Type</value>
+  </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="MsgNoRowSelected" xml:space="preserve">
+    <value>Please select at least one row to export the file.</value>
   </data>
 </root>

@@ -310,7 +310,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(NameHQ))
             {
-                sql.Append(" AND d.NVCHR_TenHangHQ = @NameHQ");
+                sql.Append(" AND r.NVCHR_NameVN = @NameHQ");
                 parameters.Add("NameHQ", NameHQ);
             }
             var data = (await _conn.QueryAsync<BaoGia_Detail_of_Quotation>(sql.ToString(), parameters)).ToList();
@@ -320,31 +320,37 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result;
         }
         // update thông tin lựa chọn nhà  cung cấp
-        public async Task<bool> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos, string userApproverNext)
+        public async Task<BaoGia_Request_of_Quotation> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos, string userApproverNext)
         {
             if (dtos == null || dtos.Count == 0)
             {
-                return false;
+                throw new ArgumentException("No data saves");
             }
-            // lưu lịch sử thay đổi
-            var historyList = new List<BaoGia_History_Detail_Request>();
+            // thông tin trả ra
+            var resultList = new List<BaoGia_Request_of_Quotation>();
+            // lưu lịch sử thay đổi detail
+            var historyDetailList = new List<BaoGia_History_Detail_Request>();
+            // Lưu lịch sử đơn
+            var historyList = new List<BaoGia_History_Request_of_Quotation>();
             foreach (var item in dtos)
             {
-                var detail = await _context.BaoGia_Detail_of_Quotations.Where(c=> c.ID_RequestQuote == item.ID).FirstOrDefaultAsync();
+                var detail = await _context.BaoGia_Detail_of_Quotations.Where(c => c.ID_RequestQuote == item.ID).FirstOrDefaultAsync();
                 if (detail != null)
                 {
                     detail.BIT_Select = item.BIT_Select;
                     detail.NVCHR_ReasonPick = item.NVCHR_ReasonPick;
+                    detail.CHR_UpdateBy = item.CHR_UpdateBy;
                     // save rq
                     var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
                     if (rq != null)
                     {
                         rq.ID_StepBaoGia = 9;
                         rq.ID_Status = "WAIT_APPROVE";
-                        rq.NVCHR_UserRequest = userApproverNext;
+                        rq.CHR_UserApproval = userApproverNext;
                     }
+                    resultList.Add(rq);
                     // luu lịch sử thay đổi
-                    var history = new BaoGia_History_Detail_Request
+                    var historyD = new BaoGia_History_Detail_Request
                     {
                         ID = 0,
                         ID_RQ_Detail = detail.ID,
@@ -353,12 +359,36 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         CHR_CreateBy = item.CHR_UpdateBy,
                         DTM_CreateBy = DateTime.Now
                     };
+                    historyDetailList.Add(historyD);
+
+                    var history = new BaoGia_History_Request_of_Quotation
+                    {
+                        ID_RequestQuote = rq.ID,
+                        CHR_MaDon = rq.CHR_MaDon?? string.Empty,
+                        CHR_UpdateBy = item.CHR_UpdateBy ?? string.Empty,
+                        NVCHR_UpdateName = item.CHR_UpdateBy ?? string.Empty,
+                        CHR_Updatedate = DateTime.Now,
+                        CHR_ChangedColumns = null,
+                        CHR_OldData = null,
+                        CHR_NewData = System.Text.Json.JsonSerializer.Serialize(rq),
+                        NVCHR_LyDo = "",
+                        CHR_ActionType = "PIC_PICK_NCC"
+                    };
                     historyList.Add(history);
                 }
             }
-            await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+            // Lưu lịch sử thay đổi cua detail
+            if (historyDetailList.Any())
+            {
+                await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyDetailList);
+            }
+            //
+            if (historyList.Any())
+            {
+                await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
+            }
             await _context.SaveChangesAsync();
-            return true;
+            return resultList.FirstOrDefault();
         }
     }
 }

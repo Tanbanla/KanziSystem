@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -29,7 +29,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
-                WHERE 1 = 1
+                WHERE 1 = 1 and BIT_LayBaoGia = 1 and r.ID_Status not like '%RETURN%' and r.ID_StepBaoGia >=6
             ";
 
             var whereBuilder = new StringBuilder();
@@ -74,7 +74,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             // Phân trang
             var PageIndex = pageIndex <= 0 ? 1 : pageIndex;
-            var PageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 100);
+            var PageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 1000);
 
             // Truy vấn tổng (không có phân trang)
             var countSql = "SELECT COUNT(DISTINCT c.ID) " + baseFrom + whereBuilder.ToString();

@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Tạo yêu cầu báo giá";
     List<DEPARTMENTDTO> nhomViTri = Model.DanhSachNhomViTri;
-    List<string> phanLoais = ["A","B","C","E","NO LIST"];
+    List<string> phanLoais = ["A","B","C","E","I","NO LIST"];
     List<MATERIALDTO> mATERIAs = Model.DanhSachVatTu;
     List<IM_NCC_NEWDTO> nccNews = Model.DanhSachNhaCungCap;
     List<string> categoryS = Model.DanhSachCategory;
@@ -359,6 +359,7 @@
     window.indexQuoteData = {
         user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser))
     };
+    window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     window.i18nQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         DialogTitle = Localizer["Notification"].Value,
         DialogOk = Localizer["DialogOk"].Value,

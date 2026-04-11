@@ -81,7 +81,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 return false;
             }
-            foreach(var dto in dtos)
+            foreach (var dto in dtos)
             {
                 var existingEntity = await _context.BaoGia_Master_Approver_Send_Mails
                     .FirstOrDefaultAsync(x => x.ID_BaoGiaStep == dto.ID_BaoGiaStep && x.CHR_UserAdid == dto.CHR_UserAdid && x.CHR_CodeSection == dto.CHR_CodeSection);
@@ -89,7 +89,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 {
                     continue;
                 }
-                 await _context.BaoGia_Master_Approver_Send_Mails.AddAsync(dto);
+                await _context.BaoGia_Master_Approver_Send_Mails.AddAsync(dto);
             }
             await _context.SaveChangesAsync();
             return true;

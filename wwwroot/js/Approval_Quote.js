@@ -26,7 +26,7 @@
                 const body = { Step: stepNumber, SectionCost: sectionCode };
                 let list = [];
                 try {
-                    const resp = await fetch('/ApprovalQuote/GetListApprovel', {
+                    const resp = await fetch((window.apiBaseUrl || '') + '/ApprovalQuote/GetListApprovel', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify(body)
@@ -812,7 +812,7 @@
     async function searchAndRender() {
         clearSelection();
         const payload = getFilterValues();
-        const url = '/ApprovalQuote/SearchApprovalQuote';
+        const url = (window.apiBaseUrl || '') + '/ApprovalQuote/SearchApprovalQuote';
         try {
             const res = await fetch(url, {
                 method: 'POST',
@@ -940,11 +940,16 @@
             if (nextStep === 6 || nextStep === 4) {
                 payload.forEach(p => {
                     p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
-                    p.iD_Status = 'WAIT_SEND_MAIL';
+                    if (nextStep === 4) {
+                        p.iD_Status = 'APPROVAL4';
+                    } else {
+                        p.iD_Status = 'WAIT_SEND_MAIL';
+                    }
+                    p.chR_UserApproval = '';
                 });
                 btnApprove.disabled = true;
                 const btnReturnEl = document.getElementById('btnReturn'); if (btnReturnEl) btnReturnEl.disabled = true;
-                fetch('/ApprovalQuote/UpdateQuotationOK', {
+                fetch((window.apiBaseUrl || '') + '/ApprovalQuote/UpdateQuotationOK', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(payload)
@@ -968,15 +973,16 @@
                     payload.forEach(p => {
                         p.chR_UserApproval = selected.chR_UserAdid || '';
                         p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
-                        if (p.iD_StepBaoGia == 6) {
-                            p.iD_Status = 'WAIT_SEND_MAIL';
-                        } else {
-                            p.iD_Status = 'APPROVAL';
-                        }
+                        //if (p.iD_StepBaoGia == 6) {
+                        //    p.iD_Status = 'WAIT_SEND_MAIL';
+                        //} else {
+                        //    p.iD_Status = 'APPROVAL';
+                        //}
+                        p.iD_Status = 'APPROVAL' + p.iD_StepBaoGia;
                     });
                     btnApprove.disabled = true;
                     const btnReturnEl = document.getElementById('btnReturn'); if (btnReturnEl) btnReturnEl.disabled = true;
-                    fetch('/ApprovalQuote/UpdateQuotationOK', {
+                    fetch((window.apiBaseUrl || '') + '/ApprovalQuote/UpdateQuotationOK', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1020,7 +1026,7 @@
                 if (payload.length === 0) return;
                 btnReturn.disabled = true;
                 const btnApproveEl = document.getElementById('btnApprove'); if (btnApproveEl) btnApproveEl.disabled = true;
-                fetch('/ApprovalQuote/UpdateQuotationNG', {
+                fetch((window.apiBaseUrl || '') + '/ApprovalQuote/UpdateQuotationNG', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1048,11 +1054,11 @@
                     Array.from(state.selectedMaDons).forEach(maDon => {
                         const group = state.groupsByMaDon[maDon] || [];
                         group.forEach(it => {
-                            it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
+                           // it.iD_StepBaoGia = (it.iD_StepBaoGia != null ? parseInt(it.iD_StepBaoGia) + 1 : 1);
                             payload.push(it);
                         });
                     });
-                    const res = await fetch('/ApprovalQuote/ExportToExcel', {
+                    const res = await fetch((window.apiBaseUrl || '') + '/ApprovalQuote/ExportToExcel', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1117,9 +1123,14 @@
             if (nextStep === 6 || nextStep === 4) {
                 payload.forEach(p => {
                     p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
-                    p.iD_Status = 'WAIT_SEND_MAIL';
+                    if (nextStep === 4) {
+                        p.iD_Status = 'APPROVAL4';
+                    } else {
+                        p.iD_Status = 'WAIT_SEND_MAIL';
+                    }
+                    p.chR_UserApproval = '';
                 });
-                fetch('/ApprovalQuote/UpdateQuotationOK', {
+                fetch((window.apiBaseUrl || '') + '/ApprovalQuote/UpdateQuotationOK', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1141,13 +1152,14 @@
                     payload.forEach(p => {
                         p.chR_UserApproval = selected.chR_UserAdid || '';
                         p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
-                        if (p.iD_StepBaoGia == 6) {
-                            p.iD_Status = 'WAIT_SEND_MAIL';
-                        } else {
-                            p.iD_Status = 'APPROVAL';
-                        }
+                        //if (p.iD_StepBaoGia == 6) {
+                        //    p.iD_Status = 'WAIT_SEND_MAIL';
+                        //} else {
+                        //    p.iD_Status = 'APPROVAL';
+                        //}
+                        p.iD_Status = 'APPROVAL' + p.iD_StepBaoGia;
                     });
-                    fetch('/ApprovalQuote/UpdateQuotationOK', {
+                    fetch((window.apiBaseUrl || '') + '/ApprovalQuote/UpdateQuotationOK', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1185,7 +1197,7 @@
                     it.iD_StepBaoGia = 1;
                     payload.push(it);
                 });
-                fetch('/ApprovalQuote/UpdateQuotationNG', {
+                fetch((window.apiBaseUrl || '') + '/ApprovalQuote/UpdateQuotationNG', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(payload)

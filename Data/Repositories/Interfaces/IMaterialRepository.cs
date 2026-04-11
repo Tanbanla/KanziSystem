@@ -23,6 +23,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> InsertMaterial(MATERIAL mt);
         // Insert nhiều
         public Task<bool> UpdateListThongTinNoList(List<MATERIAL> listMT);
-
+        // Lay ma hang lon nhat hien tai
+        public Task<string> MaterialCodeLater(string type);
+        // check ma hang
+        public Task<string> CheckMaterialCode(string keyword, string category);
     }
 }

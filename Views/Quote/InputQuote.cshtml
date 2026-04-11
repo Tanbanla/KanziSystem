@@ -282,6 +282,7 @@
         materials: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(mATERIAs)),
         nccNews: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(nccNews))
     };
+    window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     window.i18nInputQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         PageTitle = Localizer["PageTitle"].Value,
         ImportFromExcel = Localizer["ImportFromExcel"].Value,

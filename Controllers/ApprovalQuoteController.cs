@@ -8,6 +8,7 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.ApprovalQuote;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using System.Text.RegularExpressions;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
@@ -25,7 +26,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IDepartmentService _deparmentService;
         private readonly IWebHostEnvironment _env;
         private readonly IMasterApproverSendMailService _approverService;
-        public ApprovalQuoteController(ILogger<ApprovalQuoteController> logger,
+        private readonly IConfiguration _configuration;
+        public ApprovalQuoteController(ILogger<ApprovalQuoteController> logger, IConfiguration configuration,
             IHistoryApproverServive historyApproverServive, IMaterialService materialService, IMasterApproverSendMailService approverService,
             IBaoGiaService baoGiaService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStatusService baoGiaStatusService, IDepartmentService departmentService
             , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IWebHostEnvironment env)
@@ -42,6 +44,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _serviceScopeFactory = serviceScopeFactory;
             _deparmentService = departmentService;
             _approverService = approverService;
+            _configuration = configuration;
         }
         public async Task<IActionResult> Index()
         {
@@ -50,6 +53,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var soDonList = await GetSoDonList();
             var statusBaoGiaList = await GetStatusBaoGiaList();
             var stepBaoGiaList = await GetStepBaoGiaList();
+
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
+
             var vm = new ApprovalQuoteViewModel
             {
                 listNhomVitri = nhomViTriList,
@@ -87,7 +93,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             //var result = await _baoGiaService.GetListMaDonBGAsync();
             var adid = GetCurrentUserId() ?? string.Empty;
-            var result = await _baoGiaService.GetMaDonByAdidAsync(adid);
+            var result = await _baoGiaService.GetMaDonByAdidAsync(adid, 6);
             return result.Data;
         }
         // Lay status bao gia
@@ -204,7 +210,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // Gui mail thông báo phê duyệt báo giá
                     var SectionApporve = insertedList
                      .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
-                     .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia,l.CHR_UserApproval))
+                     .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia, l.CHR_UserApproval))
                      .ToList();
                     if (SectionApporve != null)
                     {
@@ -217,13 +223,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                     foreach (var item in SectionApporve)
                                     {
-                                        if(item.ID_StepBaoGia == 4)
+                                        if (item.ID_StepBaoGia == 4)
                                         {
                                             await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
                                         }
-                                        else if(item.ID_StepBaoGia != 6)
+                                        else if (item.ID_StepBaoGia != 6)
                                         {
-                                            await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", currentUserId + "@brothergroup.net", 11, "http://172.26.248.62:8057/ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
+                                            await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", currentUserId + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
                                         }
                                         //await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
 
@@ -232,6 +238,181 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 catch (Exception ex)
                                 {
                                     _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                                }
+                            }
+                        });
+                    }
+                    if (!result.Success)
+                    {
+                        return BadRequest(result.Message);
+                    }
+                    // Insert xác nhận tên và gửi mail trong background
+                    var MaterialsNew = insertedList
+                        .Where(l => string.IsNullOrEmpty(l.CHR_MaHangNoiBo) && l.ID_StepBaoGia >= 6 && l.BIT_LayBaoGia == true)
+                        .ToList();
+
+                    // Insert xác nhận tên và gửi mail trong background
+                    if (MaterialsNew.Count > 0)
+                    {
+                        // Run background work without accessing controller/HttpContext inside the task
+                        _ = Task.Run(async () =>
+                        {
+                            using (var scope = _serviceScopeFactory.CreateScope())
+                            {
+                                try
+                                {
+                                    // service
+                                    var baoGiaConfirmNameService = scope.ServiceProvider.GetRequiredService<IBaoGiaConfirmNameService>();
+                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                    var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
+                                    var materialService = scope.ServiceProvider.GetRequiredService<IMaterialService>();
+                                    var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
+
+                                    // Phân loại MaterialsNew theo CHR_Phanloai (A hoặc I)
+                                    var materialsByPhanLoai = MaterialsNew
+                                        .Where(m => !string.IsNullOrEmpty(m.CHR_MaHangNCC))
+                                        .GroupBy(m => GetMaterialType(m.CHR_Phanloai))
+                                        .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+                                    var MaterialNews = new List<MATERIAL>();
+                                    var confirmNames = new List<ConfirmNameDTO>();
+
+                                    foreach (var phanLoaiGroup in materialsByPhanLoai)
+                                    {
+                                        var materialType = phanLoaiGroup.Key; 
+                                        var materialsInGroup = phanLoaiGroup.Value;
+
+                                        // Lấy số tiếp theo cho từng loại (A hoặc I)
+                                        var latestCode = await materialService.MaterialCodeLater(materialType);
+                                        var nextNumber = ExtractNumberFromCode(latestCode.Data);
+
+                                        var processedSuppliers = new Dictionary<string, MATERIAL>(StringComparer.OrdinalIgnoreCase);
+
+                                        var materialsBySupplier = materialsInGroup
+                                            .GroupBy(m => m.CHR_MaHangNCC)
+                                            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+                                        foreach (var supplierGroup in materialsBySupplier)
+                                        {
+                                            var supplierCode = supplierGroup.Key;
+                                            var materials = supplierGroup.Value;
+
+                                            // Gọi service check material code
+                                            var checkCode = await materialService.CheckMaterialCode(supplierCode, materials.First().NVCHR_ChungLoai);
+
+                                            if (!checkCode.Success)
+                                            {
+                                                _logger.LogError(checkCode.Message, "Lỗi khi check Material code for {MaHangNCC}, Type: {Type}", supplierCode, materialType);
+                                                continue;
+                                            }
+
+                                            string existingMaterialCode = checkCode.Data;
+
+                                            if (!string.IsNullOrEmpty(existingMaterialCode))
+                                            {
+                                                // Trường hợp đã tồn tại material code
+                                                foreach (var material in materials)
+                                                {
+                                                    confirmNames.Add(new ConfirmNameDTO
+                                                    {
+                                                        Id = material.ID,
+                                                        MaHangNoiBo = existingMaterialCode
+                                                    });
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (processedSuppliers.TryGetValue(supplierCode, out var existingMaterial))
+                                                {
+                                                    foreach (var material in materials)
+                                                    {
+                                                        confirmNames.Add(new ConfirmNameDTO
+                                                        {
+                                                            Id = material.ID,
+                                                            MaHangNoiBo = existingMaterial.Material_Code
+                                                        });
+                                                        // dữ liệu xác nhận tên
+                                                        var cf = new BaoGia_Confirm_Name_QuotationDTO();
+                                                        cf.ID_RequestQuote = material.ID;
+                                                        cf.DTM_CreateDate = DateTime.Now;
+                                                        cf.VCHR_CreateBy = currentUserId;
+                                                        cf.VCHR_TenRecomment = material.NVCHR_NameVN;
+                                                        cf.CHR_Status = "Confirming";
+                                                        cf.CHR_StatusACC = "Confirmed";
+                                                        cf.CHR_StatusShip = "Confirming";
+                                                        cf.NVCHR_Note = material.CHR_MaHangNCC;
+                                                        listConfirm.Add(cf);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    // Tạo material mới
+                                                    nextNumber++;
+                                                    var newMaterialCode = GenerateMaterialCode(materialType, nextNumber);
+                                                    var firstMaterial = materials.First();
+
+                                                    var newMaterial = new MATERIAL
+                                                    {
+                                                        Material_Code = newMaterialCode,
+                                                        Material_Name_VN = firstMaterial.NVCHR_NameVN,
+                                                        Material_Name_EN = firstMaterial.CHR_NameEN,
+                                                        Code_Suppiler = firstMaterial.CHR_MaHangNCC,
+                                                        Category_VN = firstMaterial.NVCHR_ChungLoai,
+                                                        Shape = firstMaterial.NVCHR_HinhDang,
+                                                        Material1 = firstMaterial.NVCHR_ChatLieu,
+                                                        Composition = firstMaterial.NVCHR_ThanhPhan,
+                                                        Dimension = firstMaterial.NVCHR_KichThuoc,
+                                                        UsedFor = firstMaterial.NVCHR_DongMay,
+                                                        Purpose = firstMaterial.NVCHR_TinhNang,
+                                                        CHR_MaterialOutSide = "OUT", 
+                                                        Unit = firstMaterial.NVCHR_DonVi
+                                                    };
+
+                                                    MaterialNews.Add(newMaterial);
+                                                    processedSuppliers[supplierCode] = newMaterial;
+
+                                                    foreach (var material in materials)
+                                                    {
+                                                        confirmNames.Add(new ConfirmNameDTO
+                                                        {
+                                                            Id = material.ID,
+                                                            MaHangNoiBo = newMaterialCode
+                                                        });
+                                                        // dữ liệu xác nhận tên
+                                                        var cf = new BaoGia_Confirm_Name_QuotationDTO();
+                                                        cf.ID_RequestQuote = material.ID;
+                                                        cf.DTM_CreateDate = DateTime.Now;
+                                                        cf.VCHR_CreateBy = currentUserId;
+                                                        cf.VCHR_TenRecomment = material.NVCHR_NameVN;
+                                                        cf.CHR_Status = "Confirming";
+                                                        cf.CHR_StatusACC = "Confirmed";
+                                                        cf.CHR_StatusShip = "Confirming";
+                                                        cf.NVCHR_Note = material.CHR_MaHangNCC;
+                                                        listConfirm.Add(cf);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    // Send mail
+                                    if (listConfirm.Any())
+                                    {
+                                        await baoGiaConfirmNameService.AddListAsync(listConfirm);
+                                        // gửi mail thông báo có yêu cầu xác nhận tên mới
+                                        var emailResult = await sendMailService.SendMailToConfirmItemAsync(13, 17, "Material/ConfirmName", true, "", "", currentUserId);
+                                    }
+                                    if (confirmNames.Any())
+                                    {
+                                        await baoGiaService.UpdateCodeMaterialBIVN(confirmNames);
+                                    }
+                                    if (MaterialNews.Any())
+                                    {
+                                        await materialService.AddMultiAsync(MaterialNews);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Lỗi khi xử lý material theo phân loại A/I");
                                 }
                             }
                         });
@@ -247,6 +428,31 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+        private string GetMaterialType(string phanLoai)
+        {
+            if (string.IsNullOrEmpty(phanLoai)) return "O";
+
+            var upperPhanLoai = phanLoai.ToUpper().Trim();
+
+            if (upperPhanLoai == "I" || upperPhanLoai.Contains("I"))
+                return "I";
+
+            return "O";
+        }
+
+        // Tạo mã material với prefix A hoặc I
+        private string GenerateMaterialCode(string type, int number)
+        {
+            return $"{type}{number:D8}";
+        }
+
+        // Extract số từ mã material
+        private int ExtractNumberFromCode(string materialCode)
+        {
+            if (string.IsNullOrEmpty(materialCode)) return 0;
+            var match = Regex.Match(materialCode, @"\d+");
+            return match.Success && int.TryParse(match.Value, out int number) ? number : 0;
         }
         // case NG
         [HttpPost]
@@ -316,9 +522,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                 var mail = userCreate + "@brothergroup.net";
                                 var emailResult = await sendMailService.SendMailAsync(mail, mail, 12,
-                                    "http://172.26.248.62:8057/Quote/HistoryQuote", isGap,
+                                    "Quote/HistoryQuote", isGap,
                                     sectionName, maDon, currentUserId);
-                                //var emailResult = await sendMailService.SendMailToConfirmItemAsync(12, 12, "http://172.26.248.62:8057/Quote/HistoryQuote", true, "", "", currentUserId);
+                                //var emailResult = await sendMailService.SendMailToConfirmItemAsync(12, 12, "Quote/HistoryQuote", true, "", "", currentUserId);
                             }
                             catch (Exception ex)
                             {

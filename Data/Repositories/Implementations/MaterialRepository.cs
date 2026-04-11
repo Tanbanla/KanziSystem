@@ -105,7 +105,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 data.Category_EN = material.Category_EN;
                 data.Category_JP = material.Category_JP;
                 data.Shape = material.Shape;
-                data.Material = material.Material;
+                data.Material1 = material.Material1;
                 data.Composition = material.Composition;
                 data.Dimension = material.Dimension;
                 data.UsedFor = material.UsedFor;
@@ -153,7 +153,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 material.Category_EN = dto.Category_EN;
                 material.Category_JP = dto.Category_JP;
                 material.Shape = dto.Shape;
-                material.Material = dto.Material;
+                material.Material1 = dto.Material;
                 material.Composition = dto.Composition;
                 material.Dimension = dto.Dimension;
                 material.UsedFor = dto.UsedFor;
@@ -186,6 +186,30 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             await _context.MATERIALs.AddRangeAsync(newMaterials);
             return await _context.SaveChangesAsync() > 0;
+        }
+        // Lay ma hang lon nhat hien tai
+        public async Task<string> MaterialCodeLater(string type)
+        {
+            var result = await _context.MATERIALs
+                .Where(m => m.Material_Code != null && m.Material_Code.StartsWith(type))
+                .OrderByDescending(m => m.Material_Code)
+                .Select(m => m.Material_Code)
+                .FirstOrDefaultAsync();
+
+            return result ?? string.Empty;
+        }
+        // check ma hang
+        public async Task<string> CheckMaterialCode(string keyword, string category)
+        {
+            var result = await _context.MATERIALs
+             .Where(m => m.Material_Code != null
+             && (m.Material_Name_VN == keyword || m.Code_Suppiler == keyword || m.Material_Name_EN == keyword)
+             && m.Category_VN.ToLower().Contains(category.ToLower()))
+             .OrderByDescending(m => m.Material_Code)
+             .Select(m => m.Material_Code)
+             .FirstOrDefaultAsync();
+
+            return result ?? string.Empty;
         }
     }
 }

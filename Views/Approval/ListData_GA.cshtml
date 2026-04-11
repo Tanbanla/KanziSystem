@@ -328,7 +328,7 @@
                 }
                 for (var a = 0; a < response.length; a++) {
                     var tongtien = response[a].total_exchange;
-                    document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount}</td><td>${response[a].unit}</td><td>${response[a].price}</td><td>${response[a].currency}</td><td>${tongtien}</td><td>${response[a].aim}</td><td></td>`;
+                                document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td>${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td></td>`;
                 }
             }
         })

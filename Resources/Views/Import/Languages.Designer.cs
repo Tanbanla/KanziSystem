@@ -403,6 +403,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hệ thống quản lý hàng gián tiếp (IPCS) .
+        /// </summary>
+        public static string hethongquanlyhanggiantiep {
+            get {
+                return ResourceManager.GetString("hethongquanlyhanggiantiep", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ID Lịch sử nhập.
         /// </summary>
         public static string Idlichsu {
@@ -1114,7 +1123,7 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Thời hạn muốn nhận .
+        ///   Looks up a localized string similar to Ngày muốn nhận .
         /// </summary>
         public static string thoihanmuonnhan {
             get {

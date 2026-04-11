@@ -16,7 +16,7 @@ function initCategories() {
                 pageIndex: pageIndex,
                 pageSize: pageSize
             };
-            const response = await fetch('/Master/SearchCategoryByName', {
+            const response = await fetch((window.apiBaseUrl || '') + '/Master/SearchCategoryByName', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ function initCategories() {
             return;
         }
         try {
-            const response = await fetch('/Master/AddCategory', {
+            const response = await fetch((window.apiBaseUrl || '') + '/Master/AddCategory', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ function initCategories() {
     window.deleteCategory = async function (id) {
         showConfirm(window.i18nCategory.ConfirmDeleteTitle, window.i18nCategory.ConfirmDeleteMessage, async () => {
             try {
-                const response = await fetch('/Master/DeleteCategory', {
+                const response = await fetch((window.apiBaseUrl || '') + '/Master/DeleteCategory', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ function initCategories() {
         const formData = new FormData();
         formData.append('importRequest', file);
         try {
-            const response = await fetch('/Master/ImportCategory', {
+            const response = await fetch((window.apiBaseUrl || '') + '/Master/ImportCategory', {
                 method: 'POST',
                 body: formData
             });

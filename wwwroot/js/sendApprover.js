@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('file', file);
             // Gửi request ImportSectionExcel
             try { showLoading((window.i18nSendApprover && window.i18nSendApprover.LoadingData) || 'Đang xử lý...'); } catch { }
-            fetch('/Master/UploadFileApprovelUser', {
+            fetch((window.apiBaseUrl || '') + '/Master/UploadFileApprovelUser', {
                 method: 'POST',
                 body: formData
             })
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Controller action is named GetEmployeeWorkingByIdAsync in code but MVC strips the "Async" suffix
             // so the correct route is /Master/GetEmployeeWorkingById
-            const url = '/Master/GetEmployeeWorkingById?adidOrMnv=' + encodeURIComponent(adidOrMnv);
+            const url = (window.apiBaseUrl || '') + '/Master/GetEmployeeWorkingById?adidOrMnv=' + encodeURIComponent(adidOrMnv);
             const resp = await fetch(url, { method: 'GET' });
             if (!resp.ok) {
                 if (modalLookupStatusEl) modalLookupStatusEl.textContent = (T.LookupNotFound || 'Không tìm thấy');
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const step = document.getElementById('searchStep').value;
 
         try {
-            const resp = await fetch('/Master/GetApprovers', {
+            const resp = await fetch((window.apiBaseUrl || '') + '/Master/GetApprovers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const endpoint = approverId > 0 ? '/Master/UpdateApprover' : '/Master/SaveApprover';
+            const endpoint = approverId > 0 ? (window.apiBaseUrl || '') + '/Master/UpdateApprover' : (window.apiBaseUrl || '') + '/Master/SaveApprover';
             const method = 'POST';
 
             const resp = await fetch(endpoint, {
@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirmed) return;
 
         try {
-            const resp = await fetch('/Master/DeleteApprover', {
+            const resp = await fetch((window.apiBaseUrl || '') + '/Master/DeleteApprover', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

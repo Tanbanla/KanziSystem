@@ -178,6 +178,7 @@
 @section Scripts {
     <script src="/js/sendApprover.js"></script>
     <script>
+        window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
         window.i18nSendApprover = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
             SearchAndAddTitle = Localizer["SearchAndAddTitle"].Value,
             SectionName = Localizer["SectionName"].Value,

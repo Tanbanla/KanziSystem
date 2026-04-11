@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -316,7 +316,7 @@
     <value>Thêm dòng mới</value>
   </data>
   <data name="thoihanmuonnhan" xml:space="preserve">
-    <value>Thời hạn muốn nhận </value>
+    <value>Ngày muốn nhận </value>
   </data>
   <data name="thoihanthanhtoan" xml:space="preserve">
     <value>Thời hạn thanh toán</value>
@@ -539,5 +539,8 @@
   </data>
   <data name="danhanhang" xml:space="preserve">
     <value>Đã nhận hàng (Kết thúc nhận hàng)</value>
+  </data>
+  <data name="hethongquanlyhanggiantiep" xml:space="preserve">
+    <value>Hệ thống quản lý hàng gián tiếp (IPCS) </value>
   </data>
 </root>

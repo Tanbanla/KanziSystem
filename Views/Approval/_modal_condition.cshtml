@@ -1,4 +1,4 @@
-﻿<form class="modal-part" id="modal-detail-part">
+<form class="modal-part" id="modal-detail-part">
     <div class="row">      
         <table class="table table-bordered" style="text-align:center">
             <tr hidden>
@@ -12,7 +12,8 @@
                     Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                     物品依頼書（共通間材・比例間材用・消耗品）　
                 </th>
-                <th colspan="2" id="madonhang_0" style="background-color:#fff9e1; font-size:18px"></th>
+                <th colspan="1" id="madonhang_0" style="background-color:#fff9e1; font-size:18px"></th>
+                <th><button type="button" class="btn btn-primary" onclick="_dlxuatkho_trangthai('_0')">Tải xuống</button></th>
             </tr>
             <tr>
                 <th>
@@ -78,6 +79,12 @@
                 </tr>
             </thead>
             <tbody id="load_detail_0"></tbody>
+            <tr>
+                <td colspan="10" class="text-center">
+                    Tổng tiền 合計
+                </td>
+                <td id="tongtientrongdon_0"></td>
+            </tr>
         </table>
         <div class="col-12" style="font-size:11px">
             Qui trình:
@@ -94,11 +101,35 @@
         <br /><br />
     </div> 
 </form>
+<form class="modal-part" id="modal-suadon">
+    <div class="row">
+        <div class="form-group col-12 ">
 
+            <table class="table table-bordered">
+                <thead class="text-center">
+                    <tr>
+                        <td rowspan="2">No</td>
+                        <td rowspan="2">Tên nguyên liệu</td>
+                        <td rowspan="2">Mã kế toán</td>
+                        <td rowspan="2">Số lượng</td>
+                        <td rowspan="2">Đơn vị</td>
+                        <td rowspan="2">Giá tiền</td>
+                        <td colspan="2">Ngoại tệ</td>
+                        <td colspan="2">Tổng đơn</td>
+                        <td rowspan="2">Mục đích</td>
+                        <td rowspan="2">Phòng chịu phí</td>
+                        <td rowspan="2">Vị trí</td>
+                        <td rowspan="2">Ghi chú</td>
+                    </tr>                   
+                </thead>
+                <tbody id="load_suadulieu"></tbody>
+            </table>
+        </div>
+    </div>
+</form>
 
 <form class="modal-part" id="modal-bell">
-    <div class="form-group m-2">
-     
+    <div class="form-group m-2">     
         <table class="table table-bordered">
             <tr>
                 <td colspan="3" class="bg-primary text-white">Ghi nhập hàng về BIVN</td>
@@ -117,5 +148,5 @@
         <button type="button" class="btn btn-success">Lưu cài đặt</button>
         <br /><br />
     </div>
-
 </form>
+
