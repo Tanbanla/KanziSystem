@@ -122,5 +122,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+        //Exprort master Vender
+        public async Task<List<dynamic>> ExportMasterVender()
+        {
+            var sql = "SELECT [CHR_MaNCC] ,[NVCHR_TenNCC] ,[NVCHR_ChungLoai] ,[CHR_PIC] ,[CHR_Mail] ,n.Diachi ,n.ShortName FROM BaoGia_NCC_Category as c" +
+                " left join IM_NCC_NEW as n on n.Ma = c.CHR_MaNCC";
+            return (await _conn.QueryAsync<dynamic>(sql)).ToList();
+
+        }
     }
 }

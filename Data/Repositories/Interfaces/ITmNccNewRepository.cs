@@ -20,5 +20,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<bool> AddListNccNew(List<IM_NCC_NEW> listNccNew);
         // Update Short Name Suppelier
         Task<bool> UpdateShortNames(List<IM_NCC_NEW> listUpate);
+        //Exprort master Vender
+        Task<List<dynamic>> ExportMasterVender();
     }
 }

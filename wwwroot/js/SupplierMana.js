@@ -28,10 +28,51 @@ document.addEventListener('DOMContentLoaded', function () {
     const pageSizeSelect = document.getElementById('pageSizeSelect');
     const downloadMaster = document.getElementById('btnExportMaster');
 
-    downloadMaster.addEventListener('click', () => {
+    if (downloadMaster) {
+        downloadMaster.addEventListener('click', async () => {
+            const T = window.i18nSupplierMana || {};
+            try {
+                const base = window.apiBaseUrl || '';
+                const endpoints = [
+                    { url: base + '/Master/ExportExcelMasterVendor', defaultName: 'ExportMasterVendor.xlsx' },
+                    { url: base + '/Master/ExportExcelMasterMaterial', defaultName: 'ExportMasterMaterial.xlsx' }
+                ];
 
+                for (const ep of endpoints) {
+                    const res = await fetch(ep.url, { method: 'GET' });
+                    if (!res.ok) {
+                        let txt = await res.text().catch(() => res.statusText);
+                        showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.ExportFailed || 'Xuất file thất bại') + ': ' + (txt || res.statusText), type: 'error' });
+                        continue;
+                    }
+                    const blob = await res.blob();
+                    // try to parse filename from content-disposition
+                    let filename = ep.defaultName;
+                    try {
+                        const cd = res.headers.get('content-disposition');
+                        if (cd) {
+                            const m = cd.match(/filename\*?=(?:UTF-8''|\")?([^;\"']+)/i);
+                            if (m && m[1]) filename = decodeURIComponent(m[1].replace(/\"/g, '').trim());
+                        }
+                    } catch { }
 
-    });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }
+
+                showDialog({ title: (T.SuccessTitle || 'Thành công'), message: (T.ExportSuccess || 'Xuất file hoàn tất'), type: 'success' });
+            } catch (err) {
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.ExportFailed || 'Xuất file thất bại') + ': ' + (err && err.message ? err.message : err), type: 'error' });
+            }
+        });
+    }
     document.getElementById('btnSearch')?.addEventListener('click', () => { currentPage = 1; loadSuppliers(); });
     document.getElementById('btnReset')?.addEventListener('click', () => {
         document.getElementById('searchMa').value = '';

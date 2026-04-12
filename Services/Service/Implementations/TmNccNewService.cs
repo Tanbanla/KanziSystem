@@ -155,5 +155,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        //Exprort master Vender
+        public async Task<GenericResponse<List<dynamic>>> ExportMasterVender()
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                var list = await _repo.ExportMasterVender();
+                result.Data = list;
+                result.Success = true;
+            }
+            catch (Exception ex) {
+                result.Message = ex.Message;
+                result.Success = false;
+
+            }
+            return result;
+        }
     }
 }

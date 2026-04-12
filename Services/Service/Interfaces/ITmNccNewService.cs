@@ -22,5 +22,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<bool>> AddListNccNew(List<IM_NCC_NEWDTO> listNccNew);
         // Update Short Name Suppelier
         Task<GenericResponse<bool>> UpdateShortNames(List<IM_NCC_NEW> listUpate);
+        //Exprort master Vender
+        Task<GenericResponse<List<dynamic>>> ExportMasterVender();
     }
 }

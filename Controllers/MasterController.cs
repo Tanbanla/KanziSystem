@@ -31,12 +31,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ITmUserService _tmUserService;
         private readonly IDepartmentService _departmentService;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
         private readonly ILogger<MasterController> _logger;
 
         public MasterController(IMasterApproverSendMailService approverService, IBaoGiaStepService baoGiaStepService, INhomViTriService nhomViTriService,
             ITmSectionService tmSectionService, IEmployeeWorkingService employeeWorkingService, ITmNccNewService tmNccNewService,
-            IBaoGiaNccCategoryService baoGiaNccCategoryService, IDepartmentService departmentService, IConfiguration configuration
+            IBaoGiaNccCategoryService baoGiaNccCategoryService, IDepartmentService departmentService, IConfiguration configuration, IWebHostEnvironment env
             , ILogger<MasterController> logger, ITmCategoryService tmCategoryService, IMaterialService materialService, ITmEmployeeAgentService employeeAgentService, ITmUserService tmUserService)
         {
             _approverService = approverService;
@@ -53,6 +54,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _tmUserService = tmUserService;
             _departmentService = departmentService;
             _configuration = configuration;
+            _env = env;
         }
 
         public IActionResult Masters()
@@ -1189,12 +1191,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Không tìm thấy worksheet trong template");
                 }
-
-
-
-
-
-
+                var dataAsync = await _tmNccNewService.ExportMasterVender();
+                if (dataAsync == null || !dataAsync.Success || dataAsync.Data == null)
+                {
+                    return BadRequest("Error exporting master vendor data: "+dataAsync?.Message);
+                }
+                int startRow = 2;
+                foreach (var item in dataAsync.Data)
+                {
+                    ws.Cell(startRow, 1).Value = item.NVCHR_ChungLoai;
+                    ws.Cell(startRow, 2).Value = item.CHR_MaNCC;
+                    ws.Cell(startRow, 3).Value = item.ShortName;
+                    ws.Cell(startRow, 4).Value = item.NVCHR_TenNCC;
+                    ws.Cell(startRow, 5).Value = item.Diachi;
+                    ws.Cell(startRow, 6).Value = item.CHR_Mail;
+                    ws.Cell(startRow, 7).Value = item.CHR_PIC;
+                    startRow++;
+                }
                 using var outStream = new MemoryStream();
                 workbook.SaveAs(outStream);
                 var bytes = outStream.ToArray();
@@ -1207,5 +1220,57 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        //  Export master material
+         [HttpGet]
+         public async Task<IActionResult> ExportExcelMasterMaterial()
+         {
+            try
+            {
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+                var dataAsync = await _materialService.GetAllAsync();
+                if (dataAsync == null || !dataAsync.Success || dataAsync.Data == null)
+                {
+                    return BadRequest("Error exporting master material data: " + dataAsync?.Message);
+                }
+                int startRow = 2;
+                foreach (var item in dataAsync.Data)
+                {
+                    ws.Cell(startRow, 1).Value = item.Category_VN;
+                    ws.Cell(startRow, 2).Value = item.Material_Code;
+                    ws.Cell(startRow, 3).Value = item.Material_Name_VN;
+                    ws.Cell(startRow, 4).Value = item.Code_Suppiler;
+                    ws.Cell(startRow, 5).Value = item.Shape;
+                    ws.Cell(startRow, 6).Value = item.Material;
+                    ws.Cell(startRow, 7).Value = item.Composition;
+                    ws.Cell(startRow, 8).Value = item.Dimension;
+                    ws.Cell(startRow, 9).Value = item.UsedFor;
+                    ws.Cell(startRow, 10).Value = item.Purpose;
+                    startRow++;
+                }
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"ExportMasterMaterial_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+         }
     }
 }
