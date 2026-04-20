@@ -1347,5 +1347,92 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+        // Phê duyệt list lựa chọn nhà cung cấp
+        public async Task<List<BaoGia_Request_of_Quotation>> UpdateApprover(List<ApproverDTO> dataApprovers, string userNext, string userUpdate)
+        {
+            // Kiểm tra tham số đầu vào
+            if (dataApprovers == null || !dataApprovers.Any())
+            {
+                throw new ArgumentNullException(nameof(dataApprovers), "No approval data provided");
+            }
+
+            // Lấy tất cả ID cần xử lý
+            var ids = dataApprovers.Select(a => a.Id).Distinct().ToList();
+
+            // Load tất cả dữ liệu cần xử lý trong 1 query duy nhất
+            var existingData = await _context.BaoGia_Request_of_Quotations
+                .Where(c => ids.Contains(c.ID) && c.ID_StepBaoGia >= 9 && c.ID_StepBaoGia <= 11)
+                .ToDictionaryAsync(c => c.ID, c => c);
+
+            var historyList = new List<BaoGia_History_Request_of_Quotation>();
+            var updatedEntities = new List<BaoGia_Request_of_Quotation>();
+
+            foreach (var item in dataApprovers)
+            {
+                if (!existingData.TryGetValue(item.Id, out var data)) continue;
+
+                if (item.IsApproved != false)
+                {
+                    data.ID_StepBaoGia++;
+                    data.CHR_UserApproval = userNext;
+                    data.DTM_UpdateLater = DateTime.Now;
+                    if (data.ID_StepBaoGia >= 12)
+                    {
+                        data.ID_Status = "DONE";
+                    }
+
+                    var actionType = data.ID_StepBaoGia == 10 ? "QLSC_PICK_NCC" :
+                                    (data.ID_StepBaoGia == 11 ? "QLTC_PICK_NCC" : "DEFT_PICK_NCC");
+
+                    historyList.Add(new BaoGia_History_Request_of_Quotation
+                    {
+                        ID_RequestQuote = item.Id,
+                        CHR_MaDon = data.CHR_MaDon ?? string.Empty,
+                        CHR_UpdateBy = userUpdate,
+                        NVCHR_UpdateName = userUpdate,
+                        CHR_Updatedate = DateTime.Now,
+                        CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
+                        CHR_ActionType = actionType
+                    });
+                    updatedEntities.Add(data);
+                }
+                else
+                {
+                    data.ID_Status = data.ID_StepBaoGia == 9 ? "RETURN_QLSC_AFTER" :
+                                    (data.ID_StepBaoGia == 10 ? "RETURN_QLTC_AFTER" : "RETURN_TBP");
+                    data.ID_StepBaoGia = 8;
+                    data.NVCHR_LyDo = item.Reason;
+                    data.DTM_UpdateLater = DateTime.Now;
+
+                    historyList.Add(new BaoGia_History_Request_of_Quotation
+                    {
+                        ID_RequestQuote = data.ID,
+                        CHR_MaDon = data.CHR_MaDon ?? string.Empty,
+                        CHR_UpdateBy = userUpdate,
+                        NVCHR_UpdateName = userUpdate,
+                        CHR_Updatedate = DateTime.Now,
+                        CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
+                        NVCHR_LyDo = item.Reason,
+                        CHR_ActionType = data.ID_Status
+                    });
+                    updatedEntities.Add(data);
+                }
+            }
+
+            // Lưu thay đổi
+            if (updatedEntities.Any())
+            {
+                _context.BaoGia_Request_of_Quotations.UpdateRange(updatedEntities);
+            }
+
+            if (historyList.Any())
+            {
+                await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return updatedEntities;
+        }
     }
 }

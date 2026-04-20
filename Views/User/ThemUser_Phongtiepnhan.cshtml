@@ -1,0 +1,50 @@
+@page
+@model PRJ_WAREHOUSE_BIVN.Pages.UserManagement.IndexModel
+@{
+    ViewData["Title"] = "User Management";
+}
+<h2>User Management</h2>
+
+<section>
+    <h3>Add user</h3>
+    <form method="post" asp-page-handler="Create">
+        <div>
+            <label>User Name</label>
+            <input name="Input.User_Name" />
+        </div>
+        <div>
+            <label>Mail</label>
+            <input name="Input.Mail" />
+        </div>
+        <div>
+            <label>Adid</label>
+            <input name="Input.Adid" />
+        </div>
+        <div>
+            <label>Group Code</label>
+            <input name="Input.Group_Code" />
+        </div>
+        <div>
+            <label>Role</label>
+            <input name="Input.Role" />
+        </div>
+        <button type="submit">Add</button>
+    </form>
+</section>
+
+<section>
+    <h3>Users</h3>
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>User Name</th>
+                <th>Mail</th>
+                <th>Adid</th>
+                <th>Group Code</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>     
+    </table>
+</section>

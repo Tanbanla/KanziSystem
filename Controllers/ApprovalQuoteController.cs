@@ -1,6 +1,7 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Constraints;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -266,7 +267,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                     var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
                                     var materialService = scope.ServiceProvider.GetRequiredService<IMaterialService>();
-                                    var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
 
                                     // Phân loại MaterialsNew theo CHR_Phanloai (A hoặc I)
                                     var materialsByPhanLoai = MaterialsNew
@@ -274,7 +274,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         .GroupBy(m => GetMaterialType(m.CHR_Phanloai))
                                         .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
-                                    var MaterialNews = new List<MATERIAL>();
+                                    var MaterialNews = new List<MATERIALDTO>();
                                     var confirmNames = new List<ConfirmNameDTO>();
 
                                     foreach (var phanLoaiGroup in materialsByPhanLoai)
@@ -286,7 +286,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         var latestCode = await materialService.MaterialCodeLater(materialType);
                                         var nextNumber = ExtractNumberFromCode(latestCode.Data);
 
-                                        var processedSuppliers = new Dictionary<string, MATERIAL>(StringComparer.OrdinalIgnoreCase);
+                                        var processedSuppliers = new Dictionary<string, MATERIALDTO>(StringComparer.OrdinalIgnoreCase);
 
                                         var materialsBySupplier = materialsInGroup
                                             .GroupBy(m => m.CHR_MaHangNCC)
@@ -331,17 +331,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                             Id = material.ID,
                                                             MaHangNoiBo = existingMaterial.Material_Code
                                                         });
-                                                        // dữ liệu xác nhận tên
-                                                        var cf = new BaoGia_Confirm_Name_QuotationDTO();
-                                                        cf.ID_RequestQuote = material.ID;
-                                                        cf.DTM_CreateDate = DateTime.Now;
-                                                        cf.VCHR_CreateBy = currentUserId;
-                                                        cf.VCHR_TenRecomment = material.NVCHR_NameVN;
-                                                        cf.CHR_Status = "Confirming";
-                                                        cf.CHR_StatusACC = "Confirmed";
-                                                        cf.CHR_StatusShip = "Confirming";
-                                                        cf.NVCHR_Note = material.CHR_MaHangNCC;
-                                                        listConfirm.Add(cf);
                                                     }
                                                 }
                                                 else
@@ -351,7 +340,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                     var newMaterialCode = GenerateMaterialCode(materialType, nextNumber);
                                                     var firstMaterial = materials.First();
 
-                                                    var newMaterial = new MATERIAL
+                                                    var newMaterial = new MATERIALDTO
                                                     {
                                                         Material_Code = newMaterialCode,
                                                         Material_Name_VN = firstMaterial.NVCHR_NameVN,
@@ -359,7 +348,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                         Code_Suppiler = firstMaterial.CHR_MaHangNCC,
                                                         Category_VN = firstMaterial.NVCHR_ChungLoai,
                                                         Shape = firstMaterial.NVCHR_HinhDang,
-                                                        Material1 = firstMaterial.NVCHR_ChatLieu,
+                                                        Material = firstMaterial.NVCHR_ChatLieu,
                                                         Composition = firstMaterial.NVCHR_ThanhPhan,
                                                         Dimension = firstMaterial.NVCHR_KichThuoc,
                                                         UsedFor = firstMaterial.NVCHR_DongMay,
@@ -378,36 +367,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                             Id = material.ID,
                                                             MaHangNoiBo = newMaterialCode
                                                         });
-                                                        // dữ liệu xác nhận tên
-                                                        var cf = new BaoGia_Confirm_Name_QuotationDTO();
-                                                        cf.ID_RequestQuote = material.ID;
-                                                        cf.DTM_CreateDate = DateTime.Now;
-                                                        cf.VCHR_CreateBy = currentUserId;
-                                                        cf.VCHR_TenRecomment = material.NVCHR_NameVN;
-                                                        cf.CHR_Status = "Confirming";
-                                                        cf.CHR_StatusACC = "Confirmed";
-                                                        cf.CHR_StatusShip = "Confirming";
-                                                        cf.NVCHR_Note = material.CHR_MaHangNCC;
-                                                        listConfirm.Add(cf);
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                     // Send mail
-                                    if (listConfirm.Any())
-                                    {
-                                        await baoGiaConfirmNameService.AddListAsync(listConfirm);
-                                        // gửi mail thông báo có yêu cầu xác nhận tên mới
-                                        var emailResult = await sendMailService.SendMailToConfirmItemAsync(13, 17, "Material/ConfirmName", true, "", "", currentUserId);
-                                    }
                                     if (confirmNames.Any())
                                     {
                                         await baoGiaService.UpdateCodeMaterialBIVN(confirmNames);
                                     }
                                     if (MaterialNews.Any())
                                     {
-                                        await materialService.AddMultiAsync(MaterialNews);
+                                        await materialService.UpdateListThongTinNoList(MaterialNews);
                                     }
                                 }
                                 catch (Exception ex)
@@ -435,7 +407,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var upperPhanLoai = phanLoai.ToUpper().Trim();
 
-            if (upperPhanLoai == "I" || upperPhanLoai.Contains("I"))
+            if (upperPhanLoai == "I")
                 return "I";
 
             return "O";

@@ -139,20 +139,22 @@
                                         <span class="small">@Localizer["MenuQuoteApprove"]</span>
                                     </a>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item py-2" href="~/Quote/InputQuote">
-                                        <i class="fas fa-inbox me-2"></i>
-                                        <span class="small">@Localizer["MenuQuoteInput"]</span>
-                                    </a>
-                                </li>
+                                @if (User.FindFirst("Roles")?.Value == "UserPUR")
+                                {
+                                    <li>
+                                        <a class="dropdown-item py-2" href="~/Quote/InputQuote">
+                                            <i class="fas fa-inbox me-2"></i>
+                                            <span class="small">@Localizer["MenuQuoteInput"]</span>
+                                        </a>
+                                    </li>
 
-                                <li>
-                                    <a class="dropdown-item py-2" href="~/Quote/Quotation_Results">
-                                        <i class="fas fa-clipboard-list me-2"></i>
-                                        <span class="small">@Localizer["MenuQuoteResults"]</span>
-                                    </a>
-                                </li>
-
+                                    <li>
+                                        <a class="dropdown-item py-2" href="~/Quote/Quotation_Results">
+                                            <i class="fas fa-clipboard-list me-2"></i>
+                                            <span class="small">@Localizer["MenuQuoteResults"]</span>
+                                        </a>
+                                    </li>
+                                }
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Quote/SelectQuoteSection">
                                         <i class="fas fa-baseball-ball me-2"></i>
@@ -175,7 +177,7 @@
                                 <li><a class="nav-link" href="~/Material/ConfirmName"><i class="fas fa-check-square"></i> @Localizer["MenuMaterialConfirmName"]</a></li>
                             </ul>
                         </li>
-                        <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Import" ? "active" : "")">
+                        <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Import" ? "active" : "")" hidden>
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cloud-upload"></i> <span>@Localizer["MenuWarehouse"]</span></a>
                             <ul class="dropdown-menu">
                                 @*   <li><a class="nav-link" href="~/Delivery/PO_Info"><i class="ion ion-ios-information"></i> Thông tin PO</a></li> @* thông tin PO *@
@@ -190,7 +192,7 @@
                                 <li><a class="nav-link" href="~/Import/Xuatkho"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExport"]</a></li>
                             </ul>
                         </li>
-                        <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Approval" ? "active" : "")">
+                        <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Approval" ? "active" : "")" hidden>
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-android-checkmark-circle"></i> <span>@Localizer["MenuApproval"]</span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="~/Approval/ListData"><i class="fas fa-check"></i> @Localizer["MenuApprovalApprove"] PROD</a></li>

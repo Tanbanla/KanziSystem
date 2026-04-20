@@ -104,12 +104,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // lấy id của đơn báo giá
-        public async Task<GenericResponse<int?>> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNcc, string NameHQ)
+        public async Task<GenericResponse<int?>> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNB, string maNcc, string NameHQ)
         {
             var result = new GenericResponse<int?>();
             try
             {
-                result.Data = await _repo.GetIdOfQuotationAsync(maDon, maVatTu, maNcc, NameHQ);
+                result.Data = await _repo.GetIdOfQuotationAsync(maDon, maVatTu, maNB, maNcc, NameHQ);
                 result.Success = true;
             }
             catch (Exception ex)

@@ -197,7 +197,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 gia = "and b.Total >= '10000'";
             }
             var list = _db.GET_DATA_FROM_SQL(" select top (200) * from [PE_REQUEST_CONFIRM_GA] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center " +
-                "where ((CHR_ADID_NGUOIYEUCAU = '" + us + "' and CONFIRM_NGUOIYEUCAU = '0') OR (CHR_ADID_NGUOITHAMTRA = '" + us + "' and CONFIRM_NGUOITHAMTRA = '0') OR (CHR_ADID_NGUOIPHEDUYET = '" + us + "' and CONFIRM_NGUOIPHEDUYET = '0') OR (CHR_ADID_QLSC = '" + us + "' and CONFIRM_QLSC = '0') OR (CHR_ADID_QLTC = '" + us + "' and CONFIRM_QLTC = '0')) and INT_STEP < 5 " +
+                "where ((a.INT_STEP = 0 AND CHR_ADID_NGUOIYEUCAU = '" + us + "' and CONFIRM_NGUOIYEUCAU = '0') " +
+                "OR ( a.INT_STEP = 1 AND CHR_ADID_NGUOITHAMTRA = '" + us + "' and CONFIRM_NGUOITHAMTRA = '0') " +
+                "OR (a.INT_STEP = 2 AND CHR_ADID_NGUOIPHEDUYET = '" + us + "' and CONFIRM_NGUOIPHEDUYET = '0') " +
+                "OR (a.INT_STEP = 3 AND CHR_ADID_XUATKHO = '" + us + "' and (CONFIRM_XUATKHO = '0' or CONFIRM_XUATKHO is null)) " +
+                "OR (a.INT_STEP = 4 AND CHR_ADID_QLSC = '" + us + "' and CONFIRM_QLSC = '0') " +
+                "OR (a.INT_STEP = 5 AND CHR_ADID_QLTC = '" + us + "' and CONFIRM_QLTC = '0')) and INT_STEP < 6 " +
                 $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%'");
             for (int i = 0; i < list.Rows.Count; i++)
             {
@@ -334,7 +339,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Group_Code = dtm.Rows[0]["Group_Code"].ToString(),
                     Urgent = dtm.Rows[0]["Urgent"].ToString(),
                     Aim = get_if.Rows[0]["Aim"].ToString(),
-                    Place = requestt.Rows[0]["Place"].ToString()
+                    Place = requestt.Rows[0]["Place"].ToString(),
+                    Poisition = get_if.Rows[0]["Poisition"].ToString(),
                 });
             }
             return rq;

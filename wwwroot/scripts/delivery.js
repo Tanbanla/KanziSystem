@@ -45,12 +45,13 @@ function ImportWarehouse() {
             fetch(url, options)
                 .then(response => response.json())
                 .then(result => {
-                    alert("Nhận hàng PO " + row.cells[4].innerHTML + " (Mã " + row.cells[1].innerHTML + "): " + result);
-                    SearchPoDel();
+                  
                 })
                 .catch(err => console.error(err));
         }
     }
+    alert("Nhận hàng thành công !");
+    SearchPoDel();
 }
 function Usingg() {
     const url = '/Delivery/Sudungngay';
@@ -166,54 +167,88 @@ function Check_luongvethucte(id) {
 }
 
 async function _Load_PO() {
-
     let us = document.getElementById('us').innerHTML;
     const params = new URLSearchParams();
     params.append('us', us);
+
     try {
-        fetch('/Delivery/LoadDataPo', {
+        // Sử dụng await đồng bộ hóa request để try...catch có thể hoạt động đúng
+        const response = await fetch('/Delivery/LoadDataPo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: params.toString()
-        })
-            .then(response => response.json())
-            .then(result => {
-                let opt = document.getElementById('show_kho_iv');
-                opt.innerHTML = "";
-                result.forEach((value) => {
+        });
 
-                    // 1. Chuyển đổi kiểu dữ liệu
-                    var solg = parseFloat(value.soluong) || 0;
-                    var lgvekho = parseFloat(value.luongvekho) || 0;
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-                    // 2. Xác định class dựa trên điều kiện
-                    let rowClass = "";
-                    if (solg > lgvekho) {
-                        rowClass = "text-primary";
-                    }
-                    else if (solg < lgvekho) {
-                        rowClass = "text-danger";
-                    }
-                    else if (solg == lgvekho) {
-                        rowClass = "text-dark";
-                    }
-                    opt.innerHTML += `<tr class="${rowClass}"><td class="text-center"><input type="checkbox" class="item" value="${value.pO_Detail_Id}" /></td><td>${value.pO_Detail_Id}</td><td>${value.id_Goc}</td><td>${value.benxacnhantruoc}</td><td>${value.soPO}</td><td>${value.code_Request}</td><td>${value.mahang}</td><td>${value.good_Code}</td><td>${value.tentienganh}</td><td>${value.tentiengviet}</td>
-                           <td id="soluong_${value.pO_Detail_Id}">${value.soluong}</td>`
-                        + `<td><input type='number' style="background-color:lightyellow" class="form-control" id="luongvethucte_${value.pO_Detail_Id}" onblur="Check_luongvethucte('${value.pO_Detail_Id}')" value='${value.luongvekho}'></input></td>
-                          <td>${value.luongvekhoNgaynhap}</td><td>${value.luongvekhoNguoinhap}</td><td>${value.dovi}</td><td>${value.dongia}</td><td>${value.dieukiengiaohang}</td>`
-                        + `<td>${value.diadiemgiaohang}</td><td>${value.phuongthucvanchuyen}</td><td>${value.sotien}</td><td>${value.vat}</td><td>${value.maphongyeucau}</td>`
-                        + `<td>${value.tenphongyeucau}</td><td>${value.ngaygiaohangdukien}</td><td>${value.noigiaodukien}</td>`
-                        + `<td>${value.thoigianthanhtoan}</td><td>${value.loaitien}</td>`
-                        + `<td>${value.tygia}</td><td>${value.doisangUSD}</td><td>${value.danhmuc}</td>`
-                        + `<td>${value.tenNCC} </td><td>${value.id_LichsuNhap} </td><td>${value.luongvekhoKhonhap}</td><td>${value.invoice}</td><td>${value.tinhtranghaiquanPO}</td></tr>`;
-                });
-            })
-            .catch(err => console.error(err));
-    }
-    catch (error) {
-        console.error('Error : ', error);
+        const result = await response.json();
+        let opt = document.getElementById('show_kho_iv');
+
+        // Sử dụng mảng để gom các dòng HTML lại, sau đó nối chuỗi 1 lần
+        let htmlRows = result.map((value) => {
+            let solg = parseFloat(value.soluong) || 0;
+            let lgvekho = parseFloat(value.luongvekho) || 0;
+            let rowClass = "";
+
+            // Lưu ý: Đảm bảo kiểu dữ liệu khi so sánh id để class text-primary hoạt động đúng
+           
+            if (solg > lgvekho && String(value.benxacnhantruoc) === "STOCK" && String(value.Id_Goc) != "") {
+                rowClass = "text-danger";
+            }
+            else if (solg > lgvekho) {
+                rowClass = "text-primary";
+            } else if (solg < lgvekho) {
+                rowClass = "text-danger";
+            } else {
+                rowClass = "text-dark";
+            }
+
+            return `<tr class="${rowClass}">
+                <td class="text-center"><input type="checkbox" class="item" value="${value.pO_Detail_Id}" /></td>
+                <td>${value.pO_Detail_Id}</td>
+                <td>${value.id_Goc}</td>
+                <td>${value.benxacnhantruoc}</td>
+                <td>${value.soPO}</td>
+                <td>${value.mahang}</td>
+                <td>${value.good_Code}</td>
+                <td>${value.tentienganh}</td>
+                <td>${value.tentiengviet}</td>
+                <td id="soluong_${value.pO_Detail_Id}">${value.soluong}</td>
+                <td><input type='number' style="background-color:lightyellow" class="form-control" id="luongvethucte_${value.pO_Detail_Id}" onblur="Check_luongvethucte('${value.pO_Detail_Id}')" value='${value.luongvekho}'></td>
+                <td>${value.luongvekhoNgaynhap}</td>
+                <td>${value.luongvekhoNguoinhap}</td>
+                <td>${value.dovi}</td>
+                <td>${value.dongia}</td>
+                <td>${value.dieukiengiaohang}</td>
+                <td>${value.diadiemgiaohang}</td>
+                <td>${value.phuongthucvanchuyen}</td>
+                <td>${value.sotien}</td>
+                <td>${value.vat}</td>
+                <td>${value.maphongyeucau}</td>
+                <td>${value.tenphongyeucau}</td>
+                <td>${value.ngaygiaohangdukien}</td>
+                <td>${value.noigiaodukien}</td>
+                <td>${value.thoigianthanhtoan}</td>
+                <td>${value.loaitien}</td>
+                <td>${value.tygia}</td>
+                <td>${value.doisangUSD}</td>
+                <td>${value.danhmuc}</td>
+                <td>${value.tenNCC}</td>
+                <td>${value.id_LichsuNhap}</td>
+                <td>${value.luongvekhoKhonhap}</td>
+                <td>${value.invoice}</td>
+                <td>${value.tinhtranghaiquanPO}</td>
+                <td>${value.code_Request}</td>
+            </tr>`;
+        });
+
+        // Chỉ cập nhật giao diện đúng 1 lần
+        opt.innerHTML = htmlRows.join('');
+
+    } catch (error) {
+        console.error('Error fetching PO Data: ', error);
     }
 }
 function ResetWarehouse() {

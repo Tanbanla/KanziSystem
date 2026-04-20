@@ -394,7 +394,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     switch (role)
                     {
                         case "UserShip":
-                            var tenHaiQuan = ws.Cell(r, 22).GetString();
+                            var tenHaiQuan = ws.Cell(r, 24).GetString();
                             if (string.IsNullOrWhiteSpace(tenHaiQuan))
                             {
                                 ws.Cell(r, 25).SetValue("Tên hải quan không được để trống");
@@ -540,9 +540,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 try
                 {
                     if (!showMaNB) ws.Column(9).Hide();
-                    if (!showTenHQ) ws.Column(22).Hide();
-                    if (!showUserShip) ws.Column(23).Hide();
-                    if (!showUserAcc) ws.Column(24).Hide();
                 }
                 catch { /* ignore if template layout differs */ }
 
@@ -569,20 +566,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 8).SetValue(rq.CHR_MaThietBi ?? "");
                     ws.Cell(row, 9).SetValue(showMaNB ? maHangNb : "");
                     ws.Cell(row, 10).SetValue(rq.CHR_MaHangNCC ?? "");
-                    ws.Cell(row, 11).SetValue(rq.VCHR_TenRecomment ?? "");
-                    ws.Cell(row, 12).SetValue(rq.CHR_NameEN ?? "");
-                    ws.Cell(row, 13).SetValue(rq.INT_SoLuong ?? "");
-                    ws.Cell(row, 14).SetValue(rq.NVCHR_DonVi ?? "");
-                    ws.Cell(row, 15).SetValue(rq.NVCHR_ChungLoai ?? "");
-                    ws.Cell(row, 16).SetValue(rq.NVCHR_HinhDang ?? "");
-                    ws.Cell(row, 17).SetValue(rq.NVCHR_ChatLieu ?? "");
-                    ws.Cell(row, 18).SetValue(rq.NVCHR_ThanhPhan ?? "");
-                    ws.Cell(row, 19).SetValue(rq.NVCHR_KichThuoc ?? "");
-                    ws.Cell(row, 20).SetValue(rq.NVCHR_DongMay ?? "");
-                    ws.Cell(row, 21).SetValue(rq.NVCHR_TinhNang ?? "");
-                    ws.Cell(row, 22).SetValue(showTenHQ ? (rq.VCHR_TenHaiQuan ?? "") : "");
-                    ws.Cell(row, 23).SetValue(showUserShip ? (rq.VCHR_UserShip ?? "") : "");
-                    ws.Cell(row, 24).SetValue(showUserAcc ? (rq.VCHR_UserAcc ?? "") : "");
+                    ws.Cell(row, 11).SetValue(rq.CHR_CodeNCC +" - "+ rq.ShortName ?? "");
+                    ws.Cell(row, 12).SetValue(rq.VCHR_TenRecomment ?? "");
+                    ws.Cell(row, 13).SetValue(rq.CHR_NameEN ?? "");
+                    ws.Cell(row, 14).SetValue(rq.INT_SoLuong ?? "");
+                    ws.Cell(row, 15).SetValue(rq.NVCHR_DonVi ?? "");
+                    ws.Cell(row, 16).SetValue(rq.NVCHR_ChungLoai ?? "");
+                    ws.Cell(row, 17).SetValue(rq.NVCHR_HinhDang ?? "");
+                    ws.Cell(row, 18).SetValue(rq.NVCHR_ChatLieu ?? "");
+                    ws.Cell(row, 19).SetValue(rq.NVCHR_ThanhPhan ?? "");
+                    ws.Cell(row, 20).SetValue(rq.NVCHR_KichThuoc ?? "");
+                    ws.Cell(row, 21).SetValue(rq.NVCHR_DongMay ?? "");
+                    ws.Cell(row, 22).SetValue(rq.NVCHR_TinhNang ?? "");
+                    ws.Cell(row, 23).SetValue(rq.NVCHR_File ?? "");
+                    ws.Cell(row, 24).SetValue(showTenHQ ? (rq.VCHR_TenHaiQuan ?? "") : "");
+                    ws.Cell(row, 25).SetValue(showUserShip ? (rq.VCHR_UserShip ?? "") : "");
+                    ws.Cell(row, 26).SetValue(showUserAcc ? (rq.VCHR_UserAcc ?? "") : "");
                     row++;
                     idx++;
                 }

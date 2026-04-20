@@ -215,8 +215,6 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     }
     public class REQUEST_PROCESS
     {
-
-
         public static string Insert_request(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao)
         {
             //string pathLog = @"\\apbivndb20\21_WAREHOUSE_BIVN\LogFile.txt";
@@ -248,8 +246,6 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                         '{Kind}', '{Type}', '{Status}',GETDATE(), '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
                     );
                     SELECT @NewCode AS NextCode, SCOPE_IDENTITY() AS NewID;";
-
-
 
             //File.AppendAllText(pathLog, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] SQL Command for Request: {Environment.NewLine}{_cmdRequest}{Environment.NewLine}");
             var dtBase = _db.GET_DATA_FROM_SQL(_cmdRequest);
@@ -302,6 +298,18 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return pcp;
         }
+        public static List<string> vitri(string cost)
+        {
+            cost = cost.Split(":")[0];
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            var phongchiuchi = _db.GET_DATA_FROM_SQL("Select null As MaChuyen Union SELECT [MaChuyen] FROM [DEPARTMENT_VITRI] WHERE [MaCost] = '" + cost + "' ");
+            List<string> vitri = new List<string>();
+            for (int i = 0; i < phongchiuchi.Rows.Count; i++)
+            {
+                vitri.Add(phongchiuchi.Rows[i]["MaChuyen"].ToString()!);
+            }
+            return vitri;
+        }
         public static string _insert_request_confirm(string id_request, string adid_dt, string adid_tt, string adid_pheduyet, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk, string nguoitao, string mailnguoitao)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
@@ -333,8 +341,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             {
                 gia = "and b.Total >= '10000'";
             }
-            var list = _db.GET_DATA_FROM_SQL(" select top (200) * from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request" +
-                " where ((CHR_ADID_NGUOIYEUCAU = '" + us + "' and CONFIRM_NGUOIYEUCAU = '0') OR (CHR_ADID_NGUOITHAMTRA = '" + us + "' and CONFIRM_NGUOITHAMTRA = '0') OR (CHR_ADID_NGUOIPHEDUYET = '" + us + "' and CONFIRM_NGUOIPHEDUYET = '0') OR (CHR_ADID_XACNHAN = '" + us + "' and CONFIRM_XACNHAN = '0')) and INT_STEP < 5 " +
+            var list = _db.GET_DATA_FROM_SQL("select top (200) * from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request" +
+                " where (" +
+                "(a.INT_STEP = 0 AND CHR_ADID_NGUOIYEUCAU = '" + us + "' and CONFIRM_NGUOIYEUCAU = '0') " +
+                "OR ( a.INT_STEP = 1 AND CHR_ADID_NGUOITHAMTRA = '" + us + "' and CONFIRM_NGUOITHAMTRA = '0') " +
+                "OR (a.INT_STEP = 2 AND CHR_ADID_NGUOIPHEDUYET = '" + us + "' and CONFIRM_NGUOIPHEDUYET = '0') " +
+                "OR (a.INT_STEP = 3 AND CHR_ADID_XACNHAN = '" + us + "' and CONFIRM_XACNHAN = '0')) and INT_STEP < 5 " +
                 $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%'");
             for (int i = 0; i < list.Rows.Count; i++)
             {
@@ -467,7 +479,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     tmp.Group_Code = dtm.Rows[0]["Group_Code"].ToString();
                     tmp.Urgent = dtm.Rows[0]["Urgent"].ToString();
                     tmp.Aim = get_if.Rows[0]["Aim"].ToString();
-                tmp.Place = requestt.Rows[0]["Place"].ToString();
+                    tmp.Place = requestt.Rows[0]["Place"].ToString();
+                    tmp.Poisition = get_if.Rows[0]["Poisition"].ToString();
                 
                 rq.Add(tmp);
             }
@@ -638,6 +651,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 _db.GET_DATA_FROM_SQL(UpdateRequest);
 
                 CheckDone(code_request, id_rq);
+               
                 return "OK";
 
             }
@@ -660,7 +674,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             if (check == true)
             {
-                _db.GET_DATA_FROM_SQL("Update [PE_REQUEST_CONFIRM] set INT_STEP = '7' where ID_REQUEST = '" + id_rq + "'");
+                _db.GET_DATA_FROM_SQL("Update [PE_REQUEST_CONFIRM] set INT_STEP = '5' where ID_REQUEST = '" + id_rq + "'");
+                _db.GET_DATA_FROM_SQL("Update [PE_REQUEST_CONFIRM_GA] set INT_STEP = '11' where ID_REQUEST = '" + id_rq + "'");
                 _db.GET_DATA_FROM_SQL("UPDATE [REQUEST] SET [Status] = 'DONE' WHERE [Code_Request] = '" + Code_Request + "' ");
             }
         }
@@ -799,6 +814,5 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             return rq_lst;
 
         }
-
     }
 }

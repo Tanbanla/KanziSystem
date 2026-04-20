@@ -623,7 +623,7 @@ function hideEditModal() {
             tr.appendChild(addTd((getVal(d, 'lyDoQlsc') === null || getVal(d, 'lyDoQlsc') === "") ? "OK" : "NG"));
             tr.appendChild(addTd(getVal(d, 'lyDoQlsc')));
 
-            tr.appendChild(addTd(getVal(d, 'serQltc')));
+            tr.appendChild(addTd(getVal(d, 'userQltc')));
             tr.appendChild(addTd((getVal(d, 'lyDoQltc') === null || getVal(d, 'lyDoQltc') === "") ? "OK" : "NG"));
             tr.appendChild(addTd(getVal(d, 'lyDoQltc')));
 

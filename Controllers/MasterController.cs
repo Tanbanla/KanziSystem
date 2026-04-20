@@ -114,8 +114,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             foreach (var item in materials)
             {
                 checklistData.Add(new
-                {
-                  
+                {                  
                     Ma = item.Split(":")[0],
                     Ten = item.Split(":")[1]
                 });
@@ -1178,10 +1177,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
-                var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
+                var templatePath = Path.Combine(root, "template", "NccMaster.xlsx");
                 if (!System.IO.File.Exists(templatePath))
                 {
-                    return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
+                    return BadRequest("Không tìm thấy file template: NccMaster.xlsx");
                 }
 
                 using var fs = System.IO.File.OpenRead(templatePath);
@@ -1194,18 +1193,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var dataAsync = await _tmNccNewService.ExportMasterVender();
                 if (dataAsync == null || !dataAsync.Success || dataAsync.Data == null)
                 {
-                    return BadRequest("Error exporting master vendor data: "+dataAsync?.Message);
+                    return BadRequest("Error exporting master vendor data: " + dataAsync?.Message);
                 }
                 int startRow = 2;
                 foreach (var item in dataAsync.Data)
                 {
-                    ws.Cell(startRow, 1).Value = item.NVCHR_ChungLoai;
-                    ws.Cell(startRow, 2).Value = item.CHR_MaNCC;
-                    ws.Cell(startRow, 3).Value = item.ShortName;
-                    ws.Cell(startRow, 4).Value = item.NVCHR_TenNCC;
-                    ws.Cell(startRow, 5).Value = item.Diachi;
-                    ws.Cell(startRow, 6).Value = item.CHR_Mail;
-                    ws.Cell(startRow, 7).Value = item.CHR_PIC;
+                    ws.Cell(startRow, 1).Value = item.NVCHR_ChungLoai ?? string.Empty;
+                    ws.Cell(startRow, 2).Value = item.CHR_MaNCC ?? string.Empty;
+                    ws.Cell(startRow, 3).Value = item.ShortName ?? string.Empty;
+                    ws.Cell(startRow, 4).Value = item.NVCHR_TenNCC ?? string.Empty;
+                    ws.Cell(startRow, 5).Value = item.Diachi ?? string.Empty;
+                    ws.Cell(startRow, 6).Value = item.CHR_Mail ?? string.Empty;
+                    ws.Cell(startRow, 7).Value = item.CHR_PIC ?? string.Empty;
                     startRow++;
                 }
                 using var outStream = new MemoryStream();
@@ -1215,22 +1214,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 return File(bytes, contentType, fileName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
         //  Export master material
-         [HttpGet]
-         public async Task<IActionResult> ExportExcelMasterMaterial()
-         {
+        [HttpGet]
+        public async Task<IActionResult> ExportExcelMasterMaterial()
+        {
             try
             {
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
-                var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
+                var templatePath = Path.Combine(root, "template", "MaterialMaster.xlsx");
                 if (!System.IO.File.Exists(templatePath))
                 {
-                    return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
+                    return BadRequest("Không tìm thấy file template: MaterialMaster.xlsx");
                 }
 
                 using var fs = System.IO.File.OpenRead(templatePath);
@@ -1245,19 +1244,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Error exporting master material data: " + dataAsync?.Message);
                 }
-                int startRow = 2;
+                int startRow = 3;
                 foreach (var item in dataAsync.Data)
                 {
-                    ws.Cell(startRow, 1).Value = item.Category_VN;
-                    ws.Cell(startRow, 2).Value = item.Material_Code;
-                    ws.Cell(startRow, 3).Value = item.Material_Name_VN;
-                    ws.Cell(startRow, 4).Value = item.Code_Suppiler;
-                    ws.Cell(startRow, 5).Value = item.Shape;
-                    ws.Cell(startRow, 6).Value = item.Material;
-                    ws.Cell(startRow, 7).Value = item.Composition;
-                    ws.Cell(startRow, 8).Value = item.Dimension;
-                    ws.Cell(startRow, 9).Value = item.UsedFor;
-                    ws.Cell(startRow, 10).Value = item.Purpose;
+                    ws.Cell(startRow, 1).Value = item.GetLoaiHang() ?? string.Empty;
+                    ws.Cell(startRow, 2).Value = item.Material_Code ?? string.Empty;
+                    ws.Cell(startRow, 3).Value = item.Code_Suppiler ?? string.Empty;
+                    ws.Cell(startRow, 4).Value = item.Material_Name_EN ?? string.Empty;
+                    ws.Cell(startRow, 5).Value = item.Material_Name_VN ?? string.Empty;
+                    ws.Cell(startRow, 6).Value = item.Category_VN ?? string.Empty;
+                    ws.Cell(startRow, 7).Value = item.Group_Code ?? string.Empty;
+                    ws.Cell(startRow, 8).Value = item.Shape ?? string.Empty;
+                    ws.Cell(startRow, 9).Value = item.Material ?? string.Empty;
+                    ws.Cell(startRow, 10).Value = item.Composition ?? string.Empty;
+                    ws.Cell(startRow, 11).Value = item.Dimension ?? string.Empty;
+                    ws.Cell(startRow, 12).Value = item.UsedFor ?? string.Empty;
+                    ws.Cell(startRow, 13).Value = item.Purpose ?? string.Empty;
                     startRow++;
                 }
                 using var outStream = new MemoryStream();
@@ -1271,6 +1273,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(ex.Message);
             }
-         }
+        }
     }
 }

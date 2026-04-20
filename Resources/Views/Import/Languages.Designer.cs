@@ -1213,7 +1213,7 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tổng đơn.
+        ///   Looks up a localized string similar to Tổng tiền.
         /// </summary>
         public static string tongdon {
             get {

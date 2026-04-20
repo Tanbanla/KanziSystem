@@ -70,6 +70,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IDeparmentRepository, DeparmentRepository>();
         services.AddScoped<IDepartmentService, DepartmentService>();
+
+        services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
+        services.AddScoped<IExchangeRateService, ExchangeRateService>();
         return services;
     }
 }

@@ -172,49 +172,6 @@ function _insert_request_GA() {
     var adidnguoitao = document.getElementById("us").innerHTML;
     var mailnguoitao = document.getElementById("email_us").textContent;
 
-
-    //const formData = new URLSearchParams();
-    //formData.append('Cost_Center', Cost_Center);
-    //formData.append('Declaration', Declaration);
-    //formData.append('Dealine', Dealine);
-    //formData.append('Total_exchange', Total_exchange);
-    //formData.append('Exchange_rate', Exchange_rate);
-    //formData.append('Currency', Currency);
-    //formData.append('Total', Total);
-    //formData.append('Kind', Kind);
-    //formData.append('Type', Type);
-    //formData.append('Status', Status);
-    //formData.append('Place', Place);
-    //formData.append('Loaihinhtokhai', Loaihinhtokhai);
-    //formData.append('Group_Code', Group_Code);
-    //formData.append('Chophepin', Chophepin);
-    //formData.append('Urgent', Urgent);
-    //formData.append('User_Create', User_Create);
-    //formData.append('rq', dataList);
-    //formData.append('adid_dt', adid_dt);
-    //formData.append('adid_tt', adid_tt);
-    //formData.append('adid_pd', adid_pd);
-    //formData.append('mail_dt', mail_dt);
-    //formData.append('mail_tt', mail_tt);
-    //formData.append('mail_pd', mail_pd);
-    //formData.append('ten_dt', ten_dt);
-    //formData.append('ten_tt', ten_tt);
-    //formData.append('ten_pd', ten_pd);
-    ////formData.append('ten_dy', ten_dy);
-    ////formData.append('adid_dy', adid_dy);
-    ////formData.append('mail_dy', mail_dy);
-    //formData.append('ten_xk', ten_xk);
-    //formData.append('ten_qlsc', ten_qlsc);
-    //formData.append('ten_qltc', ten_qltc);
-    //formData.append('adid_xk', adid_xk);
-    //formData.append('adid_qlsc', adid_qlsc);
-    //formData.append('adid_qltc', adid_qltc);
-    //formData.append('mail_xk', mail_xk);
-    //formData.append('mail_qlscmail_qlsc', mail_qlsc);
-    //formData.append('mail_qltc', mail_qltc);
-    //formData.append('adidnguoitao', adidnguoitao);
-    //formData.append('mailnguoitao', mailnguoitao);
-
     if (Place == "" || name_dept == "" || Dealine == "") {
         alert("Vui lòng điền đủ thông tin vào đơn !");
     }
@@ -237,30 +194,7 @@ function _insert_request_GA() {
                 document.querySelectorAll('.close').forEach(button => button.click());
                 _load_confirm();
             }
-        })
-
-        //fetch('/Request/_Insert_request_GA', {
-        //    method: 'POST',
-        //    headers: {
-        //        'Content-Type': 'application/x-www-form-urlencoded',
-        //    },
-        //    body: formData.toString()
-        //}).then(response => {
-        //    if (!response.ok) {
-        //        throw new Error(`HTTP error! status: ${response.status}`);
-        //    }
-        //    return response.json();
-        //})
-        //    .then(data => {
-        //        alert(data);
-        //        location.reload();
-        //        document.querySelectorAll('.close').forEach(button => button.click());
-        //        _load_confirm();
-        //    })
-        //    .catch(error => {
-        //        console.error('There was a problem with the fetch operation:', error);
-        //    });
-       
+        })    
     }
 }
 async function _load_rate() {
@@ -306,6 +240,39 @@ async function _load_phongchiuphi() {
                     select.innerHTML += `<option value="${item}">${item}</option>`;
                 });
             });
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+function _load_vitri(cost,idd) {
+   
+    const params = new URLSearchParams();
+    params.append('cost', cost);
+    var id = idd.split('_')[1];
+  
+    fetch('/Request/_get_vitri', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body : params.toString()
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            
+                // Xóa trắng hoặc giữ lại option mặc định trước khi gán
+                document.getElementById('vt_' + id).innerHTML = '';
+
+                data.forEach(item => {
+                    document.getElementById('vt_' + id).innerHTML += `<option value="${item}">${item}</option>`;
+                });
+            
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
@@ -372,7 +339,6 @@ async function _load_confirm() {
     })
         .then(response => response.ok ? response.json() : Promise.reject(response))
         .then(data => {
-            console.log(data);
             const tbody = document.getElementById('list_approve');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
@@ -426,8 +392,7 @@ async function _load_confirm() {
                     <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
                     <td>${item.chR_TEN_NGUOIPHEDUYET} ${dots[2]}</td>
                     <td>${item.chR_TEN_XACNHAN} ${dots[3]}</td>
-                    <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>
-                  
+                    <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>                 
                 </tr>`;
             }).join('');
         })
@@ -455,7 +420,6 @@ async function _load_confirm_GA() {
     })
         .then(response => response.ok ? response.json() : Promise.reject(response))
         .then(data => {
-            console.log(data);
             const tbody = document.getElementById('list_approve');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
@@ -473,7 +437,8 @@ async function _load_confirm_GA() {
                 "7": ["Bị từ chối", "danger", 2],
                 "8": ["Bị từ chối", "danger", 3],
                 "9": ["Bị từ chối", "danger", 4],
-                "10": ["Bị từ chối", "danger", 5]
+                "10": ["Bị từ chối", "danger", 5],
+                "11": ["Hoàn thành", "secondary", 6], 
             };
             tbody.innerHTML = data.map(item => {
                 const s = item.inT_STEP;
@@ -526,7 +491,6 @@ function _modal_info(cost_request, step) {
             cost_request: cost_request
         },
         success: function (response) {
-            console.log(response);
             document.getElementById("modal-7").click();
             document.getElementById("load_detail_0").innerHTML = "";
             document.getElementById("madonhang_0").innerHTML = "*" + response[0].code_Request + "*";
@@ -556,10 +520,13 @@ function _modal_info(cost_request, step) {
             if (step == "4") {
                 document.getElementById("regency_0").innerHTML = "XUATKHO";
             }
+            if (step == "5" && response[0].group_Code.split(' ')[0] == "GA") {
+                document.getElementById("regency_0").innerHTML = "XUATKHO";
+            }
             var tongdon = 0;
             for (var i = 0; i < response.length; i++) {
                 var tongtien = response[i].total_exchange;
-                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount.toLocaleString('en-US')}</td><td>${response[i].unit}</td><td>${response[i].price.toLocaleString('en-US')}</td><td>${response[i].currency}</td><td>${tongtien.toLocaleString('en-US') }</td><td>${response[i].aim}</td>`;
+                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount.toLocaleString('en-US')}</td><td>${response[i].unit}</td><td>${response[i].price.toLocaleString('en-US')}</td><td>${response[i].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[i].aim}</td><td>${response[i].poisition}</td>`;
                 tongdon += parseFloat(tongtien);
             }
             document.getElementById("tongtientrongdon_0").innerHTML = tongdon.toLocaleString('en-US');
@@ -619,36 +586,23 @@ function _update_request(id) {
     var regency = document.getElementById("regency" + id).innerHTML;
     var step = document.getElementById("step" + id).innerHTML;
     var urgent = document.getElementById("urgent" + id).innerHTML;
-
-    const params = new URLSearchParams();
-    params.append('id_request', id_request);
-    params.append('regency', regency);
-    params.append('step', step);
-    params.append('urgent', urgent);
-
-    fetch('/Request/_update_request', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+   
+    $.ajax({
+        url: '/Request/_update_request',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            id_request: id_request, regency: regency, step: step, urgent: urgent
         },
-        body: params.toString()
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-        .then(data => {
-            alert(data);
-            /*  document.querySelectorAll('.close').forEach(button => button.click());*/
-            document.getElementById("cls_" + id).innerHTML = "";
+        success: function (response) {
+            /*   document.querySelectorAll('.close').forEach(button => button.click());*/
+            alert(response);
+            //document.getElementById("cls" + id).innerHTML = "";
             var us = document.getElementById("us").innerHTML;
             _load_confirm(us);
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-
+        }
+    })
+   
 }
 function _update_request_GA(id) {
 
@@ -677,8 +631,8 @@ function _update_request_GA(id) {
     })
         .then(data => {
             alert(data);
-            /*   document.querySelectorAll('.close').forEach(button => button.click());*/
-            document.getElementById("cls_" + id).innerHTML = "";
+               document.querySelectorAll('.close').forEach(button => button.click());
+            //document.getElementById("cls" + id).innerHTML = "";
             var us = document.getElementById("us").innerHTML;
             _load_confirm_GA(us);
         })
@@ -707,7 +661,7 @@ function _update_request_all(request) {
         return response.json();
     })
         .then(data => {
-           
+            document.querySelectorAll('.close').forEach(button => button.click());
             _load_confirm(us);
         })
         .catch(error => {
@@ -748,7 +702,9 @@ function _dongy_all() {
     const checkboxes = document.querySelectorAll('input.item');
   
     checkboxes.forEach((item) => {
-        _update_request_all(item.value);
+        if (item.checked) {
+            _update_request_all(item.value);
+        }
     });
     alert("Hoàn thành !");
 }
@@ -757,7 +713,9 @@ function _dongy_all_GA() {
     const checkboxes = document.querySelectorAll('input.item');
 
     checkboxes.forEach((item) => {
-        _update_request_all_GA(item.value);
+        if (item.checked) {
+            _update_request_all_GA(item.value);
+        }
     });
     alert("Hoàn thành !");
 }
@@ -774,7 +732,7 @@ function _reject(id) {
     params.append('step', step);
     params.append('urgent', urgent);
     params.append('reason', reason);
-    alert(id);
+  
     fetch('/Request/_reject', {
         method: 'POST',
         headers: {
@@ -790,7 +748,7 @@ function _reject(id) {
         .then(data => {
             alert("Từ chối đơn yêu cầu !");
 
-            document.getElementById("cls_" + id).innerHTML = "";
+         /*   document.getElementById("cls" + id).innerHTML = "";*/
             document.querySelectorAll('.close').forEach(button => button.click());
             var us = document.getElementById("us").innerHTML;
           
@@ -830,7 +788,7 @@ function _reject2(id) {
         .then(data => {
             alert("Từ chối đơn yêu cầu !");
             document.querySelectorAll('.close').forEach(button => button.click());
-            document.getElementById("cls_" + id).innerHTML = "";
+            /*document.getElementById("cls" + id).innerHTML = "";*/
             var us = document.getElementById("us").innerHTML;
            
             _load_confirm(us);
@@ -861,7 +819,6 @@ function _load_account() {
         return response.json();
     })
         .then(data => {
-            console.log(data);
             document.getElementById("stk_1").innerHTML = "";
             for (var i = 0; i < data.length; i++) {
                 document.getElementById("stk_1").innerHTML += `<option>${data[i]}</option>`;

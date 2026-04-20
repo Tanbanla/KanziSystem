@@ -371,5 +371,20 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Phê duyệt list lựa chọn nhà cung cấp
+        public async Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprover(List<ApproverDTO> dataApprovers, string userNext, string userUpdate)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_Quotation>>();
+            try
+            {
+                result.Data = await _repo.UpdateApprover(dataApprovers, userNext, userUpdate);
+                result.Success = true;
+            }catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

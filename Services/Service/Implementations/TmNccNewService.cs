@@ -165,7 +165,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Data = list;
                 result.Success = true;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 result.Message = ex.Message;
                 result.Success = false;
 

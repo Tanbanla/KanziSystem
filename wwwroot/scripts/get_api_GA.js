@@ -182,7 +182,7 @@ async function loadToCombo_GA(position, comboId) {
     try {
         document.getElementById("GA_ten_" + comboId).innerHTML = "";
         for (var i = 0; i < result.Data.Data.length; i++) {
-            document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+            document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_NAME}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
         }
         //document.getElementById("ten_" + comboId).innerHTML = `<option>${result.Data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
         document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
@@ -244,7 +244,7 @@ async function loadToCombo_TBP_GA(position, comboId) {
     const result = await response.json();
     document.getElementById("GA_ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
-        document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+        document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_NAME}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
     }
      
     document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;

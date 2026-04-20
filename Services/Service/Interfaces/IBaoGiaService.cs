@@ -67,5 +67,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdateUserApprovalHistory(UpdateHistoryResult update);
         // update ma hang noi bo
         public Task<GenericResponse<bool>> UpdateCodeMaterialBIVN(List<ConfirmNameDTO> list);
+        // Phê duyệt list lựa chọn nhà cung cấp
+        public Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprover(List<ApproverDTO> dataApprovers, string userNext, string userUpdate);
     }
 }

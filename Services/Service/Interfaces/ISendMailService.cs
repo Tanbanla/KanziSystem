@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -18,5 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> SendMailToRequesterAsync(string requestCode, string sectionCode, string sectionName, bool? isGap, int step);
         // Mail gữi xác nhận tên và mã hàng 
         public Task<GenericResponse<bool>> SendMailToConfirmItemAsync(int step, int codeMail, string? link, bool? isGap, string? sectionCode, string? sectionName ,string user);
+        // Lấy thông tin mail người nhận theo bước
+        public Task<GenericResponse<string>> SendMailToRequesterAsync(string sectionCode, int step);
     }
 }

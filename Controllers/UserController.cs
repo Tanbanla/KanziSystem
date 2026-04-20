@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using PRJ_WAREHOUSE_BIVN.Models;
 using System.Data;
@@ -27,6 +27,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
            string result =  MST_USER.insert_update_users(name, adid, staffcode, dept, role, mail, adid, "1");
            return Json(result);
+        }
+        public ActionResult ThemUser_Phongtiepnhan()
+        {
+            return View();
         }
     }
 }

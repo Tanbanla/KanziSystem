@@ -14,13 +14,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public IActionResult Condition()
         {
             return View();
-        }
-        [AllowAnonymous]
+        }       
         public IActionResult ListData()
         {
             return View();
         }
-        [AllowAnonymous]
         public IActionResult ListData_GA()
         {
             return View();

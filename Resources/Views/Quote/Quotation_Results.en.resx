@@ -334,7 +334,7 @@
     <value>Please select at least one supplier or product to export.</value>
   </data>
   <data name="DialogOk" xml:space="preserve">
-    <value>OK</value>
+    <value>Agree</value>
   </data>
   <data name="SearchEllipsis" xml:space="preserve">
     <value>Search...</value>
@@ -780,5 +780,26 @@
   </data>
   <data name="MsgNoRowSelected" xml:space="preserve">
     <value>Please select at least one row to export the file.</value>
+  </data>
+  <data name="ReasonApproval" xml:space="preserve">
+    <value>Reason for refusal</value>
+  </data>
+  <data name="RequestFailed" xml:space="preserve">
+    <value>Unable to download data request details.</value>
+  </data>
+  <data name="MSNGInputReason" xml:space="preserve">
+    <value>Line {0}: Please enter the reason for refusal.</value>
+  </data>
+  <data name="Confirmation" xml:space="preserve">
+    <value>Confirmation of successful approval (with a rejected line)</value>
+  </data>
+  <data name="DeptApproval" xml:space="preserve">
+    <value>Dept manager Approval</value>
+  </data>
+  <data name="SectionApproval" xml:space="preserve">
+    <value>Section manager Approval</value>
+  </data>
+  <data name="ChiefApproval" xml:space="preserve">
+    <value>Chief/Expert Approval</value>
   </data>
 </root>

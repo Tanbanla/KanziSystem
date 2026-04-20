@@ -80,8 +80,14 @@
                         </select>
                     </div>
                 </div>
-                <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-                <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-refresh"></i> Refresh </button>
+                <div id="hienthitimkiem"> 
+                    <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                    <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-refresh"></i> Refresh </button>
+                </div>
+                <div id="hienthitimkiem_GA">
+                    <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition_ga()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                    <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition_ga()"><i class="ion ion-refresh"></i> Refresh </button>
+                </div>
                 <div class="form-group float-right mt-5" >
                     <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
                 </div>
@@ -98,7 +104,7 @@
                                 <th rowspan="2">Cost Center</th>
                                 <th rowspan="2">@Languages.Ngayyeucau</th>
                                 <th rowspan="2">@Languages.thoihanmuonnhan</th>
-                                <th rowspan="2">@Languages.tongdon</th>
+                                <th rowspan="2">@Languages.tongtien</th>
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
                                 <th colspan="3">@Languages.phongtiepnhan</th>
@@ -126,6 +132,7 @@
 window.onload = function()
 {
     _load_request_condition();
+         document.getElementById("hienthitimkiem_GA").style.display = 'none';
 }
 
 function checkSelectValue(val) {
@@ -140,6 +147,8 @@ function checkSelectValue(val) {
                                 <th></th>
                                 <th></th>`
         _load_request_condition_ga();
+        document.getElementById("hienthitimkiem").style.display = 'none';
+               document.getElementById("hienthitimkiem_GA").style.display = '';
     }
     if(val == "PROD"){
                 document.getElementById("loadhangmuc").innerHTML = `
@@ -150,7 +159,9 @@ function checkSelectValue(val) {
                                     <th>@Languages.nguoixuatkho</th>
                                     <th></th>
                                     <th></th>`
-        _load_request_condition();
+     _load_request_condition();
+     document.getElementById("hienthitimkiem_GA").style.display = 'none';
+     document.getElementById("hienthitimkiem").style.display = '';
     }
 }
 

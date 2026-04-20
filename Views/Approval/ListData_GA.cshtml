@@ -129,7 +129,7 @@
                                 <th rowspan="2">Cost Center</th>
                                 <th rowspan="2">@Languages.Ngayyeucau</th>
                                 <th rowspan="2">@Languages.thoihanmuonnhan</th>
-                                <th rowspan="2">@Languages.tongdon</th>
+                                <th rowspan="2">@Languages.tongtien</th>
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
                                 <th colspan="3">@Languages.phongtiepnhan</th>
@@ -328,7 +328,7 @@
                 }
                 for (var a = 0; a < response.length; a++) {
                     var tongtien = response[a].total_exchange;
-                                document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td>${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td></td>`;
+                                    document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td>${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td>`;
                 }
             }
         })

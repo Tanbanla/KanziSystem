@@ -546,26 +546,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 tablePicInfo.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 200px;'>Quotation Request Number<br/>Số yêu cầu báo giá</th>");
                 tablePicInfo.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 300px;'>PIC explain about Product description<br/>Đảm nhiệm giải thích nếu có thắc mắc về thiết kế<br/>(Khi gửi báo giá vui lòng ko CC cho email này)</th>");
                 tablePicInfo.AppendLine("</tr>");
-                // Build table HTML cho tất cả request của nhà cung cấp
-                var tableHtml = new StringBuilder();
-                tableHtml.AppendLine("<table border='1' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;'>");
-                tableHtml.AppendLine("<tr style='background-color: #f2f2f2; text-align: center; vertical-align: middle; font-weight: bold;'>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 120px;'>Số đơn yêu cầu báo giá<br/>Quotation Request Number</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 120px;'>Mã thiết bị<br/>Equipment code</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Mã hàng nội bộ<br/>BIVN's part code</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Mã hàng của NCC<br/>Vendor's good code</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 200px;'>Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)<br/>Part name (Vietnamese)</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 150px;'>Tên hàng tiếng anh(*)<br/>Part name (English)</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 80px;'>Số lượng<br/>Quantity(*)</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 80px;'>Đơn vị <br/>Unit(*)</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Chủng loại hàng<br/>Part category</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 100px;'>File Thiết kế<br/>Design(*)</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Nhà Sản xuất<br/>Maker</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Mã nhà cung cấp<br/>Vendor code</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 150px;'>Tên nhà cung cấp<br/>Vendor name</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Ngày muốn nhận hàng<br/>Desired delivery date(*)</th>");
-                tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Kỳ hạn báo giá<br/>Deadline for submit quotation</th>");
-                tableHtml.AppendLine("</tr>");
 
                 using (var workbook = new XLWorkbook(templatePath))
                 {
@@ -597,25 +577,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                             otherRequestList.Add($"An toàn: {rq.NVCHR_AnToan}");
 
                         string otherRequest = string.Join(" & ", otherRequestList);
-                        // Thêm dòng dữ liệu vào table HTML
-                        tableHtml.AppendLine("<tr style='vertical-align: middle;'>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaDon ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaThietBi ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaHangNoiBo ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaHangNCC ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_NameVN ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_NameEN ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: right;'>{rq.INT_SoLuong?.ToString() ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_DonVi ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_ChungLoai ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.NVCHR_FileThietKe ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_NhaSanXuat ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaNCC ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_TenNCC ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""}</td>");
-                        tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? ""}</td>");
-                        tableHtml.AppendLine("</tr>");
-
                         // Ghi dữ liệu vào file Excel theo cột mới
                         worksheet.Cell(1, 3).Value = rq.NVCHR_TenNCC ?? string.Empty;
                         worksheet.Cell(2, 3).Value = rq.Diachi ?? string.Empty;
@@ -671,7 +632,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         rowIndex++;
                     }
                     tablePicInfo.AppendLine("</table>");
-                    tableHtml.AppendLine("</table>");
                     workbook.SaveAs(tempFilePath);
                 }
 
@@ -688,7 +648,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 string shortName = listRq.FirstOrDefault()?.ShortName ?? listRq.FirstOrDefault()?.Ten ?? "NCC";
                 string titleMail = $"{shortName} - {requestDate}";
 
-                var bodyTable = mail.CHR_BODY + tablePicInfo.ToString()+ "<br/><br/>" + tableHtml.ToString();
+                var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                 var body = string.Format(bodyTable, dearMail, mailTk);
                 var emailCC = "nguyenduy.khanh@brother-bivn.com.vn;bivn-pur-indirectpartquotation@brother-bivn.com.vn";
 
@@ -730,7 +690,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             // cap nhat trang thai da gui mail
             if (listSended.Any())
             {
-                await _repo.UpdateMailSentStatusAsync(listSended);
+               await _repo.UpdateMailSentStatusAsync(listSended);
             }
 
             if (listBaoGiaDetail.Any())
@@ -1010,28 +970,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     tablePicInfo.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 200px;'>Quotation Request Number<br/>Số yêu cầu báo giá</th>");
                     tablePicInfo.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 300px;'>PIC explain about Product description<br/>Đảm nhiệm giải thích nếu có thắc mắc về thiết kế<br/>(Khi gửi báo giá vui lòng ko CC cho email này)</th>");
                     tablePicInfo.AppendLine("</tr>");
-                    // tao bang html
-                    var tableHtml = "<table border='1' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;'>";
-
-                    // Row 1 - Header chính
-                    tableHtml += "<tr style='background-color: #f2f2f2; text-align: center; vertical-align: middle; font-weight: bold;'>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 120px;'>Số đơn yêu cầu báo giá<br/>Quotation Request Number</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 120px;'>Mã thiết bị<br/>Equipment code</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Mã hàng nội bộ<br/>BIVN's part code</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Mã hàng của NCC<br/>Vendor's good code</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 200px;'>Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)<br/>Part name (Vietnamese)</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 150px;'>Tên hàng tiếng anh(*)<br/>Part name (English)</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 80px;'>Số lượng<br/>Quantity(*)</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 80px;'>Đơn vị <br/>Unit(*)</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Chủng loại hàng<br/>Part category</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 100px;'>File Thiết kế<br/>Design(*)</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Nhà Sản xuất<br/>Maker</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Mã nhà cung cấp<br/>Vendor code</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 150px;'>Tên nhà cung cấp<br/>Vendor name</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Ngày muốn nhận hàng<br/>Desired delivery date(*)</th>";
-                    tableHtml += "<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Kỳ hạn báo giá<br/>Deadline for submit quotation</th>";
-                    tableHtml += "<tr>";
-
 
                     foreach (var rq in rqByNCC)
                     {
@@ -1055,26 +993,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                             otherRequestList.Add($"An toàn: {rq.NVCHR_AnToan}");
                         string otherRequest = string.Join(" & ", otherRequestList);
 
-                        tableHtml += "<tr style='vertical-align: middle;'>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaDon ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaThietBi ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaHangNoiBo ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaHangNCC ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_NameVN ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_NameEN ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999; text-align: right;'>{rq.INT_SoLuong?.ToString() ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_DonVi ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_ChungLoai ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.NVCHR_FileThietKe ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_NhaSanXuat ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaNCC ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_TenNCC ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""}</td>";
-                        tableHtml += $"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? ""}</td>";
-                        tableHtml += "</tr>";
-
                         // phần của file dữ liệu đính kèm 
-                        // Ghi dữ liệu vào file Excel theo cột mới
                         worksheet.Cell(1, 3).Value = rq.NVCHR_TenNCC ?? string.Empty;
                         worksheet.Cell(2, 3).Value = rq.Diachi ?? string.Empty;
 
@@ -1102,10 +1021,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         rowIndex++;
                     }
 
-                    tableHtml += "</table>";
                     workbook.SaveAs(tempFilePath);
 
-                    var bodyTable = mail.CHR_BODY + tablePicInfo.ToString()+ "<br/><br/>" + tableHtml.ToString();
+                    var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
                     var email = "nguyenduy.khanh@brother-bivn.com.vn"
                         + ";bivn-pur-indirectpartquotation@brother-bivn.com.vn";
@@ -1245,6 +1163,30 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = $"Error sending confirmation mail: {ex.Message}";
             }
 
+            return result;
+        }
+        // Lấy thông tin mail người nhận theo bước
+        public async Task<GenericResponse<string>> SendMailToRequesterAsync(string sectionCode, int step)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                result.Data = await _repo.GetRequesterEmailAsync(sectionCode, step);
+                if (string.IsNullOrEmpty(result.Data))
+                {
+                    result.Success = false;
+                    result.Message = "Requester email not found";
+                }
+                else
+                {
+                    result.Success = true;
+                }
+            }
+            catch(Exception ex)
+            {
+                result.Success = false;
+                result.Message = $"Error sending mail to requester: {ex.Message}";
+            }
             return result;
         }
     }

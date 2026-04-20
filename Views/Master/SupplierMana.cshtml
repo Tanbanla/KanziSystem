@@ -15,7 +15,7 @@
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-success" id="btnExportExcel"><i class="fas fa-file-excel"></i> Download Excel</button>
                 <button type="button" class="btn btn-outline-primary" id="btnImportExcel"><i class="fas fa-upload"></i> Upload Excel</button>
-                <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" hidden><i class="fas fa-upload"></i> Upload Excel First</button>
+                <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" ><i class="fas fa-upload"></i> Upload Excel First</button>
                 <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
             </div>
         </div>
@@ -37,7 +37,7 @@
             <div style="width: 6px"></div>
             <button type="button" id="btnAddSupplier" class="btn btn-success"><i class="fas fa-plus"></i> @Localizer["Add"]</button>
             <div style="width: 6px"></div>
-            <button type="button" id="btnExportMaster" class="btn btn-danger"><i class="fas fa-download"></i> Xuất dữ liệu master</button>
+            <button type="button" id="btnExportMaster" class="btn btn-danger"><i class="fas fa-download"></i> @Localizer["ExportMaster"]</button>
         </div>
     </form>
 
@@ -218,7 +218,7 @@
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
         <div class="cm-dialog-header">
             <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
-            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">âœ•</button>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
         </div>
         <div id="cmDialogBody" class="cm-dialog-body"></div>
         <div id="cmDialogFooter" class="cm-dialog-footer"></div>
@@ -230,7 +230,7 @@
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmConfirmTitle">
         <div class="cm-dialog-header">
             <h6 id="cmConfirmTitle" class="cm-dialog-title cm-confirm-title">@Localizer["Confirm"]</h6>
-            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="cancel" aria-label="@Localizer["Close"]">âœ•</button>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="cancel" aria-label="@Localizer["Close"]">✕</button>
         </div>
         <div class="cm-dialog-body cm-confirm-body">@Localizer["AreYouSure"]</div>
         <div class="cm-dialog-footer">

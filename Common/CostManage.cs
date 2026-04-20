@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Drawing;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
@@ -11,10 +12,18 @@ namespace PRJ_WAREHOUSE_BIVN.Common
         public static Models.SQL_Connect_DB20 conn = new Models.SQL_Connect_DB20();
         public static DateTime DateTimeParse(string datetime, string format)
         {
-            if (datetime.Length > 10)
-                datetime = datetime.Substring(0, 10);
-            format = "yyyy-MM-dd";
-            return DateTime.ParseExact(datetime, format, (IFormatProvider)CultureInfo.InvariantCulture);
+            if(datetime == null)
+            {
+                return DateTime.Now;
+            }
+            else
+            {
+                if (datetime.Length > 10)
+                    datetime = datetime.Substring(0, 10);
+                format = "yyyy-MM-dd";
+                return DateTime.ParseExact(datetime, format, (IFormatProvider)CultureInfo.InvariantCulture);
+            }
+          
         }
 
         public static double Tinhdutoanconlai(string Cost_Center, string Caldate, string KindofDeclaration, string Code_Request)
@@ -80,7 +89,7 @@ namespace PRJ_WAREHOUSE_BIVN.Common
                 if (str6 != "")
                     num2 = Convert.ToDouble(str6);
                 if (s != "")
-                    num1 = Convert.ToDouble(double.Parse(s).ToString("N2"));
+                    num1 = Convert.ToDouble(double.Parse(s).ToString());
                 string[] strArray6 = new string[9];
                 strArray6[0] = " SELECT SUM(Total_Real) FROM [COSTCENTER_MONTH_TOTAL_ESTIMATE] WHERE [Phongchiuchiphi] = '";
                 strArray6[1] = Cost_Center;

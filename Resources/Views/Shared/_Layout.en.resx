@@ -24,7 +24,7 @@
   <data name="MenuMaterial" xml:space="preserve"><value>Materials</value></data>
   <data name="MenuMaterialManage" xml:space="preserve"><value>Manage materials</value></data>
   <data name="MenuMaterialCreate" xml:space="preserve"><value>Create material code</value></data>
-  <data name="MenuMaterialConfirmName" xml:space="preserve"><value>Confirm name and quotation request code</value></data>
+  <data name="MenuMaterialConfirmName" xml:space="preserve"><value>Confirm the name of the customs procedure</value></data>
   <data name="MenuWarehouse" xml:space="preserve"><value>Warehouse</value></data>
   <data name="MenuWarehouseImportPO" xml:space="preserve"><value>Import by PO</value></data>
   <data name="MenuWarehouseConfirmImport" xml:space="preserve"><value>Confirm import</value></data>

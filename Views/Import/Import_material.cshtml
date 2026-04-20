@@ -2,13 +2,13 @@
 @{
     ViewData["Title"] = Languages.tonkho ;
 }
-<style>
+@* <style>
     .card .card-header .form-control {
         height: 42px;
         font-size: 13px;
         border-radius: 2px;
     }
-</style>
+</style> *@
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
@@ -16,7 +16,7 @@
                 <div class="form-group" style="margin : 10px 0 0 0">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-social-codepen-outline"></i></div>
+                            <div class="input-group-text" style="height:42px"><i class="ion ion-social-codepen-outline"></i></div>
                         </div>
                         <input type="text" class="form-control" id="mnl" placeholder="@Languages.Mahang">
                     </div>
@@ -24,7 +24,7 @@
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
-                            <div class="input-group-text">@Languages.Kho :</div>
+                            <div class="input-group-text" style="height:42px">@Languages.Kho :</div>
                         </div>
                         <select class="form-control" id="kho" onchange="_load_inv()"></select>
                     </div>
@@ -32,7 +32,7 @@
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
-                            <div class="input-group-text"><i class="ion ion-lock-combination"></i></div>
+                            <div class="input-group-text" style="height:41px"><i class="ion ion-lock-combination"></i></div>
                         </div>
                         <input type="text" class="form-control" id="cost" placeholder="Cost">
                     </div>
@@ -40,7 +40,7 @@
                 <div class="form-group" style="margin : 10px 0 0 20px">
                     <div class="input-group mb-2">
                         <div class="input-group-prepend">
-                            <div class="input-group-text">@Languages.Khoi :</div>
+                            <div class="input-group-text" style="height:42px">@Languages.Khoi :</div>
                         </div>
                         <select class="form-control" id="group_code" onchange="_load_inv()">
                             <option value=""></option>
@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 <button type="button" class="btn btn-primary" style=" margin-left: 30px; float:right" onclick="_load_inv()"><i class="ion ion-ios-search-strong"></i></button>
-                <a href="/Import/ExportToExcel_Log"> <button type="button" class="btn btn-success" style=" margin-left: 30px; float:right"><i class="fa fa-file-excel"></i> Xuất file excel</button></a>
+                    <a href="/Import/ExportToExcel_Log"> <button type="button" class="btn btn-success" style=" margin-left: 30px; float:right"><i class="fa fa-file-excel"></i> Xuất file excel</button></a>
                 <button type="button" class="btn btn-danger" style=" margin-left: 30px; float:right" id="modal-21"><i class="ion ion-ios-arrow-thin-right"></i> Chuyển kho</button>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer" id="table-1_wrapper">

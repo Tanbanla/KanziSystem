@@ -66,6 +66,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
 
             CreateMap<DEPARTMENT, DEPARTMENTDTO>();
             CreateMap<DEPARTMENTDTO, DEPARTMENT>();
+
+             CreateMap<EXCHANGE_RATE, EXCHANGE_RATEDTO>();
+            CreateMap<EXCHANGE_RATEDTO, EXCHANGE_RATE>();
         }
     }
 }

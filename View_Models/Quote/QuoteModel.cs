@@ -148,6 +148,11 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string UserApproverNext { get; set; } = string.Empty;
         public string? Reason { get; set; }
     }
+    public class ConfirmApproverModel
+    {
+        public List<ApproverDTO> listCofirm { get; set; }
+        public string UserApproverNext { get; set; } = string.Empty;
+    }
     // input file chon ncc
     public class ImportPickSupplier
     {

@@ -29,14 +29,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
           var res =  await _context.BaoGia_Request_of_Quotations
                 .Where(m => (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false)
-                && m.BIT_LayBaoGia == true && m.CHR_MaNCC != "" && m.ID_StepBaoGia == 6 && m.ID_Status == "WAIT_SEND_MAIL")
+                && m.BIT_LayBaoGia == true && m.CHR_MaNCC != "" && m.ID_StepBaoGia == 6 )
                 .Select(m => m.CHR_MaNCC)
                 .Distinct()
                 .ToListAsync();
-          if (res == null || res.Count == 0)
-          {
-              return new List<string>();
-          }
+            //&& m.ID_Status == "WAIT_SEND_MAIL"
+            if (res == null || res.Count == 0)
+            {
+                return new List<string>();
+            }
            return res;
         }
         // Lay thong tin don bao gia cua nha cung cap
@@ -47,8 +48,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 LEFT JOIN IM_NCC_NEW AS n ON q.CHR_MaNCC = n.Ma
                 WHERE q.CHR_MaNCC = @SupplierCode 
                   AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
-                  AND q.BIT_LayBaoGia = 1 and q.ID_StepBaoGia = 6 and ID_Status = 'WAIT_SEND_MAIL'";
-
+                  AND q.BIT_LayBaoGia = 1 and q.ID_StepBaoGia = 6";
+            //and ID_Status = 'WAIT_SEND_MAIL'
             var parameter = new { SupplierCode = supplierCode };
 
             return (await _conn.QueryAsync<dynamic>(sql, parameter)).ToList();
@@ -108,7 +109,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<string> GetRequesterEmailAsync(string section, int step)
         {
             var res = await _context.BaoGia_Master_Approver_Send_Mails
-                .Where(m => m.CHR_CodeSection == section && m.ID_BaoGiaStep == step && m.CHR_Status == "ON")
+                .Where(m => (m.CHR_CodeSection == section || string.IsNullOrEmpty(section)) && m.ID_BaoGiaStep == step && m.CHR_Status == "ON")
                 .GroupBy(m => m.CHR_UserAdid) 
                 .Select(g => g.Key) 
                 .ToListAsync();

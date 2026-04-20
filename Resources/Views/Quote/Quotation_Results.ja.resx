@@ -334,7 +334,7 @@
     <value>出力するために少なくとも1つの仕入先または製品を選択してください。</value>
   </data>
   <data name="DialogOk" xml:space="preserve">
-    <value>OK</value>
+    <value>同意する</value>
   </data>
   <data name="SearchEllipsis" xml:space="preserve">
     <value>検索...</value>
@@ -780,5 +780,26 @@
   </data>
   <data name="MsgNoRowSelected" xml:space="preserve">
     <value>ファイルをエクスポートするには、少なくとも1行を選択してください。</value>
+  </data>
+  <data name="ReasonApproval" xml:space="preserve">
+    <value>拒否理由</value>
+  </data>
+  <data name="RequestFailed" xml:space="preserve">
+    <value>データ要求の詳細をダウンロードできませんでした。</value>
+  </data>
+  <data name="MSNGInputReason" xml:space="preserve">
+    <value>行{0}：拒否理由を入力してください。</value>
+  </data>
+  <data name="Confirmation" xml:space="preserve">
+    <value>承認成功の確認（却下された行あり）</value>
+  </data>
+  <data name="DeptApproval" xml:space="preserve">
+    <value>Dept manager 承認</value>
+  </data>
+  <data name="SectionApproval" xml:space="preserve">
+    <value>Section manager 承認</value>
+  </data>
+  <data name="ChiefApproval" xml:space="preserve">
+    <value>Chief/Expert 承認</value>
   </data>
 </root>

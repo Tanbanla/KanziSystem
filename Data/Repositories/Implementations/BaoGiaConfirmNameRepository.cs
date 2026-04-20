@@ -29,6 +29,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
+                INNER join BaoGia_Detail_of_Quotation as d on c.ID_RequestQuote = d.ID_RequestQuote
+				INNER JOIN IM_NCC_NEW as n on n.Ma = r.CHR_MaNCC
                 WHERE 1 = 1 and BIT_LayBaoGia = 1 and r.ID_Status not like '%RETURN%' and r.ID_StepBaoGia >=6
             ";
 
@@ -83,7 +85,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // Thực hiện truy vấn dữ liệu với phân trang
             var selectSql = new StringBuilder();
             selectSql.Append("SELECT DISTINCT c.* ,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.CHR_MaHangNCC,r.INT_SoLuong,");
-            selectSql.Append(" r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang ");
+            selectSql.Append(" r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang,n.ShortName, d.CHR_CodeNCC, d.NVCHR_File ");
             selectSql.Append(baseFrom);
             selectSql.Append(whereBuilder.ToString());
             selectSql.Append(@" ORDER BY c.DTM_CreateDate ASC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");

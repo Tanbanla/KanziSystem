@@ -286,7 +286,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // lấy id của đơn báo giá
-        public async Task<int?> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNcc, string NameHQ)
+        public async Task<int?> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNB, string maNcc, string NameHQ)
         {
             var sql = new StringBuilder(@"SELECT d.*
               FROM [BaoGia_Detail_of_Quotation] as d
@@ -300,8 +300,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(maVatTu))
             {
-                sql.Append(" AND r.CHR_MaHangNoiBo = @MaVatTu");
+                sql.Append(" AND r.CHR_MaHangNCC = @MaVatTu");
                 parameters.Add("MaVatTu", maVatTu);
+            }
+            if (!string.IsNullOrEmpty(maNB))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo = @MaNB");
+                parameters.Add("MaNB", maNB);
             }
             if (!string.IsNullOrEmpty(maNcc))
             {

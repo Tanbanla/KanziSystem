@@ -781,4 +781,25 @@
   <data name="MsgNoRowSelected" xml:space="preserve">
     <value>Vui lòng chọn ít nhất một dòng để xuất file</value>
   </data>
+  <data name="ReasonApproval" xml:space="preserve">
+    <value>Lý do từ chối</value>
+  </data>
+  <data name="RequestFailed" xml:space="preserve">
+    <value>Không tải được dữ liệu chi tiết yêu cầu.</value>
+  </data>
+  <data name="MSNGInputReason" xml:space="preserve">
+    <value>Dòng thứ {0}: Vui lòng nhập lý do từ chối.</value>
+  </data>
+  <data name="Confirmation" xml:space="preserve">
+    <value>Xác nhận phê duyệt thành công (có dòng bị từ chối)</value>
+  </data>
+  <data name="DeptApproval" xml:space="preserve">
+    <value>Trưởng bộ phận phê duyệt</value>
+  </data>
+  <data name="SectionApproval" xml:space="preserve">
+    <value>QLTC phê duyệt</value>
+  </data>
+  <data name="ChiefApproval" xml:space="preserve">
+    <value>QLSC phê duyệt</value>
+  </data>
 </root>

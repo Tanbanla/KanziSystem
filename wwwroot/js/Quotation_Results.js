@@ -143,156 +143,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(err => console.error('Load supplier data failed', err));
         },
-        //renderSupplierTable: function (data) {
-        //    const tbody = document.getElementById('supplierQuoteBody');
-        //    if (!tbody) return;
-        //    // Make table more compact
-        //    const table = document.getElementById('supplierQuoteTable');
-        //    if (table) {
-        //        table.style.fontSize = '10px';
-        //        table.style.lineHeight = '1.2';
-        //    }
-        //    // Helper function to apply mismatch styling
-        //    const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
-
-        //    // Pre-calc totals grouped by MaDon + MaThietBi + MaNCC
-        //    const totals = {};
-        //    const counts = {}; // number of rows per group (for rowspan)
-        //    data.forEach(d => {
-        //        const maDon = d.CHR_MaDon || '';
-        //        const maThietBi = d.CHR_MaThietBi || '';
-        //        const maNcc = d.CHR_MaNCC || '';
-        //        const key = `${maDon}|${maThietBi}|${maNcc}`;
-        //        const vnd = (d.FL_VND != null && !isNaN(Number(d.FL_VND))) ? Number(d.FL_VND) : 0;
-        //        const usd = (d.FL_USD != null && !isNaN(Number(d.FL_USD))) ? Number(d.FL_USD) : 0;
-        //        if (!totals[key]) totals[key] = { vnd: 0, usd: 0 };
-        //        // As per requirement: mỗi loại lấy số lượng = 1 rồi nhân với giá -> tương đương cộng mỗi giá 1 lần
-        //        totals[key].vnd += vnd;
-        //        totals[key].usd += usd;
-        //        counts[key] = (counts[key] || 0) + 1;
-        //    });
-
-        //    // Track which group total has been rendered (so we render only once per group using rowspan)
-        //    const renderedTotals = new Set();
-
-        //    const rowsHtml = data.map((d, index) => {
-        //        // compute whether to show group total here
-        //        const maDon = d.CHR_MaDon || '';
-        //        const maThietBi = d.CHR_MaThietBi || '';
-        //        const maNcc = d.CHR_MaNCC || '';
-        //        const key = `${maDon}|${maThietBi}|${maNcc}`;
-        //        let totalCell = '';
-        //        if (!renderedTotals.has(key)) {
-        //            renderedTotals.add(key);
-        //            const tot = totals[key] || { vnd: 0, usd: 0 };
-        //            if (tot.vnd && tot.vnd !== 0) {
-        //                try { totalCell = Number(tot.vnd).toLocaleString(); } catch { totalCell = tot.vnd; }
-        //                totalCell = totalCell + ' VND';
-        //            } else if (tot.usd && tot.usd !== 0) {
-        //                try { totalCell = Number(tot.usd).toLocaleString(); } catch { totalCell = tot.usd; }
-        //                totalCell = totalCell + ' USD';
-        //            }
-        //        }
-
-        //        return `
-        //        <tr class="text-center" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
-        //            <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${this.MappingStatusSupplier(d.status || '')}</td>
-        //             <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
-
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNoiBo || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNCC || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Phanloai || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ChungLoai || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_NameVN || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_NameEN || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.INT_SoLuong || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_DonVi || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_HinhDang || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ChatLieu || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_ThanhPhan || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_KichThuoc || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_DongMay || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_TinhNang || ''}</td>
-
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_Rohs || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_COCQ || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_MSDS || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_AnToan || ''}</td>
-
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_FileThietKe || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.DTM_KyHan ? new Date(d.DTM_KyHan).toLocaleDateString() : ''}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_Gap === 'true' || d.CHR_Gap === true ? 'O' : 'X'}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.BIT_LayBaoGia === true ? 'O' : 'X'}</td>
-        //            <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_LyDo || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
-        //            <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NVCHR_NameNCC || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.CodeEquipmentNCC || ''}</td>
-        //            <td class="text-start" style="padding: 2px 4px; text-align: left; ${getMismatchStyle(d.IsMatch_NameVN)}">${d.NVCHR_TenHangHQ || ''}</td>
-        //             <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_SoLuong)}">${d.soluong || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_DonVi)}">${d.donvi || ''}</td>
-        //            <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
-        //            <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_MOQ || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.DTM_LeadTime || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Ngay)}">${d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Rohs)}">${d.VCHR_Rohs || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_COCQ)}">${d.VCHR_COCQ || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_MSDS)}">${d.VCHR_MSDS || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_AnToan)}">${d.VCHR_AnToan || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatchCamKet)}">${d.VCHR_CamKet || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_DeliveryTerm || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_PaymentTerm || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_File || ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.DTM_EffectiveDate ? new Date(d.DTM_EffectiveDate).toLocaleDateString() : ''}</td>
-        //            <td style="padding: 2px 4px; text-align: center;">${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
-        //            ${(() => {
-        //                // If this is first row for group, render TD with rowspan equal to counts[key]
-        //                if (totalCell) {
-        //                    const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
-        //                    return `<td style="padding: 2px 4px; text-align: center;"${span}>${totalCell}</td>`;
-        //                }
-        //                // If totalCell empty (no value) still render empty cell once
-        //                if (!renderedTotals.has(key)) {
-        //                    // mark as rendered to avoid further empty TDs
-        //                    renderedTotals.add(key);
-        //                    const span = counts[key] && counts[key] > 1 ? ` rowspan="${counts[key]}"` : '';
-        //                    return `<td style="padding: 2px 4px; text-align: center;"${span}></td>`;
-        //                }
-        //                // For subsequent rows in group, omit the TD so rowspan covers them
-        //                return `<td style="padding: 2px 4px; text-align: center;"></td>`;
-        //            })()}
-        //            <td style="padding: 2px 4px; text-align: center;">
-        //                 <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
-        //                    <option value="" ${(!d.BIT_Select && d.BIT_Select !== false) ? 'selected' : ''}></option>
-        //                    <option value="true" ${d.BIT_Select === true ? 'selected' : ''}>O</option>
-        //                    <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
-        //                </select>
-        //            </td>
-        //            <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_ReasonPick || ''}"></td>
-        //        </tr>
-        //    `}).join('');
-        //    tbody.innerHTML = rowsHtml;
-        //    // reapply columns visibility for newly rendered rows
-        //    this.applyAdditionalColumnsVisibility();
-        //},
         renderSupplierTable: function (data) {
             const tbody = document.getElementById('supplierQuoteBody');
             if (!tbody) return;
-            // Make table more compact
+
             const table = document.getElementById('supplierQuoteTable');
             if (table) {
                 table.style.fontSize = '10px';
                 table.style.lineHeight = '1.2';
             }
-            // Helper function to apply mismatch styling
+
             const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
 
             const rowsHtml = data.map((d, index) => {
-                // Tính tổng cho từng dòng riêng lẻ (vẫn tính nhưng không gom nhóm)
+
                 const vnd = (d.FL_VND != null && !isNaN(Number(d.FL_VND))) ? Number(d.FL_VND) : 0;
                 const usd = (d.FL_USD != null && !isNaN(Number(d.FL_USD))) ? Number(d.FL_USD) : 0;
                 const sl = (d.soluong != null && !isNaN(Number(d.soluong))) ? Number(d.soluong) : 0;
@@ -337,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_LyDo || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NVCHR_NameNCC || ''}</td>
-                    <td style="padding: 2px 4px; text-align: center;">${d.CodeEquipmentNCC || ''}</td>
+                    <td style="padding: 2px 4px; text-align: center;  ${getMismatchStyle(d.IsMatch_MaHangNCC)}">${d.CodeEquipmentNCC || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left; ${getMismatchStyle(d.IsMatch_NameVN)}">${d.NVCHR_TenHangHQ || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_SoLuong)}">${d.soluong || ''}</td>
@@ -1008,7 +872,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fileInput.style.display = 'none';
             document.body.appendChild(fileInput);
             // chọn người phê duyệt
-            const selectedApproverTab2 = await this.openApproverSelector(10, "");
+            const selectedApproverTab2 = await this.openApproverSelector(9, "");
             // Nếu không chọn người phê duyệt, thoát
             if (!selectedApproverTab2) {
                 return;
@@ -1249,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         return 'bg-secondary';
                     })(i.Status);
-                    const mapNameStatus = this.MappingStatusApproverSupplier(i.Status);
+                    const mapNameStatus = this.MappingStatusApproverSupplier(i.Status, i.ID_StepBaoGia);
                     const groupId = `${i.CHR_MaDon}-${i.CHR_MaHangNoiBo}`;
                     return `
                         <tr class="item-row" data-status="${i.Status || ''}" data-id="${i.CHR_MaDon || ''}">
@@ -1418,12 +1282,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 .filter(maDon => maDon);
         },
         // mapping status Approver supplier tab
-        MappingStatusApproverSupplier: function (codeStatus) {
+        MappingStatusApproverSupplier: function (codeStatus, step) {
             const T = window.i18nQuotationResults || {};
             switch (codeStatus) {
                 case 'WAITING_NCC': return T.WaitPickApSupplier || 'Chờ báo gía nhà cung cấp';
                 case 'WAITING_PICK_NCC': return T.SupplierApSelected || 'Chờ chọn nhà cung cấp';
-                case 'WAITING_APPROVER': return T.WaitApConfirmName || 'Chờ phê duyệt';
+                case 'WAITING_APPROVER':
+                    if (step === 9) {
+                        return T.ChiefApproval;
+                    } else if (step === 10) {
+                        return T.SectionApproval;
+                    } else {
+                        return T.DeptApproval;
+                    }
+                    //return T.WaitApConfirmName || 'Chờ phê duyệt';
                 case 'NO': return T.undefined || 'Không xác định';
                 default: return '';
             }
@@ -1488,6 +1360,7 @@ document.addEventListener('DOMContentLoaded', function () {
         openApprovalModal: async function (maDon) {
             if (!maDon) return;
             try {
+                const T = window.i18nQuotationResults || {};
                 const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetSupplierApprovalInfor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1495,7 +1368,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 if (!res.ok) {
                     console.error('Load request detail failed');
-                    showDialog({ message: 'Không tải được dữ liệu chi tiết yêu cầu.' });
+                    showDialog({ message: T.RequestFailed || 'Không tải được dữ liệu chi tiết yêu cầu.' });
                     return;
                 }
                 const data = await res.json();
@@ -1536,7 +1409,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 try { document.getElementById('requester').textContent = getVal(master, 'CHR_CreateBy', 'chR_CreateBy') || '-'; } catch { }
                 try { document.getElementById('id_request').textContent = getVal(master, 'ID', 'iD', 'CHR_MaDon') || maDon; } catch { }
                 try { document.getElementById('step').textContent = getVal(master, 'ID_StepBaoGia', 'iD_StepBaoGia') || ''; } catch { }
-                try { document.getElementById('regency').textContent = getVal(master, 'ID_Status', 'iD_Status', 'CHR_Status') || ''; } catch { }
 
                 // urgent badge
                 try {
@@ -1549,25 +1421,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Prepare details array: controller might return object with .Detail or an array
                 let details = [];
                 if (Array.isArray(data)) {
-                    // maybe array of items
                     details = data;
                 } else if (data && Array.isArray(data.Detail)) {
                     details = data.Detail;
                 } else if (data && Array.isArray(data.data)) {
                     details = data.data;
                 } else if (data && typeof data === 'object') {
-                    // some APIs return single object representing the master row with detail fields on it
-                    // Try to find detail-like properties by common names
                     if (Array.isArray(data.DetailList)) details = data.DetailList;
                     else details = [data];
                 }
 
                 const tbody = document.getElementById('detailModalBody');
                 if (!tbody) return;
-                // render rows using DOM for safety
                 tbody.innerHTML = '';
                 const frag = document.createDocumentFragment();
-                // helper to render mismatch styling for vendor comparison fields
+
                 const mismatchStyle = (v) => {
                     if (v === false || v === 0 || v === '0' || String(v).toLowerCase() === 'false') {
                         return 'color: #a00; background-color: #ffecec;';
@@ -1575,22 +1443,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     return '';
                 };
 
-                // ========== THÊM HÀM KIỂM TRA BIT_Select ==========
                 const isBitSelectFalse = (d) => {
                     const bitSelect = getVal(d, 'BIT_Select', 'bit_Select');
-                    // Nếu BIT_Select = false hoặc 0 thì trả về true
                     return bitSelect === false || bitSelect === 0 || String(bitSelect).toLowerCase() === 'false';
                 };
+
+                // LƯU TRỮ DỮ LIỆU LỰA CHỌN CỦA TỪNG DÒNG
+                const rowSelections = []; // Mỗi phần tử: { isApproved: bool, rejectReason: string, id: int }
 
                 details.forEach((d, idx) => {
                     const tr = document.createElement('tr');
                     tr.className = 'text-center';
+                    tr.setAttribute('data-row-index', idx);
 
-                    // ========== THÊM CLASS NỀN XÁM NẾU BIT_Select = false ==========
                     if (isBitSelectFalse(d)) {
-                        tr.style.backgroundColor = '#f5f5f5'; // Màu xám nhạt
-                        // Hoặc thêm class nếu bạn có class CSS
-                        // tr.classList.add('bg-secondary-light');
+                        tr.style.backgroundColor = '#f5f5f5';
                     }
 
                     const addTd = (txt, cls, style) => {
@@ -1602,44 +1469,43 @@ document.addEventListener('DOMContentLoaded', function () {
                     };
 
                     tr.appendChild(addTd(idx + 1));
-                    tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
+                    //tr.appendChild(addTd(getVal(d, 'iD', 'ID', 'id')));
                     tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_ChungLoai', 'NVCHR_ChungLoai')));
-                    tr.appendChild(addTd(getVal(d, 'chR_Phanloai', 'CHR_Phanloai')));
-                    tr.appendChild(addTd(getVal(d, 'chR_MaHangNCC', 'CHR_MaHangNCC')));
-                    // name VN/EN combined
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_ChungLoai', 'NVCHR_ChungLoai')));
+                    //tr.appendChild(addTd(getVal(d, 'chR_Phanloai', 'CHR_Phanloai')));
+                    //tr.appendChild(addTd(getVal(d, 'chR_MaHangNCC', 'CHR_MaHangNCC')));
+
                     const nameVN = getVal(d, 'nvchR_NameVN', 'NVCHR_NameVN') || '';
                     const nameEN = getVal(d, 'nvchR_NameEN', 'NVCHR_NameEN') || '';
-                    tr.appendChild(addTd((nameVN + (nameEN ? ' / ' + nameEN : '')).trim(), 'text-start'));
+                    //tr.appendChild(addTd((nameVN + (nameEN ? ' / ' + nameEN : '')).trim(), 'text-start'));
 
-                    tr.appendChild(addTd(getVal(d, 'inT_SoLuong', 'INT_SoLuong') || '', 'text-center'));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_DonVi', 'NVCHR_DonVi') || '', 'text-center'));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_HinhDang', 'NVCHR_HinhDang')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_ChatLieu', 'NVCHR_ChatLieu')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_ThanhPhan', 'NVCHR_ThanhPhan')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_KichThuoc', 'NVCHR_KichThuoc')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_DongMay', 'NVCHR_DongMay')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_TinhNang', 'NVCHR_TinhNang')));
+                    //tr.appendChild(addTd(getVal(d, 'inT_SoLuong', 'INT_SoLuong') || '', 'text-center'));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_DonVi', 'NVCHR_DonVi') || '', 'text-center'));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_HinhDang', 'NVCHR_HinhDang')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_ChatLieu', 'NVCHR_ChatLieu')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_ThanhPhan', 'NVCHR_ThanhPhan')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_KichThuoc', 'NVCHR_KichThuoc')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_DongMay', 'NVCHR_DongMay')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_TinhNang', 'NVCHR_TinhNang')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_FileThietKe', 'NVCHR_FileThietKe')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_NhaSanXuat', 'NVCHR_NhaSanXuat')));
+                    //tr.appendChild(addTd(getVal(d, 'chR_MaNCC', 'CHR_MaNCC')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_TenNCC', 'NVCHR_TenNCC')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_Rohs', 'NVCHR_Rohs')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_COCQ', 'NVCHR_COCQ')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_MSDS', 'NVCHR_MSDS')));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_AnToan', 'NVCHR_AnToan')));
+                    //tr.appendChild(addTd(formatDate(getVal(d, 'dtM_KyHan', 'DTM_KyHan')), 'text-center'));
 
-                    tr.appendChild(addTd(getVal(d, 'nvchR_FileThietKe', 'NVCHR_FileThietKe')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_NhaSanXuat', 'NVCHR_NhaSanXuat')));
-                    tr.appendChild(addTd(getVal(d, 'chR_MaNCC', 'CHR_MaNCC')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_TenNCC', 'NVCHR_TenNCC')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_Rohs', 'NVCHR_Rohs')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_COCQ', 'NVCHR_COCQ')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_MSDS', 'NVCHR_MSDS')));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_AnToan', 'NVCHR_AnToan')));
-
-                    tr.appendChild(addTd(formatDate(getVal(d, 'dtM_KyHan', 'DTM_KyHan')), 'text-center'));
                     const gap = getVal(d, 'chR_Gap', 'CHR_Gap');
                     const gapLabel = gap != null && gap !== '' ? (String(gap).toLowerCase() === 'true' || String(gap) === '1' ? 'O' : 'X') : '';
-                    tr.appendChild(addTd(gapLabel, 'text-center'));
+                    //tr.appendChild(addTd(gapLabel, 'text-center'));
+
                     const lay = getVal(d, 'biT_LayBaoGia', 'BIT_LayBaoGia');
                     const layLabel = lay != null && lay !== '' ? (String(lay).toLowerCase() === 'true' || String(lay) === '1' ? 'O' : 'X') : '';
-                    tr.appendChild(addTd(layLabel, 'text-center'));
-                    tr.appendChild(addTd(getVal(d, 'nvchR_LyDo', 'NVCHR_LyDo')));
+                    //tr.appendChild(addTd(layLabel, 'text-center'));
+                    //tr.appendChild(addTd(getVal(d, 'nvchR_LyDo', 'NVCHR_LyDo')));
 
-                    // Vendor input columns (read-only)
                     const fmtNum = (price, qty) => {
                         try {
                             const numPrice = parseFloat(price);
@@ -1651,119 +1517,242 @@ document.addEventListener('DOMContentLoaded', function () {
                             return '';
                         }
                     };
+
                     tr.appendChild(addTd(getVal(d, 'CHR_MaNCC', 'chR_MaNCC')));
                     tr.appendChild(addTd(getVal(d, 'NVCHR_NameNCC', 'nvchR_NameNCC'), 'text-start'));
                     tr.appendChild(addTd(getVal(d, 'CHR_MaHangNCC', 'chR_MaHangNCC'), null, mismatchStyle(getVal(d, 'IsMatch_MaHangNCC', 'IsMatch_MaHangNCC'))));
-                    tr.appendChild(addTd(getVal(d, 'NVCHR_TenHangHQ', 'nvchR_TenHangHQ'), 'text-start', mismatchStyle(getVal(d, 'IsMatch_NameVN', 'IsMatch_NameVN'))));
-                    tr.appendChild(addTd(getVal(d, 'NameENByNCC', 'nameENByNCC'), null, mismatchStyle(getVal(d, 'IsMatch_NameEN', 'IsMatch_NameEN'))));
+                    //tr.appendChild(addTd(getVal(d, 'NVCHR_TenHangHQ', 'nvchR_TenHangHQ'), 'text-start', mismatchStyle(getVal(d, 'IsMatch_NameVN', 'IsMatch_NameVN'))));
+                    //tr.appendChild(addTd(getVal(d, 'NameENByNCC', 'nameENByNCC'), null, mismatchStyle(getVal(d, 'IsMatch_NameEN', 'IsMatch_NameEN'))));
                     tr.appendChild(addTd(getVal(d, 'soluong', 'INT_SoLuong', 'soluong') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_SoLuong', 'IsMatch_SoLuong'))));
                     tr.appendChild(addTd(getVal(d, 'donvi', 'NVCHR_DonVi') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_DonVi', 'IsMatch_DonVi'))));
                     tr.appendChild(addTd(fmtNum(getVal(d, 'FL_USD', 'fl_usd')), 'text-end'));
                     tr.appendChild(addTd(fmtNum(getVal(d, 'FL_VND', 'fl_vnd')), 'text-end'));
-                    tr.appendChild(addTd(getVal(d, 'NVCHR_MOQ', 'nvchr_MOQ')));
-                    tr.appendChild(addTd(getVal(d, 'DTM_LeadTime', 'dtm_LeadTime')));
-                    tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ShipTime', 'dtm_ShipTime')), null, mismatchStyle(getVal(d, 'IsMatch_Ngay', 'IsMatch_Ngay'))));
-                    tr.appendChild(addTd(getVal(d, 'VCHR_Rohs', 'vchr_Rohs'), null, mismatchStyle(getVal(d, 'IsMatch_Rohs', 'IsMatch_Rohs'))));
-                    tr.appendChild(addTd(getVal(d, 'VCHR_COCQ', 'vchr_COCQ'), null, mismatchStyle(getVal(d, 'IsMatch_COCQ', 'IsMatch_COCQ'))));
-                    tr.appendChild(addTd(getVal(d, 'VCHR_MSDS', 'vchr_MSDS'), null, mismatchStyle(getVal(d, 'IsMatch_MSDS', 'IsMatch_MSDS'))));
-                    tr.appendChild(addTd(getVal(d, 'VCHR_AnToan', 'vchr_AnToan'), null, mismatchStyle(getVal(d, 'IsMatch_AnToan', 'IsMatch_AnToan'))));
-                    tr.appendChild(addTd(getVal(d, 'VCHR_CamKet', 'vchr_CamKet'), null, mismatchStyle(getVal(d, 'IsMatchCamKet', 'IsMatchCamKet'))));
-                    tr.appendChild(addTd(getVal(d, 'NVCHR_DeliveryTerm', 'nvchr_DeliveryTerm')));
-                    tr.appendChild(addTd(getVal(d, 'NVCHR_PaymentTerm', 'nvchr_PaymentTerm')));
+                    //tr.appendChild(addTd(getVal(d, 'NVCHR_MOQ', 'nvchr_MOQ')));
+                    //tr.appendChild(addTd(getVal(d, 'DTM_LeadTime', 'dtm_LeadTime')));
+                    //tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ShipTime', 'dtm_ShipTime')), null, mismatchStyle(getVal(d, 'IsMatch_Ngay', 'IsMatch_Ngay'))));
+                    //tr.appendChild(addTd(getVal(d, 'VCHR_Rohs', 'vchr_Rohs'), null, mismatchStyle(getVal(d, 'IsMatch_Rohs', 'IsMatch_Rohs'))));
+                    //tr.appendChild(addTd(getVal(d, 'VCHR_COCQ', 'vchr_COCQ'), null, mismatchStyle(getVal(d, 'IsMatch_COCQ', 'IsMatch_COCQ'))));
+                    //tr.appendChild(addTd(getVal(d, 'VCHR_MSDS', 'vchr_MSDS'), null, mismatchStyle(getVal(d, 'IsMatch_MSDS', 'IsMatch_MSDS'))));
+                    //tr.appendChild(addTd(getVal(d, 'VCHR_AnToan', 'vchr_AnToan'), null, mismatchStyle(getVal(d, 'IsMatch_AnToan', 'IsMatch_AnToan'))));
+                    //tr.appendChild(addTd(getVal(d, 'VCHR_CamKet', 'vchr_CamKet'), null, mismatchStyle(getVal(d, 'IsMatchCamKet', 'IsMatchCamKet'))));
+                    //tr.appendChild(addTd(getVal(d, 'NVCHR_DeliveryTerm', 'nvchr_DeliveryTerm')));
+                    //tr.appendChild(addTd(getVal(d, 'NVCHR_PaymentTerm', 'nvchr_PaymentTerm')));
                     tr.appendChild(addTd(getVal(d, 'NVCHR_File', 'nvchr_File')));
                     tr.appendChild(addTd(formatDate(getVal(d, 'DTM_EffectiveDate', 'dtm_EffectiveDate'))));
                     tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ExpiryDate', 'dtm_ExpiryDate'))));
 
-                    // System total (try VND then USD)
-                    const totalSys = (getVal(d, 'FL_VND')) ? (fmtNum(getVal(d, 'FL_VND'), getVal(d, 'soluong')) + ' VND') : (getVal(d, 'FL_USD') ? (fmtNum(getVal(d, 'FL_USD'),getVal(d, 'soluong')) + ' USD') : '');
+                    const totalSys = (getVal(d, 'FL_VND')) ? (fmtNum(getVal(d, 'FL_VND'), getVal(d, 'soluong')) + ' VND') : (getVal(d, 'FL_USD') ? (fmtNum(getVal(d, 'FL_USD'), getVal(d, 'soluong')) + ' USD') : '');
                     tr.appendChild(addTd(totalSys, 'text-center'));
 
-                    // PIC selection and reason (display only)
                     const pick = getVal(d, 'BIT_Select', 'bit_Select');
                     const pickLabel = pick === true || String(pick).toLowerCase() === 'true' ? 'O' : (pick === false || String(pick).toLowerCase() === 'false' ? 'X' : '');
                     tr.appendChild(addTd(pickLabel, 'text-center'));
                     tr.appendChild(addTd(getVal(d, 'NVCHR_ReasonPick', 'nvchr_ReasonPick') || getVal(d, 'NVCHR_LyDo', 'nvchr_LyDo')));
 
+                    // Lấy ID của dòng (quan trọng để gửi lên server)
+                    const itemId = getVal(d, 'ID', 'iD');
+
+                    // THÊM 2 CỘT MỚI: ĐỒNG Ý (CHECKBOX) VÀ LÝ DO TỪ CHỐI 
+                    // Cột Đồng ý (checkbox)
+                    const tdApprove = document.createElement('td');
+                    tdApprove.className = 'text-center align-middle';
+                    tdApprove.style.verticalAlign = 'middle';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input approval-checkbox';
+                    checkbox.style.margin = '0';  // Reset margin
+                    checkbox.style.marginLeft = '-6px';
+                    checkbox.style.marginTop = '-4px';
+                    checkbox.setAttribute('data-row-index', idx);
+                    // Mặc định tích chọn (đồng ý)
+                    checkbox.checked = true;
+                    tdApprove.appendChild(checkbox);
+                    tr.appendChild(tdApprove);
+
+                    // Cột Lý do từ chối (input text)
+                    const tdReason = document.createElement('td');
+                    tdReason.className = 'text-center';
+                    tdReason.style.verticalAlign = 'middle';
+
+                    const reasonInput = document.createElement('input');
+                    reasonInput.type = 'text';
+                    reasonInput.className = 'form-control form-control-sm reject-reason-input';
+                    reasonInput.style.width = '100%';
+                    reasonInput.style.minWidth = '150px';
+                    reasonInput.placeholder = T.InputReasonTitle +'...';
+                    reasonInput.disabled = true;
+                    reasonInput.setAttribute('data-row-index', idx);
+                    tdReason.appendChild(reasonInput);
+                    tr.appendChild(tdReason);
+
+                    // Lưu tham chiếu vào mảng rowSelections
+                    rowSelections[idx] = {
+                        id: itemId,
+                        isApproved: true,
+                        rejectReason: '',
+                        checkbox: checkbox,
+                        reasonInput: reasonInput
+                    };
+
+                    // Xử lý sự kiện khi checkbox thay đổi
+                    checkbox.addEventListener('change', function (e) {
+                        const rowIdx = parseInt(this.getAttribute('data-row-index'));
+                        const isChecked = this.checked;
+                        rowSelections[rowIdx].isApproved = isChecked;
+                        rowSelections[rowIdx].rejectReason = '';
+                        const input = rowSelections[rowIdx].reasonInput;
+                        input.disabled = isChecked;
+                        if (isChecked) {
+                            input.value = '';
+                            input.classList.remove('is-invalid');
+                        }
+                    });
+
+                    // Xử lý sự kiện khi nhập lý do từ chối
+                    reasonInput.addEventListener('input', function (e) {
+                        const rowIdx = parseInt(this.getAttribute('data-row-index'));
+                        rowSelections[rowIdx].rejectReason = this.value;
+                        if (this.value.trim() !== '') {
+                            this.classList.remove('is-invalid');
+                        }
+                    });
+
                     frag.appendChild(tr);
                 });
+
                 tbody.appendChild(frag);
 
-                // attach approve/reject handlers (reuse existing modal buttons)
-                const btnApprove = document.getElementById('modalApprove');
-                const btnReject = document.getElementById('modalReject');
-                if (btnApprove) {
-                    btnApprove.onclick = async () => {
-                        var nextStep = master.ID_StepBaoGia;
-                        if (nextStep === 9) {
+                // HÀM KIỂM TRA TÍNH HỢP LỆ TRƯỚC KHI GỬI 
+                const validateSelections = () => {
+                    let isValid = true;
+                    // Reset validation styles
+                    for (let i = 0; i < rowSelections.length; i++) {
+                        const sel = rowSelections[i];
+                        if (sel.reasonInput) {
+                            sel.reasonInput.classList.remove('is-invalid');
+                        }
+                    }
+                    // Kiểm tra từng dòng: nếu không đồng ý (checked = false) mà lý do trống
+                    for (let i = 0; i < rowSelections.length; i++) {
+                        const sel = rowSelections[i];
+                        if (!sel.isApproved && (!sel.rejectReason || sel.rejectReason.trim() === '')) {
+                            isValid = false;
+                            if (sel.reasonInput) {
+                                sel.reasonInput.classList.add('is-invalid');
+                                sel.reasonInput.focus();
+                            }
+                            showDialog({ message: (T.MSNGInputReason || 'Dòng thứ {0}: Vui lòng nhập lý do từ chối.').replace('{0}', i + 1), type: 'warning' });
+                            break;
+                        }
+                    } 
+                    return isValid;
+                };
 
+                // HÀM LẤY DỮ LIỆU PHÊ DUYỆT CHI TIẾT THEO ĐÚNG FORMAT ApproverDTO
+                const getApprovalDetails = () => {
+                    const approverList = [];
+                    for (let i = 0; i < rowSelections.length; i++) {
+                        const sel = rowSelections[i];
+                        approverList.push({
+                            Id: sel.id,
+                            IsApproved: sel.isApproved,
+                            Reason: sel.isApproved ? '' : (sel.rejectReason || '')
+                        });
+                    }
+                    return approverList;
+                };
+
+                // Xử lý nút Confirm duy nhất
+                const btnConfirm = document.getElementById('modalConfirm');
+                if (btnConfirm) {
+                    // Clone và thay thế để xóa hết các event cũ
+                    const newBtnConfirm = btnConfirm.cloneNode(true);
+                    btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
+
+                    newBtnConfirm.onclick = async () => {
+                        // Kiểm tra tính hợp lệ trước khi gửi
+                        if (!validateSelections()) {
+                            return;
+                        }
+
+                        // Lấy danh sách phê duyệt
+                        const listConfirm = getApprovalDetails();
+
+                        // Kiểm tra nếu không có dữ liệu
+                        if (!listConfirm || listConfirm.length === 0) {
+                            showDialog({ message: T.NoData||'Không có dữ liệu phê duyệt.', type: 'warning' });
+                            return;
+                        }
+
+                        // Kiểm tra xem step hiện tại có cần chọn người phê duyệt tiếp theo không
+                        const nextStep = master.ID_StepBaoGia;
+                        let userApproverNext = '';
+
+                        // Nếu step = 9 (QLSC) thì cần chọn người phê duyệt tiếp theo (QLTC)
+                        if (nextStep === 9) {
                             const selectedApprover = await this.openApproverSelector(10, "");
-                            // Nếu không chọn người phê duyệt, thoát
                             if (!selectedApprover) {
+                                return; // Người dùng đã hủy chọn
+                            }
+                            userApproverNext = selectedApprover.chR_UserAdid;
+                        }
+
+                        try {
+                            newBtnConfirm.disabled = true;
+                            showDialog({ message: T.LoadingData || 'Đang xử lý...', type: 'info', autoClose: false });
+
+                            // Tạo payload theo đúng model ConfirmApproverModel
+                            const payload = {
+                                listCofirm: listConfirm,
+                                UserApproverNext: userApproverNext
+                            };
+
+                            const response = await fetch((window.apiBaseUrl || '') + '/Quote/ConfirmApprover', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (!response.ok) {
+                                const errorText = await response.text().catch(() => null);
+                                showDialog({ message: errorText || 'Xác nhận phê duyệt thất bại', type: 'error' });
                                 return;
                             }
-                            try {
-                                const payload = {
-                                    maDon: maDon,
-                                    UserApproverNext: selectedApprover.chR_UserAdid,
-                                    Reason: ''
-                                };
-                                btnApprove.disabled = true;
-                                const r = await fetch((window.apiBaseUrl || '') + '/Quote/PheDuyetOKBaoGia', {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                                });
-                                if (!r.ok) {
-                                    const txt = r.text().catch(() => null);
-                                    showDialog({ message: txt || 'Phê duyệt thất bại', type: 'error' });
-                                    return;
-                                }
-                                showDialog({ message: 'Phê duyệt thành công', type: 'success' });
+
+                            const result = await response.json().catch(() => null);
+                            const hasRejected = listConfirm.some(item => item.IsApproved === false);
+
+                            showDialog({
+                                message: hasRejected ? T.Confirmation || 'Xác nhận phê duyệt thành công (có dòng bị từ chối)' : T.MsgSusscesAprover || 'Xác nhận phê duyệt thành công',
+                                type: 'success'
+                            });
+
+                            // Reload dữ liệu và đóng modal
+                            if (typeof quotationApp !== 'undefined' && quotationApp.searchItems) {
                                 quotationApp.searchItems();
+                            }
+
+                            // Đóng modal (gọi hàm hideEditModal nếu có)
+                            if (typeof hideEditModal === 'function') {
                                 hideEditModal();
-                            } catch (e) {
-                                showDialog({ message: 'Lỗi phê duyệt', type: 'error' });
-                            } finally { btnApprove.disabled = false; }
-                        } else {
-                            try {
-                                const payload = {
-                                    maDon: maDon,
-                                    UserApproverNext: '',
-                                    Reason: ''
-                                };
-                                btnApprove.disabled = true;
-                                const r = await fetch((window.apiBaseUrl || '') + '/Quote/PheDuyetOKBaoGia', {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                                });
-                                if (!r.ok) {
-                                    const txt = await r.text().catch(() => null);
-                                    showDialog({ message: txt || 'Phê duyệt thất bại', type: 'error' });
-                                    return;
+                            } else {
+                                // Tìm và đóng modal theo cách thông thường
+                                const modal = document.getElementById('editModal');
+                                if (modal && typeof bootstrap !== 'undefined') {
+                                    const bsModal = bootstrap.Modal.getInstance(modal);
+                                    if (bsModal) bsModal.hide();
                                 }
-                                showDialog({ message: 'Phê duyệt thành công', type: 'success' });
-                                quotationApp.searchItems();
-                                hideEditModal();
-                            } catch (e) {
-                                showDialog({ message: 'Lỗi phê duyệt', type: 'error' });
-                            } finally { btnApprove.disabled = false; }
+                            }
+
+                        } catch (error) {
+                            console.error('Confirm error:', error);
+                            showDialog({ message: 'Error Approval: '+error, type: 'error' });
+                        } finally {
+                            newBtnConfirm.disabled = false;
                         }
                     };
-                }
-                if (btnReject) {
-                    btnReject.onclick = async () => {
-                        const reason = await showPrompt({ title: 'Lý do', message: 'Vui lòng nhập lý do trả về', placeholder: '' });
-                        if (reason == null) return;
-                        try {
-                            btnReject.disabled = true;
-                            const payload = { maDon: maDon, UserApproverNext: '', Reason: reason };
-                            const r = await fetch((window.apiBaseUrl || '') + '/Quote/PheDuyetNGBaoGia', {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                            });
-                            if (!r.ok) { const txt = await r.text().catch(() => null); showDialog({ message: txt || 'Trả về thất bại', type: 'error' }); return; }
-                            showDialog({ message: 'Trả về thành công', type: 'success' });
-                            quotationApp.searchItems();
-                            hideEditModal();
-                        } catch (e) { showDialog({ message: 'Lỗi', type: 'error' }); }
-                        finally { btnReject.disabled = false; }
-                    };
+                } else {
+                    console.warn('Button modalConfirm not found');
                 }
 
                 // show modal
@@ -1773,7 +1762,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 showDialog({ message: 'Đã xảy ra lỗi khi tải dữ liệu.' });
             }
         },
-
         renderRequestListPaginationControls: function () {
             const container = document.getElementById('paginationControls');
             if (!container) return;

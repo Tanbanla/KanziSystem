@@ -210,7 +210,7 @@ async function loadToCombo_GD(position, comboId) {
 
     const result = await response.json();
     for (var i = 0; i < result.Data.Data.length; i++) {
-        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_NAME}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
     }
     document.getElementById("cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
     document.getElementById("mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
@@ -238,7 +238,7 @@ async function loadToCombo_TBP(position, comboId) {
     const result = await response.json();
     document.getElementById("ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
-        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_NAME}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
     }   
     document.getElementById("cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
     document.getElementById("mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
@@ -254,7 +254,6 @@ async function get_info(us, comboId) {
         }
 
         const data = await response.json();
-        console.log(data);
         document.getElementById("cv_" + comboId).value = data.Data[0].CHR_EMPLOYEE_ADID;
         document.getElementById("mail_" + comboId).value = data.Data[0].CHR_EMPLOYEE_MAIL;
 

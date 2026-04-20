@@ -59,6 +59,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // lấy tên mã hàng hiển thị trong combobox
         public JsonResult _load_material(string group_code, string loaichiphi)
         {
+            
             string mahang = "";
             if(loaichiphi == "AUXILIARY")
             {
@@ -71,6 +72,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if(group_code == "GA")
             {
                 mahang = "B";
+            }
+            if (group_code.Contains("_CPK"))
+            {
+                mahang = "";
+                group_code = group_code.Split("_")[0];
             }
             List<string> material = MST_INVENTORY._getname_material(group_code, mahang);
             return Json(material);
