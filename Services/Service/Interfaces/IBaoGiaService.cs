@@ -69,5 +69,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> UpdateCodeMaterialBIVN(List<ConfirmNameDTO> list);
         // Phê duyệt list lựa chọn nhà cung cấp
         public Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprover(List<ApproverDTO> dataApprovers, string userNext, string userUpdate);
+        // Xóa đơn xin báo giá
+        public Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string userUpdate);
+        // Xóa từng đơn
+        public Task<GenericResponse<bool>> DeleteDonBaoGiaAsync(int id, string userUpdate);
     }
 }

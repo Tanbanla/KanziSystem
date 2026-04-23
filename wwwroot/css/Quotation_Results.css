@@ -33,6 +33,11 @@
         max-height: 70vh;
     }
 
+/* allow horizontal scrolling on smaller screens */
+.table-responsive, .table-responsive-fixed {
+    overflow-x: auto;
+}
+
     /* Sticky header styling */
     #detailModal thead th {
         position: sticky;
@@ -40,6 +45,40 @@
         z-index: 2;
         white-space: nowrap;
     }
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    /* Hide less important BIVN columns on medium screens */
+    .additional-column { display: none !important; }
+    .table { font-size: 11px; }
+    .table-header-custom { font-size: 13px; }
+}
+
+@media (max-width: 992px) {
+    /* Further hide vendor details on small / tablet */
+    .vendor-column, .bivn-column { display: none !important; }
+    .approval-column { display: none !important; }
+    #detailModal .modal-dialog { width: 100% !important; margin: 0.5rem !important; }
+    #detailModal .modal-content { border-radius: 6px; }
+}
+
+@media (max-width: 768px) {
+    /* Mobile optimizations */
+    .table { font-size: 10px; }
+    .table th, .table td { padding: 6px 6px; white-space: nowrap; }
+    /* Make modal full screen on small devices */
+    #detailModal .modal-dialog { max-width: 100%; margin: 0; height: 100%; }
+    #detailModal .modal-content { height: 100vh; border-radius: 0; }
+    /* Hide even more columns so table stays readable */
+    .vendor-column, .bivn-column, .additional-column, .approval-column { display: none !important; }
+    /* Ensure the sticky header doesn't block content on small screens */
+    #detailTable thead th, #detailModal thead th { position: static; }
+}
+
+@media (max-width: 480px) {
+    .table { font-size: 9px; }
+    .table-header-custom { font-size: 12px; }
+}
 
     /* Table body styling */
     #detailModal tbody td {

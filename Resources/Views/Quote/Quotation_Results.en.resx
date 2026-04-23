@@ -802,4 +802,25 @@
   <data name="ChiefApproval" xml:space="preserve">
     <value>Chief/Expert Approval</value>
   </data>
+  <data name="BivnInput" xml:space="preserve">
+    <value>BIVN Input</value>
+  </data>
+  <data name="VendorInput" xml:space="preserve">
+    <value>Vendor Input</value>
+  </data>
+  <data name="SystemCalculated" xml:space="preserve">
+    <value>System Calculated</value>
+  </data>
+  <data name="BivnPur" xml:space="preserve">
+    <value>BIVN PUR</value>
+  </data>
+  <data name="PriceIncreaseReason" xml:space="preserve">
+    <value>Reason for price increase</value>
+  </data>
+  <data name="Sum" xml:space="preserve">
+    <value>Sum</value>
+  </data>
+  <data name="UnHideDetail" xml:space="preserve">
+    <value>Unhide detail</value>
+  </data>
 </root>

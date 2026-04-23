@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Master;
 using System.DirectoryServices.AccountManagement;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -1200,7 +1202,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     ws.Cell(startRow, 1).Value = item.NVCHR_ChungLoai ?? string.Empty;
                     ws.Cell(startRow, 2).Value = item.CHR_MaNCC ?? string.Empty;
-                    ws.Cell(startRow, 3).Value = item.ShortName ?? string.Empty;
+                    ws.Cell(startRow, 3).Value = string.IsNullOrEmpty(item.ShortName) ? (item.NVCHR_SanXuat ?? string.Empty): item.ShortName;
                     ws.Cell(startRow, 4).Value = item.NVCHR_TenNCC ?? string.Empty;
                     ws.Cell(startRow, 5).Value = item.Diachi ?? string.Empty;
                     ws.Cell(startRow, 6).Value = item.CHR_Mail ?? string.Empty;
@@ -1273,6 +1275,117 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        // Import Excel Material
+        [HttpPost]
+        public async Task<IActionResult> ImportExcelMaterial([FromForm] ImportSupplierDetailDTO insertFile)
+        {
+            if (insertFile?.FileExcel == null)
+                return BadRequest("File không hợp lệ");
+
+            try
+            {
+                using var stream = insertFile.FileExcel.OpenReadStream();
+                using var workbook = new XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                var rows = new List<(string phanLoai, string codeSupplier, string nameVN, string nameEN, string category)>();
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    var phanLoai = ws.Cell(r, 1).GetString();
+                    if (string.IsNullOrWhiteSpace(phanLoai)) continue;
+
+                    var nameVN = ws.Cell(r, 4).GetString();
+                    var codeSupplier = ws.Cell(r, 3).GetString();
+
+                    rows.Add((
+                        phanLoai: phanLoai,
+                        codeSupplier: codeSupplier,
+                        nameVN: nameVN,
+                        nameEN: ws.Cell(r, 5).GetString(),
+                        category: ws.Cell(r, 6).GetString()
+                    ));
+                }
+
+                if (!rows.Any())
+                    return BadRequest("File không có dữ liệu hợp lệ");
+
+                var materialNews = new List<MATERIALDTO>();
+                var groups = rows.GroupBy(r => GetMaterialType(r.phanLoai));
+
+                foreach (var group in groups)
+                {
+                    var latestCode = await _materialService.MaterialCodeLater(group.Key);
+                    var currentNumber = ExtractNumberFromCode(latestCode.Data) + 1;
+
+                    foreach (var row in group)
+                    {
+                        var newCode = GenerateMaterialCode(group.Key, currentNumber);
+
+                        // Kiểm tra trùng trong file
+                        if (materialNews.Any(m => m.Material_Code == newCode))
+                            continue;
+
+                        materialNews.Add(new MATERIALDTO
+                        {
+                            Material_Code = newCode,
+                            Material_Name_VN = row.nameVN,
+                            Material_Name_EN = row.nameEN,
+                            Code_Suppiler = row.codeSupplier,
+                            Category_VN = row.category,
+                            Shape = "",
+                            Material = "",
+                            Composition = "",
+                            Dimension = "",
+                            UsedFor = "",
+                            Purpose = "",
+                            CHR_MaterialOutSide = "OUT",
+                            Unit = "",
+                        });
+                        currentNumber++;
+                    }
+                }
+
+                if (!materialNews.Any())
+                    return BadRequest("Không có dữ liệu hợp lệ để import");
+
+                await _materialService.UpdateListThongTinNoList(materialNews);
+                return Ok(new { success = true, count = materialNews.Count });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+        // Xác định mã loại vật liệu dựa trên phân loại (I hoặc O)
+        private string GetMaterialType(string phanLoai)
+        {
+            if (string.IsNullOrEmpty(phanLoai)) return "O";
+
+            var upperPhanLoai = phanLoai.ToUpper().Trim();
+
+            if (upperPhanLoai == "I")
+                return "I";
+
+            return "O";
+        }
+
+        // Tạo mã material với prefix A hoặc I
+        private string GenerateMaterialCode(string type, int number)
+        {
+            return $"{type}{number:D8}";
+        }
+
+        // Extract số từ mã material
+        private int ExtractNumberFromCode(string materialCode)
+        {
+            if (string.IsNullOrEmpty(materialCode)) return 0;
+            var match = Regex.Match(materialCode, @"\d+");
+            return match.Success && int.TryParse(match.Value, out int number) ? number : 0;
         }
     }
 }

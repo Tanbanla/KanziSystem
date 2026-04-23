@@ -653,32 +653,123 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json("Lỗi hệ thống: " + ex.Message);
             }
         }
+        //[HttpPost]
+        //public JsonResult ResetImportRow([FromBody] ConfirmImport item)
+        //{
+        //    SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+        //    try { 
+        //        // lấy ra khối và set kho
+        //        var get_khoi = _db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE  PO_Detail_Id = '" + item.Id_nhapkho + "'");
+
+        //        // nếu khối Prod về kho F2, GA về GA, IT về IT, PUR về PUR
+        //        string khoi = get_khoi.Rows[0][0].ToString()!;
+        //        item.KhoNhan = item.Mahang switch
+        //        {
+        //            var s when s!.Contains("E") || s!.Contains("A") => "F2",
+        //            var s when s!.Contains("I") => "IT",
+        //            var s when s!.Contains("B") || s!.Contains("C") => "F1",
+        //            _ => khoi switch // không có mã hàng sẽ gán theo khối
+        //            {
+        //                "PROD" => "F2",
+        //                "GA" => "F1",
+        //                _ => khoi
+        //            }
+        //        };
+        //        if (!string.IsNullOrEmpty(item.Id_Goc))
+        //        {
+        //            _db.ReturnString("DELETE FROM [IM_PO_DETAIL] WHERE [PO_Detail_Id] IN (" + item.Id_nhapkho + ") ");
+        //        }
+        //        if (item.benXacNhanTruoc!.Trim().Equals("STOCK"))
+        //        {
+        //            string Con = item.Id_nhapkho!;
+        //            string Idcaccon = "";
+        //            while (Con != "")
+        //            {
+        //                Con = _db.ReturnString("SELECT [PO_Detail_Id] FROM [IM_PO_DETAIL] WHERE [Id_Goc] = '" + Con + "' ");
+        //                if (Con != "")
+        //                {
+        //                    Idcaccon = Idcaccon + ",'" + Con + "'";
+        //                }
+        //            }
+        //            var Donglienquan = _db.GET_DATA_FROM_SQL("SELECT * FROM [IM_PO_DETAIL] WHERE [PO_Detail_Id] IN ('" + item.PO_Detail_Id + "'" + Idcaccon + ") ");
+        //            foreach (DataRow rDonglienquan in Donglienquan.Rows)
+        //            {
+        //                if (item.luongvethuctekho!.Trim() != "")
+        //                {
+        //                    if (item.Mahang!.Trim().Equals(""))
+        //                    {
+        //                        double Luongnhapkho = Convert.ToDouble(Convert.ToDouble(rDonglienquan["Luongvekho"].ToString()!.Trim()));
+        //                        string DonviRequest = _db.ReturnString("SELECT [Unit] FROM [MATERIAL] WHERE [Material_Code] = '" + item.Mahang.Trim() + "' ");
+        //                        string Quydoi = _db.ReturnString("SELECT [Soluongquydoi] FROM [KHO_DONVIQUYDOI] WHERE [MaNguyenLieu] = '" + item.Mahang.ToString().Trim() + "' AND [DonviRequest] = N'" + DonviRequest + "' AND [DonviPO] = N'" + item.Donvi + "' ");
+        //                        if (Quydoi != "")
+        //                        {
+        //                            Luongnhapkho = Convert.ToDouble(Quydoi) * Luongnhapkho;
+        //                        }
+        //                        string Kho = "";
+        //                        if (rDonglienquan["LuongvekhoKhonhap"].ToString()!.Trim() != "")
+        //                        {
+        //                            Kho = rDonglienquan["LuongvekhoKhonhap"].ToString()!.Trim();
+        //                        }
+        //                        else
+        //                        {
+        //                            Kho = item.KhoNhan;
+        //                        }
+        //                        _db.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] - " + Luongnhapkho + " WHERE [MaNguyenLieu] =  N'" + item.Mahang.Trim() + "' AND [Kho] = '" + Kho + "' AND [Group_Code] = '" + khoi + "'");
+        //                        _db.GET_DATA_FROM_SQL("INSERT INTO [KHO_XOA] SELECT * FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + rDonglienquan["Id_LichsuNhap"].ToString()!.Trim() + "' ");
+        //                        _db.GET_DATA_FROM_SQL("DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + rDonglienquan["Id_LichsuNhap"].ToString()!.Trim() + "' ");
+        //                    }
+        //                }
+        //            }
+        //            _db.GET_DATA_FROM_SQL("INSERT INTO [KHO_XOA] SELECT * FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu + "' ");
+        //            _db.GET_DATA_FROM_SQL("DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu!.Trim() + "' ");
+        //            _db.GET_DATA_FROM_SQL("UPDATE [IM_PO_DETAIL] SET Sotien=Soluong*Dongia,DoisangUSD=(Soluong*Dongia)/Tygia, [Luongvekho] = NULL,[LuongvekhoNguoinhap] = NULL,[LuongvekhoNgaynhap] = NULL,[LuongvekhoKhonhap] = NULL,[Benxacnhantruoc] = NULL, LuongvekhoDanhap = NULL WHERE [PO_Detail_Id] = '" + item.Id_nhapkho + "' ");
+
+        //        }
+        //        else
+        //        {
+        //            _db.GET_DATA_FROM_SQL("UPDATE [IM_PO_DETAIL] SET Sotien=Soluong*Dongia,DoisangUSD=(Soluong*Dongia)/Tygia, [Luongvekho] = NULL,[LuongvekhoKhonhap] = NULL,[LuongvekhoNguoinhap] = NULL,[LuongvekhoNgaynhap] = NULL, LuongvekhoDanhap = NULL WHERE [PO_Detail_Id] = '" + item.Id_nhapkho + "' "); //16/5/2025 mai sửa : [LuongvekhoNgaynhap] = Getdate(), [LuongvekhoNguoinhap] = '" + User + "'
+        //            double Luongnhapkho = Convert.ToDouble(item.luongvethuctekho!.ToString().Trim());
+
+        //            _db.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] - " + Luongnhapkho + " WHERE [MaNguyenLieu] =  N'" + item.Mahang!.Trim() + "' AND [Kho] = '" + item.KhoNhan + "' AND [Group_Code] = '" + khoi + "'");
+        //            _db.GET_DATA_FROM_SQL("INSERT INTO [KHO_XOA] SELECT * FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu!.Trim() + "' ");
+        //            _db.GET_DATA_FROM_SQL("DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu.Trim() + "' ");
+        //        }
+        //        _db.GET_DATA_FROM_SQL("INSERT INTO [IM_LOG]([Loai],[SoPO],[PO_Detail_Id],[Hanhdong],[Thogian],[Nguoicapnhat]) VALUES ('DM','" + item.PO_Detail_Id + "','" + item.Id_nhapkho + "',N'Kho reset số lượng về',Getdate(),'" + item.UserName + "')");
+        //        _db.GET_DATA_FROM_SQL("UPDATE [IM_PO] SET [Nguoixacnhan] = '" + item.UserName + "',[Thoigianxacnhan] = GETDATE() WHERE [SoPO] = '" + item.PO_Detail_Id + "' ");
+        //        UpdateTinhTrangPO(item.PO_Detail_Id!);
+
+        //        return Json("Thành công !");
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json("Lỗi :" + ex);
+        //    }
+        //}
         [HttpPost]
         public JsonResult ResetImportRow([FromBody] ConfirmImport item)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            try { 
-                // lấy ra khối và set kho
-                var get_khoi = _db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE  PO_Detail_Id = '" + item.Id_nhapkho + "'");
+            try
+            {
+                var get_khoi = _db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE PO_Detail_Id = '" + item.Id_nhapkho + "'");
+                string? khoi = get_khoi.Rows.Count > 0 ? get_khoi.Rows[0][0].ToString()! : item.Group_Code;
 
-                // nếu khối Prod về kho F2, GA về GA, IT về IT, PUR về PUR
-                string khoi = get_khoi.Rows[0][0].ToString()!;
                 item.KhoNhan = item.Mahang switch
                 {
                     var s when s!.Contains("E") || s!.Contains("A") => "F2",
                     var s when s!.Contains("I") => "IT",
                     var s when s!.Contains("B") || s!.Contains("C") => "F1",
-                    _ => khoi switch // không có mã hàng sẽ gán theo khối
+                    _ => khoi switch
                     {
                         "PROD" => "F2",
                         "GA" => "F1",
                         _ => khoi
                     }
                 };
-                if (!string.IsNullOrEmpty(item.Id_Goc))
-                {
-                    _db.ReturnString("DELETE FROM [IM_PO_DETAIL] WHERE [PO_Detail_Id] IN (" + item.Id_nhapkho + ") ");
-                }
+
+                // ĐÃ XÓA đoạn: if (!string.IsNullOrEmpty(item.Id_Goc)) DELETE item.Id_nhapkho (Bị sai logic)
+
                 if (item.benXacNhanTruoc!.Trim().Equals("STOCK"))
                 {
                     string Con = item.Id_nhapkho!;
@@ -691,59 +782,66 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             Idcaccon = Idcaccon + ",'" + Con + "'";
                         }
                     }
-                    var Donglienquan = _db.GET_DATA_FROM_SQL("SELECT * FROM [IM_PO_DETAIL] WHERE [PO_Detail_Id] IN ('" + item.PO_Detail_Id + "'" + Idcaccon + ") ");
+
+                    // FIX số 4: Sửa item.PO_Detail_Id thành item.Id_nhapkho
+                    var Donglienquan = _db.GET_DATA_FROM_SQL("SELECT * FROM [IM_PO_DETAIL] WHERE [PO_Detail_Id] IN ('" + item.Id_nhapkho + "'" + Idcaccon + ") ");
                     foreach (DataRow rDonglienquan in Donglienquan.Rows)
                     {
-                        if (item.luongvethuctekho!.Trim() != "")
+                        // FIX số 3: Lấy Luongvekho của từng dòng db (rDonglienquan), không phải lấy từ item truyền lên
+                        if (rDonglienquan["Luongvekho"].ToString()!.Trim() != "")
                         {
-                            if (item.Mahang!.Trim().Equals(""))
+                            // FIX số 2: Thêm dấu ! (khác rỗng mới chạy)
+                            if (!string.IsNullOrEmpty(item.Mahang!.Trim()))
                             {
-                                double Luongnhapkho = Convert.ToDouble(Convert.ToDouble(rDonglienquan["Luongvekho"].ToString()!.Trim()));
+                                double Luongnhapkho = Convert.ToDouble(rDonglienquan["Luongvekho"].ToString()!.Trim());
                                 string DonviRequest = _db.ReturnString("SELECT [Unit] FROM [MATERIAL] WHERE [Material_Code] = '" + item.Mahang.Trim() + "' ");
-                                string Quydoi = _db.ReturnString("SELECT [Soluongquydoi] FROM [KHO_DONVIQUYDOI] WHERE [MaNguyenLieu] = '" + item.Mahang.ToString().Trim() + "' AND [DonviRequest] = N'" + DonviRequest + "' AND [DonviPO] = N'" + item.Donvi + "' ");
-                                if (Quydoi != "")
+                                string Quydoi = _db.ReturnString("SELECT [Soluongquydoi] FROM [KHO_DONVIQUYDOI] WHERE [MaNguyenLieu] = '" + item.Mahang.Trim() + "' AND [DonviRequest] = N'" + DonviRequest + "' AND [DonviPO] = N'" + item.Donvi + "' ");
+                                if (!string.IsNullOrEmpty(Quydoi))
                                 {
                                     Luongnhapkho = Convert.ToDouble(Quydoi) * Luongnhapkho;
                                 }
-                                string Kho = "";
-                                if (rDonglienquan["LuongvekhoKhonhap"].ToString()!.Trim() != "")
-                                {
-                                    Kho = rDonglienquan["LuongvekhoKhonhap"].ToString()!.Trim();
-                                }
-                                else
-                                {
-                                    Kho = item.KhoNhan;
-                                }
-                                _db.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] - " + Luongnhapkho + " WHERE [MaNguyenLieu] =  N'" + item.Mahang.Trim() + "' AND [Kho] = '" + Kho + "' AND [Group_Code] = '" + khoi + "'");
+
+                                string? Kho = rDonglienquan["LuongvekhoKhonhap"].ToString()!.Trim() != ""
+                                             ? rDonglienquan["LuongvekhoKhonhap"].ToString()!.Trim()
+                                             : item.KhoNhan;
+
+                                _db.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] - " + Luongnhapkho + " WHERE [MaNguyenLieu] = N'" + item.Mahang.Trim() + "' AND [Kho] = '" + Kho + "' AND [Group_Code] = '" + khoi + "'");
                                 _db.GET_DATA_FROM_SQL("INSERT INTO [KHO_XOA] SELECT * FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + rDonglienquan["Id_LichsuNhap"].ToString()!.Trim() + "' ");
                                 _db.GET_DATA_FROM_SQL("DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + rDonglienquan["Id_LichsuNhap"].ToString()!.Trim() + "' ");
                             }
                         }
                     }
+
                     _db.GET_DATA_FROM_SQL("INSERT INTO [KHO_XOA] SELECT * FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu + "' ");
                     _db.GET_DATA_FROM_SQL("DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu!.Trim() + "' ");
                     _db.GET_DATA_FROM_SQL("UPDATE [IM_PO_DETAIL] SET Sotien=Soluong*Dongia,DoisangUSD=(Soluong*Dongia)/Tygia, [Luongvekho] = NULL,[LuongvekhoNguoinhap] = NULL,[LuongvekhoNgaynhap] = NULL,[LuongvekhoKhonhap] = NULL,[Benxacnhantruoc] = NULL, LuongvekhoDanhap = NULL WHERE [PO_Detail_Id] = '" + item.Id_nhapkho + "' ");
-                  
+
+                    // FIX số 1: Trả lại đoạn code xóa các dòng con (đã bị tách) giống WinForms
+                    if (Idcaccon != "")
+                    {
+                        _db.GET_DATA_FROM_SQL("DELETE FROM [IM_PO_DETAIL] WHERE [PO_Detail_Id] IN (" + Idcaccon.Substring(1) + ") ");
+                    }
                 }
                 else
                 {
-                    _db.GET_DATA_FROM_SQL("UPDATE [IM_PO_DETAIL] SET Sotien=Soluong*Dongia,DoisangUSD=(Soluong*Dongia)/Tygia, [Luongvekho] = NULL,[LuongvekhoKhonhap] = NULL,[LuongvekhoNguoinhap] = NULL,[LuongvekhoNgaynhap] = NULL, LuongvekhoDanhap = NULL WHERE [PO_Detail_Id] = '" + item.Id_nhapkho + "' "); //16/5/2025 mai sửa : [LuongvekhoNgaynhap] = Getdate(), [LuongvekhoNguoinhap] = '" + User + "'
+                    _db.GET_DATA_FROM_SQL("UPDATE [IM_PO_DETAIL] SET Sotien=Soluong*Dongia,DoisangUSD=(Soluong*Dongia)/Tygia, [Luongvekho] = NULL,[LuongvekhoKhonhap] = NULL,[LuongvekhoNguoinhap] = NULL,[LuongvekhoNgaynhap] = NULL, LuongvekhoDanhap = NULL WHERE [PO_Detail_Id] = '" + item.Id_nhapkho + "' ");
                     double Luongnhapkho = Convert.ToDouble(item.luongvethuctekho!.ToString().Trim());
 
-                    _db.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] - " + Luongnhapkho + " WHERE [MaNguyenLieu] =  N'" + item.Mahang!.Trim() + "' AND [Kho] = '" + item.KhoNhan + "' AND [Group_Code] = '" + khoi + "'");
+                    _db.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] - " + Luongnhapkho + " WHERE [MaNguyenLieu] = N'" + item.Mahang!.Trim() + "' AND [Kho] = '" + item.KhoNhan + "' AND [Group_Code] = '" + khoi + "'");
                     _db.GET_DATA_FROM_SQL("INSERT INTO [KHO_XOA] SELECT * FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu!.Trim() + "' ");
                     _db.GET_DATA_FROM_SQL("DELETE FROM [KHO_NHAPXUAT] WHERE [Id_Lichsu] = '" + item.Id_Lichsu.Trim() + "' ");
                 }
+
+                // LƯU Ý: Biến item.PO_Detail_Id của bạn theo JS map lên là Số PO, nên chèn vào [SoPO]
                 _db.GET_DATA_FROM_SQL("INSERT INTO [IM_LOG]([Loai],[SoPO],[PO_Detail_Id],[Hanhdong],[Thogian],[Nguoicapnhat]) VALUES ('DM','" + item.PO_Detail_Id + "','" + item.Id_nhapkho + "',N'Kho reset số lượng về',Getdate(),'" + item.UserName + "')");
                 _db.GET_DATA_FROM_SQL("UPDATE [IM_PO] SET [Nguoixacnhan] = '" + item.UserName + "',[Thoigianxacnhan] = GETDATE() WHERE [SoPO] = '" + item.PO_Detail_Id + "' ");
                 UpdateTinhTrangPO(item.PO_Detail_Id!);
 
                 return Json("Thành công !");
-                
             }
             catch (Exception ex)
             {
-                return Json("Lỗi :" + ex);
+                return Json("Lỗi :" + ex.Message);
             }
         }
     }

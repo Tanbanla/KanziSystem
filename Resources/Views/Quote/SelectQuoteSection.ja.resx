@@ -417,16 +417,19 @@
   <data name="PageSize" xml:space="preserve">
     <value>ページサイズ</value>
   </data>
-    <data name="PrimaryManager" xml:space="preserve">
+  <data name="PrimaryManager" xml:space="preserve">
     <value>一次管理者</value>
-</data>
-    <data name="Result" xml:space="preserve">
+  </data>
+  <data name="Result" xml:space="preserve">
     <value>結果</value>
-</data>
-    <data name="MiddleManager" xml:space="preserve">
+  </data>
+  <data name="MiddleManager" xml:space="preserve">
     <value>中級管理者</value>
-</data>
-    <data name="DepartmentHead" xml:space="preserve">
+  </data>
+  <data name="DepartmentHead" xml:space="preserve">
     <value>部門長</value>
-</data>
+  </data>
+  <data name="PriceIncreaseReason" xml:space="preserve">
+    <value>価格上昇の理由</value>
+  </data>
 </root>

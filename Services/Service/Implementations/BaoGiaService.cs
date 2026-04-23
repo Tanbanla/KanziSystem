@@ -386,5 +386,38 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Xóa đơn xin báo giá
+        public async Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string userUpdate)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.DeleteDonXinBaoGiaAsync(maDon, userUpdate);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Xóa từng đơn
+        public async Task<GenericResponse<bool>> DeleteDonBaoGiaAsync(int id, string userUpdate)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.DeleteDonBaoGiaAsync(id, userUpdate);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return result;
+        }
     }
 }

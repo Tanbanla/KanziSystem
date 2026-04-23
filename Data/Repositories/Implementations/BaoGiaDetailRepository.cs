@@ -315,7 +315,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(NameHQ))
             {
-                sql.Append(" AND r.NVCHR_NameVN = @NameHQ");
+                sql.Append(" AND r.CHR_MaThietBi = @NameHQ");
                 parameters.Add("NameHQ", NameHQ);
             }
             var data = (await _conn.QueryAsync<BaoGia_Detail_of_Quotation>(sql.ToString(), parameters)).ToList();
@@ -345,6 +345,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.BIT_Select = item.BIT_Select;
                     detail.NVCHR_ReasonPick = item.NVCHR_ReasonPick;
                     detail.CHR_UpdateBy = item.CHR_UpdateBy;
+                    detail.NVCHR_Note = item.NVCHR_Note;
                     // save rq
                     var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
                     if (rq != null)
@@ -394,6 +395,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             await _context.SaveChangesAsync();
             return resultList.FirstOrDefault();
+        }
+        // Lấy id detail theo ID RequestQuote
+        public async Task<int> GetIdDetailAsync(int? idRequest)
+        {
+            if(idRequest == 0)
+            {
+                return 0;
+            }
+            var detail = await _context.BaoGia_Detail_of_Quotations
+                .Where(b => b.ID_RequestQuote == idRequest)
+                .Select(b => b.ID)
+                .FirstOrDefaultAsync();
+            return detail;
         }
     }
 }

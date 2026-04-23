@@ -9,6 +9,7 @@
     const btnImportHistory = document.getElementById('btnImportHistory');
     const supplierSelect = document.getElementById('editNhaCungCap');
     const hiddenTenNCC = document.getElementById('editTenNCC');
+    const btnExportManaHistory = document.getElementById('btnExportManaHistory');
     let currentPage = 1;
     const pageSize = 20;
     let currentGroups = [];
@@ -22,7 +23,61 @@
             hiddenTenNCC.value = ''; 
         }
     }
+    function showConfirmDialog(title, html, confirmText, cancelText) {
+        const overlay = document.getElementById('cmDialogOverlay');
+        const body = document.getElementById('cmDialogBody');
+        const footer = document.getElementById('cmDialogFooter');
+        const titleEl = document.getElementById('cmDialogTitle');
+        if (!overlay || !body || !footer || !titleEl) {
+            // fallback
+            return Promise.resolve(window.confirm(html || title || 'Confirm'));
+        }
+        const T = window.i18nHistoryQuote || {};
+        titleEl.textContent = title || (T.Confirm || 'Xác nhận');
+        body.innerHTML = html || '';
+        footer.innerHTML = `
+            <div class="d-flex gap-2" style="justify-content:flex-end;">
+                <button type="button" class="cm-btn cm-btn-cancel">${escapeHtml(cancelText || (T.Cancel || 'Hủy'))}</button>
+                <div style="margin-right: 4px;"></div>
+                <button type="button" class="cm-btn cm-btn-confirm" style ="background-color: #2335b7; color: white">${escapeHtml(confirmText || (T.Confirm || 'Có'))}</button>
+            </div>`;
 
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+
+        try {
+            const dlg = overlay.querySelector('.cm-dialog');
+            const focusable = dlg && dlg.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusable && typeof focusable.focus === 'function') focusable.focus();
+        } catch { }
+
+        return new Promise((resolve) => {
+            function cleanup() {
+                overlay.setAttribute('aria-hidden', 'true');
+                overlay.style.display = 'none';
+                overlay.removeEventListener('click', overlayClickHandler);
+                cancelBtn.removeEventListener('click', onCancel);
+                confirmBtn.removeEventListener('click', onConfirm);
+            }
+            function onConfirm(e) { e && e.preventDefault(); cleanup(); resolve(true); }
+            function onCancel(e) { e && e.preventDefault(); cleanup(); resolve(false); }
+            function overlayClickHandler(evt) {
+                const target = evt.target.closest('[data-cm-action="overlay"], [data-cm-action="close"]');
+                if (target) { onCancel(); }
+            }
+
+            const confirmBtn = footer.querySelector('.cm-btn-confirm');
+            const cancelBtn = footer.querySelector('.cm-btn-cancel');
+            overlay.addEventListener('click', overlayClickHandler);
+            cancelBtn.addEventListener('click', onCancel);
+            confirmBtn.addEventListener('click', onConfirm);
+        });
+    }
+
+    function escapeHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[c]; });
+    }
     // Gán sự kiện change cho select
     supplierSelect.addEventListener('change', updateHiddenValue);
 
@@ -104,11 +159,68 @@
             PageSize: 10000,
             Date: (from && to) ? { From: from, To: to } : null
         };
+        // ExportHistory
+        const T = window.i18nHistoryQuote || {};
+        try {
+            showLoading(T.Exporting || 'Đang xuất...');
+            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportManagerHistory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const msg = await res.text().catch(() => T.ExportError || 'Xuất file thất bại');
+                throw new Error(msg);
+            }
+            const blob = await res.blob();
+            let fileName = 'HistoryQuote.xlsx';
+            const cd = res.headers.get('content-disposition');
+            if (cd) {
+                const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+            }
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error exporting history', err);
+            showDialog(T.Notification || 'Thông báo', `<div class="text-danger">${err.message}</div>`);
+        } finally {
+            hideLoading();
+        }
+    });
+    btnExportManaHistory?.addEventListener('click', async () => {
+        const maDon = (document.getElementById('searchMaDon').value || '').trim();
+        const phongBan = (document.getElementById('searchPhongBan').value || '').trim();
+        const nguoiTao = (document.getElementById('searchNguoiTao').value || '').trim();
+        const maVatTu = (document.getElementById('searchMaVatTu').value || '').trim();
+        const nhaCungCap = (document.getElementById('searchNhaCungCap').value || '').trim();
+        const status = statusFilter.value;
+        const from = document.getElementById('dateFrom').value;
+        const to = document.getElementById('dateTo').value;
+        // build payload for ExportHistory
+        const payload = {
+            MaDon: maDon,
+            MaNcc: nhaCungCap,
+            Section: phongBan,
+            NguoiYeuCau: nguoiTao,
+            MaHang: maVatTu,
+            TrangThai: status,
+            Step: null,
+            PageIndex: 1,
+            PageSize: 10000,
+            Date: (from && to) ? { From: from, To: to } : null
+        };
 
         const T = window.i18nHistoryQuote || {};
         try {
             showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportHistory', {
+            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportManagerHistory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -248,7 +360,7 @@
 
         fileInput.click();
     });
-    tblBody?.addEventListener('click', (e) => {
+    tblBody?.addEventListener('click', async (e) => {
         const t = e.target.closest('button');
         if (!t) return;
         // handle item-level history buttons inside detail rows (delegated)
@@ -270,6 +382,33 @@
         if (t.dataset.action === 'edit-history') {
             const id = Number(t.dataset.id);
             if (id) openEditModal(id);
+        }
+        // delete single history item
+        if (t.dataset.action === 'delete-history') {
+            const id = Number(t.dataset.id);
+            const T = window.i18nHistoryQuote || {};
+            if (!id) return;
+            //if (!confirm(T.ConfirmDeleteItem || 'Bạn có chắc chắn muốn xóa mục này?')) return;
+            const confirmed = await showConfirmDialog(T.ConfirmDeleteGroup || 'Xác nhận', T.ConfirmDeleteGroupBody || 'Bạn có chắc chắn muốn xóa toàn bộ đơn này?', T.Confirm || 'Có', T.Cancel || 'Hủy');
+            if (!confirmed) return;
+            try {
+                showLoading(T.Deleting || 'Đang xóa...');
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByID', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(id)
+                });
+                const text = await res.text();
+                if (!res.ok) throw new Error(text || (T.DeleteFailed || 'Xóa thất bại'));
+                showDialog(T.Notification || 'Thông báo', '<div class="text-success">' + (T.DeleteSuccess || 'Đã xóa thành công.') + '</div>');
+                applyFilters();
+            } catch (err) {
+                console.error('Delete error', err);
+                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (err && err.message ? err.message : (T.DeleteFailed || 'Xóa thất bại')) + '</div>');
+            } finally {
+                hideLoading();
+            }
+            return;
         }
         if (t.classList.contains('btn-toggle-group')) {
             const groupId = row?.dataset.groupId;
@@ -326,6 +465,32 @@
         if (t.classList.contains('btn-view-approvals')) {
             const groupId = row?.dataset.groupId;
             document.dispatchEvent(new CustomEvent('quote-history:viewApprovals', { detail: { groupId } }));
+        }
+        // delete whole group (by MaDon)
+        if (t.classList.contains('btn-delete-group')) {
+            const groupId = row?.dataset.groupId;
+            const T = window.i18nHistoryQuote || {};
+            if (!groupId) return;
+            const confirmed = await showConfirmDialog(T.ConfirmDeleteGroup || 'Xác nhận', T.ConfirmDeleteGroupBody || 'Bạn có chắc chắn muốn xóa toàn bộ đơn này?', T.Confirm || 'Có', T.Cancel || 'Hủy');
+            if (!confirmed) return;
+            try {
+                showLoading(T.Deleting || 'Đang xóa...');
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByMaDon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(groupId)
+                });
+                const text = await res.text();
+                if (!res.ok) throw new Error(text || (T.DeleteFailed || 'Xóa thất bại'));
+                showDialog(T.Notification || 'Thông báo', '<div class="text-success">' + (T.DeleteSuccess || 'Đã xóa thành công.') + '</div>');
+                applyFilters();
+            } catch (err) {
+                console.error('Delete group error', err);
+                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (err && err.message ? err.message : (T.DeleteFailed || 'Xóa thất bại')) + '</div>');
+            } finally {
+                hideLoading();
+            }
+            return;
         }
     });
 
@@ -716,6 +881,7 @@
                         <div class="btn-group btn-group-sm" role="group">
                             <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử"><i class="fas fa-history"></i></button>
                             <button type="button" class="btn btn-outline-secondary btn-view-approvals" title="Phê duyệt"><i class="fas fa-check-double"></i></button>
+                            <button type="button" class="btn btn-outline-danger btn-delete-group" title="Xóa đơn"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 `;
@@ -842,6 +1008,7 @@
                     <div class="btn-group btn-group-sm" role="group">
                         <button type="button" class="btn btn-outline-info" data-action="view-history" data-id="${it.id}"><i class="fas fa-history"></i></button>
                         <button type="button" class="btn btn-outline-primary" data-action="edit-history" data-id="${it.id}"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn btn-outline-danger" data-action="delete-history" data-id="${it.id}"><i class="fas fa-trash"></i></button>
                     </div>
                 </td>
             `;

@@ -95,7 +95,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Good_Code = data.Rows[idx]["Good_Code"] is null ? "" : data.Rows[idx]["Good_Code"].ToString()!,
                     Group_Code = data.Rows[idx]["Group_Code"] is null ? "" : data.Rows[idx]["Group_Code"].ToString()!,
                     Hienthi = data.Rows[idx]["Hienthi"] is null ? "" : data.Rows[idx]["Hienthi"].ToString()!,
-                    Id_Goc = data.Rows[idx]["Id_Goc"] is null ? "" : data.Rows[idx]["Id_Goc"].ToString()!,
+                    Id_Goc = data.Rows[idx]["Id_Goc"].ToString()!,
                     Id_LichsuNhap = data.Rows[idx]["Id_LichsuNhap"] is null ? "" : data.Rows[idx]["Id_LichsuNhap"].ToString()!,
                     Id_RequestDetail = data.Rows[idx]["Id_RequestDetail"] is null ? "" : data.Rows[idx]["Id_RequestDetail"].ToString()!,
                     Invoice = data.Rows[idx]["Invoice"] is null ? "" : data.Rows[idx]["Invoice"].ToString()!,

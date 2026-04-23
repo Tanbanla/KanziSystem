@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -21,6 +21,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var result = await _context.BaoGia_History_Request_of_Quotations
             .Where(h => h.ID_RequestQuote == idRequestQuote)
+            .OrderBy(h => h.ID)
             .ToListAsync();
             return result;
         }

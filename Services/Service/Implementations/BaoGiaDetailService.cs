@@ -136,5 +136,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Lấy id detail theo ID RequestQuote
+        public async Task<GenericResponse<int>> GetIdDetailAsync(int? idRequest)
+        {
+            var result = new GenericResponse<int>();
+            try
+            {
+                result.Data = await _repo.GetIdDetailAsync(idRequest);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

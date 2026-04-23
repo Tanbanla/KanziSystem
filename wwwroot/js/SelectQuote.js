@@ -618,6 +618,7 @@ function hideEditModal() {
             const pickLabel = pick === true || String(pick).toLowerCase() === 'true' ? 'O' : (pick === false || String(pick).toLowerCase() === 'false' ? 'X' : '');
             tr.appendChild(addTd(pickLabel, 'text-center'));
             tr.appendChild(addTd(getVal(d, 'NVCHR_ReasonPick', 'nvchr_ReasonPick') || getVal(d, 'NVCHR_LyDo', 'nvchr_LyDo')));
+            tr.appendChild(addTd(getVal(d, 'NVCHR_Note', 'nvchr_Note')));
             // approval
             tr.appendChild(addTd(getVal(d, 'userQlsc')));
             tr.appendChild(addTd((getVal(d, 'lyDoQlsc') === null || getVal(d, 'lyDoQlsc') === "") ? "OK" : "NG"));

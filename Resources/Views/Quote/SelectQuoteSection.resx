@@ -417,16 +417,19 @@
   <data name="PageSize" xml:space="preserve">
     <value>Hiển thị</value>
   </data>
-    <data name="PrimaryManager" xml:space="preserve">
+  <data name="PrimaryManager" xml:space="preserve">
     <value>Quản lý sơ cấp</value>
-</data>
-    <data name="Result" xml:space="preserve">
+  </data>
+  <data name="Result" xml:space="preserve">
     <value>Kết quả</value>
-</data>
-    <data name="MiddleManager" xml:space="preserve">
+  </data>
+  <data name="MiddleManager" xml:space="preserve">
     <value>Quản lý trung cấp</value>
-</data>
-    <data name="DepartmentHead" xml:space="preserve">
+  </data>
+  <data name="DepartmentHead" xml:space="preserve">
     <value>Trưởng bộ phận</value>
-</data>
+  </data>
+  <data name="PriceIncreaseReason" xml:space="preserve">
+    <value>Lý do tăng giá</value>
+  </data>
 </root>

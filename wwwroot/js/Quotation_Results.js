@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 PageIndex: supplierState.pageIndex,
                 PageSize: supplierState.pageSize,
             };
+            const T = window.i18nQuotationResults || {};
             //SearchInputQuote
             fetch((window.apiBaseUrl || '') + '/Quote/SearchSupplierQuoteBody', {
                 method: 'POST',
@@ -133,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Update summary
                     const summaryText = document.getElementById('supplierSummaryText');
-                    if (summaryText) summaryText.textContent = `Tổng số: ${total || 0}`;
+                    if (summaryText) summaryText.textContent = `${T.Sum || 'Tổng số'}: ${total || 0}`;
 
                     // Render pagination
                     this.renderSupplierPaginationControls();
@@ -230,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         </select>
                     </td>
                     <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_ReasonPick || ''}"></td>
+                    <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_Note || ''}"></td>
                 </tr>
             `;
             }).join('');
@@ -608,6 +610,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         toggleAdditionalColumns: function () {
+            const T = window.i18nQuotationResults || {};
             const table = document.getElementById('supplierQuoteTable');
             const btn = document.getElementById('toggleAdditionalColumns');
             if (!table || !btn) return;
@@ -619,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch { }
             const toggleBtn = document.getElementById('toggleAdditionalColumns');
             if (!toggleBtn) return;
-            const isHidden = toggleBtn.textContent.includes('Ẩn');
+            const isHidden = toggleBtn.textContent.includes(T.HideDetails||'Ẩn');
 
             // Persist state
             window._quotationResultsState.showAdditionalColumns = !isHidden;
@@ -652,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function () {
             //    vendorInputTh.style.display = isHidden ? 'none' : '';
             //}
 
-            toggleBtn.textContent = isHidden ? 'Hiện chi tiết' : 'Ẩn chi tiết';
+            toggleBtn.textContent = isHidden ? (T.ShowDetails || 'Hiện chi tiết') : (T.HideDetails || 'Ẩn chi tiết');
         },
 
         applyAdditionalColumnsVisibility: function () {
@@ -757,8 +760,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 PageIndex: supplierState.pageIndex,
                 PageSize: supplierState.pageSize,
             };
-            try {
-                showLoading('Loading...');
+                try {
+                const T = window.i18nQuotationResults || {};
+                showLoading(T.LoadingData || 'Đang xử lý...');
                 const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelQuotationResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1135,13 +1139,13 @@ document.addEventListener('DOMContentLoaded', function () {
                      `;
                 }).join('');
                 tbody.innerHTML = rowsHtml;
-
+                const T = window.i18nQuotationResults || {};
                 // Update summary
                 const summaryText = document.getElementById('summaryText');
                 if (summaryText) {
                     const startOne = requestListState.returnedCount === 0 ? 0 : ((requestListState.pageIndex - 1) * requestListState.pageSize + 1);
                     const endOne = requestListState.returnedCount === 0 ? 0 : ((requestListState.pageIndex - 1) * requestListState.pageSize + requestListState.returnedCount);
-                    summaryText.textContent = `Tổng số: ${startOne}-${endOne} / ${requestListState.totalCount}`;
+                    summaryText.textContent = `${T.Sum || 'Tổng số'}: ${startOne}-${endOne} / ${requestListState.totalCount}`;
                 }
 
                 // Xử lý select all checkbox
@@ -1324,7 +1328,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             try {
-                showLoading('Loading...');
+                const T = window.i18nQuotationResults || {};
+                showLoading(T.LoadingData || 'Đang xử lý...');
                 const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelApproverResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1548,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const pickLabel = pick === true || String(pick).toLowerCase() === 'true' ? 'O' : (pick === false || String(pick).toLowerCase() === 'false' ? 'X' : '');
                     tr.appendChild(addTd(pickLabel, 'text-center'));
                     tr.appendChild(addTd(getVal(d, 'NVCHR_ReasonPick', 'nvchr_ReasonPick') || getVal(d, 'NVCHR_LyDo', 'nvchr_LyDo')));
-
+                    tr.appendChild(addTd(getVal(d, 'NVCHR_Note', 'nvchr_Note')));
                     // Lấy ID của dòng (quan trọng để gửi lên server)
                     const itemId = getVal(d, 'ID', 'iD');
 

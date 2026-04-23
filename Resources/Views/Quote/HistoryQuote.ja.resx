@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -392,5 +392,36 @@
   </data>
   <data name="ErrorPrefix" xml:space="preserve">
     <value>ファイルをエクスポートできません</value>
+  </data>
+  <data name="ConfirmDeleteItem" xml:space="preserve">
+    <value>削除の確認</value>
+  </data>
+  <data name="ConfirmDeleteItemBody" xml:space="preserve">
+    <value>この項目を削除してもよろしいですか？</value>
+  </data>
+  <data name="ConfirmDeleteGroup" xml:space="preserve">
+    <value>グループ削除の確認</value>
+  </data>
+  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
+    <value>この依頼をすべて削除してもよろしいですか？</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>はい</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>削除中...</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>削除に成功しました。</value>
+  </data>
+  <data name="DeleteFailed" xml:space="preserve">
+    <value>削除に失敗しました</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="DELETE" type="System.Resources.ResXNullRef, System.Windows.Forms">
+      <value>消去</value>
   </data>
 </root>

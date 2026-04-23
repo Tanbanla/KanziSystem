@@ -802,4 +802,25 @@
   <data name="ChiefApproval" xml:space="preserve">
     <value>QLSC phê duyệt</value>
   </data>
+  <data name="BivnInput" xml:space="preserve">
+    <value>Dữ liệu BIVN</value>
+  </data>
+  <data name="VendorInput" xml:space="preserve">
+    <value>Dữ liệu nhà cung cấp</value>
+  </data>
+  <data name="SystemCalculated" xml:space="preserve">
+    <value>Hệ thống tính</value>
+  </data>
+  <data name="BivnPur" xml:space="preserve">
+    <value>BIVN PUR</value>
+  </data>
+  <data name="PriceIncreaseReason" xml:space="preserve">
+    <value>Lý do tăng giá</value>
+  </data>
+  <data name="Sum" xml:space="preserve">
+    <value>Tổng số</value>
+  </data>
+  <data name="UnHideDetail" xml:space="preserve">
+    <value>Hiển thị chi tiết</value>
+  </data>
 </root>

@@ -17,7 +17,7 @@
 <div id="globalLoading" aria-hidden="true">
     <div class="loader-box">
         <div class="spinner" aria-hidden="true"></div>
-        <div class="loader-msg">Đang xử lý...</div>
+        <div class="loader-msg">@Localizer["LoadingData"].Value</div>
     </div>
     <!-- Modal: select next approver -->
     <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
@@ -156,6 +156,7 @@
                                     <th rowspan="2" class="approval-column" style="min-width: 70px;">@Localizer["SystemCalculatedTotal"]</th>
                                     <th rowspan="2" class="approval-column" style="min-width: 70px;">@Localizer["SupplierSelection"]</th>
                                     <th rowspan="2" class="approval-column" style="min-width: 70px;">@Localizer["SelectionReason"]</th>
+                                    <th rowspan="2" class="approval-column" style="min-width: 100px;">@Localizer["PriceIncreaseReason"]</th>
                                     @* Approval Manager *@
                                     <th rowspan="2" style="min-width: 70px;background-color: #FFCF97;">@Localizer["DialogOk"]</th>
                                     <th rowspan="2" style="min-width: 150px;background-color: #FFCF97;">@Localizer["ReasonApproval"]</th>
@@ -463,11 +464,11 @@
                         <table class="table table-sm table-hover table-bordered table-striped align-middle mb-0" id="supplierQuoteTable" style="font-size:11px;">
                             <thead class="table-header-custom" style="position: sticky; top: 0; background-color: white; z-index: 10;">
                                 <tr class="text-center" style="background-color: #f8f9fa; font-size: 10px;">
-                                    <th colspan="4" style="background-color: #ffff; border: 1px solid #dee2e6;">Status</th>
-                                    <th colspan="24" style="background-color: #d1ecf1; border: 1px solid #dee2e6; color: black">BIVN Input</th>
-                                    <th colspan="22" style="background-color: #f8d7da; border: 1px solid #dee2e6;color: black">Vendor Input</th>
-                                    <th colspan="1" style="background-color: #E1FAFD; border: 1px solid #dee2e6;color: black">Hệ thống tính</th>
-                                    <th colspan="2" style="background-color: #E1FAFD; border: 1px solid #dee2e6;color: black">BIVN PUR</th>
+                                    <th colspan="4" style="background-color: #ffff; border: 1px solid #dee2e6;">@Localizer["Status"].Value</th>
+                                    <th colspan="24" style="background-color: #d1ecf1; border: 1px solid #dee2e6; color: black">@Localizer["BivnInput"]</th>
+                                    <th colspan="22" style="background-color: #f8d7da; border: 1px solid #dee2e6;color: black">@Localizer["VendorInput"]</th>
+                                    <th colspan="1" style="background-color: #E1FAFD; border: 1px solid #dee2e6;color: black">@Localizer["SystemCalculated"]</th>
+                                    <th colspan="3" style="background-color: #E1FAFD; border: 1px solid #dee2e6;color: black">@Localizer["BivnPur"]</th>
                                 </tr>
                                 <tr class="text-center align-middle" style="font-size: 10px;text-align: center;">
                                     <th rowspan="2"  style="min-width: 35px;background-color: #FFEDE8;">@Localizer["STT"]</th>
@@ -521,6 +522,7 @@
                                     <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SystemCalculatedTotal"]</th>
                                     <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SupplierSelection"]</th>
                                     <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SelectionReason"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #E1FAFD;">@Localizer["PriceIncreaseReason"]</th>
                                 </tr>
                                 <tr class="text-center align-middle" style="background-color: #dee2e6; font-size: 9px;text-align: center;top: 0;">
                                     <th style="min-width: 60px;" class="additional-column">@Localizer["Shape"]</th>
@@ -763,6 +765,15 @@
             , ChiefApproval = Localizer["ChiefApproval"].Value
             , DeptApproval = Localizer["DeptApproval"].Value
             , SectionApproval = Localizer["SectionApproval"].Value
+            , BivnInput = Localizer["BivnInput"].Value
+            , VendorInput = Localizer["VendorInput"].Value
+            , SystemCalculated = Localizer["SystemCalculated"].Value
+            , BivnPur = Localizer["BivnPur"].Value
+            , PriceIncreaseReason = Localizer["PriceIncreaseReason"].Value
+            , Sum = Localizer["Sum"].Value
+            ,HideDetails = Localizer["HideDetails"].Value
+            , UnHideDetail = Localizer["UnHideDetail"].Value
+            , ShowDetails = Localizer["ShowDetails"].Value
         }));
     </script>
 }

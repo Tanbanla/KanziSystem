@@ -72,6 +72,10 @@
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-primary" id="btnExportHistory"><i class="fas fa-file-export"></i> @Localizer["Export"]</button>
             </div>
+            <div style="margin-right: 6px;"></div>
+            <div class="btn-group me-2 mb-2" role="group" hidden>
+                <button type="button" class="btn btn-outline-danger" id="btnExportManaHistory"><i class="fas fa-file-download"></i> Xuất file quản lý</button>
+            </div>
         </div>
     </div>
 
@@ -133,6 +137,7 @@
                         <option value="WAIT">@Localizer["Waiting"]</option>
                         <option value="RETURN">@Localizer["RETURN"]</option>
                         <option value="DONE">@Localizer["DONE"]</option>
+                        <option value="DELETE">@Localizer["DELETE"]</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -184,7 +189,6 @@
                                 <div class="btn-group btn-group-sm" role="group">
                                     <button type="button" class="btn btn-outline-info btn-view-history" title="@Localizer["ViewHistory"]"><i class="fas fa-history"></i></button>
                                     <button type="button" class="btn btn-outline-secondary btn-view-approvals" title="@Localizer["Approval"]"><i class="fas fa-check-double"></i></button>
-@*                                     <button type="button" class="btn btn-outline-primary btn-edit-uncompleted" data-action="edit-history" title="Sửa đơn trả lại"><i class="fas fa-edit"></i></button> *@
                                 </div>
                             </td>
                         </tr>

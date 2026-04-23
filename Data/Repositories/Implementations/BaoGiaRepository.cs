@@ -52,29 +52,33 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             // Build status SQL fragment and append it directly to the WHERE clause when needed
             var statusSql = "1=1";
-            if (!string.IsNullOrEmpty(status))
-            {
+            //if (!string.IsNullOrEmpty(status))
+            //{
                 switch (status)
                 {
                     case "RETURN":
-                        statusSql = "ID_Status LIKE '%RETURN%'";
+                        statusSql = "ID_Status LIKE '%RETURN%' and ID_Status NOT LIKE 'DELETE";
                         break;
                     case "DONE":
-                        statusSql = "ID_Status = 'DONE'";
+                        statusSql = "ID_Status = 'DONE' and ID_Status NOT LIKE 'DELETE";
                         break;
                     case "APPROVAL":
-                        statusSql = "ID_Status LIKE 'APPROVAL%'";
+                        statusSql = "ID_Status LIKE 'APPROVAL%' and ID_Status NOT LIKE 'DELETE";
                         break;
                     case "WAIT":
-                        statusSql = "ID_Status LIKE '%WAIT%'";
+                        statusSql = "ID_Status LIKE '%WAIT%' and ID_Status NOT LIKE 'DELETE";
+                        break;
+                    case "DELETE":
+                        statusSql = "ID_Status LIKE 'DELETE'";
                         break;
                     default:
+                        statusSql = "ID_Status NOT LIKE 'DELETE'";
                         break;
                 }
 
                 // append status filter
                 sql += " AND (" + statusSql + ")";
-            }
+            //}
 
             // Add ordering and paging
             if (pageSize > 0 && pageIndex > 0)
@@ -1433,6 +1437,59 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
 
             return updatedEntities;
+        }
+        // Xóa đơn xin báo giá
+        public async Task<bool> DeleteDonXinBaoGiaAsync(string maDon, string userUpdate)
+        {
+            if (string.IsNullOrEmpty(maDon))  throw new Exception("No valid data to update");
+
+            var data = await _context.BaoGia_Request_of_Quotations.Where(c => c.CHR_MaDon == maDon).ToListAsync();
+            if (!data.Any()) throw new Exception("No valid data to update");
+            // xoa mem
+            foreach (var item in data)
+            {
+                item.ID_Status  = "DELETE";
+                item.ID_StepBaoGia = 0;
+            }
+            // Lưu lịch sử xóa
+            var historyList = data.Select(item => new BaoGia_History_Request_of_Quotation
+            {
+                ID_RequestQuote = item.ID,
+                CHR_MaDon = item.CHR_MaDon ?? string.Empty,
+                CHR_UpdateBy = userUpdate,
+                NVCHR_UpdateName = userUpdate,
+                CHR_Updatedate = DateTime.Now,
+                CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
+                CHR_ActionType = "DELETE"
+            }).ToList();
+            await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
+            _context.BaoGia_Request_of_Quotations.UpdateRange(data);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // Xóa từng đơn
+        public async Task<bool> DeleteDonBaoGiaAsync(int id, string userUpdate)
+        {
+            var data = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(c => c.ID == id);
+            if (data == null) throw new Exception("No valid data to update");
+            // xoa mem
+            data.ID_Status = "DELETE";
+            data.ID_StepBaoGia = 0;
+            // Lưu lịch sử xóa
+            var history = new BaoGia_History_Request_of_Quotation
+            {
+                ID_RequestQuote = data.ID,
+                CHR_MaDon = data.CHR_MaDon ?? string.Empty,
+                CHR_UpdateBy = userUpdate,
+                NVCHR_UpdateName = userUpdate,
+                CHR_Updatedate = DateTime.Now,
+                CHR_NewData = System.Text.Json.JsonSerializer.Serialize(data),
+                CHR_ActionType = "DELETE"
+            };
+            await _context.BaoGia_History_Request_of_Quotations.AddAsync(history);
+            _context.BaoGia_Request_of_Quotations.Update(data);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

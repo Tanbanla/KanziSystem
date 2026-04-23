@@ -802,4 +802,25 @@
   <data name="ChiefApproval" xml:space="preserve">
     <value>Chief/Expert 承認</value>
   </data>
+  <data name="BivnInput" xml:space="preserve">
+    <value>BIVN入力</value>
+  </data>
+  <data name="VendorInput" xml:space="preserve">
+    <value>ベンダー入力</value>
+  </data>
+  <data name="SystemCalculated" xml:space="preserve">
+    <value>システム計算</value>
+  </data>
+  <data name="BivnPur" xml:space="preserve">
+    <value>BIVN PUR</value>
+  </data>
+  <data name="PriceIncreaseReason" xml:space="preserve">
+    <value>価格上昇の理由</value>
+  </data>
+  <data name="Sum" xml:space="preserve">
+    <value>和</value>
+  </data>
+  <data name="UnHideDetail" xml:space="preserve">
+    <value>詳細を表示</value>
+  </data>
 </root>

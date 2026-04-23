@@ -282,7 +282,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         var materialType = phanLoaiGroup.Key; 
                                         var materialsInGroup = phanLoaiGroup.Value;
 
-                                        // Lấy số tiếp theo cho từng loại (A hoặc I)
+                                        // Lấy số tiếp theo cho từng loại
                                         var latestCode = await materialService.MaterialCodeLater(materialType);
                                         var nextNumber = ExtractNumberFromCode(latestCode.Data);
 
@@ -340,6 +340,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                     var newMaterialCode = GenerateMaterialCode(materialType, nextNumber);
                                                     var firstMaterial = materials.First();
 
+                                                    // Xác nhận loại hàng dựa trên CHR_Phanloai
+                                                    //var typeMaterial = GetMaterialType(materialType);
+                                                    var OutSide = "";
+                                                    switch (materialType)
+                                                    {
+                                                        case "A":
+                                                        case "B":
+                                                        case "E":
+                                                            OutSide = "IN";
+                                                            break;
+                                                        default:
+                                                            OutSide = "OUT";
+                                                            break;
+                                                    }
+
                                                     var newMaterial = new MATERIALDTO
                                                     {
                                                         Material_Code = newMaterialCode,
@@ -353,7 +368,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                         Dimension = firstMaterial.NVCHR_KichThuoc,
                                                         UsedFor = firstMaterial.NVCHR_DongMay,
                                                         Purpose = firstMaterial.NVCHR_TinhNang,
-                                                        CHR_MaterialOutSide = "OUT", 
+                                                        CHR_MaterialOutSide = OutSide, 
                                                         Unit = firstMaterial.NVCHR_DonVi
                                                     };
 
@@ -409,7 +424,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             if (upperPhanLoai == "I")
                 return "I";
-
+            if (upperPhanLoai == "A")
+                return "A";
+            if (upperPhanLoai == "B")
+                return "B";
+            if (upperPhanLoai == "E")
+                return "E";
             return "O";
         }
 

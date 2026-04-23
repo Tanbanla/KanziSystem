@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', function () {
         addSupplierDetail: (window.apiBaseUrl || '') + '/Master/AddSupplierDetail',
         deleteSupplierDetail: (id) => (window.apiBaseUrl || '') +`/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
         addListSupplierDetail: (window.apiBaseUrl || '') + '/Master/AddListSupplierDetail',
-        ImportSupplierDetail: (window.apiBaseUrl || '') + '/Master/ImportSupplierDetail' //UpdateMaterialInfo
+        ImportSupplierDetail: (window.apiBaseUrl || '') + '/Master/ImportSupplierDetail', //UpdateMaterialInfo
+        ImportExcelMaterial: (window.apiBaseUrl || '') + '/Master/ImportExcelMaterial'
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');
@@ -27,6 +28,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const pageInfo = document.getElementById('pageInfo');
     const pageSizeSelect = document.getElementById('pageSizeSelect');
     const downloadMaster = document.getElementById('btnExportMaster');
+    const btnImportExcelMaterial = document.getElementById('btnImportExcelMaterial');
+    const btnTemplateImportExcel = document.getElementById('btnTemplateImportExcel');
+
+
+    if (btnTemplateImportExcel) {
+        btnTemplateImportExcel.addEventListener('click', async () => {
+            const T = window.i18nSupplierMana || {};
+            try {
+                const templates = [
+                    { url: (window.apiBaseUrl || '') + '/template/TemplateImportMaterial.xlsx', filename: 'Mẫu file Master Material.xlsx' },
+                    { url: (window.apiBaseUrl || '') + '/template/NccMaster.xlsx', filename: 'Mẫu file Master Vendor.xlsx' }
+                ];
+
+                for (const template of templates) {
+                    const a = document.createElement('a');
+                    a.href = template.url;
+                    a.download = template.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
+
+                showDialog({ title: (T.SuccessTitle || 'Thành công'), message: (T.ExportSuccess || 'Xuất file mẫu hoàn tất'), type: 'success' });
+            } catch (err) {
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.ExportFailed || 'Xuất file thất bại') + ': ' + (err && err.message ? err.message : err), type: 'error' });
+            }
+        });
+    }
 
     if (downloadMaster) {
         downloadMaster.addEventListener('click', async () => {
@@ -382,6 +412,32 @@ document.addEventListener('DOMContentLoaded', function () {
             const fd = new FormData();
             fd.append('FileExcel', file);
             const res = await fetch(api.ImportSupplierDetail, { method: 'POST', body: fd });
+            if (!res.ok) {
+                let txt = await res.text();
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportFailed || 'Nhập thất bại') + ': ' + (txt || res.statusText), type: 'error' });
+            } else {
+                const T = window.i18nSupplierMana || {};
+                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportSuccess || 'Nhập file thành công'), type: 'success' });
+                await loadSupplierItems(currentItemSupplier.ma);
+            }
+        } catch (err) {
+            const T = window.i18nSupplierMana || {};
+            showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.CannotSendFile || 'Không thể gửi file') + ': ' + (err.message || err), type: 'error' });
+        }
+        e.target.value = '';
+    });
+
+    // Input material info from excel file
+    btnImportExcelMaterial?.addEventListener('click', () => itemsExcelFileInputMaterial?.click());
+    itemsExcelFileInputMaterial?.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+            // property names expected by InsertFileExcelSupplierRequestDTO (multipart/form-data)
+            const fd = new FormData();
+            fd.append('FileExcel', file);
+            const res = await fetch(api.ImportExcelMaterial, { method: 'POST', body: fd });
             if (!res.ok) {
                 let txt = await res.text();
                 const T = window.i18nSupplierMana || {};

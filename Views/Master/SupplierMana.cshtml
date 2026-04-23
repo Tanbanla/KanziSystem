@@ -11,14 +11,40 @@
         <div>
             <h5 class="mb-3">@Localizer["HeaderTitle"]</h5>
         </div>
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+        @* <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-success" id="btnExportExcel"><i class="fas fa-file-excel"></i> Download Excel</button>
                 <button type="button" class="btn btn-outline-primary" id="btnImportExcel"><i class="fas fa-upload"></i> Upload Excel</button>
-                <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" ><i class="fas fa-upload"></i> Upload Excel First</button>
+                <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" ><i class="fas fa-upload"></i> Upload Excel Vendor</button>
                 <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
+                <button type="button" class="btn btn-outline-danger" id="btnImportExcelMaterial" ><i class="fas fa-upload"></i> Upload Excel Material</button>
+                <input type="file" id="itemsExcelFileInputMaterial" accept=".xlsx,.xls" style="display:none" />
+                <button type="button" class="btn btn-outline-danger" id="btnTemplateImportExcelMaterial" ><i class="fas fa-upload"></i> Template Import Excel Material</button>
             </div>
+        </div> *@
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+        <div class="btn-group me-2 mb-2 flex-wrap gap-2" role="group" style="gap: 8px;">
+            <button type="button" class="btn btn-success" id="btnExportExcel" style="border-radius: 6px; padding: 8px 8px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">
+                <i class="fas fa-file-excel me-1"></i> Download Excel
+            </button>
+            <button type="button" class="btn btn-outline-secondary" id="btnImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; transition: all 0.2s ease;">
+                <i class="fas fa-upload me-1"></i> Upload Excel
+            </button>
+            <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" style="border-radius: 6px; padding: 8px 6px; font-weight: 500;">
+                <i class="fas fa-upload me-1"></i> Upload Excel Vendor
+            </button>
+            <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
+        
+            <button type="button" class="btn btn-outline-danger" id="btnImportExcelMaterial" style="border-radius: 6px; padding: 8px 6px; font-weight: 500;">
+                <i class="fas fa-upload me-1"></i> Upload Excel Material
+            </button>
+            <input type="file" id="itemsExcelFileInputMaterial" accept=".xlsx,.xls" style="display:none" />
+        
+            <button type="button" class="btn btn-primary" id="btnTemplateImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; background: linear-gradient(135deg, #0d6efd, #0b5ed7); border: none; box-shadow: 0 2px 6px rgba(13,110,253,0.2);">
+                <i class="fas fa-download me-1"></i> Template Import Excel
+            </button>
         </div>
+</div>
     </div>
     <!-- Search Bar -->
     <form id="supplier-search-form" class="row g-2 align-items-end mb-3">

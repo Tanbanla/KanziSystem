@@ -592,12 +592,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         worksheet.Cell(rowIndex, 8).Value = otherRequest;                                     // Other request (tổng hợp)
                         worksheet.Cell(rowIndex, 9).Value = rq.NVCHR_NhaSanXuat ?? string.Empty;             // Maker
                         worksheet.Cell(rowIndex, 10).Value = rq.CHR_MaNCC ?? string.Empty;                    // Vendor code
-                        worksheet.Cell(rowIndex, 25).Value = rq.NVCHR_FileThietKe ?? "";                       // Design
-                        worksheet.Cell(rowIndex, 26).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""; // Delivery date
-                        worksheet.Cell(rowIndex, 27).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";       // Deadline for submit quotation
-                        worksheet.Cell(rowIndex, 29).Value = rq.CHR_CreateBy + "@brothergroup.net";            // PIC explain - để trống
+                        worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_FileThietKe ?? "";                       // Design
+                        worksheet.Cell(rowIndex, 28).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""; // Delivery date
+                        worksheet.Cell(rowIndex, 29).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";       // Deadline for submit quotation
+                        worksheet.Cell(rowIndex, 31).Value = rq.CHR_CreateBy + "@brothergroup.net";            // PIC explain - để trống
 
-                        worksheet.Cell(rowIndex, 30).Value = rq.ID ?? "";
+                        worksheet.Cell(rowIndex, 32).Value = rq.ID ?? "";
 
                         var itemDetail = new BaoGia_Detail_of_Quotation
                         {
@@ -1008,12 +1008,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         worksheet.Cell(rowIndex, 8).Value = otherRequest;                                     // Other request (tổng hợp)
                         worksheet.Cell(rowIndex, 9).Value = rq.NVCHR_NhaSanXuat ?? string.Empty;             // Maker
                         worksheet.Cell(rowIndex, 10).Value = rq.CHR_MaNCC ?? string.Empty;                    // Vendor code
-                        worksheet.Cell(rowIndex, 25).Value = rq.NVCHR_FileThietKe ?? "";                       // Design
-                        worksheet.Cell(rowIndex, 26).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""; // Delivery date
-                        worksheet.Cell(rowIndex, 27).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";       // Deadline for submit quotation
-                        worksheet.Cell(rowIndex, 29).Value = rq.CHR_CreateBy + "@brothergroup.net";            // PIC explain - để trống
+                        worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_FileThietKe ?? "";                       // Design
+                        worksheet.Cell(rowIndex, 28).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""; // Delivery date
+                        worksheet.Cell(rowIndex, 29).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";       // Deadline for submit quotation
+                        worksheet.Cell(rowIndex, 31).Value = rq.CHR_CreateBy + "@brothergroup.net";            // PIC explain - để trống
 
-                        worksheet.Cell(rowIndex, 30).Value = rq.ID ?? "";
+                        worksheet.Cell(rowIndex, 32).Value = rq.ID ?? "";
 
                         dearMail = "nhà cung cấp " + rq.Ten + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
                         mailTk = rq.CHR_CreateBy + "@grothergroup.net";

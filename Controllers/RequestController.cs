@@ -227,7 +227,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var rq = REQUEST_PROCESS_GA._get_info_dtrq(cost_request);
             return Json(rq);
         }
-
         public JsonResult _update_request(string id_request, string regency, string step, string urgent)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
@@ -540,7 +539,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //string ghep = phongban + " : " + originSection;
             return Json(phongban);
         }
-
         [HttpPost]
         public JsonResult _sua_request(string Cost_Center,string Declaration,string Code_Request, string iD_REQUEST, string Dealine, float Total_exchange, string Exchange_rate, float Total, string Place, string Urgent, string User_Create, List<Models.REQUEST_DETAIL> rq)
         {
@@ -622,8 +620,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return Json("Sai trạng thái");
                 }
-          
-         
         }
         public JsonResult _Xoadong(string id)
         {
