@@ -1,5 +1,6 @@
 using Dapper;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
@@ -237,8 +238,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 if (row == null) continue;
 
 
-                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
-                .ToListAsync();
+                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.ID == row.ID_RequestQuote)
+                .FirstOrDefaultAsync();
                 if (rq == null) continue;
 
                 // Role enforcement
@@ -248,24 +249,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_UserShip = user;
                     row.DTM_UserShip = now;
                     row.CHR_StatusShip = "Confirmed";
-                    foreach (var r in rq)
+
+                    if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
                     {
-                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
-                        if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
-                            r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
-                    }
-                }
-                else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
-                {
-                    row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
-                    row.VCHR_UserAcc = user;
-                    row.DTM_UserAcc = now;
-                    row.CHR_StatusACC = "Confirmed";
-                    foreach (var r in rq)
-                    {
-                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
-                        if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
-                            r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+                        rq.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                        rq.ID_StepBaoGia = 13;
+                        rq.ID_Status = "DONE";
                     }
                 }
                 else // UserPUR
@@ -300,8 +289,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
                 if (row == null) return false;
 
-                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
-                .ToListAsync();
+                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.ID == row.ID_RequestQuote)
+                .FirstOrDefaultAsync();
                 if (rq == null) return false;
 
                 var now = DateTime.Now;
@@ -313,24 +302,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_UserShip = user;
                     row.DTM_UserShip = now;
                     row.CHR_StatusShip = "Confirmed";
-                    foreach (var r in rq)
+                    // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
+                    if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
                     {
-                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
-                        if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
-                            r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
-                    }
-                }
-                else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
-                {
-                    row.VCHR_MaHangNoiBo = item.MaHangNoiBo ?? row.VCHR_MaHangNoiBo;
-                    row.VCHR_UserAcc = user;
-                    row.DTM_UserAcc = now;
-                    row.CHR_StatusACC = "Confirmed";
-                    foreach (var r in rq)
-                    {
-                        // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
-                        if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
-                            r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
+                        rq.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                        rq.ID_StepBaoGia = 13;
+                        rq.ID_Status = "DONE";
                     }
                 }
                 else // UserPUR
@@ -422,6 +399,78 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .ToListAsync();
 
             return data.Cast<dynamic>().ToList();
+        }
+        // Từ chối xác nhận tên hàng
+        public async Task<bool> RejectConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        {
+            if (saveConfirms == null || !saveConfirms.Any()) return false;
+            if (Role != "UserShip") return false;
+            var historyList = new List<BaoGia_History_Request_of_Quotation>();
+            foreach (var item in saveConfirms)
+            {
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
+                if (row == null) return false;
+                var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.ID == row.ID_RequestQuote)
+                .FirstOrDefaultAsync();
+                if (rq == null) return false;
+                var now = DateTime.Now;
+                // Update infor data confirm name
+                row.CHR_Status = "Rejected";
+                row.NVCHR_LyDo = item.LyDo;
+                row.VCHR_UserPUR = user;
+                row.DTM_UserPUR = now;
+                row.VCHR_UpdateBy = user;
+                row.DTM_UpdateDate = now;
+                row.CHR_StatusShip = "Rejected";
+
+                // Update infor request quote
+                //rq.ID_StepBaoGia = 6;
+                //rq.ID_Status = "RETURN_SHIP";
+
+                // Create history
+                var history = new BaoGia_History_Request_of_Quotation
+                {
+                    ID_RequestQuote = rq.ID,
+                    CHR_MaDon = rq.CHR_MaDon ?? "",
+                    CHR_UpdateBy = user,
+                    NVCHR_LyDo = item.LyDo,
+                    CHR_ActionType = "RETURN_SHIP",
+                    CHR_ChangedColumns = "CHR_Status, ID_StepBaoGia, ID_Status",
+                    CHR_OldData = $"CHR_Status: {row.CHR_Status}, ID_StepBaoGia: {rq.ID_StepBaoGia}, ID_Status: {rq.ID_Status}",
+                    CHR_NewData = $"CHR_Status: Rejected, ID_StepBaoGia: 6, ID_Status: RETURN_SHIP",
+                    CHR_Updatedate = now
+                };
+                historyList.Add(history);
+            }
+            await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
+        public async Task<List<ResultCheckCofirmName>> CheckDonHangConfirmedAsync(List<int> listCheck)
+        {
+            if (listCheck == null || !listCheck.Any())
+                throw new Exception("Invalid list of IDs.");
+
+            string sql = @"
+               SELECT DISTINCT r.CHR_MaDon as MaDon, r.CHR_SectionCode as Section, r.CHR_CreateBy as UserCreate
+               FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+               LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] as c 
+                   ON r.ID = c.ID_RequestQuote
+               WHERE c.ID IN @ListCheck
+               AND NOT EXISTS (
+                   SELECT 1 
+                   FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r2
+                   WHERE r2.CHR_MaDon = r.CHR_MaDon
+                   AND r2.BIT_LayBaoGia = 1 
+                   AND r2.ID_StepBaoGia != 13
+               )";
+
+            using (var connection = _conn)
+            {
+                var result = await connection.QueryAsync<ResultCheckCofirmName>(sql, new { ListCheck = listCheck });
+                return result.ToList();
+            }
         }
     }
 }

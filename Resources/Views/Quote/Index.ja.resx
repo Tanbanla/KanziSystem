@@ -495,4 +495,7 @@
   <data name="SelectApprover" xml:space="preserve">
     <value>承認者を選択</value>
   </data>
+  <data name="DownloadMaster" xml:space="preserve">
+    <value>ダウンロード マスタデータ</value>
+  </data>
 </root>

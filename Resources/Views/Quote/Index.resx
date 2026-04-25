@@ -495,4 +495,7 @@
   <data name="SelectApprover" xml:space="preserve">
     <value>Chọn người phê duyệt</value>
   </data>
+  <data name="DownloadMaster" xml:space="preserve">
+    <value>Tải dữ liệu Master</value>
+  </data>
 </root>

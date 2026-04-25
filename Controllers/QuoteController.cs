@@ -361,153 +361,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         }
         // Xuất dữ liệu để lựa chọn phê duyệt NCC
-        //[HttpPost]
-        //public async Task<IActionResult> ExportFileExcelApproverResult([FromBody] List<string> model)
-        //{
-        //    if (model.Count == 0)
-        //    {
-        //        return BadRequest("Please select Quote request");
-        //    }
-        //    try
-        //    {
-        //        var result = await _baoGiaService.GetExportApprovalInfoAsync(model);
-        //        if (!result.Success)
-        //        {
-        //            return BadRequest(result.Message);
-        //        }
-        //        if (result.Data == null)
-        //        {
-        //            return BadRequest("No data to export");
-        //        }
-        //        var dataList = result.Data;
-        //        // Calculate totals for system columns
-        //        var totals = new Dictionary<string, (double vnd, double usd)>();
-        //        foreach (var item in dataList)
-        //        {
-        //            string key = $"{item.CHR_MaDon ?? ""}|{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}|{item.CHR_MaNCC ?? ""}";
-        //            double vnd = item.FL_VND * item.soluong ?? 0.0;
-        //            double usd = item.FL_USD * item.soluong ?? 0.0;
-        //            if (!totals.ContainsKey(key))
-        //            {
-        //                totals[key] = (0.0, 0.0);
-        //            }
-        //            var current = totals[key];
-        //            totals[key] = (current.Item1 + vnd, current.Item2 + usd);
-        //        }
-
-        //        var root = _env.WebRootPath ?? _env.ContentRootPath;
-        //        var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
-        //        if (!System.IO.File.Exists(templatePath))
-        //        {
-        //            return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
-        //        }
-
-        //        using var fs = System.IO.File.OpenRead(templatePath);
-        //        using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
-        //        var ws = workbook.Worksheets.FirstOrDefault();
-        //        if (ws == null)
-        //        {
-        //            return BadRequest("Không tìm thấy worksheet trong template");
-        //        }
-        //        int rowStart = 4;
-        //        foreach (var item in dataList)
-        //        {
-        //            var enUs = new CultureInfo("en-US");
-        //            int col = 1;
-        //            // BIVN Input
-        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(
-        //                item.ID_StepBaoGia == 9 ? "Chief/Expert Approval" : (item.ID_StepBaoGia == 10 ? "Section Manager Approval" : "Dept Manager Approval"));
-        //            ws.Cell(rowStart, col++).SetValue(item.ID ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNCC ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_NameVN ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.CHR_NameEN ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.INT_SoLuong ?? 0);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_DonVi ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChungLoai ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_HinhDang ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChatLieu ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ThanhPhan ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_KichThuoc ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_DongMay ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_TinhNang ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_Rohs ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_COCQ ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_MSDS ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_AnToan ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
-        //            // Vendor input
-        //            ws.Cell(rowStart, col++).SetValue(item.CodeEquipmentNCC ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NameENByNCC ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.soluong ?? 0); // Vendor quantity
-        //            ws.Cell(rowStart, col++).SetValue(item.donvi ?? string.Empty); // Vendor unit
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Vendor maker
-        //            ws.Cell(rowStart, col++).SetValue((item.FL_USD ?? 0));
-        //            ws.Cell(rowStart, col++).SetValue((item.FL_VND ?? 0).ToString("N0", enUs));
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_MOQ ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_Packing ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.DTM_LeadTime ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.DTM_ShipTime ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.VCHR_Rohs ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.VCHR_COCQ ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.VCHR_MSDS ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.VCHR_AnToan ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.VCHR_CamKet ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_DeliveryTerm ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_PaymentTerm ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_File ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.DTM_EffectiveDate?.ToString("dd/MM/yyyy") ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.DTM_ExpiryDate?.ToString("dd/MM/yyyy") ?? string.Empty);
-        //            // System count
-        //            string key = $"{item.CHR_MaDon ?? ""}|{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}|{item.CHR_MaNCC ?? ""}";
-        //            var tot = totals.ContainsKey(key) ? totals[key] : (0.0, 0.0);
-        //            string totalCell = "";
-        //            if (tot.Item1 != 0)
-        //            {
-        //                totalCell = tot.Item1.ToString("N0", enUs) + " VND";
-        //            }
-        //            else if (tot.Item2 != 0)
-        //            {
-        //                totalCell = Math.Round(tot.Item2, 4).ToString("0.0000", enUs) + " USD";
-        //            }
-        //            ws.Cell(rowStart, col++).SetValue(totalCell);
-        //            ws.Cell(rowStart, col++).SetValue(item.BIT_Select == true ? "O" : "X");
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ReasonPick ?? string.Empty);
-        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_Note ?? string.Empty);
-        //            // Approval
-        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 9 ? item.UserQlsc ?? "" : "");
-        //            ws.Cell(rowStart, col++).SetValue(GetApprovalStatus(item.ID_StepBaoGia, 9, item.LyDoQlsc));
-        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 9 ? item.LyDoQlsc ?? "" : "");
-
-        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 10 ? item.UserQltc ?? "" : "");
-        //            ws.Cell(rowStart, col++).SetValue(GetApprovalStatus(item.ID_StepBaoGia, 10, item.LyDoQltc));
-        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 10 ? item.LyDoQltc ?? "" : "");
-
-        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 11 ? item.UserDeft ?? "" : "");
-        //            ws.Cell(rowStart, col++).SetValue(GetApprovalStatus(item.ID_StepBaoGia, 11, item.LyDoDeft));
-        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 11 ? item.LyDoDeft ?? "" : "");
-        //            rowStart++;
-        //        }
-        //        using var outStream = new MemoryStream();
-        //        workbook.SaveAs(outStream);
-        //        var bytes = outStream.ToArray();
-        //        var fileName = $"QuotationResults_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-        //        const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        //        return File(bytes, contentType, fileName);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
         [HttpPost]
         public async Task<IActionResult> ExportFileExcelApproverResult([FromBody] List<string> model)
         {
@@ -1049,12 +902,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         errors.Add($"Mã hàng nội bộ '{maHangNB}' đã chọn nhiều hơn 1 Vendor Code khác nhau ({vendorCodesForSameProduct} vendor code)");
                     }
-
-                    var hasAnySelect = allRowsData.Any(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"));
-                    if (!hasAnySelect && !string.IsNullOrEmpty(maHangNB))
-                    {
-                        errors.Add($"Mã hàng nội bộ '{maHangNB}' chưa chọn bất kỳ Vendor Code nào (thiếu 'O' tại cột 51)");
-                    }
+                    // Kiểm tra nếu có chọn 'O' thì phải có ít nhất 1 dòng khác cùng mã hàng nội bộ cũng chọn 'O'
+                    //var hasAnySelect = allRowsData.Any(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"));
+                    //if (!hasAnySelect && !string.IsNullOrEmpty(maHangNB))
+                    //{
+                    //    errors.Add($"Mã hàng nội bộ '{maHangNB}' chưa chọn bất kỳ Vendor Code nào (thiếu 'O' tại cột 51)");
+                    //}
 
                     var vendorsForEquipmentAndCategory = allRowsData
                         .Where(x => (x.MaThietBi == maThietBi && x.ChungLoaiHang == chungLoaiHang && x.BIT_Select.Contains("O")) && !string.IsNullOrEmpty(maThietBi))
@@ -1134,38 +987,49 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                     else
                     {
-                        var check = items.Where(c => c.CHR_MaDon == maDon
-                        && c.CHR_MaHangNoiBo == maHangNB
-                        && c.BIT_Select && c.CHR_MaThietBi == maThietBi).ToList();
-                        if (check.Any() && bitSelect.Contains("O"))
+                        // check mã hàng nội bộ theo mã thiết bị
+                        //var check = items.Where(c => c.CHR_MaDon == maDon
+                        //&& c.CHR_MaHangNoiBo == maHangNB
+                        //&& c.BIT_Select && c.CHR_MaThietBi == maThietBi).ToList();
+                        //if (check.Any() && bitSelect.Contains("O"))
+                        //{
+                        //    isErrors = true;
+                        //    errorRows.Add(new
+                        //    {
+                        //        Row = row,
+                        //        MaDon = maDon,
+                        //        ID = id,
+                        //        MaHangNoiBo = maHangNB,
+                        //        VendorCode = maHangNCC,
+                        //        BIT_Select = bitSelect,
+                        //        DonGiaUSD = donGiaUSD,
+                        //        NVCHR_ReasonPick = reason,
+                        //        Errors = "Trong 1 mã đơn, 1 hàng nội bộ chỉ được chọn 1 nhà báo giá (O)"
+                        //    });
+                        //}
+                        //else
+                        //{
+                        //    items.Add(new
+                        //    {
+                        //        ID = id,
+                        //        BIT_Select = bitSelect.Contains("O"),
+                        //        NVCHR_ReasonPick = reason,
+                        //        CHR_MaDon = maDon,
+                        //        CHR_MaHangNoiBo = maHangNB,
+                        //        NVCHR_Note = NVCHR_Note,
+                        //        CHR_MaThietBi = maThietBi
+                        //    });
+                        //}
+                        items.Add(new
                         {
-                            isErrors = true;
-                            errorRows.Add(new
-                            {
-                                Row = row,
-                                MaDon = maDon,
-                                ID = id,
-                                MaHangNoiBo = maHangNB,
-                                VendorCode = maHangNCC,
-                                BIT_Select = bitSelect,
-                                DonGiaUSD = donGiaUSD,
-                                NVCHR_ReasonPick = reason,
-                                Errors = "Trong 1 mã đơn, 1 hàng nội bộ chỉ được chọn 1 nhà báo giá (O)"
-                            });
-                        }
-                        else
-                        {
-                            items.Add(new
-                            {
-                                ID = id,
-                                BIT_Select = bitSelect.Contains("O"),
-                                NVCHR_ReasonPick = reason,
-                                CHR_MaDon = maDon,
-                                CHR_MaHangNoiBo = maHangNB,
-                                NVCHR_Note = NVCHR_Note,
-                                CHR_MaThietBi = maThietBi
-                            });
-                        }
+                            ID = id,
+                            BIT_Select = bitSelect.Contains("O"),
+                            NVCHR_ReasonPick = reason,
+                            CHR_MaDon = maDon,
+                            CHR_MaHangNoiBo = maHangNB,
+                            NVCHR_Note = NVCHR_Note,
+                            CHR_MaThietBi = maThietBi
+                        });
                     }
                 }
 
@@ -1730,17 +1594,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result.Data);
         }
-        // Lấy thông tin NCC 
-        [HttpPost]
-        public async Task<IActionResult> GetNhaCungCapByMaHang([FromBody] string maHang)
-        {
-            var result = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(maHang);
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
-            return Ok(result.Data);
-        }
         // Lấy thông tin NCC theo loại hàng 
         [HttpPost]
         public async Task<IActionResult> GetNCCByCategory([FromBody] string category)
@@ -1846,191 +1699,269 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File không hợp lệ");
-
-            var items = new List<BaoGia_Request_of_QuotationDTO>();
             try
             {
                 using var stream = file.OpenReadStream();
                 using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
                 var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                if (ws == null) 
+                    return BadRequest("Không tìm thấy worksheet");
 
-                // Dữ liệu bắt đầu từ dòng 10
-                int startRow = 10;
-                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
-
-                for (int r = startRow; r <= lastRow; r++)
-                {
-                    if (ws.Cell(r, 2).GetString() == "" || ws.Cell(r, 2).GetString() == null)
-                    {
-                        break; // kết thúc nếu gặp dòng trống ở cột Mã phòng ban
-                    }
-                    var dto = new BaoGia_Request_of_QuotationDTO();
-                    var sectionCode = ws.Cell(r, 2).GetString();
-                    var sectionName = ws.Cell(r, 3).GetString();
-                    // case 1 : nếu có mã hàng nội bộ, sẽ tự động check nhà cung cấp và nhân bản theo số lượng nhà cung cấp tìm được
-                    if (ws.Cell(r, 6).GetString() != "" && ws.Cell(r, 6).GetString() != null)
-                    {
-                        // lấy thông tin theo mã hàng nội bộ đã có sẵn
-                        var inforMateial = await _materialService.GetByMaHangAsync(ws.Cell(r, 6).GetString());
-
-                        if (inforMateial.Success && inforMateial.Data != null)
-                        {
-                            var infor = inforMateial.Data;
-                            var nmn = ParseDate(ws.Cell(r, 29).GetString());
-                            var DT = ParseDate(ws.Cell(r, 30).GetString());
-                            // Map theo thứ tự cột trong bảng ở giao diện
-                            dto = new BaoGia_Request_of_QuotationDTO
-                            {
-                                CHR_SectionCode = sectionCode,
-                                CHR_SectionName = sectionName,
-                                CHR_Phanloai = infor.LoaiHang,
-                                CHR_MaThietBi = ws.Cell(r, 5).GetString(),
-                                CHR_MaHangNoiBo = infor.Material_Code,
-                                CHR_MaHangNCC = (ws.Cell(r, 7).GetString() == "" || ws.Cell(r, 7).GetString() == null) ? infor.Code_Suppiler : ws.Cell(r, 7).GetString(),
-                                NVCHR_NameVN = infor.NameVI,//infor.TenMoThuTuc,
-                                CHR_NameEN = infor.Material_Name_EN,
-                                INT_SoLuong = ParseDouble(ws.Cell(r, 10).GetString()),
-                                NVCHR_DonVi = infor.Unit ?? ws.Cell(r, 11).GetString(),
-                                NVCHR_ChungLoai = infor.Category_VN,
-                                NVCHR_HinhDang = ws.Cell(r, 13).GetString() ?? infor.Shape,
-                                NVCHR_ChatLieu = ws.Cell(r, 14).GetString() ?? infor.Material,
-                                NVCHR_ThanhPhan = ws.Cell(r, 15).GetString() ?? infor.Composition,
-                                NVCHR_KichThuoc = ws.Cell(r, 16).GetString() ?? infor.Dimension,
-                                NVCHR_DongMay = ws.Cell(r, 17).GetString() ?? infor.UsedFor,
-                                NVCHR_TinhNang = ws.Cell(r, 18).GetString() ?? infor.Purpose,
-                                NVCHR_Rohs = ws.Cell(r, 19).GetString(),
-                                NVCHR_COCQ = ws.Cell(r, 20).GetString(),
-                                NVCHR_MSDS = ws.Cell(r, 21).GetString(),
-                                NVCHR_AnToan = ws.Cell(r, 22).GetString(),
-                                NVCHR_FileThietKe = ws.Cell(r, 23).GetString(),
-                                NVCHR_NhaSanXuat = ws.Cell(r, 24).GetString(),
-
-                                CHR_MaNCC = ws.Cell(r, 25).GetString(),
-                                NVCHR_TenNCC = ws.Cell(r, 26).GetString(),
-
-                                BIT_LayBaoGia = ParseBool(ws.Cell(r, 27).GetString()),
-                                NVCHR_LyDo = ws.Cell(r, 28).GetString(),
-                                DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
-                                DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
-                                CHR_Gap = ParseBool(ws.Cell(r, 31).GetString()) == false ? "false" : "true",
-                                NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
-                                CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
-                                DTM_CreateDate = DateTime.Now,
-                                ID_Status = "CREATE"
-                            };
-                            // Đã có thông tin nhà cung cấp 
-                            if (!string.IsNullOrEmpty(dto.CHR_MaNCC))
-                            {
-                                items.Add(dto);
-                                continue;
-                            }
-                            // Nếu có mã hàng nội bộ, tự check nhà cung cấp và nhân bản theo NCC
-                            //var suppliersResp = await _baoGiaNCCService.GetBaoGiaNCCByMaHang(dto.CHR_MaHangNoiBo ?? string.Empty);
-                            var suppliersResp = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(dto.NVCHR_ChungLoai ?? "");
-                            if (suppliersResp.Success && suppliersResp.Data != null && suppliersResp.Data.Count > 0)
-                            {
-                                var first = true;
-                                foreach (var sup in suppliersResp.Data)
-                                {
-                                    var copy = first ? dto : CloneDto(dto);
-                                    // k có mà thiết bị
-                                    //dto.CHR_MaThietBi = "";
-
-                                    //dto.CHR_MaHangNCC = sup.NVCHR_CodeByNCC;
-                                    copy.NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty;
-                                    copy.CHR_MaNCC = sup.CHR_MaNCC;
-                                    copy.NVCHR_TenNCC = sup.NVCHR_TenNCC;
-                                    items.Add(copy);
-                                    first = false;
-                                }
-                            }
-                            else
-                            {
-                                items.Add(dto);
-                            }
-                        }
-                    }
-                    // case 2 : nếu không có mã hàng nội bộ, sẽ map theo thứ tự cột trong bảng ở giao diện, và lấy thông tin nhà cung cấp theo chủng loại hàng
-                    else
-                    {
-                        // Map theo thứ tự cột trong bảng ở giao diện
-                        dto = new BaoGia_Request_of_QuotationDTO
-                        {
-                            CHR_SectionCode = sectionCode,
-                            CHR_SectionName = sectionName,
-                            CHR_Phanloai = ParsePhanloai(ws.Cell(r, 4).GetString()),
-                            CHR_MaThietBi = ws.Cell(r, 5).GetString(),
-                            CHR_MaHangNoiBo = ws.Cell(r, 6).GetString(),
-                            CHR_MaHangNCC = ws.Cell(r, 7).GetString(),
-                            NVCHR_NameVN = ws.Cell(r, 8).GetString(),
-                            CHR_NameEN = ws.Cell(r, 9).GetString(),
-                            INT_SoLuong = ParseDouble(ws.Cell(r, 10).GetString()),
-                            NVCHR_DonVi = ws.Cell(r, 11).GetString(),
-                            NVCHR_ChungLoai = ws.Cell(r, 12).GetString().Trim(),
-                            NVCHR_HinhDang = ws.Cell(r, 13).GetString(),
-                            NVCHR_ChatLieu = ws.Cell(r, 14).GetString(),
-                            NVCHR_ThanhPhan = ws.Cell(r, 15).GetString(),
-                            NVCHR_KichThuoc = ws.Cell(r, 16).GetString(),
-                            NVCHR_DongMay = ws.Cell(r, 17).GetString(),
-                            NVCHR_TinhNang = ws.Cell(r, 18).GetString(),
-                            NVCHR_Rohs = ws.Cell(r, 19).GetString(),
-                            NVCHR_COCQ = ws.Cell(r, 20).GetString(),
-                            NVCHR_MSDS = ws.Cell(r, 21).GetString(),
-                            NVCHR_AnToan = ws.Cell(r, 22).GetString(),
-                            NVCHR_FileThietKe = ws.Cell(r, 23).GetString(),
-
-                            NVCHR_NhaSanXuat = ws.Cell(r, 24).GetString(),
-                            CHR_MaNCC = ws.Cell(r, 25).GetString(),
-                            NVCHR_TenNCC = ws.Cell(r, 26).GetString(),
-
-                            BIT_LayBaoGia = ParseBool(ws.Cell(r, 27).GetString()),
-                            NVCHR_LyDo = ws.Cell(r, 28).GetString(),
-                            DTM_NgayMuonNhan = ParseDate(ws.Cell(r, 29).GetString()),
-                            DTM_KyHan = ParseDate(ws.Cell(r, 30).GetString()),
-                            CHR_Gap = ParseBool(ws.Cell(r, 31).GetString()) == false ? "false" : "true",
-                            NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty,
-                            CHR_CreateBy = GetCurrentUserId() ?? string.Empty,
-                            DTM_CreateDate = DateTime.Now,
-                            ID_Status = "CREATE"
-                        };
-
-                        // Đã có thông tin nhà cung cấp 
-                        if (!string.IsNullOrEmpty(dto.CHR_MaNCC))
-                        {
-                            items.Add(dto);
-                            continue;
-                        }
-                        // lấy thông tin nhà cung cấp theo chủng loại hàng  _baoGiaNccCategoryService 
-                        var suppliersResp = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(ws.Cell(r, 12).GetString() ?? "");
-                        if (suppliersResp.Success && suppliersResp.Data != null && suppliersResp.Data.Count > 0)
-                        {
-                            var first = true;
-                            foreach (var sup in suppliersResp.Data)
-                            {
-                                var copy = first ? dto : CloneDto(dto);
-                                copy.NVCHR_UserRequest = ws.Cell(r, 32).GetString() ?? GetCurrentUserId() ?? string.Empty;
-                                copy.CHR_MaNCC = sup.CHR_MaNCC;
-                                copy.NVCHR_TenNCC = sup.NVCHR_TenNCC;
-                                copy.NVCHR_NhaSanXuat = ws.Cell(r, 24).GetString();
-
-                                items.Add(copy);
-                                first = false;
-                            }
-                        }
-                        else
-                        {
-                            items.Add(dto);
-                        }
-                    }
-                }
-
+                var items = await ProcessExcelWorksheet(ws);
                 return Ok(items);
             }
             catch (Exception ex)
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
+        }
+
+        private async Task<List<BaoGia_Request_of_QuotationDTO>> ProcessExcelWorksheet(IXLWorksheet ws)
+        {
+            var items = new List<BaoGia_Request_of_QuotationDTO>();
+            const int startRow = 10;
+            var lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+            for (int r = startRow; r <= lastRow; r++)
+            {
+                var sectionCode = ws.Cell(r, 2).GetString();
+                if (string.IsNullOrEmpty(sectionCode))
+                    break;
+
+                var rowData = ExtractRowData(ws, r);
+                var processedItems = await ProcessRowData(rowData);
+                items.AddRange(processedItems);
+            }
+
+            return items;
+        }
+
+        private ExcelRowData ExtractRowData(IXLWorksheet ws, int row)
+        {
+            return new ExcelRowData
+            {
+                SectionCode = ws.Cell(row, 2).GetString(),
+                SectionName = ws.Cell(row, 3).GetString(),
+                Phanloai = ws.Cell(row, 4).GetString(),
+                MaThietBi = ws.Cell(row, 5).GetString(),
+                MaHangNoiBo = ws.Cell(row, 6).GetString(),
+                MaHangNCC = ws.Cell(row, 7).GetString(),
+                NameVN = ws.Cell(row, 8).GetString(),
+                NameEN = ws.Cell(row, 9).GetString(),
+                SoLuong = ws.Cell(row, 10).GetString(),
+                DonVi = ws.Cell(row, 11).GetString(),
+                ChungLoai = ws.Cell(row, 12).GetString()?.Trim(),
+                HinhDang = ws.Cell(row, 13).GetString(),
+                ChatLieu = ws.Cell(row, 14).GetString(),
+                ThanhPhan = ws.Cell(row, 15).GetString(),
+                KichThuoc = ws.Cell(row, 16).GetString(),
+                DongMay = ws.Cell(row, 17).GetString(),
+                TinhNang = ws.Cell(row, 18).GetString(),
+                Rohs = ws.Cell(row, 19).GetString(),
+                COCQ = ws.Cell(row, 20).GetString(),
+                MSDS = ws.Cell(row, 21).GetString(),
+                AnToan = ws.Cell(row, 22).GetString(),
+                FileThietKe = ws.Cell(row, 23).GetString(),
+                NhaSanXuat = ws.Cell(row, 24).GetString(),
+                MaNCC = ws.Cell(row, 25).GetString(),
+                TenNCC = ws.Cell(row, 26).GetString(),
+                LayBaoGia = ws.Cell(row, 27).GetString(),
+                LyDo = ws.Cell(row, 28).GetString(),
+                NgayMuonNhan = ws.Cell(row, 29).GetString(),
+                KyHan = ws.Cell(row, 30).GetString(),
+                Gap = ws.Cell(row, 31).GetString(),
+                UserRequest = ws.Cell(row, 32).GetString()
+            };
+        }
+
+        private async Task<List<BaoGia_Request_of_QuotationDTO>> ProcessRowData(ExcelRowData rowData)
+        {
+            var items = new List<BaoGia_Request_of_QuotationDTO>();
+            
+            // Case 1: Có mã hàng nội bộ
+            if (!string.IsNullOrEmpty(rowData.MaHangNoiBo))
+            {
+                var processedItems = await ProcessRowWithExistingMaterial(rowData);
+                items.AddRange(processedItems);
+            }
+            // Case 2: Không có mã hàng nội bộ
+            else
+            {
+                var processedItems = await ProcessRowWithoutMaterial(rowData);
+                items.AddRange(processedItems);
+            }
+
+            return items;
+        }
+
+        private async Task<List<BaoGia_Request_of_QuotationDTO>> ProcessRowWithExistingMaterial(ExcelRowData rowData)
+        {
+            var items = new List<BaoGia_Request_of_QuotationDTO>();
+            var materialResp = await _materialService.GetByMaHangAsync(rowData.MaHangNoiBo);
+
+            if (!materialResp.Success || materialResp.Data == null)
+                return items;
+
+            var material = materialResp.Data;
+            var dto = CreateDtoFromMaterial(rowData, material);
+
+            // Đã có thông tin nhà cung cấp
+            if (!string.IsNullOrEmpty(dto.CHR_MaNCC))
+            {
+                items.Add(dto);
+                return items;
+            }
+
+            // Lấy nhà cung cấp theo chủng loại hàng
+            var suppliers = await GetSuppliersByCategory(dto.NVCHR_ChungLoai ?? "");
+            items.AddRange(CreateDtosWithSuppliers(dto, suppliers, rowData));
+
+            if (!items.Any())
+                items.Add(dto);
+
+            return items;
+        }
+
+        private async Task<List<BaoGia_Request_of_QuotationDTO>> ProcessRowWithoutMaterial(ExcelRowData rowData)
+        {
+            var items = new List<BaoGia_Request_of_QuotationDTO>();
+            var dto = CreateDtoFromRowData(rowData);
+
+            // Đã có thông tin nhà cung cấp
+            if (!string.IsNullOrEmpty(dto.CHR_MaNCC))
+            {
+                items.Add(dto);
+                return items;
+            }
+
+            // Lấy nhà cung cấp theo chủng loại hàng
+            var suppliers = await GetSuppliersByCategory(rowData.ChungLoai ?? "");
+            items.AddRange(CreateDtosWithSuppliers(dto, suppliers, rowData));
+
+            if (!items.Any())
+                items.Add(dto);
+
+            return items;
+        }
+
+        private BaoGia_Request_of_QuotationDTO CreateDtoFromMaterial(ExcelRowData rowData, dynamic material)
+        {
+            var currentUserId = GetCurrentUserId() ?? string.Empty;
+            
+            return new BaoGia_Request_of_QuotationDTO
+            {
+                CHR_SectionCode = rowData.SectionCode,
+                CHR_SectionName = rowData.SectionName,
+                CHR_Phanloai = material.LoaiHang,
+                CHR_MaThietBi = rowData.MaThietBi,
+                CHR_MaHangNoiBo = material.Material_Code,
+                CHR_MaHangNCC = string.IsNullOrEmpty(rowData.MaHangNCC) ? material.Code_Suppiler : rowData.MaHangNCC,
+                NVCHR_NameVN = material.NameVI,
+                CHR_NameEN = material.Material_Name_EN,
+                INT_SoLuong = ParseDouble(rowData.SoLuong),
+                NVCHR_DonVi = material.Unit ?? rowData.DonVi,
+                NVCHR_ChungLoai = material.Category_VN,
+                NVCHR_HinhDang = rowData.HinhDang ?? material.Shape,
+                NVCHR_ChatLieu = rowData.ChatLieu ?? material.Material,
+                NVCHR_ThanhPhan = rowData.ThanhPhan ?? material.Composition,
+                NVCHR_KichThuoc = rowData.KichThuoc ?? material.Dimension,
+                NVCHR_DongMay = rowData.DongMay ?? material.UsedFor,
+                NVCHR_TinhNang = rowData.TinhNang ?? material.Purpose,
+                NVCHR_Rohs = rowData.Rohs,
+                NVCHR_COCQ = rowData.COCQ,
+                NVCHR_MSDS = rowData.MSDS,
+                NVCHR_AnToan = rowData.AnToan,
+                NVCHR_FileThietKe = rowData.FileThietKe,
+                NVCHR_NhaSanXuat = rowData.NhaSanXuat,
+                CHR_MaNCC = rowData.MaNCC,
+                NVCHR_TenNCC = rowData.TenNCC,
+                BIT_LayBaoGia = ParseBool(rowData.LayBaoGia),
+                NVCHR_LyDo = rowData.LyDo,
+                DTM_NgayMuonNhan = ParseDate(rowData.NgayMuonNhan),
+                DTM_KyHan = ParseDate(rowData.KyHan),
+                CHR_Gap = ParseBool(rowData.Gap) == false ? "false" : "true",
+                NVCHR_UserRequest = rowData.UserRequest ?? currentUserId,
+                CHR_CreateBy = currentUserId,
+                DTM_CreateDate = DateTime.Now,
+                ID_Status = "CREATE"
+            };
+        }
+
+        private BaoGia_Request_of_QuotationDTO CreateDtoFromRowData(ExcelRowData rowData)
+        {
+            var currentUserId = GetCurrentUserId() ?? string.Empty;
+            
+            return new BaoGia_Request_of_QuotationDTO
+            {
+                CHR_SectionCode = rowData.SectionCode,
+                CHR_SectionName = rowData.SectionName,
+                CHR_Phanloai = ParsePhanloai(rowData.Phanloai),
+                CHR_MaThietBi = rowData.MaThietBi,
+                CHR_MaHangNoiBo = rowData.MaHangNoiBo,
+                CHR_MaHangNCC = rowData.MaHangNCC,
+                NVCHR_NameVN = rowData.NameVN,
+                CHR_NameEN = rowData.NameEN,
+                INT_SoLuong = ParseDouble(rowData.SoLuong),
+                NVCHR_DonVi = rowData.DonVi,
+                NVCHR_ChungLoai = rowData.ChungLoai,
+                NVCHR_HinhDang = rowData.HinhDang,
+                NVCHR_ChatLieu = rowData.ChatLieu,
+                NVCHR_ThanhPhan = rowData.ThanhPhan,
+                NVCHR_KichThuoc = rowData.KichThuoc,
+                NVCHR_DongMay = rowData.DongMay,
+                NVCHR_TinhNang = rowData.TinhNang,
+                NVCHR_Rohs = rowData.Rohs,
+                NVCHR_COCQ = rowData.COCQ,
+                NVCHR_MSDS = rowData.MSDS,
+                NVCHR_AnToan = rowData.AnToan,
+                NVCHR_FileThietKe = rowData.FileThietKe,
+                NVCHR_NhaSanXuat = rowData.NhaSanXuat,
+                CHR_MaNCC = rowData.MaNCC,
+                NVCHR_TenNCC = rowData.TenNCC,
+                BIT_LayBaoGia = ParseBool(rowData.LayBaoGia),
+                NVCHR_LyDo = rowData.LyDo,
+                DTM_NgayMuonNhan = ParseDate(rowData.NgayMuonNhan),
+                DTM_KyHan = ParseDate(rowData.KyHan),
+                CHR_Gap = ParseBool(rowData.Gap) == false ? "false" : "true",
+                NVCHR_UserRequest = rowData.UserRequest ?? currentUserId,
+                CHR_CreateBy = currentUserId,
+                DTM_CreateDate = DateTime.Now,
+                ID_Status = "CREATE"
+            };
+        }
+
+        private async Task<List<BaoGia_NCC_CategoryDTO>> GetSuppliersByCategory(string category)
+        {
+            if (string.IsNullOrEmpty(category))
+                return new List<BaoGia_NCC_CategoryDTO>();
+
+            var suppliersResp = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByChungLoai(category);
+            return (suppliersResp.Success && suppliersResp.Data != null) ? suppliersResp.Data : new List<BaoGia_NCC_CategoryDTO>();
+        }
+
+        private List<BaoGia_Request_of_QuotationDTO> CreateDtosWithSuppliers(BaoGia_Request_of_QuotationDTO baseDto, List<BaoGia_NCC_CategoryDTO> suppliers, ExcelRowData rowData)
+        {
+            var items = new List<BaoGia_Request_of_QuotationDTO>();
+            var currentUserId = GetCurrentUserId() ?? string.Empty;
+            
+            var first = true;
+            foreach (var supplier in suppliers)
+            {
+                var dto = first ? baseDto : CloneDto(baseDto);
+                dto.NVCHR_UserRequest = rowData.UserRequest ?? currentUserId;
+                dto.CHR_MaNCC = supplier.CHR_MaNCC;
+                dto.NVCHR_TenNCC = supplier.NVCHR_TenNCC;
+                
+                if (string.IsNullOrEmpty(dto.NVCHR_NhaSanXuat))
+                    dto.NVCHR_NhaSanXuat = supplier.NVCHR_SanXuat;
+                    
+                dto.BIT_LayBaoGia = ParseBool(rowData.LayBaoGia);
+                
+                items.Add(dto);
+                first = false;
+            }
+            
+            return items;
         }
         private static string? ParsePhanloai(string s)
         {
@@ -2066,6 +1997,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return Catergory + "có hình dáng " + Shape + " chất liệu " + Material + " thành phần hóa chất " + Composition + " có kích thước " + Dimension + " dùng để " + UsedFor + " cho " + Purpose;
         }
+
         private static BaoGia_Request_of_QuotationDTO CloneDto(BaoGia_Request_of_QuotationDTO src)
         {
             return new BaoGia_Request_of_QuotationDTO

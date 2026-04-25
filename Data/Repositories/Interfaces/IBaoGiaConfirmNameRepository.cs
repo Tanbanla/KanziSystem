@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
@@ -29,5 +29,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Export Code Cofirmed
         public Task<List<dynamic>> ExportCodeConfirmedAsync();
+        // Từ chối xác nhận tên hàng
+        public Task<bool> RejectConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
+        // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
+        public Task<List<ResultCheckCofirmName>> CheckDonHangConfirmedAsync(List<int> listCheck);
     }
 }

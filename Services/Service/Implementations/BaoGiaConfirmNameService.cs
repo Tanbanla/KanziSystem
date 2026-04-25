@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -191,6 +191,38 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = true;
             }
             catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Từ chối xác nhận tên hàng
+        public async Task<GenericResponse<bool>> RejectConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.RejectConfirmNameListAsync(saveConfirms, user, Role);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
+        public async Task<GenericResponse<List<ResultCheckCofirmName>>> CheckDonHangConfirmedAsync(List<int> listCheck)
+        {
+            var result = new GenericResponse<List<ResultCheckCofirmName>>();
+            try
+            {
+                result.Data = await _repo.CheckDonHangConfirmedAsync(listCheck);
+                result.Success = true;
+            }
+            catch (Exception ex)
             {
                 result.Message = ex.Message;
                 result.Success = false;

@@ -730,17 +730,20 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var listResult = new List<int>();
             var sectionCode = "";
             var listUpdate = new List<BaoGia_Request_of_Quotation>();
-            var listOldData = await _context.BaoGia_Request_of_Quotations.Where(c => baoGias.Select(b => b.ID).Contains(c.ID) && c.ID_Status.Contains("RETURN")).ToListAsync();
+            var listOldData = await _context.BaoGia_Request_of_Quotations.Where(c => baoGias.Select(b => b.ID).Contains(c.ID)).ToListAsync();
             if (listOldData == null || !listOldData.Any())
             {
-                throw new Exception("Dữ liệu không tồn tại hoặc không ở trạng thái RETURN để sửa lại");
+                throw new Exception("Dữ liệu không tồn tại để sửa lại");
             }
             var listHistory = new List<BaoGia_History_Request_of_Quotation>();
             foreach (var baoGia in baoGias)
             {
                 var dto = listOldData.Find(c => c.ID == baoGia.ID);
                 if (dto != null) {
-
+                    if(dto.ID_StepBaoGia >= 6)
+                    {
+                       throw new Exception($"Đơn đã phê duyệt, không cập nhật");
+                    }
                     if (sectionCode == "") {
                         sectionCode = baoGia.CHR_SectionCode;
                     }
@@ -778,8 +781,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     dto.CHR_CreateBy = baoGia.CHR_CreateBy;
                     dto.DTM_UpdateLater = DateTime.Now;
                     dto.INT_SoLanUpdate = (dto.INT_SoLanUpdate ?? 0) + 1;
-                    dto.ID_StepBaoGia = 2;
-                    dto.ID_Status = "APPROVAL2";
+                    if (dto.ID_Status.Contains("RETURN"))
+                    {
+                        dto.ID_StepBaoGia = 2;
+                        dto.ID_Status = "APPROVAL2";
+                    }
                     listUpdate.Add(dto);
                     var history = new BaoGia_History_Request_of_Quotation
                     {
@@ -1125,7 +1131,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
                 LEFT JOIN BaoGia_History_Request_of_Quotation AS h ON h.ID_RequestQuote = r.id 
                     AND h.CHR_ActionType IN ('DEFT_PICK_NCC','QLSC_PICK_NCC','QLTC_PICK_NCC')
-                WHERE r.ID_StepBaoGia > 11 AND r.BIT_LayBaoGia = 1");
+                WHERE r.ID_StepBaoGia > 12 AND r.BIT_LayBaoGia = 1");
 
             var parameters = new DynamicParameters();
 
@@ -1231,7 +1237,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             FROM BaoGia_Request_of_Quotation r
             LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
             INNER JOIN StatusCheck sc ON r.id = sc.id
-            WHERE r.ID_StepBaoGia > 11");
+            WHERE r.ID_StepBaoGia > 12");
 
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon, r.CHR_MaThietBi, r.CHR_MaNCC, r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
 
@@ -1249,7 +1255,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             SELECT COUNT(DISTINCT r.id)
             FROM BaoGia_Request_of_Quotation r
             LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-            WHERE r.ID_StepBaoGia > 11 AND r.BIT_LayBaoGia = 1");
+            WHERE r.ID_StepBaoGia > 12 AND r.BIT_LayBaoGia = 1");
 
             var countParams = new DynamicParameters();
 
@@ -1382,7 +1388,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     data.DTM_UpdateLater = DateTime.Now;
                     if (data.ID_StepBaoGia >= 12)
                     {
-                        data.ID_Status = "DONE";
+                        data.ID_Status = "WAIT_CONFIRM_NAME";
                     }
 
                     var actionType = data.ID_StepBaoGia == 10 ? "QLSC_PICK_NCC" :
@@ -1490,6 +1496,37 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context.BaoGia_Request_of_Quotations.Update(data);
             await _context.SaveChangesAsync();
             return true;
+        }
+        // Trả lại đơn báo giá
+        public async Task<List<BaoGia_Request_of_Quotation>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate)
+        {
+            if (string.IsNullOrEmpty(maDon)) throw new Exception("No valid data to update");
+
+            var data = await _context.BaoGia_Request_of_Quotations.Where(c => c.CHR_MaDon == maDon).ToListAsync();
+
+            if (!data.Any()) throw new Exception("Mã đơn báo giá không hợp lệ");
+
+            foreach (var item in data)
+            {
+                item.ID_StepBaoGia = 1;
+                item.ID_Status = "RETURN_PIC";
+                item.DTM_UpdateLater = DateTime.Now;
+            }
+            // Lưu lịch sử trả lại
+            var historyList = data.Select(item => new BaoGia_History_Request_of_Quotation
+            {
+                ID_RequestQuote = item.ID,
+                CHR_MaDon = item.CHR_MaDon ?? string.Empty,
+                CHR_UpdateBy = userUpdate,
+                NVCHR_UpdateName = userUpdate,
+                CHR_Updatedate = DateTime.Now,
+                CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
+                CHR_ActionType = "RETURN_PIC"
+            }).ToList();
+            _context.BaoGia_Request_of_Quotations.UpdateRange(data);
+            await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
+            await _context.SaveChangesAsync();
+            return data;
         }
     }
 }

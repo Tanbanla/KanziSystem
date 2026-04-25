@@ -230,7 +230,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         }
                                         else if (item.ID_StepBaoGia != 6)
                                         {
-                                            await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", currentUserId + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
+                                            await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", item.CHR_UserApproval + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
                                         }
                                         //await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
 

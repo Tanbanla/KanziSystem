@@ -495,4 +495,7 @@
   <data name="SelectApprover" xml:space="preserve">
     <value>Select Approver</value>
   </data>
+  <data name="DownloadMaster" xml:space="preserve">
+    <value>Download Master data</value>
+  </data>
 </root>

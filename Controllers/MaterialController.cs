@@ -362,10 +362,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File không hợp lệ");
-
-            var roleAsync = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            var user = GetCurrentUserId();
+            var roleAsync = await _tmUserService.GetRoleAsync(user);
             var role = roleAsync.Success ? roleAsync.Data : string.Empty;
-            var item = new List<BaoGia_Confirm_Name_Quotation>();
+            var itemOK = new List<BaoGia_Confirm_Name_Quotation>();
+            var itemNG = new List<ConfirmNameDTO>();
             var hasErrors = false;
             try
             {
@@ -380,87 +381,62 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 for (int r = startRow; r <= lastRow; r++)
                 {
+                    if (ws.Cell(r, 1).GetString() == "")
+                    {
+                        break; 
+                    }
                     if (ws.Cell(r, 2).GetString() == "")
                     {
-                        break; // Nếu cột 2 (trạng thái) trống, dừng đọc tiếp
-                    }
-                    if (ws.Cell(r, 3).GetString() == "")
-                    {
-                        ws.Cell(r, 25).SetValue("Số đơn yêu cầu không được để trống");
+                        ws.Cell(r, 27).SetValue("Số đơn yêu cầu không được để trống");
                         hasErrors = true;
                         continue;
                     }
-                    var a = int.Parse(ws.Cell(r, 3).GetString());
+                    var a = int.Parse(ws.Cell(r, 2).GetString());
                     switch (role)
                     {
                         case "UserShip":
-                            var tenHaiQuan = ws.Cell(r, 24).GetString();
+                            var tenHaiQuan = ws.Cell(r, 23).GetString();
+                            bool bitReturn = ws.Cell(r, 25).GetString().Trim().ToUpper() == "X" ? false : true;
+                            var reasonReturn = ws.Cell(r, 26).GetString().Trim();
+                            if(string.IsNullOrEmpty(reasonReturn) && !bitReturn)
+                            {
+                                ws.Cell(r, 27).SetValue("Vui lòng nhập lý do trả lại");
+                                hasErrors = true;
+                                continue;
+                            }
                             if (string.IsNullOrWhiteSpace(tenHaiQuan))
                             {
-                                ws.Cell(r, 25).SetValue("Tên hải quan không được để trống");
+                                ws.Cell(r, 27).SetValue("Tên hải quan không được để trống");
                                 hasErrors = true;
                                 continue;
                             }
-                            item.Add(new BaoGia_Confirm_Name_Quotation
+                            if (!bitReturn)
                             {
-                                ID = int.Parse(ws.Cell(r, 3).GetString()),
-                                VCHR_TenHaiQuan = tenHaiQuan,
-                                VCHR_UserShip = GetCurrentUserId(),
-                                DTM_UserShip = DateTime.Now
-                            });
-                            break;
-                        case "UserAcc":
-                            var mahang = ws.Cell(r, 9).GetString();
-                            if (string.IsNullOrWhiteSpace(mahang))
-                            {
-                                ws.Cell(r, 25).SetValue("Mã hàng nội bộ không được để trống");
-                                hasErrors = true;
-                                continue;
+                                itemNG.Add(new ConfirmNameDTO
+                                {
+                                    Id = int.Parse(ws.Cell(r, 2).GetString()),
+                                    pheDuyet = bitReturn,
+                                    LyDo = reasonReturn,
+                                });
                             }
-                            // kiểm tra mã hàng đã tồn tại trong hệ thống chưa
-                            //var checkMaHang = await _materialService.CheckMaHangExistsAsync(mahang);
-                            //if (checkMaHang.Data)
-                            //{
-                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong hệ thống");
-                            //    hasErrors = true;
-                            //    continue;
-                            //}
-                            //var checkList = item.Where(x => x.VCHR_MaHangNoiBo == mahang).ToList();
-                            //if (checkList.Any())
-                            //{
-                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahang}' đã tồn tại trong file");
-                            //    hasErrors = true;
-                            //    continue;
-                            //}
-                            item.Add(new BaoGia_Confirm_Name_Quotation
+                            else
                             {
-                                ID = int.Parse(ws.Cell(r, 3).GetString()),
-                                VCHR_MaHangNoiBo = mahang,
-                                VCHR_UserAcc = GetCurrentUserId(),
-                                DTM_UserAcc = DateTime.Now
-                            });
+                                itemOK.Add(new BaoGia_Confirm_Name_Quotation
+                                {
+                                    ID = int.Parse(ws.Cell(r, 2).GetString()),
+                                    VCHR_TenHaiQuan = tenHaiQuan,
+                                    VCHR_UserShip = GetCurrentUserId(),
+                                    DTM_UserShip = DateTime.Now
+                                });
+                            }
                             break;
                         case "UserPUR":
-                            var tenHaiQuanPUR = ws.Cell(r, 22).GetString();
-                            var mahangPUR = ws.Cell(r, 9).GetString();
+                            var tenHaiQuanPUR = ws.Cell(r, 23).GetString();
+                            var mahangPUR = ws.Cell(r, 8).GetString();
                             // kiểm tra mã hàng đã tồn tại trong hệ thống chưa
-                            //var checkMaHangPUR = await _materialService.CheckMaHangExistsAsync(mahangPUR);
-                            //if (checkMaHangPUR.Data)
-                            //{
-                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong hệ thống");
-                            //    hasErrors = true;
-                            //    continue;
-                            //}
-                            //var checkListPUR = item.Where(x => x.VCHR_MaHangNoiBo == mahangPUR).ToList();
-                            //if (checkListPUR.Any())
-                            //{
-                            //    ws.Cell(r, 25).SetValue($"Mã hàng nội bộ '{mahangPUR}' đã tồn tại trong file");
-                            //    hasErrors = true;
-                            //    continue;
-                            //}
-                            item.Add(new BaoGia_Confirm_Name_Quotation
+                            itemOK.Add(new BaoGia_Confirm_Name_Quotation
                             {
-                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                ID = int.Parse(ws.Cell(r, 2).GetString()),
                                 VCHR_TenHaiQuan = tenHaiQuanPUR,
                                 VCHR_MaHangNoiBo = mahangPUR,
                                 VCHR_UserPUR = GetCurrentUserId(),
@@ -468,7 +444,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             });
                             break;
                         default:
-                            ws.Cell(r, 25).SetValue("Bạn không có quyền update file");
+                            ws.Cell(r, 27).SetValue("Bạn không có quyền update file");
                             break;
                     }
 
@@ -483,18 +459,105 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     return File(bytes, contentType, fileName);
                 }
-                if (!item.Any() || item == null)
+                // Lưu dữ liệu hợp lệ vào database
+                if (!itemOK.Any() || itemOK == null)
                 {
                     return BadRequest("Không có dữ liệu hợp lệ để lưu");
                 }
-                await _confirmNameService.SaveFromFileAsync(item, GetCurrentUserId(), role);
+                await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
+                // gửi mail thông báo đã hoàn thành xác nhận tên
+                if (itemOK.Any() || itemOK != null)
+                {
+                    var listCheck = itemOK.Select(d => d.ID).ToList();
+                    // Send Mail PIC khi đơn hoàn thành xác nhận tên hải quan
+                    _ = Task.Run(async () =>
+                    {
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            try
+                            {
+                                var listDone = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                if (!listDone.Success)
+                                {
+                                    _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
+                                    return;
+                                }
+
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                                foreach (var item in listDone.Data)
+                                {
+                                    // gửi mail thông báo đơn đã hoàn thành xác nhận tên hải quan
+                                    var emailResult = await sendMailService.SendMailAsync(
+                                        item.UserCreate + "@brothergroup.net",
+                                        string.Empty,
+                                        18,
+                                        "Quote/SelectQuoteSection",
+                                        true,
+                                        item.Section,
+                                        item.MaDon,
+                                        item.UserCreate);
+                                }
+
+                                // gửi mail thông báo có yêu cầu xác nhận tên mới 
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                            }
+                        }
+                    });
+                }
+
+                // Nếu có dữ liệu bị trả lại
+                if (itemNG.Any() || itemNG.Count >0)
+                {
+                    await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
+
+                    // Send Mail PIC phụ trách xác nhận tên mới (User Ship) khi có yêu cầu trả lại
+                    _ = Task.Run(async () =>
+                    {
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            try
+                            {
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
+
+                                // danh sach PIC
+                                var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
+                                if (!result.Success)
+                                {
+                                    _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
+                                }
+                                var dataPic = result.Data;
+                                string emailList = string.Join("; ", dataPic.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
+
+                                // gửi mail thông báo có yêu cầu xác nhận tên mới 
+                                var emailResult = await sendMailService.SendMailAsync(
+                                    emailList,
+                                    string.Empty,
+                                    20,
+                                    "Material/ConfirmName",
+                                    true,
+                                    itemNG?.FirstOrDefault()?.LyDo ?? string.Empty,
+                                    string.Empty,
+                                    user);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                            }
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
             }
 
-            return Ok(item);
+            return Ok(itemOK);
         }
         // Xuất file Excel table
         [HttpPost]
@@ -530,58 +593,37 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không tìm thấy worksheet trong template");
                 }
 
-                // Determine which columns to show based on role
-                var showMaNB = (role == "UserShip" || role == "UserAcc" || role == "UserPUR"); // VCHR_MaHangNoiBo (col 9)
-                var showTenHQ = (role == "UserShip" || role == "UserPUR"); // VCHR_TenHaiQuan (col 22)
-                var showUserShip = (role == "UserShip" || role == "UserPUR"); // VCHR_UserShip (col 23)
-                var showUserAcc = (role == "UserAcc" || role == "UserPUR"); // VCHR_UserAcc (col 24)
-
-                // Optionally hide entire columns in output if role lacks permission
-                try
-                {
-                    if (!showMaNB) ws.Column(9).Hide();
-                }
-                catch { /* ignore if template layout differs */ }
-
                 int row = 4;
                 int idx = 1;
                 foreach (var rq in items)
                 {
-                    var maHangNb = "";
-                    if (showUserShip)
-                    {
-                        maHangNb = rq.VCHR_MaHangNoiBo ?? (rq.CHR_MaHangNoiBo ?? "");
-                    }
-                    else
-                    {
-                        maHangNb = rq.VCHR_MaHangNoiBo ?? "";
-                    }
+                    var maHangNb = rq.VCHR_MaHangNoiBo ?? (rq.CHR_MaHangNoiBo ?? "");
+      
                     // Map fields into template columns similar to ExportSelection
-                    ws.Cell(row, 2).SetValue(rq.CHR_Status ?? "");
-                    ws.Cell(row, 3).SetValue(rq.ID ?? 0);
-                    ws.Cell(row, 4).SetValue(idx);
-                    ws.Cell(row, 5).SetValue(rq.CHR_SectionCode ?? "");
-                    ws.Cell(row, 6).SetValue(rq.CHR_SectionName ?? "");
-                    ws.Cell(row, 7).SetValue(rq.CHR_Phanloai ?? "");
-                    ws.Cell(row, 8).SetValue(rq.CHR_MaThietBi ?? "");
-                    ws.Cell(row, 9).SetValue(showMaNB ? maHangNb : "");
-                    ws.Cell(row, 10).SetValue(rq.CHR_MaHangNCC ?? "");
-                    ws.Cell(row, 11).SetValue(rq.CHR_CodeNCC +" - "+ rq.ShortName ?? "");
-                    ws.Cell(row, 12).SetValue(rq.VCHR_TenRecomment ?? "");
-                    ws.Cell(row, 13).SetValue(rq.CHR_NameEN ?? "");
-                    ws.Cell(row, 14).SetValue(rq.INT_SoLuong ?? "");
-                    ws.Cell(row, 15).SetValue(rq.NVCHR_DonVi ?? "");
-                    ws.Cell(row, 16).SetValue(rq.NVCHR_ChungLoai ?? "");
-                    ws.Cell(row, 17).SetValue(rq.NVCHR_HinhDang ?? "");
-                    ws.Cell(row, 18).SetValue(rq.NVCHR_ChatLieu ?? "");
-                    ws.Cell(row, 19).SetValue(rq.NVCHR_ThanhPhan ?? "");
-                    ws.Cell(row, 20).SetValue(rq.NVCHR_KichThuoc ?? "");
-                    ws.Cell(row, 21).SetValue(rq.NVCHR_DongMay ?? "");
-                    ws.Cell(row, 22).SetValue(rq.NVCHR_TinhNang ?? "");
-                    ws.Cell(row, 23).SetValue(rq.NVCHR_File ?? "");
-                    ws.Cell(row, 24).SetValue(showTenHQ ? (rq.VCHR_TenHaiQuan ?? "") : "");
-                    ws.Cell(row, 25).SetValue(showUserShip ? (rq.VCHR_UserShip ?? "") : "");
-                    ws.Cell(row, 26).SetValue(showUserAcc ? (rq.VCHR_UserAcc ?? "") : "");
+                    ws.Cell(row, 1).SetValue(rq.CHR_Status ?? "");
+                    ws.Cell(row, 2).SetValue(rq.ID ?? 0);
+                    ws.Cell(row, 3).SetValue(idx);
+                    ws.Cell(row, 4).SetValue(rq.CHR_SectionCode ?? "");
+                    ws.Cell(row, 5).SetValue(rq.CHR_SectionName ?? "");
+                    ws.Cell(row, 6).SetValue(rq.CHR_Phanloai ?? "");
+                    ws.Cell(row, 7).SetValue(rq.CHR_MaThietBi ?? "");
+                    ws.Cell(row, 8).SetValue(maHangNb);
+                    ws.Cell(row, 9).SetValue(rq.CHR_MaHangNCC ?? "");
+                    ws.Cell(row, 10).SetValue(rq.CHR_CodeNCC +" - "+ rq.ShortName ?? "");
+                    ws.Cell(row, 11).SetValue(rq.VCHR_TenRecomment ?? "");
+                    ws.Cell(row, 12).SetValue(rq.CHR_NameEN ?? "");
+                    ws.Cell(row, 13).SetValue(rq.INT_SoLuong ?? "");
+                    ws.Cell(row, 14).SetValue(rq.NVCHR_DonVi ?? "");
+                    ws.Cell(row, 15).SetValue(rq.NVCHR_ChungLoai ?? "");
+                    ws.Cell(row, 16).SetValue(rq.NVCHR_HinhDang ?? "");
+                    ws.Cell(row, 17).SetValue(rq.NVCHR_ChatLieu ?? "");
+                    ws.Cell(row, 18).SetValue(rq.NVCHR_ThanhPhan ?? "");
+                    ws.Cell(row, 19).SetValue(rq.NVCHR_KichThuoc ?? "");
+                    ws.Cell(row, 20).SetValue(rq.NVCHR_DongMay ?? "");
+                    ws.Cell(row, 21).SetValue(rq.NVCHR_TinhNang ?? "");
+                    ws.Cell(row, 22).SetValue(rq.NVCHR_File ?? "");
+                    ws.Cell(row, 23).SetValue("");
+                    ws.Cell(row, 24).SetValue(rq.VCHR_UserShip ?? "");
                     row++;
                     idx++;
                 }

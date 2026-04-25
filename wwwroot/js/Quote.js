@@ -11,6 +11,8 @@
         , exportRenderOutSide: (window.apiBaseUrl || '') + '/Quote/ExportRenderOutSide'
         , exportTable: (window.apiBaseUrl || '') + '/Quote/ExportTable'
         , searchApprover: (window.apiBaseUrl || '') + '/Quote/GetListApprovel'
+        ,downloadMasterMaterial: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterMaterial`
+        ,downloadMasterVendor: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterVendor`
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -670,8 +672,7 @@
             showDialog({ title: T.ErrorTitle || 'Lỗi', message: (T.SelectApprover || 'Vui lòng chọn người phê duyệt trước khi gửi'), type: 'error' });
             return;
         }
-        // Only validate and collect rows that contain user-entered data
-        // If we have an in-memory dataset (allQuoteItems) we must merge edits from visible page into it
+
         const visibleRows = Array.from(qsa('#quoteTableBody tr'));
         visibleRows.forEach((tr) => {
             if (isRowEmpty(tr)) return; // skip empty rows
@@ -680,8 +681,7 @@
         });
 
         if (Array.isArray(allQuoteItems) && allQuoteItems.length > 0) {
-            // We rendered from filteredQuoteItems when using in-memory dataset.
-            // Compute start index for current page and merge visible row values into the corresponding items.
+
             const start = (currentPage - 1) * rowsPerPage;
             visibleRows.forEach((tr, idx) => {
                 try {
@@ -1622,6 +1622,52 @@
                 hideLoading();
             }
 
+        });
+        // dowload mater data
+        qs('#btnDownMaster')?.addEventListener('click', async () => {
+
+            const T = window.i18nQuote || {};
+            try {
+                const endpoints = [
+                    { url: api.downloadMasterVendor, defaultName: 'ExportMasterVendor.xlsx' },
+                    { url: api.downloadMasterMaterial, defaultName: 'ExportMasterMaterial.xlsx' }
+                ];
+
+                for (const ep of endpoints) {
+                    const res = await fetch(ep.url, { method: 'GET' });
+                    if (!res.ok) {
+                        let txt = await res.text().catch(() => res.statusText);
+                        showLoading({ title: (T.ErrorTitle || 'Lỗi'), message: (T.ExportFailed || 'Xuất file thất bại') + ': ' + (txt || res.statusText), type: 'error' });
+                        continue;
+                    }
+                    const blob = await res.blob();
+                    // try to parse filename from content-disposition
+                    let filename = ep.defaultName;
+                    try {
+                        const cd = res.headers.get('content-disposition');
+                        if (cd) {
+                            const m = cd.match(/filename\*?=(?:UTF-8''|\")?([^;\"']+)/i);
+                            if (m && m[1]) filename = decodeURIComponent(m[1].replace(/\"/g, '').trim());
+                        }
+                    } catch { }
+
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }
+
+                showLoading({ title: (T.SuccessTitle || 'Thành công'), message: (T.ExportSuccess || 'Xuất file hoàn tất'), type: 'success' });
+            } catch (err) {
+                const T = window.i18nSupplierMana || {};
+                showLoading({ title: (T.ErrorTitle || 'Lỗi'), message: (T.ExportFailed || 'Xuất file thất bại') + ': ' + (err && err.message ? err.message : err), type: 'error' });
+            } finally {
+                hideLoading();
+            }
         });
         // Consolidated change handler (delegated) for table selects
         qs('#quoteTableBody')?.addEventListener('change', async (e) => {

@@ -880,7 +880,7 @@
                     <td class="text-center">
                         <div class="btn-group btn-group-sm" role="group">
                             <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử"><i class="fas fa-history"></i></button>
-                            <button type="button" class="btn btn-outline-secondary btn-view-approvals" title="Phê duyệt"><i class="fas fa-check-double"></i></button>
+                            <button type="button" class="btn btn-outline-secondary btn-view-approvals" title="Trả lại"><i class="fas fa-return"></i></button>
                             <button type="button" class="btn btn-outline-danger btn-delete-group" title="Xóa đơn"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
@@ -1254,11 +1254,44 @@
         const body = document.getElementById('cmDialogBody');
         const footer = document.getElementById('cmDialogFooter');
         const titleEl = document.getElementById('cmDialogTitle');
-        if (!overlay || !body || !footer || !titleEl) return;
+        
+        if (!overlay || !body || !footer || !titleEl) {
+            if (typeof title === 'object' && title !== null) {
+                alert((title.title || 'Thông báo') + ': ' + (title.message || ''));
+            } else {
+                alert((title || 'Thông báo') + ': ' + (html || ''));
+            }
+            return;
+        }
+
         const T = window.i18nHistoryQuote || {};
-        titleEl.textContent = title || (T.Notification || 'Thông báo');
-        body.innerHTML = html || '';
+        
+        // Handle both object parameter and separate title/html parameters
+        let dialogTitle, dialogContent, dialogType;
+        if (typeof title === 'object' && title !== null) {
+            dialogTitle = title.title || (T.Notification || 'Thông báo');
+            dialogContent = title.message || '';
+            dialogType = title.type || '';
+        } else {
+            dialogTitle = title || (T.Notification || 'Thông báo');
+            dialogContent = html || '';
+            dialogType = '';
+        }
+
+        titleEl.textContent = dialogTitle;
+        body.innerHTML = dialogContent;
+        
+        body.className = 'cm-dialog-body';
+        if (dialogType === 'error') {
+            body.className += ' text-danger';
+        } else if (dialogType === 'success') {
+            body.className += ' text-success';
+        } else if (dialogType === 'warning') {
+            body.className += ' text-warning';
+        }
+        
         footer.innerHTML = '<button type="button" class="cm-btn" data-cm-action="close">' + (T.Close || 'Đóng') + '</button>';
+        
         // show overlay (CSS default is display:none)
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
@@ -1283,7 +1316,6 @@
             overlay.setAttribute('aria-hidden', 'true');
             overlay.style.display = 'none';
         };
-
 
         if (overlay._closeHandler) overlay.removeEventListener('click', overlay._closeHandler);
         overlay._closeHandler = function (evt) {
