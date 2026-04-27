@@ -3779,5 +3779,43 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest("Error: " + ex.Message);
             }
         }
+        // Return PIC section
+        [HttpPost]
+        public async Task<IActionResult> ReturnQuotation([FromBody] string Madon)
+        {
+            if (string.IsNullOrEmpty(Madon)) return BadRequest("Vui long chon ma don");
+            try
+            {
+                var user = GetCurrentUserId();
+                var result = await _baoGiaService.TraLaiDonBaoGiaAsync(Madon, user);
+                if (!result.Success || result.Data == null)
+                {
+                    return BadRequest("Error: "+result.Message);
+                }
+                var firstData = result.Data.FirstOrDefault();
+                _ = Task.Run(async () =>
+                {
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        try
+                        {
+                            var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                            await sendMailService.SendMailAsync(firstData.CHR_CreateBy+ "@brothergroup.net", user + "@brothergroup.net", 11, "Quote/HistoryQuote", firstData.CHR_Gap == "false" ? false : true, firstData.CHR_SectionCode ?? "", firstData.CHR_MaDon ?? "", user);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                        }
+                    }
+                });
+                return Ok(result.Data);
+
+            }
+            catch(Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+
+        }
     }
 }

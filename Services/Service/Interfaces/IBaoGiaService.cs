@@ -73,5 +73,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string userUpdate);
         // Xóa từng đơn
         public Task<GenericResponse<bool>> DeleteDonBaoGiaAsync(int id, string userUpdate);
+        // Trả lại đơn báo giá
+        public Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate);
     }
 }
