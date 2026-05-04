@@ -6,7 +6,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 {
     public class SQL_Connect_DB20
     {
-        public readonly string connectString = @"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=whs;password=147258@;";
+        public readonly string connectString = @"data source=apbivndb14;initial catalog=COST_MANAGEMENT;user id=Kanzaisystem;password=Kanzaisystem;";
+        //public readonly string connectString = @"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=tuyenmt;password=123456a@;";
         public DataTable GET_DATA_FROM_SQL(string DATASELECT)
          {
             try
@@ -23,8 +24,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             {
                                 adp.Fill(dt);
                                 return dt;
-                            }
-                            ;
+                            };
                         }
                     }
                 }

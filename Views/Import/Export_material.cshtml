@@ -172,8 +172,8 @@
                                     <th style="width: 50px;">No.</th>
                                     <th width="380px">@Languages.TenNVL</th>
                                     <th width="150px">@Languages.Maketoan</th>
-                                    <th width="60">@Languages.Kho</th>
-                                    <th width="80">@Languages.tonkho</th>
+                                    <th width="60" hidden>@Languages.Kho</th>
+                                    <th width="80" hidden>@Languages.tonkho</th>
                                     <th width="80">@Languages.soluong</th>
                                     <th width="150px">@Languages.Donvi</th>
                                     <th>@Languages.Giatien</th>
@@ -195,8 +195,8 @@
                                         </select>
                                     </td>
                                     <td><input type="text" class="form-control stk" id="stk_1" readonly></td>
-                                    <td><input type="text" class="form-control kho" id="kho_1" readonly></td>
-                                    <td><input type="text" class="form-control tk" id="tk_1" readonly></td>
+                                    <td hidden><input type="text" class="form-control kho" id="kho_1" readonly></td>
+                                    <td hidden><input type="text" class="form-control tk" id="tk_1" readonly></td>
                                     <td><input type="number" class="form-control sl" id="sl_1" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)"></td>
                                     <td><input type="text" class="form-control dv" id="dv_1" readonly></td>
                                     <td><input type="number" class="form-control dg" id="dg_1" readonly></td>
@@ -272,8 +272,8 @@
                 <td>
                     <select id="stk_1" class="form-control stk" ></select>
                 </td>
-                <td><input type="text" class="form-control kho" id="kho_1" readonly /></td>
-                <td><input type="text" class="form-control tk" id="tk_1" readonly /></td>
+                <td hidden><input type="text" class="form-control kho" id="kho_1" readonly /></td>
+                <td hidden><input type="text" class="form-control tk" id="tk_1" readonly /></td>
                 <td><input type="number" class="form-control sl" id="sl_1" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)"></td>
                 <td><input type="text" class="form-control dv" id="dv_1" readonly></td>
                 <td><input type="number" class="form-control dg" id="dg_1" readonly></td>
@@ -415,10 +415,10 @@
         var currentVal = parseFloat(document.getElementById("sl_" + idd).value);
         var tonKho = parseFloat(document.getElementById("tk_" + idd).value);
         // Nếu nhập nhiều hơn tồn kho
-        if (currentVal > tonKho) {
-            alert("Số lượng xuất không được vượt quá tồn kho (" + tonKho + ")");
-            //document.getElementById("sl_" + idd).value = tonKho; // Tự động đưa về giá trị Max (tồn kho)
-        }
+        // if (currentVal > tonKho) {
+        //     alert("Số lượng xuất không được vượt quá tồn kho (" + tonKho + ")");
+        //     //document.getElementById("sl_" + idd).value = tonKho; // Tự động đưa về giá trị Max (tồn kho)
+        // }
         // Gọi hàm tính tổng tất cả các dòng
         tinhTongTatCa();
     }

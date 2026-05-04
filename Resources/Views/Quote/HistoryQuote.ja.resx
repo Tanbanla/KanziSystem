@@ -198,14 +198,92 @@
   <data name="Actions" xml:space="preserve">
     <value>操作</value>
   </data>
-  <data name="Expand" xml:space="preserve">
-    <value>展開</value>
+  <data name="Confirm" xml:space="preserve">
+    <value>はい</value>
   </data>
-  <data name="ViewHistory" xml:space="preserve">
-    <value>履歴を見る</value>
+  <data name="Cancel" xml:space="preserve">
+    <value>キャンセル</value>
   </data>
-  <data name="Approval" xml:space="preserve">
-    <value>同意</value>
+  <data name="Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="SearchEllipsis" xml:space="preserve">
+    <value>検索...</value>
+  </data>
+  <data name="SelectPlaceholder" xml:space="preserve">
+    <value>-- 選択 --</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>結果なし</value>
+  </data>
+  <data name="MsgSearchFailed" xml:space="preserve">
+    <value>検索に失敗しました</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>処理中...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>ファイルのエクスポートに失敗しました</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>処理中...</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>無効なファイル形式</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>ファイルをエクスポートできません</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>ファイルのインポートに成功しました</value>
+  </data>
+  <data name="MsgLoadHistoryFailed" xml:space="preserve">
+    <value>履歴を読み込めません。</value>
+  </data>
+  <data name="PageTitleHistory" xml:space="preserve">
+    <value>単一の履歴</value>
+  </data>
+  <data name="ConfirmDeleteItem" xml:space="preserve">
+    <value>削除の確認</value>
+  </data>
+  <data name="ConfirmDeleteGroup" xml:space="preserve">
+    <value>グループ削除の確認</value>
+  </data>
+  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
+    <value>この依頼をすべて削除してもよろしいですか？</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>削除中...</value>
+  </data>
+  <data name="DeleteFailed" xml:space="preserve">
+    <value>削除に失敗しました</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>削除に成功しました。</value>
+  </data>
+  <data name="MsgSelectGroupFailed" xml:space="preserve">
+    <value>注文コードを選択してください！</value>
+  </data>
+  <data name="MsgNoHistory" xml:space="preserve">
+    <value>履歴がありません。</value>
+  </data>
+  <data name="MsgNoDataToEdit" xml:space="preserve">
+    <value>編集するデータがありません。</value>
+  </data>
+  <data name="MsgNotFoundData" xml:space="preserve">
+    <value>データが見つかりません。</value>
+  </data>
+  <data name="MsgSaveFailed" xml:space="preserve">
+    <value>保存に失敗しました: {0}</value>
+  </data>
+  <data name="MsgSaveSuccess" xml:space="preserve">
+    <value>保存に成功しました。</value>
+  </data>
+  <data name="PaginationInfo" xml:space="preserve">
+    <value>{0} - {1} / {2} グループを表示</value>
   </data>
   <data name="Material" xml:space="preserve">
     <value>品目</value>
@@ -218,6 +296,30 @@
   </data>
   <data name="UpdatedDate" xml:space="preserve">
     <value>更新日</value>
+  </data>
+  <data name="HistoryTime" xml:space="preserve">
+    <value>時間</value>
+  </data>
+  <data name="RequestNo" xml:space="preserve">
+    <value>リクエスト番号</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>更新者</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>理由</value>
+  </data>
+  <data name="Expand" xml:space="preserve">
+    <value>展開</value>
+  </data>
+  <data name="ViewHistory" xml:space="preserve">
+    <value>履歴を見る</value>
+  </data>
+  <data name="Approval" xml:space="preserve">
+    <value>同意</value>
   </data>
   <data name="DepartmentCode" xml:space="preserve">
     <value>部門コード</value>
@@ -285,74 +387,17 @@
   <data name="Urgent" xml:space="preserve">
     <value>緊急</value>
   </data>
-  <data name="Reason" xml:space="preserve">
-    <value>理由</value>
-  </data>
-  <data name="HistoryTime" xml:space="preserve">
-    <value>時間</value>
-  </data>
-  <data name="RequestNo" xml:space="preserve">
-    <value>リクエスト番号</value>
-  </data>
-  <data name="Action" xml:space="preserve">
-    <value>操作</value>
-  </data>
-  <data name="UpdatedBy" xml:space="preserve">
-    <value>更新者</value>
-  </data>
-  <data name="PaginationInfo" xml:space="preserve">
-    <value>{0} - {1} / {2} グループを表示</value>
-  </data>
   <data name="FooterHint" xml:space="preserve">
     <value>グループの依頼番号（CHR_MaDon）を選択して詳細を表示します。</value>
   </data>
   <data name="EditModalTitle" xml:space="preserve">
     <value>見積依頼を編集</value>
   </data>
-  <data name="Close" xml:space="preserve">
-    <value>閉じる</value>
-  </data>
   <data name="Save" xml:space="preserve">
     <value>保存</value>
   </data>
-  <data name="Notification" xml:space="preserve">
-    <value>通知</value>
-  </data>
-  <data name="MsgSearchFailed" xml:space="preserve">
-    <value>検索に失敗しました</value>
-  </data>
-  <data name="MsgLoadHistoryFailed" xml:space="preserve">
-    <value>履歴を読み込めません。</value>
-  </data>
-  <data name="MsgNoHistory" xml:space="preserve">
-    <value>履歴がありません。</value>
-  </data>
-  <data name="MsgNoDataToEdit" xml:space="preserve">
-    <value>編集するデータがありません。</value>
-  </data>
-  <data name="MsgNotFoundData" xml:space="preserve">
-    <value>データが見つかりません。</value>
-  </data>
-  <data name="MsgSaveSuccess" xml:space="preserve">
-    <value>保存に成功しました。</value>
-  </data>
-  <data name="MsgSaveFailed" xml:space="preserve">
-    <value>保存に失敗しました: {0}</value>
-  </data>
   <data name="DialogOk" xml:space="preserve">
     <value>OK</value>
-  </data>
-  <data name="SearchEllipsis" xml:space="preserve">
-    <value>検索...</value>
-  </data>
-  <data name="NoResults" xml:space="preserve">
-    <value>結果なし</value>
-  </data>
-  <data name="SelectPlaceholder" xml:space="preserve">
-    <value>-- 選択 --</value>
-  </data>
-  <data name="PageTitleHistory" xml:space="preserve">
-    <value>単一の履歴</value>
   </data>
   <data name="Classification" xml:space="preserve">
     <value>分類</value>
@@ -375,53 +420,16 @@
   <data name="ImportFileExcel" xml:space="preserve">
     <value>Import edited files</value>
   </data>
-  <data name="Exporting" xml:space="preserve">
-    <value>エクスポート中...</value>
-  </data>
-  <data name="ExportError" xml:space="preserve">
-    <value>ファイルのエクスポートに失敗しました</value>
-  </data>
-  <data name="InvalidFileType" xml:space="preserve">
-    <value>無効なファイル形式</value>
-  </data>
-  <data name="LoadingData" xml:space="preserve">
-    <value>処理中...</value>
-  </data>
-  <data name="DataUpdatedSuccessfully" xml:space="preserve">
-    <value>ファイルのインポートに成功しました</value>
-  </data>
-  <data name="ErrorPrefix" xml:space="preserve">
-    <value>ファイルをエクスポートできません</value>
-  </data>
-  <data name="ConfirmDeleteItem" xml:space="preserve">
-    <value>削除の確認</value>
-  </data>
   <data name="ConfirmDeleteItemBody" xml:space="preserve">
     <value>この項目を削除してもよろしいですか？</value>
   </data>
-  <data name="ConfirmDeleteGroup" xml:space="preserve">
-    <value>グループ削除の確認</value>
+  <data name="DELETE" xml:space="preserve">
+    <value>消去</value>
   </data>
-  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
-    <value>この依頼をすべて削除してもよろしいですか？</value>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>戻り値に失敗しました！</value>
   </data>
-  <data name="Confirm" xml:space="preserve">
-    <value>はい</value>
-  </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>キャンセル</value>
-  </data>
-  <data name="Deleting" xml:space="preserve">
-    <value>削除中...</value>
-  </data>
-  <data name="DeleteSuccess" xml:space="preserve">
-    <value>削除に成功しました。</value>
-  </data>
-  <data name="DeleteFailed" xml:space="preserve">
-    <value>削除に失敗しました</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="DELETE" type="System.Resources.ResXNullRef, System.Windows.Forms">
-      <value>消去</value>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>戻り値に成功しました！</value>
   </data>
 </root>

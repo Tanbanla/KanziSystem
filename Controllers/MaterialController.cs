@@ -367,6 +367,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var role = roleAsync.Success ? roleAsync.Data : string.Empty;
             var itemOK = new List<BaoGia_Confirm_Name_Quotation>();
             var itemNG = new List<ConfirmNameDTO>();
+            var listUpdateRequest = new List<BaoGia_Request_of_QuotationDTO>();
             var hasErrors = false;
             try
             {
@@ -431,17 +432,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             break;
                         case "UserPUR":
-                            var tenHaiQuanPUR = ws.Cell(r, 23).GetString();
-                            var mahangPUR = ws.Cell(r, 8).GetString();
-                            // kiểm tra mã hàng đã tồn tại trong hệ thống chưa
-                            itemOK.Add(new BaoGia_Confirm_Name_Quotation
+                            var itemRequest = new BaoGia_Request_of_QuotationDTO
                             {
                                 ID = int.Parse(ws.Cell(r, 2).GetString()),
-                                VCHR_TenHaiQuan = tenHaiQuanPUR,
-                                VCHR_MaHangNoiBo = mahangPUR,
-                                VCHR_UserPUR = GetCurrentUserId(),
-                                DTM_UserPUR = DateTime.Now
-                            });
+                                NVCHR_HinhDang = ws.Cell(r, 16).GetString(),
+                                NVCHR_ChatLieu = ws.Cell(r, 17).GetString(),
+                                NVCHR_ThanhPhan = ws.Cell(r, 18).GetString(),
+                                NVCHR_KichThuoc = ws.Cell(r, 19).GetString(),
+                                NVCHR_DongMay = ws.Cell(r, 20).GetString(),
+                                NVCHR_TinhNang = ws.Cell(r, 21).GetString(),
+                                CHR_MaThietBi = ws.Cell(r, 7).GetString(),
+                                CHR_MaHangNCC = ws.Cell(r, 9).GetString()
+                            };
+                            listUpdateRequest.Add(itemRequest);
                             break;
                         default:
                             ws.Cell(r, 27).SetValue("Bạn không có quyền update file");
@@ -465,6 +468,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không có dữ liệu hợp lệ để lưu");
                 }
                 await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
+                // Lưu thông tin cập nhật vào request với role UserPUR
+                if(listUpdateRequest.Any() && role == "UserPUR")
+                {
+                    await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
+                }
                 // gửi mail thông báo đã hoàn thành xác nhận tên
                 if (itemOK.Any() || itemOK != null)
                 {
@@ -624,6 +632,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 22).SetValue(rq.NVCHR_File ?? "");
                     ws.Cell(row, 23).SetValue("");
                     ws.Cell(row, 24).SetValue(rq.VCHR_UserShip ?? "");
+
+                    // check tra lai
+                    bool isReturn = rq.CHR_StatusShip == "Rejected";
+                    ws.Cell(row, 25).SetValue(isReturn ? "O" : "");
+                    ws.Cell(row, 26).SetValue(isReturn ? rq.NVCHR_LyDo ?? "" : "");
                     row++;
                     idx++;
                 }

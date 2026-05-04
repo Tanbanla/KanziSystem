@@ -443,7 +443,7 @@
             els.btnRejectSelected.addEventListener('click', rejectSelected);
         }
         if (els.btnRejectAccSelected) {
-            if (!canEditMaNB()) { els.btnRejectAccSelected.style.display = 'none'; }
+            //if (!canEditMaNB()) { els.btnRejectAccSelected.style.display = 'none'; }
             els.btnRejectAccSelected.addEventListener('click', rejectAccSelected);
         }
         els.chkSelectAll && els.chkSelectAll.addEventListener('change', function () {

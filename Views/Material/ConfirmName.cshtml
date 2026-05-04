@@ -73,11 +73,22 @@
                     <!-- Điều chỉnh từ col-md-3 lên col-md-4 -->
                     <label class="form-label mb-1 d-block">@Localizer["ConfirmStatus"]</label>
                     <select id="trangThai" name="trangThai" class="form-select trangThai searchable-select" style="min-height:50px;">
-                        <option value="">@Localizer["All"]</option>
-                        <option value="Confirming" selected>@Localizer["StatusConfirming"]</option>
-                        <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
-                        <option value="RejectedAcc">@Localizer["StatusRejectedAcc"]</option>
-                        <option value="Rejected">@Localizer["StatusRejected"]</option>
+                        @if (role == "UserPUR")
+                        {
+                            <option value="">@Localizer["All"]</option>
+                            <option value="Confirming">@Localizer["StatusConfirming"]</option>
+                            <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
+                            // <option value="RejectedAcc">@Localizer["StatusRejectedAcc"]</option>
+                            <option value="Rejected" selected>@Localizer["StatusRejected"]</option>
+                        }
+                        else
+                        {
+                            <option value="">@Localizer["All"]</option>
+                            <option value="Confirming" selected>@Localizer["StatusConfirming"]</option>
+                            <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
+                            // <option value="RejectedAcc">@Localizer["StatusRejectedAcc"]</option>
+                            <option value="Rejected">@Localizer["StatusRejected"]</option>
+                        }
                     </select>
                 </div>
                 <div class="col-12 col-sm-6 col-md-2 d-flex align-items-end gap-2">
@@ -107,23 +118,20 @@
                     <i class="fas fa-save me-1"></i> @Localizer["SaveSelected"]
                 </button>
                 <div style="min-width: 6px;"></div>
-                @if (role == "UserPUR")
+                @if (role == "Admin")
                 {
                     <button type="button" class="btn btn-sm btn-outline-success" id="btnApproveSelected">
                         <i class="fas fa-check me-1"></i> @Localizer["ApproveSelected"]
                     </button>
                     <div style="min-width: 6px;"></div>
-                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnRejectSelected">
-                        <i class="fas fa-check me-1"></i> @Localizer["RejectSelected"]
-                    </button>
                 }
-                @if (role == "UserAcc")
+                @if (role == "UserShip")
                 {
                     <button type="button" class="btn btn-sm btn-outline-danger" id="btnRejectAccSelected">
                         <i class="fas fa-check me-1"></i> @Localizer["RejectSelected"]
                     </button>
+                    <div style="margin-left: 6px;"></div>
                 }
-                <div style="margin-left: 6px;"></div>
                 <div class="small text-muted">@Localizer["Role"]: <b>@role</b></div>
             </div>
         </div>

@@ -242,6 +242,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Urgent = list.Rows[i]["Urgent"].ToString()!
                 });
             }
+            pe_ = pe_.GroupBy(x => x.Code_Request)
+             .Select(g => g.First())
+             .ToList();
             return pe_;
         }
         public static List<PE_REQUEST_CONFIRM_GA> get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent)
@@ -305,6 +308,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Urgent = list.Rows[i]["Urgent"].ToString()!
                 });
             }
+            pe_ = pe_.GroupBy(x => x.Code_Request)
+     .Select(g => g.First())
+     .ToList();
             return pe_;
         }
         public static List<REQUEST_DETAIL> _get_info_dtrq(string cost_request)
@@ -573,6 +579,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     ID_REQUEST = int.Parse(list.Rows[i]["ID_REQUEST"].ToString()!),
                 });
             }
+            pe_ = pe_.GroupBy(x => x.Code_Request)
+             .Select(g => g.First())
+             .ToList();
             return pe_;
         }
         public static List<REQUEST_DETAIL> _load_body_detail(string code_request)

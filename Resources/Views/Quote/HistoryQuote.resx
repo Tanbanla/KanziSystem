@@ -198,14 +198,92 @@
   <data name="Actions" xml:space="preserve">
     <value>Thao tác</value>
   </data>
-  <data name="Expand" xml:space="preserve">
-    <value>Mở rộng</value>
+  <data name="Confirm" xml:space="preserve">
+    <value>Có</value>
   </data>
-  <data name="ViewHistory" xml:space="preserve">
-    <value>Xem lịch sử</value>
+  <data name="Cancel" xml:space="preserve">
+    <value>Hủy</value>
   </data>
-  <data name="Approval" xml:space="preserve">
-    <value>Phê duyệt</value>
+  <data name="Close" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="SearchEllipsis" xml:space="preserve">
+    <value>Tìm...</value>
+  </data>
+  <data name="SelectPlaceholder" xml:space="preserve">
+    <value>-- Chọn --</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>Không có kết quả</value>
+  </data>
+  <data name="MsgSearchFailed" xml:space="preserve">
+    <value>Tìm kiếm thất bại</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Xuất file thất bại</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Loại file không hợp lệ</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Không thể xuất file</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>Nhập file thành công</value>
+  </data>
+  <data name="MsgLoadHistoryFailed" xml:space="preserve">
+    <value>Không tải được lịch sử.</value>
+  </data>
+  <data name="PageTitleHistory" xml:space="preserve">
+    <value>Lịch sử đơn</value>
+  </data>
+  <data name="ConfirmDeleteItem" xml:space="preserve">
+    <value>Xác nhận xóa mục</value>
+  </data>
+  <data name="ConfirmDeleteGroup" xml:space="preserve">
+    <value>Xác nhận xóa nhóm</value>
+  </data>
+  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
+    <value>Bạn có chắc chắn muốn xóa toàn bộ đơn này?</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>Đang xóa...</value>
+  </data>
+  <data name="DeleteFailed" xml:space="preserve">
+    <value>Xóa thất bại</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>Đã xóa thành công.</value>
+  </data>
+  <data name="MsgSelectGroupFailed" xml:space="preserve">
+    <value>Vui lòng chọn mã đơn!</value>
+  </data>
+  <data name="MsgNoHistory" xml:space="preserve">
+    <value>Không có lịch sử.</value>
+  </data>
+  <data name="MsgNoDataToEdit" xml:space="preserve">
+    <value>Không có dữ liệu để chỉnh sửa.</value>
+  </data>
+  <data name="MsgNotFoundData" xml:space="preserve">
+    <value>Không tìm thấy dữ liệu.</value>
+  </data>
+  <data name="MsgSaveFailed" xml:space="preserve">
+    <value>Lưu thất bại: {0}</value>
+  </data>
+  <data name="MsgSaveSuccess" xml:space="preserve">
+    <value>Đã lưu thành công.</value>
+  </data>
+  <data name="PaginationInfo" xml:space="preserve">
+    <value>Hiển thị {0} - {1} / {2} nhóm</value>
   </data>
   <data name="Material" xml:space="preserve">
     <value>Vật tư</value>
@@ -218,6 +296,30 @@
   </data>
   <data name="UpdatedDate" xml:space="preserve">
     <value>Ngày cập nhật</value>
+  </data>
+  <data name="HistoryTime" xml:space="preserve">
+    <value>Thời gian</value>
+  </data>
+  <data name="RequestNo" xml:space="preserve">
+    <value>Số Request</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Hành động</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>Người cập nhật</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Lý do</value>
+  </data>
+  <data name="Expand" xml:space="preserve">
+    <value>Mở rộng</value>
+  </data>
+  <data name="ViewHistory" xml:space="preserve">
+    <value>Xem lịch sử</value>
+  </data>
+  <data name="Approval" xml:space="preserve">
+    <value>Phê duyệt</value>
   </data>
   <data name="DepartmentCode" xml:space="preserve">
     <value>Mã phòng ban</value>
@@ -285,74 +387,17 @@
   <data name="Urgent" xml:space="preserve">
     <value>Gấp</value>
   </data>
-  <data name="Reason" xml:space="preserve">
-    <value>Lý do</value>
-  </data>
-  <data name="HistoryTime" xml:space="preserve">
-    <value>Thời gian</value>
-  </data>
-  <data name="RequestNo" xml:space="preserve">
-    <value>Số Request</value>
-  </data>
-  <data name="Action" xml:space="preserve">
-    <value>Hành động</value>
-  </data>
-  <data name="UpdatedBy" xml:space="preserve">
-    <value>Người cập nhật</value>
-  </data>
-  <data name="PaginationInfo" xml:space="preserve">
-    <value>Hiển thị {0} - {1} / {2} nhóm</value>
-  </data>
   <data name="FooterHint" xml:space="preserve">
     <value>Chọn nhóm CHR_MaDon để xem chi tiết các đơn trong nhóm.</value>
   </data>
   <data name="EditModalTitle" xml:space="preserve">
     <value>Chỉnh sửa yêu cầu báo giá</value>
   </data>
-  <data name="Close" xml:space="preserve">
-    <value>Đóng</value>
-  </data>
   <data name="Save" xml:space="preserve">
     <value>Lưu</value>
   </data>
-  <data name="Notification" xml:space="preserve">
-    <value>Thông báo</value>
-  </data>
-  <data name="MsgSearchFailed" xml:space="preserve">
-    <value>Tìm kiếm thất bại</value>
-  </data>
-  <data name="MsgLoadHistoryFailed" xml:space="preserve">
-    <value>Không tải được lịch sử.</value>
-  </data>
-  <data name="MsgNoHistory" xml:space="preserve">
-    <value>Không có lịch sử.</value>
-  </data>
-  <data name="MsgNoDataToEdit" xml:space="preserve">
-    <value>Không có dữ liệu để chỉnh sửa.</value>
-  </data>
-  <data name="MsgNotFoundData" xml:space="preserve">
-    <value>Không tìm thấy dữ liệu.</value>
-  </data>
-  <data name="MsgSaveSuccess" xml:space="preserve">
-    <value>Đã lưu thành công.</value>
-  </data>
-  <data name="MsgSaveFailed" xml:space="preserve">
-    <value>Lưu thất bại: {0}</value>
-  </data>
   <data name="DialogOk" xml:space="preserve">
     <value>Đồng ý</value>
-  </data>
-  <data name="SearchEllipsis" xml:space="preserve">
-    <value>Tìm...</value>
-  </data>
-  <data name="NoResults" xml:space="preserve">
-    <value>Không có kết quả</value>
-  </data>
-  <data name="SelectPlaceholder" xml:space="preserve">
-    <value>-- Chọn --</value>
-  </data>
-  <data name="PageTitleHistory" xml:space="preserve">
-    <value>Lịch sử đơn</value>
   </data>
   <data name="Classification" xml:space="preserve">
     <value>Phân loại</value>
@@ -375,52 +420,16 @@
   <data name="ImportFileExcel" xml:space="preserve">
     <value>Nhập file sửa</value>
   </data>
-  <data name="Exporting" xml:space="preserve">
-    <value>Đang xuất...</value>
-  </data>
-  <data name="ExportError" xml:space="preserve">
-    <value>Xuất file thất bại</value>
-  </data>
-  <data name="InvalidFileType" xml:space="preserve">
-    <value>Loại file không hợp lệ</value>
-  </data>
-  <data name="LoadingData" xml:space="preserve">
-    <value>Đang xử lý...</value>
-  </data>
-  <data name="DataUpdatedSuccessfully" xml:space="preserve">
-    <value>Nhập file thành công</value>
-  </data>
-  <data name="ErrorPrefix" xml:space="preserve">
-    <value>Không thể xuất file</value>
-  </data>
-  <data name="ConfirmDeleteItem" xml:space="preserve">
-    <value>Xác nhận xóa mục</value>
-  </data>
   <data name="ConfirmDeleteItemBody" xml:space="preserve">
     <value>Bạn có chắc chắn muốn xóa mục này?</value>
   </data>
-  <data name="ConfirmDeleteGroup" xml:space="preserve">
-    <value>Xác nhận xóa nhóm</value>
-  </data>
-  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
-    <value>Bạn có chắc chắn muốn xóa toàn bộ đơn này?</value>
-  </data>
-  <data name="Confirm" xml:space="preserve">
-    <value>Có</value>
-  </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Hủy</value>
-  </data>
-  <data name="Deleting" xml:space="preserve">
-    <value>Đang xóa...</value>
-  </data>
-  <data name="DeleteSuccess" xml:space="preserve">
-    <value>Đã xóa thành công.</value>
-  </data>
-  <data name="DeleteFailed" xml:space="preserve">
-    <value>Xóa thất bại</value>
-  </data>
   <data name="DELETE" xml:space="preserve">
     <value>Xóa</value>
+  </data>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>Trả lại thất bại!</value>
+  </data>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>Trả về thành công.</value>
   </data>
 </root>

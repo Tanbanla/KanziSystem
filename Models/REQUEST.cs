@@ -215,7 +215,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     }
     public class REQUEST_PROCESS
     {
-        public static string Insert_request(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao)
+        public static string Insert_request(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL> rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao)
         {
             //string pathLog = @"\\apbivndb20\21_WAREHOUSE_BIVN\LogFile.txt";
             //if (!File.Exists(pathLog)) File.Create(pathLog);
@@ -383,6 +383,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Urgent = list.Rows[i]["Urgent"].ToString()!
                 });
             }
+            pe_ = pe_.GroupBy(x => x.Code_Request)
+             .Select(g => g.First())
+             .ToList();
             return pe_;
         }
         public static List<PE_REQUEST_CONFIRM> get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent)
@@ -443,6 +446,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Urgent = list.Rows[i]["Urgent"].ToString()!
                 });
             }
+            pe_ = pe_.GroupBy(x => x.Code_Request)
+          .Select(g => g.First())
+          .ToList();
             return pe_;
         }
         public static List<REQUEST_DETAIL> _get_info_dtrq(string cost_request)
@@ -713,6 +719,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     ID_REQUEST = int.Parse(list.Rows[i]["ID_REQUEST"].ToString()!),
                 });
             }
+            //pe_ = pe_.GroupBy(x => x.Code_Request)
+            // .Select(g => g.First())
+            // .ToList();
             return pe_;
         }
         public static List<REQUEST_DETAIL> _load_body_detail(string code_request)

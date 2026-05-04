@@ -10,7 +10,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Lấy thông tin báo giá theo mã báo giá
         public Task<List<BaoGia_Request_of_Quotation>> GetByMaBaoGiaAsync(string maBaoGia);
         // Tìm kiếm thông tin báo giá và phân trang 
-        public Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
+        public Task<ListRequest<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
         // Nhap bao gia
         public Task<bool> NhapBaoGiaAsync(BaoGia_Request_of_Quotation baoGia);
         // Nhap danh sach bao gia - trả về danh sách entity đã được gán ID

@@ -32,7 +32,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
         }
         // Tìm kiếm thông tin báo giá và phân trang
-        public async Task<List<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
+        public async Task<ListRequest<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
             var sql = @"
                 SELECT distinct q.*
@@ -50,23 +50,20 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                   AND ( s.CHR_UserAdid = @Adid)
             ";
 
-            // Build status SQL fragment and append it directly to the WHERE clause when needed
             var statusSql = "1=1";
-            //if (!string.IsNullOrEmpty(status))
-            //{
                 switch (status)
                 {
                     case "RETURN":
-                        statusSql = "ID_Status LIKE '%RETURN%' and ID_Status NOT LIKE 'DELETE";
+                        statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
                         break;
                     case "DONE":
-                        statusSql = "ID_Status = 'DONE' and ID_Status NOT LIKE 'DELETE";
+                        statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
                         break;
                     case "APPROVAL":
-                        statusSql = "ID_Status LIKE 'APPROVAL%' and ID_Status NOT LIKE 'DELETE";
+                        statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
                         break;
                     case "WAIT":
-                        statusSql = "ID_Status LIKE '%WAIT%' and ID_Status NOT LIKE 'DELETE";
+                        statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
                         break;
                     case "DELETE":
                         statusSql = "ID_Status LIKE 'DELETE'";
@@ -78,9 +75,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                 // append status filter
                 sql += " AND (" + statusSql + ")";
-            //}
 
-            // Add ordering and paging
+            // Build count query first
+            var countSql = @"
+                SELECT COUNT(distinct q.ID)
+                FROM BaoGia_Request_of_Quotation as q
+				  inner join [BaoGia_Master_Approver_Send_Mail] as s 
+				on q.CHR_SectionCode = s.CHR_CodeSection
+                WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
+                  AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
+                  AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
+                  AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
+                  AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
+                  AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
+                  AND (@Step IS NULL OR ID_StepBaoGia = @Step)
+                  AND (@Date IS NULL OR CAST(DTM_CreateDate AS DATE) = CAST(@Date AS DATE))
+                  AND ( s.CHR_UserAdid = @Adid)
+                  AND (" + statusSql + ")";
+
+            // Add ordering and paging to main query
             if (pageSize > 0 && pageIndex > 0)
             {
                 sql += @"
@@ -111,7 +124,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Adid = user
             };
 
-            return (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
+            var data = (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameters)).ToList();
+            var totalCount = await _conn.ExecuteScalarAsync<long>(countSql, parameters);
+
+            return new ListRequest<BaoGia_Request_of_Quotation>
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
         }
         // Nhap bao gia
         public async Task<bool> NhapBaoGiaAsync(BaoGia_Request_of_Quotation baoGia)
@@ -286,13 +306,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 SELECT DISTINCT
                     r.CHR_MaDon,
                     r.CHR_SectionName,
-                    CAST(r.DTM_NgayMuonNhan AS DATE) AS DTM_NgayMuonNhan,
-                    CAST(r.DTM_KyHan AS DATE) AS DTM_KyHan,
+					MIN(CAST(r.DTM_NgayMuonNhan AS DATE)) AS DTM_NgayMuonNhan,
+					MIN(CAST(r.DTM_KyHan AS DATE)) AS DTM_KyHan,
                     r.CHR_CreateBy,
                     r.ID_StepBaoGia
                 FROM [BaoGia_Request_of_Quotation] r
                 LEFT JOIN BaoGia_Master_Approver_Send_Mail m ON r.ID_StepBaoGia = m.ID_BaoGiaStep
                 WHERE 1=1 {whereClause}
+                GROUP BY r.CHR_MaDon, r.CHR_SectionName, r.CHR_CreateBy, r.ID_StepBaoGia
             )
             SELECT 
                 rr.CHR_MaDon,
@@ -719,7 +740,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = @"  SELECT DISTINCT CHR_MaDon FROM BaoGia_Request_of_Quotation as q
                   inner join [BaoGia_Master_Approver_Send_Mail] as s 
                   on q.CHR_SectionCode = s.CHR_CodeSection
-                  WHERE s.CHR_UserAdid = @Adid AND ID_StepBaoGia < @Step";
+                  WHERE s.CHR_UserAdid = @Adid AND ID_StepBaoGia < @Step  AND ID_STATUS <> 'DELETE'
+                  order by CHR_MaDon";
             var parameters = new { Adid = adid , Step = step};
             var maDons = await _conn.QueryAsync<string>(sql, parameters);
             return maDons.ToList();

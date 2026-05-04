@@ -177,6 +177,10 @@
                                 <li><a class="nav-link" href="~/Material/ConfirmName"><i class="fas fa-check-square"></i> @Localizer["MenuMaterialConfirmName"]</a></li>
                             </ul>
                         </li>
+
+                        <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "ReceiveMaterial" ? "active" : "")">
+
+                        </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Import" ? "active" : "")" >
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cloud-upload"></i> <span>@Localizer["MenuWarehouse"]</span></a>
                             <ul class="dropdown-menu">

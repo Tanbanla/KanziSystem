@@ -13,90 +13,171 @@ using System.Xml.Linq;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers 
 {
+    public class Insertt
+    {
+        public string? Cost_Center { get; set; }
+        public string? Declaration { get; set; }
+        public string? Dealine { get; set; }
+        public float Total_exchange { get; set; }
+        public string? Exchange_rate { get; set; }
+        public string? Currency { get; set; }
+        public float Total { get; set; }
+        public string? Kind { get; set; }
+        public string? Typee { get; set; }
+        public string? Status { get; set; }
+        public string? Place { get; set; }
+        public string? Loaihinhtokhai { get; set; }
+        public string? Group_Code { get; set; }
+        public string? Chophepin { get; set; }
+        public string? Urgent { get; set; }
+        public string? User_Create { get; set; }
+        public string? adid_dt { get; set; }
+        public string? adid_tt { get; set; }
+        public string? adid_pd { get; set; }
+        public string? mail_dt { get; set; }
+        public string? mail_tt { get; set; }
+        public string? mail_pd { get; set; }
+        public string? ten_dt { get; set; }
+        public string? ten_tt { get; set; }
+        public string? ten_pd { get; set; }
+        public string? ten_dy { get; set; }
+        public string? adid_dy { get; set; }
+        public string? mail_dy { get; set; }
+        public string? ten_xk { get; set; }
+        public string? adid_xk { get; set; }
+        public string? mail_xk { get; set; }
+        public string? adidnguoitao { get; set; }
+        public string? mailnguoitao { get; set; }
+        public List<Models.REQUEST_DETAIL>? rq { get; set; }
+    }
+    public class Insertt_GA
+    {
+        public string? Cost_Center { get; set; }
+        public string? Declaration { get; set; }
+        public string? Dealine { get; set; }
+        public float Total_exchange { get; set; }
+        public string? Exchange_rate { get; set; }
+        public string? Currency { get; set; }
+        public float Total { get; set; }
+        public string? Kind { get; set; }
+        public string? Typee { get; set; }
+        public string? Status { get; set; }
+        public string? Place { get; set; }
+        public string? Loaihinhtokhai { get; set; }
+        public string? Group_Code { get; set; }
+        public string? Chophepin { get; set; }
+        public string? Urgent { get; set; }
+        public string? User_Create { get; set; }
+        public string? adid_dt { get; set; }
+        public string? adid_tt { get; set; }
+        public string? adid_pd { get; set; }
+        public string? mail_dt { get; set; }
+        public string? mail_tt { get; set; }
+        public string? mail_pd { get; set; }
+        public string? ten_dt { get; set; }
+        public string? ten_tt { get; set; }
+        public string? ten_pd { get; set; }
+        public string? ten_dy { get; set; }
+        public string? adid_dy { get; set; }
+        public string? mail_dy { get; set; }
+        public string? ten_xk { get; set; }
+        public string? adid_xk { get; set; }
+        public string? mail_xk { get; set; }
+        public string? adidnguoitao { get; set; }
+        public string? mailnguoitao { get; set; }
+        public string? ten_qlsc { get; set; }
+        public string? mail_qlsc { get; set; }
+        public string? adid_qlsc { get; set; }
+        public string? ten_qltc { get; set; }
+        public string? mail_qltc { get; set; }
+        public string? adid_qltc { get; set; }
+        public List<Models.REQUEST_DETAIL>? rq { get; set; }
+    }
     public class RequestController : Controller
     {
         [HttpPost]
-        public JsonResult _Insert_request(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<Models.REQUEST_DETAIL> rq, string adid_dt, string adid_tt,string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_dy, string adid_dy, string mail_dy, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao)
+        public JsonResult _Insert_request([FromBody] Insertt model)
         {
-
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
 
             string _macoderq = _db.ReturnString($@"
-                                DECLARE @Prefix NVARCHAR(10) = '{Cost_Center}.';
-                                DECLARE @Today NVARCHAR(8) = FORMAT(GETDATE(), 'yyyyMMdd');
-                                DECLARE @SearchPattern NVARCHAR(20) = @Prefix + @Today + '-%';
-                                DECLARE @MaxNum INT = 0;
-                                DECLARE @NewCode NVARCHAR(30);
+                          DECLARE @Prefix NVARCHAR(10) = '{model.Cost_Center}.';
+                          DECLARE @Today NVARCHAR(8) = FORMAT(GETDATE(), 'yyyyMMdd');
+                          DECLARE @SearchPattern NVARCHAR(20) = @Prefix + @Today + '-%';
+                          DECLARE @MaxNum INT = 0;
+                          DECLARE @NewCode NVARCHAR(30);
 
-                                SELECT @MaxNum = MAX(CAST(REPLACE([Code_Request], @Prefix + @Today + '-', '') AS INT))
-                                FROM [dbo].[REQUEST] WHERE [Code_Request] LIKE @SearchPattern;
+                          SELECT @MaxNum = MAX(CAST(REPLACE([Code_Request], @Prefix + @Today + '-', '') AS INT))
+                          FROM [dbo].[REQUEST] WHERE [Code_Request] LIKE @SearchPattern;
 
-                                SET @NewCode = @Prefix + @Today + '-' + CAST(ISNULL(@MaxNum, 0) + 1 AS NVARCHAR(10));
+                          SET @NewCode = @Prefix + @Today + '-' + CAST(ISNULL(@MaxNum, 0) + 1 AS NVARCHAR(10));
 
-                                WHILE EXISTS (SELECT 1 FROM [dbo].[REQUEST] WHERE [Code_Request] = @NewCode)
-                                BEGIN 
-                                    SET @MaxNum = @MaxNum + 1;
-                                    SET @NewCode = @Prefix + @Today + '-' + CAST(@MaxNum + 1 AS NVARCHAR(10));
-                                END
+                          WHILE EXISTS (SELECT 1 FROM [dbo].[REQUEST] WHERE [Code_Request] = @NewCode)
+                          BEGIN 
+                              SET @MaxNum = @MaxNum + 1;
+                              SET @NewCode = @Prefix + @Today + '-' + CAST(@MaxNum + 1 AS NVARCHAR(10));
+                          END
 
-                                SELECT @NewCode;");
+                          SELECT @NewCode;");
             // Kiểm tra chi phí dự toán phòng ban Cost
             bool Checksotien = false;
             double Sotienphaichiuchiphi = 0;
-            var data = Common.CostManage.Tinhdutoanconlai(Cost_Center, Dealine, Declaration, _macoderq);
-            for (int i = 0; i < rq.Count; i++)
+            var data = Common.CostManage.Tinhdutoanconlai(model.Cost_Center, model.Dealine, model.Declaration, _macoderq);
+            for (int i = 0; i < model.rq.Count; i++)
             {
-                if (rq[i].Amount == 0) continue;
-                string phongchiuchipheCheck = rq[i].Phongchiuchiphi!;
-                phongchiuchipheCheck = phongchiuchipheCheck.Length > 0 ? phongchiuchipheCheck : Cost_Center;
+                if (model.rq[i].Amount == 0) continue;
+                string phongchiuchipheCheck = model.rq[i].Phongchiuchiphi!;
+                phongchiuchipheCheck = phongchiuchipheCheck.Length > 0 ? phongchiuchipheCheck : model.Cost_Center;
 
-                Checksotien = Checksotien | phongchiuchipheCheck.Contains(Cost_Center);
+                Checksotien = Checksotien | phongchiuchipheCheck.Contains(model.Cost_Center);
 
-                Sotienphaichiuchiphi += phongchiuchipheCheck.Contains(Cost_Center) ? USD(Convert.ToDouble(rq[i].Total_exchange), Convert.ToDouble(rq[i].Total_exchange)) : 0;
+                Sotienphaichiuchiphi += phongchiuchipheCheck.Contains(model.Cost_Center) ? USD(Convert.ToDouble(model.rq[i].Total_exchange), Convert.ToDouble(model.rq[i].Total_exchange)) : 0;
             }
-            if(Checksotien)
+            if (Checksotien)
             {
                 if (Convert.ToDouble(Common.CostManage.Ketqua_Chiphi["Tong"].ToString()) < Sotienphaichiuchiphi)
                 {
-                    if (_db.GET_DATA_FROM_SQL("SELECT * FROM [TM_LOAIHINHTOKHIA] WHERE [Value] = '" + Declaration + "' AND [CoverChiPhi] = 'False' ").Rows.Count > 0)
+                    if (_db.GET_DATA_FROM_SQL("SELECT * FROM [TM_LOAIHINHTOKHIA] WHERE [Value] = '" + model.Declaration + "' AND [CoverChiPhi] = 'False' ").Rows.Count > 0)
                     {
-                       return Json("Số tiền của yêu cầu lớn hơn số tiền còn lại. \nTuy nhiên hệ thống vẫn cho phép bạn đặt hàng \nVui lòng xác nhận lại với quản lý chi phí nếu cần thiết");
+                        return Json("Số tiền của yêu cầu lớn hơn số tiền còn lại. \nTuy nhiên hệ thống vẫn cho phép bạn đặt hàng \nVui lòng xác nhận lại với quản lý chi phí nếu cần thiết");
                     }
                     else
                     {
-                        return Json("Số tiền của yêu cầu: " + Sotienphaichiuchiphi + " lớn hơn số tiền còn lại: " + Convert.ToDouble(Common.CostManage.Ketqua_Chiphi["Tong"].ToString()) + ", yêu cầu xem xét lại");                       
+                        return Json("Số tiền của yêu cầu: " + Sotienphaichiuchiphi + " lớn hơn số tiền còn lại: " + Convert.ToDouble(Common.CostManage.Ketqua_Chiphi["Tong"].ToString()) + ", yêu cầu xem xét lại");
                     }
                 }
             }
-            if (string.IsNullOrEmpty(mailnguoitao))
+
+            if (string.IsNullOrEmpty(model.mailnguoitao?.Replace("\n", "").Replace(" ", "")) || model.mailnguoitao.Replace("\n", "").Replace(" ", "") == "")
             {
-                mailnguoitao = adidnguoitao + "@brothergroup.net";
+                model.mailnguoitao = model.adidnguoitao + "@brothergroup.net";
             }
-            var rq_detail = REQUEST_PROCESS.Insert_request( Cost_Center, Declaration, Dealine, Total_exchange, Exchange_rate, Currency, Total, Kind, Type, Status, Place, Loaihinhtokhai, Group_Code, Chophepin, Urgent, User_Create, rq, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd,ten_dy,adid_dy,mail_dy,ten_xk,adid_xk,mail_xk, adidnguoitao, mailnguoitao);
-          
+
+            var rq_detail = REQUEST_PROCESS.Insert_request(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_dy, model.adid_dy, model.mail_dy, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao);
+
             // gửi mail
             string body = $@"Xin chào <br />
-               Đơn yêu cầu mã : {rq_detail} đã được tạo <br /><br />
-               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
-               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-               ※このメールは自動的に送付されたので、返事をしないでください。 ";
-          
-            string body1 = $@"Xin chào <br />
-               Đơn yêu cầu mã : {rq_detail} đã được gửi đến bên xin phê duyệt <br /><br />
-               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
-               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-               ※このメールは自動的に送付されたので、返事をしないでください。 ";
+                 Đơn yêu cầu mã : {rq_detail} đã được tạo <br /><br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
+
+                    string body1 = $@"Xin chào <br />
+                 Đơn yêu cầu mã : {rq_detail} đã được gửi đến bên xin phê duyệt <br /><br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
             string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
-            if (Urgent == "True")
+            if (model.Urgent == "True")
             {
                 subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
             }
          
-            var sendmail = REQUEST_PROCESS._sendmail(body, mailnguoitao.Replace("\n", "").Replace(" ", ""), subject);
-            var sendmail1 = REQUEST_PROCESS._sendmail(body1, mail_dt.Replace("\n", "").Replace(" ", ""), subject);
+            var sendmail = REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
+            var sendmail1 = REQUEST_PROCESS._sendmail(body1, model.mail_dt, subject);
 
             return Json("OK");
         }
@@ -107,12 +188,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return USD;
         }
         [HttpPost]
-        public JsonResult _Insert_request_GA(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<Models.REQUEST_DETAIL>? rq, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_qlsc, string adid_qlsc, string mail_qlsc, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao, string ten_qltc, string adid_qltc, string mail_qltc)
+        public JsonResult _Insert_request_GA([FromBody] Insertt_GA model)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-
+           
             string _macoderq = _db.ReturnString($@"
-                                DECLARE @Prefix NVARCHAR(10) = '{Cost_Center}.';
+                                DECLARE @Prefix NVARCHAR(10) = '{model.Cost_Center}.';
                                 DECLARE @Today NVARCHAR(8) = FORMAT(GETDATE(), 'yyyyMMdd');
                                 DECLARE @SearchPattern NVARCHAR(20) = @Prefix + @Today + '-%';
                                 DECLARE @MaxNum INT = 0;
@@ -133,22 +214,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // Kiểm tra chi phí dự toán phòng ban Cost
             bool Checksotien = false;
             double Sotienphaichiuchiphi = 0;
-            var data = Common.CostManage.Tinhdutoanconlai(Cost_Center, Dealine, Declaration, _macoderq);
-            for (int i = 0; i < rq.Count; i++)
+            var data = Common.CostManage.Tinhdutoanconlai(model.Cost_Center, model.Dealine, model.Declaration, _macoderq);
+            for (int i = 0; i < model.rq.Count; i++)
             {
-                if (rq[i].Amount == 0) continue;
-                string phongchiuchipheCheck = rq[i].Phongchiuchiphi!;
-                phongchiuchipheCheck = phongchiuchipheCheck.Length > 0 ? phongchiuchipheCheck : Cost_Center;
+                if (model.rq[i].Amount == 0) continue;
+                string phongchiuchipheCheck = model.rq[i].Phongchiuchiphi!;
+                phongchiuchipheCheck = phongchiuchipheCheck.Length > 0 ? phongchiuchipheCheck : model.Cost_Center;
 
-                Checksotien = Checksotien | phongchiuchipheCheck.Contains(Cost_Center);
+                Checksotien = Checksotien | phongchiuchipheCheck.Contains(model.Cost_Center);
 
-                Sotienphaichiuchiphi += phongchiuchipheCheck.Contains(Cost_Center) ? USD(Convert.ToDouble(rq[i].Total_exchange), Convert.ToDouble(rq[i].Total_exchange)) : 0;
+                Sotienphaichiuchiphi += phongchiuchipheCheck.Contains(model.Cost_Center) ? USD(Convert.ToDouble(model.rq[i].Total_exchange), Convert.ToDouble(model.rq[i].Total_exchange)) : 0;
             }
             if (Checksotien)
             {
                 if (Convert.ToDouble(Common.CostManage.Ketqua_Chiphi["Tong"].ToString()) < Sotienphaichiuchiphi)
                 {
-                    if (_db.GET_DATA_FROM_SQL("SELECT * FROM [TM_LOAIHINHTOKHIA] WHERE [Value] = '" + Declaration + "' AND [CoverChiPhi] = 'False' ").Rows.Count > 0)
+                    if (_db.GET_DATA_FROM_SQL("SELECT * FROM [TM_LOAIHINHTOKHIA] WHERE [Value] = '" + model.Declaration + "' AND [CoverChiPhi] = 'False' ").Rows.Count > 0)
                     {
                         return Json("Số tiền của yêu cầu lớn hơn số tiền còn lại. \nTuy nhiên hệ thống vẫn cho phép bạn đặt hàng \nVui lòng xác nhận lại với quản lý chi phí nếu cần thiết");
                     }
@@ -159,34 +240,34 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
             }
             string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
-            if (Urgent == "True")
+            if (model.Urgent == "True")
             {
                 subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
             }
-            if (string.IsNullOrEmpty(mailnguoitao))
+            if (string.IsNullOrEmpty(model.mailnguoitao?.Replace("\n", "").Replace(" ", "")) || model.mailnguoitao.Replace("\n", "").Replace(" ", "") == "")
             {
-                mailnguoitao = adidnguoitao + "@brothergroup.net";
+                model.mailnguoitao = model.adidnguoitao + "@brothergroup.net";
             }
-            var rq_detail = REQUEST_PROCESS_GA.Insert_request_GA(Cost_Center, Declaration, Dealine, Total_exchange, Exchange_rate, Currency, Total, Kind, Type, Status, Place, Loaihinhtokhai, Group_Code, Chophepin, Urgent, User_Create, rq, adid_dt, adid_tt, adid_pd, mail_dt, mail_tt, mail_pd, ten_dt, ten_tt, ten_pd, ten_qlsc, adid_qlsc, mail_qlsc, ten_xk, adid_xk, mail_xk, adidnguoitao, mailnguoitao, ten_qltc, adid_qltc, mail_qltc);
+            var rq_detail = REQUEST_PROCESS_GA.Insert_request_GA(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_qlsc, model.adid_qlsc, model.mail_qlsc, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao, model.ten_qltc, model.adid_qltc, model.mail_qltc);
 
             // gửi mail
             string body = $@"Xin chào <br />
                Đơn yêu cầu mã : {rq_detail} đã được tạo <br /><br />
                Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+               <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
                ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
             string body1 = $@"Xin chào <br />
                Đơn yêu cầu mã : {rq_detail} đã được gửi đến bạn phê duyệt <br /><br />
                Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+               <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
                ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
          
-            var sendmail = REQUEST_PROCESS._sendmail(body, mailnguoitao.Replace("\n", "").Replace(" ", ""), subject);
-            var sendmail1 = REQUEST_PROCESS._sendmail(body1, mail_dt.Replace("\n", "").Replace(" ", ""), subject);
+            var sendmail = REQUEST_PROCESS._sendmail(body, model.mailnguoitao.Replace("\n", "").Replace(" ", ""), subject);
+            var sendmail1 = REQUEST_PROCESS._sendmail(body1, model.mail_dt.Replace("\n", "").Replace(" ", ""), subject);
 
             return Json("OK");
         }
@@ -235,7 +316,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = $@"Xin chào <br />
                Đơn yêu cầu mã : {get_ma} đã được gửi đến bên xin phê duyệt <br /><br />
                Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+               <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
                ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                ※このメールは自動的に送付されたので、返事をしないでください。 ";
               string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
@@ -268,7 +349,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
@@ -289,7 +370,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = $@"Xin chào <br />
                Đơn yêu cầu mã : {get_ma} đã được gửi đến bên xin phê duyệt <br /><br />
                Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+               <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
                ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                ※このメールは自動的に送付されたので、返事をしないでください。 ";
             string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
@@ -322,7 +403,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
@@ -344,7 +425,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = $@"Xin chào <br />
                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                    <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                    <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                     ※このメールは自動的に送付されたので, 返事をしないでください。";
 
@@ -382,7 +463,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8057/Approval/ListData'> Link </a> <br />
+                     <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
@@ -400,7 +481,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = $@"Xin chào <br />
                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                    <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+                    <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                     ※このメールは自動的に送付されたので, 返事をしないでください。";
 
@@ -438,7 +519,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8057/Approval/ListData_GA'> Link </a> <br />
+                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
@@ -459,7 +540,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = @"Xin chào <br />
               Đơn yêu cầu mã : " + id_request + @" của bạn ở trạng thái TỪ CHỐI phê duyệt <br /><br />
               Lý do : " + reason + @"<br /><br />
-              <a href='http://172.26.248.62:8057/Approval/Condition'> Link </a> <br />
+              <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
             var stepMap = new Dictionary<string, string>
@@ -487,7 +568,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string body = @"Xin chào <br />
               Đơn yêu cầu mã : " + id_request + @" của bạn ở trạng thái TỪ CHỐI phê duyệt <br /><br />
               Lý do : " + reason + @"<br /><br />
-              <a href='http://172.26.248.62:8057/Approval/Condition'> Link </a> <br />
+              <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
             var stepMap = new Dictionary<string, string>
@@ -514,6 +595,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //       : "0";
             double aa = double.Parse(Total);
             var cf = REQUEST_PROCESS.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent);
+            
             return Json(cf);
         }
         public JsonResult get_requestcondition_GA(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent)
@@ -531,12 +613,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             var phongban = db.ReturnString("select [CHR_Section_Code] from [DEPARTMENT] where [Cost_Center] = '" + ph.Split(':')[0] + "' ");
-            //string originSection = ph.Split(':')[1];
-            //if(ph.Split(':')[1].Contains(" "))
-            //{
-            //    originSection = ph.Split(":")[1].Split(' ').Last() ;
-            //}    
-            //string ghep = phongban + " : " + originSection;
+          
             return Json(phongban);
         }
         [HttpPost]

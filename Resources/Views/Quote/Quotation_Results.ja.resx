@@ -823,4 +823,7 @@
   <data name="UnHideDetail" xml:space="preserve">
     <value>詳細を表示</value>
   </data>
+  <data name="RequestList" xml:space="preserve">
+    <value>依頼一覧</value>
+  </data>
 </root>

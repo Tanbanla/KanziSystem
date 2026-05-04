@@ -455,6 +455,7 @@ async function _log_material(malinhkien, kho) {
 async function UploadFileFormat() {
     const fileInput = document.getElementById('mstFile');
     const us = document.getElementById('us').innerHTML;
+    const khoi = document.getElementById('group_code').value;
     const file = fileInput.files[0];
     if (!file) {
         alert("Vui lòng chọn một file Excel trước!");
@@ -464,6 +465,7 @@ async function UploadFileFormat() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("us", us);
+    formData.append("khoi", khoi);
     try {
         const response = await fetch('/Import/ImportFileExcel', {
             method: 'POST',
@@ -478,6 +480,9 @@ async function UploadFileFormat() {
         const table = document.getElementById('lstMaterial');
         table.innerHTML = "";
         data.forEach((item, index) => {
+
+            const displaySTK = item.stk || item.costKT;
+
             let data = `<tr class="input-row">`;
             data += `<td class="row-number text-center fw-bold">${index+1}</td>`;
             data += `<td>`;
@@ -485,9 +490,10 @@ async function UploadFileFormat() {
             data += `<option selected>${item.nameMaterial}</option>`;
             data += `</select>`;
             data += `</td>`;
-            data += `<td><input type="text" class="form-control stk" id="stk_${index}" readonly value="${item.costKT}"></td>`;
-            data += `<td><input type="text" class="form-control kho" id="kho_${index}" readonly value="${item.warehouse}"></td>`;
-            data += `<td><input type="text" class="form-control tk" id="tk_${index}" readonly value="${item.stock}"></td>`;
+            //data += `<td><input type="text" class="form-control stk" id="stk_${index}" value="${item.costKT}"></td>`;
+            data += `<td><select class="form-control stk" id="stk_${index}"> <option selected>${displaySTK}<option></td>`;
+            data += `<td hidden><input type="text" class="form-control kho" id="kho_${index}" readonly value="${item.warehouse}"></td>`;
+            data += `<td hidden><input type="text" class="form-control tk" id="tk_${index}" readonly value="${item.stock}"></td>`;
             data += `<td><input type="number" class="form-control sl" id="sl_${index}" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)" value="${item.quantity}"></td>`;
             data += `<td><input type="text" class="form-control dv" id="dv_${index}" readonly value="${item.unit}"></td>`;
             data += `<td><input type="number" class="form-control dg" id="dg_${index}" readonly value="${item.price.replace(',', '.') }"></td>`;
@@ -498,7 +504,7 @@ async function UploadFileFormat() {
             data += `<select class="form-control pcp" onchange="" id="pcp_${index}"><option selected>${item.deptCost}</option></select>`;
             data += `</td>`;
             data += `<td><input type="text" class="form-control vt" id="vt_${index}" value="${item.location}"></td>`;
-            data += `<td><input type="text" class="form-control" id="gc_${index}" value="${item.notetake}"></td>`;
+            data += `<td><input type="text" class="form-control gc" id="gc_${index}" value="${item.notetake}"></td>`;
             data += `<td>`;
             data += `<button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>`;
             data += `</td>`;

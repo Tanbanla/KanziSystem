@@ -36,13 +36,18 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Tìm kiếm thông tin báo giá và phân trang
-        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
+        public async Task<GenericResponse<ListRequest<BaoGia_Request_of_QuotationDTO>>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
-            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
+            var result = new GenericResponse<ListRequest<BaoGia_Request_of_QuotationDTO>>();
             try
             {
                 var data = await _repo.SearchAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, pageIndex, pageSize, date, chungLoai);
-                result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(data);
+                var mappedData = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(data.Data);
+                result.Data = new ListRequest<BaoGia_Request_of_QuotationDTO>
+                {
+                    Data = mappedData,
+                    TotalCount = data.TotalCount
+                };
                 result.Success = true;
             }
             catch (Exception ex)
@@ -285,7 +290,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             catch (Exception ex)
             {
-                result.Message = ex.Message;
+                result.Message= ex.Message;
                 result.Success = false;
             }
 
@@ -300,7 +305,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Data = await _repo.UpdateApprovarOK(maDon, userNext, userUpdate);
                 result.Success = true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 result.Message = ex.Message;
                 result.Success = false;
@@ -308,7 +313,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Phê duyệt thông tin lựa chọn nhà cung cấp
-        public async Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprovarNG(string maDon, string Reason, string userUpdate)
+        public async Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprovarNG(string maDon, string Reason,string userUpdate)
         {
             var result = new GenericResponse<List<BaoGia_Request_of_Quotation>>();
             try
@@ -325,15 +330,14 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         }
         public async Task<GenericResponse<ListRequest<dynamic>>> SearchRequestDone(string? maDon, string? section, string? maHang, string? maNCC, string user, int pageIndex, int pageSize)
         {
-            var result = new GenericResponse<ListRequest<dynamic>>();
+            var result =  new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.SearchRequestDone(maDon, section, maHang, maNCC, user, pageIndex, pageSize);
+                result.Data = await _repo.SearchRequestDone(maDon,section, maHang,maNCC,user,pageIndex,pageSize);
                 result.Success = true;
-            }
-            catch (Exception ex)
+            }catch(Exception ex)
             {
-                result.Message = ex.Message;
+                result.Message=ex.Message;
                 result.Success = false;
             }
 
@@ -342,14 +346,14 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         // update người phê duyệt cho đơn
         public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdateUserApprovalHistory(UpdateHistoryResult update)
         {
-            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
+            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>> ();
             try
             {
                 var Data = await _repo.UpdateUserApprovalHistory(update);
                 result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(Data);
                 result.Success = true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 result.Message = ex.Message;
                 result.Success = false;
@@ -380,8 +384,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 result.Data = await _repo.UpdateApprover(dataApprovers, userNext, userUpdate);
                 result.Success = true;
-            }
-            catch (Exception ex)
+            }catch(Exception ex)
             {
                 result.Message = ex.Message;
                 result.Success = false;
@@ -397,7 +400,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Data = await _repo.DeleteDonXinBaoGiaAsync(maDon, userUpdate);
                 result.Success = true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 result.Message = ex.Message;
                 result.Success = false;

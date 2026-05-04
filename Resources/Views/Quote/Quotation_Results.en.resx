@@ -823,4 +823,7 @@
   <data name="UnHideDetail" xml:space="preserve">
     <value>Unhide detail</value>
   </data>
+  <data name="RequestList" xml:space="preserve">
+    <value>Request List</value>
+  </data>
 </root>

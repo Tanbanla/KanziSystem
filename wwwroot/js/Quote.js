@@ -279,7 +279,21 @@
         const tbody = qs('#quoteTableBody');
         const rows = qsa('tr', tbody);
         const tr = btn.closest('tr');
+        
         if (rows.length > 1 && tr) {
+            if (Array.isArray(allQuoteItems) && allQuoteItems.length > 0) {
+                const start = (currentPage - 1) * rowsPerPage;
+                const rowIndex = Array.from(tbody.querySelectorAll('tr')).indexOf(tr);
+                const globalIndex = start + rowIndex;
+                
+                if (globalIndex >= 0 && globalIndex < allQuoteItems.length) {
+                    allQuoteItems.splice(globalIndex, 1);
+                    filteredQuoteItems = allQuoteItems.slice();
+
+                    renderQuotePage(tbody, filteredQuoteItems);
+                    return;
+                }
+            }
             tr.remove();
             renumberRows();
             applyFiltersAndPagination();
@@ -408,6 +422,9 @@
         const requiredFields = [
             // Phòng ban (select)
             { selector: '.tenPhongBanTb', isSelect: true, name: 'Phòng ban' },
+
+            // Chủng loại (select) - thêm điều kiện bắt buộc
+            { selector: '.chungLoaiTb', isSelect: true, name: 'Chủng loại' },
 
             // Mã hàng nội bộ (select)
             //{ selector: '.maHangNoiBo', isSelect: true, name: 'Mã hàng nội bộ' },
@@ -2175,6 +2192,12 @@
         // Lấy số hàng từ phần tử No hoặc từ tham số
         const noCell = tr.querySelector('td:first-child');
         const rowNumber = noCell ? noCell.textContent.trim() : rowIndex;
+        
+        // nút xóa cell
+        const lastCell = tr.querySelector('td:last-child');
+        if (lastCell && !lastCell.querySelector('.btn-remove-row')) {
+            lastCell.innerHTML = '<button type="button" class="btn btn-sm btn-link text-danger px-0 btn-remove-row" title="Remove Row"><i class="fas fa-times"></i></button>';
+        }
 
         // Helper function để set giá trị cho select theo ID
         const setSelectById = (idPattern, value) => {
@@ -2377,6 +2400,19 @@
             const existing = qs('#quoteTableBody tr');
             const baseRow = existing ? existing.cloneNode(true) : null;
             const template = document.createElement('tr');
+            
+            if (!baseRow) {
+                console.warn('No existing row found to clone from, creating minimal template');
+                const cellsNeeded = 33;
+                for (let j = 0; j < cellsNeeded; j++) {
+                    const td = document.createElement('td');
+                    if (j === cellsNeeded - 1) {
+                        td.className = 'text-center';
+                        td.innerHTML = '<button type="button" class="btn btn-sm btn-link text-danger px-0 btn-remove-row" title="Remove Row"><i class="fas fa-times"></i></button>';
+                    }
+                    template.appendChild(td);
+                }
+            }
 
             const total = Array.isArray(sourceItems) ? sourceItems.length : 0;
             const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));

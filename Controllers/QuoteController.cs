@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Models_Working;
@@ -42,13 +43,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IDepartmentService _deparmentService;
         private readonly IExchangeRateService _exchangeRateService;
         private readonly IBaoGiaStepService _baoGiaStepService;
+        private readonly IStringLocalizer<QuoteController> _localizer;
 
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService, IConfiguration configuration,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService, IExchangeRateService exchangeRateService,
            IDepartmentService deparmentService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStepService baoGiaStepService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
-            IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService)
+            IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService,
+            IStringLocalizer<QuoteController> localizer)
         {
             _logger = logger;
             _configuration = configuration;
@@ -71,6 +74,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _deparmentService = deparmentService;
             _exchangeRateService = exchangeRateService;
             _baoGiaStepService = baoGiaStepService;
+            _localizer = localizer;
         }
         // MARK: - Quote
         public async Task<IActionResult> Index()
@@ -247,28 +251,28 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // Vendor input
                     if (!item.IsMatch_MaHangNCC)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.CodeEquipmentNCC ?? string.Empty);
 
                     if (!item.IsMatch_NameVN)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
                     if (!item.IsMatch_NameEN)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.NameENByNCC ?? string.Empty);
                     if (!item.IsMatch_SoLuong)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.soluong ?? 0); // Vendor quantity
                     if (!item.IsMatch_DonVi)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.donvi ?? string.Empty); // Vendor unit
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Vendor maker
@@ -280,27 +284,27 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.DTM_ShipTime?.ToString("dd/MM/yyyy") ?? string.Empty);
                     if (!item.IsMatch_Rohs)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.VCHR_Rohs ?? string.Empty);
                     if (!item.IsMatch_COCQ)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.VCHR_COCQ ?? string.Empty);
                     if (!item.IsMatch_MSDS)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.VCHR_MSDS ?? string.Empty);
                     if (!item.IsMatch_AnToan)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.VCHR_AnToan ?? string.Empty);
                     if (!item.IsMatchCamKet)
                     {
-                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(rowStart, col).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     ws.Cell(rowStart, col++).SetValue(item.VCHR_CamKet ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_DeliveryTerm ?? string.Empty);
@@ -364,9 +368,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> ExportFileExcelApproverResult([FromBody] List<string> model)
         {
-            if (model.Count == 0)
+            if (model == null || model.Count == 0)
             {
-                return BadRequest("Please select Quote request");
+                return BadRequest(_localizer["PleaseSelectQuoteRequest"]);
             }
             try
             {
@@ -377,7 +381,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 if (result.Data == null)
                 {
-                    return BadRequest("No data to export");
+                    return BadRequest(_localizer["NoDataToExport"]);
                 }
                 var dataList = result.Data;
 
@@ -440,13 +444,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (vendorCodesForSameProduct >= 2 && bitSelect.Contains("O"))
                     {
-                        errors.Add($"Mã hàng nội bộ '{maHangNB}' đã chọn nhiều hơn 1 Vendor Code khác nhau ({vendorCodesForSameProduct} vendor code)");
+                        errors.Add(_localizer["VendorCodeMultipleSelected", maHangNB, vendorCodesForSameProduct]);
                     }
 
                     var hasAnySelect = allRowsData.Any(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"));
                     if (!hasAnySelect && !string.IsNullOrEmpty(maHangNB))
                     {
-                        errors.Add($"Mã hàng nội bộ '{maHangNB}' chưa chọn bất kỳ Vendor Code nào (thiếu 'O')");
+                        errors.Add(_localizer["VendorCodeNotSelected", maHangNB]);
                     }
 
                     var vendorsForEquipmentAndCategory = allRowsData
@@ -458,7 +462,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (vendorsForEquipmentAndCategory > 1 && bitSelect.Contains("O"))
                     {
-                        errors.Add($"Mã thiết bị '{maThietBi}' và chủng loại hàng '{chungLoaiHang}' đã chọn nhiều Vendor Code khác nhau ({vendorsForEquipmentAndCategory} vendor code)");
+                        errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi, chungLoaiHang, vendorsForEquipmentAndCategory]);
                     }
 
                     var tenHangList = allRowsData
@@ -469,7 +473,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (tenHangList.Count > 1)
                     {
-                        errors.Add($"Mã hàng nội bộ '{maHangNB}' có tên hàng khác nhau: (Eng): {string.Join(", ", tenHangList.Select(x => x.TenEng))}");
+                        errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
                     }
 
                     if (bitSelect.Contains("O"))
@@ -486,7 +490,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                             if (Math.Abs(currentPriceUSD - minPriceUSD) > 0.01m)
                             {
-                                errors.Add($"Đơn giá được chọn (USD: {currentPriceUSD:N2}) không phải giá thấp nhất (USD: {minPriceUSD:N2})");
+                                errors.Add(_localizer["SelectedPriceNotLowest", currentPriceUSD.ToString("N2"), minPriceUSD.ToString("N2")]);
                             }
                         }
                     }
@@ -501,12 +505,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (duplicatePrice > 1)
                     {
-                        errors.Add($"Mã hàng '{maHangNB}' và Vendor Code '{maHangNCC}' có nhiều hơn 1 mức đơn giá khác nhau");
+                        errors.Add(_localizer["DuplicatePriceForVendor", maHangNB, maHangNCC]);
                     }
 
                     if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
                     {
-                        errors.Add("Hàng được chọn nhà cung cấp (O) nhưng chưa có lý do");
+                        errors.Add(_localizer["SelectedVendorNoReason"]);
                     }
 
                     // Lưu lỗi vào dictionary với key là ID
@@ -520,7 +524,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var totals = new Dictionary<string, (double vnd, double usd)>();
                 foreach (var item in dataList)
                 {
-                    string key = $"{item.CHR_MaDon ?? ""}|{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}|{item.CHR_MaNCC ?? ""}";
+                    string key = $"{item.CHR_MaDon ?? ""}|" +
+                        $"{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}|{item.CHR_MaNCC ?? ""}" +
+                        $"|{(string.IsNullOrEmpty(item.CodeEquipmentNCC) ? item.ID.ToString() : item.CodeEquipmentNCC)}";
                     double vnd = item.FL_VND * item.soluong ?? 0.0;
                     double usd = item.FL_USD * item.soluong ?? 0.0;
                     if (!totals.ContainsKey(key))
@@ -535,7 +541,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
                 if (!System.IO.File.Exists(templatePath))
                 {
-                    return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
+                    return BadRequest(_localizer["TemplateNotFound", "TemplateQuotationResults.xlsx"]);
                 }
 
                 using var fs = System.IO.File.OpenRead(templatePath);
@@ -543,7 +549,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var ws = workbook.Worksheets.FirstOrDefault();
                 if (ws == null)
                 {
-                    return BadRequest("Không tìm thấy worksheet trong template");
+                    return BadRequest(_localizer["WorksheetNotFound"]);
                 }
                 int rowStart = 4;
                 foreach (var item in dataList)
@@ -580,30 +586,109 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
                     // Vendor input
-                    ws.Cell(rowStart, col++).SetValue(item.CodeEquipmentNCC ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.NameENByNCC ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.soluong ?? 0); // Vendor quantity
-                    ws.Cell(rowStart, col++).SetValue(item.donvi ?? string.Empty); // Vendor unit
+                    // Mã hàng NCC - tô màu nếu không khớp
+                    var codeEquipmentCell = ws.Cell(rowStart, col++);
+                    codeEquipmentCell.SetValue(item.CodeEquipmentNCC ?? string.Empty);
+                    if (!item.IsMatch_MaHangNCC)
+                    {
+                        codeEquipmentCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // Tên hàng tiếng Việt - tô màu nếu không khớp
+                    var nameVNCell = ws.Cell(rowStart, col++);
+                    nameVNCell.SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
+                    if (!item.IsMatch_NameVN)
+                    {
+                        nameVNCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // Tên hàng tiếng Anh - tô màu nếu không khớp
+                    var nameENCell = ws.Cell(rowStart, col++);
+                    nameENCell.SetValue(item.NameENByNCC ?? string.Empty);
+                    if (!item.IsMatch_NameEN)
+                    {
+                        nameENCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // Số lượng - tô màu nếu không khớp
+                    var quantityCell = ws.Cell(rowStart, col++);
+                    quantityCell.SetValue(item.soluong ?? 0);
+                    if (!item.IsMatch_SoLuong)
+                    {
+                        quantityCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // Đơn vị - tô màu nếu không khớp
+                    var unitCell = ws.Cell(rowStart, col++);
+                    unitCell.SetValue(item.donvi ?? string.Empty);
+                    if (!item.IsMatch_DonVi)
+                    {
+                        unitCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Vendor maker
                     ws.Cell(rowStart, col++).SetValue((item.FL_USD ?? 0));
                     ws.Cell(rowStart, col++).SetValue((item.FL_VND ?? 0).ToString("N0", enUs));
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_MOQ ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_Packing ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_LeadTime ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.DTM_ShipTime ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.VCHR_Rohs ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.VCHR_COCQ ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.VCHR_MSDS ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.VCHR_AnToan ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.VCHR_CamKet ?? string.Empty);
+
+                    // Ngày giao hàng - tô màu nếu không khớp
+                    var shipTimeCell = ws.Cell(rowStart, col++);
+                    shipTimeCell.SetValue(item.DTM_ShipTime ?? string.Empty);
+                    if (!item.IsMatch_Ngay)
+                    {
+                        shipTimeCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // Rohs - tô màu nếu không khớp
+                    var rohsCell = ws.Cell(rowStart, col++);
+                    rohsCell.SetValue(item.VCHR_Rohs ?? string.Empty);
+                    if (!item.IsMatch_Rohs)
+                    {
+                        rohsCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // CO/CQ - tô màu nếu không khớp
+                    var cocqCell = ws.Cell(rowStart, col++);
+                    cocqCell.SetValue(item.VCHR_COCQ ?? string.Empty);
+                    if (!item.IsMatch_COCQ)
+                    {
+                        cocqCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // MSDS - tô màu nếu không khớp
+                    var msdsCell = ws.Cell(rowStart, col++);
+                    msdsCell.SetValue(item.VCHR_MSDS ?? string.Empty);
+                    if (!item.IsMatch_MSDS)
+                    {
+                        msdsCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // An toàn - tô màu nếu không khớp
+                    var anToanCell = ws.Cell(rowStart, col++);
+                    anToanCell.SetValue(item.VCHR_AnToan ?? string.Empty);
+                    if (!item.IsMatch_AnToan)
+                    {
+                        anToanCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
+                    // Cam kết - tô màu nếu không khớp
+                    var camKetCell = ws.Cell(rowStart, col++);
+                    camKetCell.SetValue(item.VCHR_CamKet ?? string.Empty);
+                    if (!item.IsMatchCamKet)
+                    {
+                        camKetCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_DeliveryTerm ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_PaymentTerm ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_File ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_EffectiveDate?.ToString("dd/MM/yyyy") ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_ExpiryDate?.ToString("dd/MM/yyyy") ?? string.Empty);
                     // System count
-                    string key = $"{item.CHR_MaDon ?? ""}|{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}|{item.CHR_MaNCC ?? ""}";
+                    string key = $"{item.CHR_MaDon ?? ""}|{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}" +
+                        $"|{item.CHR_MaNCC ?? ""}|{(string.IsNullOrEmpty(item.CodeEquipmentNCC) ? item.ID.ToString() : item.CodeEquipmentNCC)}";
                     var tot = totals.ContainsKey(key) ? totals[key] : (0.0, 0.0);
                     string totalCell = "";
                     if (tot.Item1 != 0)
@@ -654,11 +739,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(_localizer["ExportError", ex.Message]);
             }
 
         }
-
 
         private string GetApprovalStatus(int currentStep, int requiredStep, string? reason)
         {
@@ -900,7 +984,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (vendorCodesForSameProduct >= 2 && bitSelect.Contains("O"))
                     {
-                        errors.Add($"Mã hàng nội bộ '{maHangNB}' đã chọn nhiều hơn 1 Vendor Code khác nhau ({vendorCodesForSameProduct} vendor code)");
+                        errors.Add(_localizer["VendorCodeMultipleSelected", maHangNB, vendorCodesForSameProduct]);
                     }
                     // Kiểm tra nếu có chọn 'O' thì phải có ít nhất 1 dòng khác cùng mã hàng nội bộ cũng chọn 'O'
                     //var hasAnySelect = allRowsData.Any(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"));
@@ -910,7 +994,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     //}
 
                     var vendorsForEquipmentAndCategory = allRowsData
-                        .Where(x => (x.MaThietBi == maThietBi && x.ChungLoaiHang == chungLoaiHang && x.BIT_Select.Contains("O")) && !string.IsNullOrEmpty(maThietBi))
+                        .Where(x => (x.MaThietBi == maThietBi
+                        && x.ChungLoaiHang == chungLoaiHang
+                        && x.BIT_Select.Contains("O") && x.MaHangNCC_BIVN == maHangNCC)
+                        && !string.IsNullOrEmpty(maThietBi))
                         .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
                         .Where(v => !string.IsNullOrEmpty(v))
                         .Distinct()
@@ -918,7 +1005,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (vendorsForEquipmentAndCategory > 1 && bitSelect.Contains("O"))
                     {
-                        errors.Add($"Mã thiết bị '{maThietBi}' và chủng loại hàng '{chungLoaiHang}' đã chọn nhiều Vendor Code khác nhau ({vendorsForEquipmentAndCategory} vendor code)");
+                        errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi, chungLoaiHang, vendorsForEquipmentAndCategory]);
                     }
 
                     var tenHangList = allRowsData
@@ -929,7 +1016,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (tenHangList.Count > 1)
                     {
-                        errors.Add($"Mã hàng nội bộ '{maHangNB}' có tên hàng khác nhau: (Eng): {string.Join(", ", tenHangList.Select(x => x.TenEng))}");
+                        errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
                     }
 
                     //if (bitSelect.Contains("O"))
@@ -961,12 +1048,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (duplicatePrice > 1)
                     {
-                        errors.Add($"Mã hàng '{maHangNB}' và Vendor Code '{maHangNCC}' có nhiều hơn 1 mức đơn giá khác nhau");
+                        errors.Add(_localizer["DuplicatePriceForVendor", maHangNB, maHangNCC]);
                     }
 
                     if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
                     {
-                        errors.Add("Hàng được chọn nhà cung cấp (O) nhưng chưa có lý do tại cột 52");
+                        errors.Add(_localizer["SelectedVendorNoReasonColumn", 52]);
                     }
 
                     if (errors.Any())
@@ -1309,6 +1396,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var categorys = await LoadCategoryDataAsync();
             var statusData = await _baoGiaStatusService.GetListStatusAsync();
             var madons = await LoadMadonAsync(13);
+            var role = GetRolesUser();
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             var vm = new QuoteModel
             {
@@ -1318,7 +1406,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachMaDon = madons,
                 DanhSachCategory = categorys,
                 DanhSachStatus = statusData.Data ?? new List<BaoGia_StatusDTO>(),
-                NguoiThaoTac = GetCurrentUserId() ?? ""
+                NguoiThaoTac = GetCurrentUserId() ?? "",
+                Role = role
             };
 
             return View(vm);
@@ -1582,7 +1671,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-            return Ok(result.Data);
+            return Ok(result);
         }
         // tìm kiếm theo ID đơn báo giá 
         public async Task<IActionResult> SearchID([FromBody] int id)
@@ -3081,8 +3170,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 searchModel.TrangThai,
                 searchModel.Step,
                 GetCurrentUserId() ?? "",
-                searchModel.PageIndex,
-                searchModel.PageSize,
+                0,//searchModel.PageIndex,
+                0,//searchModel.PageSize,
                 searchModel.Date,
                 searchModel.ChungLoai
                 );
@@ -3114,7 +3203,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 int row = 7;
-                foreach (var rq in result.Data)
+                foreach (var rq in result.Data.Data)
                 {
                     int col = 1;
                     // Map fields into template columns similar to ExportSelection
@@ -3185,8 +3274,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 searchModel.TrangThai,
                 searchModel.Step,
                 GetCurrentUserId() ?? "",
-                searchModel.PageIndex,
-                searchModel.PageSize,
+                0,//searchModel.PageIndex,
+                0,//searchModel.PageSize,
                 searchModel.Date,
                 searchModel.ChungLoai
              );
@@ -3224,7 +3313,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 int row = 4;
-                foreach (var rq in result.Data)
+                foreach (var rq in result.Data.Data)
                 {
                     int col = 1;
                     // Map fields into template columns similar to ExportSelection
@@ -3261,7 +3350,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, col++).SetValue(rq?.DTM_NgayMuonNhan.HasValue == true ? rq.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(row, col++).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(row, col++).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
-                    ws.Cell(row, col++).SetValue(rq?.CHR_CreateBy ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq?.NVCHR_UserRequest ?? string.Empty);
                     var history = await _baoGiaHistoryService.GetByRequestQuoteIdAsync(rq.ID);
                     var reson = rq.ID_Status.Contains("RETURN") ? (history.Data.Capacity > 0 ? history.Data.OrderByDescending(h => h.CHR_Updatedate).FirstOrDefault()?.NVCHR_LyDo : string.Empty) : "";
                     var statusName = Status.Data.Where(s => s.VCHR_CodeStatus == rq.ID_Status).Select(s => s.NVCHR_TenStatus).FirstOrDefault() ?? string.Empty;
@@ -3781,16 +3870,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Return PIC section
         [HttpPost]
-        public async Task<IActionResult> ReturnQuotation([FromBody] string Madon)
+        public async Task<IActionResult> ReturnQuotation([FromBody] string madon)
         {
-            if (string.IsNullOrEmpty(Madon)) return BadRequest("Vui long chon ma don");
+            if (string.IsNullOrEmpty(madon)) return BadRequest("Vui lòng chọn mã đơn!");
             try
             {
                 var user = GetCurrentUserId();
-                var result = await _baoGiaService.TraLaiDonBaoGiaAsync(Madon, user);
+                var result = await _baoGiaService.TraLaiDonBaoGiaAsync(madon, user);
                 if (!result.Success || result.Data == null)
                 {
-                    return BadRequest("Error: "+result.Message);
+                    return BadRequest("Error: " + result.Message);
                 }
                 var firstData = result.Data.FirstOrDefault();
                 _ = Task.Run(async () =>
@@ -3800,7 +3889,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         try
                         {
                             var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                            await sendMailService.SendMailAsync(firstData.CHR_CreateBy+ "@brothergroup.net", user + "@brothergroup.net", 11, "Quote/HistoryQuote", firstData.CHR_Gap == "false" ? false : true, firstData.CHR_SectionCode ?? "", firstData.CHR_MaDon ?? "", user);
+                            await sendMailService.SendMailAsync(firstData.CHR_CreateBy + "@brothergroup.net", user + "@brothergroup.net", 12, "Quote/HistoryQuote", firstData.CHR_Gap == "false" ? false : true, firstData.CHR_SectionCode ?? "", firstData.CHR_MaDon ?? "", user);
                         }
                         catch (Exception ex)
                         {
@@ -3811,7 +3900,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Ok(result.Data);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest($"{ex.Message}");
             }

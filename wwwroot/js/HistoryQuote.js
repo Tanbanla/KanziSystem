@@ -11,9 +11,11 @@
     const hiddenTenNCC = document.getElementById('editTenNCC');
     const btnExportManaHistory = document.getElementById('btnExportManaHistory');
     let currentPage = 1;
-    const pageSize = 20;
+    const pageSize = 850;
     let currentGroups = [];
-
+    let totalCountServer = 0; 
+    let serverPaged = false;
+    const role = window.HistoryData.role || 'User';
 
     function updateHiddenValue() {
         const selectedOption = supplierSelect.options[supplierSelect.selectedIndex];
@@ -81,7 +83,7 @@
     // Gán sự kiện change cho select
     supplierSelect.addEventListener('change', updateHiddenValue);
 
-    function applyFilters() {
+    function applyFilters(page = 1) {
         const maDon = (document.getElementById('searchMaDon').value || '').trim();
         const phongBan = (document.getElementById('searchPhongBan').value || '').trim();
         const nguoiTao = (document.getElementById('searchNguoiTao').value || '').trim();
@@ -99,8 +101,8 @@
             MaHang: maVatTu,
             TrangThai: status,
             Step: null,
-            PageIndex: 1,
-            PageSize: 10000,
+            PageIndex: page,
+            PageSize: pageSize,
             Date: (from && to) ? { From: from, To: to } : null
         };
         fetch((window.apiBaseUrl || '') + '/Quote/SearchBaoGia', {
@@ -114,9 +116,18 @@
                 return r.json();
             })
             .then(data => {
-                // data is list of BaoGia_Request_of_QuotationDTO
-                currentGroups = groupByMaDon(Array.isArray(data) ? data : (data?.Data || []));
-                currentPage = 1;
+
+                const items = Array.isArray(data.data) ? data.data : (data?.data || []);
+                if (data && typeof items.totalCount === 'number') {
+                    serverPaged = true;
+                    totalCountServer = items.totalCount;
+                } else {
+                    serverPaged = false;
+                    totalCountServer = 0;
+                }
+
+                currentGroups = groupByMaDon(items.data);
+                currentPage = page;
                 renderGroups();
             })
             .catch(err => {
@@ -125,7 +136,7 @@
             });
     }
 
-    btnApply?.addEventListener('click', applyFilters);
+    btnApply?.addEventListener('click', () => applyFilters(1));
     btnReset?.addEventListener('click', () => {
         document.getElementById('searchMaDon').value = '';
         document.getElementById('searchPhongBan').value = '';
@@ -135,7 +146,7 @@
         statusFilter.value = '';
         document.getElementById('dateFrom').value = '';
         document.getElementById('dateTo').value = '';
-        applyFilters();
+        applyFilters(1);
     });
     btnExportHistory?.addEventListener('click', async () => {
         const maDon = (document.getElementById('searchMaDon').value || '').trim();
@@ -429,13 +440,32 @@
                 icon?.classList.add('fa-plus-square');
             }
         }
-        //if (t.classList.contains('btn-edit-uncompleted')) {
-        //    const groupId = row?.dataset.groupId;
-        //    const group = currentGroups.find(g => g.groupId === groupId);
-        //    const firstId = group?.items?.[0]?.id;
-        //    if (groupId) openEditModal(groupId);
-        //    return;
-        //}
+        // Trả lại đơn 
+        if (t.classList.contains('btn-view-return')) {
+            const madon = row?.dataset.groupId;
+            const T = window.i18nHistoryQuote || {};
+            if (!madon) {
+                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgSelectGroupFailed || 'Vui lòng chọn mã đơn!') + '</div>');
+                return;
+            }
+            try {
+                showLoading(T.Exporting || 'Đang xử lý...');
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ReturnQuotation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(madon)
+                });
+                const text = await res.text();
+                if (!res.ok) throw new Error(text || (T.ReturnFailed || 'Trả lại thất bại!'));
+                showDialog(T.Notification || 'Thông báo', '<div class="text-success">' + (T.ReturnSuccess || 'Trả về thành công!') + '</div>');
+                applyFilters();
+            } catch (err) {
+                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (err && err.message ? err.message : (T.ReturnFailed || 'Trả lại thất bại!')) + '</div>');
+            } finally {
+                hideLoading();
+            }
+            return;
+        }
         if (t.classList.contains('btn-view-history')) {
             const groupId = row?.dataset.groupId;
             const group = currentGroups.find(g => g.groupId === groupId);
@@ -594,26 +624,6 @@
                 try { modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) { }
             } catch (err) { reject(err); }
         });
-    }
-
-    async function  openApproverSelectionAndSave() {
-        try {
-            const step = 2;
-            const section = document.getElementById('searchNhaCungCap')?.value || '';
-            const selected = await this.openApproverSelector(step, section);
-            if (!selected) return; // cancelled
-            // normalize selected id field
-            const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? ''; // robust fallback
-            // fallback to value if object has none
-            const finalId = approverId || (selected.value || selected.Value || '');
-            if (!finalId) {
-                return;
-            }
-            window.__selectedNextApprover = finalId;
-        } catch (err) {
-            console.error('openApproverSelectionAndSave error', err);
-            showDialog({ message: 'Lỗi khi lấy danh sách người phê duyệt', type: 'error' });
-        }
     }
 
     // Tìm kiếm - support both jQuery and plain DOM
@@ -853,11 +863,21 @@
         if (!tblBody) return;
         tblBody.innerHTML = '';
         const T = window.i18nHistoryQuote || {};
-        const total = currentGroups.length;
-        const totalPages = Math.max(1, Math.ceil(total / pageSize));
-        if (currentPage > totalPages) currentPage = totalPages;
-        const start = (currentPage - 1) * pageSize;
-        const pageGroups = currentGroups.slice(start, start + pageSize);
+
+        let total, totalPages, pageGroups, start;
+        if (serverPaged) {
+            total = totalCountServer || 0;
+            totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+            start = (currentPage - 1) * pageSize;
+            pageGroups = currentGroups;
+        } else {
+            total = currentGroups.length;
+            totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+            start = (currentPage - 1) * pageSize;
+            pageGroups = currentGroups.slice(start, start + pageSize);
+        }
 
         pageGroups.forEach((g, idx) => {
             // Try cloning existing template row; if not present, build from scratch
@@ -869,6 +889,10 @@
             } else {
                 tmpl = document.createElement('tr');
                 tmpl.className = 'group-row';
+                // show return button only for specific role (client-side)
+                const returnBtnHtml = (role === 'UserPUR')
+                    ? '<button type="button" class="btn btn-outline-secondary btn-view-return" title="Trả lại"><i class="fas ion-arrow-return-left"></i></button>'
+                    : '';
                 tmpl.innerHTML = `
                     <td class="text-center"><button type="button" class="btn btn-sm btn-link text-primary px-0 btn-toggle-group" title="Mở rộng"><i class="fas fa-plus-square"></i></button></td>
                     <td class="fw-semibold group-code"></td>
@@ -880,7 +904,7 @@
                     <td class="text-center">
                         <div class="btn-group btn-group-sm" role="group">
                             <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử"><i class="fas fa-history"></i></button>
-                            <button type="button" class="btn btn-outline-secondary btn-view-approvals" title="Trả lại"><i class="fas fa-return"></i></button>
+                            ${returnBtnHtml}
                             <button type="button" class="btn btn-outline-danger btn-delete-group" title="Xóa đơn"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
@@ -982,11 +1006,12 @@
         const btn = e.target.closest('button');
         if (!btn) return;
         const val = btn.dataset.page;
-        const totalPages = Math.max(1, Math.ceil(currentGroups.length / pageSize));
+        const totalPages = serverPaged ? Math.max(1, Math.ceil((totalCountServer || 0) / pageSize)) : Math.max(1, Math.ceil(currentGroups.length / pageSize));
         if (val === 'prev' && currentPage > 1) currentPage--;
         else if (val === 'next' && currentPage < totalPages) currentPage++;
         else if (!isNaN(Number(val))) currentPage = Number(val);
-        renderGroups();
+
+        if (serverPaged) applyFilters(currentPage); else renderGroups();
     });
 
     function renderChildOrders(detailRow, items) {
@@ -1388,6 +1413,6 @@
     }
     // Initial load
     document.addEventListener('DOMContentLoaded', function () {
-        applyFilters();
+        applyFilters(1);
     });
 })();

@@ -229,5 +229,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Cập nhật thông tin đơn báo giá sau khi trả lại
+        public async Task<GenericResponse<bool>> UpdateRequestFromFileAsync(List<BaoGia_Request_of_QuotationDTO> baoGia, string user)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var rq = _mapper.Map<List<BaoGia_Request_of_Quotation>>(baoGia);
+                result.Data = await _repo.UpdateRequestFromFileAsync(rq, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

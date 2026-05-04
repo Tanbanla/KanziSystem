@@ -28,6 +28,8 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public List<dynamic> listNcc { get; set; }
         // Danh sách mặt hàng theo đơn
         public List<string> listMaterial { get; set; }
+        // Role của người dùng
+        public string Role { get; set; } = string.Empty;
 
         // Người thao tác 
         public string? NguoiThaoTac { get; set; }

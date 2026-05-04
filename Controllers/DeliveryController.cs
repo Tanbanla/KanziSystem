@@ -183,6 +183,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             string cmdQry = $"SELECT TOP (300) {sqlColumn} FROM [PO] WHERE [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{khoi}' ORDER BY [SoPO] DESC, Hienthi ASC";
 
+            if(khoi == "PROD")
+            {
+                cmdQry = $"SELECT TOP (300) {sqlColumn} FROM [PO] WHERE [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{khoi}' AND [Group_Code] = 'PUR' ORDER BY [SoPO] DESC, Hienthi ASC";
+            }
             var dataResult = Models.PO.GetPoByPoNumber(cmdQry);
             return Json(dataResult);
         }

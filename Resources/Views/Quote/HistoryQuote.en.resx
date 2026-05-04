@@ -198,14 +198,92 @@
   <data name="Actions" xml:space="preserve">
     <value>Actions</value>
   </data>
-  <data name="Expand" xml:space="preserve">
-    <value>Expand</value>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
   </data>
-  <data name="ViewHistory" xml:space="preserve">
-    <value>View history</value>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="Approval" xml:space="preserve">
-    <value>Approval</value>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>Notification</value>
+  </data>
+  <data name="SearchEllipsis" xml:space="preserve">
+    <value>Search...</value>
+  </data>
+  <data name="SelectPlaceholder" xml:space="preserve">
+    <value>-- Select --</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>No results</value>
+  </data>
+  <data name="MsgSearchFailed" xml:space="preserve">
+    <value>Search failed</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Export file failed</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Invalid file type</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Cannot export file</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>File imported successfully</value>
+  </data>
+  <data name="MsgLoadHistoryFailed" xml:space="preserve">
+    <value>Cannot load history.</value>
+  </data>
+  <data name="PageTitleHistory" xml:space="preserve">
+    <value>Single history</value>
+  </data>
+  <data name="ConfirmDeleteItem" xml:space="preserve">
+    <value>Confirm delete item</value>
+  </data>
+  <data name="ConfirmDeleteGroup" xml:space="preserve">
+    <value>Confirm delete group</value>
+  </data>
+  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
+    <value>Are you sure you want to delete this entire order?</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>Deleting...</value>
+  </data>
+  <data name="DeleteFailed" xml:space="preserve">
+    <value>Delete failed</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>Deleted successfully.</value>
+  </data>
+  <data name="MsgSelectGroupFailed" xml:space="preserve">
+    <value>Please select the order code!</value>
+  </data>
+  <data name="MsgNoHistory" xml:space="preserve">
+    <value>No history.</value>
+  </data>
+  <data name="MsgNoDataToEdit" xml:space="preserve">
+    <value>No data to edit.</value>
+  </data>
+  <data name="MsgNotFoundData" xml:space="preserve">
+    <value>Data not found.</value>
+  </data>
+  <data name="MsgSaveFailed" xml:space="preserve">
+    <value>Save failed: {0}</value>
+  </data>
+  <data name="MsgSaveSuccess" xml:space="preserve">
+    <value>Saved successfully.</value>
+  </data>
+  <data name="PaginationInfo" xml:space="preserve">
+    <value>Showing {0} - {1} / {2} groups</value>
   </data>
   <data name="Material" xml:space="preserve">
     <value>Material</value>
@@ -218,6 +296,30 @@
   </data>
   <data name="UpdatedDate" xml:space="preserve">
     <value>Updated date</value>
+  </data>
+  <data name="HistoryTime" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="RequestNo" xml:space="preserve">
+    <value>Request No</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>Updated by</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Expand" xml:space="preserve">
+    <value>Expand</value>
+  </data>
+  <data name="ViewHistory" xml:space="preserve">
+    <value>View history</value>
+  </data>
+  <data name="Approval" xml:space="preserve">
+    <value>Approval</value>
   </data>
   <data name="DepartmentCode" xml:space="preserve">
     <value>Department code</value>
@@ -285,74 +387,17 @@
   <data name="Urgent" xml:space="preserve">
     <value>Urgent</value>
   </data>
-  <data name="Reason" xml:space="preserve">
-    <value>Reason</value>
-  </data>
-  <data name="HistoryTime" xml:space="preserve">
-    <value>Time</value>
-  </data>
-  <data name="RequestNo" xml:space="preserve">
-    <value>Request No</value>
-  </data>
-  <data name="Action" xml:space="preserve">
-    <value>Action</value>
-  </data>
-  <data name="UpdatedBy" xml:space="preserve">
-    <value>Updated by</value>
-  </data>
-  <data name="PaginationInfo" xml:space="preserve">
-    <value>Showing {0} - {1} / {2} groups</value>
-  </data>
   <data name="FooterHint" xml:space="preserve">
     <value>Select group CHR_MaDon to see details of orders in group.</value>
   </data>
   <data name="EditModalTitle" xml:space="preserve">
     <value>Edit quotation request</value>
   </data>
-  <data name="Close" xml:space="preserve">
-    <value>Close</value>
-  </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
-  <data name="Notification" xml:space="preserve">
-    <value>Notification</value>
-  </data>
-  <data name="MsgSearchFailed" xml:space="preserve">
-    <value>Search failed</value>
-  </data>
-  <data name="MsgLoadHistoryFailed" xml:space="preserve">
-    <value>Cannot load history.</value>
-  </data>
-  <data name="MsgNoHistory" xml:space="preserve">
-    <value>No history.</value>
-  </data>
-  <data name="MsgNoDataToEdit" xml:space="preserve">
-    <value>No data to edit.</value>
-  </data>
-  <data name="MsgNotFoundData" xml:space="preserve">
-    <value>Data not found.</value>
-  </data>
-  <data name="MsgSaveSuccess" xml:space="preserve">
-    <value>Saved successfully.</value>
-  </data>
-  <data name="MsgSaveFailed" xml:space="preserve">
-    <value>Save failed: {0}</value>
-  </data>
   <data name="DialogOk" xml:space="preserve">
     <value>OK</value>
-  </data>
-  <data name="SearchEllipsis" xml:space="preserve">
-    <value>Search...</value>
-  </data>
-  <data name="NoResults" xml:space="preserve">
-    <value>No results</value>
-  </data>
-  <data name="SelectPlaceholder" xml:space="preserve">
-    <value>-- Select --</value>
-  </data>
-  <data name="PageTitleHistory" xml:space="preserve">
-    <value>Single history</value>
   </data>
   <data name="Classification" xml:space="preserve">
     <value>Classification</value>
@@ -375,53 +420,16 @@
   <data name="ImportFileExcel" xml:space="preserve">
     <value>Import edited files</value>
   </data>
-  <data name="Exporting" xml:space="preserve">
-    <value>Exporting...</value>
-  </data>
-  <data name="ExportError" xml:space="preserve">
-    <value>Export file failed</value>
-  </data>
-  <data name="InvalidFileType" xml:space="preserve">
-    <value>Invalid file type</value>
-  </data>
-  <data name="LoadingData" xml:space="preserve">
-    <value>Processing...</value>
-  </data>
-  <data name="DataUpdatedSuccessfully" xml:space="preserve">
-    <value>File imported successfully</value>
-  </data>
-  <data name="ErrorPrefix" xml:space="preserve">
-    <value>Cannot export file</value>
-  </data>
-  <data name="ConfirmDeleteItem" xml:space="preserve">
-    <value>Confirm delete item</value>
-  </data>
   <data name="ConfirmDeleteItemBody" xml:space="preserve">
     <value>Are you sure you want to delete this item?</value>
   </data>
-  <data name="ConfirmDeleteGroup" xml:space="preserve">
-    <value>Confirm delete group</value>
-  </data>
-  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
-    <value>Are you sure you want to delete this entire order?</value>
-  </data>
-  <data name="Confirm" xml:space="preserve">
-    <value>Confirm</value>
-  </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
-  <data name="Deleting" xml:space="preserve">
-    <value>Deleting...</value>
-  </data>
-  <data name="DeleteSuccess" xml:space="preserve">
-    <value>Deleted successfully.</value>
-  </data>
-  <data name="DeleteFailed" xml:space="preserve">
-    <value>Delete failed</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="DELETE" type="System.Resources.ResXNullRef, System.Windows.Forms">
+  <data name="DELETE" xml:space="preserve">
     <value>Delete</value>
+  </data>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>Return Failed!</value>
+  </data>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>Return Success!</value>
   </data>
 </root>

@@ -6,25 +6,25 @@ let cost = "";
 // lấy thông tin người dùng
 async function getEmployeeData() {
      // lấy thông tin phòng ban
-     var ph = document.getElementById("name_dept").value;
-     const formData = new URLSearchParams();
-     formData.append('ph', ph);
+    var ph = document.getElementById("name_dept").value;
+    const formData = new URLSearchParams();
+    formData.append('ph', ph);
+    fetch('/Request/_layphongban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+        .then(response => response.ok ? response.json() : Promise.reject(response))
+        .then(data => {
+            // tìm cost phòng theo like
+            cost = data + "%";
 
-     fetch('/Request/_layphongban', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-         body: formData.toString()
-     })
-         .then(response => response.ok ? response.json() : Promise.reject(response))
-         .then(data => {
-             // tìm cost phòng theo like
-             cost = data + "%";
-
-         })
-         .catch(err => console.error('Fetch error:', err));
+        })
+        .catch(err => console.error('Fetch error:', err));
 
        // lấy thông tin quản lý API
     let us = document.getElementById("us").innerHTML;
+
     const employeeId = us.trim();
     const url = `http://172.26.248.62:8507/api/Employee/by-adid/${employeeId}`;
 
@@ -71,7 +71,8 @@ async function getEmployeeData() {
         get_block();
         return data;
 
-    } catch (error) {
+    }
+    catch (error) {
         console.error("Không thể lấy dữ liệu:", error);
     }
 }
@@ -210,7 +211,7 @@ async function loadToCombo_GD(position, comboId) {
 
     const result = await response.json();
     for (var i = 0; i < result.Data.Data.length; i++) {
-        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_NAME}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
     }
     document.getElementById("cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
     document.getElementById("mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
@@ -238,7 +239,7 @@ async function loadToCombo_TBP(position, comboId) {
     const result = await response.json();
     document.getElementById("ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
-        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_NAME}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+        document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
     }   
     document.getElementById("cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
     document.getElementById("mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
@@ -254,6 +255,7 @@ async function get_info(us, comboId) {
         }
 
         const data = await response.json();
+    
         document.getElementById("cv_" + comboId).value = data.Data[0].CHR_EMPLOYEE_ADID;
         document.getElementById("mail_" + comboId).value = data.Data[0].CHR_EMPLOYEE_MAIL;
 

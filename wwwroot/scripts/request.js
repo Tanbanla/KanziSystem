@@ -27,7 +27,6 @@ function _insert_request() {
 
         dataList.push(rowData);
     });
-   
     var name_dept = document.getElementById("name_dept").value;
     var Cost_Center = name_dept.split(':')[0];
     var Declaration = document.getElementById("loaichiphi").value;
@@ -54,8 +53,8 @@ function _insert_request() {
     var adid_xk = document.getElementById("cv_xuatkho").value;
 
     var ten_dt = document.getElementById("ten_duthao").value;
-    var ten_tt = document.getElementById("ten_thamtra").value;
-    var ten_pd = document.getElementById("ten_pheduyet").value;
+    var ten_tt = document.getElementById("ten_thamtra").selectedOptions[0].textContent;
+    var ten_pd = document.getElementById("ten_pheduyet").selectedOptions[0].textContent;
     var ten_dy = document.getElementById("ten_dongy").value;
     var ten_xk = document.getElementById("ten_xuatkho").value;
 
@@ -67,8 +66,6 @@ function _insert_request() {
     var adidnguoitao = document.getElementById("us").innerHTML;
     var mailnguoitao = document.getElementById("email_us").textContent;
 
-
-
     if (Place == "" || name_dept == "" || Dealine == "") {
         alert("Vui lòng điền đủ thông tin vào đơn !");
         document.querySelectorAll('.close').forEach(button => button.click());
@@ -78,28 +75,60 @@ function _insert_request() {
             url: '/Request/_Insert_request',
             type: 'POST',
             dataType: 'JSON',
-            //contentType: 'application/json',
-            data: {
-                Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
-                Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
-                adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, adid_dy: adid_dy, ten_dy: ten_dy,
-                mail_dy: mail_dy, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk, adidnguoitao: adidnguoitao, mailnguoitao: mailnguoitao
-            },
+            // 1. Thêm contentType để Server biết đây là dữ liệu JSON
+            contentType: 'application/json; charset=utf-8',
+            // 2. Bỏ traditional: true vì chúng ta sẽ dùng JSON.stringify
+            data: JSON.stringify({
+                // Bao bọc tất cả các biến vào một Object và chuyển thành chuỗi JSON
+                Cost_Center: Cost_Center,
+                Declaration: Declaration,
+                Dealine: Dealine,
+                Total_exchange: Total_exchange,
+                Exchange_rate: Exchange_rate,
+                Currency: Currency,
+                Total: Total,
+                Kind: Kind,
+                Type: Type,
+                Status: Status,
+                Place: Place,
+                Loaihinhtokhai: Loaihinhtokhai,
+                Group_Code: Group_Code,
+                Chophepin: Chophepin,
+                Urgent: Urgent,
+                User_Create: User_Create,
+                rq: dataList, // Đây là danh sách đối tượng
+                adid_dt: adid_dt,
+                adid_tt: adid_tt,
+                adid_pd: adid_pd,
+                ten_dt: ten_dt,
+                ten_tt: ten_tt,
+                ten_pd: ten_pd,
+                mail_dt: mail_dt,
+                mail_tt: mail_tt,
+                mail_pd: mail_pd,
+                adid_dy: adid_dy,
+                ten_dy: ten_dy,
+                mail_dy: mail_dy,
+                adid_xk: adid_xk,
+                ten_xk: ten_xk,
+                mail_xk: mail_xk,
+                adidnguoitao: adidnguoitao,
+                mailnguoitao: mailnguoitao
+            }),
             success: function (response) {
-                /*    send_mail(mail_dt, Urgent);*/
                 alert(response);
                 location.reload();
                 document.querySelectorAll('.close').forEach(button => button.click());
                 _load_confirm();
             }
-        })
+        });
+       
        
     }
   
 }
 function _insert_request_GA() {
     // truyền list
-
     let dataList = [];
     // Chọn tất cả các dòng có class 'input-row'
     const rows = document.querySelectorAll('.input-row');
@@ -119,13 +148,12 @@ function _insert_request_GA() {
             Aim: row.querySelector('.md').value,
             Phongchiuchiphi: (row.querySelector('.pcp').value).split(':')[0],
             Vitri: row.querySelector('.vt').value,
-            Poisition: row.querySelector('.gc').value
-        };
-
+            Poisition: row.querySelector('.gc').value,
+        };      
         // Thêm đối tượng vào danh sách tổng
         dataList.push(rowData);
     });
-
+  
     var name_dept = document.getElementById("name_dept").value;
     var Cost_Center = name_dept.split(':')[0];
     var Declaration = document.getElementById("loaichiphi").value;
@@ -135,7 +163,7 @@ function _insert_request_GA() {
     var Currency = "VND";
     var Total = document.getElementById("thanhtien").value;
     var Kind = "IN";
-    var Type = document.getElementById("typee").value;
+    var Typee = document.getElementById("typee").value;
     var Status = "WAITCONFIRM";
     var Place = name_dept.split(':')[1];
     var Loaihinhtokhai = "LOAIKHAC";
@@ -154,8 +182,8 @@ function _insert_request_GA() {
     var adid_qltc = document.getElementById("GA_cv_dongy_QLTC").value;
 
     var ten_dt = document.getElementById("GA_ten_duthao").value;
-    var ten_tt = document.getElementById("GA_ten_thamtra").value;
-    var ten_pd = document.getElementById("GA_ten_pheduyet").value;
+    var ten_tt = document.getElementById("GA_ten_thamtra").selectedOptions[0].textContent;
+    var ten_pd = document.getElementById("GA_ten_pheduyet").selectedOptions[0].textContent;
  
     var ten_xk = document.getElementById("GA_ten_xuatkho").value;
     var ten_qlsc = document.getElementById("GA_ten_dongy_QLSC").value;
@@ -180,21 +208,59 @@ function _insert_request_GA() {
             url: '/Request/_Insert_request_GA',
             type: 'POST',
             dataType: 'JSON',
-            //contentType: 'application/json',
-            data: {
-                Cost_Center: Cost_Center, Declaration: Declaration, Dealine: Dealine, Total_exchange: Total_exchange, Exchange_rate: Exchange_rate, Currency: Currency, Total: Total, Kind: Kind,
-                Type: Type, Status: Status, Place: Place, Loaihinhtokhai: Loaihinhtokhai, Group_Code: Group_Code, Chophepin: Chophepin, Urgent: Urgent, User_Create: User_Create, rq: dataList,
-                adid_dt: adid_dt, adid_tt: adid_tt, adid_pd: adid_pd, ten_dt: ten_dt, ten_tt: ten_tt, ten_pd: ten_pd, mail_dt: mail_dt, mail_tt: mail_tt, mail_pd: mail_pd, 
-                ten_qlsc: ten_qlsc, ten_qltc: ten_qltc, adid_qlsc: adid_qlsc, adid_qltc: adid_qltc, mail_qlsc: mail_qlsc, mail_qltc: mail_qltc, adid_xk: adid_xk, ten_xk: ten_xk, mail_xk: mail_xk, adidnguoitao: adidnguoitao, mailnguoitao: mailnguoitao
-            },
+            // 1. Thêm contentType để Server biết đây là dữ liệu JSON
+            contentType: 'application/json; charset=utf-8',
+            // 2. Bỏ traditional: true vì chúng ta sẽ dùng JSON.stringify
+            data: JSON.stringify({
+                // Bao bọc tất cả các biến vào một Object và chuyển thành chuỗi JSON
+                Cost_Center: Cost_Center,
+                Declaration: Declaration,
+                Dealine: Dealine,
+                Total_exchange: Total_exchange,
+                Exchange_rate: Exchange_rate,
+                Currency: Currency,
+                Total: Total,
+                Kind: Kind,
+                Typee: Typee,
+                Status: Status,
+                Place: Place,
+                Loaihinhtokhai: Loaihinhtokhai,
+                Group_Code: Group_Code,
+                Chophepin: Chophepin,
+                Urgent: Urgent,
+                User_Create: User_Create,
+                rq: dataList, // Đây là danh sách đối tượng
+                adid_dt: adid_dt,
+                adid_tt: adid_tt,
+                adid_pd: adid_pd,
+                ten_dt: ten_dt,
+                ten_tt: ten_tt,
+                ten_pd: ten_pd,
+                mail_dt: mail_dt,
+                mail_tt: mail_tt,
+                mail_pd: mail_pd,
+                //adid_dy: adid_dy,
+                //ten_dy: ten_dy,
+                //mail_dy: mail_dy,
+                adid_xk: adid_xk,
+                ten_xk: ten_xk,
+                mail_xk: mail_xk,
+                adidnguoitao: adidnguoitao,
+                mailnguoitao: mailnguoitao,
+                ten_qlsc: ten_qlsc,
+                mail_qlsc: mail_qlsc,
+                adid_qlsc: adid_qlsc,
+                ten_qltc: ten_qltc,
+                adid_qltc: adid_qltc,
+                mail_qltc: mail_qltc
+            }),
             success: function (response) {
-                /*    send_mail(mail_dt, Urgent);*/
                 alert(response);
                 location.reload();
                 document.querySelectorAll('.close').forEach(button => button.click());
                 _load_confirm();
             }
-        })    
+        });
     }
 }
 async function _load_rate() {
@@ -490,6 +556,7 @@ function _modal_info(cost_request, step) {
         data: {
             cost_request: cost_request
         },
+        traditional: true,
         success: function (response) {
             document.getElementById("modal-7").click();
             document.getElementById("load_detail_0").innerHTML = "";
@@ -595,8 +662,8 @@ function _update_request(id) {
             id_request: id_request, regency: regency, step: step, urgent: urgent
         },
         success: function (response) {
-            /*   document.querySelectorAll('.close').forEach(button => button.click());*/
             alert(response);
+            document.querySelectorAll('.close').forEach(button => button.click());           
             //document.getElementById("cls" + id).innerHTML = "";
             var us = document.getElementById("us").innerHTML;
             _load_confirm(us);
@@ -699,8 +766,7 @@ function _update_request_all_GA(request) {
 }
 function _dongy_all() {
 
-    const checkboxes = document.querySelectorAll('input.item');
-  
+    const checkboxes = document.querySelectorAll('input.item:checked');
     checkboxes.forEach((item) => {
         if (item.checked) {
             _update_request_all(item.value);
@@ -710,7 +776,7 @@ function _dongy_all() {
 }
 function _dongy_all_GA() {
 
-    const checkboxes = document.querySelectorAll('input.item');
+    const checkboxes = document.querySelectorAll('input.item:checked');
 
     checkboxes.forEach((item) => {
         if (item.checked) {

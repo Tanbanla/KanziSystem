@@ -96,6 +96,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var data = await _conn.QueryAsync<dynamic>(selectSql.ToString(), parameters);
 
+            var a = selectSql.ToString();
             var result = new ListRequest<dynamic>
             {
                 Data = data.ToList(),
@@ -249,6 +250,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_UserShip = user;
                     row.DTM_UserShip = now;
                     row.CHR_StatusShip = "Confirmed";
+                    row.CHR_Status = "Confirmed";
 
                     if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
                     {
@@ -263,6 +265,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
                     row.NVCHR_LyDo = i.NVCHR_LyDo;
                     row.NVCHR_Note = i.NVCHR_Note;
+                    row.CHR_Status = "Confirming";
+                    row.CHR_StatusShip = "Confirming";
                     row.VCHR_UserPUR = user;
                     row.DTM_UserPUR = now;
                 }
@@ -314,6 +318,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 {
                     if (item.TenHaiQuan != null) row.VCHR_TenHaiQuan = item.TenHaiQuan;
                     if (item.MaHangNoiBo != null) row.VCHR_MaHangNoiBo = item.MaHangNoiBo;
+                    row.CHR_Status = "Confirming";
+                    row.CHR_StatusShip = "Confirming";
                     row.VCHR_UserPUR = user;
                     row.DTM_UserPUR = now;
                 }
@@ -326,7 +332,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.DTM_UpdateDate = now;
                 row.VCHR_UpdateBy = user;
             }
-            //await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return true;
         }
         // Approvers 
@@ -471,6 +477,34 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var result = await connection.QueryAsync<ResultCheckCofirmName>(sql, new { ListCheck = listCheck });
                 return result.ToList();
             }
+        }
+        // Cập nhật thông tin đơn báo giá sau khi trả lại
+        public async Task<bool> UpdateRequestFromFileAsync(List<BaoGia_Request_of_Quotation> baoGia, string user)
+        {
+            if (baoGia == null || !baoGia.Any()) return false;
+            foreach (var item in baoGia)
+            {
+                var confirmName = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.ID);
+                if (confirmName == null) continue;
+                var rq = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(x => x.ID == confirmName.ID_RequestQuote);
+                if (rq == null) continue;
+                // Update infor request quote
+                rq.NVCHR_HinhDang = item.NVCHR_HinhDang;
+                rq.NVCHR_ChatLieu = item.NVCHR_ChatLieu;
+                rq.NVCHR_ThanhPhan = item.NVCHR_ThanhPhan;
+                rq.NVCHR_KichThuoc = item.NVCHR_KichThuoc;
+                rq.NVCHR_DongMay = item.NVCHR_DongMay;
+                rq.NVCHR_TinhNang = item.NVCHR_TinhNang;
+                rq.CHR_MaThietBi = item.CHR_MaThietBi;
+                rq.CHR_MaHangNCC = item.CHR_MaHangNCC;
+                // update confirm name
+                confirmName.CHR_Status = "Confirming";
+                confirmName.CHR_StatusShip = "Confirming";
+                confirmName.DTM_UserPUR = DateTime.Now;
+                confirmName.VCHR_UserPUR = user;
+            }
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

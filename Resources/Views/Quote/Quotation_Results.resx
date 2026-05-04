@@ -823,4 +823,7 @@
   <data name="UnHideDetail" xml:space="preserve">
     <value>Hiển thị chi tiết</value>
   </data>
+  <data name="RequestList" xml:space="preserve">
+    <value>Danh sách đơn</value>
+  </data>
 </root>

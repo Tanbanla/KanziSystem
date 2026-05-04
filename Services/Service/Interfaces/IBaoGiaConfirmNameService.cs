@@ -32,5 +32,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> RejectConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
         public Task<GenericResponse<List<ResultCheckCofirmName>>> CheckDonHangConfirmedAsync(List<int> listCheck);
+        // Cập nhật thông tin đơn báo giá sau khi trả lại
+        public Task<GenericResponse<bool>> UpdateRequestFromFileAsync(List<BaoGia_Request_of_QuotationDTO> baoGia, string user);
     }
 }

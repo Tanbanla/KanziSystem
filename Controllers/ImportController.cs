@@ -274,6 +274,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpGet]
         public ActionResult ExportToExcel()
         {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             string pathDir = Path.Combine(_env.ContentRootPath, "Data");
             string templatePath = Path.Combine(pathDir, "File_import_ex.xlsx");
@@ -306,6 +307,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         wsLocation.Cells["A" + (idx + 2)].Value = DataLocation[idx];
                     }
+                   
+                    var wsAccCost = package.Workbook.Worksheets[4];
+                    
+                    var list = db.GET_DATA_FROM_SQL("Select null As Account_Code,null As Account_Name_EN Union ALL SELECT DISTINCT [Account_Code],[Account_Code]+':'+[Account_Name_EN] AS Account_Name_EN FROM [TM_ACCOUNT]");
+                    List<string> maketoan = new List<string>();
+                    for (int i = 0; i < list.Rows.Count; i++)
+                    {
+                        maketoan.Add(list.Rows[i][1].ToString()!);
+                    }
+                    for (int idx = 0; idx < maketoan.Count; idx++)
+                    {
+                        wsAccCost.Cells["A" + (idx + 2)].Value = maketoan[idx];
+                    }
 
                     package.Save();
                 }
@@ -322,11 +336,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest($"Lỗi xử lý: {ex.Message}");
             }
-
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportFileExcel(IFormFile file, string us)
+        public async Task<IActionResult> ImportFileExcel(IFormFile file, string us, string khoi)
         {
             //if(file == null || file.Length = 0)
             //{
@@ -343,7 +356,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //}
 
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
-            string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
+            //string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
             var resultList = new List<Dictionary<string, object>>();
 
             var extension = Path.GetExtension(file.FileName).ToLower();
@@ -362,6 +375,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         "id",
                         "nameMaterial",
+                        "stk",
                         "quantity",
                         "purpose",
                         "deptCost",
@@ -468,6 +482,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cells["M" + currentRow].Value = item.Aim;
                     }
 
+                    int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng
+                    ws.Cells["L" + totalRow].Formula = $"SUM(L{startRow}:L{totalRow - 1})";
+                 
+                    // Tính toán lại toàn bộ công thức trong sheet trước khi lưu
+                    ws.Calculate();
                     package.Save();
                 }
 
@@ -507,6 +526,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _XOADONPROD(string iD_REQUEST)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
+
+            //var xoatrangthai = db.GET_DATA_FROM_SQL("delete from [PE_REQUEST_CONFIRM] where  [ID_REQUEST] = '" + iD_REQUEST + "'");
+            //var xoa_request = db.GET_DATA_FROM_SQL("delete from [REQUEST] where  [Id_Request] = '" + iD_REQUEST + "' ");
+            //var xoa_deltail = db.GET_DATA_FROM_SQL("delete from [REQUEST_DETAIL] where  [Id_Request] = '" + iD_REQUEST + "' ");
             // check trạng thái đơn
             var list = db.ReturnString("select count(*) from [PE_REQUEST_CONFIRM] where INT_STEP = '0' and  [ID_REQUEST] = '" + iD_REQUEST + "' ");
             try
@@ -523,7 +546,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return Json("Không thành công . Kiểm tra trạng thái đơn");
                 }
             }
-          catch 
+            catch
             {
                 return Json("Đơn yêu cầu lỗi");
             }

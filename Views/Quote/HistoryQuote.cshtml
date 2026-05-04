@@ -9,6 +9,7 @@
     List<string> madons = Model.DanhSachMaDon;
     List<string> categoryS = Model.DanhSachCategory;
     List<string> phanLoais = ["A", "B", "C", "E","I" ,"NO LIST"];
+    string role = Model.Role;
      // determine UI language and prepare localized display names for steps and status
     var uiLang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? "vi";
     Func<BaoGia_StatusDTO, string> statusDisplay = s => uiLang == "en" ? (s.CHR_TenStatusEN ?? s.NVCHR_TenStatus) : uiLang == "ja" ? (s.CHR_TenStatusJP ?? s.NVCHR_TenStatus) : s.NVCHR_TenStatus;
@@ -461,7 +462,8 @@
 </div>
 <script>
     window.HistoryData = {
-        status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(localizedStatus))
+        status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(localizedStatus)),
+        role : @Html.Raw(System.Text.Json.JsonSerializer.Serialize(role))
     };
     window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     window.i18nHistoryQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
@@ -523,6 +525,10 @@
         UpdatedBy=Localizer["UpdatedBy"].Value,
         Reason = Localizer["Reason"].Value,
         PageTitleHistory = Localizer["PageTitleHistory"].Value,
+        MsgSelectGroupFailed = Localizer["MsgSelectGroupFailed"].Value,
+        Exporting = Localizer["Exporting"].Value,
+        ReturnFailed  = Localizer["ReturnFailed"].Value,
+        ReturnSuccess = Localizer["ReturnSuccess"].Value
     }));
 </script>
 @section Scripts {
