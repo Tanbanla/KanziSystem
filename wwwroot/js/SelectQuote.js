@@ -1,8 +1,4 @@
-// Tìm kiếm - support both jQuery and plain DOM
-// Define only if not already defined to avoid conflicts when multiple pages include similar scripts
 if (typeof window.buildSearchableDropdown !== 'function') {
-
-
 
     // show dialog
     function getDialogEls() {
@@ -16,7 +12,6 @@ if (typeof window.buildSearchableDropdown !== 'function') {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
         if (!overlay) return alert(message);
 
-        // Ensure overlay is attached to body so fixed positioning is not clipped by parent containers
         try {
             if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
         } catch (e) { /* ignore */ }
@@ -37,7 +32,6 @@ if (typeof window.buildSearchableDropdown !== 'function') {
         overlay.style.display = 'flex';
         attachDialogCloseHandlers();
     }
-    // Prompt dialog that returns a Promise resolving to the entered text, or null if cancelled
     function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', placeholder = '', defaultValue = '' } = {}) {
         return new Promise((resolve) => {
             const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
@@ -691,7 +685,6 @@ function hideEditModal() {
                 throw new Error(txt || 'Server error');
             }
             const data = await res.json();
-            // controller returns a payload with .data or direct list; handle common shapes
             const items = (data && data.data) ? (Array.isArray(data.data) ? data.data : (data.data.data || [])) : (Array.isArray(data) ? data : []);
             const total = (data && data.data && typeof data.data.totalCount === 'number') ? data.data.totalCount : (data && typeof data.totalCount === 'number' ? data.totalCount : items.length);
             state.totalCount = total;
@@ -727,8 +720,26 @@ function hideEditModal() {
         const selectAll = document.getElementById('selectAll');
         if (selectAll) {
             selectAll.addEventListener('change', function () {
-                const checks = document.querySelectorAll('#sectionRequestBody .group-select');
-                checks.forEach(c => { c.checked = selectAll.checked; const ev = new Event('change', { bubbles: true }); c.dispatchEvent(ev); });
+                const checks = Array.from(document.querySelectorAll('#sectionRequestBody .group-select'));
+                const checked = !!selectAll.checked;
+                window._selectedGroups = window._selectedGroups || new Set();
+                if (checked) {
+                    checks.forEach(c => {
+                        c.checked = true;
+                        const md = c.dataset ? c.dataset.madon : null;
+                        if (md) window._selectedGroups.add(md);
+                        try { c.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) { }
+                        try { c.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+                    });
+                } else {
+                    checks.forEach(c => {
+                        c.checked = false;
+                        const md = c.dataset ? c.dataset.madon : null;
+                        if (md) window._selectedGroups.delete(md);
+                        try { c.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) { }
+                        try { c.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+                    });
+                }
             });
         }
         // export selected

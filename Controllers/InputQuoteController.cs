@@ -464,7 +464,30 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        // tìm kiếm đơn báo giá
+        [HttpPost]
+        public async Task<IActionResult> SearchBaoGia([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            var result = await _baoGiaService.SearchAsync(
+                searchModel.MaDon,
+                searchModel.MaNcc,
+                searchModel.Section,
+                searchModel.NguoiYeuCau,
+                searchModel.MaHang,
+                searchModel.TrangThai,
+                searchModel.Step,
+                GetCurrentUserId() ?? "",
+                searchModel.PageIndex,
+                searchModel.PageSize,
+                searchModel.Date,
+                searchModel.ChungLoai
+                );
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
         // Đổi tiền VND sang USD or USD sang VND
         private double? ParseVNDtoUSD(double input, bool isVNDToUSD, float exchangeRate)
         {

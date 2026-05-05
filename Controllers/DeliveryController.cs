@@ -151,7 +151,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             sqlColumn += ",[LuongvekhoKhonhap],[Aim],[Loaihinhtokhai],[Account_Code],[Phongchiuchiphi]";
 
             string cmdQry = $"SELECT TOP 200 {sqlColumn} FROM [PO] WHERE {WhereCmd} [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{khoi}' and Code_Request like '%{data.Mayeucau}%' and Mahang like '%{data.Mahang}%' and Tenphongyeucau like N'%{data.Phongbanyeucau}%'  ORDER BY [SoPO] DESC, Hienthi ASC";
-
+            if (khoi == "PROD")
+            {
+                cmdQry = $"SELECT TOP 200 {sqlColumn} FROM [PO] WHERE {WhereCmd} [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND ([Group_Code] = '{khoi}' OR [Group_Code] = 'PUR' ) and Code_Request like '%{data.Mayeucau}%' and Mahang like '%{data.Mahang}%' and Tenphongyeucau like N'%{data.Phongbanyeucau}%'  ORDER BY [SoPO] DESC, Hienthi ASC";
+            }
             var dataResult = Models.PO.GetPoByPoNumber(cmdQry);
             return Json(dataResult);
         }
@@ -185,7 +188,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             if(khoi == "PROD")
             {
-                cmdQry = $"SELECT TOP (300) {sqlColumn} FROM [PO] WHERE [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND [Group_Code] = '{khoi}' AND [Group_Code] = 'PUR' ORDER BY [SoPO] DESC, Hienthi ASC";
+                cmdQry = $"SELECT TOP (300) {sqlColumn} FROM [PO] WHERE [TinhtrangPO] Not in ('DANGCHOXACNHAN','HUY') AND ([Group_Code] = '{khoi}' OR [Group_Code] = 'PUR') ORDER BY [SoPO] DESC, Hienthi ASC";
             }
             var dataResult = Models.PO.GetPoByPoNumber(cmdQry);
             return Json(dataResult);

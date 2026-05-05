@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Global UI state preserved across tab switches
-    // store opened supplier groups (key: "MaDon-MaHang") and additional-columns visibility
+
     window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
 
     // Pagination state for Request List tab
@@ -117,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             const T = window.i18nQuotationResults || {};
             //SearchInputQuote
-            fetch((window.apiBaseUrl || '') + '/Quote/SearchSupplierQuoteBody', {
+            fetch((window.apiBaseUrl || '') + '/QuotationResults/SearchSupplierQuoteBody', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -458,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 var payloadWithApprover = { UserApproverNext: approverNext, listPick: payload };
                 showLoading((T && T.LoadingData) ? T.LoadingData : 'Đang lưu...');
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/SavePickSupplier', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuotationResults/SavePickSupplier', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadWithApprover)
@@ -677,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         openEditRequestModal: async function (id) {
             try {
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/SearchID', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuotationResults/SearchID', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(id)
@@ -763,7 +762,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 try {
                 const T = window.i18nQuotationResults || {};
                 showLoading(T.LoadingData || 'Đang xử lý...');
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelQuotationResult', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuotationResults/ExportFileExcelQuotationResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -820,7 +819,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('file', file);
                 // Gửi request
                 try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
-                fetch((window.apiBaseUrl || '') + '/Quote/ImportApprovalQuotianExcel', {
+                fetch((window.apiBaseUrl || '') + '/QuotationResults/ImportApprovalQuotianExcel', {
                     method: 'POST',
                     body: formData
                 })
@@ -901,7 +900,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fd.append('userNextApproval', selectedApproverTab2?.chR_UserAdid || '');
                 // Gửi request
                 try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
-                fetch((window.apiBaseUrl || '') + '/Quote/ImportQuotianExcel', {
+                fetch((window.apiBaseUrl || '') + '/QuotationResults/ImportQuotianExcel', {
                     method: 'POST',
                     body: fd
                 })
@@ -982,7 +981,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         pageSize: 30,
                         pageIndex: 0
                     };
-                    const res = await fetch((window.apiBaseUrl || '') + '/Quote/SearchInputQuote', {
+                    const res = await fetch((window.apiBaseUrl || '') + '/InputQuote/SearchInputQuote', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1085,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 pageSize: requestListState.pageSize
             };
             try {
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetThongTinBaoGiaGomNhom', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuotationResults/GetThongTinBaoGiaGomNhom', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1330,7 +1329,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const T = window.i18nQuotationResults || {};
                 showLoading(T.LoadingData || 'Đang xử lý...');
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelApproverResult', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuotationResults/ExportFileExcelApproverResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(selectedMaDons)
@@ -1366,7 +1365,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!maDon) return;
             try {
                 const T = window.i18nQuotationResults || {};
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetSupplierApprovalInfor', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuotationResults/GetSupplierApprovalInfor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(maDon)
@@ -1712,7 +1711,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 UserApproverNext: userApproverNext
                             };
 
-                            const response = await fetch((window.apiBaseUrl || '') + '/Quote/ConfirmApprover', {
+                            const response = await fetch((window.apiBaseUrl || '') + '/QuotationResults/ConfirmApprover', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(payload)
@@ -2055,7 +2054,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             try {
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ChonNhaCungCapBaoGia', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuotationResults/ChonNhaCungCapBaoGia', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(selections)
@@ -2093,7 +2092,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgExportSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp hoặc sản phẩm để xuất.'), type: 'info' });
                 return;
             }
-            fetch((window.apiBaseUrl || '') + '/Quote/ExportSelection', {
+            fetch((window.apiBaseUrl || '') + '/QuotationResults/ExportSelection', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selected)

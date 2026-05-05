@@ -342,7 +342,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             // Lấy địa chỉ email từ DataTable
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
-
+          
             // Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
             if (buoc == 5)
             {
@@ -353,10 +353,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
-
-            // Gửi mail 
             REQUEST_PROCESS._sendmail(body, mailTo, subject);
             var up = REQUEST_PROCESS._update_request(id_request, regency, buoc.ToString());
+            // gửi đến người tạo đơn
+            if (step == "4")
+            {
+                string guiden = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
+                body = $@"Xin chào <br />
+                     Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái đã đến kho <br /><br />
+                     Bạn vui lòng đến kho để nhận hàng <br /><br />
+                     Kiểm tra thông tin đơn tại : <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
+                REQUEST_PROCESS._sendmail(body, guiden, subject);
+            }
+            // Gửi mail 
+          
             return Json(up);
         }
         public JsonResult _update_request_GA(string id_request, string regency, string step, string urgent)
@@ -414,7 +426,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             // Gửi mail 
             REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
-
+            if (step == "5")
+            {
+                string guiden = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
+                body = $@"Xin chào <br />
+                     Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái đã đến kho <br /><br />
+                     Bạn vui lòng đến kho để nhận hàng <br /><br />
+                     Kiểm tra thông tin đơn tại : <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
+                REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
+            }
             return Json("OK");
         }
         public JsonResult _update_dongytatca(string us, string madon)

@@ -445,7 +445,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var firstLoad = load.First();
 
                     // Điền thông tin header
-                    ws.Cells["L2"].Value = firstLoad.Group_Code;
+                    ws.Cells["L2"].Value = firstLoad.Code_Request;
+                    ws.Cells["J2"].Value = firstLoad.Group_Code;
                     ws.Cells["A5"].Value = firstLoad.Cost_Center_Group;
                     ws.Cells["C5"].Value = firstLoad.Cost_Center;
                     ws.Cells["D5"].Value = firstLoad.Name;
@@ -481,9 +482,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cells["L" + currentRow].Formula = (item.Amount * item.Price).ToString();
                         ws.Cells["M" + currentRow].Value = item.Aim;
                     }
-
-                    int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng
-                    ws.Cells["L" + totalRow].Formula = $"SUM(L{startRow}:L{totalRow - 1})";
+                  
+                    int totalRow = startRow  + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng
+                    ws.Cells["L" + totalRow + 12].Formula = $"SUM(L{startRow}:L{totalRow - 1})";
                  
                     // Tính toán lại toàn bộ công thức trong sheet trước khi lưu
                     ws.Calculate();

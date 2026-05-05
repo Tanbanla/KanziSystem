@@ -668,8 +668,7 @@ function _update_request(id) {
             var us = document.getElementById("us").innerHTML;
             _load_confirm(us);
         }
-    })
-   
+    })  
 }
 function _update_request_GA(id) {
 
