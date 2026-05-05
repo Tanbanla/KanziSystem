@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+
+  <data name="PleaseSelectQuoteRequest" xml:space="preserve">
+    <value>Vui lòng chọn yêu cầu báo giá</value>
+  </data>
+  <data name="NoDataToExport" xml:space="preserve">
+    <value>Không có dữ liệu để xuất</value>
+  </data>
+  <data name="TemplateNotFound" xml:space="preserve">
+    <value>Không tìm thấy file template: {0}</value>
+  </data>
+  <data name="WorksheetNotFound" xml:space="preserve">
+    <value>Không tìm thấy worksheet trong template</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Lỗi xuất file: {0}</value>
+  </data>
+  <data name="VendorCodeMultipleSelected" xml:space="preserve">
+    <value>Mã hàng nội bộ '{0}' đã chọn nhiều hơn 1 Vendor Code khác nhau ({1} vendor code)</value>
+  </data>
+  <data name="VendorCodeNotSelected" xml:space="preserve">
+    <value>Mã hàng nội bộ '{0}' chưa chọn bất kỳ Vendor Code nào (thiếu 'O')</value>
+  </data>
+  <data name="EquipmentCategoryMultipleVendors" xml:space="preserve">
+    <value>Mã thiết bị '{0}' và chủng loại hàng '{1}' đã chọn nhiều Vendor Code khác nhau ({2} vendor code)</value>
+  </data>
+  <data name="MaterialNameMismatch" xml:space="preserve">
+    <value>Mã hàng nội bộ '{0}' có tên hàng khác nhau: (Eng): {1}</value>
+  </data>
+  <data name="SelectedPriceNotLowest" xml:space="preserve">
+    <value>Đơn giá được chọn (USD: {0}) không phải giá thấp nhất (USD: {1})</value>
+  </data>
+  <data name="DuplicatePriceForVendor" xml:space="preserve">
+    <value>Mã hàng '{0}' và Vendor Code '{1}' có nhiều hơn 1 mức đơn giá khác nhau</value>
+  </data>
+  <data name="SelectedVendorNoReason" xml:space="preserve">
+    <value>Hàng được chọn nhà cung cấp (O) nhưng chưa có lý do</value>
+  </data>
+  <data name="SelectedVendorNoReasonColumn" xml:space="preserve">
+    <value>Hàng được chọn nhà cung cấp (O) nhưng chưa có lý do (cột {0})</value>
+  </data>
+</root>
