@@ -113,15 +113,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resources\Views\HistoryQuote\HistoryQuote.en.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\HistoryQuote\HistoryQuote.ja.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\HistoryQuote\HistoryQuote.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Views\Import\Languages.en.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
@@ -132,45 +123,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Languages.Designer.cs</LastGenOutput>
       <CustomToolNamespace>PRJ_WAREHOUSE_BIVN.Language</CustomToolNamespace>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\InputQuote\HistoryQuote.en.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\InputQuote\InputQuote.en.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\InputQuote\InputQuote.ja.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\InputQuote\InputQuote.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\InputQuote\InputQuoteDetail.en.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\InputQuote\InputQuoteDetail.ja.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\InputQuote\InputQuoteDetail.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\QuotationResults\Quotation_Results.en.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\QuotationResults\Quotation_Results.ja.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\QuotationResults\Quotation_Results.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\SelectQuoteSection\SelectQuoteSection.en.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\SelectQuoteSection\SelectQuoteSection.ja.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Views\SelectQuoteSection\SelectQuoteSection.resx">
-      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
 

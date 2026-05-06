@@ -18,12 +18,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _mapper = mapper;
         }
         // search thông tin xác nhận tên hàng
-        public async Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role,int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role,string user, int pageIndex, int pageSize)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.SearchAsync(TenHang, SoDon, TrangThai, section, role, pageIndex, pageSize);
+                result.Data = await _repo.SearchAsync(TenHang, SoDon, TrangThai, section, role, user, pageIndex, pageSize);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -237,6 +237,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 var rq = _mapper.Map<List<BaoGia_Request_of_Quotation>>(baoGia);
                 result.Data = await _repo.UpdateRequestFromFileAsync(rq, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
+        public async Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<int> baoGia, string user)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.UpdateRequestForPICPURAsync(baoGia, user);
                 result.Success = true;
             }
             catch (Exception ex)

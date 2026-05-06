@@ -405,7 +405,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             {
                 gia = "and b.Total >= '10000'";
             }
-            var list = _db.GET_DATA_FROM_SQL($@"select top (1000) * from [PE_REQUEST_CONFIRM] as a 
+            var list = _db.GET_DATA_FROM_SQL($@"select top (300) * from [PE_REQUEST_CONFIRM] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
                         WHERE b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and Urgent like '%{Urgent}%' {gia}  
@@ -603,7 +603,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return ctxk;
         }
-        public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string id_rq)
+        public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, DateTime thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string id_rq)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             try

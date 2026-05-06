@@ -419,11 +419,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
-            else
-            {
-                var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());
-                return Json(up);
-            }
+           
+            var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());
+              
+            
             // Gửi mail 
             REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
             if (step == "5")
@@ -442,7 +441,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _update_dongytatca(string us, string madon)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
-            var kq = REQUEST_PROCESS._update_all(us, madon);
+            //var kq = REQUEST_PROCESS._update_all(us, madon);
             
             string body = $@"Xin chào <br />
                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
@@ -450,7 +449,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                     ※このメールは自動的に送付されたので, 返事をしないでください。";
-
+             
             var get_if = db.GET_DATA_FROM_SQL("select INT_STEP, CHR_MAIL_NGUOITAO, Urgent from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request where b.Code_Request = '" + madon.Split("_")[0] + "' ");
          
             string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
@@ -460,9 +459,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
             }
             // Gửi mail
+            var catmadon = madon.Split("_")[0];
+            var get_id = db.ReturnString("select [Id_Request] from [REQUEST] where [Code_Request] = '" + catmadon + "'");
 
-            int buoc = int.Parse(get_if.Rows[0][0].ToString()!);
-            var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM where ID_REQUEST = '" + madon.Split("_")[0] + "'");
+            int buoc = (int.Parse(get_if.Rows[0][0].ToString()!) + 1);
+            var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM where ID_REQUEST = '" + get_id + "'");
             // Định nghĩa cột email tương ứng với từng bước
             string? columnName = buoc switch
             {
@@ -483,22 +484,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (buoc == 5)
             {
                 body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
                      <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
 
-            var up = REQUEST_PROCESS._update_request(madon.Split("_")[0], columnName, buoc.ToString());
+            var up = REQUEST_PROCESS._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
             REQUEST_PROCESS._sendmail(body, mailTo!, subject);            
              
-            return Json(kq);
+            return Json(up);
         }
         public JsonResult _update_dongytatca_GA(string us, string madon)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
-            var kq = REQUEST_PROCESS_GA._update_all(us, madon);
+            //var kq = REQUEST_PROCESS_GA._update_all(us, madon);
 
             string body = $@"Xin chào <br />
                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
@@ -517,8 +518,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             // Gửi mail
 
+            var catmadon = madon.Split("_")[0];
+            var get_id = db.ReturnString("select [Id_Request] from [REQUEST] where [Code_Request] = '" + catmadon + "'");
+
             int buoc = int.Parse(get_if.Rows[0][0].ToString()!);
-            var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + madon.Split("_")[0] + "'");
+            var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + get_id + "'");
             // Định nghĩa cột email tương ứng với từng bước
             string? columnName = buoc switch
             {
@@ -539,18 +543,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (buoc == 5)
             {
                 body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
                      <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
             // update đơn
-            var up = REQUEST_PROCESS_GA._update_request(madon.Split("_")[0], columnName, buoc.ToString());
+            var up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
             // gửi mail
             REQUEST_PROCESS_GA._sendmail(body, mailTo!, subject);
 
-            return Json(kq);
+            return Json(up);
         }
         public JsonResult _reject(string id_request, string reason, string regency, string step, string urgent)
         {

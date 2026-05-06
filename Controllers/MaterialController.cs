@@ -70,9 +70,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             if (role.Data == null || (role.Data !="UserPUR" && role.Data != "UserShip"&& role.Data != "UserAcc"))
             {
-                return BadRequest("Không có quyền truy cập vào trang này.");
+                ViewBag.Role = "User";
             }
-            ViewBag.Role = role.Data;
+            else
+            {
+                ViewBag.Role = role.Data;
+            }
             var vitris = await LoadNhomViTriDataAsync();
             var vm = new MaterialVM
             {
@@ -83,7 +86,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<DEPARTMENTDTO>> LoadNhomViTriDataAsync()
         {
-            var nhomViTri = await _deparmentService.GetAllDepartmentAsync();
+            var nhomViTri = await _deparmentService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId());
             return nhomViTri.Data ?? new List<DEPARTMENTDTO>();
         }
         private async Task<List<dynamic>> LoadConfirmedCodesAsync()
@@ -96,7 +99,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
         {
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
-            var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role.Data, req.pageIndex, req.pageSize);
+            var user = (string.IsNullOrEmpty(role.Data)) ? GetCurrentUserId() : "";
+            var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role.Data, user, req.pageIndex, req.pageSize);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -367,6 +371,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var role = roleAsync.Success ? roleAsync.Data : string.Empty;
             var itemOK = new List<BaoGia_Confirm_Name_Quotation>();
             var itemNG = new List<ConfirmNameDTO>();
+            var listDifferent = new List<int>();
             var listUpdateRequest = new List<BaoGia_Request_of_QuotationDTO>();
             var hasErrors = false;
             try
@@ -392,11 +397,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         hasErrors = true;
                         continue;
                     }
-                    var a = int.Parse(ws.Cell(r, 2).GetString());
                     switch (role)
                     {
                         case "UserShip":
                             var tenHaiQuan = ws.Cell(r, 23).GetString();
+                            var tenRecomment = ws.Cell(r, 11).GetString();
                             bool bitReturn = ws.Cell(r, 25).GetString().Trim().ToUpper() == "X" ? false : true;
                             var reasonReturn = ws.Cell(r, 26).GetString().Trim();
                             if(string.IsNullOrEmpty(reasonReturn) && !bitReturn)
@@ -411,7 +416,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 hasErrors = true;
                                 continue;
                             }
-                            if (!bitReturn)
+                            if (bitReturn)
                             {
                                 itemNG.Add(new ConfirmNameDTO
                                 {
@@ -422,16 +427,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             else
                             {
-                                itemOK.Add(new BaoGia_Confirm_Name_Quotation
+                                if(tenHaiQuan != tenRecomment)
                                 {
-                                    ID = int.Parse(ws.Cell(r, 2).GetString()),
-                                    VCHR_TenHaiQuan = tenHaiQuan,
-                                    VCHR_UserShip = GetCurrentUserId(),
-                                    DTM_UserShip = DateTime.Now
-                                });
+                                    listDifferent.Add(int.Parse(ws.Cell(r, 2).GetString()));
+                                }
+                                else
+                                {
+                                    itemOK.Add(new BaoGia_Confirm_Name_Quotation
+                                    {
+                                        ID = int.Parse(ws.Cell(r, 2).GetString()),
+                                        VCHR_TenHaiQuan = tenHaiQuan,
+                                        VCHR_UserShip = GetCurrentUserId(),
+                                        DTM_UserShip = DateTime.Now
+                                    });
+                                }
                             }
                             break;
                         case "UserPUR":
+                        default:
                             var itemRequest = new BaoGia_Request_of_QuotationDTO
                             {
                                 ID = int.Parse(ws.Cell(r, 2).GetString()),
@@ -446,9 +459,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             };
                             listUpdateRequest.Add(itemRequest);
                             break;
-                        default:
-                            ws.Cell(r, 27).SetValue("Bạn không có quyền update file");
-                            break;
+                            //ws.Cell(r, 27).SetValue("Bạn không có quyền update file");
+                            //break;
                     }
 
                 }
@@ -467,61 +479,106 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Không có dữ liệu hợp lệ để lưu");
                 }
-                await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
+                if (role == "UserShip")
+                {
+                    await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
+                    // gửi mail thông báo đã hoàn thành xác nhận tên đến PIC PUR
+                    if (itemOK.Any() || itemOK != null)
+                    {
+                        var listCheck = itemOK.Select(d => d.ID).ToList();
+                        // Send Mail PIC khi đơn hoàn thành xác nhận tên hải quan
+                        _ = Task.Run(async () =>
+                        {
+                            using (var scope = _serviceScopeFactory.CreateScope())
+                            {
+                                try
+                                {
+                                    var listDone = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                    if (!listDone.Success)
+                                    {
+                                        _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
+                                        return;
+                                    }
+
+                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                                    foreach (var item in listDone.Data)
+                                    {
+                                        // gửi mail thông báo đơn đã hoàn thành xác nhận tên hải quan
+                                        var emailResult = await sendMailService.SendMailAsync(
+                                            item.UserCreate + "@brothergroup.net",
+                                            string.Empty,
+                                            18,
+                                            "Quote/SelectQuoteSection",
+                                            true,
+                                            item.Section,
+                                            item.MaDon,
+                                            item.UserCreate);
+                                    }
+
+                                    // gửi mail thông báo có yêu cầu xác nhận tên mới 
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                                }
+                            }
+                        });
+                    }
+
+                    // với các dữ liệu tên bị lệch
+                    if (listDifferent.Count() > 0)
+                    {
+                        await _confirmNameService.UpdateRequestForPICPURAsync(listDifferent,user);
+                        //_ = Task.Run(async () =>
+                        //{
+                        //    using (var scope = _serviceScopeFactory.CreateScope())
+                        //    {
+                        //        try
+                        //        {
+                        //            var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                        //            var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
+
+                        //            // danh sach PIC
+                        //            var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
+                        //            if (!result.Success)
+                        //            {
+                        //                _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
+                        //            }
+                        //            var dataPic = result.Data;
+                        //            string emailList = string.Join("; ", dataPic.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
+
+                        //            // gửi mail thông báo có yêu cầu xác nhận tên mới 
+                        //            var emailResult = await sendMailService.SendMailAsync(
+                        //                emailList,
+                        //                string.Empty,
+                        //                21,
+                        //                "Material/ConfirmName",
+                        //                true,
+                        //                "",
+                        //                "",
+                        //                "");
+                        //        }
+                        //        catch (Exception ex)
+                        //        {
+                        //            _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                        //        }
+                        //    }
+                        //});
+                    }
+                }
+
                 // Lưu thông tin cập nhật vào request với role UserPUR
-                if(listUpdateRequest.Any() && role == "UserPUR")
+                if(listUpdateRequest.Any())
                 {
                     await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
                 }
-                // gửi mail thông báo đã hoàn thành xác nhận tên
-                if (itemOK.Any() || itemOK != null)
-                {
-                    var listCheck = itemOK.Select(d => d.ID).ToList();
-                    // Send Mail PIC khi đơn hoàn thành xác nhận tên hải quan
-                    _ = Task.Run(async () =>
-                    {
-                        using (var scope = _serviceScopeFactory.CreateScope())
-                        {
-                            try
-                            {
-                                var listDone = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
-                                if (!listDone.Success)
-                                {
-                                    _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
-                                    return;
-                                }
 
-                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-
-                                foreach (var item in listDone.Data)
-                                {
-                                    // gửi mail thông báo đơn đã hoàn thành xác nhận tên hải quan
-                                    var emailResult = await sendMailService.SendMailAsync(
-                                        item.UserCreate + "@brothergroup.net",
-                                        string.Empty,
-                                        18,
-                                        "Quote/SelectQuoteSection",
-                                        true,
-                                        item.Section,
-                                        item.MaDon,
-                                        item.UserCreate);
-                                }
-
-                                // gửi mail thông báo có yêu cầu xác nhận tên mới 
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
-                            }
-                        }
-                    });
-                }
-
-                // Nếu có dữ liệu bị trả lại
+                // Nếu có dữ liệu bị trả lại gửi đến PIC phòng ban để chỉnh sửa lại thông tin
                 if (itemNG.Any() || itemNG.Count >0)
                 {
                     await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
-
+                    var listCheck = itemNG.Select(d => d.Id).ToList();
                     // Send Mail PIC phụ trách xác nhận tên mới (User Ship) khi có yêu cầu trả lại
                     _ = Task.Run(async () =>
                     {
@@ -529,28 +586,29 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             try
                             {
-                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                                var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
 
-                                // danh sach PIC
-                                var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
-                                if (!result.Success)
+                                var listPIC = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                if (!listPIC.Success)
                                 {
-                                    _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
+                                    _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listPIC.Message);
+                                    return;
                                 }
-                                var dataPic = result.Data;
-                                string emailList = string.Join("; ", dataPic.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
 
-                                // gửi mail thông báo có yêu cầu xác nhận tên mới 
-                                var emailResult = await sendMailService.SendMailAsync(
-                                    emailList,
-                                    string.Empty,
-                                    20,
-                                    "Material/ConfirmName",
-                                    true,
-                                    itemNG?.FirstOrDefault()?.LyDo ?? string.Empty,
-                                    string.Empty,
-                                    user);
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                                foreach (var item in listPIC.Data)
+                                {
+                                    // gửi mail thông báo chỉnh sửa thông tin xác nhận tên mới
+                                    var emailResult = await sendMailService.SendMailAsync(
+                                        item.UserCreate + "@brothergroup.net",
+                                        string.Empty,
+                                        20,
+                                        "Material/ConfirmName",
+                                        true,
+                                        itemNG?.FirstOrDefault()?.LyDo ?? string.Empty,
+                                        item.MaDon,
+                                        item.UserCreate);
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -575,8 +633,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 var roleAsync = await _tmUserService.GetRoleAsync(GetCurrentUserId());
                 var role = roleAsync.Success ? roleAsync.Data : string.Empty;
-
-                var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role, req.pageIndex, req.pageSize);
+                var user = (string.IsNullOrEmpty(role)) ? GetCurrentUserId() : "";
+                var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role, user, req.pageIndex, req.pageSize);
                 if (!result.Success)
                 {
                     return BadRequest(result.Message);
@@ -630,7 +688,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 20).SetValue(rq.NVCHR_DongMay ?? "");
                     ws.Cell(row, 21).SetValue(rq.NVCHR_TinhNang ?? "");
                     ws.Cell(row, 22).SetValue(rq.NVCHR_File ?? "");
-                    ws.Cell(row, 23).SetValue("");
+                    ws.Cell(row, 23).SetValue(rq.VCHR_TenHaiQuan ?? "");
+                    if(role == "UserPUR")
+                    {
+                        if (rq.VCHR_TenHaiQuan != rq.VCHR_TenRecomment)
+                        {
+                            ws.Cell(row, 23).Style.Fill.BackgroundColor = XLColor.DarkPink;
+                        }
+                    }
                     ws.Cell(row, 24).SetValue(rq.VCHR_UserShip ?? "");
 
                     // check tra lai

@@ -197,7 +197,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string soluong = Kho.Rows[0]["Hientai"].ToString()!;
             return Json(soluong);
         }
-        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string tongchiphiold, string id_rq)
+        public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, DateTime thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string tongchiphiold, string id_rq)
         {
             if (tongchiphi == "0")
             {
@@ -291,7 +291,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     List<string> DataListMaterial = MST_INVENTORY._getname_material();
                     for (int idx = 0; idx < DataListMaterial.Count; idx++)
                     {
-                        wsMaterial.Cells["A" + (idx + 2)].Value = DataListMaterial[idx];
+                        wsMaterial.Cells["A" + (idx + 2)].Value = DataListMaterial[idx].Split(":")[0];
                     }
 
                     var wsDept = package.Workbook.Worksheets[2];
@@ -408,6 +408,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                         if (dataOther.Count >= 1)
                         {
+                            rowData["tenht"] = dataOther.First().Material_Code!.ToString() + ":" + dataOther.First().Material_Name_VN!.ToString();
                             rowData["costKT"] = dataOther.First().Account_Code!.ToString() + ":" + dataOther.First().Account_Name_EN!.ToString();
                             rowData["warehouse"] = dataOther.First().Inventory!.ToString();
                             rowData["stock"] = dataOther.First().Num_Inventory!.ToString();

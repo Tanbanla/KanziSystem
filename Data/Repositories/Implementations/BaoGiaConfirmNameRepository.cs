@@ -24,21 +24,34 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context = context;
         }
         //search thông tin xác nhận tên hàng
-        public async Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user, int pageIndex, int pageSize)
         {
             // Tách phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
-                INNER JOIN BaoGia_Request_of_Quotation r ON c.ID_RequestQuote = r.ID
-                INNER join BaoGia_Detail_of_Quotation as d on c.ID_RequestQuote = d.ID_RequestQuote
-				INNER JOIN IM_NCC_NEW as n on n.Ma = r.CHR_MaNCC
-                WHERE 1 = 1 and BIT_LayBaoGia = 1 and r.ID_Status not like '%RETURN%' and r.ID_StepBaoGia >=6
+                INNER JOIN BaoGia_Request_of_Quotation r 
+                    ON c.ID_RequestQuote = r.ID
+                    AND r.ID_Status NOT LIKE '%RETURN%'
+                    AND r.ID_StepBaoGia >= 6
+                    AND r.BIT_LayBaoGia = 1
+                INNER JOIN BaoGia_Detail_of_Quotation d 
+                    ON c.ID_RequestQuote = d.ID_RequestQuote
+                INNER JOIN IM_NCC_NEW n 
+                    ON n.Ma = r.CHR_MaNCC
+                WHERE 1 = 1
             ";
 
             var whereBuilder = new StringBuilder();
             var parameters = new DynamicParameters();
 
             // Thêm điều kiện tìm kiếm
+            if (!string.IsNullOrWhiteSpace(user))
+            {
+                var u = user.Trim();
+                whereBuilder.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail m " +
+                    "WHERE m.CHR_CodeSection = r.CHR_SectionCode AND m.CHR_UserAdid LIKE @User)");
+                parameters.Add("@User", $"%{u}%");
+            }
             if (!string.IsNullOrWhiteSpace(TenHang))
             {
                 var kw = TenHang.Trim();
@@ -68,9 +81,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 {
                     whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
                 }
-                else
+                else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
                 {
                     whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
+                }else
+                {
+                    whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
                 }
                 parameters.Add("@TrangThai", TrangThai.Trim());
             }
@@ -220,8 +236,54 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Luu thong tin
+        //public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
+        //{
+        //    // Lấy thông tin tên hải quan của nhà cung cấp
+        //    foreach (var item in confirmNames)
+        //    {
+        //        var rq = await _context.BaoGia_Detail_of_Quotations.FirstOrDefaultAsync(x => x.ID_RequestQuote == item.ID_RequestQuote);
+        //        if (rq != null)
+        //        {
+        //            if (rq.NVCHR_TenHangHQ != null && !string.IsNullOrWhiteSpace(rq.NVCHR_TenHangHQ))
+        //            {
+        //                item.VCHR_TenHaiQuan = rq.NVCHR_TenHangHQ;
+        //            }
+        //        }
+        //    }
+        //    await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
+        // Luu thong tin
         public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
         {
+            if (confirmNames == null || !confirmNames.Any()) return false;
+
+            var requestIds = confirmNames
+                .Select(x => x.ID_RequestQuote)
+                .Distinct()
+                .ToList();
+
+            var details = await _context.BaoGia_Detail_of_Quotations
+                .Where(d => requestIds.Contains(d.ID_RequestQuote) && !string.IsNullOrWhiteSpace(d.NVCHR_TenHangHQ))
+                .ToListAsync();
+
+            var nameByRequest = details
+                .GroupBy(d => d.ID_RequestQuote)
+                .ToDictionary(g => g.Key, g => g.First().NVCHR_TenHangHQ);
+
+            foreach (var item in confirmNames)
+            {
+                if (item == null) continue;
+                if (item.VCHR_TenHaiQuan != null && !string.IsNullOrWhiteSpace(item.VCHR_TenHaiQuan)) continue;
+
+                if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan))
+                {
+                    if (!string.IsNullOrWhiteSpace(tenHaiQuan))
+                        item.VCHR_TenHaiQuan = tenHaiQuan;
+                }
+            }
+
             await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
             await _context.SaveChangesAsync();
             return true;
@@ -252,12 +314,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.CHR_StatusShip = "Confirmed";
                     row.CHR_Status = "Confirmed";
 
-                    if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
-                    {
-                        rq.NVCHR_NameVN = row.VCHR_TenHaiQuan;
-                        rq.ID_StepBaoGia = 13;
-                        rq.ID_Status = "DONE";
-                    }
+                    //if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
+                    //{
+                    //    rq.NVCHR_NameVN = row.VCHR_TenHaiQuan;
+                    //    rq.ID_StepBaoGia = 13;
+                    //    rq.ID_Status = "DONE";
+                    //}
                 }
                 else // UserPUR
                 {
@@ -498,10 +560,26 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 rq.CHR_MaThietBi = item.CHR_MaThietBi;
                 rq.CHR_MaHangNCC = item.CHR_MaHangNCC;
                 // update confirm name
-                confirmName.CHR_Status = "Confirming";
+                confirmName.CHR_Status = "";
                 confirmName.CHR_StatusShip = "Confirming";
                 confirmName.DTM_UserPUR = DateTime.Now;
                 confirmName.VCHR_UserPUR = user;
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
+        public async Task<bool> UpdateRequestForPICPURAsync(List<int> baoGia, string user)
+        {
+            if(baoGia == null || !baoGia.Any()) return false;
+            foreach (var id in baoGia)
+            {
+                var confirmName = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == id);
+                if (confirmName == null) continue;
+                confirmName.CHR_Status = "Confirming";
+                confirmName.DTM_UserPUR = DateTime.Now;
+                confirmName.VCHR_UserPUR = user;
+                confirmName.NVCHR_LyDo = "Tên xác nhận của Ship và nhà cung cấp khác nhau";
             }
             await _context.SaveChangesAsync();
             return true;

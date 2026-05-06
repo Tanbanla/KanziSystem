@@ -7,7 +7,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
     public interface IBaoGiaConfirmNameService : IBaseService<BaoGia_Confirm_Name_Quotation, int, BaoGia_Confirm_Name_QuotationDTO>
     {
         // search thông tin xác nhận tên hàng
-        public Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, int pageIndex, int pageSize);
+        public Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user, int pageIndex, int pageSize);
         // Luu thong tin
         public Task<GenericResponse<bool>> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User);
         // Them thong tin 
@@ -34,5 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<ResultCheckCofirmName>>> CheckDonHangConfirmedAsync(List<int> listCheck);
         // Cập nhật thông tin đơn báo giá sau khi trả lại
         public Task<GenericResponse<bool>> UpdateRequestFromFileAsync(List<BaoGia_Request_of_QuotationDTO> baoGia, string user);
+        // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
+        public Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<int> baoGia, string user);
     }
 }

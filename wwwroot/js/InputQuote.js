@@ -64,7 +64,7 @@
             pageIndex: quoteState.pageIndex
         };
 
-        callApi((window.apiBaseUrl || '') + '/InputQuote/SearchInputQuoteBySoDon', body)
+        callApi((window.apiBaseUrl || '') + '/Quote/SearchInputQuoteBySoDon', body)
             .then(res => {
                 if (!res) return;
                 const items = Array.isArray(res.data) ? res.data : [];
@@ -175,7 +175,7 @@
 
     // Open detail page for a specific quote
     function openDetailPage(item) {
-        window.location.href = (window.apiBaseUrl || '') + `/InputQuote/InputQuoteDetail?maDon=${item.CHR_MaDon}`;
+        window.location.href = (window.apiBaseUrl || '') + `/Quote/InputQuoteDetail?maDon=${item.CHR_MaDon}`;
     }
     // Download sample Excel file
     function exportSampleExcel() {
@@ -510,7 +510,7 @@
                 formData.append('file', file);
 
                 // Gửi request
-                fetch((window.apiBaseUrl || '') + '/InputQuote/ImportExcelInputQuote', {
+                fetch((window.apiBaseUrl || '') + '/Quote/ImportExcelInputQuote', {
                     method: 'POST',
                     body: formData
                 })
@@ -568,7 +568,7 @@
             pageIndex: pageIndex
         };
 
-        callApi((window.apiBaseUrl || '') + '/InputQuote/SearchInputQuote', body)
+        callApi((window.apiBaseUrl || '') + '/Quote/SearchInputQuote', body)
             .then(res => {
                 if (!res) {
                     renderSupplierTable([]);

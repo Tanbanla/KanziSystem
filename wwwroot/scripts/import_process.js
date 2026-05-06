@@ -487,7 +487,7 @@ async function UploadFileFormat() {
             data += `<td class="row-number text-center fw-bold">${index+1}</td>`;
             data += `<td>`;
             data += `<select class="form-control select2 tenhang" onchange="_load_material(this.value, this.id)" id="tenhang_${index}">`;
-            data += `<option selected>${item.nameMaterial}</option>`;
+            data += `<option selected>${item.tenht}</option>`;
             data += `</select>`;
             data += `</td>`;
             //data += `<td><input type="text" class="form-control stk" id="stk_${index}" value="${item.costKT}"></td>`;
@@ -506,10 +506,9 @@ async function UploadFileFormat() {
             data += `<td><input type="text" class="form-control vt" id="vt_${index}" value="${item.location}"></td>`;
             data += `<td><input type="text" class="form-control gc" id="gc_${index}" value="${item.notetake}"></td>`;
             data += `<td>`;
-            data += `<button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>`;
+            data += `<button type="button" class="btn btn-outline-danger btn-remove">&times;</button>`;
             data += `</td>`;
-            data += `<button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>`;
-            data += `</td>`;
+        
             data += `</tr>`;
             table.innerHTML += data;
         });
