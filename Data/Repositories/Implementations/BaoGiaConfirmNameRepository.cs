@@ -327,7 +327,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
                     row.NVCHR_LyDo = i.NVCHR_LyDo;
                     row.NVCHR_Note = i.NVCHR_Note;
-                    row.CHR_Status = "Confirming";
+                    row.CHR_Status = "";
                     row.CHR_StatusShip = "Confirming";
                     row.VCHR_UserPUR = user;
                     row.DTM_UserPUR = now;
@@ -380,7 +380,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 {
                     if (item.TenHaiQuan != null) row.VCHR_TenHaiQuan = item.TenHaiQuan;
                     if (item.MaHangNoiBo != null) row.VCHR_MaHangNoiBo = item.MaHangNoiBo;
-                    row.CHR_Status = "Confirming";
+                    row.CHR_Status = "";
                     row.CHR_StatusShip = "Confirming";
                     row.VCHR_UserPUR = user;
                     row.DTM_UserPUR = now;
@@ -483,7 +483,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 if (rq == null) return false;
                 var now = DateTime.Now;
                 // Update infor data confirm name
-                row.CHR_Status = "Rejected";
+                row.CHR_Status = "";
                 row.NVCHR_LyDo = item.LyDo;
                 row.VCHR_UserPUR = user;
                 row.DTM_UserPUR = now;

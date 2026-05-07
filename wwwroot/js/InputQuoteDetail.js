@@ -80,7 +80,7 @@
             .then(data => {
                 if (data && Array.isArray(data.data.data)) {
                     quoteState.requestData = data.data.data; // Store for comparison
-                    renderDetailTable(data.data.data.data);
+                    renderDetailTable(data.data.data);
                 }
             })
             .catch(err => showAlert('danger', window.i18nInputQuoteDetail.ErrorLoadingDetails + err));

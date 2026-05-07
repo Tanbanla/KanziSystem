@@ -1058,6 +1058,10 @@
                             payload.push(it);
                         });
                     });
+                    //if (payload.length === 0) {
+                    //    showToast('danger', "Vui lòng chọn đơn muốn xuất dữ liệu");
+                    //    return;
+                    //} 
                     const res = await fetch((window.apiBaseUrl || '') + '/ApprovalQuote/ExportToExcel', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1082,12 +1086,20 @@
                     a.click();
                     a.remove();
                     window.URL.revokeObjectURL(url);
-                    hideAr();
-                    const T = window.i18nQuote || {};
+                    //hideAr();
                     showToast('success', T.MSGExportOK);
                 } catch (e) {
+                    showToast('danger', e);
                     console.error('Export to Excel error', e);
                 }
+
+            });
+        }
+        // Event click Export to Excel
+        const btnImportExport = document.getElementById('btnImportExport');
+        if (btnImportExport) {
+            btnImportExport.addEventListener('click', async function () {
+
 
             });
         }

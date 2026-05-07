@@ -416,7 +416,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 hasErrors = true;
                                 continue;
                             }
-                            if (bitReturn)
+                            if (!bitReturn)
                             {
                                 itemNG.Add(new ConfirmNameDTO
                                 {
@@ -427,7 +427,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             else
                             {
-                                if(tenHaiQuan != tenRecomment)
+                                if(false)//(tenHaiQuan != tenRecomment)
                                 {
                                     listDifferent.Add(int.Parse(ws.Cell(r, 2).GetString()));
                                 }
@@ -474,13 +474,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     return File(bytes, contentType, fileName);
                 }
-                // Lưu dữ liệu hợp lệ vào database
-                if (!itemOK.Any() || itemOK == null)
-                {
-                    return BadRequest("Không có dữ liệu hợp lệ để lưu");
-                }
                 if (role == "UserShip")
                 {
+                    // Lưu dữ liệu hợp lệ vào database
+                    if (!itemOK.Any() || itemOK == null)
+                    {
+                        return BadRequest("Không có dữ liệu hợp lệ để lưu");
+                    }
                     await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
                     // gửi mail thông báo đã hoàn thành xác nhận tên đến PIC PUR
                     if (itemOK.Any() || itemOK != null)
@@ -525,46 +525,88 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                         });
                     }
+                    // Nếu có dữ liệu bị trả lại gửi đến PIC phòng ban để chỉnh sửa lại thông tin
+                    if (itemNG.Any() || itemNG.Count > 0)
+                    {
+                        await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
+                        var listCheck = itemNG.Select(d => d.Id).ToList();
+                        // Send Mail PIC phụ trách xác nhận tên mới (User Ship) khi có yêu cầu trả lại
+                        _ = Task.Run(async () =>
+                        {
+                            using (var scope = _serviceScopeFactory.CreateScope())
+                            {
+                                try
+                                {
 
+                                    var listPIC = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                    if (!listPIC.Success)
+                                    {
+                                        _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listPIC.Message);
+                                        return;
+                                    }
+
+                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                                    foreach (var item in listPIC.Data)
+                                    {
+                                        // gửi mail thông báo chỉnh sửa thông tin xác nhận tên mới
+                                        var emailResult = await sendMailService.SendMailAsync(
+                                            item.UserCreate + "@brothergroup.net",
+                                            string.Empty,
+                                            20,
+                                            "Material/ConfirmName",
+                                            true,
+                                            itemNG?.FirstOrDefault()?.LyDo ?? string.Empty,
+                                            item.MaDon,
+                                            item.UserCreate);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                                }
+                            }
+                        });
+                    }
                     // với các dữ liệu tên bị lệch
                     if (listDifferent.Count() > 0)
                     {
                         await _confirmNameService.UpdateRequestForPICPURAsync(listDifferent,user);
-                        //_ = Task.Run(async () =>
-                        //{
-                        //    using (var scope = _serviceScopeFactory.CreateScope())
-                        //    {
-                        //        try
-                        //        {
-                        //            var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                        //            var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
+                        _ = Task.Run(async () =>
+                        {
+                            using (var scope = _serviceScopeFactory.CreateScope())
+                            {
+                                try
+                                {
+                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                    var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
 
-                        //            // danh sach PIC
-                        //            var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
-                        //            if (!result.Success)
-                        //            {
-                        //                _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
-                        //            }
-                        //            var dataPic = result.Data;
-                        //            string emailList = string.Join("; ", dataPic.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
+                                    //danh sach PIC
+                                   var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
+                                    if (!result.Success)
+                                    {
+                                        _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
+                                    }
+                                    var dataPic = result.Data;
+                                    string emailList = string.Join("; ", dataPic.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
 
-                        //            // gửi mail thông báo có yêu cầu xác nhận tên mới 
-                        //            var emailResult = await sendMailService.SendMailAsync(
-                        //                emailList,
-                        //                string.Empty,
-                        //                21,
-                        //                "Material/ConfirmName",
-                        //                true,
-                        //                "",
-                        //                "",
-                        //                "");
-                        //        }
-                        //        catch (Exception ex)
-                        //        {
-                        //            _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
-                        //        }
-                        //    }
-                        //});
+                                    // gửi mail thông báo có yêu cầu xác nhận tên mới
+                                   var emailResult = await sendMailService.SendMailAsync(
+                                       emailList,
+                                       string.Empty,
+                                       21,
+                                       "Material/ConfirmName",
+                                       true,
+                                       "",
+                                       "",
+                                       "");
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                                }
+                            }
+                        });
                     }
                 }
 
@@ -574,49 +616,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
                 }
 
-                // Nếu có dữ liệu bị trả lại gửi đến PIC phòng ban để chỉnh sửa lại thông tin
-                if (itemNG.Any() || itemNG.Count >0)
-                {
-                    await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
-                    var listCheck = itemNG.Select(d => d.Id).ToList();
-                    // Send Mail PIC phụ trách xác nhận tên mới (User Ship) khi có yêu cầu trả lại
-                    _ = Task.Run(async () =>
-                    {
-                        using (var scope = _serviceScopeFactory.CreateScope())
-                        {
-                            try
-                            {
-
-                                var listPIC = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
-                                if (!listPIC.Success)
-                                {
-                                    _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listPIC.Message);
-                                    return;
-                                }
-
-                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-
-                                foreach (var item in listPIC.Data)
-                                {
-                                    // gửi mail thông báo chỉnh sửa thông tin xác nhận tên mới
-                                    var emailResult = await sendMailService.SendMailAsync(
-                                        item.UserCreate + "@brothergroup.net",
-                                        string.Empty,
-                                        20,
-                                        "Material/ConfirmName",
-                                        true,
-                                        itemNG?.FirstOrDefault()?.LyDo ?? string.Empty,
-                                        item.MaDon,
-                                        item.UserCreate);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
-                            }
-                        }
-                    });
-                }
             }
             catch (Exception ex)
             {
@@ -666,7 +665,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var maHangNb = rq.VCHR_MaHangNoiBo ?? (rq.CHR_MaHangNoiBo ?? "");
       
                     // Map fields into template columns similar to ExportSelection
-                    ws.Cell(row, 1).SetValue(rq.CHR_Status ?? "");
+                    ws.Cell(row, 1).SetValue(role == "UserPUR" ? rq.CHR_Status ?? "" : rq.CHR_StatusShip ?? "");
                     ws.Cell(row, 2).SetValue(rq.ID ?? 0);
                     ws.Cell(row, 3).SetValue(idx);
                     ws.Cell(row, 4).SetValue(rq.CHR_SectionCode ?? "");

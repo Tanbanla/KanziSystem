@@ -1948,7 +1948,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NVCHR_NameVN = material.NameVI,
                 CHR_NameEN = material.Material_Name_EN,
                 INT_SoLuong = ParseDouble(rowData.SoLuong),
-                NVCHR_DonVi = material.Unit ?? rowData.DonVi,
+                NVCHR_DonVi = string.IsNullOrEmpty(material.Unit) ? rowData.DonVi : material.Unit,
                 NVCHR_ChungLoai = material.Category_VN,
                 NVCHR_HinhDang = rowData.HinhDang ?? material.Shape,
                 NVCHR_ChatLieu = rowData.ChatLieu ?? material.Material,
@@ -2041,8 +2041,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 dto.CHR_MaNCC = supplier.CHR_MaNCC;
                 dto.NVCHR_TenNCC = supplier.NVCHR_TenNCC;
                 
-                if (string.IsNullOrEmpty(dto.NVCHR_NhaSanXuat))
-                    dto.NVCHR_NhaSanXuat = supplier.NVCHR_SanXuat;
+                //if (string.IsNullOrEmpty(dto.NVCHR_NhaSanXuat))
+                 //dto.NVCHR_NhaSanXuat = supplier.NVCHR_SanXuat;
                     
                 dto.BIT_LayBaoGia = ParseBool(rowData.LayBaoGia);
                 
@@ -3540,6 +3540,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                var role = GetRolesUser();
+                if (role == "UserPUR" && selectedMaDon.Count>5)
+                {
+                    var maDonList = await _baoGiaService.GetMaDonYeuCauHangHoaAsync();
+                    selectedMaDon = maDonList.Data.ToList();
+                }
                 if (selectedMaDon == null || !selectedMaDon.Any())
                 {
                     return BadRequest("Không có nhóm nào được chọn");

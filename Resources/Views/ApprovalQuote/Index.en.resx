@@ -486,4 +486,10 @@
   <data name="VendorCode" xml:space="preserve">
     <value>Vendor Code</value>
   </data>
+  <data name="SelectQuotionExport" xml:space="preserve">
+    <value>Please select the Request for which you wish to export data.</value>
+  </data>
+  <data name="ImportFromExcel" xml:space="preserve">
+    <value>Import Excel</value>
+  </data>
 </root>

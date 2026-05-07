@@ -219,4 +219,7 @@
   <data name="PageSize" xml:space="preserve">
     <value> Page Size</value>
   </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>Export template file</value>
+  </data>
 </root>

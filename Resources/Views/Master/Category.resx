@@ -219,4 +219,7 @@
   <data name="PageSize" xml:space="preserve">
     <value>Số dòng</value>
   </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>Xuất file mẫu</value>
+  </data>
 </root>

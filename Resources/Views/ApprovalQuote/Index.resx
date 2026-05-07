@@ -486,4 +486,10 @@
   <data name="VendorCode" xml:space="preserve">
     <value>Mã NCC</value>
   </data>
+  <data name="SelectQuotionExport" xml:space="preserve">
+    <value>Vui lòng chọn đơn muốn xuất dữ liệu</value>
+  </data>
+  <data name="ImportFromExcel" xml:space="preserve">
+    <value>Nhập Excel</value>
+  </data>
 </root>

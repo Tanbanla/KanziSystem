@@ -1610,10 +1610,13 @@
                 const res = await fetch(api.uploadQuoteExcel, { method: 'POST', body: fd });
                 if (!res.ok) throw new Error(await res.text());
                 const items = await res.json();
-                if (!Array.isArray(items)) throw new Error((window.i18nQuote && window.i18nQuote.MsgInvalidData) || 'Dữ liệu không hợp lệ');
+                if (!Array.isArray(items)) {
+                    throw new Error((window.i18nQuote && window.i18nQuote.MsgInvalidData) || 'Dữ liệu không hợp lệ');
+                    return;
+                }
                 populateTableFromItems(items);
-                const T = window.i18nQuote || {};
-                showDialog({ title: T.SuccessTitle || 'Thành công', message: (T.MsgLoadedRows || 'Đã tải {0} dòng từ Excel').replace('{0}', items.length), type: 'success' });
+               // const T = window.i18nQuote || {};
+
             } catch (err) {
                 const T = window.i18nQuote || {};
                 showDialog({ title: T.ErrorTitle || 'Lỗi', message: err.message || T.MsgCannotReadFile || 'Không thể đọc file', type: 'error' });
@@ -2384,6 +2387,8 @@
                     try { $(sel).data('search-dropdown', false); } catch { }
                 });
             }
+            const T = window.i18nQuote || {};
+            showDialog({ title: T.SuccessTitle || 'Thành công', message: (T.MsgLoadedRows || 'Đã tải {0} dòng từ Excel').replace('{0}', items.length), type: 'success' });
         } catch (ex) {
             console.warn('Error validating uploaded items:', ex);
         }

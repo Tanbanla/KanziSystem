@@ -1550,5 +1550,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return data;
         }
+        // lấy danh sách đơn yêu cầu hàng hóa
+        public async Task<List<string>> GetMaDonYeuCauHangHoaAsync()
+        {
+              var data = await _context.BaoGia_Request_of_Quotations
+                .Where(c => c.ID_StepBaoGia == 13 && c.BIT_LayBaoGia == true)
+                .Select(c => c.CHR_MaDon)
+                .Distinct()
+                .ToListAsync();
+            return data;
+        }
     }
 }

@@ -12,6 +12,9 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.ApprovalQuote
         public List<BaoGia_StepDTO> listStepBaoGia { get; set; } = new List<BaoGia_StepDTO>();
         // list approvel
         public List<BaoGia_Master_Approver_Send_MailDTO> ListApprovel { get; set; } = new List<BaoGia_Master_Approver_Send_MailDTO>();
+
+        // Role
+        public string? Role { get; set; }
     }
     public class ApprovalQuoteSearchViewModel
     {

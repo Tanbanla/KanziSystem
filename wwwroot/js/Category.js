@@ -162,6 +162,27 @@ function initCategories() {
         document.getElementById('excelFileInput').click();
     });
 
+    // Export template Excel for import (download TemplateCategory.xlsx from server template folder)
+    document.getElementById('btnExportExcel').addEventListener('click', async function () {
+        try {
+            // Template path - adjust if your template folder is different
+            const templatePath = (window.apiBaseUrl || '') + '/template/TemplateCategory.xlsx';
+            const res = await fetch(templatePath);
+            if (!res.ok) throw new Error('Template not found');
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'TemplateCategory.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            showDialog(window.i18nCategory.ErrorTitle, (err && err.message) || window.i18nCategory.ErrorConnection);
+        }
+    });
+
     document.getElementById('excelFileInput').addEventListener('change', async function (e) {
         const file = e.target.files[0];
         if (!file) return;

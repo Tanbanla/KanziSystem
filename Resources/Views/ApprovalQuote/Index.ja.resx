@@ -486,4 +486,10 @@
   <data name="VendorCode" xml:space="preserve">
     <value>ベンダーコード</value>
   </data>
+  <data name="SelectQuotionExport" xml:space="preserve">
+    <value>データのエクスポートを希望するリクエストを選択してください。</value>
+  </data>
+  <data name="ImportFromExcel" xml:space="preserve">
+    <value>Excelをインポート</value>
+  </data>
 </root>

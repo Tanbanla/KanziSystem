@@ -441,5 +441,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             return result;
         }
+        // lấy danh sách đơn yêu cầu hàng hóa
+        public async Task<GenericResponse<List<string>>> GetMaDonYeuCauHangHoaAsync()
+        {
+            var result = new GenericResponse<List<string>>();
+            try
+            {
+                result.Data = await _repo.GetMaDonYeuCauHangHoaAsync();
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+
     }
 }

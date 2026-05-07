@@ -8,6 +8,7 @@
     List<BaoGia_Request_of_QuotationDTO> listData = Model.listBaoGia;
     List<BaoGia_StatusDTO> listStatus = Model.listStatusBaoGia;
     List<BaoGia_StepDTO> listStep = Model.listStepBaoGia;
+    string role = Model.Role;
     //List<BaoGia_Master_Approver_Send_MailDTO> listApproval = Model.ListApprovel;
 
     // determine UI language and prepare localized display names for steps and status
@@ -129,6 +130,11 @@
                     <div style="min-width: 12px;"></div>
                     <button type="button" id="btnExcelExport" class="btn btn-success btn-sm"><i class="fas fa-file-excel"></i> @Localizer["ExportToExcel"]</button>
                     <div style="min-width: 12px;"></div>
+                    @if (role == "UserPUR")
+                    {
+                        <button type="button" id="btnImportExport" class="btn btn-danger btn-sm"><i class="fas fa-upload"></i> @Localizer["ImportFromExcel"]</button>
+                        <div style="min-width: 12px;"></div>
+                    }
                     <button type="button" id="btnClear" class="btn btn-outline-secondary btn-sm"><i class="fas fa-eraser"></i> @Localizer["ClearFilters"]</button>
                 </div>
             </form>
@@ -415,6 +421,7 @@
         ,SelectNextApprover = Localizer["SelectNextApprover"].Value
         ,NextApproverLabel = Localizer["NextApproverLabel"].Value
         ,SelectApproverRequired = Localizer["SelectApproverRequired"].Value
+        ,SelectQuotionExport = Localizer["SelectQuotionExport"].Value
     }));
 </script>
 @section Scripts {
