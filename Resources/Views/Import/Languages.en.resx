@@ -543,4 +543,7 @@
   <data name="hethongquanlyhanggiantiep" xml:space="preserve">
     <value>Indirect part control system (IPCS) </value>
   </data>
+  <data name="sotaikhoan" xml:space="preserve">
+    <value>Account </value>
+  </data>
 </root>

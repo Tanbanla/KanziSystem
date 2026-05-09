@@ -109,7 +109,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     ) 
                     VALUES (
                          
-                        @NewCode, '{Cost_Center}', GETDATE(), N'{Declaration}', '{Dealine}','{Total_exchange}', '{Exchange_rate}', '{Currency}', '{Total }',  
+                        @NewCode, '{Cost_Center}', GETDATE(), N'{Declaration}', '{Dealine}','{Total_exchange}', '{Exchange_rate}', '{Currency}', '{Total}',  
                         '{Kind}', '{Type}', '{Status}',GETDATE(), '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
                     );
                     SELECT @NewCode AS NextCode, SCOPE_IDENTITY() AS NewID;";
@@ -122,6 +122,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             // INSERT BẢNG REQUEST_DETAIL ---
             foreach (var item in rq_dt!)
             {
+                var tongtien = item.Total / double.Parse(Exchange_rate);
+                var tongma = item.Total_exchange / double.Parse(Exchange_rate);
+
                 string _cmdDetail = $@"
                                         INSERT INTO [REQUEST_DETAIL] (
                                         [Code_Request], [Id_Request], [Material_Code], [Material_Name], [Material_Name_EN], [Material_Name_ENJP], 
@@ -132,7 +135,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                                         VALUES (
                                             '{newCode}', {newId}, '{item.Material_Code}', N'{item.Material_Name}', N'{item.Material_Name_EN}', N'{item.Material_Name_ENJP}', 
                                             '{item.Account_Code}', N'{item.Account_Name}', N'{item.Unit}', '{item.Unit_Real}', '{item.Amount}', {item.Price}, 
-                                             {item.Total_exchange}, '{item.Rate}', '{item.Currency}', {item.Total}, '{item.Amount_Real}', '{item.Price_Real}', 
+                                             ROUND('{tongma}',2), '{item.Rate}', '{item.Currency}',ROUND('{tongtien}',2), '{item.Amount_Real}', '{item.Price_Real}', 
                                             '{item.VAT}', '{item.Total_exchange_real}', '{item.Rate_Real}', '{item.Currency_Real}', '{item.Total_Real}', 
                                             '{item.Dealine_Real}', N'{item.Poisition}', N'{item.Aim}', '{item.Status}', GETDATE(), 
                                             '{item.User_Update}', '{item.PO}', N'{item.Unit_Note}', N'{item.Phongchiuchiphi}', N'{item.Vitri}', '{item.Id_LichsuXuat}', '{item.Kho}'
@@ -197,12 +200,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 gia = "and b.Total >= '10000'";
             }
             var list = _db.GET_DATA_FROM_SQL(" select top (200) * from [PE_REQUEST_CONFIRM_GA] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center " +
-                "where ((a.INT_STEP = 0 AND CHR_ADID_NGUOIYEUCAU = '" + us + "' and CONFIRM_NGUOIYEUCAU = '0') " +
-                "OR ( a.INT_STEP = 1 AND CHR_ADID_NGUOITHAMTRA = '" + us + "' and CONFIRM_NGUOITHAMTRA = '0') " +
-                "OR (a.INT_STEP = 2 AND CHR_ADID_NGUOIPHEDUYET = '" + us + "' and CONFIRM_NGUOIPHEDUYET = '0') " +
-                "OR (a.INT_STEP = 3 AND CHR_ADID_XUATKHO = '" + us + "' and (CONFIRM_XUATKHO = '0' or CONFIRM_XUATKHO is null)) " +
-                "OR (a.INT_STEP = 4 AND CHR_ADID_QLSC = '" + us + "' and CONFIRM_QLSC = '0') " +
-                "OR (a.INT_STEP = 5 AND CHR_ADID_QLTC = '" + us + "' and CONFIRM_QLTC = '0')) and INT_STEP < 6 " +
+                "where ((a.INT_STEP = 0 AND CHR_ADID_NGUOIYEUCAU = '" + us + "') " +
+                "OR ( a.INT_STEP = 1 AND CHR_ADID_NGUOITHAMTRA = '" + us + "') " +
+                "OR (a.INT_STEP = 2 AND CHR_ADID_NGUOIPHEDUYET = '" + us + "') " +
+                "OR (a.INT_STEP = 3 AND CHR_ADID_XUATKHO = '" + us + "' ) " +
+                "OR (a.INT_STEP = 4 AND CHR_ADID_QLSC = '" + us + "') " +
+                "OR (a.INT_STEP = 5 AND CHR_ADID_QLTC = '" + us + "')) and INT_STEP < 6 " +
                 $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%'");
             for (int i = 0; i < list.Rows.Count; i++)
             {
@@ -247,7 +250,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
              .ToList();
             return pe_;
         }
-        public static List<PE_REQUEST_CONFIRM_GA> get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent)
+        public static List<PE_REQUEST_CONFIRM_GA> get_requestcondition(string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent, string costt_ct)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM_GA> pe_ = new List<PE_REQUEST_CONFIRM_GA>();
@@ -267,7 +270,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             var list = _db.GET_DATA_FROM_SQL($@"select top (1000) * from [PE_REQUEST_CONFIRM_GA] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
-                        WHERE b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and Urgent like '%{Urgent}%' {gia}  
+                        WHERE a.CHR_ADID_NGUOITAO = '{us}' and b.Cost_Center like '%{costt_ct}%' and b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and Urgent like '%{Urgent}%' {gia}  
                         order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)
@@ -305,12 +308,13 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     CHR_MAIL_NGUOITHAMTRA = list.Rows[i]["CHR_MAIL_NGUOITHAMTRA"].ToString()!,
                     CHR_ADID_XUATKHO = list.Rows[i]["CHR_ADID_XUATKHO"].ToString()!,
                     Cost_Center_Group = list.Rows[i]["Cost_Center_Group"].ToString()!,
-                    Urgent = list.Rows[i]["Urgent"].ToString()!
+                    Urgent = list.Rows[i]["Urgent"].ToString()!,
+                    Declaration = list.Rows[i]["Declaration"].ToString()!
                 });
             }
             pe_ = pe_.GroupBy(x => x.Code_Request)
-     .Select(g => g.First())
-     .ToList();
+             .Select(g => g.First())
+             .ToList();
             return pe_;
         }
         public static List<REQUEST_DETAIL> _get_info_dtrq(string cost_request)
@@ -323,13 +327,15 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             List<REQUEST_DETAIL> rq = new List<REQUEST_DETAIL>();
             for (int i = 0; i < get_if.Rows.Count; i++)
             {
+                var material_jp = _db.ReturnString($" select  [Material_Name_JP] from [MATERIAL] where Material_Code = '{get_if.Rows[i]["Material_Code"].ToString()}'");
+
                 rq.Add(new REQUEST_DETAIL
                 {
                     Id_RequestDetail = int.Parse(get_if.Rows[i]["Id_RequestDetail"].ToString()!),
                     Id_Request = int.Parse(get_if.Rows[i]["Id_Request"].ToString()!),
                     Code_Request = get_if.Rows[i]["Code_Request"].ToString(),
                     Material_Code = get_if.Rows[i]["Material_Code"].ToString(),
-                    Material_Name = get_if.Rows[i]["Material_Name"].ToString(),
+                    Material_Name = get_if.Rows[i]["Material_Name"].ToString() + "<br />" + material_jp,
                     Account_Code = get_if.Rows[i]["Account_Code"].ToString(),
                     Account_Name = get_if.Rows[i]["Account_Name"].ToString(),
                     Unit = get_if.Rows[i]["Unit"].ToString(),
@@ -347,8 +353,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Aim = get_if.Rows[0]["Aim"].ToString(),
                     Place = requestt.Rows[0]["Place"].ToString(),
                     Poisition = get_if.Rows[0]["Poisition"].ToString(),
+                    Material_Name_ENJP = material_jp
                 });
             }
+            rq = rq.GroupBy(x => x.Material_Code)
+         .Select(g => g.First())
+         .ToList();
             return rq;
         }
         public static string _update_request(string id_request, string regency, string step)
@@ -357,43 +367,43 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '" + step + "' , CONFIRM_" + regency + " = '1', DTM_" + regency + " = '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' where ID_REQUEST = '" + id_request + "'");
             return "Xác nhận thành công !";
         }
-        public static string _update_all(string us, string madon)
-        {
-            SQL_Connect_DB20 db = new SQL_Connect_DB20();
-            var id_rq = db.ReturnString("select Id_Request from REQUEST where Code_Request = '" + madon.Split('_')[0] + "'");
-            db.GET_DATA_FROM_SQL($@"
-                                UPDATE [COST_MANAGEMENT].[dbo].[PE_REQUEST_CONFIRM_GA]
-                                SET 
-                                    -- Cập nhật trạng thái xác nhận: Chỉ chuyển từ '0' sang '1'
-                                    [CONFIRM_NGUOIYEUCAU]   = CASE WHEN [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' THEN '1' ELSE [CONFIRM_NGUOIYEUCAU] END,
-                                    [CONFIRM_NGUOITHAMTRA]  = CASE WHEN [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' THEN '1' ELSE [CONFIRM_NGUOITHAMTRA] END,
-                                    [CONFIRM_NGUOIPHEDUYET] = CASE WHEN [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' THEN '1' ELSE [CONFIRM_NGUOIPHEDUYET] END,
-                                    [CONFIRM_QLSC]       = CASE WHEN [CHR_ADID_QLSC]       = '{us}' AND [CONFIRM_QLSC]       = '0' THEN '1' ELSE [CONFIRM_QLSC] END,
-                                    [CONFIRM_QLTC]       = CASE WHEN [CHR_ADID_QLTC]       = '{us}' AND [CONFIRM_QLTC]       = '0' THEN '1' ELSE [CONFIRM_QLTC] END,
-                                    [CONFIRM_XUATKHO]       = CASE WHEN [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' THEN '1' ELSE [CONFIRM_XUATKHO] END,
+        //public static string _update_all(string us, string madon)
+        //{
+        //    SQL_Connect_DB20 db = new SQL_Connect_DB20();
+        //    var id_rq = db.ReturnString("select Id_Request from REQUEST where Code_Request = '" + madon.Split('_')[0] + "'");
+        //    db.GET_DATA_FROM_SQL($@"
+        //                        UPDATE [COST_MANAGEMENT].[dbo].[PE_REQUEST_CONFIRM_GA]
+        //                        SET 
+        //                            -- Cập nhật trạng thái xác nhận: Chỉ chuyển từ '0' sang '1'
+        //                            [CONFIRM_NGUOIYEUCAU]   = CASE WHEN [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' THEN '1' ELSE [CONFIRM_NGUOIYEUCAU] END,
+        //                            [CONFIRM_NGUOITHAMTRA]  = CASE WHEN [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' THEN '1' ELSE [CONFIRM_NGUOITHAMTRA] END,
+        //                            [CONFIRM_NGUOIPHEDUYET] = CASE WHEN [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' THEN '1' ELSE [CONFIRM_NGUOIPHEDUYET] END,
+        //                            [CONFIRM_QLSC]       = CASE WHEN [CHR_ADID_QLSC]       = '{us}' AND [CONFIRM_QLSC]       = '0' THEN '1' ELSE [CONFIRM_QLSC] END,
+        //                            [CONFIRM_QLTC]       = CASE WHEN [CHR_ADID_QLTC]       = '{us}' AND [CONFIRM_QLTC]       = '0' THEN '1' ELSE [CONFIRM_QLTC] END,
+        //                            [CONFIRM_XUATKHO]       = CASE WHEN [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' THEN '1' ELSE [CONFIRM_XUATKHO] END,
     
-                                    -- Chỉ tăng step nếu có ít nhất một cột thực sự được cập nhật từ '0' thành '1'
-                                    [INT_STEP] = ISNULL([INT_STEP], 0) + 1,
+        //                            -- Chỉ tăng step nếu có ít nhất một cột thực sự được cập nhật từ '0' thành '1'
+        //                            [INT_STEP] = ISNULL([INT_STEP], 0) + 1,
 
-                                    -- Cập nhật ngày giờ xác nhận: Chỉ cập nhật nếu cột confirm tương ứng đang là '0'
-                                    [DTM_NGUOIYEUCAU]   = CASE WHEN [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' THEN GETDATE() ELSE [DTM_NGUOIYEUCAU] END,
-                                    [DTM_NGUOITHAMTRA]  = CASE WHEN [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' THEN GETDATE() ELSE [DTM_NGUOITHAMTRA] END,
-                                    [DTM_NGUOIPHEDUYET] = CASE WHEN [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' THEN GETDATE() ELSE [DTM_NGUOIPHEDUYET] END,
-                                    [DTM_QLSC]       = CASE WHEN [CHR_ADID_QLSC]       = '{us}' AND [CONFIRM_QLSC]       = '0' THEN GETDATE() ELSE [DTM_QLSC] END,
-                                    [DTM_QLTC]       = CASE WHEN [CHR_ADID_QLTC]       = '{us}' AND [CONFIRM_QLTC]       = '0' THEN GETDATE() ELSE [DTM_QLTC] END,
-                                    [DTM_XUATKHO]       = CASE WHEN [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' THEN GETDATE() ELSE [DTM_XUATKHO] END
+        //                            -- Cập nhật ngày giờ xác nhận: Chỉ cập nhật nếu cột confirm tương ứng đang là '0'
+        //                            [DTM_NGUOIYEUCAU]   = CASE WHEN [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' THEN GETDATE() ELSE [DTM_NGUOIYEUCAU] END,
+        //                            [DTM_NGUOITHAMTRA]  = CASE WHEN [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' THEN GETDATE() ELSE [DTM_NGUOITHAMTRA] END,
+        //                            [DTM_NGUOIPHEDUYET] = CASE WHEN [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' THEN GETDATE() ELSE [DTM_NGUOIPHEDUYET] END,
+        //                            [DTM_QLSC]       = CASE WHEN [CHR_ADID_QLSC]       = '{us}' AND [CONFIRM_QLSC]       = '0' THEN GETDATE() ELSE [DTM_QLSC] END,
+        //                            [DTM_QLTC]       = CASE WHEN [CHR_ADID_QLTC]       = '{us}' AND [CONFIRM_QLTC]       = '0' THEN GETDATE() ELSE [DTM_QLTC] END,
+        //                            [DTM_XUATKHO]       = CASE WHEN [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' THEN GETDATE() ELSE [DTM_XUATKHO] END
 
-                                WHERE 
-                                    -- Điều kiện lọc: User có tên trong danh sách và cột đó phải đang ở trạng thái '0'
-                                     ID_REQUEST = '{id_rq}' AND
-                                    ( [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' ) OR
-                                    ( [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' ) OR
-                                    ( [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' ) OR
-                                    ( [CHR_ADID_QLSC]       = '{us}' AND [CONFIRM_QLSC]       = '0' ) OR
-                                    ( [CHR_ADID_QLTC]       = '{us}' AND [CONFIRM_QLTC]       = '0' ) OR
-                                    ( [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' );");
-            return "Update thành công !";
-        }
+        //                        WHERE 
+        //                            -- Điều kiện lọc: User có tên trong danh sách và cột đó phải đang ở trạng thái '0'
+        //                             ID_REQUEST = '{id_rq}' AND
+        //                            ( [CHR_ADID_NGUOIYEUCAU]   = '{us}' AND [CONFIRM_NGUOIYEUCAU]   = '0' ) OR
+        //                            ( [CHR_ADID_NGUOITHAMTRA]  = '{us}' AND [CONFIRM_NGUOITHAMTRA]  = '0' ) OR
+        //                            ( [CHR_ADID_NGUOIPHEDUYET] = '{us}' AND [CONFIRM_NGUOIPHEDUYET] = '0' ) OR
+        //                            ( [CHR_ADID_QLSC]       = '{us}' AND [CONFIRM_QLSC]       = '0' ) OR
+        //                            ( [CHR_ADID_QLTC]       = '{us}' AND [CONFIRM_QLTC]       = '0' ) OR
+        //                            ( [CHR_ADID_XUATKHO]       = '{us}' AND [CONFIRM_XUATKHO]       = '0' );");
+        //    return "Update thành công !";
+        //}
         public static List<PE_USERNAME> _load_userinventory(string group_code, string id)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();

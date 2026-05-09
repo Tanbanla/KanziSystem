@@ -135,7 +135,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .Where(c => c.BIT_LayBaoGia == true && c.ID == detail.ID_RequestQuote)
                 .FirstOrDefaultAsync();
                 if (rq == null) continue;
-                rq.ID_Status = "WAIT_NCC";
+                if (rq.BIT_LayBaoGia)
+                {
+                    rq.ID_Status = "WAIT_NCC";
+                }else
+                {
+                    rq.ID_Status = "NOT_QUOTATION";
+                }
                 // kiểm tra dữ liệu Insert
                 var exists = await _context.BaoGia_Detail_of_Quotations
                     .AnyAsync(c => c.ID_RequestQuote == detail.ID_RequestQuote);

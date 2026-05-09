@@ -492,4 +492,7 @@
   <data name="ImportFromExcel" xml:space="preserve">
     <value>Excelをインポート</value>
   </data>
+  <data name="ReasonQuotation" xml:space="preserve">
+    <value>見積もりを依頼した理由</value>
+  </data>
 </root>

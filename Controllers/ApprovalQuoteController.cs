@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -169,243 +170,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (result.Success)
                 {
                     var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
-                    // Luu lich su phe duyet
-                    var approverHistories = insertedList.Select(b => new BaoGia_History_Approver_of_QuotationDTO
-                    {
-                        ID_RequestQuote = b.ID,
-                        ID_BaoGiaStep = b.ID_StepBaoGia - 1 ?? 0,
-                        CHR_UserSendApprover = currentUserId ?? string.Empty,
-                        DTM_UserSendApprover = DateTime.Now,
-                        CHR_UserApprover = currentUserId ?? string.Empty,
-                        DTM_UserApprover = DateTime.Now,
-                        CHR_StatusFlag = "1",
-                        BIT_SendMail = false,
-                        NVCHR_ReturnReason = null,
-                        BIT_Return = false,
-                        CHR_SectionCodeSend = GetCurrentUserSection() ?? string.Empty,
-                        CHR_SectionNameSend = GetCurrentUserDepartment() ?? string.Empty,
-                        CHR_SectionCodeApprover = GetCurrentUserSection() ?? string.Empty,
-                        CHR_SectionNameApprover = GetCurrentUserDepartment() ?? string.Empty
-                    }).ToList();
-                    if (approverHistories.Any())
-                    {
-                        await _historyApproverServive.AddHistoryListAsync(approverHistories);
-                    }
-                    // Luu lich su thay doi trang thai bao gia
-                    var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO
-                    {
-                        ID_RequestQuote = b.ID,
-                        CHR_MaDon = b.CHR_MaDon ?? string.Empty,
-                        CHR_UpdateBy = currentUserId ?? string.Empty,
-                        NVCHR_UpdateName = currentUserId ?? string.Empty,
-                        CHR_Updatedate = DateTime.Now,
-                        CHR_ChangedColumns = null,
-                        CHR_OldData = null,
-                        CHR_NewData = System.Text.Json.JsonSerializer.Serialize(b),
-                        NVCHR_LyDo = b.NVCHR_LyDo,
-                        CHR_ActionType = StatusOld(b.ID_StepBaoGia)
-                    }).ToList();
-
-                    if (histories.Any())
-                    {
-                        await _baoGiaHistoryService.InsertHistoryListAsync(histories);
-                    }
-                    // Gui mail thông báo phê duyệt báo giá
-                    var SectionApporve = insertedList
-                     .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
-                     .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia, l.CHR_UserApproval))
-                     .ToList();
-                    if (SectionApporve != null)
-                    {
-                        _ = Task.Run(async () =>
-                        {
-                            using (var scope = _serviceScopeFactory.CreateScope())
-                            {
-                                try
-                                {
-                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                                    foreach (var item in SectionApporve)
-                                    {
-                                        if (item.ID_StepBaoGia == 4)
-                                        {
-                                            await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
-                                        }
-                                        else if (item.ID_StepBaoGia != 6)
-                                        {
-                                            await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", item.CHR_UserApproval + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
-                                        }
-                                        //await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
-
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
-                                }
-                            }
-                        });
-                    }
-                    if (!result.Success)
-                    {
-                        return BadRequest(result.Message);
-                    }
-                    // Insert xác nhận tên và gửi mail trong background
-                    var MaterialsNew = insertedList
-                        .Where(l => string.IsNullOrEmpty(l.CHR_MaHangNoiBo) && l.ID_StepBaoGia >= 6 && l.BIT_LayBaoGia == true)
-                        .ToList();
-
-                    // Insert xác nhận tên và gửi mail trong background
-                    if (MaterialsNew.Count > 0)
-                    {
-                        // Run background work without accessing controller/HttpContext inside the task
-                        _ = Task.Run(async () =>
-                        {
-                            using (var scope = _serviceScopeFactory.CreateScope())
-                            {
-                                try
-                                {
-                                    // service
-                                    var baoGiaConfirmNameService = scope.ServiceProvider.GetRequiredService<IBaoGiaConfirmNameService>();
-                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                                    var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
-                                    var materialService = scope.ServiceProvider.GetRequiredService<IMaterialService>();
-
-                                    // Phân loại MaterialsNew theo CHR_Phanloai (A hoặc I)
-                                    var materialsByPhanLoai = MaterialsNew
-                                        .Where(m => !string.IsNullOrEmpty(m.CHR_MaHangNCC))
-                                        .GroupBy(m => GetMaterialType(m.CHR_Phanloai))
-                                        .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-                                    var MaterialNews = new List<MATERIALDTO>();
-                                    var confirmNames = new List<ConfirmNameDTO>();
-
-                                    foreach (var phanLoaiGroup in materialsByPhanLoai)
-                                    {
-                                        var materialType = phanLoaiGroup.Key; 
-                                        var materialsInGroup = phanLoaiGroup.Value;
-
-                                        // Lấy số tiếp theo cho từng loại
-                                        var latestCode = await materialService.MaterialCodeLater(materialType);
-                                        var nextNumber = ExtractNumberFromCode(latestCode.Data);
-
-                                        var processedSuppliers = new Dictionary<string, MATERIALDTO>(StringComparer.OrdinalIgnoreCase);
-
-                                        var materialsBySupplier = materialsInGroup
-                                            .GroupBy(m => m.CHR_MaHangNCC)
-                                            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-                                        foreach (var supplierGroup in materialsBySupplier)
-                                        {
-                                            var supplierCode = supplierGroup.Key;
-                                            var materials = supplierGroup.Value;
-
-                                            // Gọi service check material code
-                                            var checkCode = await materialService.CheckMaterialCode(supplierCode, materials.First().NVCHR_ChungLoai);
-
-                                            if (!checkCode.Success)
-                                            {
-                                                _logger.LogError(checkCode.Message, "Lỗi khi check Material code for {MaHangNCC}, Type: {Type}", supplierCode, materialType);
-                                                continue;
-                                            }
-
-                                            string existingMaterialCode = checkCode.Data;
-
-                                            if (!string.IsNullOrEmpty(existingMaterialCode))
-                                            {
-                                                // Trường hợp đã tồn tại material code
-                                                foreach (var material in materials)
-                                                {
-                                                    confirmNames.Add(new ConfirmNameDTO
-                                                    {
-                                                        Id = material.ID,
-                                                        MaHangNoiBo = existingMaterialCode
-                                                    });
-                                                }
-                                            }
-                                            else
-                                            {
-                                                if (processedSuppliers.TryGetValue(supplierCode, out var existingMaterial))
-                                                {
-                                                    foreach (var material in materials)
-                                                    {
-                                                        confirmNames.Add(new ConfirmNameDTO
-                                                        {
-                                                            Id = material.ID,
-                                                            MaHangNoiBo = existingMaterial.Material_Code
-                                                        });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    // Tạo material mới
-                                                    nextNumber++;
-                                                    var newMaterialCode = GenerateMaterialCode(materialType, nextNumber);
-                                                    var firstMaterial = materials.First();
-
-                                                    // Xác nhận loại hàng dựa trên CHR_Phanloai
-                                                    //var typeMaterial = GetMaterialType(materialType);
-                                                    var OutSide = "";
-                                                    switch (materialType)
-                                                    {
-                                                        case "A":
-                                                        case "B":
-                                                        case "E":
-                                                            OutSide = "IN";
-                                                            break;
-                                                        default:
-                                                            OutSide = "OUT";
-                                                            break;
-                                                    }
-
-                                                    var newMaterial = new MATERIALDTO
-                                                    {
-                                                        Material_Code = newMaterialCode,
-                                                        Material_Name_VN = firstMaterial.NVCHR_NameVN,
-                                                        Material_Name_EN = firstMaterial.CHR_NameEN,
-                                                        Code_Suppiler = firstMaterial.CHR_MaHangNCC,
-                                                        Category_VN = firstMaterial.NVCHR_ChungLoai,
-                                                        Shape = firstMaterial.NVCHR_HinhDang,
-                                                        Material = firstMaterial.NVCHR_ChatLieu,
-                                                        Composition = firstMaterial.NVCHR_ThanhPhan,
-                                                        Dimension = firstMaterial.NVCHR_KichThuoc,
-                                                        UsedFor = firstMaterial.NVCHR_DongMay,
-                                                        Purpose = firstMaterial.NVCHR_TinhNang,
-                                                        CHR_MaterialOutSide = OutSide, 
-                                                        Unit = firstMaterial.NVCHR_DonVi
-                                                    };
-
-                                                    MaterialNews.Add(newMaterial);
-                                                    processedSuppliers[supplierCode] = newMaterial;
-
-                                                    foreach (var material in materials)
-                                                    {
-                                                        confirmNames.Add(new ConfirmNameDTO
-                                                        {
-                                                            Id = material.ID,
-                                                            MaHangNoiBo = newMaterialCode
-                                                        });
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // Send mail
-                                    if (confirmNames.Any())
-                                    {
-                                        await baoGiaService.UpdateCodeMaterialBIVN(confirmNames);
-                                    }
-                                    if (MaterialNews.Any())
-                                    {
-                                        await materialService.UpdateListThongTinNoList(MaterialNews);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, "Lỗi khi xử lý material theo phân loại A/I");
-                                }
-                            }
-                        });
-                    }
+                    await EventApprovelOk(insertedList);
                     return Json(new { success = true, message = result.Message });
                 }
                 else
@@ -454,79 +219,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
-                var result = await _baoGiaService.CapNhatDanhSachBGAsync(updateModel);
+                var result = await _baoGiaService.UpdatePheDuyetDonBaoGiaAsync(updateModel);
                 if (result.Success)
                 {
                     var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
-                    // Capture user info before background task
-                    var currentUserId = GetCurrentUserId();
-                    var firstItem = insertedList.FirstOrDefault();
-                    var isGap = firstItem?.CHR_Gap == "false" ? false : true;
-                    var sectionName = firstItem?.CHR_SectionName;
-                    var maDon = firstItem?.CHR_MaDon;
-                    var userCreate = firstItem?.CHR_CreateBy;
-                    // Luu lich su phe duyet
-                    var approverHistories = insertedList.Select(b => new BaoGia_History_Approver_of_QuotationDTO
-                    {
-                        ID_RequestQuote = b.ID,
-                        ID_BaoGiaStep = StepOld(b.ID_Status),
-                        CHR_UserSendApprover = GetCurrentUserId() ?? string.Empty,
-                        DTM_UserSendApprover = DateTime.Now,
-                        CHR_UserApprover = GetCurrentUserId() ?? string.Empty,
-                        DTM_UserApprover = DateTime.Now,
-                        CHR_StatusFlag = "1",
-                        BIT_SendMail = false,
-                        NVCHR_ReturnReason = b.NVCHR_LyDo,
-                        BIT_Return = true,
-                        CHR_SectionCodeSend = GetCurrentUserSection() ?? string.Empty,
-                        CHR_SectionNameSend = GetCurrentUserDepartment() ?? string.Empty,
-                        CHR_SectionCodeApprover = GetCurrentUserSection() ?? string.Empty,
-                        CHR_SectionNameApprover = GetCurrentUserDepartment() ?? string.Empty
-                    }).ToList();
-                    if (approverHistories.Any())
-                    {
-                        await _historyApproverServive.AddHistoryListAsync(approverHistories);
-                    }
-                    // Luu lich su thay doi trang thai bao gia
-                    var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO
-                    {
-                        ID_RequestQuote = b.ID,
-                        CHR_MaDon = b.CHR_MaDon ?? string.Empty,
-                        CHR_UpdateBy = GetCurrentUserId() ?? string.Empty,
-                        NVCHR_UpdateName = GetCurrentUserFullName() ?? string.Empty,
-                        CHR_Updatedate = DateTime.Now,
-                        CHR_ChangedColumns = null,
-                        CHR_OldData = null,
-                        CHR_NewData = System.Text.Json.JsonSerializer.Serialize(b),
-                        NVCHR_LyDo = b.NVCHR_LyDo,
-                        CHR_ActionType = b.ID_Status
-                    }).ToList();
-
-                    if (histories.Any())
-                    {
-                        await _baoGiaHistoryService.InsertHistoryListAsync(histories);
-                    }
-                    // Gui mail thông báo trả về người tạo báo giá
-                    _ = Task.Run(async () =>
-                    {
-                        using (var scope = _serviceScopeFactory.CreateScope())
-                        {
-                            try
-                            {
-                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                                var mail = userCreate + "@brothergroup.net";
-                                var emailResult = await sendMailService.SendMailAsync(mail, mail, 12,
-                                    "Quote/HistoryQuote", isGap,
-                                    sectionName, maDon, currentUserId);
-                                //var emailResult = await sendMailService.SendMailToConfirmItemAsync(12, 12, "Quote/HistoryQuote", true, "", "", currentUserId);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Error sending email in UpdateQuotationNG");
-                            }
-                        }
-                    });
-
+                    await EventApprovelNG(insertedList);
                     return Json(new { success = true, message = result.Message });
                 }
                 else
@@ -537,6 +234,330 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+        // Send mail Approval OK
+        private async Task<IActionResult> EventApprovelOk(List<BaoGia_Request_of_QuotationDTO> insertedList)
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                // Luu lich su phe duyet
+                var approverHistories = insertedList.Select(b => new BaoGia_History_Approver_of_QuotationDTO
+                {
+                    ID_RequestQuote = b.ID,
+                    ID_BaoGiaStep = b.ID_StepBaoGia - 1 ?? 0,
+                    CHR_UserSendApprover = currentUserId ?? string.Empty,
+                    DTM_UserSendApprover = DateTime.Now,
+                    CHR_UserApprover = currentUserId ?? string.Empty,
+                    DTM_UserApprover = DateTime.Now,
+                    CHR_StatusFlag = "1",
+                    BIT_SendMail = false,
+                    NVCHR_ReturnReason = null,
+                    BIT_Return = false,
+                    CHR_SectionCodeSend = GetCurrentUserSection() ?? string.Empty,
+                    CHR_SectionNameSend = GetCurrentUserDepartment() ?? string.Empty,
+                    CHR_SectionCodeApprover = GetCurrentUserSection() ?? string.Empty,
+                    CHR_SectionNameApprover = GetCurrentUserDepartment() ?? string.Empty
+                }).ToList();
+                if (approverHistories.Any())
+                {
+                    await _historyApproverServive.AddHistoryListAsync(approverHistories);
+                }
+                // Luu lich su thay doi trang thai bao gia
+                var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO
+                {
+                    ID_RequestQuote = b.ID,
+                    CHR_MaDon = b.CHR_MaDon ?? string.Empty,
+                    CHR_UpdateBy = currentUserId ?? string.Empty,
+                    NVCHR_UpdateName = currentUserId ?? string.Empty,
+                    CHR_Updatedate = DateTime.Now,
+                    CHR_ChangedColumns = null,
+                    CHR_OldData = null,
+                    CHR_NewData = System.Text.Json.JsonSerializer.Serialize(b),
+                    NVCHR_LyDo = b.NVCHR_LyDo,
+                    CHR_ActionType = StatusOld(b.ID_StepBaoGia)
+                }).ToList();
+
+                if (histories.Any())
+                {
+                   await _baoGiaHistoryService.InsertHistoryListAsync(histories);
+                }
+                // Gui mail thông báo phê duyệt báo giá
+                var SectionApporve = insertedList
+                 .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
+                 .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia, l.CHR_UserApproval))
+                 .ToList();
+                if (SectionApporve != null)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            try
+                            {
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                foreach (var item in SectionApporve)
+                                {
+                                    if (item.ID_StepBaoGia == 4)
+                                    {
+                                        await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 3);
+                                    }
+                                    else if (item.ID_StepBaoGia != 6)
+                                    {
+                                        await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", item.CHR_UserApproval + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
+                                    }
+
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                            }
+                        }
+                    });
+                }
+                // Insert xác nhận tên và gửi mail trong background
+                var MaterialsNew = insertedList
+                    .Where(l => string.IsNullOrEmpty(l.CHR_MaHangNoiBo) && l.ID_StepBaoGia >= 6 && l.BIT_LayBaoGia == true)
+                    .ToList();
+
+                // Insert xác nhận tên và gửi mail trong background
+                if (MaterialsNew.Count > 0)
+                {
+                    // Run background work without accessing controller/HttpContext inside the task
+                    _ = Task.Run(async () =>
+                    {
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            try
+                            {
+                                // service
+                                var baoGiaConfirmNameService = scope.ServiceProvider.GetRequiredService<IBaoGiaConfirmNameService>();
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
+                                var materialService = scope.ServiceProvider.GetRequiredService<IMaterialService>();
+
+                                // Phân loại MaterialsNew theo CHR_Phanloai (A hoặc I)
+                                var materialsByPhanLoai = MaterialsNew
+                                    .Where(m => !string.IsNullOrEmpty(m.CHR_MaHangNCC))
+                                    .GroupBy(m => GetMaterialType(m.CHR_Phanloai))
+                                    .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+                                var MaterialNews = new List<MATERIALDTO>();
+                                var confirmNames = new List<ConfirmNameDTO>();
+
+                                foreach (var phanLoaiGroup in materialsByPhanLoai)
+                                {
+                                    var materialType = phanLoaiGroup.Key;
+                                    var materialsInGroup = phanLoaiGroup.Value;
+
+                                    // Lấy số tiếp theo cho từng loại
+                                    var latestCode = await materialService.MaterialCodeLater(materialType);
+                                    var nextNumber = ExtractNumberFromCode(latestCode.Data);
+
+                                    var processedSuppliers = new Dictionary<string, MATERIALDTO>(StringComparer.OrdinalIgnoreCase);
+
+                                    var materialsBySupplier = materialsInGroup
+                                        .GroupBy(m => m.CHR_MaHangNCC)
+                                        .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+                                    foreach (var supplierGroup in materialsBySupplier)
+                                    {
+                                        var supplierCode = supplierGroup.Key;
+                                        var materials = supplierGroup.Value;
+
+                                        // Gọi service check material code
+                                        var checkCode = await materialService.CheckMaterialCode(supplierCode, materials.First().NVCHR_ChungLoai);
+
+                                        if (!checkCode.Success)
+                                        {
+                                            _logger.LogError(checkCode.Message, "Lỗi khi check Material code for {MaHangNCC}, Type: {Type}", supplierCode, materialType);
+                                            continue;
+                                        }
+
+                                        string existingMaterialCode = checkCode.Data;
+
+                                        if (!string.IsNullOrEmpty(existingMaterialCode))
+                                        {
+                                            // Trường hợp đã tồn tại material code
+                                            foreach (var material in materials)
+                                            {
+                                                confirmNames.Add(new ConfirmNameDTO
+                                                {
+                                                    Id = material.ID,
+                                                    MaHangNoiBo = existingMaterialCode
+                                                });
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (processedSuppliers.TryGetValue(supplierCode, out var existingMaterial))
+                                            {
+                                                foreach (var material in materials)
+                                                {
+                                                    confirmNames.Add(new ConfirmNameDTO
+                                                    {
+                                                        Id = material.ID,
+                                                        MaHangNoiBo = existingMaterial.Material_Code
+                                                    });
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // Tạo material mới
+                                                nextNumber++;
+                                                var newMaterialCode = GenerateMaterialCode(materialType, nextNumber);
+                                                var firstMaterial = materials.First();
+
+                                                // Xác nhận loại hàng dựa trên CHR_Phanloai
+                                                //var typeMaterial = GetMaterialType(materialType);
+                                                var OutSide = "";
+                                                switch (materialType)
+                                                {
+                                                    case "A":
+                                                    case "B":
+                                                    case "E":
+                                                        OutSide = "IN";
+                                                        break;
+                                                    default:
+                                                        OutSide = "OUT";
+                                                        break;
+                                                }
+
+                                                var newMaterial = new MATERIALDTO
+                                                {
+                                                    Material_Code = newMaterialCode,
+                                                    Material_Name_VN = firstMaterial.NVCHR_NameVN,
+                                                    Material_Name_EN = firstMaterial.CHR_NameEN,
+                                                    Code_Suppiler = firstMaterial.CHR_MaHangNCC,
+                                                    Category_VN = firstMaterial.NVCHR_ChungLoai,
+                                                    Shape = firstMaterial.NVCHR_HinhDang,
+                                                    Material = firstMaterial.NVCHR_ChatLieu,
+                                                    Composition = firstMaterial.NVCHR_ThanhPhan,
+                                                    Dimension = firstMaterial.NVCHR_KichThuoc,
+                                                    UsedFor = firstMaterial.NVCHR_DongMay,
+                                                    Purpose = firstMaterial.NVCHR_TinhNang,
+                                                    CHR_MaterialOutSide = OutSide,
+                                                    Unit = firstMaterial.NVCHR_DonVi
+                                                };
+
+                                                MaterialNews.Add(newMaterial);
+                                                processedSuppliers[supplierCode] = newMaterial;
+
+                                                foreach (var material in materials)
+                                                {
+                                                    confirmNames.Add(new ConfirmNameDTO
+                                                    {
+                                                        Id = material.ID,
+                                                        MaHangNoiBo = newMaterialCode
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                // Send mail
+                                if (confirmNames.Any())
+                                {
+                                    await baoGiaService.UpdateCodeMaterialBIVN(confirmNames);
+                                }
+                                if (MaterialNews.Any())
+                                {
+                                    await materialService.UpdateListThongTinNoList(MaterialNews);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi xử lý material theo phân loại A/I");
+                            }
+                        }
+                    });
+                }
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error Approval: "+ex.Message);
+            }
+        }
+        // Send mail Approval NG
+        private async Task<IActionResult> EventApprovelNG(List<BaoGia_Request_of_QuotationDTO> insertedList)
+        {
+            try {
+                // Capture user info before background task
+                var currentUserId = GetCurrentUserId();
+                var firstItem = insertedList.FirstOrDefault();
+                var isGap = firstItem?.CHR_Gap == "false" ? false : true;
+                var sectionName = firstItem?.CHR_SectionName;
+                var maDon = firstItem?.CHR_MaDon;
+                var userCreate = firstItem?.CHR_CreateBy;
+                // Luu lich su phe duyet
+                var approverHistories = insertedList.Select(b => new BaoGia_History_Approver_of_QuotationDTO
+                {
+                    ID_RequestQuote = b.ID,
+                    ID_BaoGiaStep = StepOld(b.ID_Status),
+                    CHR_UserSendApprover = GetCurrentUserId() ?? string.Empty,
+                    DTM_UserSendApprover = DateTime.Now,
+                    CHR_UserApprover = GetCurrentUserId() ?? string.Empty,
+                    DTM_UserApprover = DateTime.Now,
+                    CHR_StatusFlag = "1",
+                    BIT_SendMail = false,
+                    NVCHR_ReturnReason = b.NVCHR_LyDo,
+                    BIT_Return = true,
+                    CHR_SectionCodeSend = GetCurrentUserSection() ?? string.Empty,
+                    CHR_SectionNameSend = GetCurrentUserDepartment() ?? string.Empty,
+                    CHR_SectionCodeApprover = GetCurrentUserSection() ?? string.Empty,
+                    CHR_SectionNameApprover = GetCurrentUserDepartment() ?? string.Empty
+                }).ToList();
+                if (approverHistories.Any())
+                {
+                    await _historyApproverServive.AddHistoryListAsync(approverHistories);
+                }
+                // Luu lich su thay doi trang thai bao gia
+                var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO
+                {
+                    ID_RequestQuote = b.ID,
+                    CHR_MaDon = b.CHR_MaDon ?? string.Empty,
+                    CHR_UpdateBy = GetCurrentUserId() ?? string.Empty,
+                    NVCHR_UpdateName = GetCurrentUserFullName() ?? string.Empty,
+                    CHR_Updatedate = DateTime.Now,
+                    CHR_ChangedColumns = null,
+                    CHR_OldData = null,
+                    CHR_NewData = System.Text.Json.JsonSerializer.Serialize(b),
+                    NVCHR_LyDo = b.NVCHR_LyDo,
+                    CHR_ActionType = b.ID_Status
+                }).ToList();
+
+                if (histories.Any())
+                {
+                    await _baoGiaHistoryService.InsertHistoryListAsync(histories);
+                }
+                // Gui mail thông báo trả về người tạo báo giá
+                _ = Task.Run(async () =>
+                {
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        try
+                        {
+                            var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                            var mail = userCreate + "@brothergroup.net";
+                            var emailResult = await sendMailService.SendMailAsync(mail, mail, 12,
+                                "Quote/HistoryQuote", isGap,
+                                sectionName, maDon, currentUserId);
+                            //var emailResult = await sendMailService.SendMailToConfirmItemAsync(12, 12, "Quote/HistoryQuote", true, "", "", currentUserId);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error sending email in UpdateQuotationNG");
+                        }
+                    }
+                });
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error Approval: " + ex.Message);
             }
         }
         // Export to Excel
@@ -570,6 +591,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     int col = 1;
                     ws.Cell(rowStart, col++).SetValue(rowStart-3);
+                    ws.Cell(rowStart, col++).SetValue(item.ID);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_SectionCode);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_SectionName);
@@ -598,11 +620,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC);
                     ws.Cell(rowStart, col++).SetValue(item.BIT_LayBaoGia == false ? "X" : "O");
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_LyDo);
-                    ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan);
-                    ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan);
-                    ws.Cell(rowStart, col++).SetValue(item.CHR_Gap == "false" ? "X" : "O");
-                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_UserRequest);
-
+                    ws.Cell(rowStart, col++).SetValue(item?.DTM_NgayMuonNhan.HasValue == true ? item.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item?.DTM_KyHan.HasValue == true ? item.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item?.CHR_Gap == "false" ? "X" : "O");
+                    ws.Cell(rowStart, col++).SetValue(item?.NVCHR_UserRequest);
+                    ws.Cell(rowStart, col++).SetValue(item?.NVCHR_ReasonQuotation);
+                    ws.Cell(rowStart, col++).SetValue(item?.ID_StepBaoGia);
+                    ws.Cell(rowStart, col++).SetValue(item?.ID_Status);
                     rowStart++;
                 }
                 using var outStream = new MemoryStream();
@@ -624,7 +648,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (vm.fileSend == null || vm.fileSend.Length == 0)
                 return BadRequest("File không hợp lệ");
 
-            var items = new List<dynamic>();
+            var itemsOK = new List<BaoGia_Request_of_QuotationDTO>();
+            var itemsNG = new List<BaoGia_Request_of_QuotationDTO>();
             var errorRows = new List<dynamic>();
             try
             {
@@ -637,24 +662,26 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 int startRow = 4;
                 int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
 
+                // các dòng hợp lệ
+                var allRows = new List<(int Row, string MaDon, bool BitSelect, string Reason, BaoGia_Request_of_QuotationDTO Dto)>();
+
                 for (int r = startRow; r <= lastRow; r++)
                 {
                     var errors = new List<string>();
-                    var maDon = ws.Cell(r, 1).GetString();
-                    if (string.IsNullOrEmpty(maDon))
+                    var idRequest = ws.Cell(r, 2).GetString();
+                    if (string.IsNullOrEmpty(idRequest))
                     {
                         break;
                     }
-                    var id = ws.Cell(r, 3).GetString();
-                    var bitSelect = ws.Cell(r, 51).GetString();
-                    var reason = ws.Cell(r, 52).GetString();
-                    var maHangNB = ws.Cell(r, 5).GetString();
+                    var bitSelect = ws.Cell(r, 38).GetString().Contains("NG");
+                    var reason = ws.Cell(r, 39).GetString();
+                    var maDon = ws.Cell(r, 3).GetString();
 
-                    // Validate
-                    if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
+                    // Validate từng dòng
+                    if (bitSelect && string.IsNullOrEmpty(reason))
                     {
                         isErrors = true;
-                        errors.Add("Hàng chưa được chọn nhà cung cấp nhưng đã có lý do từ chối");
+                        errors.Add("Chưa chọn lý do từ chối");
                     }
 
                     if (errors.Any())
@@ -663,7 +690,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             Row = r,
                             MaDon = maDon,
-                            ID = id,
+                            ID = idRequest,
                             BIT_Select = bitSelect,
                             NVCHR_ReasonPick = reason,
                             Errors = string.Join("; ", errors)
@@ -671,31 +698,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                     else
                     {
-                        var check = items.Where(c => c.CHR_MaDon == maDon && c.CHR_MaHangNoiBo == maHangNB && c.BIT_Select).ToList();
-                        if (check.Any() && bitSelect.Contains("O"))
-                        {
-                            isErrors = true;
-                            errorRows.Add(new
-                            {
-                                Row = r,
-                                MaDon = maDon,
-                                ID = id,
-                                BIT_Select = bitSelect,
-                                NVCHR_ReasonPick = reason,
-                                Errors = string.Join("; ", " Trong 1 mã đơn , 1 hàng nội bộ chỉ dc chọn 1 nhà báo giá")
-                            });
-                        }
-                        else
-                        {
-                            items.Add(new
-                            {
-                                ID = id,
-                                BIT_Select = bitSelect.Contains("O"),
-                                NVCHR_ReasonPick = reason,
-                                CHR_MaDon = maDon,
-                                CHR_MaHangNoiBo = maHangNB
-                            });
-                        }
+                        var dto = CreateDtoFromMaterial(ws, r);
+                        allRows.Add((r, maDon, bitSelect, reason, dto));
                     }
                 }
 
@@ -729,25 +733,84 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 else
                 {
-                    // Update database
-                    var dtoList = items.Select(i => new BaoGia_Detail_of_QuotationDTO
+                    // Xử lý theo nhóm MaDon
+                    var groupedByMaDon = allRows.GroupBy(x => x.MaDon);
+
+                    foreach (var group in groupedByMaDon)
                     {
-                        ID = int.Parse(i.ID.ToString()),
-                        BIT_Select = (bool)i.BIT_Select,
-                        NVCHR_ReasonPick = i.NVCHR_ReasonPick.ToString(),
-                        CHR_UpdateBy = GetCurrentUserId()
-                    }).ToList();
-                    //var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(dtoList, vm.userNextApproval);
-                    //if (!result.Success)
-                    //{
-                    //    return BadRequest(result.Message);
-                    //}
+                        var maDon = group.Key;
+                        var hasAnyNG = group.Any(x => x.BitSelect);
+                        //var reasonForNG = group.Where(x => x.BitSelect && !string.IsNullOrEmpty(x.Reason)).Select(x => x.Reason).FirstOrDefault();
+
+                        if (hasAnyNG)
+                        {
+                            // Nếu có ít nhất một NG, tất cả đều NG với lý do chung
+                            foreach (var item in group)
+                            {
+                                var i = item.Dto;
+                                i.ID_Status = GetStatusFromStepReturn(i.ID_StepBaoGia);
+                                i.NVCHR_LyDo = item.Reason;
+                                i.ID_StepBaoGia = 1;
+                                itemsNG.Add(i);
+                            }
+                        }
+                        else
+                        {
+                            // Tất cả OK
+                            foreach (var item in group)
+                            {
+                                var i = item.Dto;
+                                i.ID_StepBaoGia = i.ID_StepBaoGia + 1;
+                                i.ID_Status = GetStatusFromStep(i.ID_StepBaoGia);
+                                i.CHR_UserApproval = "nganng";
+                                itemsOK.Add(i);
+                            }
+                        }
+                    }
+
+                    if(itemsOK.Any())
+                    {
+                        var updateResult = await _baoGiaService.UpdatePheDuyetDonBaoGiaAsync(itemsOK);
+                        if (!updateResult.Success)
+                        {
+                            return BadRequest(updateResult.Message);
+                        }
+                        await EventApprovelOk(updateResult.Data);
+                    }
+                    if (itemsNG.Any())
+                    {
+                        var updateResult = await _baoGiaService.UpdatePheDuyetDonBaoGiaAsync(itemsNG);
+                        if (!updateResult.Success)
+                        {
+                            return BadRequest(updateResult.Message);
+                        }
+                        await EventApprovelNG(updateResult.Data);
+                    }
                     return Ok(new { message = "Import successful" });
                 }
             }
             catch (Exception ex)
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
+        private string GetStatusFromStepReturn(int? step)
+        {
+            switch (step)
+            {
+                case 2: return "RETURN_QLSC"; // Trả về QLSC phong ban
+                case 3: return "RETURN_QLTC"; // Trả về QLTC phong ban
+                case 4: return "RETURN_PIC";    // Trả về PIC phong mua hang
+                case 5: return "RETURN_QLSC_1"; // Trả về QLSC phong ban mua hang
+                default: return "CREATE";
+            }
+        }
+        private string GetStatusFromStep(int? step)
+        {
+            switch (step)
+            {
+                case 5: return "APPROVAL5";
+                default: return "WAIT_SEND_MAIL";
             }
         }
         private int StepOld(string? status)
@@ -771,6 +834,77 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 case 6: return "QLSC_1";
                 default: return "CREATE";
             }
+        }
+        private BaoGia_Request_of_QuotationDTO CreateDtoFromMaterial(IXLWorksheet ws, int row)
+        {
+            return new BaoGia_Request_of_QuotationDTO
+            {
+                ID = int.TryParse(ws.Cell(row, 2).GetString(), out int id) ? id : 0,
+                CHR_MaDon = ws.Cell(row, 3).GetString(),
+                CHR_SectionCode = ws.Cell(row, 4).GetString(),
+                CHR_SectionName = ws.Cell(row, 5).GetString(),
+                CHR_Phanloai = ParsePhanloai(ws.Cell(row, 6).GetString()),
+                CHR_MaThietBi = ws.Cell(row, 7).GetString(),
+                CHR_MaHangNoiBo = ws.Cell(row, 8).GetString(),
+                CHR_MaHangNCC = ws.Cell(row, 9).GetString(),
+                NVCHR_NameVN = ws.Cell(row, 10).GetString(),
+                CHR_NameEN = ws.Cell(row, 11).GetString(),
+                INT_SoLuong = ParseDouble(ws.Cell(row, 12).GetString()),
+                NVCHR_DonVi = ws.Cell(row, 13).GetString(),
+                NVCHR_ChungLoai = ws.Cell(row, 14).GetString(),
+                NVCHR_HinhDang = ws.Cell(row, 15).GetString(),
+                NVCHR_ChatLieu = ws.Cell(row, 16).GetString(),
+                NVCHR_ThanhPhan = ws.Cell(row, 17).GetString(),
+                NVCHR_KichThuoc = ws.Cell(row, 18).GetString(),
+                NVCHR_DongMay = ws.Cell(row, 19).GetString(),
+                NVCHR_TinhNang = ws.Cell(row, 20).GetString(),
+                NVCHR_Rohs = ws.Cell(row, 21).GetString(),
+                NVCHR_COCQ = ws.Cell(row, 22).GetString(),
+                NVCHR_MSDS = ws.Cell(row, 23).GetString(),
+                NVCHR_AnToan = ws.Cell(row, 24).GetString(),
+                NVCHR_FileThietKe = ws.Cell(row, 25).GetString(),
+                NVCHR_NhaSanXuat = ws.Cell(row, 26).GetString(),
+                CHR_MaNCC = ws.Cell(row, 27).GetString(),
+                NVCHR_TenNCC = ws.Cell(row, 28).GetString(),
+                BIT_LayBaoGia = ParseBool(ws.Cell(row, 29).GetString()),
+                NVCHR_LyDo = ws.Cell(row, 30).GetString(),
+                DTM_NgayMuonNhan = ParseDate(ws.Cell(row, 31).GetString()   ),
+                DTM_KyHan = ParseDate(ws.Cell(row, 32).GetString()),
+                CHR_Gap = ParseBool(ws.Cell(row, 33).GetString()) == false ? "false" : "true",
+                NVCHR_UserRequest = ws.Cell(row, 34).GetString(),
+                ID_StepBaoGia = ParseInt(ws.Cell(row, 36).GetString()),
+                ID_Status = ws.Cell(row, 37).GetString()
+            };
+        }
+        private static string? ParsePhanloai(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return "No list";
+            if (s != "A" && s != "B" && s != "C" && s != "E" && s != "I") return "No list";
+            return s;
+        }
+        private static double? ParseDouble(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            if (double.TryParse(s.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var d)) return d;
+            return null;
+        }
+        private static int? ParseInt(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            if (int.TryParse(s.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var d)) return d;
+            return null;
+        }
+        private static DateTime? ParseDate(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            if (DateTime.TryParse(s, out var dt)) return dt;
+            return null;
+        }
+        private static bool? ParseBool(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            var v = s.Trim().ToLowerInvariant();
+            return v.ToUpper().Contains("O") ? true : false;
         }
     }
 }

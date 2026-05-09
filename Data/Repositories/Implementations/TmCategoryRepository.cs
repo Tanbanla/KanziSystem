@@ -21,36 +21,48 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return (await _conn.QueryAsync<string>(sql)).ToList();
         }
         // Tìm kiếm chủng loại theo tên
-        public async Task<List<TM_Category>> SearchCategoryByName(string name, int? pageIndex, int? pageSize)
+        public async Task<ListRequest<TM_Category>> SearchCategoryByName(string name, int? pageIndex, int? pageSize)
         {
-            // Parameterize input and handle empty name
             var param = new DynamicParameters();
             var nameParam = string.IsNullOrWhiteSpace(name) ? null : $"%{name}%";
             param.Add("Name", nameParam);
 
-            // If both pageIndex and pageSize provided and valid -> apply pagination
+            var whereClause = "WHERE (@Name IS NULL OR @Name = '' OR NVCHR_Category LIKE @Name)";
+
             if (pageIndex.HasValue && pageSize.HasValue && pageIndex.Value > 0 && pageSize.Value > 0)
             {
                 var offset = (pageIndex.Value - 1) * pageSize.Value;
-                var sql = @"SELECT *
+                var countSql = $"SELECT COUNT(1) FROM TM_Category {whereClause}";
+                var total = await _conn.ExecuteScalarAsync<int>(countSql, param);
+
+                var sql = $@"SELECT *
                     FROM TM_Category
-                    WHERE (@Name IS NULL OR @Name = '' OR NVCHR_Category LIKE @Name)
+                    {whereClause}
                     ORDER BY NVCHR_Category
                     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
 
                 param.Add("Offset", offset);
                 param.Add("PageSize", pageSize.Value);
 
-                return (await _conn.QueryAsync<TM_Category>(sql, param)).ToList();
-            }
+                var items = (await _conn.QueryAsync<TM_Category>(sql, param)).ToList();
 
-            // No pagination -> return all matching
-            var sqlAll = @"SELECT *
+                return new ListRequest<TM_Category>
+                {
+                    Data = items,
+                    TotalCount = total
+                };
+            }
+            var sqlAll = $@"SELECT *
                 FROM TM_Category
-                WHERE (@Name IS NULL OR @Name = '' OR NVCHR_Category LIKE @Name)
+                {whereClause}
                 ORDER BY NVCHR_Category";
 
-            return (await _conn.QueryAsync<TM_Category>(sqlAll, param)).ToList();
+            var allItems = (await _conn.QueryAsync<TM_Category>(sqlAll, param)).ToList();
+            return new ListRequest<TM_Category>
+            {
+                Data = allItems,
+                TotalCount = allItems.Count
+            };
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -118,6 +118,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
-
+        // Check Supperlier and Catergory
+        public async Task<GenericResponse<bool>> CheckSupperlier(string codeSupperlier, string catergory)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.CheckSupperlier(codeSupperlier, catergory);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

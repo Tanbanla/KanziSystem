@@ -35,10 +35,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<ListRequest<BaoGia_Request_of_Quotation>> SearchAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
         {
             var sql = @"
-                SELECT distinct q.*
+                SELECT DISTINCT q.*
                 FROM BaoGia_Request_of_Quotation as q
-				  inner join [BaoGia_Master_Approver_Send_Mail] as s 
-				on q.CHR_SectionCode = s.CHR_CodeSection
+                INNER JOIN [BaoGia_Master_Approver_Send_Mail] as s ON q.CHR_SectionCode = s.CHR_CodeSection
                 WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
                   AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
@@ -751,6 +750,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var listResult = new List<int>();
             var sectionCode = "";
+            bool isReturn = false;
             var listUpdate = new List<BaoGia_Request_of_Quotation>();
             var listOldData = await _context.BaoGia_Request_of_Quotations.Where(c => baoGias.Select(b => b.ID).Contains(c.ID)).ToListAsync();
             if (listOldData == null || !listOldData.Any())
@@ -800,13 +800,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     dto.BIT_LayBaoGia = baoGia.BIT_LayBaoGia;
                     dto.NVCHR_LyDo = baoGia.NVCHR_LyDo;
                     dto.CHR_Gap = baoGia.CHR_Gap;
-                    dto.CHR_CreateBy = baoGia.CHR_CreateBy;
+                    dto.NVCHR_UserRequest = baoGia.NVCHR_UserRequest;
                     dto.DTM_UpdateLater = DateTime.Now;
                     dto.INT_SoLanUpdate = (dto.INT_SoLanUpdate ?? 0) + 1;
                     if (dto.ID_Status.Contains("RETURN"))
                     {
                         dto.ID_StepBaoGia = 2;
                         dto.ID_Status = "APPROVAL2";
+                        isReturn = true;
                     }
                     listUpdate.Add(dto);
                     var history = new BaoGia_History_Request_of_Quotation
@@ -832,7 +833,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return new UpdateHistoryResult
             {
                 listUpdate = listResult,
-                sectionCode = sectionCode
+                sectionCode = sectionCode,
+                isReturn = isReturn
             };
         }
         // Get thông tin đơn phê duyệt lựa chọn ncc
@@ -1467,7 +1469,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return updatedEntities;
         }
         // Xóa đơn xin báo giá
-        public async Task<bool> DeleteDonXinBaoGiaAsync(string maDon, string userUpdate)
+        public async Task<bool> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate)
         {
             if (string.IsNullOrEmpty(maDon))  throw new Exception("No valid data to update");
 
@@ -1488,6 +1490,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 NVCHR_UpdateName = userUpdate,
                 CHR_Updatedate = DateTime.Now,
                 CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
+                NVCHR_LyDo = reason,
                 CHR_ActionType = "DELETE"
             }).ToList();
             await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
@@ -1496,7 +1499,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Xóa từng đơn
-        public async Task<bool> DeleteDonBaoGiaAsync(int id, string userUpdate)
+        public async Task<bool> DeleteDonBaoGiaAsync(int id, string reason, string userUpdate)
         {
             var data = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(c => c.ID == id);
             if (data == null) throw new Exception("No valid data to update");
@@ -1512,6 +1515,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 NVCHR_UpdateName = userUpdate,
                 CHR_Updatedate = DateTime.Now,
                 CHR_NewData = System.Text.Json.JsonSerializer.Serialize(data),
+                NVCHR_LyDo = reason,
                 CHR_ActionType = "DELETE"
             };
             await _context.BaoGia_History_Request_of_Quotations.AddAsync(history);
@@ -1559,6 +1563,40 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .Distinct()
                 .ToListAsync();
             return data;
+        }
+        // update phê duyệt đơn báo giá
+        public async Task<List<BaoGia_Request_of_Quotation>> UpdatePheDuyetDonBaoGiaAsync(List<BaoGia_Request_of_Quotation> baoGias)
+        {
+            if (baoGias == null || !baoGias.Any())
+            {
+                throw new ArgumentNullException(nameof(baoGias), "No data to update");
+            }
+
+            var ids = baoGias.Select(b => b.ID).Where(id => id > 0).Distinct().ToList();
+            if (!ids.Any())
+            {
+                throw new ArgumentException("No valid IDs provided in the input list.");
+            }
+
+            var existingDict = await _context.BaoGia_Request_of_Quotations
+                .Where(c => ids.Contains(c.ID))
+                .ToDictionaryAsync(c => c.ID);
+
+            var now = DateTime.Now;
+            foreach (var item in baoGias)
+            {
+                if (existingDict.TryGetValue(item.ID, out var data))
+                {
+                    data.ID_StepBaoGia = item.ID_StepBaoGia;
+                    data.ID_Status = item.ID_Status;
+                    data.CHR_UserApproval = item.CHR_UserApproval;
+                    data.DTM_UpdateLater = now;
+                    item.CHR_CreateBy = data.CHR_CreateBy;
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            return baoGias;
         }
     }
 }

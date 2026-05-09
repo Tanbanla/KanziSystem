@@ -543,4 +543,7 @@
   <data name="hethongquanlyhanggiantiep" xml:space="preserve">
     <value>Hệ thống quản lý hàng gián tiếp (IPCS) </value>
   </data>
+  <data name="sotaikhoan" xml:space="preserve">
+    <value>Số tài khoản</value>
+  </data>
 </root>

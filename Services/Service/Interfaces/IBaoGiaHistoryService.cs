@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
@@ -18,5 +18,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> InsertHistoryListAsync(List<BaoGia_History_Request_of_QuotationDTO> historyList);
         // Sửa thông tin lịch sử báo giá
         public Task<GenericResponse<bool>> UpdateHistoryAsync(BaoGia_History_Request_of_QuotationDTO history);
+        // Lấy lý do trả lại đơn báo giá
+        public Task<GenericResponse<string>> GetReturnReasonAsync(int idRequestQuote);
+        public Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<int> ids);
     }
 }

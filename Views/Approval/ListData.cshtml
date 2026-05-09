@@ -58,7 +58,32 @@
         background-color: #28a745;
         color: white !important;
     }
+    /* Container bọc bảng có id hoặc class cụ thể để tránh ảnh hưởng bảng khác */
+    .table-responsive-custom {
+        max-height: 500px; /* Hoặc chiều cao bạn muốn */
+        overflow-y: auto;
+        position: relative;
+    }
 
+    /* Dòng header thứ nhất: Dính sát đỉnh (top: 0) */
+    #modal-silder .table thead tr:nth-child(1) td,
+    #modal-silder .table thead tr:nth-child(1) th {
+        position: sticky;
+        top: 0;
+        background-color: #fff9e1 !important; /* Phải có màu nền để không lộ chữ bên dưới */
+        z-index: 1000;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Dòng header thứ hai: Dính bên dưới dòng thứ nhất */
+    /* Bạn phải kiểm tra chiều cao thực tế của dòng 1, thường là khoảng 45px đến 55px */
+    #modal-silder .table thead tr:nth-child(2) td,
+    #modal-silder .table thead tr:nth-child(2) th {
+        position: sticky;
+        top: 52px; /* TĂNG/GIẢM số này cho đến khi khít với dòng 1 */
+        background-color: #fff9e1 !important;
+        z-index: 999;
+    }
 </style>
 <div class="row">
     <div class="col-12">
@@ -212,7 +237,8 @@
                             Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                             物品依頼書（共通間材・比例間材用・消耗品）　
                         </th>
-                        <th colspan="2" id="madonhang${i}" style="background-color:#fff9e1; font-size:18px"></th>
+                        <th id="madonhang${i}" style="background-color:#fff9e1; font-size:18px"></th>
+                        <th><button type="button" class="btn btn-primary" onclick="_dlxuatkho_trangthai('_${i}')">Tải xuống</button></th>
                     </tr>
                     <tr>
                         <th>
@@ -246,7 +272,7 @@
                             希望期限
                         </td>
                     </tr>
-                    <tr style="height:120px; background-color : #fff9e1">
+                    <tr style="height:60px; background-color : #fff9e1">
                         <td id="mbp${i}"></td>
                         <td id="mpb_yc${i}"></td>
                         <td id="tenphongban${i}"></td>
@@ -255,8 +281,9 @@
                         <td id="thmm${i}"></td>
                     </tr>
                 </table>
+                <div class="table-responsive-custom">
                 <table class="table table-bordered">
-                    <thead class="text-center">
+                    <thead class="text-center"  style="position: sticky; top: 0; background: #fff9e1; z-index: 999;">
                         <tr>
                             <td rowspan="2">No</td>
                             <td rowspan="2">※ Mã đơn <br />システムコード</td>
@@ -278,7 +305,13 @@
                         </tr>
                     </thead>
                     <tbody id="load_detail${i}"></tbody>
+                      <td colspan="10" class="text-center">
+                        Tổng tiền 合計
+                    </td>
+                    <td id="tongtien_${i}" class="bg-warning"></td>
                 </table>
+                </div>
+                <br />
                 <div class="float-right" id="cls_${i}">
                     <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
                     <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
@@ -302,9 +335,7 @@
                 document.getElementById("khoi" + i).innerHTML = response[0].group_Code.split(' ')[0];
                 document.getElementById("id_request" + i).innerHTML = response[0].id_Request;
                 document.getElementById("urgent" + i).innerHTML = response[0].urgent;
-                document.getElementById("step" + i
-                
-                ).innerHTML = buoc;
+                document.getElementById("step" + i).innerHTML = buoc;
                 if (buoc == "0") {
                     document.getElementById("regency" + i).innerHTML = "NGUOIYEUCAU";
                 }
@@ -320,10 +351,14 @@
                 if (buoc == "4") {
                     document.getElementById("regency"+ i).innerHTML = "XUATKHO";
                 }
+                var tongdon = 0;
                 for (var a = 0; a < response.length; a++) {
                     var tongtien = response[a].total_exchange;
-                    document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td>${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td>`;
+                    document.getElementById("load_detail" + i).innerHTML += `<td>${a+1}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td>${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td>`;
+                     tongdon += parseFloat(tongtien);
                 }
+                 document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US');
+
             }
             })
       

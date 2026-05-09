@@ -275,12 +275,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             foreach (var item in confirmNames)
             {
                 if (item == null) continue;
-                if (item.VCHR_TenHaiQuan != null && !string.IsNullOrWhiteSpace(item.VCHR_TenHaiQuan)) continue;
+                //if (item.VCHR_TenHaiQuan != null && !string.IsNullOrWhiteSpace(item.VCHR_TenHaiQuan)) continue;
 
                 if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan))
                 {
                     if (!string.IsNullOrWhiteSpace(tenHaiQuan))
-                        item.VCHR_TenHaiQuan = tenHaiQuan;
+                        item.VCHR_TenRecomment = tenHaiQuan;
                 }
             }
 

@@ -399,6 +399,18 @@
   <data name="DialogOk" xml:space="preserve">
     <value>Đồng ý</value>
   </data>
+  <data name="DeleteReasonTitle" xml:space="preserve">
+    <value>Lý do xóa</value>
+  </data>
+  <data name="DeleteReasonLabel" xml:space="preserve">
+    <value>Vui lòng nhập lý do xóa</value>
+  </data>
+  <data name="EnterDeleteReasonPlaceholder" xml:space="preserve">
+    <value>Nhập lý do xóa...</value>
+  </data>
+  <data name="DeleteReasonRequired" xml:space="preserve">
+    <value>Vui lòng nhập lý do xóa</value>
+  </data>
   <data name="Classification" xml:space="preserve">
     <value>Phân loại</value>
   </data>
@@ -431,5 +443,11 @@
   </data>
   <data name="ReturnSuccess" xml:space="preserve">
     <value>Trả về thành công.</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>Người phê duyệt bước tiếp theo</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>Chọn người phê duyệt tiếp theo</value>
   </data>
 </root>

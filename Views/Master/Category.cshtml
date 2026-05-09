@@ -13,7 +13,7 @@
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-primary" id="btnImportExcel"><i class="fas fa-upload"></i> @Localizer["ImportExcel"]</button>
-                <button type="button" class="btn btn-outline-success" id="btnExportExcel"><i class="fas fa-download"></i> @Localizer["ExportExcel"]</button>
+                <button type="button" class="btn btn-outline-warning" id="btnExportExcel"><i class="fas fa-download"></i> @Localizer["ExportExcel"]</button>
                 <button type="button" class="btn btn-outline-success" id="btnAddCategory"><i class="fas fa-plus"></i> @Localizer["Add"]</button>
             </div>
         </div>
@@ -51,10 +51,11 @@
         <div class="d-flex align-items-center gap-2">
             <label for="categoryPageSize" class="form-label mb-0">@Localizer["PageSize"]</label>
             <select id="categoryPageSize" class="form-select form-select-sm" style="width:90px">
-                <option value="10">10</option>
+                <option value="15">15</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
+                <option value="150">150</option>
             </select>
         </div>
         <div id="categoryPagination" class="btn-group" role="group" aria-label="pagination">

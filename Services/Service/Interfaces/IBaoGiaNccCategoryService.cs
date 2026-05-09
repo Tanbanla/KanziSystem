@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
@@ -18,5 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
             public Task<GenericResponse<bool>> AddListBaoGiaNccCategory(List<BaoGia_NCC_CategoryDTO> listBaoGiaNccCategory);
             // update thong tin
             public Task<GenericResponse<bool>> UpdateBaoGiaNccCategory(BaoGia_NCC_CategoryDTO baoGiaNccCategory);
+            // Check Supperlier and Catergory
+            public Task<GenericResponse<bool>> CheckSupperlier(string codeSupperlier, string catergory);
     }
 }

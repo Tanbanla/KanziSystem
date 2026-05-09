@@ -746,6 +746,9 @@
             const gap = getVal(it, 'chR_Gap', 'chR_Gap');
             const gapLabel = gap != null && gap !== '' ? (String(gap).toLowerCase() === 'true' || String(gap) === '1' ? 'O' : 'X') : '';
             const tdGap = td(gapLabel); tdGap.className = 'text-center'; tr.appendChild(tdGap); // Khẩn
+
+            tr.appendChild(td(getVal(it, 'nvchR_ReasonQuotation'))); // NVCHR_ReasonQuotation
+
             const layBaogia = getVal(it, 'biT_LayBaoGia', 'biT_LayBaoGia');
             const layLabel = layBaogia != null && layBaogia !== '' ? (String(layBaogia).toLowerCase() === 'true' || String(layBaogia) === '1' ? 'O' : 'X') : '';
             const tdLay = td(layLabel); tdLay.className = 'text-center'; tr.appendChild(tdLay); // Lấy báo giá
@@ -1095,12 +1098,78 @@
 
             });
         }
-        // Event click Export to Excel
+        // Event click Import from Excel
         const btnImportExport = document.getElementById('btnImportExport');
         if (btnImportExport) {
             btnImportExport.addEventListener('click', async function () {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.xlsx, .xls';
+                fileInput.style.display = 'none';
+                document.body.appendChild(fileInput);
 
+                fileInput.addEventListener('change', async function () {
+                    const file = fileInput.files[0];
+                    if (!file) return;
+                    const T = window.i18nApproval || {};
 
+                    const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+                    if (!allowedTypes.includes(file.type)) {
+                        showToast('error', T.InvalidFileType || 'Loại file không hợp lệ');
+                        document.body.removeChild(fileInput);
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('fileSend', file);
+
+                    try {
+                        showToast('info', T.Importing || 'Đang nhập...');
+                        const response = await fetch((window.apiBaseUrl || '') + '/ApprovalQuote/ImportExcel', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(errorText || (T.ImportError || 'Nhập file thất bại'));
+                        }
+
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            // Success response
+                            const result = await response.json();
+                            showToast('success', result.message || (T.ImportSuccess || 'Nhập file thành công'));
+                            // Optionally refresh the data
+                            searchAndRender();
+                        } else {
+                            // Error file response
+                            const blob = await response.blob();
+                            let fileName = 'ImportErrors.xlsx';
+                            const cd = response.headers.get('content-disposition');
+                            if (cd) {
+                                const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
+                                if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                            }
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = fileName;
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            window.URL.revokeObjectURL(url);
+                            showToast('warning', T.ImportErrorsFound || 'Có lỗi trong file, vui lòng kiểm tra file tải xuống');
+                        }
+                    } catch (error) {
+                        console.error('Import error', error);
+                        showToast('error', error.message || (T.ImportFailed || 'Nhập file thất bại'));
+                    } finally {
+                        document.body.removeChild(fileInput);
+                    }
+                });
+
+                fileInput.click();
             });
         }
         // select all checkbox

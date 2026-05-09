@@ -4,7 +4,7 @@ function initCategories() {
     let filteredCategories = [];
     let pageIndex = 1;
     // initialize pageSize to match the select default in the view (10)
-    let pageSize = 10;
+    let pageSize = 15;
     let totalPages = 1;
     let totalCount = 0;
 
@@ -25,29 +25,28 @@ function initCategories() {
             });
             const result = await response.json();
             if (result.success) {
-                // If API returns a paged result, it may include total count/properties. We expect data array here.
-                categories = result.data || [];
+             
+                categories = result.data.data || [];
 
-                // If server provides totalCount (recommended), compute pages from that.
+         
                 if (typeof result.totalCount === 'number') {
                     totalCount = result.totalCount;
                     totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-                    // server likely returned only current page items
+                   
                     filteredCategories = categories;
                 }
-                // If server provides totalPages (less ideal), use it and assume categories are current page
+             
                 else if (typeof result.totalPages === 'number') {
                     totalPages = result.totalPages;
-                    totalCount = totalPages * pageSize; // best-effort
+                    totalCount = totalPages * pageSize; 
                     filteredCategories = categories;
                 }
-                // Otherwise assume server returned the full dataset -> do client-side paging
+               
                 else {
-                    totalCount = categories.length;
+                    totalCount = result.data.totalCount;
                     totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-                    // ensure pageIndex in range
                     if (pageIndex > totalPages) pageIndex = totalPages;
-                    filteredCategories = categories.slice((pageIndex - 1) * pageSize, pageIndex * pageSize);
+                    filteredCategories = categories;
                 }
 
                 updatePaginationUI();

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -118,6 +118,39 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
-    
+        // Lấy lý do trả lại đơn báo giá
+        public async Task<GenericResponse<string>>GetReturnReasonAsync(int idRequestQuote)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                var reason = await _repo.GetReturnReasonAsync(idRequestQuote);
+                result.Data = reason;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return result;
+        }
+        public async Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<int> ids)
+        {
+            var result = new GenericResponse<List<ReasonQuotition>>();
+            try
+            {
+                var reasons = await _repo.GetReasonsAsync(ids);
+                result.Data = reasons;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

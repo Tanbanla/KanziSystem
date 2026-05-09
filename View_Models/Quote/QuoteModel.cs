@@ -167,5 +167,19 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string? sectionCode { get; set; }
 
         public List<int>? listUpdate { get; set; }
+
+        public bool isReturn { get; set; }
+    }
+    // delete quotation by id
+    public class DeleteQuotationByIdModel
+    {
+        public int id { get; set; }
+        public string reason { get; set; } = string.Empty;
+    }
+    // delete quotation by maDon
+    public class DeleteQuotationByMaDonModel
+    {
+        public string maDon { get; set; } = string.Empty;
+        public string reason { get; set; } = string.Empty;
     }
 }

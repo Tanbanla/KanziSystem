@@ -314,7 +314,7 @@ function _xuatkho() {
                     return response.json();
                 })
                 .then(data => {
-                    alert(data);
+                  
                     document.querySelectorAll('.close').forEach(button => button.click());
                     _load_xuatkho();
                 })
@@ -322,6 +322,7 @@ function _xuatkho() {
                     console.error('There was a problem with the fetch operation:', error);
                 });
         });
+        alert("Xuất kho thành công!");
     }
     
   

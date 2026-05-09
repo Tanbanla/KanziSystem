@@ -86,7 +86,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
 
-            //var sendMail = await _sendMailService.SendMailToSupplierAsync();
             //var a = GetRolesUser();
             var vm = new QuoteModel
             {
@@ -727,7 +726,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         ws.Cell(rowStart, col++).SetValue("");
                     }
-                    
+
                     rowStart++;
                 }
                 using var outStream = new MemoryStream();
@@ -914,7 +913,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var soLuong = ws.Cell(r, 9).GetDouble();
                     var donVi = ws.Cell(r, 10).GetString();
                     var chungLoaiHang = ws.Cell(r, 11).GetString();
-                    var codeVender = ws.Cell(r,24).GetString();
+                    var codeVender = ws.Cell(r, 24).GetString();
 
                     var maHangNCC_Vendor = ws.Cell(r, 28).GetString();
                     var tenHangVN_Vendor = ws.Cell(r, 29).GetString();
@@ -1533,10 +1532,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Delete danh sách báo giá theo mã đơn
         [HttpPost]
-        public async Task<IActionResult> DeleteDanhSachBaoGiaByMaDon([FromBody] string maDon)
+        public async Task<IActionResult> DeleteDanhSachBaoGiaByMaDon([FromBody] DeleteQuotationByMaDonModel deleteQuotation)
         {
             var userRequest = GetCurrentUserId() ?? "";
-            var result = await _baoGiaService.DeleteDonXinBaoGiaAsync(maDon, userRequest);
+            var result = await _baoGiaService.DeleteDonXinBaoGiaAsync(deleteQuotation.maDon, deleteQuotation.reason, userRequest);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1545,10 +1544,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Delete theo ID request
         [HttpPost]
-        public async Task<IActionResult> DeleteDanhSachBaoGiaByID([FromBody] int IdRequest)
+        public async Task<IActionResult> DeleteDanhSachBaoGiaByID([FromBody] DeleteQuotationByIdModel deleteQuotation)
         {
             var userRequest = GetCurrentUserId() ?? "";
-            var result = await _baoGiaService.DeleteDonBaoGiaAsync(IdRequest, userRequest);
+            var result = await _baoGiaService.DeleteDonBaoGiaAsync(deleteQuotation.id, deleteQuotation.reason, userRequest);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1793,7 +1792,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var stream = file.OpenReadStream();
                 using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
                 var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null) 
+                if (ws == null)
                     return BadRequest("Không tìm thấy worksheet");
 
                 var items = await ProcessExcelWorksheet(ws);
@@ -1859,14 +1858,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NgayMuonNhan = ws.Cell(row, 29).GetString(),
                 KyHan = ws.Cell(row, 30).GetString(),
                 Gap = ws.Cell(row, 31).GetString(),
-                UserRequest = ws.Cell(row, 32).GetString()
+                UserRequest = ws.Cell(row, 32).GetString(),
+                ReasonQuote = ws.Cell(row, 34).GetString()
             };
         }
 
         private async Task<List<BaoGia_Request_of_QuotationDTO>> ProcessRowData(ExcelRowData rowData)
         {
             var items = new List<BaoGia_Request_of_QuotationDTO>();
-            
+
             // Case 1: Có mã hàng nội bộ
             if (!string.IsNullOrEmpty(rowData.MaHangNoiBo))
             {
@@ -1936,7 +1936,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private BaoGia_Request_of_QuotationDTO CreateDtoFromMaterial(ExcelRowData rowData, dynamic material)
         {
             var currentUserId = GetCurrentUserId() ?? string.Empty;
-            
+
             return new BaoGia_Request_of_QuotationDTO
             {
                 CHR_SectionCode = rowData.SectionCode,
@@ -1972,14 +1972,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NVCHR_UserRequest = rowData.UserRequest ?? currentUserId,
                 CHR_CreateBy = currentUserId,
                 DTM_CreateDate = DateTime.Now,
-                ID_Status = "CREATE"
+                ID_Status = "CREATE",
+                NVCHR_ReasonQuotation = rowData.ReasonQuote
             };
         }
 
         private BaoGia_Request_of_QuotationDTO CreateDtoFromRowData(ExcelRowData rowData)
         {
             var currentUserId = GetCurrentUserId() ?? string.Empty;
-            
+
             return new BaoGia_Request_of_QuotationDTO
             {
                 CHR_SectionCode = rowData.SectionCode,
@@ -2032,7 +2033,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var items = new List<BaoGia_Request_of_QuotationDTO>();
             var currentUserId = GetCurrentUserId() ?? string.Empty;
-            
+
             var first = true;
             foreach (var supplier in suppliers)
             {
@@ -2040,16 +2041,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 dto.NVCHR_UserRequest = rowData.UserRequest ?? currentUserId;
                 dto.CHR_MaNCC = supplier.CHR_MaNCC;
                 dto.NVCHR_TenNCC = supplier.NVCHR_TenNCC;
-                
+
                 //if (string.IsNullOrEmpty(dto.NVCHR_NhaSanXuat))
-                 //dto.NVCHR_NhaSanXuat = supplier.NVCHR_SanXuat;
-                    
+                //dto.NVCHR_NhaSanXuat = supplier.NVCHR_SanXuat;
+
                 dto.BIT_LayBaoGia = ParseBool(rowData.LayBaoGia);
-                
+
                 items.Add(dto);
                 first = false;
             }
-            
+
             return items;
         }
         private static string? ParsePhanloai(string s)
@@ -3069,7 +3070,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 VCHR_CamKet = agree,
                                 NVCHR_DeliveryTerm = ws.Cell(r, 23).GetString(),
                                 NVCHR_PaymentTerm = ws.Cell(r, 24).GetString(),
-                                DTM_EffectiveDate = ParseDate(ws.Cell(r,25).GetString()),
+                                DTM_EffectiveDate = ParseDate(ws.Cell(r, 25).GetString()),
                                 DTM_ExpiryDate = ParseDate(ws.Cell(r, 26).GetString()),
                                 CHR_UpdateBy = GetCurrentUserId(),
                                 NVCHR_File = ws.Cell(r, 30).GetString(),//fileUrl,
@@ -3297,6 +3298,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Lỗi lấy danh sách step");
                 }
+                // tách thông tin lịch sử trả ra
+                var historyData = result.Data.Data;
+
+                // Lấy các đơn trả về có trạng thái RETURN để lấy lý do trả
+                var listReason = new List<ReasonQuotition>();
+                var returnIds = historyData.Where(rq => rq.ID_Status.Contains("RETURN")).Select(rq => rq.ID).ToList();
+
+                if (returnIds.Any())
+                {
+                    var reasons = await _baoGiaHistoryService.GetReasonsAsync(returnIds);
+                    if (!reasons.Success)
+                    {
+                        return BadRequest("Lỗi lấy lý do trả");
+                    }
+                    listReason = reasons.Data;
+                }
+
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
                 var templatePath = Path.Combine(root, "template", "TemplateExportHistoryNew.xlsx");
                 if (!System.IO.File.Exists(templatePath))
@@ -3313,7 +3331,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 int row = 4;
-                foreach (var rq in result.Data.Data)
+                foreach (var rq in historyData)
                 {
                     int col = 1;
                     // Map fields into template columns similar to ExportSelection
@@ -3351,8 +3369,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, col++).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(row, col++).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
                     ws.Cell(row, col++).SetValue(rq?.NVCHR_UserRequest ?? string.Empty);
-                    var history = await _baoGiaHistoryService.GetByRequestQuoteIdAsync(rq.ID);
-                    var reson = rq.ID_Status.Contains("RETURN") ? (history.Data.Capacity > 0 ? history.Data.OrderByDescending(h => h.CHR_Updatedate).FirstOrDefault()?.NVCHR_LyDo : string.Empty) : "";
+                    var reson = rq.ID_Status.Contains("RETURN") ? (listReason.Where(c => c.Id == rq.ID).Select(c =>c.Reason).FirstOrDefault()) : "";
                     var statusName = Status.Data.Where(s => s.VCHR_CodeStatus == rq.ID_Status).Select(s => s.NVCHR_TenStatus).FirstOrDefault() ?? string.Empty;
                     ws.Cell(row, col++).SetValue(statusName);
                     var stepName = Steps.Data.Where(s => s.INT_StepNumber == rq.ID_StepBaoGia).Select(s => s.CHR_StepName).FirstOrDefault() ?? string.Empty;
@@ -3438,7 +3455,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     dto.DTM_NgayMuonNhan = ParseDate(ws.Cell(i, 31).GetString());
                     dto.DTM_KyHan = ParseDate(ws.Cell(i, 32).GetString());
                     dto.CHR_Gap = ws.Cell(i, 33).GetString() == "X" ? "false" : "true";
-                    dto.CHR_CreateBy = ws.Cell(i, 34).GetString() ?? GetCurrentUserId() ?? string.Empty;
+                    dto.NVCHR_UserRequest = ws.Cell(i, 34).GetString() ?? GetCurrentUserId() ?? string.Empty;
+                    dto.CHR_CreateBy = GetCurrentUserId() ?? string.Empty;
                     dto.DTM_UpdateLater = DateTime.Now;
 
                     listRequest.Add(dto);
@@ -3541,7 +3559,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 var role = GetRolesUser();
-                if (role == "UserPUR" && selectedMaDon.Count>5)
+                if (role == "UserPUR" && selectedMaDon.Count > 5)
                 {
                     var maDonList = await _baoGiaService.GetMaDonYeuCauHangHoaAsync();
                     selectedMaDon = maDonList.Data.ToList();
@@ -3911,6 +3929,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"{ex.Message}");
             }
 
+        }
+        // check NCC
+        [HttpPost]
+        public async Task<IActionResult> CheckNCC([FromBody] string maNcc, string catergory)
+        {
+            if (string.IsNullOrWhiteSpace(maNcc))
+            {
+                return BadRequest("Mã nhà cung cấp không được để trống");
+            }
+            var result = await _baoGiaNccCategoryService.CheckSupperlier(maNcc, catergory);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
         }
     }
 }

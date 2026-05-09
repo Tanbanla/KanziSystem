@@ -492,4 +492,7 @@
   <data name="ImportFromExcel" xml:space="preserve">
     <value>Import Excel</value>
   </data>
+  <data name="ReasonQuotation" xml:space="preserve">
+    <value>Reason for requesting a quote</value>
+  </data>
 </root>

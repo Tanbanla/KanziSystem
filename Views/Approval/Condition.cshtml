@@ -56,7 +56,12 @@
                         <input type="text" class="form-control" id="mnl" >
                     </div>
                 </div>
-              
+                <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>Cost :</label> <br />
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="costt_ct">
+                    </div>
+                </div>
                 <div class="form-group" style="margin : 10px 0 0 10px" hidden>
                     <div class="input-group mb-2">
                         <input type="text" class="form-control" id="cost" placeholder="Cost">
@@ -80,6 +85,7 @@
                         </select>
                     </div>
                 </div>
+             
                 <div id="hienthitimkiem"> 
                     <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
                     <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-refresh"></i> Refresh </button>
@@ -103,7 +109,9 @@
                                 <th rowspan="2">@Languages.mayeucau</th>
                                 <th rowspan="2">Cost Center</th>
                                 <th rowspan="2">@Languages.Ngayyeucau</th>
+                             
                                 <th rowspan="2">@Languages.thoihanmuonnhan</th>
+                                <th rowspan="2">@Languages.loaichiphi</th>
                                 <th rowspan="2">@Languages.tongtien</th>
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
@@ -174,6 +182,8 @@ function _load_request_condition() {
     var Request_Date = document.getElementById("ngayyc").value;
     var Total = document.getElementById("giadonhang").value;
     var Urgent = document.getElementById("trangthaidon").value;
+    var us = document.getElementById("us").innerHTML;
+    var costt_ct = document.getElementById("costt_ct").value;
         
     const params = new URLSearchParams();
         params.append('Group_Code', Group_Code);
@@ -183,6 +193,8 @@ function _load_request_condition() {
         params.append('Request_Date', Request_Date);
         params.append('Total', Total);
         params.append('Urgent', Urgent);
+        params.append('us', us);
+        params.append('costt_ct', costt_ct);
 
     fetch('/Request/get_requestcondition', {
         method: 'POST',
@@ -212,7 +224,8 @@ function _load_request_condition() {
             "10": ["Bị từ chối", "danger", 5]
         };
 
-        console.log(data);
+
+          
 
         const tbody = document.getElementById('list_approve');
         if (!data || data.length === 0) {
@@ -226,7 +239,12 @@ function _load_request_condition() {
             const config = stepMap[s] || ["Không xác định", "dark", 0];
             const isReject = Number(s) >= 6;
             const currentStep = config[2];
-
+            var loaichiphi = "";
+            if(item.declaration == "AUXILIARY") {loaichiphi = "Chi phí biến đổi theo sản lượng"}
+            if(item.declaration == "EUQIMENT") {loaichiphi = "Chi phí cố định"}
+            if(item.declaration == "FIXED") {loaichiphi = "Tài sản cố định"}
+            if(item.declaration == "COMMON") {loaichiphi = "Chi phí chung"}
+            if(item.declaration == "OTHER") {loaichiphi = "OTHER"}
             // Tạo các dấu chấm (chamtron)
             const dots = Array.from({ length: 5 }, (_, i) => {
                 const stepIdx = i + 1;
@@ -242,7 +260,8 @@ function _load_request_condition() {
                 var quyen = "<td></td><td></td>";
                     if(item.user_Create == us){
                                 quyen = `<td><i class="fa fa-trash text-danger" onclick="xoa_don_prod('${item.iD_REQUEST}')" /></i></td>
-                                             <td><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>`
+                                             <td><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
+                                             <td><a href="/Import/Huydon?iD_REQUEST=${item.iD_REQUEST}"><i class="fa fa-undo text-danger" ></i> </a></td>`
                     }
             return `
                     <tr>
@@ -253,6 +272,7 @@ function _load_request_condition() {
                         <td>${item.cost_Center}</td>
                         <td>${item.create_Date}</td>
                         <td>${item.dealine}</td>
+                        <td>${loaichiphi}</td>
                         <td>${item.total}</td>
                         <td>${item.user_Create}</td>
                         <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
@@ -286,7 +306,9 @@ function _load_request_condition_ga() {
         'Cost_Center': getValue("cost"),
         'Request_Date': getValue("ngayyc"),
         'Total': getValue("giadonhang"),
-        'Urgent': getValue("trangthaidon")
+        'Urgent': getValue("trangthaidon"),
+        'us': us,
+        'costt_ct' : getValue("costt_ct") 
     });
 
     fetch('/Request/get_requestcondition_ga', {
@@ -325,6 +347,13 @@ function _load_request_condition_ga() {
             const isReject = parseInt(s) >= 6;
             const currentStep = config[2];
 
+            var loaichiphi = "";
+            if(item.declaration == "AUXILIARY") {loaichiphi = "Chi phí biến đổi theo sản lượng"}
+            if(item.declaration == "EUQIMENT") {loaichiphi = "Chi phí cố định"}
+            if(item.declaration == "FIXED") {loaichiphi = "Tài sản cố định"}
+            if(item.declaration == "COMMON") {loaichiphi = "Chi phí chung"}
+            if(item.declaration == "OTHER") {loaichiphi = "OTHER"}
+
             const dots = Array.from({ length: 5 }, (_, i) => {
                 const stepIdx = i + 1;
                 if (isReject && stepIdx === currentStep) return "<span class='text-danger'><b>×</b></span>";
@@ -348,6 +377,7 @@ function _load_request_condition_ga() {
                     <td>${item.cost_Center}</td>
                     <td>${item.create_Date}</td>
                     <td>${item.dealine}</td>
+                    <td>${loaichiphi}</td>
                     <td>${item.total}</td>
                     <td>${item.user_Create}</td>
                     <td>${item.chR_TEN_NGUOIYEUCAU || ''} ${dots[0]}</td>

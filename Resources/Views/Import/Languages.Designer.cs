@@ -979,6 +979,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Số tài khoản.
+        /// </summary>
+        public static string sotaikhoan {
+            get {
+                return ResourceManager.GetString("sotaikhoan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Số tiền.
         /// </summary>
         public static string Sotien {
@@ -1213,7 +1222,7 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tổng tiền.
+        ///   Looks up a localized string similar to Tổng đơn.
         /// </summary>
         public static string tongdon {
             get {

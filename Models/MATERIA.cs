@@ -33,7 +33,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 timcode = "a.Material_Code = N'" + code_mt + "' and";
             }
                     
-            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode} a.Material_Name_VN like N'%" + para.Material_Name_VN + "%' and a.Account_Name_VN like N'%" + para.Account_Name_VN + "%' and a.Group_Code like '%" + para.Group_Code + "%' ");
+            //var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode} a.Material_Name_VN like N'%" + para.Material_Name_VN + "%' and a.Account_Name_VN like N'%" + para.Account_Name_VN + "%' and a.Group_Code like '%" + para.Group_Code + "%' ");
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode}  a.Group_Code like '%" + para.Group_Code + "%' ");
             List<PARAS> _material = new List<PARAS>();
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {

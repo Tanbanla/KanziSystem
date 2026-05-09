@@ -609,8 +609,7 @@ function _modal_info(cost_request, step) {
                     document.getElementById("hiennutGA").style.display = '';
                 }
             }
-            catch { }
-          
+            catch { }         
         }
     })
 }

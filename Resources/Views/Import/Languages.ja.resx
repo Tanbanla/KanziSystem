@@ -543,4 +543,7 @@
   <data name="hethongquanlyhanggiantiep" xml:space="preserve">
     <value>間接部品管理システム (IPCS)</value>
   </data>
+  <data name="sotaikhoan" xml:space="preserve">
+    <value>口座番号</value>
+  </data>
 </root>

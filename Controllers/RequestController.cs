@@ -612,7 +612,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             REQUEST_PROCESS_GA._sendmail(body, mail_nguoidat, subject);
             return Json("Hoàn thành !");
         }
-        public JsonResult get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent)
+        public JsonResult get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent, string us, string costt_ct)
         {
             //Urgent = (Urgent == "Gấp") ? "1" : (Urgent == "Thông thường" ? "0" : Urgent);
             //var a =  (Total == "Dưới 3000") ? "2999"                  
@@ -620,11 +620,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //       : (Total == "Trên 10,000") ? "10000"
             //       : "0";
             double aa = double.Parse(Total);
-            var cf = REQUEST_PROCESS.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent);
+            var cf = REQUEST_PROCESS.get_requestcondition(us,Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent,costt_ct);
             
             return Json(cf);
         }
-        public JsonResult get_requestcondition_GA(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent)
+        public JsonResult get_requestcondition_GA(string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent, string costt_ct)
         {
             //Urgent = (Urgent == "Gấp") ? "1" : (Urgent == "Thông thường" ? "0" : Urgent);
             //var a =  (Total == "Dưới 3000") ? "2999"                  
@@ -632,7 +632,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //       : (Total == "Trên 10,000") ? "10000"
             //       : "0";
             double aa = double.Parse(Total);
-            var cf = REQUEST_PROCESS_GA.get_requestcondition(Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent);
+            var cf = REQUEST_PROCESS_GA.get_requestcondition(us,Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent, costt_ct);
             return Json(cf);
         }
         public JsonResult _layphongban(string ph)

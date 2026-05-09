@@ -203,6 +203,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 tongchiphi = tongchiphiold;
             }
+           
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);
         }
@@ -292,6 +293,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     for (int idx = 0; idx < DataListMaterial.Count; idx++)
                     {
                         wsMaterial.Cells["A" + (idx + 2)].Value = DataListMaterial[idx].Split(":")[0];
+                        wsMaterial.Cells["B" + (idx + 2)].Value = DataListMaterial[idx].Split(":")[1];
                     }
 
                     var wsDept = package.Workbook.Worksheets[2];

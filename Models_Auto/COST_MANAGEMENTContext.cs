@@ -868,6 +868,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_ThanhPhan).HasMaxLength(550);
             entity.Property(e => e.NVCHR_TinhNang).HasMaxLength(550);
             entity.Property(e => e.NVCHR_UserRequest).HasMaxLength(200);
+            entity.Property(e => e.NVCHR_ReasonQuotation).HasMaxLength(250);
         });
 
         modelBuilder.Entity<BaoGia_Status>(entity =>

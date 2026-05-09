@@ -59,7 +59,32 @@
         background-color: #28a745;
         color: white !important;
     }
+    /* Container bọc bảng có id hoặc class cụ thể để tránh ảnh hưởng bảng khác */
+    .table-responsive-custom {
+        max-height: 500px; /* Hoặc chiều cao bạn muốn */
+        overflow-y: auto;
+        position: relative;
+    }
 
+    /* Dòng header thứ nhất: Dính sát đỉnh (top: 0) */
+    #modal-silder .table thead tr:nth-child(1) td,
+    #modal-silder .table thead tr:nth-child(1) th {
+        position: sticky;
+        top: 0;
+        background-color: #fff9e1 !important; /* Phải có màu nền để không lộ chữ bên dưới */
+        z-index: 1000;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Dòng header thứ hai: Dính bên dưới dòng thứ nhất */
+    /* Bạn phải kiểm tra chiều cao thực tế của dòng 1, thường là khoảng 45px đến 55px */
+    #modal-silder .table thead tr:nth-child(2) td,
+    #modal-silder .table thead tr:nth-child(2) th {
+        position: sticky;
+        top: 52px; /* TĂNG/GIẢM số này cho đến khi khít với dòng 1 */
+        background-color: #fff9e1 !important;
+        z-index: 999;
+    }
 </style>
 <div class="row">
     <div class="col-12">
@@ -251,7 +276,7 @@
                             希望期限
                         </td>
                     </tr>
-                    <tr style="height:120px; background-color : #fff9e1">
+                    <tr style="height:60px; background-color : #fff9e1">
                         <td id="mbp${i}"></td>
                         <td id="mpb_yc${i}"></td>
                         <td id="tenphongban${i}"></td>
@@ -260,8 +285,9 @@
                         <td id="thmm${i}"></td>
                     </tr>
                 </table>
-                <table class="table table-bordered">
-                    <thead class="text-center">
+                  <div class="table-responsive-custom">
+                    <table class="table table-bordered">
+                        <thead class="text-center"  style="position: sticky; top: 0; background: #fff9e1; z-index: 999;">
                         <tr>
                             <td rowspan="2">No</td>
                             <td rowspan="2">※ Mã đơn <br />システムコード</td>
@@ -281,9 +307,15 @@
                             <td>Đơn giá<br />単価</td>
                             <td>Đơn vị tiền tệ <br />通貨単位</td>
                         </tr>
-                    </thead>
-                    <tbody id="load_detail${i}"></tbody>
-                </table>
+                        </thead>
+                        <tbody id="load_detail${i}"></tbody>
+                        <td colspan="10" class="text-center">
+                            Tổng tiền 合計
+                        </td>
+                        <td id="tongtien_${i}" class="bg-warning"></td>
+                    </table>
+                </div>
+                <br />
                 <div class="float-right" id="cls_${i}">
                     <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_GA('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
                     <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
@@ -326,10 +358,13 @@
                  if (buoc == "5") {
                     document.getElementById("regency"+ i).innerHTML = "QLTC";
                 }
+                var tongdon = 0;
                 for (var a = 0; a < response.length; a++) {
                     var tongtien = response[a].total_exchange;
                                     document.getElementById("load_detail" + i).innerHTML += `<td>${a}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td>${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td>`;
+                    tongdon += parseFloat(tongtien);
                 }
+                document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US');
             }
         })
     }

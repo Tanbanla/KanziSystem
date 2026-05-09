@@ -33,13 +33,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Tìm kiếm chủng loại theo tên
-        public async Task<GenericResponse<List<TM_CategoryDTO>>> SearchCategoryByName(string name, int? pageIndex, int? pageSize)
+        public async Task<GenericResponse<ListRequest<TM_Category>>> SearchCategoryByName(string name, int? pageIndex, int? pageSize)
         {
-            var result = new GenericResponse<List<TM_CategoryDTO>>();
+            var result = new GenericResponse<ListRequest<TM_Category>>();
             try
             {
                 var categories = await _repo.SearchCategoryByName(name, pageIndex, pageSize);
-                result.Data = _mapper.Map<List<TM_CategoryDTO>>(categories);
+                result.Data = categories;
                 result.Success = true;
             }
             catch(Exception ex)

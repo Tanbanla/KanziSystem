@@ -33,5 +33,6 @@ namespace PRJ_WAREHOUSE_BIVN.DTO
         public string KyHan { get; set; }
         public string Gap { get; set; }
         public string UserRequest { get; set; }
+        public string ReasonQuote { get; set; }
     }
 }

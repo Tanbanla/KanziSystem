@@ -37,6 +37,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return StatusCode(500, new { success = false, message = "failed to send email" });
         }
         [HttpGet]
+        [HttpGet("SendMailSupplier")]
         [AllowAnonymous]
         public async Task<IActionResult> SendMailSupplier()
         {

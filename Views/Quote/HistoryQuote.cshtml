@@ -33,29 +33,53 @@
             <div class="spinner" aria-hidden="true"></div>
             <div class="loader-msg">Đang xử lý...</div>
         </div>
-    </div>
-    <!-- Modal: select next approver -->
-    <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
+    <!-- Modal: delete reason -->
+    <div class="modal fade" id="deleteReasonModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@Localizer["SelectNextApprover"].Value</h5>
+                    <h5 class="modal-title">@Localizer["DeleteReasonTitle"]</h5>
                     <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
                         <i class="fas fa-times fa-lg"></i>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-2">
-                        <label for="selectNextApprover" class="form-label small">@Localizer["NextApproverLabel"].Value</label>
+                        <label for="deleteReasonText" class="form-label small">@Localizer["DeleteReasonLabel"]</label>
+                        <textarea id="deleteReasonText" class="form-control" rows="4" placeholder="@Localizer["EnterDeleteReasonPlaceholder"]"></textarea>
+                        <div id="deleteReasonNotice" class="text-danger small mt-2" style="display:none;">@Localizer["DeleteReasonRequired"]</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteWithReason">@Localizer["Delete"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- Modal: select next approver -->
+    <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["SelectNextApprover"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="selectNextApprover" class="form-label small">@Localizer["NextApproverLabel"]</label>
                         <select id="selectNextApprover" class="form-select">
                             <option value="">@Localizer["SelectPlaceholder"]</option>
                         </select>
                     </div>
-                    <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"].Value</div>
+                    <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"]</div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"].Value</button>
-                    <button type="button" class="btn btn-primary" id="confirmSelectApprover">@Localizer["Confirm"].Value</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-primary" id="confirmSelectApprover">@Localizer["Confirm"]</button>
                 </div>
             </div>
         </div>
@@ -167,7 +191,7 @@
                         <tr class="text-center align-middle">
                             <th style="width: 40px">#</th>
                             <th style="min-width: 180px">@Localizer["OrderCodeGroup"]</th>
-                            <th style="min-width: 180px">@Localizer["Requester"]</th>
+                            <th style="min-width: 180px">@Localizer["Creator"]</th>
                             <th style="min-width: 160px">@Localizer["CreatedDate"]</th>
                             <th style="min-width: 140px">@Localizer["CurrentStatus"]</th>
                             <th style="min-width: 140px">@Localizer["TotalOrders"]</th>

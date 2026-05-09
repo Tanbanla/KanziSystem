@@ -399,6 +399,18 @@
   <data name="DialogOk" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="DeleteReasonTitle" xml:space="preserve">
+    <value>削除理由</value>
+  </data>
+  <data name="DeleteReasonLabel" xml:space="preserve">
+    <value>削除理由を入力してください</value>
+  </data>
+  <data name="EnterDeleteReasonPlaceholder" xml:space="preserve">
+    <value>削除理由を入力してください...</value>
+  </data>
+  <data name="DeleteReasonRequired" xml:space="preserve">
+    <value>削除理由を入力してください</value>
+  </data>
   <data name="Classification" xml:space="preserve">
     <value>分類</value>
   </data>
@@ -431,5 +443,11 @@
   </data>
   <data name="ReturnSuccess" xml:space="preserve">
     <value>戻り値に成功しました！</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>次の承認者</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>次の承認者を選択</value>
   </data>
 </root>

@@ -492,4 +492,7 @@
   <data name="ImportFromExcel" xml:space="preserve">
     <value>Nhập Excel</value>
   </data>
+  <data name="ReasonQuotation" xml:space="preserve">
+    <value>Lý do xin báo giá</value>
+  </data>
 </root>

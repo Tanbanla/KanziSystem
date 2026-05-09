@@ -1,8 +1,52 @@
+<style>
+    /* Thiết lập chiều cao tối đa cho container chứa bảng và bật thanh cuộn */
+    #modal-detail-part .form-group {
+        max-height: 80vh; /* Giới hạn chiều cao modal (70% chiều cao màn hình) */
+        overflow-y: auto; /* Hiện thanh cuộn khi nội dung dài */
+    }
+
+    /* Kỹ thuật giữ cố định tiêu đề bảng khi lăn xuống */
+    #modal-detail-part table thead th,
+    #modal-detail-part table thead td {
+        position: sticky;
+        top: 0;
+        background-color: #fff; /* Tránh bị trong suốt khi đè lên dữ liệu bên dưới */
+        z-index: 10;
+        border-top: 1px solid #dee2e6;
+    }
+
+    /* Container bọc bảng có id hoặc class cụ thể để tránh ảnh hưởng bảng khác */
+    .table-responsive-custom {
+        max-height: 400px; /* Hoặc chiều cao bạn muốn */
+        overflow-y: auto;
+        position: relative;
+    }
+
+    /* Dòng header thứ nhất: Dính sát đỉnh (top: 0) */
+    #modal-silder .table thead tr:nth-child(1) td,
+    #modal-silder .table thead tr:nth-child(1) th {
+        position: sticky;
+        top: 0;
+        background-color: #fff9e1 !important; /* Phải có màu nền để không lộ chữ bên dưới */
+        z-index: 1000;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Dòng header thứ hai: Dính bên dưới dòng thứ nhất */
+    /* Bạn phải kiểm tra chiều cao thực tế của dòng 1, thường là khoảng 45px đến 55px */
+    #modal-silder .table thead tr:nth-child(2) td,
+    #modal-silder .table thead tr:nth-child(2) th {
+        position: sticky;
+        top: 52px; /* TĂNG/GIẢM số này cho đến khi khít với dòng 1 */
+        background-color: #fff9e1 !important;
+        z-index: 999;
+    }
+</style>
 <form class="modal-part" id="modal-detail-part">
     <div class="row">
         <div class="form-group col-12 ">
             <table class="table table-bordered" style="text-align:center">
-                <tr>
+                <tr hidden>
                     <td>Id_request : <i id="id_request_0"></i></td>
                     <td>Bước : <i id="step_0"></i></td>
                     <td>Regency : <i id="regency_0"></i></td>
@@ -57,9 +101,10 @@
                     <td id="thmm_0"></td>
                 </tr>
             </table>
-            <table class="table table-bordered">
-                <thead class="text-center">
-                    <tr>
+            <div style="max-height: 500px; overflow-y: auto; border: 1px solid #dee2e6;">
+                <table class="table table-bordered">
+                    <thead class="text-center " style="position: sticky; top: 0; background: #fff9e1; z-index: 999;">
+                        <tr>
                         <td rowspan="2">No</td>
                         <td rowspan="2">※ Mã đơn <br />システムコード</td>
                         <td rowspan="2">※ Tên hàng <br />品名</td>
@@ -83,9 +128,11 @@
                   <td colspan="10" class="text-center">
                     Tổng tiền 合計
                 </td>
-                <td id="tongtientrongdon_0"></td>
-            </table>
-            <div class="col-12" style="font-size:11px">
+                    <td id="tongtientrongdon_0" class="bg-warning"></td>
+                </table>
+
+            </div>
+            <div class="col-12" style="font-size:11px" hidden>
                 Qui trình:
                 フロー: <br />
                 - Dưới <b>3,000 USD (66 triệu VNĐ)</b> : Người phụ trách làm dự thảo → Quản lý trung cấp thẩm tra → Phó trưởng bộ phận. <br />
@@ -98,7 +145,7 @@
                 - Phê duyệt xuất kho PR1-MC: Quản lý sơ cấp/quản lý trung cấp  → Đảm nhiệm xuất kho kho Kanzai <br />
                 - Phê duyệt xuất kho GA : Đảm nhiệm kho GA → Quản lý sơ cấp → Quản lý trung cấp
             </div>
-            <br /><br />
+            <br />
 
             <div class="float-right" id="hiennutGA">
                <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_GA('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
@@ -184,9 +231,10 @@
                     <td id="thmm"></td>
                 </tr>
             </table>
-            <table class="table table-bordered">
-                <thead class="text-center">
-                    <tr>
+            <div class="table-responsive-custom">
+                <table class="table table-bordered">
+                    <thead class="text-center">
+                        <tr>
                         <td rowspan="2">No</td>
                         <td rowspan="2">※ Mã đơn <br />システムコード</td>
                         <td rowspan="2">※ Tên hàng <br />品名</td>
@@ -207,7 +255,8 @@
                     </tr>
                 </thead>
                 <tbody id="load_detail"></tbody>
-            </table>
+                </table>
+            </div>
             <div class="float-right">
                 <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request()"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
                 <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-22"><i class="ion ion-android-close"></i> Từ chối </button>

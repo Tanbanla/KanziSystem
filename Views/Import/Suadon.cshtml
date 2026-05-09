@@ -514,7 +514,7 @@
                 document.getElementById("madon").value = data[0].code_Request;
                 document.getElementById("name_dept").value = data[0].cost_Center;
                 document.getElementById("ngayyeucau").value = data[0].request_Date.split(' ')[0];
-                document.getElementById("thoihan").value = new Date(data[0].request_Date).toISOString().split('T')[0];
+                document.getElementById("thoihan").value = new Date(data[0].dealine).toISOString().split('T')[0];
                 document.getElementById("typee").value = data[0].typee;
                 document.getElementById("thanhtien").value = data[0].total;
                 document.getElementById("loaichiphi").value = data[0].declaration;

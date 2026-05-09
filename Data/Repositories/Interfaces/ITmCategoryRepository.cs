@@ -1,3 +1,4 @@
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
@@ -7,6 +8,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // lấy danh sách chủng loại
         public Task<List<string>> GetListCategory();
         // Tìm kiếm chủng loại theo tên
-        public Task<List<TM_Category>> SearchCategoryByName(string name, int ? pageIndex, int? pageSize);
+        public Task<ListRequest<TM_Category>> SearchCategoryByName(string name, int ? pageIndex, int? pageSize);
     }
 }

@@ -70,11 +70,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Phê duyệt list lựa chọn nhà cung cấp
         public Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprover(List<ApproverDTO> dataApprovers, string userNext, string userUpdate);
         // Xóa đơn xin báo giá
-        public Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string userUpdate);
+        public Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate);
         // Xóa từng đơn
-        public Task<GenericResponse<bool>> DeleteDonBaoGiaAsync(int id, string userUpdate);
+        public Task<GenericResponse<bool>> DeleteDonBaoGiaAsync(int id, string reason, string userUpdate);
         public Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate);
         // lấy danh sách đơn yêu cầu hàng hóa
         public Task<GenericResponse<List<string>>> GetMaDonYeuCauHangHoaAsync();
+        // update phê duyệt đơn báo giá
+        public Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdatePheDuyetDonBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias);
     }
 }

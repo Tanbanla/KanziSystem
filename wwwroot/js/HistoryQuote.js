@@ -83,6 +83,66 @@
     // Gán sự kiện change cho select
     supplierSelect.addEventListener('change', updateHiddenValue);
 
+    // Show delete reason 
+    function showDeleteReasonModal() {
+        return new Promise((resolve) => {
+            const modalEl = document.getElementById('deleteReasonModal');
+            const textarea = document.getElementById('deleteReasonText');
+            const notice = document.getElementById('deleteReasonNotice');
+            const confirmBtn = document.getElementById('confirmDeleteWithReason');
+            if (!modalEl || !textarea || !confirmBtn) return resolve(null);
+
+            // reset
+            textarea.value = '';
+            notice.style.display = 'none';
+
+            // ensure modal in body
+            try { if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl); } catch (e) {}
+
+            let bsModal = null;
+            try {
+                if (window.bootstrap && bootstrap.Modal) {
+                    bsModal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
+                    bsModal.show();
+                } else {
+                    modalEl.style.display = 'block';
+                    modalEl.classList.add('show');
+                    document.body.classList.add('modal-open');
+                }
+            } catch (e) {
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
+
+            function cleanup() {
+                try { if (bsModal) bsModal.hide(); else { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); } } catch (e) { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
+                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) {}
+                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) {}
+                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+            }
+
+            function onHidden() { cleanup(); resolve(null); }
+            function onCancel(e) { e && e.preventDefault(); cleanup(); resolve(null); }
+            function onConfirm(e) {
+                e && e.preventDefault();
+                const reason = (textarea.value || '').trim();
+                if (!reason) {
+                    if (notice) notice.style.display = '';
+                    return;
+                }
+                cleanup();
+                resolve(reason);
+            }
+
+            try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) {}
+            try { if (bsModal) modalEl.addEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+            confirmBtn.addEventListener('click', onConfirm);
+            // focus textarea
+            try { textarea.focus(); } catch (e) {}
+        });
+    }
+
     function applyFilters(page = 1) {
         const maDon = (document.getElementById('searchMaDon').value || '').trim();
         const phongBan = (document.getElementById('searchPhongBan').value || '').trim();
@@ -167,7 +227,7 @@
             TrangThai: status,
             Step: null,
             PageIndex: 1,
-            PageSize: 10000,
+            PageSize: 100,
             Date: (from && to) ? { From: from, To: to } : null
         };
         // ExportHistory
@@ -304,6 +364,14 @@
                 // Import thành công, hiển thị dialog và CHỜ người dùng chọn
                 const step = 2;
                 const section = importResult?.sectionCode || '';
+                if (importResult?.isReturn) {
+                    showDialog({
+                        title: T.Notification || 'Thông báo',
+                        message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'),
+                        type: 'success'
+                    });
+                    return;
+                }
 
                 const selected = await openApproverSelector(step, section);
 
@@ -349,11 +417,11 @@
 
                 const updateResult = await updateResponse.json();
 
-                //showDialog({
-                //    title: T.Notification || 'Thông báo',
-                //    message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'),
-                //    type: 'success'
-                //});
+                showDialog({
+                    title: T.Notification || 'Thông báo',
+                    message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'),
+                    type: 'success'
+                });
 
             } catch (error) {
                 const T = window.i18nHistoryQuote || {};
@@ -399,15 +467,17 @@
             const id = Number(t.dataset.id);
             const T = window.i18nHistoryQuote || {};
             if (!id) return;
-            //if (!confirm(T.ConfirmDeleteItem || 'Bạn có chắc chắn muốn xóa mục này?')) return;
-            const confirmed = await showConfirmDialog(T.ConfirmDeleteGroup || 'Xác nhận', T.ConfirmDeleteGroupBody || 'Bạn có chắc chắn muốn xóa toàn bộ đơn này?', T.Confirm || 'Có', T.Cancel || 'Hủy');
-            if (!confirmed) return;
+
+            const reason = await showDeleteReasonModal();
+            if (!reason) return;
+
             try {
                 showLoading(T.Deleting || 'Đang xóa...');
+                const payloadId = { id: id, reason: reason };
                 const res = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByID', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(id)
+                    body: JSON.stringify(payloadId)
                 });
                 const text = await res.text();
                 if (!res.ok) throw new Error(text || (T.DeleteFailed || 'Xóa thất bại'));
@@ -501,17 +571,21 @@
             const groupId = row?.dataset.groupId;
             const T = window.i18nHistoryQuote || {};
             if (!groupId) return;
-            const confirmed = await showConfirmDialog(T.ConfirmDeleteGroup || 'Xác nhận', T.ConfirmDeleteGroupBody || 'Bạn có chắc chắn muốn xóa toàn bộ đơn này?', T.Confirm || 'Có', T.Cancel || 'Hủy');
-            if (!confirmed) return;
+            const reason = await showDeleteReasonModal();
+            if (!reason) return;
+
             try {
                 showLoading(T.Deleting || 'Đang xóa...');
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByMaDon', {
+
+                const payloadGroup = { maDon: groupId, reason: reason };
+                const resGroup = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByMaDon', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(groupId)
+                    body: JSON.stringify(payloadGroup)
                 });
-                const text = await res.text();
-                if (!res.ok) throw new Error(text || (T.DeleteFailed || 'Xóa thất bại'));
+                const textGroup = await resGroup.text();
+                if (!resGroup.ok) throw new Error(textGroup || (T.DeleteFailed || 'Xóa thất bại'));
+
                 showDialog(T.Notification || 'Thông báo', '<div class="text-success">' + (T.DeleteSuccess || 'Đã xóa thành công.') + '</div>');
                 applyFilters();
             } catch (err) {
@@ -831,7 +905,10 @@
             map.get(key).push(it);
         });
         const groups = Array.from(map.entries()).map(([key, arr]) => {
-            const first = arr[0] || {};
+            const first = (arr.find(x => {
+                const v = getVal(x, 'biT_LayBaoGia', 'BIT_LayBaoGia');
+                return v === true || v === 'true' || v === 1 || v === '1';
+            }) || arr[0]) || {};
             const suppliers = Array.from(new Set(arr.map(x => {
                 const ma = getVal(x,'chR_MaNCC') || '';
                 return (ma || '');

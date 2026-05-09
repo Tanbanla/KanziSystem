@@ -43,26 +43,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return await _context.SaveChangesAsync() > 0;
         }
         // them danh sach
-        //public async Task<bool> AddListBaoGiaNccCategory(List<BaoGia_NCC_Category> listBaoGiaNccCategory)
-        //{
-        //    var listInsert = new List<BaoGia_NCC_Category>();
-        //    foreach (var item in listBaoGiaNccCategory)
-        //    {
-        //        var checklist = listInsert.Where(c => c.CHR_MaNCC == item.CHR_MaNCC && c.NVCHR_ChungLoai == item.NVCHR_ChungLoai);
-        //        if (checklist != null) continue;
-        //        var a = await _context.BaoGia_NCC_Categories.Where(c => c.CHR_MaNCC == item.CHR_MaNCC && c.NVCHR_ChungLoai == item.NVCHR_ChungLoai).FirstOrDefaultAsync();
-        //        if (a != null) continue;
-
-        //        listInsert.Add(item);
-        //    }
-        //    if(listInsert.Count == 0)
-        //    {
-        //        return false;
-        //    }
-        //    await _context.BaoGia_NCC_Categories.AddRangeAsync(listInsert);
-        //    return await _context.SaveChangesAsync() > 0;
-        //}
-        public async Task<bool> AddListBaoGiaNccCategory(List<BaoGia_NCC_Category> listBaoGiaNccCategory)
+        public async Task<bool> AddListBaoGiaNccCategoryOld(List<BaoGia_NCC_Category> listBaoGiaNccCategory)
         {
             if (listBaoGiaNccCategory == null || !listBaoGiaNccCategory.Any())
                 return false;
@@ -93,11 +74,71 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.BaoGia_NCC_Categories.AddRangeAsync(uniqueItems);
             return await _context.SaveChangesAsync() > 0;
         }
+        public async Task<bool> AddListBaoGiaNccCategory(List<BaoGia_NCC_Category> listBaoGiaNccCategory)
+        {
+            if (listBaoGiaNccCategory == null || !listBaoGiaNccCategory.Any())
+                return false;
+
+            var existingEntities = await _context.BaoGia_NCC_Categories
+                .Where(c => listBaoGiaNccCategory.Select(x => x.CHR_MaNCC).Contains(c.CHR_MaNCC))
+                .ToListAsync();
+
+            var existingDict = existingEntities
+                .ToDictionary(e => (e.CHR_MaNCC, e.NVCHR_ChungLoai));
+
+            var toAdd = new List<BaoGia_NCC_Category>();
+
+            foreach (var item in listBaoGiaNccCategory)
+            {
+                var key = (item.CHR_MaNCC, item.NVCHR_ChungLoai);
+
+                if (existingDict.TryGetValue(key, out var existingEntity))
+                {
+                    existingEntity.CHR_PIC = item.CHR_PIC;
+                    existingEntity.CHR_Mail = item.CHR_Mail;
+                }
+                else
+                {
+                    toAdd.Add(item);
+                }
+            }
+
+            if (toAdd.Any())
+            {
+                await _context.BaoGia_NCC_Categories.AddRangeAsync(toAdd);
+            }
+            // update short name
+            var shortNameDict = listBaoGiaNccCategory
+                .Where(x => !string.IsNullOrEmpty(x.NVCHR_SanXuat))
+                .GroupBy(x => x.CHR_MaNCC)
+                .ToDictionary(g => g.Key, g => g.First().NVCHR_SanXuat);
+
+            var listUpdate = await _context.IM_NCC_NEWs
+                .Where(c => shortNameDict.Keys.Contains(c.Ma))
+                .ToListAsync();
+
+            foreach (var item in listUpdate)
+            {
+                if (shortNameDict.TryGetValue(item.Ma, out var shortName))
+                {
+                    item.ShortName = shortName;
+                }
+            }
+
+            // Lưu 
+            return await _context.SaveChangesAsync() > 0;
+        }
         // update thong tin
         public async Task<bool> UpdateBaoGiaNccCategory(BaoGia_NCC_Category baoGiaNccCategory)
         {
             _context.BaoGia_NCC_Categories.Update(baoGiaNccCategory);
             return await _context.SaveChangesAsync() > 0;
+        }
+        // Check Supperlier and Catergory
+        public async Task<bool> CheckSupperlier(string codeSupperlier, string catergory)
+        {
+            var result = await _context.BaoGia_NCC_Categories.AnyAsync(x => x.CHR_MaNCC == codeSupperlier && x.NVCHR_ChungLoai == catergory);
+            return result;
         }
     }
 }

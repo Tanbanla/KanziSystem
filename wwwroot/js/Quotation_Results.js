@@ -1530,8 +1530,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     //tr.appendChild(addTd(getVal(d, 'NameENByNCC', 'nameENByNCC'), null, mismatchStyle(getVal(d, 'IsMatch_NameEN', 'IsMatch_NameEN'))));
                     tr.appendChild(addTd(getVal(d, 'soluong', 'INT_SoLuong', 'soluong') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_SoLuong', 'IsMatch_SoLuong'))));
                     tr.appendChild(addTd(getVal(d, 'donvi', 'NVCHR_DonVi') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_DonVi', 'IsMatch_DonVi'))));
-                    tr.appendChild(addTd(fmtNum(getVal(d, 'FL_USD', 'fl_usd')), 'text-end'));
-                    tr.appendChild(addTd(fmtNum(getVal(d, 'FL_VND', 'fl_vnd')), 'text-end'));
+                    tr.appendChild(addTd(getVal(d, 'FL_USD', 'fl_usd')));
+                    tr.appendChild(addTd(getVal(d, 'FL_VND', 'fl_vnd')));
                     //tr.appendChild(addTd(getVal(d, 'NVCHR_MOQ', 'nvchr_MOQ')));
                     //tr.appendChild(addTd(getVal(d, 'DTM_LeadTime', 'dtm_LeadTime')));
                     //tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ShipTime', 'dtm_ShipTime')), null, mismatchStyle(getVal(d, 'IsMatch_Ngay', 'IsMatch_Ngay'))));

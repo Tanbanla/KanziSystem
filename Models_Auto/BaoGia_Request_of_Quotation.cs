@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -88,4 +88,6 @@ public partial class BaoGia_Request_of_Quotation
     public int? INT_SoLuong { get; set; }
 
     public int? ID_StepBaoGia { get; set; }
+
+    public string? NVCHR_ReasonQuotation { get; set; }
 }

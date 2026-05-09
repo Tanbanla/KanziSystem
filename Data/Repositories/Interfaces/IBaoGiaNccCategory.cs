@@ -1,4 +1,4 @@
-﻿using Microsoft.Identity.Client;
+using Microsoft.Identity.Client;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
@@ -17,5 +17,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> AddListBaoGiaNccCategory(List<BaoGia_NCC_Category> listBaoGiaNccCategory);
         // update thong tin
         public Task<bool> UpdateBaoGiaNccCategory(BaoGia_NCC_Category baoGiaNccCategory);
+        // Check Supperlier and Catergory
+        public Task<bool> CheckSupperlier(string codeSupperlier, string catergory);
+
     }
 }

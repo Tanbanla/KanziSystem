@@ -9,7 +9,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // lấy danh sách chủng loại
         public Task<GenericResponse<List<string>>> GetListCategory();
         // Tìm kiếm chủng loại theo tên
-        public Task<GenericResponse<List<TM_CategoryDTO>>> SearchCategoryByName(string name, int? pageIndex, int? pageSize);
+        public Task<GenericResponse<ListRequest<TM_Category>>> SearchCategoryByName(string name, int? pageIndex, int? pageSize);
         // Thêm mới chủng loại
         public Task<GenericResponse<bool>> AddCategory(TM_CategoryDTO categoryDTO);
         // Thêm nhiều chủng loại 

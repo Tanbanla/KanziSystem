@@ -3,6 +3,7 @@ using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -827,7 +828,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return Json(new { success = false, message = resp?.Message ?? "Error" });
             }
-            var data = resp.Data ?? new List<TM_CategoryDTO>();
+            var data = resp.Data ?? new ListRequest<TM_Category>();
             return Json(new { success = true, data });
         }
         // API thêm mới chủng loại hàng

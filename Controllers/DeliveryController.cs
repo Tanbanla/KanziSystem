@@ -568,10 +568,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     "PROD" => "F2",
                     "GA" => "F1",
+                    "PUR" => "F2",
                     _ => khoi
                 }
             };
-
+            // nếu khối = PUR sẽ chuyển về khối PROD
+            if(khoi == "PUR") { khoi = "PROD"; }
             //Kiểm tra điều kiện
             if (poRow.Benxacnhantruoc == "STOCK")
             {

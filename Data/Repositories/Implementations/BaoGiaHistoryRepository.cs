@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
+using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
@@ -87,6 +88,31 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context.BaoGia_History_Request_of_Quotations.Update(history);
             await _context.SaveChangesAsync();
             return true;
+        }
+        // Lấy lý do trả lại đơn báo giá
+        public async Task<string> GetReturnReasonAsync(int idRequestQuote)
+        {
+            var result = await _context.BaoGia_History_Request_of_Quotations
+                .Where(h => h.ID_RequestQuote == idRequestQuote
+                         && h.CHR_ActionType != null
+                         && h.CHR_ActionType.Contains("RETURN"))
+                .OrderByDescending(h => h.ID)
+                .Select(h => h.NVCHR_LyDo)
+                .FirstOrDefaultAsync();
+            return result ?? string.Empty;
+        }
+        public async Task<List<ReasonQuotition>> GetReasonsAsync(List<int> ids)
+        {
+            var results = await _context.BaoGia_History_Request_of_Quotations
+                .Where(h => ids.Contains(h.ID_RequestQuote) && h.CHR_ActionType != null && h.CHR_ActionType.Contains("RETURN"))
+                .GroupBy(h => h.ID_RequestQuote)
+                .Select(g => new ReasonQuotition
+                {
+                    Id = g.Key,
+                    Reason = g.OrderByDescending(h => h.ID).FirstOrDefault().NVCHR_LyDo
+                })
+                .ToListAsync();
+            return results;
         }
     }
 }

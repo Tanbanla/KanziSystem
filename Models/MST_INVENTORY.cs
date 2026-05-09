@@ -91,24 +91,24 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public static List<string> _getname_material(string group_code, string loaichiphi)
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
-            var _cmd = _context.GET_DATA_FROM_SQL("SELECT distinct(MaNguyenLieu), Material_Name_VN FROM [COST_MANAGEMENT].[dbo].[KHO] as a left join MATERIAL as b on a.MaNguyenLieu = b.Material_Code where a.Group_Code = '" + group_code + "' and a.MaNguyenLieu like '"+ loaichiphi +"%'");
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * from MATERIAL where Material_Code like '{loaichiphi}%' and Group_Code = '{group_code}'");
             List<string> material = new List<string>();
 
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {
-                material.Add(_cmd.Rows[i]["MaNguyenLieu"].ToString() + ":" + _cmd.Rows[i]["Material_Name_VN"].ToString());
+                material.Add(_cmd.Rows[i]["Material_Code"].ToString() + ":" + _cmd.Rows[i]["Material_Name_VN"].ToString());
             }
             return material;
         }
         public static List<string> _getname_material()
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
-            var _cmd = _context.GET_DATA_FROM_SQL("SELECT distinct(MaNguyenLieu), Material_Name_VN FROM [COST_MANAGEMENT].[dbo].[KHO] as a left join MATERIAL as b on a.MaNguyenLieu = b.Material_Code where a.Hientai > 0");
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * from MATERIAL");
             List<string> material = new List<string>();
 
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {
-                material.Add(_cmd.Rows[i]["MaNguyenLieu"].ToString() + ":" + _cmd.Rows[i]["Material_Name_VN"].ToString());
+                material.Add(_cmd.Rows[i]["Material_Code"].ToString() + ":" + _cmd.Rows[i]["Material_Name_VN"].ToString());
             }
             return material;
         }

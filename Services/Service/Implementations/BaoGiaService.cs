@@ -392,12 +392,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Xóa đơn xin báo giá
-        public async Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string userUpdate)
+        public async Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate)
         {
             var result = new GenericResponse<bool>();
             try
             {
-                result.Data = await _repo.DeleteDonXinBaoGiaAsync(maDon, userUpdate);
+                result.Data = await _repo.DeleteDonXinBaoGiaAsync(maDon,reason, userUpdate);
                 result.Success = true;
             }
             catch(Exception ex)
@@ -408,12 +408,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Xóa từng đơn
-        public async Task<GenericResponse<bool>> DeleteDonBaoGiaAsync(int id, string userUpdate)
+        public async Task<GenericResponse<bool>> DeleteDonBaoGiaAsync(int id, string reason, string userUpdate)
         {
             var result = new GenericResponse<bool>();
             try
             {
-                result.Data = await _repo.DeleteDonBaoGiaAsync(id, userUpdate);
+                result.Data = await _repo.DeleteDonBaoGiaAsync(id,reason, userUpdate);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -457,6 +457,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
-
+        // update phê duyệt đơn báo giá
+        public Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdatePheDuyetDonBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
+            try
+            {
+                var data = _mapper.Map<List<BaoGia_Request_of_Quotation>>(baoGias);
+                var updated =  _repo.UpdatePheDuyetDonBaoGiaAsync(data);
+                result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(updated.Result);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return Task.FromResult(result);
+        }
     }
 }

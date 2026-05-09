@@ -303,31 +303,24 @@
     function resetForm() {
         const form = qs('#quoteForm');
         form.reset();
-        // keep 5 rows
         const tbody = qs('#quoteTableBody');
         if (tbody) {
-            // remove extra rows until only 5 remain
             while (tbody.children.length > 5) {
                 tbody.removeChild(tbody.lastElementChild);
             }
 
-            // Remove any searchable dropdown wrappers inside the table and reset selects
             qsa('.ms-container', tbody).forEach((w) => w.remove());
 
             qsa('select.searchable-select', tbody).forEach((sel) => {
-                // if wrapper was inserted as sibling after select, remove it
                 try {
                     const next = sel.nextElementSibling;
                     if (next && next.classList && next.classList.contains('ms-container')) next.remove();
                 } catch (e) { }
 
-                // show original select
                 sel.style.display = '';
 
-                // reset stored enhanced flag so buildSearchableDropdown will re-run
                 try { $(sel).data('search-dropdown', false); } catch (e) { }
 
-                // set default value based on classes
                 if (sel.classList.contains('rohsTb')) {
                     sel.value = 'No Need';
                 } else if (sel.classList.contains('laybaogiaTb')) {
@@ -335,13 +328,11 @@
                 } else if (sel.classList.contains('gapTb')) {
                     sel.value = 'false';
                 } else {
-                    // reset to first option if exists
                     if (sel.options && sel.options.length) sel.selectedIndex = 0;
                 }
                 sel.classList.remove('is-invalid');
             });
 
-            // clear all inputs inside remaining rows
             qsa('tr', tbody).forEach((tr) => {
                 qsa('input', tr).forEach((inp) => {
                     if (inp.type === 'checkbox' || inp.type === 'radio') inp.checked = false;
@@ -353,10 +344,9 @@
             filteredQuoteItems = [];
         }
 
-        // clear validation styles for form-level controls
         qsa('input, select', form).forEach((el) => el.classList.remove('is-invalid'));
 
-        // close any open dropdowns and reattach them to their wrappers
+
         try {
             $('.ms-dropdown.open').each(function () {
                 const $d = $(this);
@@ -368,7 +358,6 @@
             });
         } catch (ex) { /* ignore if jquery missing */ }
 
-        // re-init searchable dropdowns for remaining selects (use document to ensure all get processed)
         try { buildSearchableDropdown($(document)); }
         catch (ex) { console.error('Error re-initializing searchable dropdowns:', ex); }
 
@@ -376,20 +365,16 @@
         applyFiltersAndPagination();
     }
 
-    // No header validation: the view does not include header fields
-
     function validateRow(tr) {
         // required fields per row: department, internal code, VN name, EN name, qty, unit, supplier, laybaogia, desired date
         let ok = true;
 
-        // Helper function to get value and mark as invalid
         const validateField = (selector, isSelect = false) => {
             let element;
 
             if (isSelect) {
                 element = tr.querySelector(selector);
             } else {
-                // For inputs, we need to be more specific
                 const elements = qsa(selector, tr);
                 if (elements.length > 0) {
                     element = elements[0];
@@ -403,10 +388,8 @@
 
             if (!isValid) ok = false;
 
-            // Mark element as invalid
             element.classList.toggle('is-invalid', !isValid);
 
-            // For searchable selects, also mark the custom dropdown UI
             if (element.classList && element.classList.contains('searchable-select')) {
                 const $element = $(element);
                 const $wrapper = $element.siblings('.ms-container');
@@ -448,7 +431,6 @@
             { selector: '.laybaogiaTb', isSelect: true, name: 'Lấy báo giá' }
         ];
 
-        // Validate all required fields
         requiredFields.forEach(field => {
             validateField(field.selector, field.isSelect);
         });
@@ -456,14 +438,13 @@
         // Ngày muốn nhận hàng (required - có dấu *)
         const dateInputs = qsa('input[type="date"]', tr);
         if (dateInputs.length >= 1) {
-            const ngayMuonNhan = dateInputs[0]; // First date input is ngayMuonNhan
+            const ngayMuonNhan = dateInputs[0]; 
             const ngayMuonNhanValid = ngayMuonNhan.value && ngayMuonNhan.value.toString().trim() !== '';
 
             if (!ngayMuonNhanValid) ok = false;
             ngayMuonNhan.classList.toggle('is-invalid', !ngayMuonNhanValid);
         }
 
-        // If internal material code is NOT provided, require supplier item code (Mã hàng NCC)
         try {
             const maHangNoiBoEl = tr.querySelector('.maHangNoiBo');
             const maHangNCCEl = tr.querySelector('input[id^="maHangNCC_"]') || tr.querySelector('input[placeholder*="mã hàng ncc"]');
@@ -478,10 +459,10 @@
                     if (maHangNCCEl) maHangNCCEl.classList.remove('is-invalid');
                 }
             } else {
-                // if internal provided, clear any invalid marker on supplier code
+   
                 if (maHangNCCEl) maHangNCCEl.classList.remove('is-invalid');
             }
-        } catch (e) { /* ignore */ }
+        } catch (e) { }
 
         return ok;
     }
@@ -682,7 +663,6 @@
         let rowsValid = true;
         let rowsCheckReason = true;
         let payload = [];
-        // Require approver selected before submitting
         const approverVal = (qs('#approverSelect') || {}).value || '';
         if (!approverVal || approverVal.toString().trim() === '') {
             const T = window.i18nQuote || {};
@@ -692,7 +672,7 @@
 
         const visibleRows = Array.from(qsa('#quoteTableBody tr'));
         visibleRows.forEach((tr) => {
-            if (isRowEmpty(tr)) return; // skip empty rows
+            if (isRowEmpty(tr)) return;
             if (!validateRow(tr)) rowsValid = false;
             if (!CheckLyDoTuChoi(tr)) rowsCheckReason = false;
         });
@@ -704,33 +684,26 @@
                 try {
                     const globalIdx = start + idx;
                     const collected = collectRow(tr);
-                    // If filteredQuoteItems is present and was used to render, update that item (objects are references to allQuoteItems)
                     if (Array.isArray(filteredQuoteItems) && filteredQuoteItems.length > globalIdx && filteredQuoteItems[globalIdx]) {
                         Object.assign(filteredQuoteItems[globalIdx], collected);
                     }
-                    // Find matching object in allQuoteItems and merge (best-effort by index if same ordering)
                     if (Array.isArray(allQuoteItems) && allQuoteItems.length > globalIdx && allQuoteItems[globalIdx]) {
                         Object.assign(allQuoteItems[globalIdx], collected);
                     } else {
-                        // fallback: append collected if cannot map by index
                         allQuoteItems.push(collected);
                     }
                 } catch (e) { console.warn('Error merging visible row into full dataset', e); }
             });
 
-            // Submit the full in-memory dataset (merged)
             payload = allQuoteItems.slice();
         } else {
-            // No in-memory dataset: collect directly from DOM rows
             visibleRows.forEach((tr) => {
                 if (isRowEmpty(tr)) return;
                 payload.push(collectRow(tr));
             });
         }
 
-        // Ensure every item has CHR_MaDon and CHR_UserApproval — generate one CHR_MaDon for the whole payload
         try {
-            // find section for payload from first item if available
             let sectionForPayload = '';
             for (const it of payload) {
                 const s = it && (it.CHR_SectionCode || it.chR_SectionCode || it.CHR_SectionName || it.chR_SectionName || it.sectionCode || it.sectionName) || '';
@@ -739,7 +712,6 @@
                     break;
                 }
             }
-            // fallback: try to read first visible row's section select
             if (!sectionForPayload) {
                 const firstSel = qs('#quoteTableBody tr .tenPhongBanTb');
                 if (firstSel) sectionForPayload = (firstSel.value || '').toString().trim();
@@ -758,7 +730,7 @@
                         item.CHR_SectionName = SetionNameFirst;
                     }
                     item.ID_StepBaoGia = 2; // set step duyệt báo giá
-                } catch (e) { /* ignore per-item errors */ }
+                } catch (e) { }
             });
         } catch (e) { console.warn('Error ensuring CHR_MaDon/CHR_UserApproval on payload', e); }
 
@@ -898,8 +870,6 @@
                         insertAfter.parentNode.insertBefore(newRow, insertAfter.nextSibling);
                         insertAfter = newRow;
                     }
-
-                    // re-init searchable dropdowns and ids
                     try { buildSearchableDropdown($(document)); } catch (ex) { }
                     renumberRows();
                 }
@@ -912,7 +882,6 @@
         const tr = selectEl.closest('tr');
         const code = selectEl.value;
         if (!code) return;
-        // If supplier already selected on this row, do not auto-fill to avoid overwriting user's choice
         try {
             const supplierSel = tr ? tr.querySelector('.nhaCungCapTb') : null;
             const supVal = supplierSel ? (supplierSel.value || '').toString().trim() : '';
@@ -924,45 +893,6 @@
             const materials = await res.json();
             const material = Array.isArray(materials) ? materials.find((m) => m.material_Code === code) : null;
             if (!material) return;
-            // If a category is selected on this row, ensure the material's category matches
-            //try {
-            //    const categorySelect = tr ? tr.querySelector('.chungLoaiTb') : null;
-            //    const selectedCategory = categorySelect ? (categorySelect.value || '').toString().trim() : '';
-            //    // material may provide category under different property names
-            //    const materialCategory = (material.category_VN || material.category || material.nvchR_ChungLoai || '').toString().trim();
-            //    const T = window.i18nQuote || {};
-            //    if (selectedCategory && materialCategory && selectedCategory.toLowerCase() !== materialCategory.toLowerCase()) {
-            //        // mark category select as invalid (for both original select and searchable wrapper)
-            //        try { if (categorySelect) categorySelect.classList.add('is-invalid'); } catch (e) { }
-            //        try {
-            //            const $sel = $(categorySelect);
-            //            const $wrapper = $sel.siblings('.ms-container');
-            //            if ($wrapper.length) $wrapper.find('.ms-btn').addClass('is-invalid');
-            //        } catch (e) { }
-
-            //        showDialog({
-            //            title: T.WarningTitle || 'Cảnh báo',
-            //            message: `Chủng loại hàng của mã hàng nội bộ (${materialCategory}) không trùng với chủng loại đã chọn (${selectedCategory}).`,
-            //            type: 'error'
-            //        });
-            //        // do not auto-fill other fields when categories mismatch
-            //        return;
-            //    } else {
-            //        // remove any previous invalid marker
-            //        try { if (categorySelect) categorySelect.classList.remove('is-invalid'); } catch (e) { }
-            //        try {
-            //            const $sel = $(categorySelect);
-            //            const $wrapper = $sel.siblings('.ms-container');
-            //            if ($wrapper.length) $wrapper.find('.ms-btn').removeClass('is-invalid');
-            //        } catch (e) { }
-            //    }
-            //} catch (e) { console.warn('Lỗi khi bắt điều kiện chủng loại và mã hàng nội bộ:', e); }
-            //// If supplier already selected on this row, do not auto-fill to avoid overwriting user's choice
-            //try {
-            //    const supplierSel = tr ? tr.querySelector('.nhaCungCapTb') : null;
-            //    const supVal = supplierSel ? (supplierSel.value || '').toString().trim() : '';
-            //    if (supVal) return;
-            //} catch (e) { /* ignore */ }
             // Fill EN name
             const enInput = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('tên hàng en'));
             if (enInput && material.material_Name_EN) enInput.value = material.material_Name_EN;
@@ -998,12 +928,10 @@
             if (categorySelect && material.category_VN) {
                 try {
                     // nếu select đang rỗng, thử set bằng value hoặc bằng text (setSelectValueByText sẽ tìm theo value trước)
-                    //if (!categorySelect.value || categorySelect.value === '') {
                     setSelectValueByText(categorySelect, material.category_VN);
                     // nếu select được enhance thành searchable, cập nhật hiển thị
                     updateSearchableSelectDisplay(categorySelect);
                     autoAddRowByCategory(categorySelect);
-                    //}
                 } catch (e) {
                     console.warn('Error setting category select:', e);
                 }
@@ -1013,106 +941,6 @@
             const loaiHangValue = material.loaiHang || material.LoaiHang || (typeof material.GetLoaiHang === 'function' ? material.GetLoaiHang() : null);
             if (categoryInput && loaiHangValue) categoryInput.value = loaiHangValue;
 
-            // Fetch suppliers for this material and if >1 create rows per supplier
-            //try {
-            //    const supRes = await fetch(api.getSuppliersByMaHang, {
-            //        method: 'POST',
-            //        headers: { 'Content-Type': 'application/json' },
-            //        body: JSON.stringify(code)
-            //    });
-            //    if (!supRes.ok) throw new Error(await supRes.text());
-            //    const suppliers = await supRes.json();
-            //    if (Array.isArray(suppliers) && suppliers.length > 0) {
-            //        // Helper to extract supplier code
-            //        const getSupCode = (s) => s?.chR_MaNCC ||  (typeof s === 'string' ? s : undefined) || '';
-            //        // If only one supplier, set current row's supplier
-            //        if (suppliers.length === 1) {
-            //            const s = suppliers[0];
-            //            const supCode = getSupCode(s);
-            //            const supSel = tr.querySelector('.nhaCungCapTb');
-            //            if (supSel) {
-            //                supSel.value = supCode;
-            //                try { updateSearchableSelectDisplay(supSel); } catch (e) { }
-            //            }
-            //            // Fill mã hàng NCC and NSX for the single supplier into the current row
-            //            const codeByNccInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
-            //            if (codeByNccInputSingle && s.nvchR_CodeByNCC) codeByNccInputSingle.value = s.nvchR_CodeByNCC;
-            //            const nsxInputSingle = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
-            //            if (nsxInputSingle && s.nvchR_MakeIn) nsxInputSingle.value = s.nvchR_MakeIn;
-            //        } else if (suppliers.length > 1) {
-            //            // Collect current row values to replicate
-            //            const values = {};
-            //            // copy inputs
-            //            qsa('input', tr).forEach((inp) => values[inp.name || inp.id || inp.placeholder || inp.type] = inp.value);
-            //            // copy selects
-            //            qsa('select', tr).forEach((sel) => values[sel.className || sel.name || sel.id] = sel.value);
-
-            //            // For first supplier, set current row
-            //            const s0 = suppliers[0];
-            //            const firstCode = getSupCode(s0);
-            //            const supSel0 = tr.querySelector('.nhaCungCapTb');
-            //            if (supSel0) {
-            //                supSel0.value = firstCode;
-            //                // update visible searchable UI for this existing row
-            //                try { updateSearchableSelectDisplay(supSel0); } catch (e) { }
-            //            }
-            //            // Also fill mã hàng NCC and NSX for the first supplier into the current row
-            //            const codeByNccInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
-            //            if (codeByNccInputFirst && s0.nvchR_CodeByNCC) codeByNccInputFirst.value = s0.nvchR_CodeByNCC;
-            //            const nsxInputFirst = qsa('input', tr).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
-            //            if (nsxInputFirst && s0.nvchR_MakeIn) nsxInputFirst.value = s0.nvchR_MakeIn;
-
-            //            // Insert additional rows for remaining suppliers
-            //            let insertAfter = tr;
-            //            for (let i = 1; i < suppliers.length; i++) {
-            //                const s = suppliers[i];
-            //                const supCode = getSupCode(s);
-            //                // clone the row
-            //                const newRow = tr.cloneNode(true);
-            //                // clean any ms-container wrappers inside clone
-            //                qsa('.ms-container', newRow).forEach(w => w.remove());
-            //                // restore selects display
-            //                qsa('select.searchable-select', newRow).forEach(sv => sv.style.display = '');
-
-            //                // set values on inputs/selects in newRow
-            //                qsa('input', newRow).forEach((inp) => {
-            //                    const key = inp.name || inp.id || inp.placeholder || inp.type;
-            //                    if (values.hasOwnProperty(key)) inp.value = values[key];
-            //                    inp.classList.remove('is-invalid');
-            //                });
-            //                qsa('select', newRow).forEach((sel) => {
-            //                    const key = sel.className || sel.name || sel.id;
-            //                    if (values.hasOwnProperty(key)) sel.value = values[key];
-            //                    sel.classList.remove('is-invalid');
-            //                });
-            //                // Set supplier value for this clone and update its searchable display
-            //                const supSel = newRow.querySelector('.nhaCungCapTb');
-            //                if (supSel) {
-            //                    supSel.value = supCode || '';
-            //                    try { updateSearchableSelectDisplay(supSel); } catch(e) { }
-            //                }
-
-            //                // Fill ten hang ncc in the cloned row
-            //                const codeByNccInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('mã hàng ncc'));
-            //                if (codeByNccInput && s.nvchR_CodeByNCC) codeByNccInput.value = s.nvchR_CodeByNCC;
-            //                // Fill san xuat in the cloned row
-            //                const nsxInput = qsa('input', newRow).find((i) => (i.placeholder || '').toLowerCase().includes('nsx'));
-            //                if (nsxInput && s.nvchR_MakeIn) nsxInput.value = s.nvchR_MakeIn;
-
-
-            //                // insert after last inserted
-            //                insertAfter.parentNode.insertBefore(newRow, insertAfter.nextSibling);
-            //                insertAfter = newRow;
-            //            }
-
-            //            // re-init searchable dropdowns and ids
-            //            try { buildSearchableDropdown($(document)); } catch (ex) { }
-            //            renumberRows();
-            //        }
-            //    }
-            //} catch (err) {
-            //    console.warn('Không thể lấy NCC cho mã hàng:', err);
-            //}
         } catch (err) {
             console.warn('Không thể tự động điền thông tin vật tư:', err);
             showDialog({
