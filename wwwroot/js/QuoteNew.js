@@ -17,7 +17,8 @@
                 searchApprover: `${w.apiBaseUrl || ''}/Quote/GetListApprovel`,
                 downloadMasterMaterial: `${w.apiBaseUrl || ''}/Master/ExportExcelMasterMaterial`,
                 downloadMasterVendor: `${w.apiBaseUrl || ''}/Master/ExportExcelMasterVendor`,
-                templateUrl: `${w.apiBaseUrl || ''}/template/TemPlateQuote.xlsx`
+                templateUrl: `${w.apiBaseUrl || ''}/template/TemPlateQuote.xlsx`,
+                checkNCC: `${w.apiBaseUrl || ''}/Quote/CheckNCC`
             },
             selectors: {
                 container: '#quote-request',
@@ -199,6 +200,8 @@
                 this.autofillFromMaterialSelect(target);
             } else if (target.matches(selectors.categorySelect)) {
                 this.handleCategoryChange(target);
+            } else if (target.matches(selectors.supplierSelect)) {
+                this.handleSupplierChange(target);
             }
         },
 
@@ -215,7 +218,7 @@
         },
 
         handleDocumentClick(e) {
-            // Close searchable dropdowns if click is outside
+ 
             if (!e.target.closest('.ms-container')) {
                 document.querySelectorAll('.ms-dropdown.open').forEach(dropdown => {
                     this.closeSearchableDropdown(dropdown);
@@ -223,35 +226,43 @@
             }
         },
 
-        // Core Logic
+
         addRow() {
             const lastRow = this.elements.tableBody.lastElementChild;
             if (!lastRow) return;
 
             const newRow = lastRow.cloneNode(true);
 
-            newRow.querySelectorAll('input, textarea').forEach(inp => {
-                inp.value = '';
-                inp.classList.remove('is-invalid');
-            });
+            const inputs = newRow.querySelectorAll('input, textarea');
+            for (let i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+                inputs[i].classList.remove('is-invalid');
+            }
 
-            newRow.querySelectorAll('select').forEach(sel => {
+            const selects = newRow.querySelectorAll('select');
+            for (let i = 0; i < selects.length; i++) {
+                const sel = selects[i];
                 if (sel.matches(this.config.selectors.rohsSelect)) sel.value = 'No Need';
                 else if (sel.matches(this.config.selectors.getQuoteSelect)) sel.value = 'true';
                 else if (sel.matches(this.config.selectors.urgentSelect)) sel.value = 'false';
                 else sel.value = '';
                 sel.classList.remove('is-invalid');
-            });
+            }
 
-            newRow.querySelectorAll('.ms-container').forEach(w => w.remove());
-            newRow.querySelectorAll('select.searchable-select').forEach(s => {
-                s.style.display = '';
-                s.dataset.searchDropdown = 'false';
-            });
+            const containers = newRow.querySelectorAll('.ms-container');
+            for (let i = containers.length - 1; i >= 0; i--) {
+                containers[i].remove();
+            }
+
+            const searchableSelects = newRow.querySelectorAll('select.searchable-select');
+            for (let i = 0; i < searchableSelects.length; i++) {
+                searchableSelects[i].style.display = '';
+                searchableSelects[i].dataset.searchDropdown = 'false';
+            }
 
             this.elements.tableBody.appendChild(newRow);
             this.initSearchableDropdowns(newRow);
-            this.renumberRows();
+            this.renumberRowsOptimized();
             this.applyFiltersAndPagination();
         },
 
@@ -433,16 +444,19 @@
                 return;
             }
 
+            const searchFields = ['chR_MaHangNoiBo', 'chR_MaHangNCC', 'nvchR_NameVN', 'chR_NameEN',
+                                'nvchR_DonVi', 'chR_MaNCC', 'nvchR_TenNCC', 'nvchR_ChungLoai', 'chR_Phanloai'];
+
             this.state.filteredQuoteItems = this.state.allQuoteItems.filter(dto => {
-                const combined = [
-                    dto.chR_MaHangNoiBo, dto.chR_MaHangNCC, dto.nvchR_NameVN, dto.chR_NameEN,
-                    dto.nvchR_DonVi, dto.chR_MaNCC, dto.nvchR_TenNCC, dto.nvchR_ChungLoai, dto.chR_Phanloai
-                ].map(v => String(v || '').toLowerCase()).join(' ');
-                return filters.every((filter, idx) => {
-                    if (!filter) return true;
-                    // This is a simplified filter. For column-specific filtering, this needs expansion.
-                    return combined.includes(filter);
-                });
+                // Build search string once per DTO
+                let combined = '';
+                for (let i = 0; i < searchFields.length; i++) {
+                    const val = dto[searchFields[i]];
+                    if (val) combined += String(val).toLowerCase() + ' ';
+                }
+
+                // Check all filters (every filter must match)
+                return filters.every(filter => !filter || combined.includes(filter));
             });
         },
 
@@ -492,20 +506,29 @@
                 return;
             }
 
-            this.elements.tableBody.innerHTML = '';
-            const frag = document.createDocumentFragment();
+            // Batch render: Use requestAnimationFrame để không block UI
+            requestAnimationFrame(() => {
+                this.elements.tableBody.innerHTML = '';
+                const frag = document.createDocumentFragment();
 
-            pageItems.forEach((dto, i) => {
-                const row = baseRow.cloneNode(true);
-                this.resetRow(row);
-                this.populateRowFromDto(row, dto, start + i + 1);
-                frag.appendChild(row);
+                // Optimize: Pre-cache selectors trong loop
+                const rowTemplate = baseRow.cloneNode(true);
+                pageItems.forEach((dto, i) => {
+                    const row = rowTemplate.cloneNode(true);
+                    this.resetRowOptimized(row);
+                    this.populateRowFromDtoOptimized(row, dto, start + i + 1);
+                    frag.appendChild(row);
+                });
+
+                this.elements.tableBody.appendChild(frag);
+
+                // Defer DOM-heavy operations
+                requestAnimationFrame(() => {
+                    this.initSearchableDropdowns(this.elements.tableBody);
+                    this.renumberRowsOptimized();
+                    this.updatePaginationUI(totalItems, totalPages);
+                });
             });
-
-            this.elements.tableBody.appendChild(frag);
-            this.initSearchableDropdowns(this.elements.tableBody);
-            this.renumberRows();
-            this.updatePaginationUI(totalItems, totalPages);
         },
 
         updatePaginationState() {
@@ -629,6 +652,54 @@
 
             await this.autoAddRowByCategory(selectElement);
             await this.refreshMaterialOptions(tr, selectElement.value);
+        },
+
+        async handleSupplierChange(selectElement) {
+            const tr = selectElement.closest('tr');
+            if (!tr) return;
+
+            const maNcc = selectElement.value;
+            const categorySelect = tr.querySelector(this.config.selectors.categorySelect);
+            const category = categorySelect?.value || '';
+
+            if (!maNcc || !category) return;
+
+            // Kiểm tra xem NCC này có cung cấp chủng loại này hay không
+            try {
+                const isValid = await this.checkNccCategory(maNcc, category);
+                if (!isValid) {
+                    // NCC không cung cấp chủng loại này - revert choice
+                    selectElement.value = '';
+                    this.updateSearchableSelectDisplay(selectElement);
+                    this.showDialog({
+                        title: this.config.i18n.ErrorTitle,
+                        message: `Nhà cung cấp này không cung cấp chủng loại hàng được chọn. Vui lòng chọn nhà cung cấp khác.`,
+                        type: 'error'
+                    });
+                }
+            } catch (err) {
+                console.warn('Lỗi kiểm tra NCC:', err);
+            }
+        },
+
+        async checkNccCategory(maNcc, category) {
+            try {
+                const res = await fetch(this.config.api.checkNCC, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ maNcc, catergory: category })
+                });
+
+                if (!res.ok) {
+                    return false;
+                }
+
+                const result = await res.json();
+                return result && result.success !== false;
+            } catch (err) {
+                console.warn('Lỗi gọi API CheckNCC:', err);
+                return true; // Allow nếu có lỗi để không block user
+            }
         },
 
         async autofillFromMaterialSelect(selectEl) {
@@ -855,15 +926,21 @@
             return true;
         },
 
-        renumberRows() {
-            this.elements.tableBody.querySelectorAll('tr').forEach((tr, idx) => {
+        renumberRowsOptimized() {
+            // Optimize: Cache nodelist once, update in single pass
+            const rows = this.elements.tableBody.querySelectorAll('tr');
+            const rowCount = rows.length;
+
+            for (let idx = 0; idx < rowCount; idx++) {
+                const tr = rows[idx];
                 const noCell = tr.children[0];
                 if (noCell) noCell.textContent = String(idx + 1);
-                this.assignRowIds(tr, idx + 1);
-            });
+                this.assignRowIdsOptimized(tr, idx + 1);
+            }
         },
 
-        assignRowIds(tr, index) {
+        assignRowIdsOptimized(tr, index) {
+            // Optimize: Pre-build selector map, minimize DOM queries
             const idMap = {
                 '.tenPhongBanTb': 'tenPhongBanTb',
                 '.chungLoaiTb': 'chungLoai',
@@ -895,6 +972,7 @@
                 'input[name^="ngayMuonNhan"]': 'ngayMuonNhan',
                 'input[name^="kyHanChonNCC"]': 'kyHanChonNCC',
             };
+
             for (const selector in idMap) {
                 const el = tr.querySelector(selector);
                 if (el) el.id = `${idMap[selector]}_${index}`;
@@ -975,7 +1053,7 @@
             return obj;
         },
 
-        populateRowFromDto(tr, dto, rowIndex) {
+        populateRowFromDtoOptimized(tr, dto, rowIndex) {
             if (rowIndex) {
                 tr.querySelector('td:first-child').textContent = rowIndex;
             }
@@ -984,52 +1062,49 @@
                 lastCell.innerHTML = `<button type="button" class="btn btn-sm btn-link text-danger px-0 btn-remove-row" title="Remove Row"><i class="fas fa-times"></i></button>`;
             }
 
-            const setInput = (selector, value) => {
-                const el = tr.querySelector(selector);
-                if (el) el.value = value ?? '';
-            };
-            const setSelect = (selector, value) => {
-                const el = tr.querySelector(selector);
-                if (el) this.setSelectValueByText(el, value);
-            };
-
-            const fieldMap = {
-                '.tenPhongBanTb': dto.chR_SectionCode || dto.chR_SectionName,
-                '.chungLoaiTb': dto.nvchR_ChungLoai,
-                '.tenPhanLoaiTb': dto.chR_Phanloai,
-                'input[name^="maThietBi"]': dto.chR_MaThietBi,
-                '.maHangNoiBo': dto.chR_MaHangNoiBo,
-                'input[name^="maHangNCC"]': dto.chR_MaHangNCC,
-                'input[name^="tenHangVN"]': dto.nvchR_NameVN,
-                'input[name^="tenHangEN"]': dto.chR_NameEN,
-                'input[name^="soLuong"]': dto.inT_SoLuong,
-                'input[name^="donVi"]': dto.nvchR_DonVi,
-                '.hinhDang': dto.nvchR_HinhDang,
-                '.chatLieu': dto.nvchR_ChatLieu,
-                '.thanhPhan': dto.nvchR_ThanhPhan,
-                '.kichThuoc': dto.nvchR_KichThuoc,
-                '.viTriSuDung': dto.nvchR_DongMay,
-                '.tinhNang': dto.nvchR_TinhNang,
-                '.rohsTb': dto.nvchR_Rohs,
-                '.CoCqTb': dto.nvchR_COCQ,
-                'input[name^="msds"]': dto.nvchR_MSDS,
-                'input[name^="tieuChuanAnToan"]': dto.nvchR_AnToan,
-                'input[name^="fileThietKe"]': dto.nvchR_FileThietKe,
-                'input[name^="nsx"]': dto.nvchR_NhaSanXuat,
-                '.nhaCungCapTb': dto.chR_MaNCC || dto.nvchR_TenNCC,
-                '.laybaogiaTb': dto.biT_LayBaoGia === true ? 'true' : 'false',
-                'input[name^="lyDo"]': dto.nvchR_LyDo,
-                'input[name^="ngayMuonNhan"]': this.dateToInputValue(dto.dtM_NgayMuonNhan),
-                'input[name^="kyHanChonNCC"]': this.dateToInputValue(dto.dtM_KyHan),
-                '.gapTb': String(dto.chR_Gap),
-                'input[name^="nguoiYeuCauRow"]': dto.nvchR_UserRequest || this.config.userData.user,
+            // Optimize: Pre-compile field mappings, minimize DOM queries
+            const fieldConfig = {
+                '.tenPhongBanTb': { value: dto.chR_SectionCode || dto.chR_SectionName, isSelect: true },
+                '.chungLoaiTb': { value: dto.nvchR_ChungLoai, isSelect: true },
+                '.tenPhanLoaiTb': { value: dto.chR_Phanloai, isSelect: false },
+                'input[name^="maThietBi"]': { value: dto.chR_MaThietBi, isSelect: false },
+                '.maHangNoiBo': { value: dto.chR_MaHangNoiBo, isSelect: true },
+                'input[name^="maHangNCC"]': { value: dto.chR_MaHangNCC, isSelect: false },
+                'input[name^="tenHangVN"]': { value: dto.nvchR_NameVN, isSelect: false },
+                'input[name^="tenHangEN"]': { value: dto.chR_NameEN, isSelect: false },
+                'input[name^="soLuong"]': { value: dto.inT_SoLuong, isSelect: false },
+                'input[name^="donVi"]': { value: dto.nvchR_DonVi, isSelect: false },
+                '.hinhDang': { value: dto.nvchR_HinhDang, isSelect: false },
+                '.chatLieu': { value: dto.nvchR_ChatLieu, isSelect: false },
+                '.thanhPhan': { value: dto.nvchR_ThanhPhan, isSelect: false },
+                '.kichThuoc': { value: dto.nvchR_KichThuoc, isSelect: false },
+                '.viTriSuDung': { value: dto.nvchR_DongMay, isSelect: false },
+                '.tinhNang': { value: dto.nvchR_TinhNang, isSelect: false },
+                '.rohsTb': { value: dto.nvchR_Rohs, isSelect: true },
+                '.CoCqTb': { value: dto.nvchR_COCQ, isSelect: true },
+                'input[name^="msds"]': { value: dto.nvchR_MSDS, isSelect: false },
+                'input[name^="tieuChuanAnToan"]': { value: dto.nvchR_AnToan, isSelect: false },
+                'input[name^="fileThietKe"]': { value: dto.nvchR_FileThietKe, isSelect: false },
+                'input[name^="nsx"]': { value: dto.nvchR_NhaSanXuat, isSelect: false },
+                '.nhaCungCapTb': { value: dto.chR_MaNCC || dto.nvchR_TenNCC, isSelect: true },
+                '.laybaogiaTb': { value: dto.biT_LayBaoGia === true ? 'true' : 'false', isSelect: true },
+                'input[name^="lyDo"]': { value: dto.nvchR_LyDo, isSelect: false },
+                'input[name^="ngayMuonNhan"]': { value: this.dateToInputValue(dto.dtM_NgayMuonNhan), isSelect: false },
+                'input[name^="kyHanChonNCC"]': { value: this.dateToInputValue(dto.dtM_KyHan), isSelect: false },
+                '.gapTb': { value: String(dto.chR_Gap), isSelect: true },
+                'input[name^="nguoiYeuCauRow"]': { value: dto.nvchR_UserRequest || this.config.userData.user, isSelect: false },
             };
 
-            for (const selector in fieldMap) {
+            // Batch update: Single pass through config
+            for (const selector in fieldConfig) {
+                const config = fieldConfig[selector];
                 const el = tr.querySelector(selector);
-                if (el) {
-                    if (el.tagName === 'SELECT') setSelect(selector, fieldMap[selector]);
-                    else setInput(selector, fieldMap[selector]);
+                if (!el) continue;
+
+                if (config.isSelect) {
+                    this.setSelectValueByText(el, config.value);
+                } else {
+                    el.value = config.value ?? '';
                 }
             }
         },
@@ -1136,10 +1211,12 @@
                 pageIndex: 1, pageSize: 200, loading: false, lastQuery: '', hasMore: true, options: [], controller: null
             };
 
+
+            const valuesEl = btn.querySelector('.ms-values');
+            const placeholderEl = btn.querySelector('.ms-placeholder');
+
             const updateButtonText = () => {
                 const selectedOption = select.options[select.selectedIndex];
-                const valuesEl = btn.querySelector('.ms-values');
-                const placeholderEl = btn.querySelector('.ms-placeholder');
                 if (selectedOption && selectedOption.value) {
                     valuesEl.textContent = selectedOption.text;
                     placeholderEl.textContent = '';
@@ -1153,8 +1230,14 @@
                 list.innerHTML = '';
                 const q = query.toLowerCase();
                 let hasItems = false;
-                options.forEach(opt => {
-                    if (!q || opt.text.toLowerCase().includes(q)) {
+
+                const frag = document.createDocumentFragment();
+
+                for (let i = 0; i < options.length; i++) {
+                    const opt = options[i];
+                    const optText = opt.text.toLowerCase();
+
+                    if (!q || optText.includes(q)) {
                         const item = document.createElement('div');
                         item.className = 'ms-item';
                         item.dataset.value = opt.value;
@@ -1162,16 +1245,24 @@
                         if (select.value === opt.value) {
                             item.classList.add('selected');
                         }
-                        list.appendChild(item);
+                        frag.appendChild(item);
                         hasItems = true;
                     }
-                });
+                }
+
                 if (!hasItems) {
-                    list.innerHTML = `<div class="ms-empty">${this.config.i18n.NoResults || 'Không có kết quả'}</div>`;
+                    const empty = document.createElement('div');
+                    empty.className = 'ms-empty';
+                    empty.textContent = this.config.i18n.NoResults || 'Không có kết quả';
+                    frag.appendChild(empty);
+                } else if (isRemote && remoteState.hasMore) {
+                    const loading = document.createElement('div');
+                    loading.className = 'ms-loading';
+                    loading.textContent = 'Loading more...';
+                    frag.appendChild(loading);
                 }
-                if (isRemote && remoteState.hasMore) {
-                    list.innerHTML += '<div class="ms-loading">Loading more...</div>';
-                }
+
+                list.appendChild(frag);
             };
 
             const loadRemote = async (query, append = false) => {
@@ -1189,8 +1280,13 @@
                     return;
                 }
 
-                list.querySelector('.ms-loading')?.remove();
-                list.insertAdjacentHTML('beforeend', '<div class="ms-loading">Loading...</div>');
+                const prevLoading = list.querySelector('.ms-loading');
+                if (prevLoading) prevLoading.remove();
+
+                const loading = document.createElement('div');
+                loading.className = 'ms-loading';
+                loading.textContent = 'Loading...';
+                list.appendChild(loading);
 
                 try {
                     remoteState.controller = new AbortController();
@@ -1207,14 +1303,16 @@
                     const newItems = data.map(m => ({ value: m.material_Code, text: `${m.material_Code} - ${m.material_Name_VN}` }));
 
                     if (!append) remoteState.options = [];
-                    newItems.forEach(item => {
+
+                    for (let i = 0; i < newItems.length; i++) {
+                        const item = newItems[i];
                         if (!remoteState.options.some(o => o.value === item.value)) {
                             remoteState.options.push(item);
                         }
                         if (!Array.from(select.options).some(o => o.value === item.value)) {
                             select.add(new Option(item.text, item.value));
                         }
-                    });
+                    }
 
                     remoteState.hasMore = newItems.length === remoteState.pageSize;
                     if (remoteState.hasMore) remoteState.pageIndex++;
@@ -1224,7 +1322,8 @@
                     if (err.name !== 'AbortError') console.warn('Error loading remote materials:', err);
                 } finally {
                     remoteState.loading = false;
-                    list.querySelector('.ms-loading')?.remove();
+                    const loadingEl = list.querySelector('.ms-loading');
+                    if (loadingEl) loadingEl.remove();
                     renderList(remoteState.options, searchInput.value);
                 }
             };
@@ -1247,7 +1346,7 @@
             });
 
             list.addEventListener('click', (e) => {
-                if (e.target.matches('.ms-item')) {
+                if (e.target.classList.contains('ms-item')) {
                     select.value = e.target.dataset.value;
                     select.dispatchEvent(new Event('change', { bubbles: true }));
                     updateButtonText();
@@ -1271,7 +1370,9 @@
             if (isRemote) {
                 list.addEventListener('scroll', () => {
                     if (list.scrollTop + list.clientHeight >= list.scrollHeight - 40) {
-                        loadRemote(remoteState.lastQuery, true);
+                        if (!remoteState.loading && remoteState.hasMore) {
+                            loadRemote(remoteState.lastQuery, true);
+                        }
                     }
                 });
             }
@@ -1334,11 +1435,35 @@
             return td.textContent.trim();
         },
 
-        resetRow(row) {
-            row.querySelectorAll('input, textarea').forEach(inp => { inp.value = ''; inp.classList.remove('is-invalid'); });
-            row.querySelectorAll('select').forEach(sel => { sel.selectedIndex = 0; sel.classList.remove('is-invalid'); });
-            row.querySelectorAll('.ms-container').forEach(w => w.remove());
-            row.querySelectorAll('select.searchable-select').forEach(s => { s.style.display = ''; s.dataset.searchDropdown = 'false'; });
+        resetRowOptimized(row) {
+            // Optimize: Batch update, minimize reflows
+            const inputs = row.querySelectorAll('input, textarea');
+            const selects = row.querySelectorAll('select');
+            const containers = row.querySelectorAll('.ms-container');
+
+            // Update inputs
+            for (let i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+                inputs[i].classList.remove('is-invalid');
+            }
+
+            // Update selects
+            for (let i = 0; i < selects.length; i++) {
+                selects[i].selectedIndex = 0;
+                selects[i].classList.remove('is-invalid');
+            }
+
+            // Remove containers
+            for (let i = containers.length - 1; i >= 0; i--) {
+                containers[i].remove();
+            }
+
+            // Reset searchable-select display
+            const searchableSelects = row.querySelectorAll('select.searchable-select');
+            for (let i = 0; i < searchableSelects.length; i++) {
+                searchableSelects[i].style.display = '';
+                searchableSelects[i].dataset.searchDropdown = 'false';
+            }
         },
 
         formatDateToISO(dateString) {

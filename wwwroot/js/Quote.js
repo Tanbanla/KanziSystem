@@ -13,6 +13,7 @@
         , searchApprover: (window.apiBaseUrl || '') + '/Quote/GetListApprovel'
         ,downloadMasterMaterial: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterMaterial`
         ,downloadMasterVendor: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterVendor`
+        , checkNCC: (window.apiBaseUrl || '') + '/Quote/CheckNCC'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -2001,6 +2002,26 @@
             console.warn('Không thể tải danh sách approver:', err);
         } finally {
             hideLoading();
+        }
+    }
+
+    async function checkNccCategory(maNcc, category) {
+        try {
+            const res = await fetch(api.checkNCC, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maNcc, catergory: category })
+            });
+
+            if (!res.ok) {
+                return false;
+            }
+
+            const result = await res.json();
+            return result && result.success !== false;
+        } catch (err) {
+            console.warn('Lỗi gọi API CheckNCC:', err);
+            return true; // Allow nếu có lỗi để không block user
         }
     }
 
