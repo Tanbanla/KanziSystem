@@ -1476,10 +1476,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     try
                     {
                         var savedUrl = await _fileImportService.SaveFileFromPathAsync(dto.linkImg);
-                        if (!string.IsNullOrWhiteSpace(savedUrl))
+                        if (!savedUrl.Success)
                         {
-                            dto.NVCHR_FileThietKe = savedUrl;
+                            return BadRequest($"Lỗi khi sao chép file từ linkImg: {dto.linkImg}. Chi tiết: {savedUrl.Message}");
                         }
+                        dto.NVCHR_FileThietKe = savedUrl.Data;
+                        //if (!string.IsNullOrWhiteSpace(savedUrl))
+                        //{
+                        //    dto.NVCHR_FileThietKe = savedUrl;
+                        //}
                     }
                     catch (Exception ex)
                     {

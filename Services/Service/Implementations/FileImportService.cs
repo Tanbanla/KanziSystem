@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using System;
 using System.IO;
@@ -19,16 +20,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _configuration = configuration;
         }
 
-        public async Task<string?> SaveFileFromPathAsync(string sourcePath)
+        public async Task<GenericResponse<string?>> SaveFileFromPathAsync(string sourcePath)
         {
-            if (string.IsNullOrWhiteSpace(sourcePath)) return null;
+            var result = new GenericResponse<string?>();
+
+
+            if (string.IsNullOrWhiteSpace(sourcePath))
+            {
+                result.Success = false;
+                result.Message = "Source path is empty.";
+                return result;
+            } ;
 
             // Normalize and split by comma if multiple paths provided
             var raw = sourcePath.Trim();
             raw = raw.Trim('"', '\'');
             var parts = raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                           .Select(p => p.Trim().Trim('"', '\''))
-                           .ToList();
+                            .Select(p => p.Trim().Trim('"', '\''))
+                            .ToList();
 
             string? found = null;
             foreach (var p0 in parts)
@@ -51,6 +60,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             if (found == null) return null;
 
+            var extension = Path.GetExtension(found).ToLowerInvariant();
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc" };
+            if (!allowedExtensions.Contains(extension)) return null;
+
             try
             {
                 var uploadFolder = Path.Combine(_env.WebRootPath ?? _env.ContentRootPath, "uploads", "quotes");
@@ -60,16 +73,25 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var uniqueName = $"{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid():N}_{fileName}";
                 var dest = Path.Combine(uploadFolder, uniqueName);
 
-                // Use synchronous copy (fast) but provide Task wrapper
-                File.Copy(found, dest, overwrite: false);
+                // Use asynchronous copy if possible, but for local files, synchronous is fine wrapped in Task
+                using (var sourceStream = File.OpenRead(found))
+                using (var destStream = new FileStream(dest, FileMode.Create))
+                {
+                    await sourceStream.CopyToAsync(destStream);
+                }
 
                 var baseUrl = (_configuration["ApiSettings:BaseUrl"] ?? string.Empty).TrimEnd('/');
                 var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/uploads/quotes/{uniqueName}";
-                return await Task.FromResult(fileUrl);
+
+                result.Data = fileUrl;
+                result.Success = true;
+                return result;
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                result.Success = false;
+                result.Message = ex.Message;
+                return result;
             }
         }
     }
