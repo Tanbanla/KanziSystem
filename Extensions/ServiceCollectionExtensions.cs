@@ -73,6 +73,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
         services.AddScoped<IExchangeRateService, ExchangeRateService>();
+
+        services.AddScoped<IFileImportService, FileImportService>();
         return services;
     }
 }

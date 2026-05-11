@@ -50,7 +50,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Account_Name_VN = _cmd.Rows[i]["Account_Name_VN"].ToString(),
                     Unit = _cmd.Rows[i]["Unit"].ToString(),
                     Unit_Note = _cmd.Rows[i]["Unit_Note"].ToString(),
-                    Price = Math.Round(decimal.Parse(_cmd.Rows[i]["Price"].ToString()!),2),
+                    Price = Math.Round(decimal.Parse(_cmd.Rows[i]["Price"].ToString()!),3),
                     Currency = _cmd.Rows[i]["Currency"].ToString(),
                     Group_Code = _cmd.Rows[i]["Group_Code"].ToString(),
                     GoodKind = _cmd.Rows[i]["GoodKind"].ToString(),

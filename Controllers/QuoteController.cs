@@ -42,6 +42,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IMasterApproverSendMailService _approverService;
         private readonly IDepartmentService _deparmentService;
         private readonly IExchangeRateService _exchangeRateService;
+        private readonly IFileImportService _fileImportService;
         private readonly IBaoGiaStepService _baoGiaStepService;
         private readonly IStringLocalizer<QuoteController> _localizer;
 
@@ -51,7 +52,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
             IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService,
-            IStringLocalizer<QuoteController> localizer)
+            IStringLocalizer<QuoteController> localizer,
+            IFileImportService fileImportService)
         {
             _logger = logger;
             _configuration = configuration;
@@ -75,6 +77,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _exchangeRateService = exchangeRateService;
             _baoGiaStepService = baoGiaStepService;
             _localizer = localizer;
+            _fileImportService = fileImportService;
         }
         // MARK: - Quote
         public async Task<IActionResult> Index()
@@ -1007,16 +1010,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi, chungLoaiHang, vendorsForEquipmentAndCategory]);
                     }
 
-                    var tenHangList = allRowsData
-                        .Where(x => x.MaHangNoiBo == maHangNB)
-                        .Select(x => new { TenEng = x.TenHangEng, TenVN = x.TenHangVN })
-                        .Distinct()
-                        .ToList();
+                    //var tenHangList = allRowsData
+                    //    .Where(x => x.MaHangNoiBo == maHangNB)
+                    //    .Select(x => new { TenEng = x.TenHangEng, TenVN = x.TenHangVN })
+                    //    .Distinct()
+                    //    .ToList();
 
-                    if (tenHangList.Count > 1)
-                    {
-                        errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
-                    }
+                    //if (tenHangList.Count > 1)
+                    //{
+                    //    errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
+                    //}
 
                     //if (bitSelect.Contains("O"))
                     //{
@@ -1464,6 +1467,28 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertDanhSachBaoGia([FromBody] List<BaoGia_Request_of_QuotationDTO> danhSachBaoGia)
         {
+            if (danhSachBaoGia != null && danhSachBaoGia.Any())
+            {
+                foreach (var dto in danhSachBaoGia)
+                {
+                    if (dto == null) continue;
+                    if (string.IsNullOrWhiteSpace(dto.linkImg)) continue;
+                    try
+                    {
+                        var savedUrl = await _fileImportService.SaveFileFromPathAsync(dto.linkImg);
+                        if (!string.IsNullOrWhiteSpace(savedUrl))
+                        {
+                            dto.NVCHR_FileThietKe = savedUrl;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // log and continue; do not block saving other rows
+                        _logger.LogError(ex, "Lỗi khi sao chép file từ linkImg: {Link}", dto.linkImg);
+                    }
+                }
+            }
+
             var result = await _baoGiaService.NhapDanhSachBaoGiaAsync(danhSachBaoGia);
             if (!result.Success)
             {
@@ -1859,7 +1884,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 KyHan = ws.Cell(row, 30).GetString(),
                 Gap = ws.Cell(row, 31).GetString(),
                 UserRequest = ws.Cell(row, 32).GetString(),
-                ReasonQuote = ws.Cell(row, 34).GetString()
+                ReasonQuote = ws.Cell(row, 34).GetString(),
+                linkImg = ws.Cell(row, 35).GetString()
             };
         }
 

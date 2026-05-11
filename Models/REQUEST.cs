@@ -447,9 +447,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Declaration = list.Rows[i]["Declaration"].ToString()!,
                 });
             }
-            pe_ = pe_.GroupBy(x => x.Code_Request)
-          .Select(g => g.First())
-          .ToList();
+               pe_ = pe_.GroupBy(x => x.Code_Request)
+              .Select(g => g.First())
+              .ToList();
             return pe_;
         }
         public static List<REQUEST_DETAIL> _get_info_dtrq(string cost_request)

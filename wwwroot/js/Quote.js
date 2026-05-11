@@ -1,4 +1,4 @@
-// JS for Quote page: handle buttons, validations, row operations, autofill from material selection, and API calls
+
 (() => {
     const api = {
         insertListBaoGia: (window.apiBaseUrl || '') + '/Quote/InsertDanhSachBaoGia',
@@ -13,7 +13,7 @@
         , searchApprover: (window.apiBaseUrl || '') + '/Quote/GetListApprovel'
         ,downloadMasterMaterial: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterMaterial`
         ,downloadMasterVendor: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterVendor`
-        , checkNCC: (window.apiBaseUrl || '') + '/Quote/CheckNCC'
+        ,checkNCC: (window.apiBaseUrl || '') + '/Quote/CheckNCC'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -33,6 +33,24 @@
             if (noCell) noCell.textContent = String(idx + 1);
         });
         assignRowIds();
+    }
+    
+    // Kiểm tra NCC có cung cấp chủng loại hay không
+    async function checkNccCategory(maNcc, category) {
+        try {
+            const body = { maNcc: maNcc, category: category };
+            const res = await fetch(api.checkNCC, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) return false;
+            const data = await res.json();
+            return data && data.success !== false;
+        } catch (err) {
+            console.warn('Lỗi gọi API CheckNCC:', err);
+            return true;
+        }
     }
 
     // Generate a single request code (CHR_MaDon) for the whole submission
@@ -1531,6 +1549,28 @@
                 return;
             }
 
+        if (t.classList.contains('nhaCungCapTb')) {
+            try {
+                const tr = t.closest('tr');
+                if (!tr) return;
+                const maNcc = (t.value || '').toString();
+                const category = (tr.querySelector('.chungLoaiTb') || {}).value || '';
+                if (!maNcc || !category) return;
+                try {
+                    const isValid = await checkNccCategory(maNcc, category);
+                    if (!isValid) {
+                        t.value = '';
+                        try { updateSearchableSelectDisplay(t); } catch (e) { }
+                        const T = window.i18nQuote || {};
+                        showDialog({ title: T.ErrorTitle || 'Lỗi', message: 'Nhà cung cấp này không cung cấp chủng loại hàng được chọn. Vui lòng chọn nhà cung cấp khác.', type: 'error' });
+                    }
+                } catch (err) {
+                    console.warn('Lỗi kiểm tra NCC:', err);
+                }
+            } catch (e) { /* ignore */ }
+            return;
+        }
+
             // Category changed -> 1) try to auto-add rows for suppliers, 2) refresh material options for the same row
             if (t.classList.contains('chungLoaiTb')) {
                 const tr = t.closest('tr');
@@ -2002,26 +2042,6 @@
             console.warn('Không thể tải danh sách approver:', err);
         } finally {
             hideLoading();
-        }
-    }
-
-    async function checkNccCategory(maNcc, category) {
-        try {
-            const res = await fetch(api.checkNCC, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ maNcc, catergory: category })
-            });
-
-            if (!res.ok) {
-                return false;
-            }
-
-            const result = await res.json();
-            return result && result.success !== false;
-        } catch (err) {
-            console.warn('Lỗi gọi API CheckNCC:', err);
-            return true; // Allow nếu có lỗi để không block user
         }
     }
 

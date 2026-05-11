@@ -221,8 +221,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     tableHtmlPerGroup += "</table>";
                     var bodyTable = mail.CHR_BODY + tableHtmlPerGroup;
                     var body = string.Format(bodyTable, "nhà cung cấp");
-                    var email = "nguyenduy.khanh@brother-bivn.com.vn"+
-                    ";bivn-pur-indirectpartquotation@brother-bivn.com.vn";
+                    var email = string.IsNullOrEmpty(mail.CHR_CC) ?
+                    "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
                         mail_from = mail.CHR_FROM,
@@ -433,7 +433,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                     var bodyTable = mail.CHR_BODY + tableHtml.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
-                    var email = "nguyenduy.khanh@brother-bivn.com.vn" + ";bivn-pur-indirectpartquotation@brother-bivn.com.vn";
+                    var email = string.IsNullOrEmpty(mail.CHR_CC) ?
+                    "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
 
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
@@ -472,12 +473,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             // cap nhat trang thai da gui mail
             if (listSended.Any())
             {
-               //await _repo.UpdateMailSentStatusAsync(listSended);
+               await _repo.UpdateMailSentStatusAsync(listSended);
             }
 
             if (listBaoGiaDetail.Any())
             {
-               //await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
+               await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
             }
 
             return new GenericResponse<bool>
@@ -650,7 +651,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                 var body = string.Format(bodyTable, dearMail, mailTk);
-                var emailCC = "nguyenduy.khanh@brother-bivn.com.vn;bivn-pur-indirectpartquotation@brother-bivn.com.vn";
+                var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ?
+                    "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
 
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {
@@ -848,8 +850,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         workbook.SaveAs(tempFilePath);
                         var bodyTable = mail.CHR_BODY + tableHtml;
                         var body = string.Format(bodyTable, dearMail);
-                        var email = "nguyenduy.khanh@brother-bivn.com.vn"
-                            + ";bivn-pur-indirectpartquotation@brother-bivn.com.vn";
+                        var email = string.IsNullOrEmpty(mail.CHR_CC) ?
+                    "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
 
                         var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                         {
@@ -1025,8 +1027,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                     var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
-                    var email = "nguyenduy.khanh@brother-bivn.com.vn"
-                        + ";bivn-pur-indirectpartquotation@brother-bivn.com.vn";
+                    var email = string.IsNullOrEmpty(mail.CHR_CC) ?
+                        "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
 
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {

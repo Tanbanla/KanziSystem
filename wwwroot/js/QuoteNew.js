@@ -111,7 +111,49 @@
             this.initSearchableDropdowns(this.elements.container);
             this.renumberRows();
         },
+        renumberRows() {
+            try {
+                this.renumberRowsOptimized();
+            } catch (e) {
+                console.warn('renumberRows wrapper failed, falling back to simple implementation', e);
+                const rows = this.elements.tableBody ? this.elements.tableBody.querySelectorAll('tr') : [];
+                for (let i = 0; i < rows.length; i++) {
+                    const tr = rows[i];
+                    const noCell = tr.children[0];
+                    if (noCell) noCell.textContent = String(i + 1);
+                }
+            }
+        },
 
+        resetRow(row) {
+            if (!row) return;
+            if (typeof this.resetRowOptimized === 'function') {
+                this.resetRowOptimized(row);
+                return;
+            }
+            row.querySelectorAll('input, textarea').forEach(inp => { inp.value = ''; inp.classList.remove('is-invalid'); });
+            row.querySelectorAll('select').forEach(sel => { sel.selectedIndex = 0; sel.classList.remove('is-invalid'); });
+            row.querySelectorAll('.ms-container').forEach(c => c.remove());
+        },
+
+        populateRowFromDto(row, dto, rowIndex) {
+            if (!row) return;
+            if (typeof this.populateRowFromDtoOptimized === 'function') {
+                this.populateRowFromDtoOptimized(row, dto, rowIndex);
+                return;
+            }
+            // Minimal fallback: attempt to set some common fields
+            try {
+                if (rowIndex) row.querySelector('td:first-child').textContent = rowIndex;
+                const setIf = (sel, val) => { const el = row.querySelector(sel); if (el) el.value = val ?? ''; };
+                setIf('.maHangNoiBo', dto.chR_MaHangNoiBo || dto.CHR_MaHangNoiBo);
+                setIf('input[name^="tenHangVN"]', dto.nvchR_NameVN || dto.NVCHR_NameVN);
+                setIf('input[name^="tenHangEN"]', dto.chR_NameEN || dto.CHR_NameEN);
+                setIf('input[name^="soLuong"]', dto.inT_SoLuong || dto.INT_SoLuong);
+            } catch (e) {
+                console.warn('populateRowFromDto fallback failed', e);
+            }
+        },
         cacheElements() {
             const { selectors } = this.config;
             for (const key in selectors) {
@@ -119,14 +161,14 @@
                 if (!sel) continue;
                 try {
                     const s = sel.toString().trim();
- 
+
                     if (s.startsWith('#')) {
                         this.elements[key] = document.querySelector(s);
                     } else {
 
                         const nodes = Array.from(document.querySelectorAll(s));
                         if (nodes.length === 1) this.elements[key] = nodes[0];
-                        else this.elements[key] = nodes; 
+                        else this.elements[key] = nodes;
                     }
                 } catch (e) {
                     try { this.elements[key] = document.querySelector(sel); } catch (ex) { this.elements[key] = null; }
@@ -218,7 +260,7 @@
         },
 
         handleDocumentClick(e) {
- 
+
             if (!e.target.closest('.ms-container')) {
                 document.querySelectorAll('.ms-dropdown.open').forEach(dropdown => {
                     this.closeSearchableDropdown(dropdown);
@@ -445,7 +487,7 @@
             }
 
             const searchFields = ['chR_MaHangNoiBo', 'chR_MaHangNCC', 'nvchR_NameVN', 'chR_NameEN',
-                                'nvchR_DonVi', 'chR_MaNCC', 'nvchR_TenNCC', 'nvchR_ChungLoai', 'chR_Phanloai'];
+                'nvchR_DonVi', 'chR_MaNCC', 'nvchR_TenNCC', 'nvchR_ChungLoai', 'chR_Phanloai'];
 
             this.state.filteredQuoteItems = this.state.allQuoteItems.filter(dto => {
                 // Build search string once per DTO
@@ -1960,6 +2002,10 @@
         }
     };
 
-    document.addEventListener('DOMContentLoaded', () => app.init());
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    } else {
+        app.init();
+    }
 
 })(window);
