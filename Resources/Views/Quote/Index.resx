@@ -498,4 +498,13 @@
   <data name="DownloadMaster" xml:space="preserve">
     <value>Tải dữ liệu Master</value>
   </data>
+  <data name="FilterLink" xml:space="preserve">
+    <value>Lọc Link</value>
+  </data>
+  <data name="LinkToFile" xml:space="preserve">
+    <value>Liên kết đến hình ảnh hoặc tệp thiết kế (Không cần bảo mật)</value>
+  </data>
+  <data name="FileLink" xml:space="preserve">
+    <value>Link ảnh or file thiết kế</value>
+  </data>
 </root>

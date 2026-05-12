@@ -96,6 +96,7 @@
                             <th rowspan="2" class="title_column">@Localizer["SupplierSelectionDeadline"]<br /></th>
                             <th rowspan="2" class="title_column" style="width: 50px">@Localizer["Urgent"]<br /></th>
                             <th rowspan="2" class="title_column" style="min-width: 150px">@Localizer["Requester"]<br /></th>
+                            <th rowspan="2" class="title_column">@Localizer["FileLink"]<br /><small>(No need to keep it confidential)</small></th>
                             <th rowspan="2" class="title_column_stt">#</th>
                         </tr>
                         <tr class="text-center align-middle">
@@ -137,7 +138,7 @@
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="19" placeholder="@Localizer["FilterMSDS"]" /></th>
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="20" placeholder="@Localizer["FilterSafety"]" /></th>
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="21" placeholder="@Localizer["FilterDesignFile"]" /></th>
-                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="22" placeholder="@Localizer["FilterManufacturer"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="23" placeholder="@Localizer["FilterManufacturer"]" /></th>
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="23" placeholder="@Localizer["FilterSupplier"]" /></th>
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="24" placeholder="@Localizer["FilterGetQuote"]" /></th>
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="25" placeholder="@Localizer["FilterReason"]" /></th>
@@ -145,6 +146,7 @@
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="27" placeholder="@Localizer["FilterDeadline"]" /></th>
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="28" placeholder="@Localizer["FilterUrgent"]" /></th>
                             <th><input type="text" class="form-control form-control-sm filter-input" data-column="29" placeholder="@Localizer["FilterRequester"]" /></th>
+                            <th><input type="text" class="form-control form-control-sm filter-input" data-column="22" placeholder="@Localizer["FilterLink"]" /></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -245,6 +247,7 @@
                                     </select>
                                 </td>
                                 <td><input id="nguoiYeuCauRow_@i" name="nguoiYeuCauRow_@i" type="text" class="form-control form-control-sm" placeholder="@Localizer["Requester"]" /></td>
+                                <td><input id="linkFile_@i" name="linkFile_@i" type="text" class="form-control form-control-sm linkFile" placeholder="@Localizer["LinkToFile"]" /></td>
                                 <td class="text-center"><button type="button" class="btn btn-sm btn-link text-danger px-0 btn-remove-row" title="@Localizer["RemoveRow"]"><i class="fas fa-times"></i></button></td>
                             </tr>
                         }

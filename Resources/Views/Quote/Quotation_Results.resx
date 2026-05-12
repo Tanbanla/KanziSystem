@@ -394,7 +394,7 @@
     <value>Số hàng / trang</value>
   </data>
   <data name="OrderNumber" xml:space="preserve">
-    <value>Số thứ tự</value>
+    <value>Số đơn báo giá</value>
   </data>
   <data name="SupplierName" xml:space="preserve">
     <value>Tên nhà cung cấp</value>

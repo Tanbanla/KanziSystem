@@ -578,6 +578,7 @@
             NVCHR_MSDS: getInputBy(['input[id^="msds_"]', 'input[placeholder*="MSDS"]']),
             NVCHR_AnToan: getInputBy(['input[id^="tieuChuanAnToan_"]', 'input[placeholder*="an toàn"]']),
             NVCHR_FileThietKe: getInputBy(['input[id^="fileThietKe_"]', 'input[placeholder*="File thiết kế"]']),
+            CHR_LinkFile: getInputBy(['input[id^="linkFile_"]', 'input[placeholder*="Link"]']),
             NVCHR_NhaSanXuat: getInputBy(['input[id^="nsx_"]', 'input[placeholder*="NSX"]']),
             CHR_MaNCC: getSel('.nhaCungCapTb'),
             NVCHR_TenNCC: getSelDisplay('.nhaCungCapTb'),
@@ -2151,6 +2152,8 @@
 
         // File thiết kế
         setInputById('fileThietKe', dto.nvchR_FileThietKe);
+        // Link ảnh hoặc file thiết kế
+        setInputById('linkFile', dto.chR_LinkFile || dto.CHR_LinkFile || dto.nvchR_LinkFile);
 
         // Nhà sản xuất
         setInputById('nsx', dto.nvchR_NhaSanXuat);

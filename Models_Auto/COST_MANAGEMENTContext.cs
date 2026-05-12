@@ -581,7 +581,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.VCHR_TenHaiQuan).HasMaxLength(500);
-            entity.Property(e => e.VCHR_TenRecomment).HasMaxLength(500);
+            entity.Property(e => e.VCHR_TenRecomment).HasMaxLength(1200);
             entity.Property(e => e.VCHR_UpdateBy)
                 .HasMaxLength(20)
                 .IsUnicode(false);
@@ -641,7 +641,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_Packing).HasMaxLength(350);
             entity.Property(e => e.NVCHR_PaymentTerm).HasMaxLength(500);
             entity.Property(e => e.NVCHR_ReasonPick).HasMaxLength(500);
-            entity.Property(e => e.NVCHR_TenHangHQ).HasMaxLength(450);
+            entity.Property(e => e.NVCHR_TenHangHQ).HasMaxLength(1200);
             entity.Property(e => e.NVCHR_Warranty).HasMaxLength(500);
             entity.Property(e => e.VCHR_AnToan)
                 .HasMaxLength(50)
@@ -832,7 +832,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_MaThietBi)
                 .HasMaxLength(250)
                 .IsUnicode(false);
-            entity.Property(e => e.CHR_NameEN).HasMaxLength(500);
+            entity.Property(e => e.CHR_NameEN).HasMaxLength(1200);
             entity.Property(e => e.CHR_Phanloai).HasMaxLength(250);
             entity.Property(e => e.CHR_SectionCode)
                 .HasMaxLength(100)
@@ -861,7 +861,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_KichThuoc).HasMaxLength(550);
             entity.Property(e => e.NVCHR_LyDo).HasMaxLength(550);
             entity.Property(e => e.NVCHR_MSDS).HasMaxLength(450);
-            entity.Property(e => e.NVCHR_NameVN).HasMaxLength(550);
+            entity.Property(e => e.NVCHR_NameVN).HasMaxLength(1200);
             entity.Property(e => e.NVCHR_NhaSanXuat).HasMaxLength(450);
             entity.Property(e => e.NVCHR_Rohs).HasMaxLength(450);
             entity.Property(e => e.NVCHR_TenNCC).HasMaxLength(550);
@@ -869,6 +869,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_TinhNang).HasMaxLength(550);
             entity.Property(e => e.NVCHR_UserRequest).HasMaxLength(200);
             entity.Property(e => e.NVCHR_ReasonQuotation).HasMaxLength(250);
+            entity.Property(e => e.CHR_LinkFile).HasMaxLength(1500);
         });
 
         modelBuilder.Entity<BaoGia_Status>(entity =>

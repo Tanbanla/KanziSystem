@@ -30,7 +30,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = false;
                 result.Message = "Source path is empty.";
                 return result;
-            } ;
+            }
+            ;
 
             // Normalize and split by comma if multiple paths provided
             var raw = sourcePath.Trim();
@@ -45,7 +46,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var p = p0.Replace("/", "\\").Trim();
                 if (p.StartsWith("\\") && !p.StartsWith("\\\\"))
                 {
-                    // ensure UNC style \\\server\share -> \\\\server\share
                     p = "\\" + p;
                 }
 
@@ -54,8 +54,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     found = p;
                     break;
                 }
-
-                // try to expand mapped drive letter with environment variable? skip for now
             }
 
             if (found == null) return null;
@@ -70,7 +68,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
 
                 var fileName = Path.GetFileName(found) ?? (Guid.NewGuid().ToString() + ".dat");
-                var uniqueName = $"{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid():N}_{fileName}";
+                var uniqueName = $"{DateTime.Now:yyyyMMdd}_{Guid.NewGuid():N}_{fileName}";
                 var dest = Path.Combine(uploadFolder, uniqueName);
 
                 // Use asynchronous copy if possible, but for local files, synchronous is fine wrapped in Task

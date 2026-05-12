@@ -424,7 +424,7 @@ async function _load_confirm() {
                 "9": ["Bị từ chối", "danger", 4],
                 "10": ["Bị từ chối", "danger", 5]
             };
-            tbody.innerHTML = data.map(item => {
+            tbody.innerHTML = data.map((item, index) => {
                 const s = item.inT_STEP;
                 const config = stepMap[s] || ["Không xác định", "dark", 0];
                 const isReject = parseInt(s) >= 6;
@@ -438,14 +438,13 @@ async function _load_confirm() {
                     if (stepIdx === currentStep) return `<span class='text-warning'>${s === "5" ? "✓" : "◉"}</span>`;
                     return "<span></span>";
                 });
-
                 const urg = item.urgent == "True" ? "<b class='text-danger'><i>* Gấp</i></b>" : "Thông thường";
                 const trangthai = `<div class="badge badge-pill badge-${config[1]} mb-1">${config[0]}</div>`;
-
                 return `
                 <tr>
                     <td><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>
                     <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info"></i></button></td>
+                    <td>${index + 1}</td>
                     <td>${urg}</td>
                     <td>${trangthai}</td>
                     <td>${item.code_Request}</td>
@@ -506,7 +505,7 @@ async function _load_confirm_GA() {
                 "10": ["Bị từ chối", "danger", 5],
                 "11": ["Hoàn thành", "secondary", 6], 
             };
-            tbody.innerHTML = data.map(item => {
+            tbody.innerHTML = data.map((item,index) => {
                 const s = item.inT_STEP;
                 const config = stepMap[s] || ["Không xác định", "dark", 0];
                 const isReject = parseInt(s) >= 6;
@@ -526,8 +525,9 @@ async function _load_confirm_GA() {
 
                 return `
                 <tr>
-                    <td><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>
+                    <td><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>                 
                     <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info"></i></button></td>
+                    <td>${index + 1}</td>
                     <td>${urg}</td>
                     <td>${trangthai}</td>
                     <td>${item.code_Request}</td>
@@ -754,7 +754,7 @@ function _update_request_all_GA(request) {
         return response.json();
     })
         .then(data => {
-
+               document.querySelectorAll('.close').forEach(button => button.click());
             _load_confirm_GA(us);
         })
         .catch(error => {
@@ -772,17 +772,7 @@ function _dongy_all() {
     });
     alert("Hoàn thành !");
 }
-function _dongy_all_GA() {
 
-    const checkboxes = document.querySelectorAll('input.item:checked');
-
-    checkboxes.forEach((item) => {
-        if (item.checked) {
-            _update_request_all_GA(item.value);
-        }
-    });
-    alert("Hoàn thành !");
-}
 function _reject(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;

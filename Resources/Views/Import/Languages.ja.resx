@@ -546,4 +546,7 @@
   <data name="sotaikhoan" xml:space="preserve">
     <value>口座番号</value>
   </data>
+  <data name="Donhang" xml:space="preserve">
+    <value>注文書</value>
+  </data>
 </root>

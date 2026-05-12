@@ -34,6 +34,6 @@ namespace PRJ_WAREHOUSE_BIVN.DTO
         public string Gap { get; set; }
         public string UserRequest { get; set; }
         public string ReasonQuote { get; set; }
-        public string linkImg { get; set; }
+        public string? CHR_LinkFile { get; set; }
     }
 }

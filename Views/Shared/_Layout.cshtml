@@ -202,6 +202,7 @@
                                 <li><a href="~/Approval/ListData"><i class="fas fa-check"></i> @Localizer["MenuApprovalApprove"] PROD</a></li>
                                 <li><a href="~/Approval/ListData_GA"><i class="fas fa-check"></i> @Localizer["MenuApprovalApprove"] GA</a></li>
                                 <li><a class="nav-link" href="~/Approval/Condition"><i class="fas fa-info-circle"></i> @Localizer["MenuApprovalStatus"]</a></li>
+                                <li><a class="nav-link" href="~/Request/RequestAll"><i class="fas fa-clipboard-list"></i> @Languages.Donhang</a></li>
                             </ul>
                         </li>
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Master" ? "active" : "")">

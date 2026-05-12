@@ -424,7 +424,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
               
             
             // Gửi mail 
-            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+           // REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
             if (step == "5")
             {
                 string guiden = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
@@ -434,7 +434,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      Kiểm tra thông tin đơn tại : <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
-                REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
+                //REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
             }
             return Json("OK");
         }
@@ -521,7 +521,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var catmadon = madon.Split("_")[0];
             var get_id = db.ReturnString("select [Id_Request] from [REQUEST] where [Code_Request] = '" + catmadon + "'");
 
-            int buoc = int.Parse(get_if.Rows[0][0].ToString()!);
+            int buoc = int.Parse(get_if.Rows[0][0].ToString()!) + 1;
+            if (buoc == 5)
+            {
+                body = $@"Xin chào <br />
+                     Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
+            }
+
             var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + get_id + "'");
             // Định nghĩa cột email tương ứng với từng bước
             string? columnName = buoc switch
@@ -540,15 +550,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
 
             // Cập nhật lại nội dung Body
-            if (buoc == 5)
-            {
-                body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
-                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-                     ※このメールは自動的に送付されたので, 返事をしないでください。";
-            }
+          
             // update đơn
             var up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
             // gửi mail
@@ -730,6 +732,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var xoa = db.GET_DATA_FROM_SQL("delete from [REQUEST_DETAIL] where Id_RequestDetail = '" + id + "'");
             return Json("OK");
         }
-    
+        public ActionResult RequestAll()
+        {
+            return View();
+        }
     }
 }

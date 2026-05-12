@@ -356,9 +356,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Material_Name_ENJP = material_jp
                 });
             }
-            rq = rq.GroupBy(x => x.Material_Code)
-         .Select(g => g.First())
-         .ToList();
+         //   rq = rq.GroupBy(x => x.Material_Code)
+         //.Select(g => g.First())
+         //.ToList();
             return rq;
         }
         public static string _update_request(string id_request, string regency, string step)

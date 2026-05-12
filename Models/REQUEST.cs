@@ -492,9 +492,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     tmp.Material_Name_ENJP = material_jp;
                 rq.Add(tmp);
             }
-            rq = rq.GroupBy(x => x.Material_Code)
-            .Select(g => g.First())
-            .ToList();
+            //rq = rq.GroupBy(x => x.Material_Code)
+            //.Select(g => g.First())
+            //.ToList();
             return rq;
         }
         public static string _update_request(string id_request, string regency, string step)
@@ -646,6 +646,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Total_exchange_real] = '{tongchiphi}',
                             [Status] = 'DONE',
                             [Last_Update] = GETDATE(),
+                            [Total_Real] = '{tongchiphi}',
+                            [Dealine_Real] = '{thoigian}',
                             [User_Update] = '{nguoixuatkho}'
                             WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
 

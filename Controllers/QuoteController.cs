@@ -1467,31 +1467,48 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertDanhSachBaoGia([FromBody] List<BaoGia_Request_of_QuotationDTO> danhSachBaoGia)
         {
-            if (danhSachBaoGia != null && danhSachBaoGia.Any())
+            if (danhSachBaoGia == null || !danhSachBaoGia.Any())
             {
-                foreach (var dto in danhSachBaoGia)
+               return BadRequest("Not data empty");
+            }
+            var distinctLinks = danhSachBaoGia.Select(b => b.CHR_LinkFile)
+                                               .Where(s => !string.IsNullOrWhiteSpace(s))
+                                               .Distinct(StringComparer.OrdinalIgnoreCase)
+                                               .ToList();
+
+            var savedMap = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            foreach (var src in distinctLinks)
+            {
+                if (savedMap.ContainsKey(src)) continue;
+                try
                 {
-                    if (dto == null) continue;
-                    if (string.IsNullOrWhiteSpace(dto.linkImg)) continue;
-                    try
+                    var saveRes = await _fileImportService.SaveFileFromPathAsync(src);
+                    if (saveRes != null && saveRes.Success && !string.IsNullOrWhiteSpace(saveRes.Data))
                     {
-                        var savedUrl = await _fileImportService.SaveFileFromPathAsync(dto.linkImg);
-                        if (!savedUrl.Success)
-                        {
-                            return BadRequest($"Lỗi khi sao chép file từ linkImg: {dto.linkImg}. Chi tiết: {savedUrl.Message}");
-                        }
-                        dto.NVCHR_FileThietKe = savedUrl.Data;
-                        //if (!string.IsNullOrWhiteSpace(savedUrl))
-                        //{
-                        //    dto.NVCHR_FileThietKe = savedUrl;
-                        //}
+                        savedMap[src] = saveRes.Data;
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        // log and continue; do not block saving other rows
-                        _logger.LogError(ex, "Lỗi khi sao chép file từ linkImg: {Link}", dto.linkImg);
+
+                        savedMap[src] = null;
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed saving link {Link}", src);
+                    savedMap[src] = null;
+                }
+            }
+
+            foreach (var dto in danhSachBaoGia)
+            {
+                if (string.IsNullOrWhiteSpace(dto.CHR_LinkFile)) continue;
+                var checkKey = dto.CHR_LinkFile?.Trim().Trim('"', '\'') ?? dto.CHR_LinkFile;
+                if (savedMap.TryGetValue(checkKey, out var saved) && !string.IsNullOrWhiteSpace(saved))
+                {
+                    dto.CHR_LinkFile = saved;
+                }
+
             }
 
             var result = await _baoGiaService.NhapDanhSachBaoGiaAsync(danhSachBaoGia);
@@ -1499,11 +1516,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-            // result.Data contains inserted DTOs with IDs
             try
             {
                 var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
-                // Capture user info locally to avoid accessing HttpContext inside background tasks
                 var currentUserId = GetCurrentUserId();
                 var currentUserFullName = GetCurrentUserFullName();
                 var userAppproval = result.Data?.FirstOrDefault()?.CHR_UserApproval ?? "";
@@ -1558,7 +1573,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result.Message);
             }
 
-            return Ok(result.Data);
+            return Ok(danhSachBaoGia);
         }
         // Delete danh sách báo giá theo mã đơn
         [HttpPost]
@@ -1795,6 +1810,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 30).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(row, 31).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
                     ws.Cell(row, 32).SetValue(rq?.NVCHR_UserRequest ?? string.Empty);
+                    ws.Cell(row, 33).SetValue(rq?.NVCHR_ReasonQuotation ?? string.Empty);
+                    ws.Cell(row, 34).SetValue(rq?.CHR_LinkFile ?? string.Empty);
                     row++;
                 }
 
@@ -1889,8 +1906,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 KyHan = ws.Cell(row, 30).GetString(),
                 Gap = ws.Cell(row, 31).GetString(),
                 UserRequest = ws.Cell(row, 32).GetString(),
-                ReasonQuote = ws.Cell(row, 34).GetString(),
-                linkImg = ws.Cell(row, 35).GetString()
+                ReasonQuote = ws.Cell(row, 33).GetString(),
+                CHR_LinkFile = ws.Cell(row, 34).GetString()
             };
         }
 
@@ -2004,7 +2021,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CHR_CreateBy = currentUserId,
                 DTM_CreateDate = DateTime.Now,
                 ID_Status = "CREATE",
-                NVCHR_ReasonQuotation = rowData.ReasonQuote
+                NVCHR_ReasonQuotation = rowData.ReasonQuote,
+                CHR_LinkFile = rowData.CHR_LinkFile
             };
         }
 
@@ -2047,7 +2065,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NVCHR_UserRequest = rowData.UserRequest ?? currentUserId,
                 CHR_CreateBy = currentUserId,
                 DTM_CreateDate = DateTime.Now,
-                ID_Status = "CREATE"
+                ID_Status = "CREATE",
+                NVCHR_ReasonQuotation = rowData.ReasonQuote,
+                CHR_LinkFile = rowData.CHR_LinkFile
             };
         }
 

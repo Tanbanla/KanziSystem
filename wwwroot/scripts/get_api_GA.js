@@ -4,7 +4,7 @@ let centercode_GA = "";
 let cost_GA = "";
 // thông tin người dùng GA
 async function getEmployeeData_GA() {
-    // lấy thông tin phòng ban
+
     var ph = document.getElementById("name_dept").value;
     const formData = new URLSearchParams();
     formData.append('ph', ph);

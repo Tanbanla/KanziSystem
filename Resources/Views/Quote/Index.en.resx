@@ -498,4 +498,13 @@
   <data name="DownloadMaster" xml:space="preserve">
     <value>Download Master data</value>
   </data>
+  <data name="FilterLink" xml:space="preserve">
+    <value>Filter links</value>
+  </data>
+  <data name="LinkToFile" xml:space="preserve">
+    <value>Link to image or design file (No need to secure)</value>
+  </data>
+  <data name="FileLink" xml:space="preserve">
+    <value>Link to image or design file</value>
+  </data>
 </root>

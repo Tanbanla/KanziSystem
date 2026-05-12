@@ -546,4 +546,7 @@
   <data name="sotaikhoan" xml:space="preserve">
     <value>Số tài khoản</value>
   </data>
+  <data name="Donhang" xml:space="preserve">
+    <value>Đơn hàng</value>
+  </data>
 </root>

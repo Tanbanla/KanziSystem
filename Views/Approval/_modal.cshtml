@@ -1,7 +1,7 @@
 <style>
     /* Thiết lập chiều cao tối đa cho container chứa bảng và bật thanh cuộn */
     #modal-detail-part .form-group {
-        max-height: 80vh; /* Giới hạn chiều cao modal (70% chiều cao màn hình) */
+        max-height: 88vh; /* Giới hạn chiều cao modal (70% chiều cao màn hình) */
         overflow-y: auto; /* Hiện thanh cuộn khi nội dung dài */
     }
 
@@ -17,7 +17,7 @@
 
     /* Container bọc bảng có id hoặc class cụ thể để tránh ảnh hưởng bảng khác */
     .table-responsive-custom {
-        max-height: 400px; /* Hoặc chiều cao bạn muốn */
+        max-height: 500px; /* Hoặc chiều cao bạn muốn */
         overflow-y: auto;
         position: relative;
     }
@@ -27,7 +27,7 @@
     #modal-silder .table thead tr:nth-child(1) th {
         position: sticky;
         top: 0;
-        background-color: #fff9e1 !important; /* Phải có màu nền để không lộ chữ bên dưới */
+        background-color: #d7ebff8f !important; /* Phải có màu nền để không lộ chữ bên dưới */
         z-index: 1000;
         border-bottom: 1px solid #dee2e6;
     }
@@ -38,7 +38,7 @@
     #modal-silder .table thead tr:nth-child(2) th {
         position: sticky;
         top: 52px; /* TĂNG/GIẢM số này cho đến khi khít với dòng 1 */
-        background-color: #fff9e1 !important;
+        background-color: #d7ebff8f !important;
         z-index: 999;
     }
 </style>
@@ -53,18 +53,18 @@
                     <td>Urgent : <i id="urgent_0"></i></td>
                 </tr>
                 <tr>
-                    <th rowspan="2" colspan="4" style="font-size:18px;background-color:#fff9e1">
+                    <th rowspan="2" colspan="4" style="font-size:18px;background-color:#d7ebff8f">
                         Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                         物品依頼書（共通間材・比例間材用・消耗品）　
                     </th>
-                    <th id="madonhang_0" style="background-color:#fff9e1; font-size:18px"></th>
+                    <th id="madonhang_0" style="background-color:#d7ebff8f; font-size:18px"></th>
                     <th><button type="button" class="btn btn-primary" onclick="_dlxuatkho_trangthai('_0')">Tải xuống</button></th>
                 </tr>
                 <tr>
                     <th>
                         Phòng tiếp nhận　受け部門：
                     </th>
-                    <td style="background-color:#fff9e1" id="khoi_0"></td>
+                    <td style="background-color:#d7ebff8f" id="khoi_0"></td>
                 </tr>
                 <tr>
                     <td>
@@ -92,7 +92,7 @@
                         希望期限
                     </td>
                 </tr>
-                <tr style="height:60px; background-color : #fff9e1">
+                <tr style="height:60px; background-color : #d7ebff8f">
                     <td id="mbp_0"></td>
                     <td id="mpb_yc_0"></td>
                     <td id="tenphongban_0"></td>
@@ -103,32 +103,46 @@
             </table>
             <div style="max-height: 500px; overflow-y: auto; border: 1px solid #dee2e6;">
                 <table class="table table-bordered">
-                    <thead class="text-center " style="position: sticky; top: 0; background: #fff9e1; z-index: 999;">
-                        <tr>
-                        <td rowspan="2">No</td>
-                        <td rowspan="2">※ Mã đơn <br />システムコード</td>
-                        <td rowspan="2">※ Tên hàng <br />品名</td>
-                        <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
-                        <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
-                        <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
-                        <td colspan="2">Yêu cầu <br />依頼</td>
-                        <td colspan="2">Già thành<br />単価</td>
-                        <td rowspan="2">Tổng chi phí <br />金額合計</td>
-                        <td rowspan="2">※ Mục đích <br />目的</td>
-                        <td rowspan="2">※ Ghi chú <br />備考</td>
+                    <thead class="text-center " style="position: sticky; top: 0; z-index: 999;">
+                        <tr class="bg-white">
+                            <td colspan="8" class="text-right">
+                                Tổng tiền 合計
+                            </td>
+                            <td id="tongtientrongdon_0" class="bg-warning"></td>
+                          
+                          <td colspan="4" class="text-right" >
+                                <div class="float-left" id="hiennutGA">
+                                    <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_GA('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button> &nbsp;
+                                    <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-22"><i class="ion ion-android-close"></i> Từ chối </button>
+                                </div>
+                                <div class="float-left" id="hiennutPROD">
+                                    <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
+                                    <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
+                                </div>
+                          </td>
+                        </tr>
+                        <tr style="background: #d7ebff8f">
+                            <td rowspan="2">No</td>
+                            <td rowspan="2">※ Mã đơn <br />システムコード</td>
+                            <td rowspan="2">※ Tên hàng <br />品名</td>
+                            <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
+                            <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
+                            <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
+                            <td colspan="2">Yêu cầu <br />依頼</td>
+                            <td colspan="2">Già thành<br />単価</td>
+                            <td rowspan="2">Tổng chi phí <br />金額合計</td>
+                            <td rowspan="2">※ Mục đích <br />目的</td>
+                            <td rowspan="2">※ Ghi chú <br />備考</td>
                     </tr>
-                    <tr>
-                        <td>※ Số lượng <br />数量</td>
+                        <tr style="background: #d7ebff8f">
+                            <td>※ Số lượng <br />数量</td>
                         <td>Đơn vị<br />単位</td>
                         <td>Đơn giá<br />単価</td>
                         <td>Đơn vị tiền tệ <br />通貨単位</td>
                     </tr>
                 </thead>
                 <tbody id="load_detail_0"></tbody>
-                  <td colspan="10" class="text-center">
-                    Tổng tiền 合計
-                </td>
-                    <td id="tongtientrongdon_0" class="bg-warning"></td>
+                  
                 </table>
 
             </div>
@@ -147,14 +161,7 @@
             </div>
             <br />
 
-            <div class="float-right" id="hiennutGA">
-               <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_GA('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
-               <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-22"><i class="ion ion-android-close"></i> Từ chối </button>
-            </div>
-            <div class="float-right" id="hiennutPROD">
-               <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request('_0')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
-               <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
-            </div>
+          
         </div>
     </div>
 </form>
@@ -184,17 +191,17 @@
                     <td>Urgent : <i id="urgent"></i></td>
                 </tr>
                 <tr>
-                    <th rowspan="2" colspan="4" style="font-size:18px;background-color:#fff9e1">
+                    <th rowspan="2" colspan="4" style="font-size:18px;background-color:#d7ebff8f">
                         Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                         物品依頼書（共通間材・比例間材用・消耗品）　
                     </th>
-                    <th colspan="2" id="madonhang" style="background-color:#fff9e1; font-size:18px"></th>
+                    <th colspan="2" id="madonhang" style="background-color:#d7ebff8f; font-size:18px"></th>
                 </tr>
                 <tr>
                     <th>
                         Phòng tiếp nhận　受け部門：
                     </th>
-                    <td style="background-color:#fff9e1" id="khoi"></td>
+                    <td style="background-color:#d7ebff8f" id="khoi"></td>
                 </tr>
                 <tr>
                     <td>
@@ -222,7 +229,7 @@
                         希望期限
                     </td>
                 </tr>
-                <tr style="height:60px; background-color : #fff9e1">
+                <tr style="height:60px; background-color : #d7ebff8f">
                     <td id="mbp"></td>
                     <td id="mpb_yc"></td>
                     <td id="tenphongban"></td>

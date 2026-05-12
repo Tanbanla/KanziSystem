@@ -498,4 +498,13 @@
   <data name="DownloadMaster" xml:space="preserve">
     <value>ダウンロード マスタデータ</value>
   </data>
+  <data name="FilterLink" xml:space="preserve">
+    <value>フィルターリンク</value>
+  </data>
+  <data name="LinkToFile" xml:space="preserve">
+    <value>画像またはデザインファイルへのリンク（セキュリティ保護は不要）</value>
+  </data>
+  <data name="FileLink" xml:space="preserve">
+    <value>Link to image or design file</value>
+  </data>
 </root>

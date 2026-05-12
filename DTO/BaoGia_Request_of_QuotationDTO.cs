@@ -91,5 +91,5 @@ public partial class BaoGia_Request_of_QuotationDTO
 
     public string? NVCHR_ReasonQuotation { get; set; }
 
-    public string? linkImg { get; set; }
+    public string? CHR_LinkFile { get; set; }
 }

@@ -546,4 +546,7 @@
   <data name="sotaikhoan" xml:space="preserve">
     <value>Account </value>
   </data>
+  <data name="Donhang" xml:space="preserve">
+    <value>Request</value>
+  </data>
 </root>

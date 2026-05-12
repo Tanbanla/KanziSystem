@@ -295,6 +295,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Đơn hàng.
+        /// </summary>
+        public static string Donhang {
+            get {
+                return ResourceManager.GetString("Donhang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Đơn vị.
         /// </summary>
         public static string Donvi {

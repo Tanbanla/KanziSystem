@@ -394,7 +394,7 @@
     <value>Rows per page</value>
   </data>
   <data name="OrderNumber" xml:space="preserve">
-    <value>Order number</value>
+    <value>Number of quotations</value>
   </data>
   <data name="SupplierName" xml:space="preserve">
     <value>Supplier name</value>

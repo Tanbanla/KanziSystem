@@ -90,4 +90,6 @@ public partial class BaoGia_Request_of_Quotation
     public int? ID_StepBaoGia { get; set; }
 
     public string? NVCHR_ReasonQuotation { get; set; }
+
+    public string? CHR_LinkFile { get; set; }
 }

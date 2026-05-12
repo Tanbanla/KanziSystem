@@ -44,11 +44,16 @@
 
     function statusBadge(s) {
         const T = window.i18nConfirmName || {};
-        switch ((s || '').toLowerCase()) {
-            case 'confirmed': return '<span class="status-badge status-confirmed">' + (T.StatusConfirmed || 'Đã xác nhận') + '</span>';
-            case 'confirming': return '<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span';
-            case 'rejected': return '<span class="status-badge status-rejected">' + (T.StatusRejected || 'Từ chối') + '</span>';
-            default: return '<span class="<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span>';
+        const txt = (s || '').toString();
+        switch (txt.toLowerCase()) {
+            case 'confirmed':
+                return '<span class="status-badge status-confirmed">' + (T.StatusConfirmed || 'Đã xác nhận') + '</span>';
+            case 'confirming':
+                return '<span class="status-badge status-confirming">' + (T.StatusConfirming || 'Đang xác nhận') + '</span>';
+            case 'rejected':
+                return '<span class="status-badge status-rejected">' + (T.StatusRejected || 'Từ chối') + '</span>';
+            default:
+                return '<span class="status-badge status-unknown">' + (txt || (T.StatusUnknown || 'Không xác định')) + '</span>';
         }
     }
 
@@ -269,11 +274,9 @@
                 } else
                 
                 if (field.key === 'status') {
-                    
-                    if (role == "UserShip") {
+                    if (role === "UserShip") {
                         td.innerHTML = statusBadge(r.CHR_StatusShip);
-                    }
-                    if (role == "UserAcc") {
+                    } else if (role === "UserAcc") {
                         td.innerHTML = statusBadge(r.CHR_StatusACC);
                     } else {
                         td.innerHTML = statusBadge(r.CHR_Status);
