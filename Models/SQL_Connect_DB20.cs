@@ -16,7 +16,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 {
                     if (cn.State != ConnectionState.Open) { cn.Open(); }
                     string CommandText = DATASELECT;
-                    using ( SqlCommand cmd = new SqlCommand(CommandText, cn))
+                    using (  SqlCommand cmd = new SqlCommand(CommandText, cn))
                     {
                         using (SqlDataAdapter adp = new SqlDataAdapter(cmd))
                         {

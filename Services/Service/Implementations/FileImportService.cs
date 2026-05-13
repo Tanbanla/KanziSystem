@@ -64,7 +64,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             try
             {
-                var uploadFolder = Path.Combine(_env.WebRootPath ?? _env.ContentRootPath, "uploads", "quotes");
+                var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/'); ;
                 if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
 
                 var fileName = Path.GetFileName(found) ?? (Guid.NewGuid().ToString() + ".dat");

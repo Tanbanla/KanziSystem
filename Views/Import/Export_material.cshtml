@@ -166,7 +166,7 @@
                         <table class="table table-bordered align-middle" id="dynamic-table">
                             <thead>
                                 <tr style="border-top:1px solid #e9e9e9">
-                                    <td colspan="15"><input type="checkbox" onclick="check_mucdichkhac()" /> &nbsp; Mục đích khác </td>
+                                    <td colspan="15"><input type="checkbox" onchange="mucdichkhac(this)" /> &nbsp; Mục đích khác </td>
                                 </tr>
                                 <tr class="bg-primary text-white text-center">
                                     <th style="width: 50px;">No.</th>
@@ -218,8 +218,7 @@
                         </table>
                     </div>
                     <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button>
-                </div>
-               
+                </div>               
                 <div id="gyc">
                     <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>
                       <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>                  
@@ -250,11 +249,17 @@
 
         //initSelect2($('.select2'));
     }
-        function check_mucdichkhac() {
+        function check_mucdichkhac() { 
         // mặc định là chi phí cố định
-        $('#loaichiphi').val('EUQIMENT').change();
-        $('#loaichiphi').val('EUQIMENT').prop('disabled', true);
-
+        if(document.getElementById("group_code").value == "GA"){
+          
+              $('#loaichiphi').val('COMMON').prop('disabled', false);
+        }
+        if(document.getElementById("group_code").value == "PROD"){
+              $('#loaichiphi').val('EUQIMENT').change();
+              $('#loaichiphi').val('EUQIMENT').prop('disabled', true);
+        }
+      
         // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
         const lstMaterial = document.getElementById("lstMaterial");
         if (lstMaterial) lstMaterial.innerHTML = "";
@@ -301,7 +306,36 @@
         // 5. Tính toán lại tổng tiền (về 0)
         tinhTongTatCa();
     }
-   
+       function uncheck_mucdichkhac() {
+        // 1. Mở khóa và reset loại chi phí
+        $('#loaichiphi').prop('disabled', false);
+        $('#loaichiphi').val('').change(); // Hoặc set về giá trị mặc định ban đầu
+        $('#loaichiphi').val('AUXILIARY').change();
+        // 2. Reset danh sách vật tư (nếu cần)
+        const lstMaterial = document.getElementById("lstMaterial");
+        if (lstMaterial) lstMaterial.innerHTML = "";
+
+        // 3. Load lại dữ liệu ban đầu (không có hậu tố _CPK)
+        let group_code = document.getElementById("group_code").value;
+
+        // Xóa nội dung bảng hiện tại để người dùng nhập mới từ đầu
+        const tbody = document.querySelector('#dynamic-table tbody');
+        tbody.innerHTML = "";
+
+        // Gọi lại các hàm load dữ liệu mặc định
+        _load_name_inv(group_code);
+        _load_phongchiuphi();
+
+        // Reset tổng tiền
+        tinhTongTatCa();
+    }
+       function mucdichkhac(el) {
+        if ($(el).is(':checked')) {
+            check_mucdichkhac();
+        } else {
+            uncheck_mucdichkhac();
+        }
+    }   
         function updateRowNumbers() {
         const rows = document.querySelectorAll('#dynamic-table tbody tr');
         rows.forEach((row, index) => {

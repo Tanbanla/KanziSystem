@@ -116,7 +116,7 @@
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
                                 <th colspan="3">@Languages.phongtiepnhan</th>
-                                <td colspan="2"></td>
+                                <td colspan="3"></td>
                             </tr>
                             <tr id="loadhangmuc">
                               
@@ -132,6 +132,52 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalLyDoHuyn" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Lý do hủy đơn</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id_huy">
+                <div class="form-group">
+                    <label>Vui lòng nhập lý do:</label>
+                    <textarea class="form-control" id="txtLyDo" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-danger" onclick="Huy_don()">Xác nhận hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalLyDoHuyn_GA" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Lý do hủy đơn</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id_huy_GA">
+                <div class="form-group">
+                    <label>Vui lòng nhập lý do:</label>
+                    <textarea class="form-control" id="txtLyDo_GA" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-danger" onclick="Huy_don_GA()">Xác nhận hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
 <button id="modal-7" hidden></button>
 <button id="modal-23" hidden></button>
 @await Html.PartialAsync("_modal_condition", "Approval")
@@ -153,6 +199,7 @@ function checkSelectValue(val) {
                                 <th>@Languages.dongyboi QLSC</th>
                                 <th>@Languages.dongyboi QLTC</th>
                                 <th></th>
+                                <th></th>
                                 <th></th>`
         _load_request_condition_ga();
         document.getElementById("hienthitimkiem").style.display = 'none';
@@ -165,6 +212,7 @@ function checkSelectValue(val) {
                                     <th>@Languages.nguoipheduyet</th>                                        
                                     <th>@Languages.dongyboi QLSC/QLTC</th>
                                     <th>@Languages.nguoixuatkho</th>
+                                    <th></th>
                                     <th></th>
                                     <th></th>`
      _load_request_condition();
@@ -221,11 +269,9 @@ function _load_request_condition() {
             "7": ["Bị từ chối", "danger", 2],
             "8": ["Bị từ chối", "danger", 3],
             "9": ["Bị từ chối", "danger", 4],
-            "10": ["Bị từ chối", "danger", 5]
+            "10": ["Bị từ chối", "danger", 5],
+            "15": ["Hủy đơn", "danger", 0],
         };
-
-
-          
 
         const tbody = document.getElementById('list_approve');
         if (!data || data.length === 0) {
@@ -259,9 +305,9 @@ function _load_request_condition() {
 
                 var quyen = "<td></td><td></td>";
                     if(item.user_Create == us){
-                                quyen = `<td><i class="fa fa-trash text-danger" onclick="xoa_don_prod('${item.iD_REQUEST}')" /></i></td>
-                                             <td><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
-                                             <td><a href="/Import/Huydon?iD_REQUEST=${item.iD_REQUEST}"><i class="fa fa-undo text-danger" ></i> </a></td>`
+                                    quyen = `<td  title="Xóa đơn" ><i class="fa fa-trash text-danger" onclick="xoa_don_prod('${item.iD_REQUEST}')"/></i></td>
+                                             <td title="Sửa đơn" ><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
+                                             <td title="Hủy đơn"><i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon('${item.iD_REQUEST}')" ></i></td>`;
                     }
             return `
                     <tr>
@@ -292,9 +338,20 @@ function _load_request_condition() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+function moModalHuyDon(id) {
+document.getElementById("id_huy").value = id;
+document.getElementById("txtLyDo").value = "";
+
+// Mở modal
+$('#modalLyDoHuyn').modal('show');
+
+// Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
+// Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
+$('#modalLyDoHuyn').appendTo("body");
+}
 
 // GA
-function _load_request_condition_ga() {
+async function _load_request_condition_ga() {
     // Lấy giá trị (Đảm bảo các ID này tồn tại trong HTML của bạn)
     var us = document.getElementById("us").innerHTML;
     const getValue = (id) => document.getElementById(id) ? document.getElementById(id).value : "";
@@ -338,7 +395,8 @@ function _load_request_condition_ga() {
             "7": ["Bị từ chối", "danger", 2],
             "8": ["Bị từ chối", "danger", 3],
             "9": ["Bị từ chối", "danger", 4],
-            "10": ["Bị từ chối", "danger", 5]
+            "10": ["Bị từ chối", "danger", 5],
+            "15": ["Hủy đơn", "danger", 0],
         };
 
         const htmlContent = data.map(item => {
@@ -363,8 +421,9 @@ function _load_request_condition_ga() {
             });
                 var quyen = "<td></td><td></td>";
                 if(item.user_Create == us){
-                        quyen = `<td><i class="fa fa-trash text-danger" onclick="xoa_don_GA('${item.iD_REQUEST}')" /></i></td>
-                                    <td><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>`
+                            quyen = `<td title="Xóa đơn"><i class="fa fa-trash text-danger" onclick="xoa_don_GA('${item.iD_REQUEST}')" /></i></td>
+                                    <td title="Sửa đơn"><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
+                                  <td title="Hủy đơn"><i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon_GA('${item.iD_REQUEST}')" ></i></td>`;
                 }
             return `
                 <tr>
@@ -395,7 +454,6 @@ function _load_request_condition_ga() {
     })
     .catch(error => console.error('Error:', error));
 }
-
 function xoa_don_prod(iD_REQUEST){
 var x = confirm("Bạn có muốn xóa đơn không !");
 if(x){
@@ -496,4 +554,16 @@ function _modal_sua(iD_REQUEST) {
         alert("Không thể tải dữ liệu đơn hàng!");
     });
 }
+function moModalHuyDon_GA(id) {
+  
+    document.getElementById("id_huy_GA").value = id;
+    document.getElementById("txtLyDo_GA").value = "";
+
+    // Mở modal
+    $('#modalLyDoHuyn_GA').modal('show');
+
+    // Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
+    // Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
+    $('#modalLyDoHuyn_GA').appendTo("body");
+    }
 </script>

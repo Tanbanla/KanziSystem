@@ -884,3 +884,71 @@ function _load_account() {
         });
 }
 
+function Huy_don() {
+    var x = confirm("Bạn có chắc muốn hủy đơn yêu cầu này không ?");
+    if(x) {
+        var reason = document.getElementById("txtLyDo").value;
+        var id = document.getElementById("id_huy").value;
+        const params = new URLSearchParams();
+        params.append('id_request', id);
+        params.append('reason', reason);
+
+        fetch('/Request/_huydon_prod', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+            .then(data => {
+                document.querySelectorAll('.close').forEach(button => button.click());
+                var us = document.getElementById("us").innerHTML;
+
+                _load_confirm(us);
+
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+   
+}
+
+function Huy_don_GA() {
+    var x = confirm("Bạn có chắc muốn hủy đơn yêu cầu này không ?");
+    if (x) {
+        var reason = document.getElementById("txtLyDo_GA").value;
+        var id = document.getElementById("id_huy_GA").value;
+        const params = new URLSearchParams();
+        params.append('id_request', id);
+        params.append('reason', reason);
+
+        fetch('/Request/_huydon_GA', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+            .then(data => {
+               
+                var us = document.getElementById("us").innerHTML;
+                _load_confirm_GA(us);
+
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+}

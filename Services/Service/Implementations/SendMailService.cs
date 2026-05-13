@@ -226,8 +226,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
                         mail_from = mail.CHR_FROM,
-                        mail_to = toEmail,
-                        mail_cc = email,
+                        mail_to = "nguyenduy.khanh@brother-bivn.com.vn", //toEmail,
+                        mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",//email,
                         mail_bcc = mail.CHR_BCC,
                         title = (rqList.FirstOrDefault()?.ShortName ?? rqList.FirstOrDefault()?.Ten) + " - Deadline: " + (rqList.FirstOrDefault()?.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn: " + (rqList.FirstOrDefault()?.CHR_MaDon ?? maDon),
                         body = body,
@@ -243,11 +243,11 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             // cap nhat trang thai da gui mail
             if (listSended.Any())
             {
-               await _repo.UpdateMailSentStatusAsync(listSended);
+              // await _repo.UpdateMailSentStatusAsync(listSended);
             }
             if (listBaoGiaDetail.Any())
             {
-               await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
+               //await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
             }
             return new GenericResponse<bool>
             {
@@ -439,8 +439,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
                         mail_from = mail.CHR_FROM,
-                        mail_to = toEmail,
-                        mail_cc = email,
+                        mail_to = "nguyenduy.khanh@brother-bivn.com.vn",//toEmail,
+                        mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",//email,
                         mail_bcc = mail.CHR_BCC,
                         title = titleMail,
                         body = body,
@@ -473,12 +473,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             // cap nhat trang thai da gui mail
             if (listSended.Any())
             {
-               await _repo.UpdateMailSentStatusAsync(listSended);
+               //await _repo.UpdateMailSentStatusAsync(listSended);
             }
 
             if (listBaoGiaDetail.Any())
             {
-               await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
+               //await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
             }
 
             return new GenericResponse<bool>

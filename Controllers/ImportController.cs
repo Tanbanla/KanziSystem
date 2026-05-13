@@ -193,7 +193,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _chonnhamay(string mahang, string kho)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            var Kho = _db.GET_DATA_FROM_SQL("  select Kho, Hientai from Kho where MaNguyenLieu = '" + mahang + "' and Hientai > 0 and Kho = '" + kho + "'");
+            var Kho = _db.GET_DATA_FROM_SQL("  select Kho, Hientai from Kho where MaNguyenLieu = '" + mahang + "' and Kho = '" + kho + "'");
             string soluong = Kho.Rows[0]["Hientai"].ToString()!;
             return Json(soluong);
         }
@@ -511,6 +511,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public JsonResult chuyenkho(string malinhkien, string soluonghientai, string khochuyen, string khonhan, string vitri, string soluongchuyen, string ngaychuyen, string us)
         {
+            if(string.IsNullOrEmpty(ngaychuyen) || ngaychuyen == "1/1/0001 12:00:00 AM" || ngaychuyen.Contains("1900-01-01"))
+            {
+                ngaychuyen = DateTime.Now.ToString();
+            }
             var chuyenkho = MST_INVENTORY._chuyenkho(malinhkien, soluonghientai, khochuyen, khonhan, vitri, soluongchuyen, ngaychuyen, us);
             return Json(chuyenkho);
         }

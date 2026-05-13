@@ -267,20 +267,27 @@ function _xuatkho() {
     var phong = document.getElementById("phong_yc").innerHTML;
     var id_rq = document.getElementById("id_rq").innerHTML;
     var kho = document.getElementById("khoSelect").value;
+
     if (nguoixuatkho == "" || nguoinhan == "") {
         alert("Điền thông tin người xuất kho và người nhận !");
+        return; // Thoát hàm nếu thiếu thông tin chung
     }
-    else {
-        const checkboxes = document.querySelectorAll('input.itemsmall');
 
-        checkboxes.forEach((item, i) => {
+    const checkboxes = document.querySelectorAll('input.itemsmall');
+    let countChecked = 0;
+    let promises = []; // Để quản lý các tiến trình gửi dữ liệu
+
+    checkboxes.forEach((item, i) => {
+        // --- ĐIỀU KIỆN QUAN TRỌNG NHẤT: Chỉ xử lý nếu checkbox ĐƯỢC CHỌN ---
+        if (item.checked) {
+            countChecked++;
+
             var manguyenlieu = document.getElementById("mahang_" + i).innerHTML;
             var soluong = document.getElementById("slthucte_" + i).value;
             var giathucte = document.getElementById("dgthucte_" + i).value;
-            var donvi = document.getElementById("donvi_" + i).innerHTML;         
+            var donvi = document.getElementById("donvi_" + i).innerHTML;
             var tongchiphi = document.getElementById("ttthucte_" + i).innerHTML;
             var tongchiphiold = document.getElementById("tongchiphiold_" + i).innerHTML;
-        
             const params = new URLSearchParams();
             params.append('code_request', code_request);
             params.append('adid_nx', adid_nx);
@@ -293,39 +300,43 @@ function _xuatkho() {
             params.append('donvi', donvi);
             params.append('kho', kho);
             params.append('tongchiphi', tongchiphi);
-            params.append('tongchiphi', tongchiphi);
             params.append('vitri', vitri);
             params.append('phong', phong);
             params.append('khoi', khoi);
             params.append('tongchiphiold', tongchiphiold);
             params.append('id_rq', id_rq);
 
-            fetch('/Import/_xuatkhothucte', {
+            // Đẩy mỗi lần fetch vào mảng promises
+            let p = fetch('/Import/_xuatkhothucte', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: params.toString()
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                  
-                    document.querySelectorAll('.close').forEach(button => button.click());
-                    _load_xuatkho();
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        });
-        alert("Xuất kho thành công!");
+                .then(response => response.json())
+                .catch(error => console.error('Lỗi tại dòng ' + i, error));
+
+            promises.push(p);
+        }
+    });
+
+    // Kiểm tra nếu không có dòng nào được chọn
+    if (countChecked === 0) {
+        alert("Vui lòng tích chọn ít nhất một mặt hàng để xuất kho!");
+        return;
     }
-    
-  
+
+    // Chờ tất cả các yêu cầu gửi đi hoàn tất mới báo thành công và load lại
+    Promise.all(promises).then(() => {
+        alert("Đã xử lý xuất kho cho " + countChecked + " mặt hàng thành công!");
+        // Đóng modal (nếu có)
+        document.querySelectorAll('.close').forEach(button => button.click());
+        // Load lại danh sách
+        if (typeof _load_xuatkho === "function") {
+            _load_xuatkho();
+        }
+    });
 }
 function _dlxuatkho() {
     var code_request = document.getElementById("madonn").innerHTML;

@@ -438,7 +438,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     // Kiểm tra lỗi
                     var vendorCodesForSameProduct = allRowsData
-                        .Where(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"))
+                        .Where(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O") && x.MaThietBi == maThietBi)
                         .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
                         .Where(v => !string.IsNullOrEmpty(v))
                         .Distinct()
@@ -978,7 +978,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var NVCHR_Note = rowData.NVCHR_Note;
 
                     var vendorCodesForSameProduct = allRowsData
-                        .Where(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"))
+                        .Where(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O") && x.MaThietBi == maThietBi)
                         .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
                         .Where(v => !string.IsNullOrEmpty(v))
                         .Distinct()
@@ -3657,7 +3657,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         int col = 1;
                         ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.status ?? string.Empty);
+                        ws.Cell(rowStart, col++).SetValue(item.ID_Status ?? string.Empty);
                         ws.Cell(rowStart, col++).SetValue(item.ID ?? string.Empty);
                         ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi ?? string.Empty);
                         ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty);
@@ -3722,6 +3722,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cell(rowStart, col++).SetValue(totalCell); // placeholder
                         ws.Cell(rowStart, col++).SetValue(item.BIT_Select == true ? "O" : "X"); // BIT_Select
                         ws.Cell(rowStart, col++).SetValue(item.NVCHR_ReasonPick); // Reason
+                        col++;
                                                                                   // Approval
                         ws.Cell(rowStart, col++).SetValue(item.UserQlsc ?? "");
                         ws.Cell(rowStart, col++).SetValue((item.LyDoQlsc == null || item.LyDoQlsc == "") ? "OK" : "NG");

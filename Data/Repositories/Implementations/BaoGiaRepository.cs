@@ -38,7 +38,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 SELECT DISTINCT q.*
                 FROM BaoGia_Request_of_Quotation as q
                 INNER JOIN [BaoGia_Master_Approver_Send_Mail] as s ON q.CHR_SectionCode = s.CHR_CodeSection
-                WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
+                WHERE --(@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
+                  (@MaDon IS NULL OR CHR_MaDon = @MaDon)
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
                   AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
                   AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')

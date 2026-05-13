@@ -262,14 +262,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                                         [Code_Request], [Id_Request], [Material_Code], [Material_Name], [Material_Name_EN], [Material_Name_ENJP], 
                                         [Account_Code], [Account_Name], [Unit], [Unit_Real], [Amount], [Price], [Total_exchange], [Rate], 
                                         [Currency], [Total], [Amount_Real], [Price_Real], [VAT], [Total_exchange_real], [Rate_Real], 
-                                        [Currency_Real], [Total_Real], [Dealine_Real], [Poisition], [Aim], [Status], [Last_Update], 
+                                        [Currency_Real], [Poisition], [Aim], [Status], [Last_Update], 
                                         [User_Update], [PO], [Unit_Note], [Phongchiuchiphi], [Vitri], [Id_LichsuXuat], [Kho] )
                                         VALUES (
                                             '{newCode}', {newId}, '{item.Material_Code}', N'{item.Material_Name}', N'{item.Material_Name_EN}', N'{item.Material_Name_ENJP}', 
                                             '{item.Account_Code}', N'{item.Account_Name}', N'{item.Unit}', '{item.Unit_Real}', '{item.Amount}', {item.Price}, 
                                              {item.Total_exchange}, '{item.Rate}', '{item.Currency}', {item.Total}, '{item.Amount_Real}', '{item.Price_Real}', 
-                                            '{item.VAT}', '{item.Total_exchange_real}', '{item.Rate_Real}', '{item.Currency_Real}', '{item.Total_Real}', 
-                                            '{item.Dealine_Real}', N'{item.Poisition}', N'{item.Aim}', '{item.Status}', GETDATE(), 
+                                            '{item.VAT}', '{item.Total_exchange_real}', '{item.Rate_Real}', '{item.Currency_Real}',  
+                                              N'{item.Poisition}', N'{item.Aim}', '{item.Status}', GETDATE(), 
                                             '{item.User_Update}', '{item.PO}', N'{item.Unit_Note}', N'{item.Phongchiuchiphi}', N'{item.Vitri}', '{item.Id_LichsuXuat}', '{item.Kho}'
                                         )";
                 //File.AppendAllText(pathLog, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] SQL Command for Request Detail: {Environment.NewLine}{_cmdDetail}{Environment.NewLine}");
@@ -613,6 +613,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             try
             {
+                if (string.IsNullOrEmpty(thoigian.ToString()) || thoigian.ToString().Contains("1/1/0001") || thoigian.ToString().Contains("1900-01-01"))
+                {
+                    thoigian = DateTime.Now;
+                }
                 // Kiểm tra tồn kho hiện tại trước khi xuất
                 string sqlCheckKho = $"SELECT [Hientai] FROM [KHO] WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
                 DataTable dtKho = _db.GET_DATA_FROM_SQL(sqlCheckKho);
@@ -684,7 +688,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             {
                 if (dte.Rows[i]["Status"].ToString()!.Trim() != "DONE")
                 {
-                    check = false;
+                     check = false;
                 }
             }
             if (check == true)

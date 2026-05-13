@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Collections.Generic;
+using System.Data;
 using System.DirectoryServices.Protocols;
 using System.Drawing;
 using System.Net;
@@ -586,6 +587,58 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             REQUEST_PROCESS._sendmail(body, mail_nguoidat, subject);
             return Json("Hoàn thành !");
         }
+        public JsonResult _huydon_prod(string id_request, string reason)
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            string subject = "Hủy đơn yêu cầu hàng hóa ";
+
+            var madon = _db.ReturnString("select Code_Request from REQUEST where [Id_Request] = '" + id_request + "'");
+
+            string body = @"Xin chào <br />
+              Đơn yêu cầu mã : " + madon + @" bị hủy bỏ <br /><br />
+              Lý do : " + reason + @"<br /><br />            
+
+              ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+              ※このメールは自動的に送付されたので、返事をしないでください。";
+           
+            var up = _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '15' where [ID_REQUEST] = '" + id_request+"'");
+                    
+            var mail_send = _db.ReturnString("select CHR_MAIL_NGUOITAO from PE_REQUEST_CONFIRM where ID_REQUEST = '" + id_request + "'");
+
+            _db.GET_DATA_FROM_SQL("Insert into PE_LOGHUYDON ([ID_REQUEST],[Lydo],[Madon]) values ('" + id_request + "',N'" + reason + "','" + madon + "')");
+            _db.GET_DATA_FROM_SQL("update [REQUEST] set [Status] = 'REFUSE' where [Id_Request] = '" + id_request + "'");
+            // Gửi về người tạo đơn
+            // mail_nguoidat = mail_send.Trim();
+            //REQUEST_PROCESS._sendmail(body, mail_nguoidat, subject);
+
+            return Json("Hoàn thành !");
+        }
+        public JsonResult _huydon_GA(string id_request, string reason)
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            string subject = "Hủy đơn yêu cầu hàng hóa ";
+
+            var madon = _db.ReturnString("select Code_Request from REQUEST where [Id_Request] = '" + id_request + "'");
+
+            string body = @"Xin chào <br />
+              Đơn yêu cầu mã : " + madon + @" bị hủy bỏ <br /><br />
+              Lý do : " + reason + @"<br /><br />            
+
+              ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+              ※このメールは自動的に送付されたので、返事をしないでください。";
+
+            var up = _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '15' where [ID_REQUEST] = '" + id_request + "'");
+
+            var mail_send = _db.ReturnString("select CHR_MAIL_NGUOITAO from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + id_request + "'");
+
+            _db.GET_DATA_FROM_SQL("Insert into PE_LOGHUYDON ([ID_REQUEST],[Lydo],[Madon]) values ('" + id_request + "',N'" + reason + "','" + madon + "')");
+            _db.GET_DATA_FROM_SQL("update [REQUEST] set [Status] = 'REFUSE' where [Id_Request] = '" + id_request + "'");
+            // Gửi về người tạo đơn
+            string mail_nguoidat = mail_send.Trim();
+            REQUEST_PROCESS_GA._sendmail(body, mail_nguoidat, subject);
+
+            return Json("Hoàn thành !");
+        }
         public JsonResult _reject_GA(string id_request, string reason, string regency, string step, string urgent)
         {
             string subject = "Từ chối phê duyệt đơn yêu cầu hàng hóa ";
@@ -736,5 +789,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
+        public JsonResult view_rqall(DateTime StartDate, DateTime EndDate, string us)
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            // 1. Lấy dữ liệu chính
+            var Truongdulieu = "[Id_Request],[Code_Request],[Group_Code],[Cost_Center],[Request_Date],[Declaration],[Dealine],[Dealine_Real],[Total],[Total_Real],[Kind],[Type],[Status],[Create_Date],[User_Create],[Last_Update],[User_Update],[Reason],[Action],[Note] AS Chitiet,[Chophepin]";
+
+            string sql = $@"SELECT {Truongdulieu} FROM REQUEST 
+                    WHERE Create_Date > '{StartDate:MM/dd/yyyy}' 
+                    AND Create_Date <= '{EndDate.AddDays(1):MM/dd/yyyy}' 
+                    AND Cost_Center in (SELECT Cost_Center FROM VIEW_USER_DEPT WHERE CHR_USERID = '{us}') 
+                    ORDER BY [Create_Date] DESC";
+
+            DataTable dataTable = _db.GET_DATA_FROM_SQL(sql);
+
+            var resultList = new List<Dictionary<string, object>>();
+            foreach (DataRow row in dataTable.Rows)
+            {
+                var dict = new Dictionary<string, object>();
+                foreach (DataColumn col in dataTable.Columns)
+                {
+                    dict[col.ColumnName] = row[col];
+                }
+                resultList.Add(dict);
+            }
+
+            return Json(resultList);
+        }
+
     }
 }
