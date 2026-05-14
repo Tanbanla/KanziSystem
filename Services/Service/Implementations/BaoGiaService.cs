@@ -425,12 +425,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Trả lại đơn báo giá
-        public async Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate)
+        public async Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate, string reason)
         {
             var result = new GenericResponse<List<BaoGia_Request_of_Quotation>>();
             try
             {
-                result.Data = await _repo.TraLaiDonBaoGiaAsync(maDon, userUpdate);
+                result.Data = await _repo.TraLaiDonBaoGiaAsync(maDon, userUpdate, reason);
                 result.Success = true;
             }
             catch (Exception ex)

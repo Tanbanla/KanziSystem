@@ -320,7 +320,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public static List<REQUEST_DETAIL> _get_info_dtrq(string cost_request)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            var get_if = _db.GET_DATA_FROM_SQL("select * from REQUEST_DETAIL as a left join DEPARTMENT as b on a.Phongchiuchiphi = b.Cost_Center where a.Code_Request = '" + cost_request + "'");
+            var get_if = _db.GET_DATA_FROM_SQL("SELECT * FROM REQUEST_DETAIL AS a LEFT JOIN (SELECT DISTINCT Cost_Center FROM DEPARTMENT) AS b ON a.Phongchiuchiphi = b.Cost_Center WHERE a.Code_Request = '" + cost_request + "'");
             var dtm = _db.GET_DATA_FROM_SQL("SELECT * FROM [COST_MANAGEMENT].[dbo].[REQUEST] where Code_Request = '" + cost_request + "'");
             var requestt = _db.GET_DATA_FROM_SQL("select Code_Request,a.Cost_Center, Request_Date, Declaration, Dealine,Dealine_Real, Total_exchange, Exchange_rate, Currency, Total, Total_exchange_real,Exchange_rate_Real,Currency_Real, Total_Real,Kind,[Type],Status,Create_Date, User_Create, Last_Update,User_Update,Reason,Place, Loaihinhtokhai, Phuongthucvanchuyen, Group_Code, b.[Name], Name_Jp,Cost_Center_Group,Note, Urgent from [REQUEST] as a left join DEPARTMENT as b on a.Cost_Center =  b.Cost_Center where a.Code_Request = '" + cost_request + "'");
 

@@ -190,7 +190,7 @@
     <value>安全規格要件</value>
   </data>
   <data name="DesignFile" xml:space="preserve">
-    <value>設計ファイル</value>
+    <value>リンクBox</value>
   </data>
   <data name="Manufacturer" xml:space="preserve">
     <value>メーカー</value>
@@ -445,7 +445,7 @@
     <value>フィルター安全</value>
   </data>
   <data name="FilterDesignFile" xml:space="preserve">
-    <value>フィルター設計ファイル</value>
+    <value>フィルターリンクBox</value>
   </data>
   <data name="FilterManufacturer" xml:space="preserve">
     <value>フィルターメーカー</value>
@@ -505,6 +505,6 @@
     <value>画像またはデザインファイルへのリンク（セキュリティ保護は不要）</value>
   </data>
   <data name="FileLink" xml:space="preserve">
-    <value>Link to image or design file</value>
+    <value>画像リンク（デザイン用） - セキュリティ不要</value>
   </data>
 </root>

@@ -33,6 +33,30 @@
             <div class="spinner" aria-hidden="true"></div>
             <div class="loader-msg">Đang xử lý...</div>
         </div>
+    <!-- Modal: return reason (separate from delete) -->
+    <div class="modal fade" id="returnReasonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["ReturnReasonTitle"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="returnReasonText" class="form-label small">@Localizer["ReturnReasonLabel"]</label>
+                        <textarea id="returnReasonText" class="form-control" rows="4" placeholder="@Localizer["EnterReturnReasonPlaceholder"]"></textarea>
+                        <div id="returnReasonNotice" class="text-danger small mt-2" style="display:none;">@Localizer["ReturnReasonRequired"]</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-primary" id="confirmReturnWithReason">@Localizer["DialogOk"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal: delete reason -->
     <div class="modal fade" id="deleteReasonModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

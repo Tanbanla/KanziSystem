@@ -196,7 +196,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 return new List<BaoGia_Request_of_Quotation>();
             }
-
+            foreach(var item in danhSachMaDonBG)
+            {
+                if(item.BIT_LayBaoGia == false)
+                {
+                    item.ID_Status = "NOT_QUOTATION";
+                }
+            }
             // Update range and persist changes
             _context.BaoGia_Request_of_Quotations.UpdateRange(danhSachMaDonBG);
             await _context.SaveChangesAsync();
@@ -1525,7 +1531,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Trả lại đơn báo giá
-        public async Task<List<BaoGia_Request_of_Quotation>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate)
+        public async Task<List<BaoGia_Request_of_Quotation>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate, string reason)
         {
             if (string.IsNullOrEmpty(maDon)) throw new Exception("No valid data to update");
 
@@ -1547,6 +1553,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 CHR_UpdateBy = userUpdate,
                 NVCHR_UpdateName = userUpdate,
                 CHR_Updatedate = DateTime.Now,
+                NVCHR_LyDo = reason,
                 CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
                 CHR_ActionType = "RETURN_PIC"
             }).ToList();
@@ -1593,6 +1600,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     data.CHR_UserApproval = item.CHR_UserApproval;
                     data.DTM_UpdateLater = now;
                     item.CHR_CreateBy = data.CHR_CreateBy;
+                    if(data.BIT_LayBaoGia == false)
+                    {
+                        data.ID_Status = "NOT_QUOTATION";
+                    }
                 }
             }
             await _context.SaveChangesAsync();

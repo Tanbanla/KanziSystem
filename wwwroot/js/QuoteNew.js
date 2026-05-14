@@ -660,6 +660,34 @@
                 this.loadApprovers(sections.values().next().value);
             }
 
+            try {
+                const materialCodes = new Set();
+                items.forEach(it => {
+                    const code = (it && (it.CHR_MaHangNoiBo || it.chR_MaHangNoiBo || it.maHangNoiBo)) || '';
+                    if (code && code.toString().trim() !== '') materialCodes.add(code.toString().trim());
+                });
+                if (materialCodes.size > 0) {
+                    const allSelects = Array.from(document.querySelectorAll('.maHangNoiBo'));
+                    allSelects.forEach(sel => {
+                        materialCodes.forEach(code => {
+                            try {
+                                if (!Array.from(sel.options).some(o => (o.value || '') === code)) {
+                                    const o = document.createElement('option');
+                                    o.value = code;
+                                    o.text = code; 
+                                    sel.appendChild(o);
+                                }
+                            } catch (e) {  }
+                        });
+                      
+                        try { sel.dataset.searchDropdown = 'false'; } catch (e) { }
+                    });
+                    try { this.initSearchableDropdowns(this.elements.tableBody); } catch (e) { }
+                }
+            } catch (ex) {
+                console.warn('Error ensuring material codes in selects:', ex);
+            }
+
             this.renderQuotePage();
             this.showDialog({ title: this.config.i18n.SuccessTitle, message: this.config.i18n.MsgLoadedRows.replace('{0}', items.length), type: 'success' });
         },

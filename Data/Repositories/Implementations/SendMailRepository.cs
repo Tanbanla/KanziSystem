@@ -13,10 +13,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
     public class SendMailRepository: BaseRepository<TM_MASTER_MAIL, int>, ISendMailRepository
     {
         private readonly COST_MANAGEMENTContext _context;
-        public SendMailRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration)
+        private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
+
+        public SendMailRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration, IWebHostEnvironment env)
             : base(context, options, configuration)
         {
             _context = context;
+            _configuration = configuration;
+            _env = env;
         }
         // lấy mail theo ID
         public async Task<TM_MASTER_MAIL?> GetMailByIdAsync(int id)
@@ -84,7 +89,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             foreach (var item in requests)
             {
-                item.BIT_IsTemplate = true;
+                item.ID_Status = "WAIT_NCC";
             }
 
             await _context.SaveChangesAsync();
@@ -135,13 +140,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .Where(c => c.BIT_LayBaoGia == true && c.ID == detail.ID_RequestQuote)
                 .FirstOrDefaultAsync();
                 if (rq == null) continue;
-                if (rq.BIT_LayBaoGia)
-                {
-                    rq.ID_Status = "WAIT_NCC";
-                }else
-                {
-                    rq.ID_Status = "NOT_QUOTATION";
-                }
+                rq.BIT_IsTemplate = true;
+
                 // kiểm tra dữ liệu Insert
                 var exists = await _context.BaoGia_Detail_of_Quotations
                     .AnyAsync(c => c.ID_RequestQuote == detail.ID_RequestQuote);
@@ -151,6 +151,78 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.BaoGia_Detail_of_Quotations.AddRangeAsync(listDetailOK);
             await _context.SaveChangesAsync();
             return true;
+        }
+        // Lấy file từ link 
+        public async Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath)
+        {
+            var result = new GenericResponse<IFormFile>();
+
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                result.Success = false;
+                result.Message = "File path is empty.";
+                return result;
+            }
+
+            try
+            {
+                var raw = filePath.Trim().Trim('"', '\'');
+                string fileNameOnly = Path.GetFileName(raw);
+                string uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/', '\\');
+
+                string physicalPath = raw;
+
+                if (raw.StartsWith("\\\\") || raw.StartsWith("//"))
+                {
+                    physicalPath = raw.Replace('/', Path.DirectorySeparatorChar);
+                }
+                else if (raw.StartsWith("/"))
+                {
+                    if (!string.IsNullOrWhiteSpace(uploadFolder))
+                    {
+                        physicalPath = Path.Combine(uploadFolder, fileNameOnly);
+                    }
+                    else
+                    {
+                        var webRoot = _env.WebRootPath ?? string.Empty;
+                        var trimmed = raw.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                        physicalPath = Path.Combine(webRoot, trimmed);
+                    }
+                }
+
+                physicalPath = physicalPath.Replace('/', Path.DirectorySeparatorChar);
+
+                if (!File.Exists(physicalPath))
+                {
+                    result.Success = false;
+                    result.Message = "File not found.";
+                    return result;
+                }
+
+                var ms = new MemoryStream();
+                using (var fs = File.OpenRead(physicalPath))
+                {
+                    await fs.CopyToAsync(ms);
+                }
+                ms.Position = 0;
+
+                var localFileName = Path.GetFileName(physicalPath);
+                var localFormFile = new FormFile(ms, 0, ms.Length, "file", localFileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/octet-stream"
+                };
+
+                result.Data = localFormFile;
+                result.Success = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+                return result;
+            }
         }
     }
 }

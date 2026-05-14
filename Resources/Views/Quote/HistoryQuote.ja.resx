@@ -411,6 +411,18 @@
   <data name="DeleteReasonRequired" xml:space="preserve">
     <value>削除理由を入力してください</value>
   </data>
+  <data name="ReturnReasonTitle" xml:space="preserve">
+    <value>返却の理由</value>
+  </data>
+  <data name="ReturnReasonLabel" xml:space="preserve">
+    <value>返却理由を入力してください</value>
+  </data>
+  <data name="EnterReturnReasonPlaceholder" xml:space="preserve">
+    <value>返却理由を入力してください...</value>
+  </data>
+  <data name="ReturnReasonRequired" xml:space="preserve">
+    <value>返却理由を入力してください</value>
+  </data>
   <data name="Classification" xml:space="preserve">
     <value>分類</value>
   </data>

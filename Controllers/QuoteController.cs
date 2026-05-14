@@ -3946,13 +3946,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Return PIC section
         [HttpPost]
-        public async Task<IActionResult> ReturnQuotation([FromBody] string madon)
+        public async Task<IActionResult> ReturnQuotation([FromBody] ReturnQuotationByMaDonModel vm)
         {
-            if (string.IsNullOrEmpty(madon)) return BadRequest("Vui lòng chọn mã đơn!");
+            if (string.IsNullOrEmpty(vm.maDon)) return BadRequest("Vui lòng chọn mã đơn!");
             try
             {
                 var user = GetCurrentUserId();
-                var result = await _baoGiaService.TraLaiDonBaoGiaAsync(madon, user);
+                var result = await _baoGiaService.TraLaiDonBaoGiaAsync(vm.maDon, user, vm.reason);
                 if (!result.Success || result.Data == null)
                 {
                     return BadRequest("Error: " + result.Message);

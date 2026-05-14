@@ -410,12 +410,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 hasErrors = true;
                                 continue;
                             }
-                            if (string.IsNullOrWhiteSpace(tenHaiQuan))
-                            {
-                                ws.Cell(r, 27).SetValue("Tên hải quan không được để trống");
-                                hasErrors = true;
-                                continue;
-                            }
                             if (!bitReturn)
                             {
                                 itemNG.Add(new ConfirmNameDTO
@@ -427,7 +421,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             else
                             {
-                                if(false)//(tenHaiQuan != tenRecomment)
+                                if (string.IsNullOrWhiteSpace(tenHaiQuan))
+                                {
+                                    ws.Cell(r, 27).SetValue("Tên hải quan không được để trống");
+                                    hasErrors = true;
+                                    continue;
+                                }
+                                if (tenHaiQuan != tenRecomment)
                                 {
                                     listDifferent.Add(int.Parse(ws.Cell(r, 2).GetString()));
                                 }
@@ -476,15 +476,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 if (role == "UserShip")
                 {
-                    // Lưu dữ liệu hợp lệ vào database
-                    if (!itemOK.Any() || itemOK == null)
-                    {
-                        return BadRequest("Không có dữ liệu hợp lệ để lưu");
-                    }
-                    await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
                     // gửi mail thông báo đã hoàn thành xác nhận tên đến PIC PUR
-                    if (itemOK.Any() || itemOK != null)
+                    if (itemOK.Any())
                     {
+                        // Lưu dữ liệu hợp lệ vào database
+                        await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
                         var listCheck = itemOK.Select(d => d.ID).ToList();
                         // Send Mail PIC khi đơn hoàn thành xác nhận tên hải quan
                         _ = Task.Run(async () =>
@@ -526,7 +522,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         });
                     }
                     // Nếu có dữ liệu bị trả lại gửi đến PIC phòng ban để chỉnh sửa lại thông tin
-                    if (itemNG.Any() || itemNG.Count > 0)
+                    if (itemNG.Any())
                     {
                         await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
                         var listCheck = itemNG.Select(d => d.Id).ToList();
@@ -610,7 +606,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                 }
 
-                // Lưu thông tin cập nhật vào request với role UserPUR
+                // Lưu thông tin cập nhật vào request với role UserPUR và User
                 if(listUpdateRequest.Any())
                 {
                     await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);

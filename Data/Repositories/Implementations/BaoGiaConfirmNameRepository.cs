@@ -526,13 +526,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] as c 
                    ON r.ID = c.ID_RequestQuote
                WHERE c.ID IN @ListCheck
-               AND NOT EXISTS (
-                   SELECT 1 
-                   FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r2
-                   WHERE r2.CHR_MaDon = r.CHR_MaDon
-                   AND r2.BIT_LayBaoGia = 1 
-                   AND r2.ID_StepBaoGia != 13
-               )";
+               --AND NOT EXISTS (
+                 --  SELECT 1 
+                 --  FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r2
+                 --  WHERE r2.CHR_MaDon = r.CHR_MaDon
+                 --  AND r2.BIT_LayBaoGia = 1 
+                 --  AND r2.ID_StepBaoGia != 13
+               --)";
 
             using (var connection = _conn)
             {

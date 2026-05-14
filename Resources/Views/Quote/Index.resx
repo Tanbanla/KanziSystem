@@ -190,7 +190,7 @@
     <value>Yêu cầu tiêu chuẩn an toàn</value>
   </data>
   <data name="DesignFile" xml:space="preserve">
-    <value>File thiết kế</value>
+    <value>Link Box</value>
   </data>
   <data name="Manufacturer" xml:space="preserve">
     <value>Nhà sản xuất</value>
@@ -445,7 +445,7 @@
     <value>Lọc tiêu chuẩn an toàn</value>
   </data>
   <data name="FilterDesignFile" xml:space="preserve">
-    <value>Lọc file thiết kế</value>
+    <value>Lọc link Box</value>
   </data>
   <data name="FilterManufacturer" xml:space="preserve">
     <value>Lọc nhà sản xuất</value>
@@ -505,6 +505,6 @@
     <value>Liên kết đến hình ảnh hoặc tệp thiết kế (Không cần bảo mật)</value>
   </data>
   <data name="FileLink" xml:space="preserve">
-    <value>Link ảnh or file thiết kế</value>
+    <value>Link ảnh(thiết kế) không cần bảo mật</value>
   </data>
 </root>

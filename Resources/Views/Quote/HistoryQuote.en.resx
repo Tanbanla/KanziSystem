@@ -411,6 +411,18 @@
   <data name="DeleteReasonRequired" xml:space="preserve">
     <value>Delete reason is required</value>
   </data>
+  <data name="ReturnReasonTitle" xml:space="preserve">
+    <value>Return reason</value>
+  </data>
+  <data name="ReturnReasonLabel" xml:space="preserve">
+    <value>Please enter reason for return</value>
+  </data>
+  <data name="EnterReturnReasonPlaceholder" xml:space="preserve">
+    <value>Enter return reason...</value>
+  </data>
+  <data name="ReturnReasonRequired" xml:space="preserve">
+    <value>Return reason is required</value>
+  </data>
   <data name="Classification" xml:space="preserve">
     <value>Classification</value>
   </data>

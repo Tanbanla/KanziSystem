@@ -182,4 +182,10 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string maDon { get; set; } = string.Empty;
         public string reason { get; set; } = string.Empty;
     }
+    // Return quotation by madon
+    public class ReturnQuotationByMaDonModel
+    {
+        public string maDon { get; set; } = string.Empty;
+        public string reason { get; set; } = string.Empty;
+    }
 }

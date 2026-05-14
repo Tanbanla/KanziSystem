@@ -456,7 +456,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
 
-            var get_if = _db.GET_DATA_FROM_SQL("select * from REQUEST_DETAIL as a left join DEPARTMENT as b on a.Phongchiuchiphi = b.Cost_Center where a.Code_Request = '" + cost_request + "'");
+            var get_if = _db.GET_DATA_FROM_SQL("SELECT * FROM REQUEST_DETAIL AS a LEFT JOIN (SELECT DISTINCT Cost_Center FROM DEPARTMENT) AS b ON a.Phongchiuchiphi = b.Cost_Center WHERE a.Code_Request = '" + cost_request + "'");
             var dtm = _db.GET_DATA_FROM_SQL("SELECT * FROM [COST_MANAGEMENT].[dbo].[REQUEST] where Code_Request = '" + cost_request + "'");
             var requestt = _db.GET_DATA_FROM_SQL("select Code_Request,a.Cost_Center, Request_Date, Declaration, Dealine,Dealine_Real, Total_exchange, Exchange_rate, Currency, Total, Total_exchange_real,Exchange_rate_Real,Currency_Real, Total_Real,Kind,[Type],Status,Create_Date, User_Create, Last_Update,User_Update,Reason,Place, Loaihinhtokhai, Phuongthucvanchuyen, Group_Code, b.[Name], Name_Jp,Cost_Center_Group,Note, Urgent from [REQUEST] as a left join DEPARTMENT as b on a.Cost_Center =  b.Cost_Center where a.Code_Request = '" + cost_request + "'");
 
@@ -613,7 +613,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             try
             {
-                if (string.IsNullOrEmpty(thoigian.ToString()) || thoigian.ToString().Contains("1/1/0001") || thoigian.ToString().Contains("1900-01-01"))
+                if (string.IsNullOrEmpty(thoigian.ToString()) || thoigian.ToString().Split(" ")[0] == "01/01/0001" || thoigian.ToString().Split(" ")[0] == "1900-01-01")
                 {
                     thoigian = DateTime.Now;
                 }
@@ -639,7 +639,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 string hanhdong = $"Xuất kho {kho} cho request: {code_request}";
                 string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
                     ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi])
-                    VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', GETDATE(), N'{nguoixuatkho}', '{kho}', '{khoi}', '{phong}', N'{vitri}', '{thoigian}', '{slHienTai}', '{slHienTai - slXuat}')";
+                    VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', GETDATE(), N'{nguoixuatkho}', '{kho}', '{khoi}', '{phong}', N'{vitri}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}')";
 
                 _db.GET_DATA_FROM_SQL(sqlLog);
 
@@ -651,7 +651,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Status] = 'DONE',
                             [Last_Update] = GETDATE(),
                             [Total_Real] = '{tongchiphi}',
-                            [Dealine_Real] = '{thoigian}',
+                            [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}'
                             WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
 
@@ -745,7 +745,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             var lst = db.GET_DATA_FROM_SQL("SELECT * FROM [REQUEST_DETAIL] WHERE [Code_Request] = '" + code_request + "' and [Status] <> 'DONE'");
             for (int i = 0; i < lst.Rows.Count; i++)
             {
-                var list = db.GET_DATA_FROM_SQL("select Hientai, Kho from KHO where MaNguyenLieu = '" + lst.Rows[i]["Material_Code"].ToString() + "' and Hientai <> '0' ");
+                var list = db.GET_DATA_FROM_SQL("select Hientai, Kho from KHO where MaNguyenLieu = '" + lst.Rows[i]["Material_Code"].ToString() + "' ");
                 List<SOLUONGKHO> sl = new List<SOLUONGKHO>();
                 for (int a = 0; a < list.Rows.Count; a++)
                 {

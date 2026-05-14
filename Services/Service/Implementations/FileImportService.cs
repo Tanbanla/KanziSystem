@@ -5,7 +5,9 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
@@ -78,10 +80,82 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     await sourceStream.CopyToAsync(destStream);
                 }
 
-                var baseUrl = (_configuration["ApiSettings:BaseUrl"] ?? string.Empty).TrimEnd('/');
-                var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/uploads/quotes/{uniqueName}";
+                var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
+                var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
 
                 result.Data = fileUrl;
+                result.Success = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+                return result;
+            }
+        }
+        // Lấy file từ link 
+        public async Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath)
+        {
+            var result = new GenericResponse<IFormFile>();
+
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                result.Success = false;
+                result.Message = "File path is empty.";
+                return result;
+            }
+
+            try
+            {
+                var raw = filePath.Trim().Trim('"', '\'');
+                string fileNameOnly = Path.GetFileName(raw);
+                string uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/', '\\');
+
+                string physicalPath = raw;
+
+                if (raw.StartsWith("\\\\") || raw.StartsWith("//"))
+                {
+                    physicalPath = raw.Replace('/', Path.DirectorySeparatorChar);
+                }
+                else if (raw.StartsWith("/"))
+                {
+                    if (!string.IsNullOrWhiteSpace(uploadFolder))
+                    {
+                        physicalPath = Path.Combine(uploadFolder, fileNameOnly);
+                    }
+                    else
+                    {
+                        var webRoot = _env.WebRootPath ?? string.Empty;
+                        var trimmed = raw.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                        physicalPath = Path.Combine(webRoot, trimmed);
+                    }
+                }
+
+                physicalPath = physicalPath.Replace('/', Path.DirectorySeparatorChar);
+
+                if (!File.Exists(physicalPath))
+                {
+                    result.Success = false;
+                    result.Message = "File not found.";
+                    return result;
+                }
+
+                var ms = new MemoryStream();
+                using (var fs = File.OpenRead(physicalPath))
+                {
+                    await fs.CopyToAsync(ms);
+                }
+                ms.Position = 0;
+
+                var localFileName = Path.GetFileName(physicalPath);
+                var localFormFile = new FormFile(ms, 0, ms.Length, "file", localFileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/octet-stream"
+                };
+
+                result.Data = localFormFile;
                 result.Success = true;
                 return result;
             }

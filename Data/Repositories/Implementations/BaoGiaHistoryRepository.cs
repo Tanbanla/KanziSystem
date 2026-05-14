@@ -32,6 +32,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var result = await _context.BaoGia_History_Request_of_Quotations
             .Where(h => h.CHR_MaDon == soDon)
             .OrderBy(h => h.ID_RequestQuote)
+            .ThenBy(h => h.ID)
             .ToListAsync();
             return result;
         }

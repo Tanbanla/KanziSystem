@@ -57,7 +57,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Xóa từng đơn
         public Task<bool> DeleteDonBaoGiaAsync(int id, string reason, string userUpdate);
         // Trả lại đơn báo giá
-        public Task<List<BaoGia_Request_of_Quotation>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate);
+        public Task<List<BaoGia_Request_of_Quotation>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate,string reason);
         // lấy danh sách đơn yêu cầu hàng hóa
         public Task<List<string>> GetMaDonYeuCauHangHoaAsync();
         // update phê duyệt đơn báo giá

@@ -238,42 +238,15 @@
         _load_phongchiuphi_1();
         _load_account_1();
         _load_request();
+        
+        //_load_name_inv1(document.getElementById("group_code").value);
     }
         function check_mucdichkhac() {
         // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
         const lstMaterial = document.getElementById("lstMaterial");
         if (lstMaterial) lstMaterial.innerHTML = "";
 
-        // 2. Định nghĩa dòng mẫu mới (Cột STK có thể thay đổi tùy ý ở đây)
-        const tbody = document.querySelector('#dynamic-table tbody');
-        const templateRow = `
-            <tr class="input-row">
-                <td class="row-number text-center fw-bold">1</td>
-                <td>
-                    <select class="form-control select2 tenhang" id="tenhang_1">
-                        <option value=""></option>
-                    </select>
-                </td>
-                <td>
-                    <select id="stk_1" class="form-control stk" ></select>
-                </td>
-
-                <td><input type="number" class="form-control sl" id="sl_1" min="0" onblur="caculator(this.id)" onchange="caculator(this.id)"></td>
-                <td><input type="text" class="form-control dv" id="dv_1" readonly></td>
-                <td><input type="number" class="form-control dg" id="dg_1" readonly></td>
-                <td><input type="text" class="form-control nt" id="nt_1" readonly></td>
-                <td><input type="text" class="form-control tcp" id="tcp_1" readonly></td>
-                <td><input type="text" class="form-control md" id="md_1"></td>
-                <td><select class="form-control pcp" id="pcp_1"></select></td>
-                <td><input type="text" class="form-control vt" id="vt_1"></td>
-                <td><input type="text" class="form-control" id="gc_1"></td>
-                <td>
-                    <button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>
-                </td>
-            </tr>`;
-
-        // 3. Thay thế nội dung bảng
-        tbody.innerHTML = templateRow;
+       
         _load_phongchiuphi_1();
         _load_account_1();
         // 5. Tính toán lại tổng tiền (về 0)
@@ -514,7 +487,7 @@
                 document.getElementById("madon").value = data[0].code_Request;
                 document.getElementById("name_dept").value = data[0].cost_Center;
                 document.getElementById("ngayyeucau").value = data[0].request_Date.split(' ')[0];
-                document.getElementById("thoihan").value = new Date(data[0].dealine).toISOString().split('T')[0];
+                document.getElementById("thoihan").value = data[0].dealine.split(' ')[0];
                 document.getElementById("typee").value = data[0].typee;
                 document.getElementById("thanhtien").value = data[0].total;
                 document.getElementById("loaichiphi").value = data[0].declaration;
@@ -760,5 +733,30 @@
          
                 }
             })           
+    }
+
+    async function _load_name_inv1(group_code) {
+    const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
+    fetch('/Import/_load_material', {
+        method: 'POST',
+        body: params
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (group_code == "GA") {
+                document.getElementById("modal-20").style.display = '';
+                document.getElementById("modal-6").style.display = 'none';
+
+            }
+            if (group_code == "PROD") {
+                document.getElementById("modal-20").style.display = 'none';
+                document.getElementById("modal-6").style.display = '';
+
+            }
+            globalMaterialData = data; // Lưu lại để dùng sau
+            const $allSelects = $('.select2');
+            // Nạp data cho toàn bộ select2 đang có trên màn hình
+            fillDataToSelect($allSelects, data);
+        });
     }
 </script>

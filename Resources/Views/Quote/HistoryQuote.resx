@@ -411,6 +411,18 @@
   <data name="DeleteReasonRequired" xml:space="preserve">
     <value>Vui lòng nhập lý do xóa</value>
   </data>
+  <data name="ReturnReasonTitle" xml:space="preserve">
+    <value>Lý do trả lại</value>
+  </data>
+  <data name="ReturnReasonLabel" xml:space="preserve">
+    <value>Vui lòng nhập lý do trả lại</value>
+  </data>
+  <data name="EnterReturnReasonPlaceholder" xml:space="preserve">
+    <value>Nhập lý do trả lại...</value>
+  </data>
+  <data name="ReturnReasonRequired" xml:space="preserve">
+    <value>Vui lòng nhập lý do trả lại</value>
+  </data>
   <data name="Classification" xml:space="preserve">
     <value>Phân loại</value>
   </data>

@@ -190,7 +190,7 @@
     <value>Safety Standard Requirement</value>
   </data>
   <data name="DesignFile" xml:space="preserve">
-    <value>Design File</value>
+    <value>Link Box</value>
   </data>
   <data name="Manufacturer" xml:space="preserve">
     <value>Manufacturer</value>
@@ -445,7 +445,7 @@
     <value>Filter Safety</value>
   </data>
   <data name="FilterDesignFile" xml:space="preserve">
-    <value>Filter Design File</value>
+    <value>Filter Link Box</value>
   </data>
   <data name="FilterManufacturer" xml:space="preserve">
     <value>Filter Manufacturer</value>
@@ -505,6 +505,6 @@
     <value>Link to image or design file (No need to secure)</value>
   </data>
   <data name="FileLink" xml:space="preserve">
-    <value>Link to image or design file</value>
+    <value>Image Link (design) - No security required</value>
   </data>
 </root>

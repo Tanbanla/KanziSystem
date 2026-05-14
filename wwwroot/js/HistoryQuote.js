@@ -25,6 +25,66 @@
             hiddenTenNCC.value = ''; 
         }
     }
+
+    // Show return reason modal (separate from delete modal)
+    function showReturnReasonModal() {
+        return new Promise((resolve) => {
+            const modalEl = document.getElementById('returnReasonModal');
+            const textarea = document.getElementById('returnReasonText');
+            const notice = document.getElementById('returnReasonNotice');
+            const confirmBtn = document.getElementById('confirmReturnWithReason');
+            if (!modalEl || !textarea || !confirmBtn) return resolve(null);
+
+            // reset
+            textarea.value = '';
+            if (notice) notice.style.display = 'none';
+
+            // ensure modal in body
+            try { if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl); } catch (e) {}
+
+            let bsModal = null;
+            try {
+                if (window.bootstrap && bootstrap.Modal) {
+                    bsModal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
+                    bsModal.show();
+                } else {
+                    modalEl.style.display = 'block';
+                    modalEl.classList.add('show');
+                    document.body.classList.add('modal-open');
+                }
+            } catch (e) {
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
+
+            function cleanup() {
+                try { if (bsModal) bsModal.hide(); else { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); } } catch (e) { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
+                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) {}
+                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) {}
+                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+            }
+
+            function onHidden() { cleanup(); resolve(null); }
+            function onCancel(e) { e && e.preventDefault(); cleanup(); resolve(null); }
+            function onConfirm(e) {
+                e && e.preventDefault();
+                const reason = (textarea.value || '').trim();
+                if (!reason) {
+                    if (notice) notice.style.display = '';
+                    return;
+                }
+                cleanup();
+                resolve(reason);
+            }
+
+            try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) {}
+            try { if (bsModal) modalEl.addEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+            confirmBtn.addEventListener('click', onConfirm);
+            // focus textarea
+            try { textarea.focus(); } catch (e) {}
+        });
+    }
     function showConfirmDialog(title, html, confirmText, cancelText) {
         const overlay = document.getElementById('cmDialogOverlay');
         const body = document.getElementById('cmDialogBody');
@@ -364,7 +424,7 @@
                 // Import thành công, hiển thị dialog và CHỜ người dùng chọn
                 const step = 2;
                 const section = importResult?.sectionCode || '';
-                if (importResult?.isReturn) {
+                if (!importResult?.isReturn) {
                     showDialog({
                         title: T.Notification || 'Thông báo',
                         message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'),
@@ -518,12 +578,19 @@
                 showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgSelectGroupFailed || 'Vui lòng chọn mã đơn!') + '</div>');
                 return;
             }
+
+            // Ask user to provide a reason for returning the quotation
+            const reason = await showReturnReasonModal();
+            if (!reason) return; // user cancelled or did not provide reason
+
             try {
                 showLoading(T.Exporting || 'Đang xử lý...');
+
+                const payload = { maDon: madon, reason: reason };
                 const res = await fetch((window.apiBaseUrl || '') + '/Quote/ReturnQuotation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(madon)
+                    body: JSON.stringify(payload)
                 });
                 const text = await res.text();
                 if (!res.ok) throw new Error(text || (T.ReturnFailed || 'Trả lại thất bại!'));
