@@ -1,0 +1,14 @@
+﻿ID,CHR_StepName,CHR_CreateBy,DTM_CreateDate,CHR_Note,CHR_Status,INT_StepNumber,CHR_StepNameEN,CHR_StepNameJP
+1,Khởi tạo đơn,khanhmf,2026-03-31 19:05:22.730,PUBLISH,NULL,1,Create Order,注文作成
+2,QLSC phòng ban yêu cầu phê duyệt,khanhmf,2026-03-31 19:05:22.880,PUBLISH,APPROVAL,2,Chief/Expert Department Requests Approval,Chief/Expert 部門 承認依頼
+3,QLTC phòng yêu cầu phê duyệt,khanhmf,2026-03-31 19:05:23.043,PUBLISH,APPROVAL,3,Section Manager Department Requests Approval,Section Manager 部門 承認依頼
+4,PIC phòng đặt hàng phê duyệt,khanhmf,2026-03-31 19:05:23.213,PUBLISH,APPROVAL,4,PIC Order Department Approves,PIC発注部門 承認
+5,QLSC phòng đặt hàng phê duyệt,khanhmf,2026-03-31 19:05:23.633,PUBLISH,APPROVAL,5,Chief/Expert Order Department Approves,Chief/Expert 発注部門 承認
+6,"Chờ báo giá ",khanhmf,2026-03-31 19:05:23.850,PUBLISH,NULL,6,Awaiting Quotation,見積待ち
+7,Chờ lên đề án lựa chọn NCC,khanhmf,2026-03-31 19:05:24.040,PUBLISH,NULL,7,Awaiting Vendor Selection Proposal,供給元選定企画待ち
+8,Hoàn thành lựa chọn NCC,khanhmf,2026-03-31 19:05:24.543,PUBLISH,NULL,13,Vendor Selection Completed,供給元選定完了
+9,Chờ sửa lại điều kiện xin báo giá,khanhmf,2026-03-31 19:05:24.863,PUBLISH,NULL,8,Awaiting Revision of Quotation Request Conditions,見積依頼条件の再修正待ち
+10,QLSC phê duyệt sau lựa chọn NCC,khanhmf,2026-03-31 19:05:25.193,PUBLISH,APPROVAL,9,Chief/Expert Approval After Vendor Selection,供給元選定後Chief/Expert 承認
+11,QLTC phê duyệt sau lựa chọn NCC,khanhmf,2026-03-31 19:05:25.393,PUBLISH,APPROVAL,10,Section Manager Approval After Vendor Selection,供給元選定後 Section Manager 承認
+12,Deft Manager phê duyệt,khanhmf,2026-03-31 19:05:25.587,PUBLISH,APPROVAL,11,Deft Manager Approves,Deft Managerが承認し
+13,Xác nhận tên hải quan,khanhmf,2026-03-31 19:05:25.810,PUBLISH,NULL,12,Confirm customs name,税関名の確認
