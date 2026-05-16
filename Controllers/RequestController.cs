@@ -5,6 +5,7 @@ using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Collections.Generic;
 using System.Data;
+using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.Protocols;
 using System.Drawing;
 using System.Net;
@@ -667,7 +668,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             REQUEST_PROCESS_GA._sendmail(body, mail_nguoidat, subject);
             return Json("Hoàn thành !");
         }
-        public JsonResult get_requestcondition(string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent, string us, string costt_ct)
+        public JsonResult get_requestcondition(string loaicp, string ngayyc,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent, string us, string costt_ct)
         {
             //Urgent = (Urgent == "Gấp") ? "1" : (Urgent == "Thông thường" ? "0" : Urgent);
             //var a =  (Total == "Dưới 3000") ? "2999"                  
@@ -675,11 +676,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //       : (Total == "Trên 10,000") ? "10000"
             //       : "0";
             double aa = double.Parse(Total);
-            var cf = REQUEST_PROCESS.get_requestcondition(us,Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent,costt_ct);
+            var cf = REQUEST_PROCESS.get_requestcondition(loaicp, ngayyc,us,Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent,costt_ct);
             
             return Json(cf);
         }
-        public JsonResult get_requestcondition_GA(string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent, string costt_ct)
+        public JsonResult get_requestcondition_GA(string loaicp, string ngayyc,string us, string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent, string costt_ct)
         {
             //Urgent = (Urgent == "Gấp") ? "1" : (Urgent == "Thông thường" ? "0" : Urgent);
             //var a =  (Total == "Dưới 3000") ? "2999"                  
@@ -687,7 +688,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //       : (Total == "Trên 10,000") ? "10000"
             //       : "0";
             double aa = double.Parse(Total);
-            var cf = REQUEST_PROCESS_GA.get_requestcondition(us,Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent, costt_ct);
+            var cf = REQUEST_PROCESS_GA.get_requestcondition(loaicp, ngayyc, us, Group_Code, Code_Request, INT_STEP, Cost_Center, Request_Date, aa, Urgent, costt_ct);
             return Json(cf);
         }
         public JsonResult _layphongban(string ph)
@@ -797,7 +798,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             string sql = $@"SELECT {Truongdulieu} FROM REQUEST 
                     WHERE Create_Date > '{StartDate:MM/dd/yyyy}' 
-                    AND Create_Date <= '{EndDate.AddDays(1):MM/dd/yyyy}' 
+                    AND Create_Date <= '{EndDate.AddDays(1):MM/dd/yyyy}'
+                    AND KIND = 'IN'
                     AND Cost_Center in (SELECT Cost_Center FROM VIEW_USER_DEPT WHERE CHR_USERID = '{us}') 
                     ORDER BY [Create_Date] DESC";
 

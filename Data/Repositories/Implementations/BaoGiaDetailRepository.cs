@@ -272,6 +272,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.DTM_EffectiveDate = item.DTM_EffectiveDate;
                     detail.DTM_ExpiryDate = item.DTM_ExpiryDate;
                     detail.BIT_Select = null;
+                    detail.CHR_Status = item.CHR_Status;
                 }
                 // save step BaoGia_Request
                 var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
@@ -408,6 +409,57 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .Select(b => b.ID)
                 .FirstOrDefaultAsync();
             return detail;
+        }
+        // Cập nhật thông tin status của đơn báo giá
+        public async Task<bool> UpdateStatusAsync(List<int> ids)
+        {
+            if (ids == null || ids.Count == 0)
+            {
+                return false;
+            }
+
+            var details = await _context.BaoGia_Detail_of_Quotations
+                .Where(b => ids.Contains(b.ID))
+                .Select(d => new { d.ID, d.ID_RequestQuote, d.CHR_Status })
+                .ToListAsync();
+
+            if (!details.Any()) return false;
+
+            // Lấy danh sách ID_RequestQuote
+            var requestQuoteIds = details.Select(d => d.ID_RequestQuote).Distinct().ToList();
+
+            // Lấy tất cả detail của các request quote
+            var allDetails = await _context.BaoGia_Detail_of_Quotations
+                .Where(d => requestQuoteIds.Contains(d.ID_RequestQuote))
+                .GroupBy(d => d.ID_RequestQuote)
+                .Select(g => new
+                {
+                    RequestQuoteId = g.Key,
+                    TotalCount = g.Count(),
+                    RefusedCount = g.Count(d => d.CHR_Status == "Refuse")
+                })
+                .ToListAsync();
+
+            // Tìm các request có tất cả detail đều bị từ chối
+            var fullyRefusedRequestIds = allDetails
+                .Where(x => x.TotalCount == x.RefusedCount && x.TotalCount > 0)
+                .Select(x => x.RequestQuoteId)
+                .ToList();
+
+            if (!fullyRefusedRequestIds.Any()) return true;
+
+            // Cập nhật status cho các request
+            var requestsToUpdate = await _context.BaoGia_Request_of_Quotations
+                .Where(r => fullyRefusedRequestIds.Contains(r.ID))
+                .ToListAsync();
+
+            foreach (var request in requestsToUpdate)
+            {
+                request.ID_Status = "SUPPLIER_REFUSED";
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

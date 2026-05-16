@@ -20,6 +20,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> UpdateHistoryAsync(BaoGia_History_Request_of_QuotationDTO history);
         // Lấy lý do trả lại đơn báo giá
         public Task<GenericResponse<string>> GetReturnReasonAsync(int idRequestQuote);
-        public Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<int> ids);
+        public Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<dynamic> ids);
     }
 }

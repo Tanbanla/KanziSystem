@@ -1,5 +1,7 @@
 using Dapper;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
+
 
 // removed unused OpenXML usings
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Text;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -1609,6 +1612,88 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
 
             return baoGias;
+        }
+        // Check đơn return
+        public async Task<bool> CheckDonReturnAsync(List<string> maDons)
+        {
+            if (maDons == null || !maDons.Any())
+            {
+                throw new ArgumentNullException(nameof(maDons), "No data to check");
+            }
+
+            var count = await _context.BaoGia_Request_of_Quotations
+                .Where(c => maDons.Equals(c.CHR_MaDon) && c.ID_Status.Contains("RETURN"))
+                .CountAsync();
+
+            return count > 0;
+        }
+        // Export history báo giá
+        public async Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        {
+
+            var sql = @"
+                SELECT DISTINCT q.*, d.BIT_Select, d.NVCHR_ReasonPick, d.NVCHR_File
+                FROM BaoGia_Request_of_Quotation as q
+                INNER JOIN [BaoGia_Master_Approver_Send_Mail] as s ON q.CHR_SectionCode = s.CHR_CodeSection
+                left join  BaoGia_Detail_of_Quotation as d
+                on q.ID = d.ID_RequestQuote
+                WHERE --(@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
+                  (@MaDon IS NULL OR CHR_MaDon = @MaDon)
+                  AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
+                  AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
+                  AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
+                  AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
+                  AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
+                  AND (@Step IS NULL OR ID_StepBaoGia = @Step)
+                  AND ( s.CHR_UserAdid = @Adid)
+            ";
+
+            var statusSql = "1=1";
+            switch (status)
+            {
+                case "RETURN":
+                    statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DONE":
+                    statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "APPROVAL":
+                    statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "WAIT":
+                    statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DELETE":
+                    statusSql = "ID_Status LIKE 'DELETE'";
+                    break;
+                default:
+                    statusSql = "ID_Status NOT LIKE 'DELETE'";
+                    break;
+            }
+
+            // append status filter
+            sql += " AND (" + statusSql + ")";
+
+            // Add ordering to main query
+            sql += @"
+                ORDER BY DTM_CreateDate DESC
+            ";
+
+            var parameters = new
+            {
+                MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
+                MaNcc = string.IsNullOrEmpty(MaNcc) ? null : MaNcc,
+                Section = string.IsNullOrEmpty(Section) ? null : Section,
+                NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
+                MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
+                Step = step,
+                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
+                Adid = user
+            };
+
+            var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+
+            return data;
         }
     }
 }

@@ -90,10 +90,6 @@
                     <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
                     <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-refresh"></i> Refresh </button>
                 </div>
-             
-                <div class="form-group float-right mt-5">
-                    <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
-                </div>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
@@ -115,14 +111,13 @@
                                 <th colspan="3">@Languages.phongtiepnhan</th>
                                 <td colspan="2"></td>
                             </tr>
-                            <tr id="loadhangmuc">
+                            <tr id="loadhangmuc" >
                             </tr>
                         </thead>
                         <tbody id="list_approve"></tbody>
                     </table>
                     <ul class="pagination" id="pagination-controls"></ul>
                 </div>
-
             </div>
         </div>
     </div>
@@ -131,3 +126,79 @@
 <button id="modal-7" hidden></button>
 <button id="modal-23" hidden></button>
 <script src="~/scripts/request.js"></script>
+<script>
+    window.onload = function () {
+        // Gọi hàm load dữ liệu khi trang đã tải xong
+        _load_request_all();
+    };
+    function _load_request_all() {
+        // Giả sử bạn lấy user hiện tại từ một biến global hoặc input ẩn
+        var user = document.getElementById("us").innerHTML;
+        // Thiết lập ngày mặc định (ví dụ: trong vòng 30 ngày qua)
+        var startDate = "2026-05-01";
+        var endDate = "2026-05-14";
+
+        $.ajax({
+            url: '/Request/view_rqall', // Thay YourControllerName bằng tên Controller của bạn
+            type: 'GET',
+            data: {
+                StartDate: startDate,
+                EndDate: endDate,
+                us: user
+            },
+            success: function (data) {
+              
+                var html = '';
+                if (data && data.length > 0) {
+                    console.log(data);
+                    $.each(data, function (index, item) {
+                        html += '<tr>';
+                        html += `<td><button class="btn btn-sm btn-info" onclick="viewDetail('${item.Id_Request}')">Xem</button></td>`;
+                        html += `<td>${item.Type == 1 ? '<span class="badge badge-danger">Gấp</span>' : 'Thông thường'}</td>`;
+                        html += `<td>${getStatusName(item.Status)}</td>`;
+                        html += `<td>${item.Code_Request}</td>`;
+                        html += `<td>${item.Cost_Center}</td>`;
+                        html += `<td>${formatDate(item.Request_Date)}</td>`;
+                        html += `<td>${formatDate(item.Dealine)}</td>`;
+                        html += `<td>${item.Kind}</td>`;
+                        html += `<td>${item.Total.toLocaleString()}</td>`;
+                        html += `<td>${item.User_Create}</td>`;
+
+                        // Các cột phê duyệt (Ví dụ hiển thị icon theo status)
+                        html += `<td colspan="3" class="text-center">${item.Status}</td>`;
+                        html += `<td colspan="3"></td>`;
+                        html += '</tr>';
+                    });
+                } else {
+                    html = '<tr><td colspan="15" class="text-center">Không có dữ liệu</td></tr>';
+                }
+                $('#list_approve').html(html);
+            },
+            error: function (err) {
+                console.error("Lỗi khi tải dữ liệu:", err);
+            }
+        });
+    }
+
+    // Hàm bổ trợ định dạng ngày tháng
+    function formatDate(dateString) {
+        if (!dateString) return "";
+        var date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN');
+    }
+
+    // Hàm bổ trợ lấy tên trạng thái
+    function getStatusName(status) {
+        var statuses = {
+            "WAITCONFIRM": "Đang chờ xác nhận",
+            "EXPORT": "Đang xuất kho",
+            "PROGRESS": "Đang xử lý",
+            "REFUSE": "Hủy bỏ",
+            "ACCEPT": "Đang chờ nhận hàng",
+            "DONE": "Hoàn thành"     
+        };
+        return statuses[status] || "Không xác định";
+    }
+
+  
+</script>

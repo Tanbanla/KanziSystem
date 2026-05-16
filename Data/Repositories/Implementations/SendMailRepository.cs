@@ -51,8 +51,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = @"SELECT q.*, n.ShortName , n.Ten, n.Diachi
                 FROM BaoGia_Request_of_Quotation AS q
                 LEFT JOIN IM_NCC_NEW AS n ON q.CHR_MaNCC = n.Ma
-                WHERE q.CHR_MaNCC = @SupplierCode 
-                  AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
+                WHERE q.CHR_MaNCC = @SupplierCode
+                  and ID_Status = 'WAIT_SEND_MAIL'
+                  -- AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
                   AND q.BIT_LayBaoGia = 1 and q.ID_StepBaoGia = 6";
             //and ID_Status = 'WAIT_SEND_MAIL'
             var parameter = new { SupplierCode = supplierCode };

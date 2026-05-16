@@ -22,5 +22,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<BaoGia_Request_of_Quotation> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos, string userApproverNext);
         // Lấy id detail theo ID RequestQuote
         public Task<int> GetIdDetailAsync(int? idRequest);
+        // Cập nhật thông tin status của đơn báo giá
+        Task<bool> UpdateStatusAsync(List<int> ids);
     }
 }

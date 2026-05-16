@@ -152,5 +152,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Cập nhật thông tin status của đơn báo giá
+        public async Task<GenericResponse<bool>> UpdateStatusAsync(List<int> ids)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.UpdateStatusAsync(ids);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

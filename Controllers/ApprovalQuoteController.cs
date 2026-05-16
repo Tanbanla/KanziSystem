@@ -340,7 +340,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                                 // Phân loại MaterialsNew theo CHR_Phanloai (A hoặc I)
                                 var materialsByPhanLoai = MaterialsNew
-                                    .Where(m => !string.IsNullOrEmpty(m.CHR_MaHangNCC))
+                                    //.Where(m => !string.IsNullOrEmpty(m.CHR_MaHangNCC))
                                     .GroupBy(m => GetMaterialType(m.CHR_Phanloai))
                                     .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
@@ -359,7 +359,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var processedSuppliers = new Dictionary<string, MATERIALDTO>(StringComparer.OrdinalIgnoreCase);
 
                                     var materialsBySupplier = materialsInGroup
-                                        .GroupBy(m => m.CHR_MaHangNCC)
+                                        .GroupBy(m => string.IsNullOrEmpty(m.CHR_MaHangNCC) ? m.CHR_NameEN : m.CHR_MaHangNCC)
                                         .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
                                     foreach (var supplierGroup in materialsBySupplier)

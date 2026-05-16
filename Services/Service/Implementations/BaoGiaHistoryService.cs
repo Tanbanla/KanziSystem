@@ -136,7 +136,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             return result;
         }
-        public async Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<int> ids)
+        public async Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<dynamic> ids)
         {
             var result = new GenericResponse<List<ReasonQuotition>>();
             try

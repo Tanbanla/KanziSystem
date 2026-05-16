@@ -475,5 +475,37 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return Task.FromResult(result);
         }
+        // Check đơn return
+        public async Task<GenericResponse<bool>> CheckDonReturnAsync(List<string> maDons)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.CheckDonReturnAsync(maDons);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Export history báo giá
+        public async Task<GenericResponse<List<dynamic>>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.ExportHistoryBaoGiaAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, chungLoai);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

@@ -122,6 +122,7 @@ $("#modal-8").fireModal({
     footerClass: 'bg-whitesmoke',
     autoFocus: false,
     created: function (modal) {
+        modal.css('z-index', '9999');
         modal.find('.modal-dialog').css('max-width', '380px');
         modal.find('.modal-dialog').css('padding-top', '300px');
         modal.find('.modal-content').css({

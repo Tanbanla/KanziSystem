@@ -772,7 +772,6 @@ function _dongy_all() {
     });
     alert("Hoàn thành !");
 }
-
 function _reject(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;

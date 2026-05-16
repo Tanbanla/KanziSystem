@@ -78,5 +78,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<string>>> GetMaDonYeuCauHangHoaAsync();
         // update phê duyệt đơn báo giá
         public Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdatePheDuyetDonBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias);
+        // Check đơn return
+        Task<GenericResponse<bool>> CheckDonReturnAsync(List<string> maDons);
+        // Export history báo giá
+        Task<GenericResponse<List<dynamic>>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
     }
 }

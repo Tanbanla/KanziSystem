@@ -20,6 +20,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Lấy lý do trả lại đơn báo giá
         public Task<string> GetReturnReasonAsync(int idRequestQuote);
 
-        public Task<List<ReasonQuotition>> GetReasonsAsync(List<int> ids);
+        public Task<List<ReasonQuotition>> GetReasonsAsync(List<dynamic> ids);
     }
 }

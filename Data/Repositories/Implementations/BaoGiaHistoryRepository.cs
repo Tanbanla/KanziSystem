@@ -102,7 +102,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .FirstOrDefaultAsync();
             return result ?? string.Empty;
         }
-        public async Task<List<ReasonQuotition>> GetReasonsAsync(List<int> ids)
+        public async Task<List<ReasonQuotition>> GetReasonsAsync(List<dynamic> ids)
         {
             var results = await _context.BaoGia_History_Request_of_Quotations
                 .Where(h => ids.Contains(h.ID_RequestQuote) && h.CHR_ActionType != null && h.CHR_ActionType.Contains("RETURN"))

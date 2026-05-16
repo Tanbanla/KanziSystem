@@ -3,7 +3,8 @@ function _load_xuatkho() {
     var mayeucau = document.getElementById("mayeucau").value;
     var nguoitao = document.getElementById("nguoitao").value;
     var khoi = document.getElementById("khoi").value;
-    const params = new URLSearchParams({ mayeucau: mayeucau, nguoitao: nguoitao, khoi: khoi });
+    var us = document.getElementById("us").innerHTML;
+    const params = new URLSearchParams({us : us, mayeucau: mayeucau, nguoitao: nguoitao, khoi: khoi });
     fetch('/Import/_load_xuatkhohang', {
         method: 'POST',
         headers: {

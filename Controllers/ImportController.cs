@@ -207,7 +207,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);
         }
-        public JsonResult _load_xuatkhohang(string mayeucau, string nguoitao, string khoi)
+        public JsonResult _load_xuatkhohang(string us,string mayeucau, string nguoitao, string khoi)
         {
             if(khoi == "GA")
             {
@@ -217,7 +217,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
            
             if(khoi == "PROD")
             {
-                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(mayeucau, nguoitao, khoi);
+                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us,mayeucau, nguoitao, khoi);
                 return Json(list);
             }
             return Json("Không có dữ liệu");

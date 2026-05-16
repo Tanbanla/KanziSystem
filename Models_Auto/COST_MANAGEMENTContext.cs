@@ -611,8 +611,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.CHR_MaHangNCC)
-                .HasMaxLength(250)
-                .IsUnicode(false);
+                .HasMaxLength(250);
             entity.Property(e => e.CHR_NameEN).HasMaxLength(200);
             entity.Property(e => e.CHR_Status).HasMaxLength(150);
             entity.Property(e => e.CHR_UpdateBy)

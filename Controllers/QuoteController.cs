@@ -1,5 +1,7 @@
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +19,7 @@ using System.Drawing.Printing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Path = System.IO.Path;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
@@ -2907,9 +2910,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không có file được tải lên");
                 }
 
-                // Lưu file vào thư mục và lấy đường dẫn
-                //  string fileUrl = await SaveUploadedFile(file);
-
                 // lấy tỷ giá tiền tệ
                 var exchangRateAsyenc = await _exchangeRateService.GetExchangeRate();
                 if (exchangRateAsyenc == null || !exchangRateAsyenc.Success)
@@ -3006,7 +3006,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 CHR_UpdateBy = null,
                                 NVCHR_File = ws.Cell(r, 30).GetString(),
                                 BIT_Select = false,
-                                NVCHR_ReasonPick = "Refuse"
+                                CHR_Status = "Refuse"
                             };
 
                             items.Add(dto1);
@@ -3149,6 +3149,30 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest(result.Message);
                 }
+                // Cập nhật trạng thái cho đơn hàng
+                var listUpdateStatus = items.Select(c => c.ID).ToList();
+                _ = Task.Run(async () =>
+                {
+                    using (var scope = _serviceScopeFactory.CreateScope())
+                    {
+                        try
+                        {
+                            var baoGiaDetailService = scope.ServiceProvider.GetRequiredService<IBaoGiaDetailService>();
+                            var resultUpdateStatus = await baoGiaDetailService.UpdateStatusAsync(listUpdateStatus);
+                            if (!resultUpdateStatus.Success) {
+
+                                _logger.LogError(resultUpdateStatus.Message, "Lỗi khi cập nhật trạng thái");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Lỗi khi cập nhật trạng thái");
+                        }
+                    }
+
+                });
+
+
                 return Ok(result.Data);
             }
             catch (Exception ex)
@@ -3173,41 +3197,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Math.Round(result, 4);
             }
             return null;
-        }
-
-        // Thêm method để lưu file và trả về URL
-        private async Task<string> SaveUploadedFile(IFormFile file)
-        {
-            try
-            {
-                // Tạo thư mục lưu file nếu chưa tồn tại
-                string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "quotes");
-                if (!Directory.Exists(uploadFolder))
-                {
-                    Directory.CreateDirectory(uploadFolder);
-                }
-
-                // Tạo tên file duy nhất
-                string fileName = $"{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid():N}_{file.FileName}";
-                string filePath = Path.Combine(uploadFolder, fileName);
-
-                // Lưu file
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                // Tạo URL để truy cập file (có thể lấy từ cấu hình)
-                string baseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
-                string fileUrl = $"{baseUrl}/uploads/quotes/{fileName}";
-
-                return fileUrl;
-            }
-            catch (Exception ex)
-            {
-                // Log lỗi nếu cần
-                throw new Exception($"Không thể lưu file: {ex.Message}");
-            }
         }
         // Xuất file lịch sử báo giá 
         [HttpPost]
@@ -3317,44 +3306,44 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> ExportManagerHistory([FromBody] SearchBaoGiaViewModel searchModel)
         {
-            var result = await _baoGiaService.SearchAsync(
-                searchModel.MaDon,
-                searchModel.MaNcc,
-                searchModel.Section,
-                searchModel.NguoiYeuCau,
-                searchModel.MaHang,
-                searchModel.TrangThai,
-                searchModel.Step,
-                GetCurrentUserId() ?? "",
-                0,//searchModel.PageIndex,
-                0,//searchModel.PageSize,
-                searchModel.Date,
-                searchModel.ChungLoai
-             );
+            var result = await _baoGiaService.ExportHistoryBaoGiaAsync(searchModel.MaDon,
+                searchModel.MaNcc, searchModel.Section,
+                searchModel.NguoiYeuCau, searchModel.MaHang,
+                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai);
+
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
+
             try
             {
-                // lấy thong tin status
+                var historyData = result.Data;
+                if (historyData == null || !historyData.Any())
+                {
+                    return BadRequest("Không có dữ liệu để xuất");
+                }
+
+                // Lấy thông tin status
                 var Status = await _baoGiaStatusService.GetListStatusAsync();
                 if (Status == null || !Status.Success)
                 {
                     return BadRequest("Lỗi lấy danh sách trạng thái");
                 }
+
                 // Lấy thông tin step
                 var Steps = await _baoGiaStepService.GetAll();
                 if (Steps == null || !Steps.Success)
                 {
                     return BadRequest("Lỗi lấy danh sách step");
                 }
-                // tách thông tin lịch sử trả ra
-                var historyData = result.Data.Data;
 
                 // Lấy các đơn trả về có trạng thái RETURN để lấy lý do trả
                 var listReason = new List<ReasonQuotition>();
-                var returnIds = historyData.Where(rq => rq.ID_Status.Contains("RETURN")).Select(rq => rq.ID).ToList();
+                var returnIds = historyData
+                    .Where(rq => rq != null && rq.ID_Status != null && rq.ID_Status.Contains("RETURN"))
+                    .Select(rq => rq.ID)
+                    .ToList();
 
                 if (returnIds.Any())
                 {
@@ -3363,7 +3352,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         return BadRequest("Lỗi lấy lý do trả");
                     }
-                    listReason = reasons.Data;
+                    listReason = reasons.Data ?? new List<ReasonQuotition>();
                 }
 
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
@@ -3382,50 +3371,87 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 int row = 4;
+                int stt = 1;
+
                 foreach (var rq in historyData)
                 {
+                    if (rq == null) continue; 
+
                     int col = 1;
-                    // Map fields into template columns similar to ExportSelection
-                    ws.Cell(row, col++).SetValue(row - 3); // status placeholder
-                    ws.Cell(row, col++).SetValue(rq?.CHR_MaDon ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.ID);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_SectionCode ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_SectionName ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_Phanloai ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_MaThietBi ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_MaHangNoiBo ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_MaHangNCC ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_NameVN ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_NameEN ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.INT_SoLuong.HasValue == true ? rq.INT_SoLuong.Value : 0);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_DonVi ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_ChungLoai ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_HinhDang ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_ChatLieu ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_ThanhPhan ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_KichThuoc ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_DongMay ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_TinhNang ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_Rohs ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_COCQ ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_MSDS ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_AnToan ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_FileThietKe ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_NhaSanXuat ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_MaNCC ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_TenNCC ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.BIT_LayBaoGia == false ? "X" : "O");
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_LyDo ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.DTM_NgayMuonNhan.HasValue == true ? rq.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.DTM_KyHan.HasValue == true ? rq.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
-                    ws.Cell(row, col++).SetValue(rq?.CHR_Gap == "false" ? "X" : "O");
-                    ws.Cell(row, col++).SetValue(rq?.NVCHR_UserRequest ?? string.Empty);
-                    var reson = rq.ID_Status.Contains("RETURN") ? (listReason.Where(c => c.Id == rq.ID).Select(c =>c.Reason).FirstOrDefault()) : "";
-                    var statusName = Status.Data.Where(s => s.VCHR_CodeStatus == rq.ID_Status).Select(s => s.NVCHR_TenStatus).FirstOrDefault() ?? string.Empty;
+                    ws.Cell(row, col++).SetValue(stt++);
+                    ws.Cell(row, col++).SetValue(rq.CHR_MaDon ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.ID);
+                    ws.Cell(row, col++).SetValue(rq.CHR_SectionCode ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_SectionName ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_Phanloai ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_MaThietBi ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_MaHangNoiBo ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_MaHangNCC ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_NameVN ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_NameEN ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.INT_SoLuong ?? 0);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_DonVi ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_ChungLoai ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_HinhDang ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_ChatLieu ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_ThanhPhan ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_KichThuoc ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_DongMay ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_TinhNang ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_Rohs ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_COCQ ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_MSDS ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_AnToan ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_FileThietKe ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_NhaSanXuat ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_MaNCC ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.BIT_LayBaoGia == false ? "X" : "O");
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_LyDo ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
+                    ws.Cell(row, col++).SetValue(rq.CHR_Gap == "false" ? "X" : "O");
+                    ws.Cell(row, col++).SetValue(rq.NVCHR_UserRequest ?? string.Empty);
+
+                    // Lấy lý do trả (chỉ khi có RETURN)
+                    var reason = (rq.ID_Status != null && rq.ID_Status.Contains("RETURN"))
+                        ? (listReason.FirstOrDefault(c => c.Id == rq.ID)?.Reason ?? "")
+                        : "";
+
+                    // Lấy tên trạng thái
+                    var statusName = Status.Data?
+                        .FirstOrDefault(s => s.VCHR_CodeStatus == rq.ID_Status)?
+                        .NVCHR_TenStatus ?? string.Empty;
+
+                    // Lấy tên step
+                    var stepName = Steps.Data?
+                        .FirstOrDefault(s => s.INT_StepNumber == rq.ID_StepBaoGia)?
+                        .CHR_StepName ?? string.Empty;
+
                     ws.Cell(row, col++).SetValue(statusName);
-                    var stepName = Steps.Data.Where(s => s.INT_StepNumber == rq.ID_StepBaoGia).Select(s => s.CHR_StepName).FirstOrDefault() ?? string.Empty;
                     ws.Cell(row, col++).SetValue(stepName);
-                    ws.Cell(row, col++).SetValue(reson);
+                    ws.Cell(row, col++).SetValue(reason);
+                    if(rq.BIT_Select == null)
+                    {
+                        ws.Cell(row, col++).SetValue("");
+                    }
+                    else
+                    {
+                        ws.Cell(row, col++).SetValue(rq.BIT_Select == true ? "O" : "X");
+                    }
+
+                    // Lý do pick & file (chỉ khi có chọn)
+                    if (rq.BIT_Select == true)
+                    {
+                        ws.Cell(row, col++).SetValue(rq.NVCHR_ReasonPick ?? string.Empty);
+                        ws.Cell(row, col++).SetValue(rq.NVCHR_File ?? string.Empty);
+                    }
+                    else
+                    {
+                        ws.Cell(row, col++).SetValue(string.Empty);
+                        ws.Cell(row, col++).SetValue(string.Empty);
+                    }
+
                     row++;
                 }
 
@@ -3514,6 +3540,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 if (!listRequest.Any()) return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
+
+                // check điều kiện update đơn
+                var listMa = listRequest.Select(r => r.CHR_MaDon).Distinct().ToList();
+                var checkUpdate = await _baoGiaService.CheckDonReturnAsync(listMa);
+                if (!checkUpdate.Success || !checkUpdate.Data)
+                {
+                    return BadRequest("Không thể cập nhật đơn vì có đơn đang ở trạng thái RETURN");
+                }
 
                 // Call service to update list of requests
                 var result = await _baoGiaService.UpdateThongTinLichSuBaoGiaAsync(listRequest);

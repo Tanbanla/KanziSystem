@@ -250,7 +250,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
              .ToList();
             return pe_;
         }
-        public static List<PE_REQUEST_CONFIRM_GA> get_requestcondition(string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent, string costt_ct)
+        public static List<PE_REQUEST_CONFIRM_GA> get_requestcondition(string loaicp, string ngayyc, string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent, string costt_ct)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM_GA> pe_ = new List<PE_REQUEST_CONFIRM_GA>();
@@ -270,7 +270,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             var list = _db.GET_DATA_FROM_SQL($@"select top (1000) * from [PE_REQUEST_CONFIRM_GA] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
-                        WHERE a.CHR_ADID_NGUOITAO = '{us}' and b.Cost_Center like '%{costt_ct}%' and b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and Urgent like '%{Urgent}%' {gia}  
+                        WHERE a.CHR_ADID_NGUOITAO = '{us}' and b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and b.Dealine like '%{ngayyc}%' and b.Declaration like '%{loaicp}%'  and Urgent like '%{Urgent}%' {gia}  
                         order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)
@@ -327,7 +327,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             List<REQUEST_DETAIL> rq = new List<REQUEST_DETAIL>();
             for (int i = 0; i < get_if.Rows.Count; i++)
             {
-                var material_jp = _db.ReturnString($" select  [Material_Name_JP] from [MATERIAL] where Material_Code = '{get_if.Rows[i]["Material_Code"].ToString()}'");
+                var material_jp = _db.ReturnString($" select  [Material_Name_EN] from [MATERIAL] where Material_Code = '{get_if.Rows[i]["Material_Code"].ToString()}'");
 
                 rq.Add(new REQUEST_DETAIL
                 {

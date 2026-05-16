@@ -11,7 +11,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
-            <div class="card-header ml-0">
+         @*    <div class="card-header ml-0">
                 <div class="form-group" style="margin : 10px 0 0 0">
                     <label>@Languages.Khoi :</label> <br />
                     <div class="input-group mb-2">
@@ -74,6 +74,18 @@
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>@Languages.Ngaymongmuonnhan :</label> <br />
+                    <div class="input-group mb-2">
+                        <input type="date" class="form-control" id="ngaymn">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 10px">
+                    <label>@Languages.loaichiphi :</label> <br />
+                    <div class="input-group mb-2">
+                        <input type="date" class="form-control" id="loaicp">
+                    </div>
+                </div>
+                <div class="form-group" style="margin : 10px 0 0 10px">
                     <label>@Languages.Giatien :</label> <br />
                     <div class="input-group mb-2">
                    
@@ -97,31 +109,109 @@
                 <div class="form-group float-right mt-5" >
                     <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
                 </div>
-            </div>
+            </div> *@
+
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
                     <table class="table table-bordered">
-                        <thead class="bg-primary">
-                            <tr>                              
-                                <th rowspan="2">@Languages.chitiet</th>
-                                <th rowspan="2">@Languages.Tinhtrangdon</th>
-                                <th rowspan="2">@Languages.Trangthaidon</th>
-                                <th rowspan="2">@Languages.mayeucau</th>
-                                <th rowspan="2">Cost Center</th>
-                                <th rowspan="2">@Languages.Ngayyeucau</th>
+                      
+                        <tr>
+                            <td> 
+                                <select class="form-control" id="khoi" onchange="checkSelectValue(this.value)">
+                                    <option value="PROD">PROD</option>
+                                    <option value="GA">GA</option>
+                                    <option value="IT">IT</option>
+                                    <option value="PUR">PUR</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="trangthaidon" class="form-control">
+                                    <option value=""> ---  Chọn ---</option>
+                                    <option value="1">Gấp</option>
+                                    <option value="0">Thông thường</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control" id="tinhtrangdon">
+                                    <option value=""> ---  Chọn ---</option>
+                                    <option value="0">Đợi người dự thảo</option>
+                                    <option value="1">Đợi người thẩm tra</option>
+                                    <option value="2">Đợi người phê duyệt</option>
+                                    <option value="3">Đợi quản lý phòng tiếp nhận</option>
+                                    <option value="4">Đợi người xuất kho</option>
+                                    <option value="5">Hoàn thành</option>
+                                    <option value="6">Bị từ chối</option>
+                                </select>
+                            </td>
+                            <td width="120">
+                                <input type="text" class="form-control" id="mnl">
+                            </td>
+                            <td width="80">
+                                <input type="text" class="form-control" id="cost" >
+                            </td>
+                            <td hidden>
+                                <input type="text" class="form-control" id="costt_ct" >
+                            </td>
+                            <td>
+                                <input type="date" class="form-control" id="ngayyc">
+                            </td>
+                            <td>
+                                <input type="date" class="form-control" id="ngaymn">
+                            </td>
+                            <td width="180">
+                                <select class="form-control" id="loaicp">
+                                    <option></option>
+                                    <option value="AUXILIARY">@Languages.cpbiendoitheosanluong</option>
+                                    <option value="EUQIMENT">@Languages.chiphicodinh</option>
+                                    <option value="FIXED">@Languages.taisancodinh</option>
+                                    <option value="COMMON">@Languages.Chiphichung</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select id="giadonhang" class="form-control">
+                                    <option value="0"> ---  Chọn ---</option>
+                                    <option value="2999">Dưới 3000</option>
+                                    <option value="3000">Dưới 10,000</option>
+                                    <option value="10000">Trên 10,000</option>
+                                </select>
+                            </td>
+                            <td colspan="9">
+                                <div id="hienthitimkiem">
+                                    <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                                    <button type="button" class="btn btn-secondary ml-3" onclick="_load_request_condition()"><i class="ion ion-refresh"></i> Refresh </button>
+                                    <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
+                                </div>
+                                <div id="hienthitimkiem_GA">
+                                    <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition_ga()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                                    <button type="button" class="btn btn-secondary ml-3" onclick="_load_request_condition_ga()"><i class="ion ion-refresh"></i> Refresh </button>
+                                    <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
+                                </div>
+
+                            </td>
+                           @*  <td colspan="6">
+                                <div class="form-group float-right mt-5">
+                                    <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
+                                </div>
+                            </td> *@
+                        </tr>                      
+                        <tr class="bg-primary text-white">                              
+                            <th rowspan="2">@Languages.chitiet</th>
+                            <th rowspan="2">@Languages.Tinhtrangdon</th>
+                            <th rowspan="2">@Languages.Trangthaidon</th>
+                            <th rowspan="2">@Languages.mayeucau</th>
+                            <th rowspan="2">Cost Center</th>
+                            <th rowspan="2">@Languages.Ngayyeucau</th>
                              
-                                <th rowspan="2">@Languages.thoihanmuonnhan</th>
-                                <th rowspan="2">@Languages.loaichiphi</th>
-                                <th rowspan="2">@Languages.tongtien</th>
-                                <th rowspan="2">@Languages.nguoitao</th>
-                                <th colspan="3">@Languages.phongbanyeucau</th>
-                                <th colspan="3">@Languages.phongtiepnhan</th>
-                                <td colspan="3"></td>
-                            </tr>
-                            <tr id="loadhangmuc">
-                              
-                            </tr>
-                        </thead>
+                            <th rowspan="2">@Languages.thoihanmuonnhan</th>
+                            <th rowspan="2">@Languages.loaichiphi</th>
+                            <th rowspan="2">@Languages.tongtien</th>
+                            <th rowspan="2">@Languages.nguoitao</th>
+                            <th colspan="3">@Languages.phongbanyeucau</th>
+                            <th colspan="3">@Languages.phongtiepnhan</th>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr class="bg-primary text-white" id="loadhangmuc"></tr>
                         <tbody id="list_approve"></tbody>
                     </table>
                     <ul class="pagination" id="pagination-controls"></ul>
@@ -189,7 +279,7 @@ window.onload = function()
     document.getElementById("hienthitimkiem_GA").style.display = 'none';
 }
 
-function checkSelectValue(val) {
+async function checkSelectValue(val) {
     if(val === "GA") {
             document.getElementById("loadhangmuc").innerHTML = `
                                 <th>@Languages.nguoiduthao</th>
@@ -232,6 +322,8 @@ function _load_request_condition() {
     var Urgent = document.getElementById("trangthaidon").value;
     var us = document.getElementById("us").innerHTML;
     var costt_ct = document.getElementById("costt_ct").value;
+    var ngayyc = document.getElementById("ngaymn").value;
+    var loaicp = document.getElementById("loaicp").value;
         
     const params = new URLSearchParams();
         params.append('Group_Code', Group_Code);
@@ -243,6 +335,8 @@ function _load_request_condition() {
         params.append('Urgent', Urgent);
         params.append('us', us);
         params.append('costt_ct', costt_ct);
+        params.append('ngayyc', ngayyc);
+        params.append('loaicp', loaicp);
 
     fetch('/Request/get_requestcondition', {
         method: 'POST',
@@ -321,11 +415,11 @@ function _load_request_condition() {
                         <td>${loaichiphi}</td>
                         <td>${item.total}</td>
                         <td>${item.user_Create}</td>
-                        <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
-                        <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
-                        <td>${item.chR_TEN_NGUOIPHEDUYET} ${dots[2]}</td>
-                        <td>${item.chR_TEN_XACNHAN} ${dots[3]}</td>
-                        <td>${item.chR_TEN_XUATKHO} ${dots[4]}</td>
+                        <td>${item.chR_TEN_NGUOIYEUCAU}${dots[0]}</td>
+                        <td>${item.chR_TEN_NGUOITHAMTRA}${dots[1]}</td>
+                        <td>${item.chR_TEN_NGUOIPHEDUYET}${dots[2]}</td>
+                        <td>${item.chR_TEN_XACNHAN}${dots[3]}</td>
+                        <td>${item.chR_TEN_XUATKHO}${dots[4]}</td>
                         ${quyen}
                     </tr>`;
         }).join(''); // Nối tất cả các chuỗi thành một chuỗi HTML lớn
@@ -365,7 +459,9 @@ async function _load_request_condition_ga() {
         'Total': getValue("giadonhang"),
         'Urgent': getValue("trangthaidon"),
         'us': us,
-        'costt_ct' : getValue("costt_ct") 
+        'costt_ct' : getValue("costt_ct") ,
+        'ngayyc' : getValue("ngaymn"),
+        'loaicp' : getValue("loaicp"),
     });
 
     fetch('/Request/get_requestcondition_ga', {

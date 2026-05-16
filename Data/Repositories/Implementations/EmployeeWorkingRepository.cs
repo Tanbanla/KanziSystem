@@ -16,7 +16,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public EmployeeWorkingRepository( WorkingSystemContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration)
         {
             _context = context;
-            _connectionString = options.Value.WorkingControlConnection;
+            _connectionString = options.Value.AgentConnection;
         }
         // Lấy thông tin nhân viên theo ADID or MNV
         public async Task<IEnumerable<dynamic>> GetEmployeeWorkingByIdAsync(string adidOrMnv)

@@ -388,7 +388,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             // .ToList();
             return pe_;
         }
-        public static List<PE_REQUEST_CONFIRM> get_requestcondition(string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent, string costt_ct)
+        public static List<PE_REQUEST_CONFIRM> get_requestcondition(string loaicp, string ngayyc, string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent, string costt_ct)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
@@ -408,7 +408,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             var list = _db.GET_DATA_FROM_SQL($@"select top (300) * from [PE_REQUEST_CONFIRM] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
-                        WHERE a.CHR_ADID_NGUOITAO = '{us}' and b.Cost_Center like '%{costt_ct}%' and b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and Urgent like '%{Urgent}%' {gia}  
+                        WHERE a.CHR_ADID_NGUOITAO = '{us}' and b.Group_Code like '%{Group_Code}%' and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' and b.Cost_Center like '%{Cost_Center}%' and b.Request_Date like '%{Request_Date}%' and b.Dealine like '%{ngayyc}%' and b.Declaration like '%{loaicp}%'  and Urgent like '%{Urgent}%' {gia}  
                         order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)
@@ -699,44 +699,54 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
             }
         }
-        public static List<PE_REQUEST_CONFIRM> _load_tonkhoxuathang(string madonhang, string nguoitao, string khoi)
-        {
+        public static List<PE_REQUEST_CONFIRM> _load_tonkhoxuathang(string us,string madonhang, string nguoitao, string khoi)
+        {            
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
 
-            var list = _db.GET_DATA_FROM_SQL($@"select b.*,a.ID_REQUEST from [PE_REQUEST_CONFIRM] as a 
+            var checkus = _db.GET_DATA_FROM_SQL($"select * from PE_USERNAME where Adid = '{us}'");
+            if(checkus.Rows.Count > 0)
+            {
+                List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
+
+                var list = _db.GET_DATA_FROM_SQL($@"select b.*,a.ID_REQUEST from [PE_REQUEST_CONFIRM] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
                         WHERE (a.INT_STEP = '4' OR a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
                         and b.Group_Code like '%{khoi}%' order by ID desc");
 
-            for (int i = 0; i < list.Rows.Count; i++)
-            {
-                pe_.Add(new PE_REQUEST_CONFIRM
+                for (int i = 0; i < list.Rows.Count; i++)
                 {
-                    Code_Request = list.Rows[i]["Code_Request"].ToString()!,
-                    Cost_Center = list.Rows[i]["Cost_Center"].ToString()!,
-                    Request_Date = list.Rows[i]["Request_Date"].ToString()!,
-                    Declaration = list.Rows[i]["Declaration"].ToString()!,
-                    Dealine = list.Rows[i]["Dealine"].ToString()!,
-                    Total_exchange = double.Parse(list.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                    Total = double.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                    Kind = list.Rows[i]["Kind"].ToString()!,
-                    Type = list.Rows[i]["Type"].ToString()!,
-                    Status = list.Rows[i]["Status"].ToString()!,
-                    Create_Date = list.Rows[i]["Create_Date"].ToString()!,
-                    User_Create = list.Rows[i]["User_Create"].ToString()!,
-                    Last_Update = list.Rows[i]["Last_Update"].ToString()!,
-                    User_Update = list.Rows[i]["User_Update"].ToString()!,
-                    Group_Code = list.Rows[i]["Group_Code"].ToString()!,
-                    Urgent = list.Rows[i]["Urgent"].ToString()!,
-                    ID_REQUEST = int.Parse(list.Rows[i]["ID_REQUEST"].ToString()!),
-                });
+                    pe_.Add(new PE_REQUEST_CONFIRM
+                    {
+                        Code_Request = list.Rows[i]["Code_Request"].ToString()!,
+                        Cost_Center = list.Rows[i]["Cost_Center"].ToString()!,
+                        Request_Date = list.Rows[i]["Request_Date"].ToString()!,
+                        Declaration = list.Rows[i]["Declaration"].ToString()!,
+                        Dealine = list.Rows[i]["Dealine"].ToString()!,
+                        Total_exchange = double.Parse(list.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                        Total = double.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                        Kind = list.Rows[i]["Kind"].ToString()!,
+                        Type = list.Rows[i]["Type"].ToString()!,
+                        Status = list.Rows[i]["Status"].ToString()!,
+                        Create_Date = list.Rows[i]["Create_Date"].ToString()!,
+                        User_Create = list.Rows[i]["User_Create"].ToString()!,
+                        Last_Update = list.Rows[i]["Last_Update"].ToString()!,
+                        User_Update = list.Rows[i]["User_Update"].ToString()!,
+                        Group_Code = list.Rows[i]["Group_Code"].ToString()!,
+                        Urgent = list.Rows[i]["Urgent"].ToString()!,
+                        ID_REQUEST = int.Parse(list.Rows[i]["ID_REQUEST"].ToString()!),
+                    });
+                }
+                pe_ = pe_.GroupBy(x => x.Code_Request)
+                 .Select(g => g.First())
+                 .ToList();
+                return pe_;
             }
-            pe_ = pe_.GroupBy(x => x.Code_Request)
-             .Select(g => g.First())
-             .ToList();
-            return pe_;
+            else
+            {
+                return new List<PE_REQUEST_CONFIRM>();
+            }
+          
         }
         public static List<REQUEST_DETAIL> _load_body_detail(string code_request)
         {
