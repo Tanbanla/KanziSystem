@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -583,6 +584,85 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             await _context.SaveChangesAsync();
             return true;
+        }
+        //Export file ten hanh xac nhan
+        public async Task<List<dynamic>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user)
+        {
+            // sửa lại  phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
+            var baseFrom = @"
+                FROM BaoGia_Confirm_Name_Quotation c
+                INNER JOIN BaoGia_Request_of_Quotation r 
+                    ON c.ID_RequestQuote = r.ID
+                    AND r.ID_Status NOT LIKE '%RETURN%'
+                    AND r.ID_StepBaoGia >= 6
+                    AND r.BIT_LayBaoGia = 1
+                INNER JOIN BaoGia_Detail_of_Quotation d 
+                    ON c.ID_RequestQuote = d.ID_RequestQuote
+                INNER JOIN IM_NCC_NEW n 
+                    ON n.Ma = r.CHR_MaNCC
+                WHERE 1 = 1
+            ";
+
+            var whereBuilder = new StringBuilder();
+            var parameters = new DynamicParameters();
+
+            // Thêm điều kiện tìm kiếm
+            if (!string.IsNullOrWhiteSpace(user))
+            {
+                var u = user.Trim();
+                whereBuilder.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail m " +
+                    "WHERE m.CHR_CodeSection = r.CHR_SectionCode AND m.CHR_UserAdid LIKE @User)");
+                parameters.Add("@User", $"%{u}%");
+            }
+            if (!string.IsNullOrWhiteSpace(TenHang))
+            {
+                var kw = TenHang.Trim();
+                whereBuilder.Append(" AND (ISNULL(c.VCHR_TenHaiQuan, '') LIKE @TenHang OR ISNULL(r.NVCHR_NameVN, '') LIKE @TenHang)");
+                parameters.Add("@TenHang", $"%{kw}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(SoDon))
+            {
+                var md = SoDon.Trim();
+                whereBuilder.Append(" AND ISNULL(ID_RequestQuote, '') LIKE @SoDon");
+                parameters.Add("@SoDon", $"%{md}%");
+            }
+            if (!string.IsNullOrWhiteSpace(section))
+            {
+                var se = section.Trim();
+                whereBuilder.Append(" AND ISNULL(r.CHR_SectionCode, '') LIKE @Section");
+                parameters.Add("@Section", $"%{se}%");
+            }
+            if (!string.IsNullOrWhiteSpace(TrangThai))
+            {
+                if (string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase))
+                {
+                    whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
+                }
+                else if (string.Equals(role, "UserAcc", StringComparison.OrdinalIgnoreCase))
+                {
+                    whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
+                }
+                else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
+                {
+                    whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
+                }
+                else
+                {
+                    whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
+                }
+                parameters.Add("@TrangThai", TrangThai.Trim());
+            }
+
+            var selectSql = new StringBuilder();
+            selectSql.Append("SELECT DISTINCT c.* ,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo, r.CHR_NameEN,r.CHR_MaHangNCC,r.INT_SoLuong,");
+            selectSql.Append(" r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang,n.ShortName, d.CHR_CodeNCC, d.NVCHR_File ");
+            selectSql.Append(baseFrom);
+            selectSql.Append(whereBuilder.ToString());
+
+            var data = await _conn.QueryAsync<dynamic>(selectSql.ToString(), parameters);
+
+            return new List<dynamic>();
         }
     }
 }
