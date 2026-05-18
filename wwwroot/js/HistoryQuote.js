@@ -225,7 +225,7 @@
             PageSize: pageSize,
             Date: (from && to) ? { From: from, To: to } : null
         };
-        fetch((window.apiBaseUrl || '') + '/Quote/SearchBaoGia', {
+        fetch((window.apiBaseUrl || '') + '/Quote/SearchHistoryBaoGia', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -236,17 +236,31 @@
                 return r.json();
             })
             .then(data => {
+                const wrapper = data?.data ?? data?.Data ?? data;
+                let itemsArray = [];
+                let totalFromServer = 0;
+                let foundServerPaging = false;
 
-                const items = Array.isArray(data.data) ? data.data : (data?.data || []);
-                if (data && typeof items.totalCount === 'number') {
-                    serverPaged = true;
-                    totalCountServer = items.totalCount;
+                if (Array.isArray(wrapper)) {
+                    itemsArray = wrapper;
+                } else if (wrapper && Array.isArray(wrapper.data)) {
+                    itemsArray = wrapper.data;
+                    if (typeof wrapper.totalCount === 'number') { totalFromServer = wrapper.totalCount; foundServerPaging = true; }
+                    else if (typeof wrapper.total === 'number') { totalFromServer = wrapper.total; foundServerPaging = true; }
+                } else if (wrapper && Array.isArray(wrapper.Data)) {
+                    itemsArray = wrapper.Data;
+                    if (typeof wrapper.TotalCount === 'number') { totalFromServer = wrapper.TotalCount; foundServerPaging = true; }
+                } else if (data && Array.isArray(data.data)) {
+                    itemsArray = data.data;
                 } else {
-                    serverPaged = false;
-                    totalCountServer = 0;
+                    // fallback: try to find array inside returned object
+                    itemsArray = [];
                 }
 
-                currentGroups = groupByMaDon(items.data);
+                serverPaged = !!foundServerPaging;
+                totalCountServer = serverPaged ? totalFromServer : 0;
+
+                currentGroups = groupByMaDon(itemsArray);
                 currentPage = page;
                 renderGroups();
             })
@@ -561,9 +575,35 @@
                 detailRow.removeAttribute('hidden');
                 icon?.classList.remove('fa-plus-square');
                 icon?.classList.add('fa-minus-square');
-                // render child orders for the group
                 const group = currentGroups.find(g => g.groupId === groupId);
-                if (group) renderChildOrders(detailRow, group.items);
+                // call server API GetByMaBaoGiaAsync which expects maDon string in body
+                (async function () {
+                    try {
+                        showLoading();
+                        const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetByMaBaoGiaAsync', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(groupId)
+                        });
+                        if (!res.ok) {
+                            // fallback to client-side items
+                            throw new Error('Failed to load details');
+                        }
+                        const data = await res.json();
+                        // server returns the detailed items array (or wrapper). Normalize to array
+                        const items = Array.isArray(data) ? data : (data?.data || data?.Data || []);
+                        if (items && items.length) {
+                            renderChildOrders(detailRow, items);
+                        } else if (group) {
+                            renderChildOrders(detailRow, group.items);
+                        }
+                    } catch (e) {
+                        console.warn('GetByMaBaoGiaAsync failed, using cached items', e);
+                        if (group) renderChildOrders(detailRow, group.items);
+                    } finally {
+                        try { hideLoading(); } catch (e) {}
+                    }
+                })();
             } else {
                 detailRow.setAttribute('hidden', '');
                 icon?.classList.remove('fa-minus-square');
