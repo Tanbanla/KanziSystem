@@ -21,5 +21,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Lấy lý do trả lại đơn báo giá
         public Task<GenericResponse<string>> GetReturnReasonAsync(int idRequestQuote);
         public Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<dynamic> ids);
+        // Sreach lịch sử bảo giá
+        Task<GenericResponse<ListRequest<dynamic>>> SearchHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
     }
 }

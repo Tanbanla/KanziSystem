@@ -361,9 +361,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                     foreach (var rq in listRq)
                     {
-                        if (mailTk != rq.CHR_CreateBy + "@brothergroup.net" && checkMaDon != rq.CHR_MaDon)
+                        var maiUserCreate = await _repo.GetRequesterEmailByAdidAsync(rq.CHR_CreateBy);
+                        if (mailTk != maiUserCreate && checkMaDon != rq.CHR_MaDon)
                         {
-                            mailTk = rq.CHR_CreateBy + "@brothergroup.net";
+                            mailTk = maiUserCreate;
                             tablePicInfo.AppendLine("<tr style='vertical-align: middle;'>");
                             tablePicInfo.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.CHR_MaDon ?? ""}</td>");
                             tablePicInfo.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{mailTk}</td>");
@@ -401,7 +402,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_FileThietKe ?? "";                       // Design
                         worksheet.Cell(rowIndex, 28).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""; // Delivery date
                         worksheet.Cell(rowIndex, 29).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";       // Deadline for submit quotation
-                        worksheet.Cell(rowIndex, 31).Value = rq.CHR_CreateBy + "@brothergroup.net";            // PIC explain - để trống
+
+                        worksheet.Cell(rowIndex, 31).Value = maiUserCreate;            // PIC explain - để trống
 
                         worksheet.Cell(rowIndex, 32).Value = rq.ID ?? "";
 
@@ -586,9 +588,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                     foreach (var rq in rqByNCC)
                     {
-                        if (mailTk != rq.CHR_CreateBy + "@brothergroup.net")
+                        var maiUserCreate = await _repo.GetRequesterEmailByAdidAsync(rq.CHR_CreateBy);
+                        if (mailTk != maiUserCreate)
                         {
-                            mailTk = rq.CHR_CreateBy + "@brothergroup.net";
+                            mailTk = maiUserCreate;
                             tablePicInfo.AppendLine("<tr style='vertical-align: middle;'>");
                             tablePicInfo.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.CHR_MaDon ?? ""}</td>");
                             tablePicInfo.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{mailTk}</td>");
@@ -624,12 +627,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_FileThietKe ?? "";                       // Design
                         worksheet.Cell(rowIndex, 28).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""; // Delivery date
                         worksheet.Cell(rowIndex, 29).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";       // Deadline for submit quotation
-                        worksheet.Cell(rowIndex, 31).Value = rq.CHR_CreateBy + "@brothergroup.net";            // PIC explain - để trống
+
+                        worksheet.Cell(rowIndex, 31).Value = maiUserCreate;            // PIC explain - để trống
 
                         worksheet.Cell(rowIndex, 32).Value = rq.ID ?? "";
 
                         dearMail = "nhà cung cấp " + rq.Ten + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
-                        mailTk = rq.CHR_CreateBy + "@grothergroup.net";
+                        mailTk = maiUserCreate;
                         titleMail = (rq.ShortName ?? rq.Ten) + " - Deadline: " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
                         rowIndex++;
                     }

@@ -29,5 +29,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> InsertBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> dtos);
         // Lay file
         Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath);
+        // lấy mail người tạo đơn
+        Task<string> GetRequesterEmailByAdidAsync(string adid);
     }
 }

@@ -1,3 +1,4 @@
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
@@ -21,5 +22,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<string> GetReturnReasonAsync(int idRequestQuote);
 
         public Task<List<ReasonQuotition>> GetReasonsAsync(List<dynamic> ids);
+        // Sreach lịch sử bảo giá
+        Task<ListRequest<dynamic>> SearchHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
     }
 }

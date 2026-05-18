@@ -68,7 +68,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(role.Message);
             }
-            if (role.Data == null || (role.Data !="UserPUR" && role.Data != "UserShip"&& role.Data != "UserAcc"))
+            if (role.Data == null || (role.Data != "UserPUR" && role.Data != "UserShip" && role.Data != "UserAcc"))
             {
                 ViewBag.Role = "User";
             }
@@ -109,18 +109,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create_Material([FromBody] MATERIALDTO model)  
+        public async Task<IActionResult> Create_Material([FromBody] MATERIALDTO model)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);  
+                return View(model);
             }
 
             var result = await _materialService.InsertMaterial(model);
             if (result.Success)
             {
                 TempData["SuccessMessage"] = "Material created successfully.";
-                return RedirectToAction("Material");  
+                return RedirectToAction("Material");
             }
             else
             {
@@ -172,11 +172,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var Account_Code = row.Cell(10).GetString().Trim();
                             var Account_Name_EN = row.Cell(11).GetString().Trim();
                             var Account_Name_VN = row.Cell(12).GetString().Trim();
-                            var Unit = row.Cell(13).GetString().Trim();  
-                            var Currency = row.Cell(14).GetString().Trim(); 
+                            var Unit = row.Cell(13).GetString().Trim();
+                            var Currency = row.Cell(14).GetString().Trim();
                             var Group_Code = row.Cell(5).GetString().Trim();
-                            var Category_VN = row.Cell(15).GetString().Trim();  
-                            var Shape = row.Cell(16).GetString().Trim();  
+                            var Category_VN = row.Cell(15).GetString().Trim();
+                            var Shape = row.Cell(16).GetString().Trim();
                             var Material = row.Cell(17).GetString().Trim();
                             var Composition = row.Cell(18).GetString().Trim();
                             var Dimension = row.Cell(19).GetString().Trim();
@@ -185,7 +185,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                             if (string.IsNullOrEmpty(Material_Code) || string.IsNullOrEmpty(Material_Name_VN))
                             {
-                                continue; 
+                                continue;
                             }
 
                             details.Add(new MATERIALDTO
@@ -198,7 +198,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 Account_Name_EN = Account_Name_EN,
                                 Unit = Unit,
                                 Currency = Currency,
-                                Group_Code = Group_Code,  
+                                Group_Code = Group_Code,
                                 Category_VN = Category_VN,
                                 Shape = Shape,
                                 Material = Material,
@@ -223,7 +223,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return Json(new { success = false, message = "An error occurred during import. Check the file format." });
                 }
             }
-            catch(Exception ex) { return BadRequest(ex.Message); }
+            catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
 
@@ -333,7 +333,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-           
+
             return Ok(result.Success);
         }
 
@@ -389,7 +389,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     if (ws.Cell(r, 2).GetString() == "")
                     {
-                        break; 
+                        break;
                     }
                     if (ws.Cell(r, 3).GetString() == "")
                     {
@@ -404,7 +404,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var tenRecomment = ws.Cell(r, 12).GetString();
                             bool bitReturn = ws.Cell(r, 26).GetString().Trim().ToUpper() == "X" ? false : true;
                             var reasonReturn = ws.Cell(r, 27).GetString().Trim();
-                            if(string.IsNullOrEmpty(reasonReturn) && !bitReturn)
+                            if (string.IsNullOrEmpty(reasonReturn) && !bitReturn)
                             {
                                 ws.Cell(r, 28).SetValue("Vui lòng nhập lý do trả lại");
                                 hasErrors = true;
@@ -567,7 +567,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // với các dữ liệu tên bị lệch
                     if (listDifferent.Count() > 0)
                     {
-                        await _confirmNameService.UpdateRequestForPICPURAsync(listDifferent,user);
+                        await _confirmNameService.UpdateRequestForPICPURAsync(listDifferent, user);
                         _ = Task.Run(async () =>
                         {
                             using (var scope = _serviceScopeFactory.CreateScope())
@@ -578,7 +578,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
 
                                     //danh sach PIC
-                                   var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
+                                    var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
                                     if (!result.Success)
                                     {
                                         _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
@@ -587,15 +587,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     string emailList = string.Join("; ", dataPic.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
 
                                     // gửi mail thông báo có yêu cầu xác nhận tên mới
-                                   var emailResult = await sendMailService.SendMailAsync(
-                                       emailList,
-                                       string.Empty,
-                                       21,
-                                       "Material/ConfirmName",
-                                       true,
-                                       "",
-                                       "",
-                                       "");
+                                    var emailResult = await sendMailService.SendMailAsync(
+                                        emailList,
+                                        string.Empty,
+                                        21,
+                                        "Material/ConfirmName",
+                                        true,
+                                        "",
+                                        "",
+                                        "");
                                 }
                                 catch (Exception ex)
                                 {
@@ -607,7 +607,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 // Lưu thông tin cập nhật vào request với role UserPUR và User
-                if(listUpdateRequest.Any())
+                if (listUpdateRequest.Any())
                 {
                     await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
                 }
@@ -634,7 +634,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest(result.Message);
                 }
-                if(result.Data == null)
+                if (result.Data == null)
                 {
                     return BadRequest("Không có dữ liệu để xuất");
                 }
@@ -670,9 +670,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 7).SetValue(rq.CHR_Phanloai ?? "");
                     ws.Cell(row, 8).SetValue(rq.CHR_MaThietBi ?? "");
                     ws.Cell(row, 9).SetValue(maHangNb);
-                    ws.Cell(row, 10).SetValue(rq.CHR_MaHangNCC ?? "");
-                    ws.Cell(row, 11).SetValue(rq.CHR_CodeNCC +" - "+ rq.ShortName ?? "");
-                    ws.Cell(row, 12).SetValue(rq.VCHR_TenRecomment ?? "");
+                    ws.Cell(row, 10).SetValue(rq.maHangNcc ?? "");
+                    ws.Cell(row, 11).SetValue(rq.CHR_CodeNCC + " - " + rq.ShortName ?? "");
+                    ws.Cell(row, 12).SetValue(rq.NVCHR_TenHangHQ ?? "");
                     ws.Cell(row, 13).SetValue(rq.CHR_NameEN ?? "");
                     ws.Cell(row, 14).SetValue(rq.INT_SoLuong ?? "");
                     ws.Cell(row, 15).SetValue(rq.NVCHR_DonVi ?? "");
@@ -685,7 +685,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 22).SetValue(rq.NVCHR_TinhNang ?? "");
                     ws.Cell(row, 23).SetValue(rq.NVCHR_File ?? "");
                     ws.Cell(row, 24).SetValue(rq.VCHR_TenHaiQuan ?? "");
-                    if(role == "UserPUR")
+                    if (role == "UserPUR")
                     {
                         if (rq.VCHR_TenHaiQuan != rq.VCHR_TenRecomment)
                         {

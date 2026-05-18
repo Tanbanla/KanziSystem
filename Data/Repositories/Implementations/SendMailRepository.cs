@@ -138,7 +138,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             foreach (var detail in dtos)
             {
                 var rq = await _context.BaoGia_Request_of_Quotations
-                .Where(c => c.BIT_LayBaoGia == true && c.ID == detail.ID_RequestQuote)
+                .Where(c => c.BIT_LayBaoGia == true && c.ID == detail.ID_RequestQuote && c.ID_Status == "WAIT_NCC")
                 .FirstOrDefaultAsync();
                 if (rq == null) continue;
                 rq.BIT_IsTemplate = true;
@@ -224,6 +224,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 result.Message = ex.Message;
                 return result;
             }
+        }
+        // lấy mail người tạo đơn
+        public async Task<string> GetRequesterEmailByAdidAsync(string adid)
+        {
+            if (string.IsNullOrWhiteSpace(adid))
+            {
+                return string.Empty;
+            }
+
+            var sql = @"SELECT top 1 [CHR_EMPLOYEE_MAIL]
+             FROM [AGENTDB].[dbo].[TM_EMPLOYEE] where CHR_EMPLOYEE_ADID =  @Adid";
+
+            var parameter = new { Adid = adid };
+
+            var email = await _conn.QueryFirstOrDefaultAsync<string>(sql, parameter);
+            return string.IsNullOrWhiteSpace(email) ? string.Empty : email.Trim();
         }
     }
 }

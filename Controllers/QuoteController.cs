@@ -1472,7 +1472,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (danhSachBaoGia == null || !danhSachBaoGia.Any())
             {
-               return BadRequest("Not data empty");
+                return BadRequest("Not data empty");
             }
             var distinctLinks = danhSachBaoGia.Select(b => b.CHR_LinkFile)
                                                .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -3159,7 +3159,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             var baoGiaDetailService = scope.ServiceProvider.GetRequiredService<IBaoGiaDetailService>();
                             var resultUpdateStatus = await baoGiaDetailService.UpdateStatusAsync(listUpdateStatus);
-                            if (!resultUpdateStatus.Success) {
+                            if (!resultUpdateStatus.Success)
+                            {
 
                                 _logger.LogError(resultUpdateStatus.Message, "Lỗi khi cập nhật trạng thái");
                             }
@@ -3375,7 +3376,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 foreach (var rq in historyData)
                 {
-                    if (rq == null) continue; 
+                    if (rq == null) continue;
 
                     int col = 1;
                     ws.Cell(row, col++).SetValue(stt++);
@@ -3431,7 +3432,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, col++).SetValue(statusName);
                     ws.Cell(row, col++).SetValue(stepName);
                     ws.Cell(row, col++).SetValue(reason);
-                    if(rq.BIT_Select == null)
+                    if (rq.BIT_Select == null)
                     {
                         ws.Cell(row, col++).SetValue("");
                     }
@@ -3757,7 +3758,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cell(rowStart, col++).SetValue(item.BIT_Select == true ? "O" : "X"); // BIT_Select
                         ws.Cell(rowStart, col++).SetValue(item.NVCHR_ReasonPick); // Reason
                         col++;
-                                                                                  // Approval
+                        // Approval
                         ws.Cell(rowStart, col++).SetValue(item.UserQlsc ?? "");
                         ws.Cell(rowStart, col++).SetValue((item.LyDoQlsc == null || item.LyDoQlsc == "") ? "OK" : "NG");
                         ws.Cell(rowStart, col++).SetValue(item.LyDoQlsc ?? "");
@@ -4025,6 +4026,41 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest("Mã nhà cung cấp không được để trống");
             }
             var result = await _baoGiaNccCategoryService.CheckSupperlier(maNcc, catergory);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
+        // tìm kiếm đơn báo giá
+        [HttpPost]
+        public async Task<IActionResult> SearchHistoryBaoGia([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            var result = await _baoGiaHistoryService.SearchHistoryAsync(
+                searchModel.MaDon,
+                searchModel.MaNcc,
+                searchModel.Section,
+                searchModel.NguoiYeuCau,
+                searchModel.MaHang,
+                searchModel.TrangThai,
+                searchModel.Step,
+                GetCurrentUserId() ?? "",
+                searchModel.PageIndex,
+                searchModel.PageSize,
+                searchModel.Date,
+                searchModel.ChungLoai
+                );
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+        // tìm kiếm chi tiết đơn báo giá theo mã đơn
+        [HttpPost]
+        public async Task<IActionResult> GetByMaBaoGiaAsync([FromBody] string maDon)
+        {
+            var result = await _baoGiaService.GetByMaBaoGiaAsync(maDon);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
