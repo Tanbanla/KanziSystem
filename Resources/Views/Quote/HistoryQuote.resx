@@ -462,4 +462,7 @@
   <data name="SelectNextApprover" xml:space="preserve">
     <value>Chọn người phê duyệt tiếp theo</value>
   </data>
+  <data name="SenedSupperlier" xml:space="preserve">
+    <value>NCC đã gửi  báo giá</value>
+  </data>
 </root>

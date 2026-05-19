@@ -462,4 +462,7 @@
   <data name="SelectNextApprover" xml:space="preserve">
     <value>Select next approver</value>
   </data>
+  <data name="SenedSupperlier" xml:space="preserve">
+    <value>suppliers have submitted quotations</value>
+  </data>
 </root>

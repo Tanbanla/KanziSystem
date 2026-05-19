@@ -806,7 +806,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (resultApproval == "NG" && resonApproval == "")
                     {
                         isErrors = true;
-                        errors.Add("Please input reason. The reason not empty");
+                        errorRows.Add(new
+                        {
+                            Row = r,
+                            MaDon = maDon,
+                            ID = idRequest,
+                            BIT_Select = false,
+                            NVCHR_LyDo = resonApproval,
+                            ID_Step = status,
+                            Errors = "Lý do phê duyệt không được để trống khi kết quả là NG"
+                        });
                         continue;
                     }
                     items.Add(new
@@ -816,7 +825,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ID = idRequest,
                         BIT_Select = resultApproval == "NG" ? false : true,
                         NVCHR_LyDo = resonApproval,
-                        ID_Step = status == "Chief/Expert Approval" ? 10 : (status == "Section Manager Approval" ? 11 : 12),
+                        ID_Step = status == "Chief/Expert Approval" ? 10 : (status == "Section Manager Approval" ? 11 : 11),
                         Errors = string.Join("; ", errors)
                     });
                 }
@@ -856,7 +865,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var step = 0;
                 foreach (var item in items)
                 {
-                    // tanbanla
                     if (step == 0)
                     {
                         step = item.ID_Step;
@@ -4058,7 +4066,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // tìm kiếm chi tiết đơn báo giá theo mã đơn
         [HttpPost]
-        public async Task<IActionResult> GetByMaBaoGiaAsync([FromBody] string maDon)
+        public async Task<IActionResult> GetByMaBaoGia([FromBody] string maDon)
         {
             var result = await _baoGiaService.GetByMaBaoGiaAsync(maDon);
             if (!result.Success)

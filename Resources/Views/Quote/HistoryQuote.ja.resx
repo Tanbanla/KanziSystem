@@ -462,4 +462,7 @@
   <data name="SelectNextApprover" xml:space="preserve">
     <value>次の承認者を選択</value>
   </data>
+  <data name="SenedSupperlier" xml:space="preserve">
+    <value>提出済みサプライヤー</value>
+  </data>
 </root>

@@ -11,9 +11,9 @@
     const hiddenTenNCC = document.getElementById('editTenNCC');
     const btnExportManaHistory = document.getElementById('btnExportManaHistory');
     let currentPage = 1;
-    const pageSize = 850;
+    const pageSize = 50;
     let currentGroups = [];
-    let totalCountServer = 0; 
+    let totalCountServer = 0;
     let serverPaged = false;
     const role = window.HistoryData.role || 'User';
 
@@ -22,7 +22,7 @@
         if (selectedOption && selectedOption.value) {
             hiddenTenNCC.value = selectedOption.text;
         } else {
-            hiddenTenNCC.value = ''; 
+            hiddenTenNCC.value = '';
         }
     }
 
@@ -40,7 +40,7 @@
             if (notice) notice.style.display = 'none';
 
             // ensure modal in body
-            try { if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl); } catch (e) {}
+            try { if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl); } catch (e) { }
 
             let bsModal = null;
             try {
@@ -60,9 +60,9 @@
 
             function cleanup() {
                 try { if (bsModal) bsModal.hide(); else { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); } } catch (e) { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
-                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) {}
-                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) {}
-                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) { }
+                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) { }
+                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) { }
             }
 
             function onHidden() { cleanup(); resolve(null); }
@@ -78,11 +78,11 @@
                 resolve(reason);
             }
 
-            try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) {}
-            try { if (bsModal) modalEl.addEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+            try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) { }
+            try { if (bsModal) modalEl.addEventListener('hidden.bs.modal', onHidden); } catch (e) { }
             confirmBtn.addEventListener('click', onConfirm);
             // focus textarea
-            try { textarea.focus(); } catch (e) {}
+            try { textarea.focus(); } catch (e) { }
         });
     }
     function showConfirmDialog(title, html, confirmText, cancelText) {
@@ -157,7 +157,7 @@
             notice.style.display = 'none';
 
             // ensure modal in body
-            try { if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl); } catch (e) {}
+            try { if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl); } catch (e) { }
 
             let bsModal = null;
             try {
@@ -177,9 +177,9 @@
 
             function cleanup() {
                 try { if (bsModal) bsModal.hide(); else { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); } } catch (e) { modalEl.style.display = 'none'; modalEl.classList.remove('show'); document.body.classList.remove('modal-open'); }
-                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) {}
-                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) {}
-                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) { }
+                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) { }
+                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) { }
             }
 
             function onHidden() { cleanup(); resolve(null); }
@@ -195,11 +195,11 @@
                 resolve(reason);
             }
 
-            try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) {}
-            try { if (bsModal) modalEl.addEventListener('hidden.bs.modal', onHidden); } catch (e) {}
+            try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) { }
+            try { if (bsModal) modalEl.addEventListener('hidden.bs.modal', onHidden); } catch (e) { }
             confirmBtn.addEventListener('click', onConfirm);
             // focus textarea
-            try { textarea.focus(); } catch (e) {}
+            try { textarea.focus(); } catch (e) { }
         });
     }
 
@@ -481,7 +481,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(payload) 
+                    body: JSON.stringify(payload)
                 });
 
                 if (!updateResponse.ok) {
@@ -576,21 +576,20 @@
                 icon?.classList.remove('fa-plus-square');
                 icon?.classList.add('fa-minus-square');
                 const group = currentGroups.find(g => g.groupId === groupId);
-                // call server API GetByMaBaoGiaAsync which expects maDon string in body
                 (async function () {
                     try {
                         showLoading();
-                        const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetByMaBaoGiaAsync', {
+                        const maDonValue = group?.code || groupId;
+                        const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetByMaBaoGia', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(groupId)
+                            body: JSON.stringify(maDonValue)
                         });
                         if (!res.ok) {
                             // fallback to client-side items
                             throw new Error('Failed to load details');
                         }
                         const data = await res.json();
-                        // server returns the detailed items array (or wrapper). Normalize to array
                         const items = Array.isArray(data) ? data : (data?.data || data?.Data || []);
                         if (items && items.length) {
                             renderChildOrders(detailRow, items);
@@ -601,7 +600,7 @@
                         console.warn('GetByMaBaoGiaAsync failed, using cached items', e);
                         if (group) renderChildOrders(detailRow, group.items);
                     } finally {
-                        try { hideLoading(); } catch (e) {}
+                        try { hideLoading(); } catch (e) { }
                     }
                 })();
             } else {
@@ -959,7 +958,7 @@
                 const value = it.dataset.value;
                 select.value = value;
                 // dispatch change events
-                try { select.dispatchEvent(new Event('change', { bubbles: true })); } catch (ex) {}
+                try { select.dispatchEvent(new Event('change', { bubbles: true })); } catch (ex) { }
                 updateButtonText();
                 dropdown.classList.remove('open');
                 if (dropdown._detached) {
@@ -981,59 +980,27 @@
             // Mark enhanced
             select.dataset.searchDropdown = 'true';
             // When value changes programmatically, update UI text
-            try { select.addEventListener('change', updateButtonText); } catch {}
+            try { select.addEventListener('change', updateButtonText); } catch { }
         });
     }
 
-    // Initialize for existing selects. If jQuery present, pass $(document) for compatibility.
     if (window.jQuery) buildSearchableDropdown($(document)); else buildSearchableDropdown(document);
-    // Also run on DOMContentLoaded to ensure selects added later are enhanced
     document.addEventListener('DOMContentLoaded', function () { buildSearchableDropdown(document); });
+    function groupByMaDon(rows) {
+        if (!rows || !rows.length) return [];
 
-    // Helper: group items by CHR_MaDon
-    function groupByMaDon(items) {
-        function getVal(obj, ...keys) {
-            for (const k of keys) {
-                if (!obj) continue;
-                if (Object.prototype.hasOwnProperty.call(obj, k)) return obj[k];
-                const lower = k.charAt(0).toLowerCase() + k.slice(1);
-                if (Object.prototype.hasOwnProperty.call(obj, lower)) return obj[lower];
-                const upper = k.charAt(0).toUpperCase() + k.slice(1);
-                if (Object.prototype.hasOwnProperty.call(obj, upper)) return obj[upper];
-            }
-            return undefined;
-        }
-        const map = new Map();
-        (items || []).forEach(it => {
-            const rawKey = getVal(it,'chR_MaDon') || '';
-            const key = String(rawKey).trim();
-            if (!key) return;
-            if (!map.has(key)) map.set(key, []);
-            map.get(key).push(it);
-        });
-        const groups = Array.from(map.entries()).map(([key, arr]) => {
-            const first = (arr.find(x => {
-                const v = getVal(x, 'biT_LayBaoGia', 'BIT_LayBaoGia');
-                return v === true || v === 'true' || v === 1 || v === '1';
-            }) || arr[0]) || {};
-            const suppliers = Array.from(new Set(arr.map(x => {
-                const ma = getVal(x,'chR_MaNCC') || '';
-                return (ma || '');
-            }))).filter(Boolean).join(', ');
-            return {
-                groupId: key,
-                code: key,
-                requester: getVal(first,'chR_CreateBy') || '',
-                created: toDateString(getVal(first,'dtM_CreateDate')),
-                status: getVal(first,'iD_Status') || '',
-                count: arr.length,
-                suppliers,
-                items: arr
-            };
-        });
-        return groups;
+        return rows.map(row => ({
+            groupId: row.CHR_MaDon,
+            code: row.CHR_MaDon,
+            requester: row.CHR_CreateBy,
+            created: toDateString(row.DTM_CreateDate),
+            status: row.ID_Status,
+            count: row.TongSoDon,               // tổng số đơn trong nhóm
+            suppliersSent: row.SupperlierSened, // số nhà cung cấp đã gửi báo giá
+            suppliersTotal: row.SupperlierSum,  // tổng số nhà cung cấp
+            suppliers: row.Suppliers,       
+        }));
     }
-
     function toDateString(dt) {
         try {
             if (!dt) return '';
@@ -1094,13 +1061,19 @@
                     </td>
                 `;
             }
-           // <button type="button" class="btn btn-outline-primary btn-edit-uncompleted" title="S?a don tr? l?i"><i class="fas fa-edit"></i></button>
+            // <button type="button" class="btn btn-outline-primary btn-edit-uncompleted" title="S?a don tr? l?i"><i class="fas fa-edit"></i></button>
             tmpl.dataset.groupId = g.groupId;
             const cells = tmpl.querySelectorAll('td');
             const codeEl = tmpl.querySelector('.group-code'); if (codeEl) codeEl.textContent = g.code;
             const reqEl = tmpl.querySelector('.group-requester'); if (reqEl) reqEl.textContent = g.requester;
             const createdEl = tmpl.querySelector('.group-created'); if (createdEl) createdEl.textContent = g.created;
-            const statusEl = tmpl.querySelector('.group-status'); if (statusEl) statusEl.textContent = StatusText(g.status);
+            const statusEl = tmpl.querySelector('.group-status'); if (statusEl) {
+                if (g.status === 'WAIT_NCC' || g.status === 'WAIT_PICK_NCC') {
+                    statusEl.textContent = StatusText(g.status) + ` ( ${T.Confirm} ${g.suppliersSent} / ${g.suppliersTotal} ${T.SenedSupperlier})`;
+                } else {
+                    statusEl.textContent = StatusText(g.status)
+                }
+            }
             const countEl = tmpl.querySelector('.group-count'); if (countEl) countEl.textContent = g.count;
             const suppEl = tmpl.querySelector('.group-suppliers'); if (suppEl) suppEl.textContent = g.suppliers;
             // index
@@ -1232,22 +1205,22 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(parseInt(requestId))
         })
-        .then(r => { const T = window.i18nHistoryQuote || {}; if (!r.ok) throw new Error(T.MsgLoadHistoryFailed || 'Load history failed'); return r.json(); })
-        .then(result => {
-            const data = result?.data || result || [];
-            if (!data){
+            .then(r => { const T = window.i18nHistoryQuote || {}; if (!r.ok) throw new Error(T.MsgLoadHistoryFailed || 'Load history failed'); return r.json(); })
+            .then(result => {
+                const data = result?.data || result || [];
+                if (!data) {
+                    const T = window.i18nHistoryQuote || {};
+                    showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgNoDataToEdit || 'Không có dữ liệu để chỉnh sửa.') + '</div>');
+                    return;
+                }
+                fillEditFormFromDto(data);
+                showEditModal();
+            })
+            .catch(err => {
+                console.error(err);
                 const T = window.i18nHistoryQuote || {};
-                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgNoDataToEdit || 'Không có dữ liệu để chỉnh sửa.') + '</div>');
-                return;
-            }
-            fillEditFormFromDto(data);
-            showEditModal();
-        })
-        .catch(err => {
-            console.error(err);
-            const T = window.i18nHistoryQuote || {};
-            showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgNotFoundData || 'Không tìm thấy dữ liệu.') + '</div>');
-        });
+                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgNotFoundData || 'Không tìm thấy dữ liệu.') + '</div>');
+            });
     }
 
     function fillEditFormFromDto(dto) {
@@ -1266,14 +1239,14 @@
                         el.appendChild(opt);
                     }
                     el.value = strVal;
-                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
                 } else {
                     el.value = val ?? '';
                 }
-            } catch (e) { try { el.value = val ?? ''; } catch {} }
+            } catch (e) { try { el.value = val ?? ''; } catch { } }
         }
 
-        const toDateInput = (d) => { try { if (!d) return ''; const dt = new Date(d); return dt.toISOString().slice(0,10);} catch { return ''; } };
+        const toDateInput = (d) => { try { if (!d) return ''; const dt = new Date(d); return dt.toISOString().slice(0, 10); } catch { return ''; } };
 
         document.getElementById('editRequestId')?.setAttribute('value', dto.ID ?? dto.id ?? '');
         setControlValue('editMaDon', dto.chR_MaDon || dto.CHR_MaDon || '');
@@ -1320,7 +1293,7 @@
         setControlValue('editIsTemplate', (dto.biT_IsTemplate === true) ? 'true' : (dto.biT_IsTemplate === false) ? 'false' : '');
 
         // enhance selects if needed
-        try { if (window.jQuery) buildSearchableDropdown($(document)); else buildSearchableDropdown(document); } catch {}
+        try { if (window.jQuery) buildSearchableDropdown($(document)); else buildSearchableDropdown(document); } catch { }
     }
 
     function showEditModal() {
@@ -1359,7 +1332,7 @@
                 const fallbackFocus = document.getElementById('btnApplyFilters') || document.body;
                 if (fallbackFocus && typeof fallbackFocus.focus === 'function') fallbackFocus.focus();
             }
-        } catch {}
+        } catch { }
         modalEl.style.display = 'none';
         modalEl.classList.remove('show');
         modalEl.setAttribute('aria-hidden', 'true');
@@ -1372,7 +1345,7 @@
                 dialog.style.width = '';
                 dialog.style.margin = '';
             }
-        } catch {}
+        } catch { }
         const backdrop = document.querySelector('.custom-modal-backdrop');
         if (backdrop) backdrop.remove();
     }
@@ -1393,27 +1366,27 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dto)
         })
-        .then(async r => {
-            const txt = await r.text();
-            const T = window.i18nHistoryQuote || {};
-            if (!r.ok) throw new Error(txt || (T.MsgSaveFailed || 'Lưu thất bại'));
-            hideEditModal();
-            const T2 = window.i18nHistoryQuote || {};
-            showDialog(T2.Notification || 'Thông báo', '<div class="text-success">' + (T2.MsgSaveSuccess || 'Đã lưu thành công.') + '</div>');
-            applyFilters();
-        })
-         .catch(err => {
+            .then(async r => {
+                const txt = await r.text();
+                const T = window.i18nHistoryQuote || {};
+                if (!r.ok) throw new Error(txt || (T.MsgSaveFailed || 'Lưu thất bại'));
                 hideEditModal();
-            console.error(err);
-            const T = window.i18nHistoryQuote || {};
-            showDialog(T.Notification || 'Thông báo', `<div class="text-danger">${err.message}</div>`);
+                const T2 = window.i18nHistoryQuote || {};
+                showDialog(T2.Notification || 'Thông báo', '<div class="text-success">' + (T2.MsgSaveSuccess || 'Đã lưu thành công.') + '</div>');
+                applyFilters();
+            })
+            .catch(err => {
+                hideEditModal();
+                console.error(err);
+                const T = window.i18nHistoryQuote || {};
+                showDialog(T.Notification || 'Thông báo', `<div class="text-danger">${err.message}</div>`);
 
-        });
+            });
     });
 
     function collectEditFormDto() {
         const gv = id => document.getElementById(id)?.value || '';
-        const toIso = d => { if (!d) return null; try { const parts = d.split('-'); return new Date(Date.UTC(+parts[0], +parts[1]-1, +parts[2], 7, 0, 0)).toISOString(); } catch { return null; } };
+        const toIso = d => { if (!d) return null; try { const parts = d.split('-'); return new Date(Date.UTC(+parts[0], +parts[1] - 1, +parts[2], 7, 0, 0)).toISOString(); } catch { return null; } };
         return {
             ID: Number(document.getElementById('editRequestId')?.getAttribute('value') || 0),
             CHR_MaDon: gv('editMaDon') || null,
@@ -1463,7 +1436,7 @@
         const body = document.getElementById('cmDialogBody');
         const footer = document.getElementById('cmDialogFooter');
         const titleEl = document.getElementById('cmDialogTitle');
-        
+
         if (!overlay || !body || !footer || !titleEl) {
             if (typeof title === 'object' && title !== null) {
                 alert((title.title || 'Thông báo') + ': ' + (title.message || ''));
@@ -1474,7 +1447,7 @@
         }
 
         const T = window.i18nHistoryQuote || {};
-        
+
         // Handle both object parameter and separate title/html parameters
         let dialogTitle, dialogContent, dialogType;
         if (typeof title === 'object' && title !== null) {
@@ -1489,7 +1462,7 @@
 
         titleEl.textContent = dialogTitle;
         body.innerHTML = dialogContent;
-        
+
         body.className = 'cm-dialog-body';
         if (dialogType === 'error') {
             body.className += ' text-danger';
@@ -1498,9 +1471,9 @@
         } else if (dialogType === 'warning') {
             body.className += ' text-warning';
         }
-        
+
         footer.innerHTML = '<button type="button" class="cm-btn" data-cm-action="close">' + (T.Close || 'Đóng') + '</button>';
-        
+
         // show overlay (CSS default is display:none)
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
@@ -1510,7 +1483,7 @@
             const dlg = overlay.querySelector('.cm-dialog');
             const focusable = dlg && dlg.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
             if (focusable && typeof focusable.focus === 'function') focusable.focus();
-        } catch {}
+        } catch { }
 
         const doClose = () => {
             // If focus is within overlay, blur and move focus outside before hiding to avoid aria-hidden ancestor warnings
@@ -1521,7 +1494,7 @@
                     const fallbackFocus = document.getElementById('btnApplyFilters') || document.body;
                     if (fallbackFocus && typeof fallbackFocus.focus === 'function') fallbackFocus.focus();
                 }
-            } catch {}
+            } catch { }
             overlay.setAttribute('aria-hidden', 'true');
             overlay.style.display = 'none';
         };

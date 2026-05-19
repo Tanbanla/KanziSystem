@@ -123,10 +123,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     q.CHR_MaDon,
                     q.CHR_CreateBy,
                     MAX(q.DTM_CreateDate) AS DTM_CreateDate,
-                    MAX(CASE WHEN q.BIT_LayBaoGia = 1 THEN q.ID_Status ELSE q.ID_Status END) AS ID_Status,
-                    COUNT(*) AS TongSoDon,
-                    COUNT(CASE WHEN q.ID_StepBaoGia = 7 and q.BIT_LayBaoGia = 1 THEN 1 END) AS SupperlierSened,
-                    COUNT(CASE WHEN q.BIT_LayBaoGia = 1 THEN 1 END) AS SupperlierSum,
+                        CASE 
+                        WHEN COUNT(CASE WHEN q.BIT_LayBaoGia = 1 THEN 1 END) > 0 
+                        THEN MAX(CASE WHEN q.BIT_LayBaoGia = 1 THEN q.ID_Status END)
+                        ELSE MIN(q.ID_Status)
+                    END AS ID_Status,
+                    COUNT(DISTINCT q.ID) AS TongSoDon,
+                    COUNT(DISTINCT CASE 
+                        WHEN q.ID_StepBaoGia = 7 AND q.BIT_LayBaoGia = 1 
+                        THEN q.CHR_MaNCC 
+                        ELSE NULL 
+                    END) AS SupperlierSened,
+                    COUNT(DISTINCT CASE 
+                        WHEN q.BIT_LayBaoGia = 1 
+                        THEN q.CHR_MaNCC 
+                        ELSE NULL 
+                    END) AS SupperlierSum,
                     STUFF((
                         SELECT DISTINCT ', ' + q2.CHR_MaNCC
                         FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] q2
@@ -136,7 +148,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] AS q
                 INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] AS s 
                     ON q.CHR_SectionCode = s.CHR_CodeSection
-                WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
+                WHERE (@MaDon IS NULL OR CHR_MaDon = @MaDon)
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
                   AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
                   AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
@@ -184,7 +196,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM BaoGia_Request_of_Quotation as q
 				  inner join [BaoGia_Master_Approver_Send_Mail] as s 
 				on q.CHR_SectionCode = s.CHR_CodeSection
-                WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
+                WHERE (@MaDon IS NULL OR CHR_MaDon = @MaDon)
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
                   AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
                   AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')

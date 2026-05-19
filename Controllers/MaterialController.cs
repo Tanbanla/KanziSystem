@@ -689,15 +689,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         if (rq.VCHR_TenHaiQuan != rq.VCHR_TenRecomment)
                         {
-                            ws.Cell(row, 23).Style.Fill.BackgroundColor = XLColor.DarkPink;
+                            ws.Cell(row, 24).Style.Fill.BackgroundColor = XLColor.DarkPink;
                         }
                     }
-                    ws.Cell(row, 24).SetValue(rq.VCHR_UserShip ?? "");
+                    ws.Cell(row, 25).SetValue(rq.VCHR_UserShip ?? "");
 
                     // check tra lai
                     bool isReturn = rq.CHR_StatusShip == "Rejected";
-                    ws.Cell(row, 25).SetValue(isReturn ? "O" : "");
-                    ws.Cell(row, 26).SetValue(isReturn ? rq.NVCHR_LyDo ?? "" : "");
+                    ws.Cell(row, 26).SetValue(isReturn ? "O" : "");
+                    ws.Cell(row, 27).SetValue(isReturn ? rq.NVCHR_LyDo ?? "" : "");
                     row++;
                     idx++;
                 }

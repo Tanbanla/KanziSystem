@@ -12,7 +12,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     public class EmailController : ControllerBase
     {
         private readonly ISendMailService _sendMailService;
-        
+
         public EmailController(ISendMailService sendMailService)
         {
             _sendMailService = sendMailService;
