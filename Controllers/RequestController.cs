@@ -693,10 +693,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult _layphongban(string ph)
         {
-            SQL_Connect_DB20 db = new SQL_Connect_DB20();
-            var phongban = db.ReturnString("select [CHR_Section_Code] from [DEPARTMENT] where [Cost_Center] = '" + ph.Split(':')[0] + "' ");
-          
-            return Json(phongban);
+            if(ph == null)
+            {
+                return Json("Chưa nhập phòng ban");
+            }
+            else
+            {
+                SQL_Connect_DB20 db = new SQL_Connect_DB20();
+                var phongban = db.ReturnString("select [CHR_Section_Code] from [DEPARTMENT] where [Cost_Center] = '" + ph.Split(':')[0] + "' ");
+
+                return Json(phongban);
+            }
+         
         }
         [HttpPost]
         public JsonResult _sua_request(string Cost_Center,string Declaration,string Code_Request, string iD_REQUEST, string Dealine, float Total_exchange, string Exchange_rate, float Total, string Place, string Urgent, string User_Create, List<Models.REQUEST_DETAIL> rq)
@@ -790,16 +798,36 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
-        public JsonResult view_rqall(DateTime StartDate, DateTime EndDate, string us)
+        public JsonResult view_rqall(string StartDate, string EndDate, string us, string Group_Code, string loaicp, string Code_Request, string Urgent,string Cost_Center, string Tinhtrang, double Total)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             // 1. Lấy dữ liệu chính
             var Truongdulieu = "[Id_Request],[Code_Request],[Group_Code],[Cost_Center],[Request_Date],[Declaration],[Dealine],[Dealine_Real],[Total],[Total_Real],[Kind],[Type],[Status],[Create_Date],[User_Create],[Last_Update],[User_Update],[Reason],[Action],[Note] AS Chitiet,[Chophepin]";
-
-            string sql = $@"SELECT {Truongdulieu} FROM REQUEST 
-                    WHERE Create_Date > '{StartDate:MM/dd/yyyy}' 
-                    AND Create_Date <= '{EndDate.AddDays(1):MM/dd/yyyy}'
+            string gia = "";
+           
+            if (Total > 0 && Total < 3000)
+            {
+                gia = "and b.Total < '3000'";
+            }
+            if (Total >= 3000 && Total < 10000)
+            {
+                gia = "and b.Total >= '3000' and b.Total < '10000'";
+            }
+            if (Total >= 10000)
+            {
+                gia = "and b.Total >= '10000'";
+            }
+            string sql = $@"SELECT TOP (100) {Truongdulieu} FROM REQUEST 
+                    WHERE Create_Date like '%{StartDate}%' 
+                    AND Dealine like '%{EndDate}%'
                     AND KIND = 'IN'
+                    AND Urgent like N'%%'
+	                AND Group_Code like N'%{Group_Code}%'
+					AND Declaration like N'%{loaicp}%'
+                    AND [Status] like N'%{Tinhtrang}%'
+					AND Code_Request like N'%{Code_Request}%'
+					AND Cost_Center like N'%{Cost_Center}%'
+                    {gia}
                     AND Cost_Center in (SELECT Cost_Center FROM VIEW_USER_DEPT WHERE CHR_USERID = '{us}') 
                     ORDER BY [Create_Date] DESC";
 

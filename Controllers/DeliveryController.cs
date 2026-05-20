@@ -118,7 +118,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             var khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + data.UserName + "'");
-
+            
             string WhereCmd = string.Empty;
             if (data.PoNumber!.Contains(','))
             {
@@ -162,7 +162,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
-
+            
             string sqlColumn = "[PO_Detail_Id],[Id_Goc],[SoPO],[Code_Request]";
             sqlColumn += ",[Id_RequestDetail],[Good_Code],[Tentienganh]";
             sqlColumn += ",[Tentiengviet],[Mahang],[Soluong]";
@@ -763,7 +763,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 var get_khoi = _db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE PO_Detail_Id = '" + item.Id_nhapkho + "'");
                 string? khoi = get_khoi.Rows.Count > 0 ? get_khoi.Rows[0][0].ToString()! : item.Group_Code;
-
+                if(khoi == "PUR")
+                {
+                    khoi = "PROD";
+                }
                 item.KhoNhan = item.Mahang switch
                 {
                     var s when s!.Contains("E") || s!.Contains("A") => "F2",
@@ -772,11 +775,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     _ => khoi switch
                     {
                         "PROD" => "F2",
-                        "GA" => "F1",
+                        "GA" => "F1",                        
                         _ => khoi
                     }
                 };
-
                 // ĐÃ XÓA đoạn: if (!string.IsNullOrEmpty(item.Id_Goc)) DELETE item.Id_nhapkho (Bị sai logic)
 
                 if (item.benXacNhanTruoc!.Trim().Equals("STOCK"))

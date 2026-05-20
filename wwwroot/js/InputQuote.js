@@ -64,7 +64,7 @@
             pageIndex: quoteState.pageIndex
         };
 
-        callApi((window.apiBaseUrl || '') + '/QuoteInput/SearchInputQuoteBySoDon', body)
+        callApi((window.apiBaseUrl || '') + '/Quote/SearchInputQuoteBySoDon', body)
             .then(res => {
                 if (!res) return;
                 const items = Array.isArray(res.data) ? res.data : [];
@@ -175,7 +175,7 @@
 
     // Open detail page for a specific quote
     function openDetailPage(item) {
-        window.location.href = (window.apiBaseUrl || '') + `/QuoteInputDetail/InputQuoteDetail?maDon=${item.CHR_MaDon}`;
+        window.location.href = (window.apiBaseUrl || '') + `/Quote/InputQuoteDetail?maDon=${item.CHR_MaDon}`;
     }
     // Download sample Excel file
     function exportSampleExcel() {

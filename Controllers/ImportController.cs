@@ -193,16 +193,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _chonnhamay(string mahang, string kho)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            var Kho = _db.GET_DATA_FROM_SQL("  select Kho, Hientai from Kho where MaNguyenLieu = '" + mahang + "' and Kho = '" + kho + "'");
+            var Kho = _db.GET_DATA_FROM_SQL(" select Kho, Hientai from Kho where MaNguyenLieu = '" + mahang + "' and Kho = '" + kho + "'");
             string soluong = Kho.Rows[0]["Hientai"].ToString()!;
             return Json(soluong);
         }
         public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, DateTime thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string tongchiphiold, string id_rq)
         {
-            if (tongchiphi == "0")
-            {
-                tongchiphi = tongchiphiold;
-            }
+            //if (tongchiphi == "0")
+            //{
+            //    tongchiphi = tongchiphiold;
+            //}
            
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);

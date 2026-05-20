@@ -677,7 +677,7 @@ function hideEditModal() {
                 PageIndex: state.pageIndex,
                 PageSize: state.pageSize
             };
-            const res = await fetch((window.apiBaseUrl || '') + '/QuoteSelectSection/SearchQuoteSection', {
+            const res = await fetch((window.apiBaseUrl || '') + '/Quote/SearchQuoteSection', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             });
             if (!res.ok) {
@@ -752,7 +752,7 @@ function hideEditModal() {
                     return;
                 }
                 // call export API with selected MaDon
-            fetch((window.apiBaseUrl || '') + '/QuoteSelectSection/ExportSelectedGroups', {
+                fetch((window.apiBaseUrl || '') + '/Quote/ExportSelectedGroups', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(selected)

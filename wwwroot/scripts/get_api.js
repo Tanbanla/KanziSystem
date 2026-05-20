@@ -4,9 +4,13 @@ let centercode = "";
 let cost = "";
 
 // lấy thông tin người dùng
-async function getEmployeeData() {
+ async function getEmployeeData() {
      // lấy thông tin phòng ban
-    var ph = document.getElementById("name_dept").value;
+     var ph = document.getElementById("name_dept").value;
+   
+     if (ph == "") {
+         alert("Chưa chọn phòng");
+     }
     const formData = new URLSearchParams();
     formData.append('ph', ph);
     fetch('/Request/_layphongban', {
@@ -244,7 +248,7 @@ async function loadToCombo_TBP(position, comboId) {
     document.getElementById("mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
 }
 // lấy mail theo ADID
-async function get_info(us, comboId) {
+ async function get_info(us, comboId) {
     const url = `http://172.26.248.62:8507/api/Employee/by-adid/${us}`;
 
     try {
@@ -263,7 +267,7 @@ async function get_info(us, comboId) {
     }
 }
 
-async function GA_get_info(us, comboId) {
+ async function GA_get_info(us, comboId) {
     const url = `http://172.26.248.62:8507/api/Employee/by-adid/${us}`;
 
     try {
@@ -282,7 +286,7 @@ async function GA_get_info(us, comboId) {
     }
 }
 
-async function GA_get_useriv(id) {
+ async function GA_get_useriv(id) {
 
     const params = new URLSearchParams();
     params.append('id', id.split('_')[0]);

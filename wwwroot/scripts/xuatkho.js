@@ -430,11 +430,11 @@ function _modal_chitietxuatkho(code_request) {
                 <td id="slpo_${i}">${item.amount}</td>                  
                 <td id="donvi_${i}">${item.unit}</td>
                 <td>${item.price}</td>
-                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="slthucte_${i}" value="${item.amount}" onblur="_tinhthucte('${i}')" /></td>
-                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="dgthucte_${i}" value="${item.price}" onblur="_tinhthucte('${i}')" /></td>
+                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="slthucte_${i}" value="${item.amount}" onblur="_tinhthucte('${i}')" onchange="_tinhthucte('${i}')" /></td>
+                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="dgthucte_${i}" value="${item.price}" onblur="_tinhthucte('${i}')" onchange="_tinhthucte('${i}')" /></td>
                 <td>${item.vat} %</td>
                 <td id="tongchiphiold_${i}">${item.total_exchange}</td>
-                <td style="background-color:#d0ffd8ab" id="ttthucte_${i}">${item.total_exchange_real}</td>
+                <td style="background-color:#d0ffd8ab" id="ttthucte_${i}">${item.total_exchange}</td>
                 <td>${item.po}</td>
             </tr>`;
             });

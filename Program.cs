@@ -40,7 +40,7 @@ builder.Services.AddControllersWithViews(options =>
 // Cấu hình Session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(3); // Session timeout 3 tiếng
+    options.IdleTimeout = TimeSpan.FromHours(10); // Session timeout 3 tiếng
     options.Cookie.HttpOnly = true; // Bảo mật cookie
     options.Cookie.IsEssential = true; // Cookie cần thiết
     options.Cookie.Name = ".PRJ_WAREHOUSE_BIVN.Session";
@@ -53,7 +53,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login"; // Đường dẫn đến trang login
         options.LogoutPath = "/Account/Logout"; // Đường dẫn logout
         options.AccessDeniedPath = "/Account/AccessDenied"; // Đường dẫn khi bị từ chối truy cập
-        options.ExpireTimeSpan = TimeSpan.FromHours(3); // Thời gian hết hạn cookie 3 tiếng
+        options.ExpireTimeSpan = TimeSpan.FromHours(10); // Thời gian hết hạn cookie 3 tiếng
         options.SlidingExpiration = true; // Gia hạn cookie khi user hoạt động
         options.Cookie.Name = ".PRJ_WAREHOUSE_BIVN.Auth";
         options.Cookie.HttpOnly = true;
@@ -128,7 +128,6 @@ app.Use(async (context, next) =>
             return;
         }
     }
-
     await next();
 });
 app.UseAuthorization();

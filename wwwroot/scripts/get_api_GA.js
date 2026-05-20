@@ -3,9 +3,12 @@ let phongban_GA = "";
 let centercode_GA = "";
 let cost_GA = "";
 // thông tin người dùng GA
-async function getEmployeeData_GA() {
+ async function getEmployeeData_GA() {
 
-    var ph = document.getElementById("name_dept").value;
+     var ph = document.getElementById("name_dept").value;
+     if (ph == "") {
+         alert("Chưa chọn phòng");
+     }
     const formData = new URLSearchParams();
     formData.append('ph', ph);
 
@@ -195,7 +198,7 @@ async function loadToCombo_GA(position, comboId) {
 }
 
 // Hàm tạo Payload (dữ liệu gửi đi)
-const createSearchData_GD_GA = (position) => ({
+ createSearchData_GD_GA = (position) => ({
     "SearchTerm": "",
     "SearchFields": ["CHR_EMPLOYEE_NAME"],
     "PageNumber": 1, "PageSize": 10,

@@ -225,7 +225,7 @@
             PageSize: pageSize,
             Date: (from && to) ? { From: from, To: to } : null
         };
-        fetch((window.apiBaseUrl || '') + '/QuoteHistory/SearchHistoryBaoGia', {
+        fetch((window.apiBaseUrl || '') + '/Quote/SearchHistoryBaoGia', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -308,7 +308,7 @@
         const T = window.i18nHistoryQuote || {};
         try {
             showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch((window.apiBaseUrl || '') + '/QuoteHistory/ExportManagerHistory', {
+            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportManagerHistory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -365,7 +365,7 @@
         const T = window.i18nHistoryQuote || {};
         try {
             showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch((window.apiBaseUrl || '') + '/QuoteHistory/ExportManagerHistory', {
+            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportManagerHistory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -423,7 +423,7 @@
             } catch (e) { }
 
             try {
-                const response = await fetch((window.apiBaseUrl || '') + '/QuoteHistory/ImportFileExcelEditHistory', {
+                const response = await fetch((window.apiBaseUrl || '') + '/Quote/ImportFileExcelEditHistory', {
                     method: 'POST',
                     body: formData
                 });
@@ -520,7 +520,7 @@
         if (t.dataset.action === 'view-history') {
             const id = Number(t.dataset.id);
             if (!id) return;
-                fetch((window.apiBaseUrl || '') + '/QuoteHistory/GetHistoryDataByID', {
+            fetch((window.apiBaseUrl || '') + '/Quote/GetHistoryDataByID', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(id)
@@ -548,7 +548,7 @@
             try {
                 showLoading(T.Deleting || 'Đang xóa...');
                 const payloadId = { id: id, reason: reason };
-                const res = await fetch((window.apiBaseUrl || '') + '/QuoteHistory/DeleteDanhSachBaoGiaByID', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByID', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadId)
@@ -580,7 +580,7 @@
                     try {
                         showLoading();
                         const maDonValue = group?.code || groupId;
-                const res = await fetch((window.apiBaseUrl || '') + '/QuoteHistory/GetByMaBaoGia', {
+                        const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetByMaBaoGia', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(maDonValue)
@@ -626,7 +626,7 @@
                 showLoading(T.Exporting || 'Đang xử lý...');
 
                 const payload = { maDon: madon, reason: reason };
-                const res = await fetch((window.apiBaseUrl || '') + '/QuoteHistory/ReturnQuotation', {
+                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ReturnQuotation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -648,7 +648,7 @@
             const soDon = group?.code || groupId;
             if (!soDon) return;
             // View history for the whole group (by SoDon)
-                fetch((window.apiBaseUrl || '') + '/QuoteHistory/GetHistoryDataBySoDon', {
+            fetch((window.apiBaseUrl || '') + '/Quote/GetHistoryDataBySoDon', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(soDon)
@@ -684,7 +684,7 @@
                 showLoading(T.Deleting || 'Đang xóa...');
 
                 const payloadGroup = { maDon: groupId, reason: reason };
-                const resGroup = await fetch((window.apiBaseUrl || '') + '/QuoteHistory/DeleteDanhSachBaoGiaByMaDon', {
+                const resGroup = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByMaDon', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadGroup)
@@ -1361,7 +1361,7 @@
         const dto = collectEditFormDto();
         if (!dto) return;
         // UpdateBaoGiaById expects a list
-                fetch((window.apiBaseUrl || '') + '/QuoteHistory/UpdateBaoGiaById', {
+        fetch((window.apiBaseUrl || '') + '/Quote/UpdateBaoGiaById', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dto)

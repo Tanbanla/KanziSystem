@@ -290,11 +290,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public static List<string> phongchiuphi()
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            var phongchiuchi = _db.GET_DATA_FROM_SQL("select * from [DEPARTMENT] order by Cost_Center");
+            var phongchiuchi = _db.GET_DATA_FROM_SQL("select * from [DEPARTMENT_VITRI] order by MaCost");
             List<string> pcp = new List<string>();
             for (int i = 0; i < phongchiuchi.Rows.Count; i++)
             {
-                pcp.Add(phongchiuchi.Rows[i]["Cost_Center"].ToString() + ":" + phongchiuchi.Rows[i]["Name"].ToString());
+                pcp.Add(phongchiuchi.Rows[i]["MaCost"].ToString() + ":" + phongchiuchi.Rows[i]["MaChuyen"].ToString());
             }
             return pcp;
         }
@@ -657,11 +657,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
                 _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
 
+                // đẩy vào đơn gốc
+                var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
+
                 string UpdateRequest = "";
-                UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongchiphi + "'";
+                UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongtien + "'";
                 UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
                 UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
-                UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongchiphi + "' ,[Status] = 'PROGRESS' ";
+                UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
                 UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
                 UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
 
@@ -777,12 +780,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Good_Code = lst.Rows[i]["Good_Code"].ToString()!,
                     Account_Code = lst.Rows[i]["Account_Code"].ToString()!,
                     Account_Name = lst.Rows[i]["Account_Name"].ToString()!,
-                    Amount = float.Parse(lst.Rows[i]["Amount"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                    Amount_Real = float.Parse(lst.Rows[i]["Amount_Real"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Amount = float.Parse(lst.Rows[i]["Amount"].ToString()! == null ? "0" : lst.Rows[i]["Amount"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Amount_Real = float.Parse(lst.Rows[i]["Amount_Real"].ToString()! == null ? "0" : lst.Rows[i]["Amount_Real"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
                     Unit = lst.Rows[i]["Unit"].ToString()!,
-                    Unit_Note = lst.Rows[i]["Unit_Note"].ToString()!,
-                    Price = float.Parse(lst.Rows[i]["Price"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                    Price_Real = lst.Rows[i]["Price_Real"].ToString()!,
+                    Unit_Note = lst.Rows[i]["Unit_Note"].ToString()! ,
+                    Price = float.Parse(lst.Rows[i]["Price"].ToString()! == null ? "0" : lst.Rows[i]["Price"].ToString()!, System.Globalization.CultureInfo.InvariantCulture) ,
+                    Price_Real =  lst.Rows[i]["Price_Real"].ToString()!,
                     VAT = lst.Rows[i]["VAT"].ToString()!,
                     Total_exchange = float.Parse(lst.Rows[i]["Total_exchange"].ToString()!),
                     Total_exchange_real = lst.Rows[i]["Total_exchange_real"].ToString()!,

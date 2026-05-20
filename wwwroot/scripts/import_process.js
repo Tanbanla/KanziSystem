@@ -79,7 +79,7 @@ function renderUserTable(data) {
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(vd => {
         const btn = `<td class="text-center"><button class=" btn btn-outline-danger" onclick="_log_material('${vd.maNguyenLieu}','${ vd.kho }')"><i class="ion ion-ios-eye-outline"></i> Xem lịch sử</button></td>
-                     <td class="text-center"><button class=" btn btn-outline-success" onclick="_modal11('${vd.maNguyenLieu}','${vd.kho}','${vd.hientai}','${vd.material_Name}','${vd.group_Code}')"><i class="fas ion-arrow-swap" ></i> Chuyển kho</button></td>`;
+                    `;
         return `<tr>
                     <td>${vd.maNguyenLieu}</td>
                     <td>${vd.material_Name}</td>

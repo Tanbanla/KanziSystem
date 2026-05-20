@@ -10,111 +10,10 @@
 </style>
 <div class="row">
     <div class="col-12">
-        <div class="card card-primary">
-         @*    <div class="card-header ml-0">
-                <div class="form-group" style="margin : 10px 0 0 0">
-                    <label>@Languages.Khoi :</label> <br />
-                    <div class="input-group mb-2">
-                        <select class="form-control" id="khoi" onchange="checkSelectValue(this.value)">
-                            <option value="PROD">PROD</option>
-                            <option value="GA">GA</option>
-                            <option value="IT">IT</option>
-                            <option value="PUR">PUR</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>@Languages.Tinhtrangdon :</label> <br />
-                    <div class="input-group mb-2">
-                        <select id="trangthaidon" class="form-control">
-                            <option value=""> ---  Chọn ---</option>
-                            <option value="1">Gấp</option>
-                            <option value="0">Thông thường</option>
-                        </select>
-                    </div>
-                </div>
-               
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>@Languages.Trangthaidon :</label> <br />
-                    <div class="input-group mb-2">
-                       
-                        <select class="form-control" id="tinhtrangdon">
-                            <option value=""> ---  Chọn ---</option>
-                            <option value="0">Đợi người dự thảo</option>
-                            <option value="1">Đợi người thẩm tra</option>
-                            <option value="2">Đợi người phê duyệt</option>
-                            <option value="3">Đợi quản lý phòng tiếp nhận</option>
-                            <option value="4">Đợi người xuất kho</option>
-                            <option value="5">Hoàn thành</option>
-                            <option value="6">Bị từ chối</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>@Languages.mayeucau :</label> <br />
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" >
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>Cost :</label> <br />
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="costt_ct">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px" hidden>
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="cost" placeholder="Cost">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>@Languages.Ngayyeucau :</label> <br />
-                    <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="ngayyc">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>@Languages.Ngaymongmuonnhan :</label> <br />
-                    <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="ngaymn">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>@Languages.loaichiphi :</label> <br />
-                    <div class="input-group mb-2">
-                        <input type="date" class="form-control" id="loaicp">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <label>@Languages.Giatien :</label> <br />
-                    <div class="input-group mb-2">
-                   
-                        <select id="giadonhang" class="form-control">
-                            <option value="0"> ---  Chọn ---</option>
-                            <option value="2999">Dưới 3000</option>
-                            <option value="3000">Dưới 10,000</option>
-                            <option value="10000" >Trên 10,000</option>
-                        </select>
-                    </div>
-                </div>
-             
-                <div id="hienthitimkiem"> 
-                    <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-                    <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition()"><i class="ion ion-refresh"></i> Refresh </button>
-                </div>
-                <div id="hienthitimkiem_GA">
-                    <button type="button" class="btn btn-info ml-3 mt-4" onclick="_load_request_condition_ga()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-                    <button type="button" class="btn btn-secondary ml-3 mt-4" onclick="_load_request_condition_ga()"><i class="ion ion-refresh"></i> Refresh </button>
-                </div>
-                <div class="form-group float-right mt-5" >
-                    <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
-                </div>
-            </div> *@
-
+        <div class="card card-primary">      
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
-                    <table class="table table-bordered">
-                      
+                    <table class="table table-bordered">                     
                         <tr>
                             <td> 
                                 <select class="form-control" id="khoi" onchange="checkSelectValue(this.value)">
@@ -143,7 +42,7 @@
                                     <option value="6">Bị từ chối</option>
                                 </select>
                             </td>
-                            <td width="120">
+                            <td width="125">
                                 <input type="text" class="form-control" id="mnl">
                             </td>
                             <td width="80">
