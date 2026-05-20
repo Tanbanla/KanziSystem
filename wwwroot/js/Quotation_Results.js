@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Global UI state preserved across tab switches
-    // store opened supplier groups (key: "MaDon-MaHang") and additional-columns visibility
     window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
 
     // Pagination state for Request List tab
@@ -845,7 +843,35 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                         } else {
                             // Thành công
-                            return response.json().then(data => {
+                            return response.json().then(async data => {
+                                try {
+                                    if (data && data.RequiresSelection) {
+                                        try { hideLoading(); } catch { }
+                                        const selected = await quotationApp.openApproverSelector(data.Step || 10, '');
+                                        if (!selected) {
+                                            showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgCancelled || 'Đã hủy lựa chọn người phê duyệt'), type: 'info' });
+                                            return;
+                                        }
+                                        const approverId = selected.CHR_UserAdid || selected.chR_UserAdid || selected.ADID || selected.Id || selected.id || selected.value || '';
+                                        const payload = { SelectedApprover: approverId, Items: data.Items };
+                                        try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
+                                        const res2 = await fetch((window.apiBaseUrl || '') + '/Quote/ConfirmImportedApprovals', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify(payload)
+                                        });
+                                        try { hideLoading(); } catch { }
+                                        if (!res2.ok) {
+                                            const txt = await res2.text().catch(() => 'Lỗi server');
+                                            showDialog({ title: T.Notification || 'Thông báo', message: txt || (T.MsgSaveError || 'Lỗi khi xử lý phê duyệt'), type: 'error' });
+                                            return;
+                                        }
+                                        showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                                        return;
+                                    }
+                                } catch (err) {
+                                    console.error('Post-import approver flow failed', err);
+                                }
                                 showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
                             });
                         }

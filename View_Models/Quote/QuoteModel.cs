@@ -188,4 +188,20 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string maDon { get; set; } = string.Empty;
         public string reason { get; set; } = string.Empty;
     }
+    public class ConfirmImportedApprovalsRequest
+    {
+        public string SelectedApprover { get; set; }
+        public List<ImportedItem> Items { get; set; }
+    }
+
+    public class ImportedItem
+    {
+        public int Row { get; set; }
+        public string MaDon { get; set; }
+        public int ID { get; set; }
+        public bool BIT_Select { get; set; }
+        public string NVCHR_LyDo { get; set; }
+        public int ID_Step { get; set; }
+        public string Errors { get; set; }
+    }
 }

@@ -861,6 +861,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Không nhận được dữ liệu hợp lệ ");
                 }
+
+                // If any item is in Chief/Expert Approval step (mapped to 10) ask client to select next approver
+                var requiresChiefSelection = items.Any(i => i.ID_Step == 10);
+
                 var listApproval = new List<ApproverDTO>();
                 var step = 0;
                 foreach (var item in items)
@@ -875,8 +879,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         IsApproved = item.BIT_Select,
                         Reason = item.NVCHR_LyDo.ToString(),
                     });
-
                 }
+
+                if (requiresChiefSelection)
+                {
+                    var approverResult = await _approverService.GetApproverByStepAndSectionAsync(10, "");
+                    if (!approverResult.Success)
+                    {
+                        return BadRequest("Error list Approver: " + approverResult.Message);
+                    }
+                    return Ok(new
+                    {
+                        RequiresSelection = true,
+                        Step = 10,
+                        Approvers = approverResult.Data,
+                        Items = items
+                    });
+                }
+
                 // lấy user phê duyệt theo step và section hiện tại
                 var result = await _approverService.GetApproverByStepAndSectionAsync(step, "");
                 if (!result.Success)
@@ -889,6 +909,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmImportedApprovals([FromBody] ConfirmImportedApprovalsRequest req)
+        {
+            if (req == null || req.Items == null || !req.Items.Any())
+                return BadRequest("No items provided");
+
+            try
+            {
+                var listApproval = new List<ApproverDTO>();
+                foreach (var it in req.Items)
+                {
+                    listApproval.Add(new ApproverDTO
+                    {
+                        Id = it.ID,
+                        IsApproved = it.BIT_Select,
+                        Reason = it.NVCHR_LyDo ?? string.Empty,
+                    });
+                }
+                var approverAdid = req.SelectedApprover ?? "";
+                return await PheDuyetBaoGia(listApproval, approverAdid == string.Empty ? "vuthipt" : approverAdid);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error processing approvals: " + ex.Message);
             }
         }
         // Nhập lựa chọn báo giá file excel
