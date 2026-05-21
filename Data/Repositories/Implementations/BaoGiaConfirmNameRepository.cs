@@ -580,6 +580,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 confirmName.DTM_UserPUR = DateTime.Now;
                 confirmName.VCHR_UserPUR = user;
                 confirmName.NVCHR_LyDo = "Tên xác nhận của Ship và nhà cung cấp khác nhau";
+                confirmName.CHR_StatusShip = "Rejected";
             }
             await _context.SaveChangesAsync();
             return true;

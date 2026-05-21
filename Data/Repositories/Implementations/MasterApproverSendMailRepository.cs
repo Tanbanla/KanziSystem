@@ -39,6 +39,29 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lưu thông tin
         public async Task<bool> SaveMasterApproverSendMailAsync(BaoGia_Master_Approver_Send_Mail obj)
         {
+            if(obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+            // Kiểm tra nếu đã tồn tại thông tin với cùng ID_BaoGiaStep, CHR_UserAdid và CHR_CodeSection
+            var existingEntity = await _context.BaoGia_Master_Approver_Send_Mails
+                .FirstOrDefaultAsync(x => x.ID_BaoGiaStep == obj.ID_BaoGiaStep && x.CHR_UserAdid == obj.CHR_UserAdid && x.CHR_CodeSection == obj.CHR_CodeSection);
+            if (existingEntity != null)
+            {
+                throw new InvalidOperationException("Thông tin đã tồn tại với cùng ID_BaoGiaStep, CHR_UserAdid và CHR_CodeSection.");
+            }
+
+            // Nhập thông tin phòng ban vào bảng USER_DEPT nếu chưa tồn tại
+            var checkUserDept = await _context.USER_DEPTs.FirstOrDefaultAsync(x => x.CHR_USERID == obj.CHR_UserAdid && x.Cost_Center == obj.CHR_CodeSection);
+            if(checkUserDept == null)
+            {
+                var userDept = new USER_DEPT
+                {
+                    CHR_USERID = obj.CHR_UserAdid,
+                    Cost_Center = obj.CHR_CodeSection
+                };
+                await _context.USER_DEPTs.AddAsync(userDept);
+            }
             await _context.BaoGia_Master_Approver_Send_Mails.AddAsync(obj);
             await _context.SaveChangesAsync();
             return true;

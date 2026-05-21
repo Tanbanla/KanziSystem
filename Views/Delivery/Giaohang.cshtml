@@ -1,226 +1,569 @@
-﻿@using PRJ_WAREHOUSE_BIVN.Language
+
+@using PRJ_WAREHOUSE_BIVN.Language
 @{
     ViewData["Title"] = "Quản lý nhận hàng";
 }
-<div class="card">
-    <div class="form-group m-3">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <td colspan="2"></td>
-                    <td><input type="text" class="form-control" placeholder="PO..." onkeyup="filterTable(0)"></td>
-                    <td><input type="text" class="form-control" placeholder="RQ..." onkeyup="filterTable(1)"></td>
-                    <td><input type="text" class="form-control" placeholder="Phòng..." onkeyup="filterTable(2)"></td>
-                    <td><input type="text" class="form-control" placeholder="NCC..." onkeyup="filterTable(3)"></td>
-                    <td><input type="text" class="form-control" placeholder="SĐT..." onkeyup="filterTable(4)"></td>
-                    <td><input type="text" class="form-control" placeholder="Mã hàng..." onkeyup="filterTable(5)"></td>
-                    <td><input type="text" class="form-control" placeholder="Tên hàng..." onkeyup="filterTable(6)"></td>
-                    <td colspan="3"></td>
-                    <td><input type="date" class="form-control"></td>
-                    <td><input type="date" class="form-control"></td>
-                    <td></td>
-                    <td>
-                        <select class="form-control">
-                            <option value=""> -- </option>
-                            <option value="Chờ giao hàng">Chờ giao hàng</option>
-                            <option value="Đã hoàn tất">Đã hoàn tất</option>
-                        </select>
-                    </td>
-                    <td></td>
-                    <td>
-                        <button type="button" class="btn btn-success"><i class="fa fa-search"></i> Tìm kiếm</button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-info"><i class="ion ion-ios-refresh"></i> Refresh</button>
-                    </td>
-                </tr>
-                <tr class="bg-primary text-white">
-                    <th rowspan="2" class="text-center"><input type="checkbox" id="checkAll"></th>
-                    <th rowspan="2">No</th>
-                    <th rowspan="2">Số PO</th>
-                    <th rowspan="2">Số yêu cầu hàng hóa</th>
-                    <th rowspan="2">Phòng yêu cầu</th>
-                    <th rowspan="2">Người nhận hàng</th>
-                    <th rowspan="2">Nhà cung cấp</th>
-                    <th rowspan="2">Số điện thoại</th>
-                    <th rowspan="2">Mã hàng</th>
-                    <th rowspan="2">Tên hàng</th>
-                    <th rowspan="2">Số lượng trên PO</th>
-                    <th rowspan="2">Đơn vị</th>
-                    <th rowspan="2">SL thực nhận</th>
-                    <th rowspan="2">Ngày mong muốn nhận hàng</th>
-                    <th rowspan="2">Ngày NCC dự định giao hàng</th>
-                    <th rowspan="2">Phòng đảm nhiệm nhận hàng</th>
-                    <th rowspan="2">Tình trạng</th>
-                    <th rowspan="2">Ghi chú</th>
-                    <th colspan="2" class="text-center">Hành động</th>
 
-                </tr>
-                <tr>
-                    <td class="text-center"><button class="btn btn-sm btn-info" style="padding: .2rem .3rem;" id="modal-18"><i class="ion ion-ios-cart"></i> Giao hàng</button></td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="main-row" style="cursor:pointer">
-                    <th class="text-center"><input type="checkbox"></th>
-                    <th>1</th>
-                    <td><strong>PO-2026-001</strong> </td>
-                    <td>PR-102</td>
-                    <td>R&D PE</td>
-                    <td>Nguyễn Thị Luân</td>
-                    <td>Công ty TNHH Giải Pháp Việt</td>
-                    <td>+84 123 563 22</td>
-                    <td>A000776</td>
-                    <td>Giấy A4 80gsm</td>
-                    <td>50</td>
-                    <td>Pcs</td>
-                    <td><input type="text" class="form-control" value="30" /></td>
-                    <td>2026-03-16</td>
-                    <td>2026-03-15</td>
-                    <td>PUR</td>
-                    <td><span class="badge bg-warning text-white">Chờ giao hàng</span></td>
-                    <td></td>
-                    <td class="text-center"><input type="checkbox" /></td>
-                </tr>
-                @*  <tr id="details-1" class="collapse-row" style="display: none; background-color: #f8f9fa;">
-                    <td colspan="20">
-                        <div class="p-3">
-                            <div class="row">
-                                <table class="table table-bordered">
-                                    <tr class="bg-light">
-                                        <td>No</td>
-                                        <td>※ Mã hàng</td>
-                                        <td>※ Tên hàng</td>
-                                        <td>※ Đơn vị đóng gói </td>
-                                        <td>※ Thời gian yêu cầu </td>
-                                        <td>※ Số tài khoản</td>
-                                        <td>※ Số lượng</td>
-                                        <td>※ Đơn vị</td>
-                                        <td>Giá tiền</td>
-                                        <td>Tỷ giá</td>
-                                        <td>Tổng chi phí</td>
-                                        <td>※ Mục đích</td>
-                                        <td>※ Ghi chú</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>A000035</td>
-                                        <td>Dây điện cadisun 3x0.75</td>
-                                        <td>Mét</td>
-                                        <td>24/8/2020</td>
-                                        <td>Indirect material for Prod_Tools & Equipment</td>
-                                        <td>100</td>
-                                        <td>Mét</td>
-                                        <td>37</td>
-                                        <td>USD</td>
-                                        <td>37</td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-size: 14px;
+    }
 
-                                    <tr>
-                                        <td>2</td>
-                                        <td>A000027</td>
-                                        <td>Bu lông WB-0625 HBL</td>
-                                        <td>Pcs(500 pcs/ túi)</td>
-                                        <td>24/8/2020</td>
-                                        <td>Indirect material for Prod_Tools & Equipment</td>
-                                        <td>100</td>
-                                        <td>Pcs(500 pcs/ túi)</td>
-                                        <td>5</td>
-                                        <td>USD</td>
-                                        <td>5</td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
+    .input-group-text, select.form-control:not([size]):not([multiple]), .form-control:not(.form-control-sm):not(.form-control-lg) {
+        font-size: 13px;
+        padding: 15px 12px;
+        height: 38px;
+    }
 
-                                    <tr>
-                                        <td>3</td>
-                                        <td>A000027</td>
-                                        <td>Bu lông WB-0625 HBL</td>
-                                        <td>Pcs(500 pcs/ túi)</td>
-                                        <td>24/8/2020</td>
-                                        <td>Indirect material for Prod_Tools & Equipment</td>
-                                        <td>100</td>
-                                        <td>Pcs(500 pcs/ túi)</td>
-                                        <td>5</td>
-                                        <td>USD</td>
-                                        <td>5</td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </td>
-                </tr> *@
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
 
-                <tr class="main-row" style="cursor:pointer">
-                    <th class="text-center"><input type="checkbox"></th>
-                    <th>2</th>
-                    <td><strong>PO-2026-002</strong> </td>
-                    <td>PR-102</td>
-                    <td>R&D PE</td>
-                    <td>Nguyễn Thị Luân</td>
-                    <td>Công ty TNHH Brother VietNam</td>
-                    <td>+84 123 563 22</td>
-                    <td>A000776</td>
-                    <td>Giấy A4 80gsm</td>
-                    <td>50</td>
-                    <td>Pcs</td>
-                    <td><input type="text" class="form-control" value="30" /></td>
-                    <td>2026-03-16</td>
-                    <td>2026-03-15</td>
-                    <td>PUR</td>
-                    <td><span class="badge bg-success text-white">Đã giao hàng</span></td>
-                    <td></td>
-                    <td class="text-center"><input type="checkbox" /></td>
-                </tr>
-                @*  <tr id="details-2" class="collapse-row" style="display: none; background-color: #f8f9fa;">
-                    <td colspan="20">
-                        <div class="p-3">
-                            <div class="row">
-                               <table class="table table-bordered">
-                                        <tr class="bg-light">
-                                        <td>No</td>
-                                        <td>※ Mã hàng</td>
-                                        <td>※ Tên hàng</td>
-                                        <td>※ Đơn vị đóng gói </td>
-                                        <td>※ Thời gian yêu cầu </td>
-                                        <td>※ Số tài khoản</td>
-                                        <td>※ Số lượng</td>
-                                        <td>※ Đơn vị</td>
-                                        <td>Giá tiền</td>
-                                        <td>Tỷ giá</td>
-                                        <td>Tổng chi phí</td>
-                                        <td>※ Mục đích</td>
-                                        <td>※ Ghi chú</td>
-                                    </tr>    
+    .table-responsive {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .table th {
+        background-color: #e9ecef;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        vertical-align: middle;
+    }
+
+    .bg-pur {
+        background-color: #e2f0d9 !important;
+    }
+
+    .badge-ng {
+        background-color: #ff0000;
+        color: white;
+    }
+
+    .badge-ok {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .row-alert-yes {
+        background-color: #fce8e6;
+    }
+
+    /* Đảm bảo khoảng cách nhỏ giữa 2 nút trong ô hành động */
+    .btn-action-gap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+</style>
+
+<div class="container-fluid py-4" style="background-color: #efefef82;">
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded card">
+        <h4 class="text-primary mb-0"><i class="fa-solid ion-clipboard me-2"></i>&nbsp; THEO DÕI TIẾN ĐỘ ĐƠN HÀNG (PO) CHƯA GIAO</h4>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-white fw-bold text-dark">
+            <i class="fa-solid ion ion-search me-1"></i> &nbsp; Bộ lọc tìm kiếm
+        </div>
+        <div class="card-body">
+            <form class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
+                    <input type="text" class="form-control" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
+                    <input type="month" class="form-control" value="2026-05">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
+                    <select class="form-control" style="padding: 5px 12px;">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="Yes">Có (Yes) - Đang cảnh báo</option>
+                        <option value="No">Không (No)</option>
+                        <option value="Wait">Chờ phòng ban xác nhận</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="button" class="btn btn-primary w-100"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
+                    <button type="reset" class="btn btn-outline-secondary w-100"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-dark"><i class="fa-solid ion-ios-list me-1"></i> Danh sách chi tiết PO</span>
+            <button class="btn btn-sm btn-success"><i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel</button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0 align-middle">
+                    <thead>
+                        <tr class="text-center text-uppercase fs-7 bg-light">
+                            <th class="text-dark">No.</th>
+                            <th class="bg-pur text-dark">Ngày YC</th>
+                            <th class="bg-pur text-dark">Ngày YC giao</th>
+                            <th class="bg-pur text-dark">Số PO</th>
+                            <th class="bg-pur text-dark">Tên hàng</th>
+                            <th class="bg-pur text-dark">Mã hàng</th>
+                            <th class="bg-pur text-dark">Số lượng</th>
+                            <th class="bg-pur text-dark">Đơn vị</th>
+                            <th class="bg-pur text-dark">Tên NCC</th>
+                            <th class="bg-pur text-dark">Time GH</th>
+                            <th class="bg-pur text-dark" width="100">ĐN phát hành PO</th>
+                            <th class="text-dark">Ngày gửi PO</th>
+                            <th class="bg-pur text-dark">ĐN Follow NCC</th>
+                            <th class="text-dark">Ngày NCC XN Giao</th>
+                            <th class="text-dark">Lịch giao (OK/NG)</th>
+                            <th class="text-dark">Ảnh hưởng SX</th>
+                            <th class="text-dark">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row-alert-yes">
+                            <td class="text-center fw-bold">153</td>
+                            <td class="text-center">04-May-2026</td>
+                            <td class="text-center">05-May-2026</td>
+                            <td class="text-center fw-bold text-primary">2603-0008</td>
+                            <td>Dây đai PP (0.7mm*15mm*1500m)</td>
+                            <td class="text-center fw-bold">E000188</td>
+                            <td class="text-end">100</td>
+                            <td class="text-center">Roll</td>
+                            <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
+                            <td>60</td>
+                            <td>thuongti</td>
+                            <td class="text-center">09-Mar-2026</td>
+                            <td>Hương</td>
+                            <td class="text-center fw-bold text-danger">13-May-2026</td>
+                            <td class="text-center"><span class="badge badge-ng p-2 w-100">NG</span></td>
+                            <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
+                            <td class="text-center">
+                                <div class="btn-action-gap">
+                                    <button class="btn btn-sm btn-outline-primary btn-update-po"
+                                            data-po="2603-0008"
+                                            data-item-name="Dây đai PP (0.7mm*15mm*1500m)"
+                                            data-item-code="E000188"
+                                            data-req-date="05-May-2026"
+                                            data-send-date="09-Mar-2026"
+                                            data-confirm-date="13-May-2026"
+                                            data-impact="Yes">
+                                        <i class="fa-solid ion-compose"></i> Dự kiến
+                                    </button>
+                                
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success btn-official-po"
+                                        data-po="2603-0008"
+                                        data-item-name="Dây đai PP (0.7mm*15mm*1500m)"
+                                        data-item-code="E000188"
+                                        data-req-date="05-May-2026">
+                                    <i class="fa-solid ion-compose"></i> Chính thức
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center fw-bold">154</td>
+                            <td class="text-center">04-May-2026</td>
+                            <td class="text-center">05-May-2026</td>
+                            <td class="text-center fw-bold text-primary">2603-0008</td>
+                            <td>Giấy A4 in 2 mặt Bãi Bằng 58gsm</td>
+                            <td class="text-center fw-bold">E000189</td>
+                            <td class="text-end">200</td>
+                            <td class="text-center">Ream</td>
+                            <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
+                            <td>30</td>
+                            <td>thuongti</td>
+                            <td class="text-center">09-Mar-2026</td>
+                            <td>Hương</td>
+                            <td class="text-center fw-bold text-danger">06-May-2026</td>
+                            <td class="text-center"><span class="badge badge-ng p-2 w-100">NG</span></td>
+                            <td class="text-center text-secondary">Không (No)</td>
+                            <td class="text-center">
+                                <div class="btn-action-gap">
+                                    <button class="btn btn-sm btn-outline-primary btn-update-po"
+                                            data-po="2603-0008"
+                                            data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm"
+                                            data-item-code="E000189"
+                                            data-req-date="05-May-2026"
+                                            data-send-date="09-Mar-2026"
+                                            data-confirm-date="06-May-2026"
+                                            data-impact="No">
+                                        <i class="fa-solid ion-compose"></i> Dự kiến
+                                    </button>
                                   
-                                </table>
-                            </div>
-                        </div>
-                    </td>
-                </tr> *@
-            </tbody>
-        </table>
-        <br /><br />
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success btn-official-po"
+                                        data-po="2603-0008"
+                                        data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm"
+                                        data-item-code="E000189"
+                                        data-req-date="05-May-2026">
+                                    <i class="fa-solid ion-compose"></i> Chính thức
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center fw-bold">155</td>
+                            <td class="text-center">04-May-2026</td>
+                            <td class="text-center">05-May-2026</td>
+                            <td class="text-center fw-bold text-primary">2603-0008</td>
+                            <td>Băng dính xốp PE (45mm * 45mm)</td>
+                            <td class="text-center text-muted">Ngoài E/A</td>
+                            <td class="text-end">42,000</td>
+                            <td class="text-center">Pcs</td>
+                            <td>CÔNG TY TNHH THƯƠNG MẠI Y</td>
+                            <td>10</td>
+                            <td>thuongti</td>
+                            <td class="text-center">09-Mar-2026</td>
+                            <td>Hương</td>
+                            <td class="text-center text-success">02-May-2026</td>
+                            <td class="text-center"><span class="badge badge-ok p-2 w-100">OK</span></td>
+                            <td class="text-center text-secondary">Không (No)</td>
+                            <td class="text-center">
+                                <div class="btn-action-gap">
+                                    <button class="btn btn-sm btn-outline-primary btn-update-po"
+                                            data-po="2603-0008"
+                                            data-item-name="Băng dính xốp PE (45mm * 45mm)"
+                                            data-item-code="Ngoài E/A"
+                                            data-req-date="05-May-2026"
+                                            data-send-date="09-Mar-2026"
+                                            data-confirm-date="02-May-2026"
+                                            data-impact="No">
+                                        <i class="fa-solid ion-compose"></i> Dự kiến
+                                    </button>                                 
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success btn-official-po"
+                                        data-po="2603-0008"
+                                        data-item-name="Băng dính xốp PE (45mm * 45mm)"
+                                        data-item-code="Ngoài E/A"
+                                        data-req-date="05-May-2026">
+                                    <i class="fa-solid ion-compose"></i> Chính thức
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+            <span class="text-muted">Hiển thị 1-3 trong tổng số 158 dòng dữ liệu chưa giao</span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
-@await Html.PartialAsync("_modal", "Delivery")
+
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-primary" id="updateModalLabel">
+                    <i class="fa-solid fa fa-pen-to-square me-1"></i> Cập nhật Tiến độ PO: <span id="modalPoNumber"></span>
+                </h5>
+                <button type="button" class="btn-close btn" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-2 mb-3 fs-7">
+                    <strong>Mặt hàng:</strong> <span id="modalItemName"></span> (<span id="modalItemCode"></span>) <br>
+                    <strong>Ngày YC giao trên PO:</strong> <span class="text-danger fw-bold" id="modalReqDate"></span>
+                </div>
+
+                <form id="updateForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">1. Ngày gửi PO cho NCC</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-regular fa fa-calendar"></i></span>
+                            <input type="date" id="modalSendPoDate" class="form-control" placeholder="Chọn ngày gửi PO">
+                        </div>
+                        <div class="form-text text-muted">Hệ thống sẽ mail nhắc nhở PIC PUR sau 2 ngày phát hành nếu bỏ trống.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">2. Ngày NCC xác nhận giao (Dự kiến)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-regular fa fa-calendar-check"></i></span>
+                            <input type="date" id="modalConfirmDate" class="form-control" placeholder="Chọn ngày NCC cam kết giao">
+                        </div>
+                        <div class="form-text text-muted">Sau 5 ngày gửi PO nếu chưa nhập, hệ thống sẽ gửi mail cảnh báo.</div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3 p-3 bg-light rounded border border-warning">
+                        <label class="form-label fw-bold text-warning-emphasis d-block mb-2">
+                            <i class="fa-solid fa-users-gear me-1"></i> Dành cho Phòng ban yêu cầu (PR1-MC / User RQ)
+                        </label>
+                        <label class="form-label fw-semibold">Xác nhận ảnh hưởng tới sản xuất:</label>
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioImpact" id="radioNo" value="No">
+                                <label class="form-check-label text-success fw-bold" for="radioNo">Không ảnh hưởng (No)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioImpact" id="radioYes" value="Yes">
+                                <label class="form-check-label text-danger fw-bold" for="radioYes">Có ảnh hưởng (Yes)</label>
+                            </div>
+                        </div>
+                        <div class="form-text text-danger mt-1">Lưu ý: Nếu chọn "Yes", cảnh báo sẽ duy trì liên tục trên hệ thống cho tới khi hàng về kho.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSaveInfo" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thông tin
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="officialModal" tabindex="-1" aria-labelledby="officialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-success">
+            <div class="modal-header text-success">
+                <h5 class="modal-title fw-bold" id="officialModalLabel">
+                    <i class="fa-solid ion-android-checkbox me-1 "></i> Nhập nhận hàng thực tế PO: <span id="offPoNumber"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white btn" data-bs-dismiss="modal" aria-label="Close"> x</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success py-2 mb-3 fs-7">
+                    <strong>Mặt hàng:</strong> <span id="offItemName"></span> (<span id="offItemCode"></span>) <br>
+                    <strong>Ngày YC giao trên PO:</strong> <span class="fw-bold text-dark" id="offReqDate"></span>
+                </div>
+
+                <form id="officialForm">
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Ngày giao hàng chính thức</label>
+                            <input type="date" id="modalActualDate" class="form-control border-success" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Giờ giao hàng</label>
+                            <input type="time" id="modalActualTime" class="form-control border-success">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Cửa giao hàng</label>
+                            <select class="form-control" style="padding: 5px 12px">
+                                <option>F1</option>
+                                <option>F2</option>
+                                <option>F3</option>
+                                <option>F4</option>
+                                <option>F5</option>
+                                <option>F6</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Kho nhận hàng</label>
+                            <select class="form-control" style="padding: 5px 12px">
+                                <option>Kho F1</option>
+                                <option>Kho F2</option>
+                                <option>Kho F3</option>                             
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" id="btnSaveOfficial" class="btn btn-success fw-bold">
+                    <i class="fa-solid fa-circle-check me-1"></i> Hoàn thành nhận hàng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    function toggleRow(id) {
-        var element = document.getElementById(id);
-        if (element.style.display === "none") {
-            element.style.display = "table-row";
-        } else {
-            element.style.display = "none";
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- KHỞI TẠO MODAL 1: DỰ KIẾN ---
+        const estModalEl = document.getElementById('updateModal');
+        let bsEstModal = null;
+        if (estModalEl) {
+            document.body.appendChild(estModalEl);
+            bsEstModal = new bootstrap.Modal(estModalEl, { backdrop: true, focus: true });
+
+            estModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (bsEstModal) bsEstModal.hide();
+                });
+            });
         }
-    }
-    function _giaohang(){
-       alert("Giao hàng thành công !");
-    }
-    function _thongbao(){
-        alert("Đã thông báo đơn hàng đến phòng ban!");
-    }
+
+        // --- KHỞI TẠO MODAL 2: CHÍNH THỨC ---
+        const offModalEl = document.getElementById('officialModal');
+        let bsOffModal = null;
+        if (offModalEl) {
+            document.body.appendChild(offModalEl);
+            bsOffModal = new bootstrap.Modal(offModalEl, { backdrop: true, focus: true });
+
+            offModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (bsOffModal) bsOffModal.hide();
+                });
+            });
+        }
+
+        // Hàm phụ trợ xử lý định dạng chuỗi ngày tháng
+        function convertToDateInputValue(dateStr) {
+            if (!dateStr || dateStr.trim() === "") return "";
+            const months = {
+                'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06',
+                'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12'
+            };
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return "";
+            const day = parts[0].padStart(2, '0');
+            const monthStr = parts[1].toLowerCase();
+            const month = months[monthStr] || '01';
+            const year = parts[2];
+            return `${year}-${month}-${day}`;
+        }
+
+        // --- LOGIC EVENT: NÚT NHẬP DỰ KIẾN ---
+        const estButtons = document.querySelectorAll('.btn-update-po');
+        estButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const poNumber = this.getAttribute('data-po') || '';
+                const itemName = this.getAttribute('data-item-name') || '';
+                const itemCode = this.getAttribute('data-item-code') || '';
+                const reqDate = this.getAttribute('data-req-date') || '';
+                const sendDate = this.getAttribute('data-send-date') || '';
+                const confirmDate = this.getAttribute('data-confirm-date') || '';
+                const impact = this.getAttribute('data-impact') || '';
+
+                document.getElementById('modalPoNumber').textContent = poNumber;
+                document.getElementById('modalItemName').textContent = itemName;
+                document.getElementById('modalItemCode').textContent = itemCode;
+                document.getElementById('modalReqDate').textContent = reqDate;
+
+                const inputSendDate = document.getElementById('modalSendPoDate');
+                if (sendDate && sendDate.trim() !== "") {
+                    inputSendDate.value = convertToDateInputValue(sendDate);
+                    inputSendDate.classList.add('bg-light');
+                } else {
+                    inputSendDate.value = "";
+                    inputSendDate.classList.remove('bg-light');
+                }
+
+                const inputConfirmDate = document.getElementById('modalConfirmDate');
+                if (confirmDate && confirmDate.trim() !== "") {
+                    inputConfirmDate.value = convertToDateInputValue(confirmDate);
+                    inputConfirmDate.classList.add('bg-light');
+                } else {
+                    inputConfirmDate.value = "";
+                    inputConfirmDate.classList.remove('bg-light');
+                }
+
+                const radioYes = document.getElementById('radioYes');
+                const radioNo = document.getElementById('radioNo');
+                const radioInputs = document.querySelectorAll('input[name="flexRadioImpact"]');
+
+                if (impact === "Yes") {
+                    radioYes.checked = true;
+                    radioInputs.forEach(radio => radio.disabled = true);
+                } else if (impact === "No") {
+                    radioNo.checked = true;
+                    radioInputs.forEach(radio => radio.disabled = true);
+                } else {
+                    radioNo.checked = true;
+                    radioInputs.forEach(radio => radio.disabled = false);
+                }
+
+                const btnSave = document.getElementById('btnSaveInfo');
+                if (sendDate && sendDate.trim() !== "" && confirmDate && confirmDate.trim() !== "" && (impact === "Yes" || impact === "No")) {
+                    btnSave.style.display = 'none';
+                } else {
+                    btnSave.style.display = 'block';
+                }
+
+                if (bsEstModal) bsEstModal.show();
+            });
+        });
+
+        // --- LOGIC EVENT: NÚT NHẬP CHÍNH THỨC ---
+        const offButtons = document.querySelectorAll('.btn-official-po');
+        offButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const poNumber = this.getAttribute('data-po') || '';
+                const itemName = this.getAttribute('data-item-name') || '';
+                const itemCode = this.getAttribute('data-item-code') || '';
+                const reqDate = this.getAttribute('data-req-date') || '';
+
+                document.getElementById('offPoNumber').textContent = poNumber;
+                document.getElementById('offItemName').textContent = itemName;
+                document.getElementById('offItemCode').textContent = itemCode;
+                document.getElementById('offReqDate').textContent = reqDate;
+
+                // Xóa form cũ trước khi hiển thị
+                document.getElementById('officialForm').reset();
+
+                if (bsOffModal) bsOffModal.show();
+            });
+        });
+
+        // --- LOGIC EVENT: LƯU MODAL DỰ KIẾN ---
+        const btnSaveInfo = document.getElementById('btnSaveInfo');
+        if (btnSaveInfo) {
+            btnSaveInfo.addEventListener('click', function() {
+                alert('Lưu dữ liệu thành công! Hệ thống sẽ tự động tính toán OK/NG và kích hoạt luồng Mail.');
+                if (bsEstModal) bsEstModal.hide();
+            });
+        }
+
+        // --- LOGIC EVENT: LƯU MODAL CHÍNH THỨC ---
+        const btnSaveOfficial = document.getElementById('btnSaveOfficial');
+        if (btnSaveOfficial) {
+            btnSaveOfficial.addEventListener('click', function() {
+                const actualDate = document.getElementById('modalActualDate').value;
+                const warehouse = document.getElementById('modalWarehouse').value;
+
+                if (!actualDate || !warehouse) {
+                    alert("Vui lòng nhập Ngày nhận hàng thực tế và Chọn kho nhận hàng!");
+                    return;
+                }
+
+                alert("Xác nhận nhập kho hàng thành công! Trạng thái đơn hàng sẽ được lưu chính thức.");
+                if (bsOffModal) bsOffModal.hide();
+            });
+        }
+
+        // --- RESET FORM KHI ĐÓNG MODAL DỰ KIẾN ---
+        if (estModalEl) {
+            estModalEl.addEventListener('hidden.bs.modal', function () {
+                document.getElementById('updateForm').reset();
+                document.getElementById('modalSendPoDate').classList.remove('bg-light');
+                document.getElementById('modalConfirmDate').classList.remove('bg-light');
+                document.querySelectorAll('input[name="flexRadioImpact"]').forEach(radio => {
+                    radio.disabled = false;
+                });
+                document.getElementById('btnSaveInfo').style.display = 'block';
+            });
+        }
+    });
 </script>

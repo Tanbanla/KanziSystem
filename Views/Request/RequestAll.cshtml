@@ -1,24 +1,22 @@
 @using PRJ_WAREHOUSE_BIVN.Language
 @{
-    ViewData["Title"] = "Trạng thái đơn";
+    ViewData["Title"] = Languages.Donhang;
 }
 <style>
     .form-control, .input-group-text, .custom-select, .custom-file-label {
         border-color: #6e75c4;
     }
-
 </style>
 <div class="row">
     <div class="col-12">
-        <div class="card card-primary">
-           
+        <div class="card card-primary">  
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div class="table-responsive card">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <td>
-                                    <select class="form-control" id="khoi" onchange="checkSelectValue(this.value)">
+                                    <select class="form-control" id="khoi" onchange="_load_request_all()">
                                         <option value="PROD">PROD</option>
                                         <option value="GA">GA</option>
                                         <option value="IT">IT</option>
@@ -183,6 +181,11 @@
                 if (data && data.length > 0) {
                     console.log(data);
                     $.each(data, function (index, item) {
+                         var huydon = "";
+                        if(item.Status == "WAITCONFIRM" ){
+                          
+                             huydon = `<button class="btn btn-danger" onclick="moModalHuyDon('${item.Id_Request}')" ><i class="fa fa-ban text-white" style="cursor:pointer"  ></i> Hủy đơn</button>`;
+                        }
                         var loaichiphi = "";
                         if(item.Declaration == "AUXILIARY") {loaichiphi = "Chi phí biến đổi theo sản lượng"}
                         if(item.Declaration == "EUQIMENT") {loaichiphi = "Chi phí cố định"}
@@ -200,7 +203,7 @@
                         html += `<td>${loaichiphi}</td>`;
                         html += `<td>${item.Total.toLocaleString()}</td>`;
                         html += `<td>${item.User_Create}</td>`;
-                        html += `<td colspan="3"> <button class="btn btn-danger" onclick="moModalHuyDon('${item.Id_Request}')" ><i class="fa fa-ban text-white" style="cursor:pointer"  ></i> Hủy đơn</button></td>`;
+                        html += `<td colspan="3"> ${huydon}</td>`;
                         html += '</tr>';
                     });
                 } else {

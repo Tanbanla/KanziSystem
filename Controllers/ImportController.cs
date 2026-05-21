@@ -591,7 +591,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //var request = db.GET_DATA_FROM_SQL("select * from DETAIL where Id_Request = '" + iD_REQUEST + "'");
             //List<REQUEST> rq = new List<REQUEST>();
 
-            var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST_DETAIL] where Id_Request = '" + iD_REQUEST + "'");            
+            var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST_DETAIL] where Id_Request = '" + iD_REQUEST + "'");
+            var get_vitri = db.ReturnString("select Place from [REQUEST] where [Id_Request] = '" + iD_REQUEST +"'");
             List<REQUEST_DETAIL> rq_dt = new List<REQUEST_DETAIL>();
 
             for(int i = 0; i < request_detail.Rows.Count; i++)
@@ -606,7 +607,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     Currency = request_detail.Rows[i]["Currency"].ToString(),
                     Total_exchange = float.Parse(request_detail.Rows[i]["Total_exchange"].ToString()!),
                     Aim = request_detail.Rows[i]["Aim"].ToString(),
-                    Phongchiuchiphi = request_detail.Rows[i]["Phongchiuchiphi"].ToString(),
+                    Phongchiuchiphi = request_detail.Rows[i]["Phongchiuchiphi"].ToString() + ":" + request_detail.Rows[i]["Vitri"].ToString(),
                     Vitri = request_detail.Rows[i]["Vitri"].ToString(),
                     Poisition = request_detail.Rows[i]["Poisition"].ToString(),
                     Id_RequestDetail = int.Parse(request_detail.Rows[i]["Id_RequestDetail"].ToString()!)
@@ -622,7 +623,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST] where Id_Request = '" + iD_REQUEST + "'");
             List<REQUEST> rq_dt = new List<REQUEST>();
-
+      
             for (int i = 0; i < request_detail.Rows.Count; i++)
             {
                 rq_dt.Add(new REQUEST
@@ -631,7 +632,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     Cost_Center = request_detail.Rows[i]["Cost_Center"].ToString(),
                     Request_Date = request_detail.Rows[i]["Request_Date"].ToString(),
                     Declaration = request_detail.Rows[i]["Declaration"].ToString(),
-                    Dealine = request_detail.Rows[i]["Dealine"].ToString(),
+                    Dealine = Convert.ToDateTime(request_detail.Rows[i]["Dealine"]).ToString("yyyy-MM-dd"),
                     Total_exchange = float.Parse(request_detail.Rows[i]["Total_exchange"].ToString()!),
                     Exchange_rate = request_detail.Rows[i]["Exchange_rate"].ToString(),
                     Currency = request_detail.Rows[i]["Currency"].ToString(),

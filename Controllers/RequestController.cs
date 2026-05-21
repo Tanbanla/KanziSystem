@@ -768,18 +768,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 Poisition = N'{rq[i].Poisition}',
                                 Currency = N'{rq[i].Currency!.Trim()}',
                                 Aim = N'{rq[i].Aim}',
-                                Total_exchange = '{rq[i].Total_exchange}'
+                                Total_exchange = '{rq[i].Total_exchange}',
+                                Phongchiuchiphi = '{rq[i].Phongchiuchiphi!.Split(':')[0]}'
                             
                             WHERE Code_Request = '{Code_Request}' AND Material_Code = '{rq[i].Material_Code}'
                         END
                         ELSE
                         BEGIN
                             -- Thực hiện Insert
-                            INSERT INTO REQUEST_DETAIL (Code_Request,Material_Name, Material_Code, Account_Name,Account_Code,Unit, Amount, Price, Total, Vitri, Poisition,Currency, Aim, Id_Request,Total_exchange,Rate,Material_Name_EN,Material_Name_ENJP)
-                            VALUES ('{Code_Request}',N'{rq[i].Material_Name}','{rq[i].Material_Code}','{rq[i].Account_Name}','{rq[i].Account_Code}',N'{rq[i].Unit}','{rq[i].Amount}','{rq[i].Price}','{rq[i].Total_exchange}','{rq[i].Vitri}',N'{rq[i].Poisition}',N'{rq[i].Currency!.Trim()}',N'{rq[i].Aim}','{iD_REQUEST}','{rq[i].Total_exchange}','1','','')
+                            INSERT INTO REQUEST_DETAIL (Code_Request,Material_Name, Material_Code, Account_Name,Account_Code,Unit, Amount, Price, Total, Vitri, Poisition,Currency, Aim, Id_Request,Total_exchange,Rate,Material_Name_EN,Material_Name_ENJP, Phongchiuchiphi)
+                            VALUES ('{Code_Request}',N'{rq[i].Material_Name}','{rq[i].Material_Code}','{rq[i].Account_Name}','{rq[i].Account_Code}',N'{rq[i].Unit}','{rq[i].Amount}','{rq[i].Price}','{rq[i].Total_exchange}','{rq[i].Vitri}',N'{rq[i].Poisition}',N'{rq[i].Currency!.Trim()}',N'{rq[i].Aim}','{iD_REQUEST}','{rq[i].Total_exchange}','1','','','{rq[i].Phongchiuchiphi!.Split(':')[0]}')
                         END");
                     }
-                    db.GET_DATA_FROM_SQL($"Update [REQUEST] set [Total_exchange] = '{Total_exchange}', Exchange_rate = '{Exchange_rate}', [Dealine] = '{Dealine}', Total = '{Total}',Place = N'{Place}',Urgent = '{Urgent}', User_Create = '{User_Create}', Create_Date = GETDATE() where Id_Request = '{iD_REQUEST}'");
+                    db.GET_DATA_FROM_SQL($"Update [REQUEST] set [Declaration] = '{Declaration}', [Total_exchange] = '{Total_exchange}', Exchange_rate = '{Exchange_rate}', [Dealine] = '{Dealine}', Total = '{Total}',Place = N'{Place}',Urgent = '{Urgent}', User_Create = '{User_Create}', Create_Date = GETDATE() where Id_Request = '{iD_REQUEST}'");
 
                     return Json("OK");
                 }
@@ -817,8 +818,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 gia = "and b.Total >= '10000'";
             }
-            string sql = $@"SELECT TOP (100) {Truongdulieu} FROM REQUEST 
-                    WHERE Create_Date like '%{StartDate}%' 
+            string sql = $@"SELECT TOP (300) {Truongdulieu} FROM REQUEST 
+                    WHERE Request_Date like '%{StartDate}%' 
                     AND Dealine like '%{EndDate}%'
                     AND KIND = 'IN'
                     AND Urgent like N'%%'
@@ -828,8 +829,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 					AND Code_Request like N'%{Code_Request}%'
 					AND Cost_Center like N'%{Cost_Center}%'
                     {gia}
-                    AND Cost_Center in (SELECT Cost_Center FROM VIEW_USER_DEPT WHERE CHR_USERID = '{us}') 
-                    ORDER BY [Create_Date] DESC";
+                    AND Group_Code like N'%{Group_Code}%'
+                    AND Cost_Center in (SELECT Cost_Center FROM USER_DEPT WHERE CHR_USERID = '{us}') 
+                    ORDER BY [Id_Request] DESC";
 
             DataTable dataTable = _db.GET_DATA_FROM_SQL(sql);
 

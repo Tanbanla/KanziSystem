@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     try { totalCell = Number(vnd * sl).toLocaleString(); } catch { totalCell = vnd * sl; }
                     totalCell = totalCell + ' VND';
                 } else if (usd && usd !== 0) {
-                    try { totalCell = Number(usd *sl).toLocaleString(); } catch { totalCell = usd * sl; }
+                    try { totalCell = Number(usd * sl).toLocaleString(); } catch { totalCell = usd * sl; }
                     totalCell = totalCell + ' USD';
                 }
 
@@ -620,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch { }
             const toggleBtn = document.getElementById('toggleAdditionalColumns');
             if (!toggleBtn) return;
-            const isHidden = toggleBtn.textContent.includes(T.HideDetails||'Ẩn');
+            const isHidden = toggleBtn.textContent.includes(T.HideDetails || 'Ẩn');
 
             // Persist state
             window._quotationResultsState.showAdditionalColumns = !isHidden;
@@ -758,7 +758,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 PageIndex: supplierState.pageIndex,
                 PageSize: supplierState.pageSize,
             };
-                try {
+            try {
                 const T = window.i18nQuotationResults || {};
                 showLoading(T.LoadingData || 'Đang xử lý...');
                 const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelQuotationResult', {
@@ -845,7 +845,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             // Thành công
                             return response.json().then(async data => {
                                 try {
-                                    if (data && data.RequiresSelection) {
+                                    if (data && data.requiresSelection) {
                                         try { hideLoading(); } catch { }
                                         const selected = await quotationApp.openApproverSelector(data.Step || 10, '');
                                         if (!selected) {
@@ -853,7 +853,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             return;
                                         }
                                         const approverId = selected.CHR_UserAdid || selected.chR_UserAdid || selected.ADID || selected.Id || selected.id || selected.value || '';
-                                        const payload = { SelectedApprover: approverId, Items: data.Items };
+                                        const payload = { SelectedApprover: approverId, Items: data.items };
                                         try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
                                         const res2 = await fetch((window.apiBaseUrl || '') + '/Quote/ConfirmImportedApprovals', {
                                             method: 'POST',
@@ -931,40 +931,40 @@ document.addEventListener('DOMContentLoaded', function () {
                     method: 'POST',
                     body: fd
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
-                    }
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                        }
 
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
-                        // Trả về file lỗi
-                        return response.blob().then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(url);
-                            showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
-                        });
-                    } else {
-                        // Thành công
-                        return response.json().then(data => {
-                            showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
-                        });
-                    }
-                })
-                .catch(error => {
-                    const T = window.i18nQuotationResults || {};
-                    showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
-                })
-                .finally(() => {
-                    try { hideLoading(); } catch { }
-                    document.body.removeChild(fileInput);
-                });
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                            // Trả về file lỗi
+                            return response.blob().then(blob => {
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(url);
+                                showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
+                            });
+                        } else {
+                            // Thành công
+                            return response.json().then(data => {
+                                showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        const T = window.i18nQuotationResults || {};
+                        showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
+                    })
+                    .finally(() => {
+                        try { hideLoading(); } catch { }
+                        document.body.removeChild(fileInput);
+                    });
             });
             this.loadSupplierData(); // refresh data before opening file dialog
             try {
@@ -1227,7 +1227,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         detailBtn.removeEventListener('click', this.handleDetailClick);
                         // Gắn event mới với bind this
                         detailBtn.addEventListener('click', (ev) => {
-                            ev.stopPropagation(); 
+                            ev.stopPropagation();
                             const maDon = row.getAttribute('data-id');
                             if (maDon) {
                                 quotationApp.openApprovalModal(maDon);
@@ -1325,7 +1325,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         return T.DeptApproval;
                     }
-                    //return T.WaitApConfirmName || 'Chờ phê duyệt';
+                //return T.WaitApConfirmName || 'Chờ phê duyệt';
                 case 'NO': return T.undefined || 'Không xác định';
                 default: return '';
             }
@@ -1610,7 +1610,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     reasonInput.className = 'form-control form-control-sm reject-reason-input';
                     reasonInput.style.width = '100%';
                     reasonInput.style.minWidth = '150px';
-                    reasonInput.placeholder = T.InputReasonTitle +'...';
+                    reasonInput.placeholder = T.InputReasonTitle + '...';
                     reasonInput.disabled = true;
                     reasonInput.setAttribute('data-row-index', idx);
                     tdReason.appendChild(reasonInput);
@@ -1675,7 +1675,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             showDialog({ message: (T.MSNGInputReason || 'Dòng thứ {0}: Vui lòng nhập lý do từ chối.').replace('{0}', i + 1), type: 'warning' });
                             break;
                         }
-                    } 
+                    }
                     return isValid;
                 };
 
@@ -1711,7 +1711,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         // Kiểm tra nếu không có dữ liệu
                         if (!listConfirm || listConfirm.length === 0) {
-                            showDialog({ message: T.NoData||'Không có dữ liệu phê duyệt.', type: 'warning' });
+                            showDialog({ message: T.NoData || 'Không có dữ liệu phê duyệt.', type: 'warning' });
                             return;
                         }
 
@@ -1777,7 +1777,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         } catch (error) {
                             console.error('Confirm error:', error);
-                            showDialog({ message: 'Error Approval: '+error, type: 'error' });
+                            showDialog({ message: 'Error Approval: ' + error, type: 'error' });
                         } finally {
                             newBtnConfirm.disabled = false;
                         }

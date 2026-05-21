@@ -94,7 +94,8 @@ a:not(.btn-social-icon):not(.btn-social):not(.page-link) .fab {
   background-color: #fc544b !important; }
 
 .bg-light {
-  background-color: #e3eaef !important; }
+    background-color: #dfdfdf03 !important;
+}
 
 .bg-dark {
   background-color: #191d21 !important; }
@@ -1048,8 +1049,8 @@ table tr:hover .table-links {
 /* 3.10 Pagination */
 .page-item .page-link {
   color: #2335b7;
-  border-radius: 3px;
-  margin: 0 3px; }
+/*  border-radius: 3px;
+  margin: 0 3px;*/ }
 .page-item.active .page-link {
   background-color: #2335b7;
   border-color: #2335b7; }

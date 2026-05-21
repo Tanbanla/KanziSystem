@@ -119,7 +119,13 @@
                 <div class="form-row">
                     <div class="form-group col-md-2">
                         <label for="inputAddress">@Languages.loaichiphi</label>
-                        <input type="text" class="form-control" id="loaichiphi" readonly />
+                        <select class="form-control" id="loaichiphi" style="padding: 0px 2px; background-color:#ffff0029">
+                            <option value="AUXILIARY">@Languages.cpbiendoitheosanluong</option>
+                            <option value="EUQIMENT">@Languages.chiphicodinh</option>
+                            <option value="FIXED">@Languages.taisancodinh</option>
+                            <option value="COMMON">@Languages.Chiphichung</option>
+                            <option value="OTHER">Other</option>
+                        </select>
                     </div>
                     <div class="form-group col-md-1">
                         <label>@Languages.Ngayyeucau</label>
@@ -202,7 +208,7 @@
                                         <td><input type="text" class="form-control md" id="md_1" value="@item.Aim"></td>
                                         <td>            
                                             <select class="form-control pcp" id="pcp_1">
-                                                <option>@item.Phongchiuchiphi</option>
+                                                <option value="@item.Phongchiuchiphi">@item.Phongchiuchiphi</option>
                                             </select>
                                         </td>
                                         <td><input type="text" class="form-control vt" id="vt_1" value="@item.Vitri"></td>
@@ -252,30 +258,7 @@
         // 5. Tính toán lại tổng tiền (về 0)
         tinhTongTatCa();
     }
-    //     function reinitSelect2(rowId) {
-    //     const $select = $(`#tenhang_${rowId}`);
-
-    //     // Khởi tạo Select2 với dữ liệu từ Server
-    //     $select.select2({
-    //         width: '100%',
-    //         ajax: {
-    //             url: '/YourController/GetMaterials', // Đường dẫn lấy dữ liệu theo mục đích mới
-    //             dataType: 'json',
-    //             data: function (params) {
-    //                 return {
-    //                     searchTerm: params.term,
-    //                     mucDich: document.getElementById("mucdich_id").value // Gửi kèm điều kiện lọc
-    //                 };
-    //             },
-    //             processResults: function (data) {
-    //                 return { results: data };
-    //             }
-    //         }
-    //     });
-
-    //     // Khởi tạo select pcp nếu cần
-    //     $(`#pcp_${rowId}`).select2({ width: '100%' });
-    // }
+  
         function updateRowNumbers() {
         const rows = document.querySelectorAll('#dynamic-table tbody tr');
         rows.forEach((row, index) => {
@@ -482,6 +465,7 @@
                 return response.json();
             })
             .then(data => {
+               
                 console.log('request data', data);
                 document.getElementById("group_code").value = data[0].group_Code;
                 document.getElementById("madon").value = data[0].code_Request;
@@ -491,6 +475,7 @@
                 document.getElementById("typee").value = data[0].typee;
                 document.getElementById("thanhtien").value = data[0].total;
                 document.getElementById("loaichiphi").value = data[0].declaration;
+                //document.getElementById("loaichiphi").value = loaichiphi;
                 document.getElementById("cost_center").value = data[0].cost_Center;
                 lcp = data[0].declaration;
                 gr = data[0].group_Code;

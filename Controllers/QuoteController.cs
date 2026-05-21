@@ -470,16 +470,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi, chungLoaiHang, vendorsForEquipmentAndCategory]);
                     }
 
-                    var tenHangList = allRowsData
-                        .Where(x => x.MaHangNoiBo == maHangNB)
-                        .Select(x => new { TenEng = x.TenHangEng, TenVN = x.TenHangVN })
-                        .Distinct()
-                        .ToList();
+                    //var tenHangList = allRowsData
+                    //    .Where(x => x.MaHangNoiBo == maHangNB)
+                    //    .Select(x => new { TenEng = x.TenHangEng, TenVN = x.TenHangVN })
+                    //    .Distinct()
+                    //    .ToList();
 
-                    if (tenHangList.Count > 1)
-                    {
-                        errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
-                    }
+                    //if (tenHangList.Count > 1)
+                    //{
+                    //    errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
+                    //}
 
                     if (bitSelect.Contains("O"))
                     {
@@ -755,6 +755,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return string.IsNullOrEmpty(reason) ? "OK" : "NG";
         }
         // Nhập lựa chọn báo giá file excel
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> ImportApprovalQuotianExcel([FromForm] IFormFile file)
         {
@@ -3600,9 +3601,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 // check điều kiện update đơn
                 var listMa = listRequest.Select(r => r.CHR_MaDon).Distinct().ToList();
                 var checkUpdate = await _baoGiaService.CheckDonReturnAsync(listMa);
-                if (!checkUpdate.Success || !checkUpdate.Data)
+                if (checkUpdate.Data)
                 {
-                    return BadRequest("Không thể cập nhật đơn vì có đơn đang ở trạng thái RETURN");
+                    return BadRequest("Không thể cập nhật đơn vì có đơn đang không ở trạng thái RETURN");
                 }
 
                 // Call service to update list of requests
