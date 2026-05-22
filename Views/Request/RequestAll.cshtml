@@ -160,6 +160,7 @@
      
         var ngayyc = document.getElementById("ngaymn").value;
         var loaicp = document.getElementById("loaicp").value;
+        
         $.ajax({
             url: '/Request/view_rqall', // Thay YourControllerName bằng tên Controller của bạn
             type: 'GET',
@@ -176,15 +177,32 @@
                 loaicp :loaicp
             },
             success: function (data) {
-              
-                var html = '';
+              if(Group_Code == "PROD"){
+                      var html = '';
                 if (data && data.length > 0) {
                     console.log(data);
                     $.each(data, function (index, item) {
                          var huydon = "";
                         if(item.Status == "WAITCONFIRM" ){
-                          
+
                              huydon = `<button class="btn btn-danger" onclick="moModalHuyDon('${item.Id_Request}')" ><i class="fa fa-ban text-white" style="cursor:pointer"  ></i> Hủy đơn</button>`;
+                        }
+                        var domau = "text-secondary";
+                        if(parseFloat(item.INT_STEP) <= 4 && item.Group_Code == "PROD" )
+                        {
+                            domau = "text-danger";
+                        }
+                        if(parseFloat(item.INT_STEP) == 5 && item.Group_Code == "PROD" )
+                        {
+                            domau = "text-warning";
+                        }
+                        if(item.Status == "REFUSE" )
+                        {
+                            domau = "text-secondary";
+                        }
+                        if(item.Status == "DONE" )
+                        {
+                            domau = "text-dark";
                         }
                         var loaichiphi = "";
                         if(item.Declaration == "AUXILIARY") {loaichiphi = "Chi phí biến đổi theo sản lượng"}
@@ -192,10 +210,10 @@
                         if(item.Declaration == "FIXED") {loaichiphi = "Tài sản cố định"}
                         if(item.Declaration == "COMMON") {loaichiphi = "Chi phí chung"}
                         if(item.Declaration == "OTHER") {loaichiphi = "OTHER"}
-                        html += '<tr>';
+                        html += `<tr class="${domau}">`;
                         html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info(this.id, '${item.INT_STEP}')">Xem</button></td>`;
                         html += `<td>${item.Type == 1 ? '<span class="badge badge-danger">Gấp</span>' : 'Thông thường'}</td>`;
-                        html += `<td>${getStatusName(item.Status)}</td>`;
+                        html += `<td>${getStatusName(item.INT_STEP)}</td>`;
                         html += `<td>${item.Code_Request}</td>`;
                         html += `<td>${item.Cost_Center}</td>`;
                         html += `<td>${formatDate(item.Request_Date)}</td>`;
@@ -210,6 +228,55 @@
                     html = '<tr><td colspan="15" class="text-center">Không có dữ liệu</td></tr>';
                 }
                 $('#list_approve').html(html);
+              }
+             if(Group_Code == "GA"){
+                     var html = '';
+                if (data && data.length > 0) {
+                    console.log(data);
+                    $.each(data, function (index, item) {
+                         var huydon = "";
+                        if(item.Status == "WAITCONFIRM" ){
+
+                             huydon = `<button class="btn btn-danger" onclick="moModalHuyDon('${item.Id_Request}')" ><i class="fa fa-ban text-white" style="cursor:pointer"  ></i> Hủy đơn</button>`;
+                        }
+                        var domau = "";
+                        if(parseFloat(item.INT_STEP) <= 6)
+                        {
+                            domau = "text-danger";
+                        }                        
+                        if(item.Status == "REFUSE" )
+                        {
+                            domau = "text-secondary";
+                        }
+                        if(item.Status == "DONE" )
+                        {
+                            domau = "text-dark";
+                        }
+                        var loaichiphi = "";
+                        if(item.Declaration == "AUXILIARY") {loaichiphi = "Chi phí biến đổi theo sản lượng"}
+                        if(item.Declaration == "EUQIMENT") {loaichiphi = "Chi phí cố định"}
+                        if(item.Declaration == "FIXED") {loaichiphi = "Tài sản cố định"}
+                        if(item.Declaration == "COMMON") {loaichiphi = "Chi phí chung"}
+                        if(item.Declaration == "OTHER") {loaichiphi = "OTHER"}
+                        html += `<tr class="${domau}">`;
+                        html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info(this.id, '${item.INT_STEP}')">Xem</button></td>`;
+                        html += `<td>${item.Type == 1 ? '<span class="badge badge-danger">Gấp</span>' : 'Thông thường'}</td>`;
+                        html += `<td>${getStatusName_GA(item.INT_STEP)}</td>`;
+                        html += `<td>${item.Code_Request}</td>`;
+                        html += `<td>${item.Cost_Center}</td>`;
+                        html += `<td>${formatDate(item.Request_Date)}</td>`;
+                        html += `<td>${formatDate(item.Dealine)}</td>`;
+                        html += `<td>${loaichiphi}</td>`;
+                        html += `<td>${item.Total.toLocaleString()}</td>`;
+                        html += `<td>${item.User_Create}</td>`;
+                        html += `<td colspan="3"> ${huydon}</td>`;
+                        html += '</tr>';
+                    });
+                } else {
+                    html = '<tr><td colspan="15" class="text-center">Không có dữ liệu</td></tr>';
+                }
+                $('#list_approve').html(html);
+             }
             },
             error: function (err) {
                 console.error("Lỗi khi tải dữ liệu:", err);
@@ -226,18 +293,41 @@
 
     // Hàm bổ trợ lấy tên trạng thái
     function getStatusName(status) {
-        var statuses = {
-            "WAITCONFIRM": "Đang chờ xác nhận",
-            "EXPORT": "Đang xuất kho",
-            "PROGRESS": "Đang xử lý",
-            "REFUSE": "Hủy bỏ",
-            "ACCEPT": "Đang chờ nhận hàng",
-            "DONE": "Hoàn thành"     
+        var statuses = {          
+                "0": "Đợi người dự thảo",
+                "1":"Đợi người thẩm tra", 
+                "2": "Đợi người phê duyệt",
+                "3": "Đợi bên tiếp nhận",
+                "4": "Đợi phụ trách kho", 
+                "5": "Hoàn thành", 
+                "6": "Bị từ chối", 
+                "7": "Bị từ chối", 
+                "8": "Bị từ chối", 
+                "9": "Bị từ chối", 
+                "10": "Bị từ chối",
+                "15" : "Hủy bỏ"
         };
         return statuses[status] || "Không xác định";
     }
-
-
+   
+    function getStatusName_GA(status) {
+         const statuses = {
+                "0": "Đợi người dự thảo",
+                "1": "Đợi người thẩm tra", 
+                "2": "Đợi người phê duyệt", 
+                "3": "Đợi đảm nhiệm kho", 
+                "4": "Đợi QLSC phòng tiếp nhận", 
+                "5": "Đợi QLTC phòng tiếp nhận", 
+                "6": "Bị từ chối", 
+                "7": "Bị từ chối", 
+                "8": "Bị từ chối", 
+                "9": "Bị từ chối", 
+                "10": "Bị từ chối", 
+                "11": "Hoàn thành",
+                "15" : "Hủy bỏ"
+            };
+            return statuses[status] || "Không xác định";
+    }
     function xoa_don_prod(iD_REQUEST){
     var x = confirm("Bạn có muốn xóa đơn không !");
     if(x){

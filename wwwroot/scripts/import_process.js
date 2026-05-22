@@ -520,7 +520,7 @@ async function UploadFileFormat() {
 }
 
 async function chuyenkhoo() {
-    
+   
     var malinhkien = document.getElementById('malkchuyen').value.trim();
     var khochuyen = document.getElementById('khochuyen').value;
     var soluonghientai = document.getElementById('soluongkho').value;
@@ -529,7 +529,6 @@ async function chuyenkhoo() {
     var soluongchuyen = document.getElementById('soluongchuyen').value;
     var ngaychuyen = document.getElementById('ngaychuyen').value;
     var us = document.getElementById('us').innerHTML
-      
    
     const params = new URLSearchParams();
     params.append('malinhkien', malinhkien);
@@ -540,17 +539,25 @@ async function chuyenkhoo() {
     params.append('soluongchuyen', soluongchuyen);
     params.append('ngaychuyen', ngaychuyen);
     params.append('us', us);
-
-    fetch('/Import/chuyenkho', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params
-    })
-        .then(response => response.json())
-        .then(data => {
-            alert(data);
-            _load_xuatkho();
+    if (khochuyen == "") {
+        alert("Chưa chọn kho chuyển !");
+    }
+    else if (khochuyen == khonhan) {
+        alert("Kho chuyển và kho nhận phải khác nhau ");
+    }
+    else {
+        fetch('/Import/chuyenkho', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
         })
-        .catch(error => console.error('Error:', error));
+            .then(response => response.json())
+            .then(data => {
+                alert(data);
+                _load_xuatkho();
+            })
+            .catch(error => console.error('Error:', error));
 
+    }
 }
+   

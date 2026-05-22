@@ -53,7 +53,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<dynamic>>> GetSupplierApprovalInfoAsync(string maDon);
 
         // Xuất file phê duyệt báo giá
-        public Task<GenericResponse<List<dynamic>>> GetExportApprovalInfoAsync(List<string> listMaDon);
+        public Task<GenericResponse<List<dynamic>>> GetExportApprovalInfoAsync(List<string> listMaDon,string adid);
 
         // Phê duyệt thông tin lựa chọn nhà cung cấp
         public Task<GenericResponse<List<BaoGia_Request_of_Quotation>>> UpdateApprovarOK(string maDon, string userNext, string userUpdate);

@@ -1333,25 +1333,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Export File Excel tab 1
         ExportFileTab1: async function () {
+            // If user checked "selectAll" we should send an empty list to indicate export all
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const isSelectAll = !!(selectAllCheckbox && selectAllCheckbox.checked);
+
             const selectedMaDons = [];
 
-            // Lấy tất cả checkbox có class 'row-select' và đã được checked
-            const checkboxes = document.querySelectorAll('#quotationResultsTableBody .row-select:checked');
-
-            checkboxes.forEach(checkbox => {
-                const maDon = checkbox.getAttribute('data-madon-select');
-                if (maDon) {
-                    selectedMaDons.push(maDon);
-                }
-            });
-            if (selectedMaDons.length === 0) {
-                const T = window.i18nQuotationResults || {};
-                showDialog({
-                    title: T.Notification || 'Thông báo',
-                    message: T.MsgNoRowSelected || 'Vui lòng chọn ít nhất một dòng để xuất file',
-                    type: 'warning'
+            if (!isSelectAll) {
+                // Lấy tất cả checkbox có class 'row-select' và đã được checked
+                const checkboxes = document.querySelectorAll('#quotationResultsTableBody .row-select:checked');
+                checkboxes.forEach(checkbox => {
+                    const maDon = checkbox.getAttribute('data-madon-select');
+                    if (maDon) selectedMaDons.push(maDon);
                 });
-                return;
+
+                if (selectedMaDons.length === 0) {
+                    const T = window.i18nQuotationResults || {};
+                    showDialog({
+                        title: T.Notification || 'Thông báo',
+                        message: T.MsgNoRowSelected || 'Vui lòng chọn ít nhất một dòng để xuất file',
+                        type: 'warning'
+                    });
+                    return;
+                }
             }
             try {
                 const T = window.i18nQuotationResults || {};

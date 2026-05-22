@@ -280,12 +280,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Xuất file phê duyệt báo giá 
-        public async Task<GenericResponse<List<dynamic>>> GetExportApprovalInfoAsync(List<string> listMaDon)
+        public async Task<GenericResponse<List<dynamic>>> GetExportApprovalInfoAsync(List<string> listMaDon,string adid)
         {
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                result.Data = await _repo.GetExportApprovalInfoAsync(listMaDon);
+                result.Data = await _repo.GetExportApprovalInfoAsync(listMaDon,adid);
                 result.Success = true;
             }
             catch (Exception ex)

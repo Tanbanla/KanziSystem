@@ -634,8 +634,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 string sqlUpdateKho = $"UPDATE [KHO] SET [Hientai] = [Hientai] - {slXuat} WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
                 _db.GET_DATA_FROM_SQL(sqlUpdateKho);
 
-                // Ghi log vào bảng lịch sử KHO_NHAPXUAT
-
+              
                 string hanhdong = $"Xuất kho {kho} cho request: {code_request}";
                 string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
                     ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi])
@@ -643,8 +642,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
                 _db.GET_DATA_FROM_SQL(sqlLog);
 
-                // Cập nhật trạng thái trong REQUEST_DETAIL
-                string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
+
+                // Ghi log vào bảng lịch sử KHO_NHAPXUAT
+                if (khoi == "GA")
+                {
+                    // Cập nhật trạng thái trong REQUEST_DETAIL
+                    string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
                             [Amount_Real] = '{slXuat}', 
                             [Price_Real] = '{giathucte}',
                             [Total_exchange_real] = '{tongchiphi}',
@@ -655,20 +658,53 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [User_Update] = '{nguoixuatkho}'
                             WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
 
-                _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
+                    _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
 
-                // đẩy vào đơn gốc
-                var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
+                    // đẩy vào đơn gốc
+                    var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
 
-                string UpdateRequest = "";
-                UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongtien + "'";
-                UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
-                UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
-                UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
-                UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
-                UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
+                    string UpdateRequest = "";
+                    UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongtien + "'";
+                    UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
+                    UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
+                    UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
+                    UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
+                    UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
 
-                _db.GET_DATA_FROM_SQL(UpdateRequest);
+                    _db.GET_DATA_FROM_SQL(UpdateRequest);
+
+                }
+                // xuất kho khối PROD
+                else
+                {
+                    // Cập nhật trạng thái trong REQUEST_DETAIL
+                    string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
+                            [Amount_Real] = '{slXuat}', 
+                            [Price_Real] = '{giathucte}',
+                            [Total_exchange_real] = '{tongchiphi}',
+                            [Status] = 'DONE',
+                            [Last_Update] = GETDATE(),
+                            [Total_Real] = '{tongchiphi}',
+                            [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
+                            [User_Update] = '{nguoixuatkho}'
+                            WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
+
+                    _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
+
+                    // đẩy vào đơn gốc
+                    var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
+
+                    string UpdateRequest = "";
+                    UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongtien + "'";
+                    UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
+                    UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
+                    UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
+                    UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
+                    UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
+
+                    _db.GET_DATA_FROM_SQL(UpdateRequest);
+                }
+                  
 
               
                 var idrq = _db.ReturnString("SELECT Id_Request FROM REQUEST WHERE Code_Request = '" + code_request + "'");
@@ -785,10 +821,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Unit = lst.Rows[i]["Unit"].ToString()!,
                     Unit_Note = lst.Rows[i]["Unit_Note"].ToString()! ,
                     Price = float.Parse(lst.Rows[i]["Price"].ToString()! == null ? "0" : lst.Rows[i]["Price"].ToString()!, System.Globalization.CultureInfo.InvariantCulture) ,
-                    Price_Real =  lst.Rows[i]["Price_Real"].ToString()!,
-                    VAT = lst.Rows[i]["VAT"].ToString()!,
-                    Total_exchange = float.Parse(lst.Rows[i]["Total_exchange"].ToString()!),
-                    Total_exchange_real = lst.Rows[i]["Total_exchange_real"].ToString()!,
+                    Price_Real =  lst.Rows[i]["Price_Real"].ToString()! == null ? "0" : lst.Rows[i]["Price_Real"].ToString()!,
+                    VAT = lst.Rows[i]["VAT"].ToString()! == null ? "0" : lst.Rows[i]["VAT"].ToString()!,
+                    Total_exchange = float.Parse(lst.Rows[i]["Total_exchange"].ToString()! == null ? "0" : lst.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture) ,
+                    Total_exchange_real = lst.Rows[i]["Total_exchange_real"].ToString()! == null ? "0" : lst.Rows[i]["Total_exchange_real"].ToString()!,
                     PO = lst.Rows[i]["PO"].ToString()!,
                     Dealine_Real = lst.Rows[i]["Dealine_Real"].ToString()!,
                     Aim = lst.Rows[i]["Aim"].ToString()!,

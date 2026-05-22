@@ -373,13 +373,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> ExportFileExcelApproverResult([FromBody] List<string> model)
         {
-            if (model == null || model.Count == 0)
-            {
-                return BadRequest(_localizer["PleaseSelectQuoteRequest"]);
-            }
+            //if (model == null || model.Count == 0)
+            //{
+            //    return BadRequest(_localizer["PleaseSelectQuoteRequest"]);
+            //}
             try
             {
-                var result = await _baoGiaService.GetExportApprovalInfoAsync(model);
+                var result = await _baoGiaService.GetExportApprovalInfoAsync(model, GetCurrentUserId());
                 if (!result.Success)
                 {
                     return BadRequest(result.Message);
@@ -2999,7 +2999,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             break;
                         }
                         var errors = new List<string>();
-                        if (ws.Cell(r, 16).GetString().Contains("Refuse"))
+                        if (ws.Cell(r, 16).GetString().ToLower().Contains("refuse"))
                         {
                             // lấy Id của đơn lưu trong csdl
                             var idRequestQuote1 = 0;
@@ -3100,7 +3100,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                             // MOQ (cột 18) <= Số lượng (cột 14)
                             var moq = ParseInt(ws.Cell(r, 18).GetString());
-                            if (moq != null && qty1 != null && moq > qty1) errors.Add("MOQ (cột 18) lớn hơn Số lượng (cột 14)");
+                            //if (moq != null && qty1 != null && moq > qty1) errors.Add("MOQ (cột 18) lớn hơn Số lượng (cột 14)");
 
                             // Kiểm tra các điều kiện Rohs/COCQ/MSDS/AnToan: nếu expected yêu cầu nhưng value thiếu -> lỗi
                             //if (CheckNotRequired(ws.Cell(r, 13).GetString())) errors.Add("Rohs không thỏa mãn (cột 13)");

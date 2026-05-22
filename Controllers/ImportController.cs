@@ -209,17 +209,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult _load_xuatkhohang(string us,string mayeucau, string nguoitao, string khoi)
         {
-            if(khoi == "GA")
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var chk = db.ReturnString($"select [Group_Code] from PE_USERNAME where Adid = '{us}'");
+            
+
+            if (chk == "GA")
             {
                 var list = Models.REQUEST_PROCESS_GA._load_tonkhoxuathang(mayeucau, nguoitao, khoi);
                 return Json(list);
             }
-           
-            if(khoi == "PROD")
+
+            if (chk == "PROD")
             {
-                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us,mayeucau, nguoitao, khoi);
+                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us, mayeucau, nguoitao, khoi);
                 return Json(list);
             }
+            
+           
             return Json("Không có dữ liệu");
         }
         public JsonResult _load_body_detail(string code_request)

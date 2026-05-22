@@ -591,16 +591,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _huydon_prod(string id_request, string reason)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            string subject = "Hủy đơn yêu cầu hàng hóa ";
+            //string subject = "Hủy đơn yêu cầu hàng hóa ";
 
             var madon = _db.ReturnString("select Code_Request from REQUEST where [Id_Request] = '" + id_request + "'");
 
-            string body = @"Xin chào <br />
-              Đơn yêu cầu mã : " + madon + @" bị hủy bỏ <br /><br />
-              Lý do : " + reason + @"<br /><br />            
+            //string body = @"Xin chào <br />
+            //  Đơn yêu cầu mã : " + madon + @" bị hủy bỏ <br /><br />
+            //  Lý do : " + reason + @"<br /><br />            
 
-              ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-              ※このメールは自動的に送付されたので、返事をしないでください。";
+            //  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+            //  ※このメールは自動的に送付されたので、返事をしないでください。";
            
             var up = _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '15' where [ID_REQUEST] = '" + id_request+"'");
                     
@@ -769,8 +769,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 Currency = N'{rq[i].Currency!.Trim()}',
                                 Aim = N'{rq[i].Aim}',
                                 Total_exchange = '{rq[i].Total_exchange}',
-                                Phongchiuchiphi = '{rq[i].Phongchiuchiphi!.Split(':')[0]}'
-                            
+                                Phongchiuchiphi = '{rq[i].Phongchiuchiphi!.Split(':')[0]}',
+                                [Status] = '',
+
                             WHERE Code_Request = '{Code_Request}' AND Material_Code = '{rq[i].Material_Code}'
                         END
                         ELSE
@@ -803,7 +804,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             // 1. Lấy dữ liệu chính
-            var Truongdulieu = "[Id_Request],[Code_Request],[Group_Code],[Cost_Center],[Request_Date],[Declaration],[Dealine],[Dealine_Real],[Total],[Total_Real],[Kind],[Type],[Status],[Create_Date],[User_Create],[Last_Update],[User_Update],[Reason],[Action],[Note] AS Chitiet,[Chophepin]";
+            var Truongdulieu = "REQUEST.[Id_Request],[Code_Request],[Group_Code],[Cost_Center],[Request_Date],[Declaration],[Dealine],[Dealine_Real],[Total],[Total_Real],[Kind],[Type],[Status],[Create_Date],[User_Create],[Last_Update],[User_Update],[Reason],[Action],[Note] AS Chitiet,[Chophepin],[INT_STEP] ";
             string gia = "";
            
             if (Total > 0 && Total < 3000)
@@ -818,7 +819,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 gia = "and b.Total >= '10000'";
             }
-            string sql = $@"SELECT TOP (300) {Truongdulieu} FROM REQUEST 
+            string bang = "PE_REQUEST_CONFIRM";
+            if (Group_Code == "GA")
+            {
+                bang = "PE_REQUEST_CONFIRM_GA";
+            }
+            string sql = $@"SELECT TOP (300) {Truongdulieu} FROM REQUEST  left join {bang} on REQUEST.Id_Request = {bang}.ID_REQUEST
                     WHERE Request_Date like '%{StartDate}%' 
                     AND Dealine like '%{EndDate}%'
                     AND KIND = 'IN'
@@ -831,7 +837,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {gia}
                     AND Group_Code like N'%{Group_Code}%'
                     AND Cost_Center in (SELECT Cost_Center FROM USER_DEPT WHERE CHR_USERID = '{us}') 
-                    ORDER BY [Id_Request] DESC";
+                    ORDER BY REQUEST.[Id_Request] DESC";
 
             DataTable dataTable = _db.GET_DATA_FROM_SQL(sql);
 

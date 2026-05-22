@@ -40,7 +40,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Get thông tin đơn phê duyệt lựa chọn ncc
         public Task<List<dynamic>> GetSupplierApprovalInfoAsync(string maDon);
         // Xuất file phê duyệt báo giá 
-        public Task<List<dynamic>> GetExportApprovalInfoAsync(List<string> listMaDon);
+        public Task<List<dynamic>> GetExportApprovalInfoAsync(List<string> listMaDon, string adid);
         // Phê duyệt thông tin lựa chọn nhà cung cấp
         public Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarOK(string maDon, string userNext, string userUpdate);
         public Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarNG(string maDon, string Reason, string userUpdate);

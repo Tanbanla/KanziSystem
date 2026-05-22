@@ -946,7 +946,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return data;
         }
 
-        public async Task<List<dynamic>> GetExportApprovalInfoAsync(List<string> listMaDon)
+        public async Task<List<dynamic>> GetExportApprovalInfoAsync(List<string> listMaDon, string adid)
         {
             var sql = new StringBuilder(@"
                WITH StatusCheck AS (
@@ -969,6 +969,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
 
             var parameters = new DynamicParameters();
+            if(!string.IsNullOrEmpty(adid))
+            {
+                sql.Append(" AND r.CHR_UserApproval = @Adid");
+                parameters.Add("Adid", adid);
+            }
             if (listMaDon != null && listMaDon.Any())
             {
                 sql.Append(" AND r.CHR_MaDon IN @MaDonList");
@@ -1052,6 +1057,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             INNER JOIN StatusCheck sc ON r.id = sc.id
             WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
 
+            if (!string.IsNullOrEmpty(adid))
+            {
+                sql.Append(" AND r.CHR_UserApproval = @Adid");
+                parameters.Add("Adid", adid);
+            }
             if (listMaDon != null && listMaDon.Any())
             {
                 sql.Append(" AND r.CHR_MaDon IN @MaDonList");
