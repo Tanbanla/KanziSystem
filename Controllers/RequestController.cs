@@ -1,6 +1,7 @@
 using DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Collections.Generic;
@@ -157,29 +158,29 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var rq_detail = REQUEST_PROCESS.Insert_request(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_dy, model.adid_dy, model.mail_dy, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao);
 
-            // gửi mail
-            string body = $@"Xin chào <br />
-                 Đơn yêu cầu mã : {rq_detail} đã được tạo <br /><br />
-                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+            string body = $@"Xin chào <br />こんにちは、 <br />
+                 Đơn yêu cầu xuất kho :  {rq_detail}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
+                 ご承認賜りますようお願い申し上げます。<br />
                  <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
                  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                  ※このメールは自動的に送付されたので、返事をしないでください。 ";
-
-                    string body1 = $@"Xin chào <br />
-                 Đơn yêu cầu mã : {rq_detail} đã được gửi đến bên xin phê duyệt <br /><br />
-                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
-                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
-
-            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+         
+            string subject = "Xin phê duyệt đơn yêu cầu xuất kho /出庫依頼承認のお願い";
             if (model.Urgent == "True")
             {
-                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+                subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
-         
-            var sendmail = REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
-            var sendmail1 = REQUEST_PROCESS._sendmail(body1, model.mail_dt, subject);
+            if(model.mailnguoitao == model.mail_dt)
+            {
+                REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
+            }
+            else
+            {
+                REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
+                REQUEST_PROCESS._sendmail(body, model.mail_dt, subject);
+            } 
+           
 
             return Json("OK");
         }
@@ -241,35 +242,35 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                 }
             }
-            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
-            if (model.Urgent == "True")
-            {
-                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
-            }
+       
             if (string.IsNullOrEmpty(model.mailnguoitao?.Replace("\n", "").Replace(" ", "")) || model.mailnguoitao.Replace("\n", "").Replace(" ", "") == "")
             {
                 model.mailnguoitao = model.adidnguoitao + "@brothergroup.net";
             }
             var rq_detail = REQUEST_PROCESS_GA.Insert_request_GA(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_qlsc, model.adid_qlsc, model.mail_qlsc, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao, model.ten_qltc, model.adid_qltc, model.mail_qltc);
 
-            // gửi mail
-            string body = $@"Xin chào <br />
-               Đơn yêu cầu mã : {rq_detail} đã được tạo <br /><br />
-               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
-               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-               ※このメールは自動的に送付されたので、返事をしないでください。 ";
+            string body = $@"Xin chào <br />こんにちは、 <br />
+                 Đơn yêu cầu xuất kho :  {rq_detail}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
+                 ご承認賜りますようお願い申し上げます。<br />
+                 <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
-            string body1 = $@"Xin chào <br />
-               Đơn yêu cầu mã : {rq_detail} đã được gửi đến bạn phê duyệt <br /><br />
-               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
-               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-               ※このメールは自動的に送付されたので、返事をしないでください。 ";
-
-         
-            var sendmail = REQUEST_PROCESS._sendmail(body, model.mailnguoitao.Replace("\n", "").Replace(" ", ""), subject);
-            var sendmail1 = REQUEST_PROCESS._sendmail(body1, model.mail_dt.Replace("\n", "").Replace(" ", ""), subject);
+            string subject = "Xin phê duyệt đơn yêu cầu xuất kho /出庫依頼承認のお願い";
+            if (model.Urgent == "True")
+            {
+                subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
+            }
+            if (model.mailnguoitao == model.mail_dt)
+            {
+                REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
+            }
+            else
+            {
+                REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
+                REQUEST_PROCESS._sendmail(body, model.mail_dt, subject);
+            }
 
             return Json("OK");
         }
@@ -314,17 +315,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             var get_ma = _db.ReturnString("select Code_Request from REQUEST where Id_Request = '" + id_request + "'");
+            string body = $@"Xin chào <br />こんにちは、 <br />
+                 Đơn yêu cầu xuất kho :  {get_ma}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
+                 ご承認賜りますようお願い申し上げます。<br />
+                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
-            string body = $@"Xin chào <br />
-               Đơn yêu cầu mã : {get_ma} đã được gửi đến bên xin phê duyệt <br /><br />
-               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
-               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-               ※このメールは自動的に送付されたので、返事をしないでください。 ";
-              string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+            string subject = "Xin phê duyệt đơn yêu cầu xuất kho /出庫依頼承認のお願い";
             if (urgent == "True")
             {
-                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+                subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
             var buoc = int.Parse(step) + 1;
          
@@ -345,24 +347,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // Lấy địa chỉ email từ DataTable
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
           
-            // Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
-            if (buoc == 5)
-            {
-                body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
-                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-                     ※このメールは自動的に送付されたので, 返事をしないでください。";
-            }
-            REQUEST_PROCESS._sendmail(body, mailTo, subject);
+            //// Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
+            //if (buoc == 5)
+            //{
+            //     body = $@"Xin chào <br />こんにちは、 <br />
+            //     Đơn yêu cầu xuất kho :  {get_ma}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
+            //     Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
+            //     ご承認賜りますようお願い申し上げます。<br />
+            //     <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+            //     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+            //     ※このメールは自動的に送付されたので、返事をしないでください。 ";
+            //}
+            //REQUEST_PROCESS._sendmail(body, mailTo, subject);
             var up = REQUEST_PROCESS._update_request(id_request, regency, buoc.ToString());
             // gửi đến người tạo đơn
             if (step == "4")
             {
                 string guiden = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
                 body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái đã đến kho <br /><br />
+                     Đơn yêu cầu mã : {get_ma} của bạn đã HOÀN THÀNH <br /><br />
                      Bạn vui lòng đến kho để nhận hàng <br /><br />
                      Kiểm tra thông tin đơn tại : <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
@@ -379,21 +382,30 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 regency = "XUATKHO";
             }
+            if (regency == "XUATKHO" && step == "5")
+            {
+                regency = "QLTC";
+            }
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             var get_ma = _db.ReturnString("select Code_Request from REQUEST where Id_Request = '" + id_request + "'");
-            string body = $@"Xin chào <br />
-               Đơn yêu cầu mã : {get_ma} đã được gửi đến bên xin phê duyệt <br /><br />
-               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-               <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
-               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-               ※このメールは自動的に送付されたので、返事をしないでください。 ";
-            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+
+            string body = $@"Xin chào <br />こんにちは、 <br />
+                 Đơn yêu cầu xuất kho :  {get_ma}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
+                 ご承認賜りますようお願い申し上げます。<br />
+                 <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
+            string subject = "Xin phê duyệt đơn yêu cầu xuất kho /出庫依頼承認のお願い";
             if (urgent == "True")
             {
-                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+                subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
             var buoc = int.Parse(step) + 1;
-          
+            if(step == "5")
+            {
+                buoc = 5;
+            }
             var mail_send = _db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + id_request + "'");
             // Định nghĩa cột email tương ứng với từng bước
             string? columnName = buoc switch
@@ -412,31 +424,29 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
 
             // Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
-            if (buoc == 5)
-            {
-                body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
-                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-                     ※このメールは自動的に送付されたので, 返事をしないでください。";
-            }
-           
-            var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());
-              
-            
+            //if (buoc == 5)
+            //{
+            //    body = $@"Xin chào <br />
+            //         Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+            //         Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+            //         <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+            //         ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+            //         ※このメールは自動的に送付されたので, 返事をしないでください。";
+            //}
+          
+            var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());                        
             // Gửi mail 
-           // REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
             if (step == "5")
             {
                 string guiden = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
                 body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái đã đến kho <br /><br />
+                     Đơn yêu cầu mã : {get_ma} của bạn đã HOÀN THÀNH <br /><br />
                      Bạn vui lòng đến kho để nhận hàng <br /><br />
                      Kiểm tra thông tin đơn tại : <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
-                //REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
+                REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
             }
             return Json("OK");
         }
@@ -444,21 +454,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             //var kq = REQUEST_PROCESS._update_all(us, madon);
-            
-            string body = $@"Xin chào <br />
-                    Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-                    Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                    <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
-                    ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-                    ※このメールは自動的に送付されたので, 返事をしないでください。";
-             
+
+            string body = $@"Xin chào <br />こんにちは、 <br />
+                 Đơn yêu cầu xuất kho :  {madon}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
+                 ご承認賜りますようお願い申し上げます。<br />
+                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
+
             var get_if = db.GET_DATA_FROM_SQL("select INT_STEP, CHR_MAIL_NGUOITAO, Urgent from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request where b.Code_Request = '" + madon.Split("_")[0] + "' ");
-         
-            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+
+            string subject = "Xin phê duyệt đơn yêu cầu xuất kho /出庫依頼承認のお願い";
 
             if (get_if.Rows[0][2].ToString() == "True")
             {
-                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+                subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
             // Gửi mail
             var catmadon = madon.Split("_")[0];
@@ -503,20 +514,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             //var kq = REQUEST_PROCESS_GA._update_all(us, madon);
 
-            string body = $@"Xin chào <br />
-                    Đơn yêu cầu mã : {madon.Split("_")[0]} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-                    Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                    <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
-                    ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-                    ※このメールは自動的に送付されたので, 返事をしないでください。";
+            string body = $@"Xin chào <br />こんにちは、 <br />
+                 Đơn yêu cầu xuất kho :  {madon}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
+                 Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
+                 ご承認賜りますようお願い申し上げます。<br />
+                 <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                 ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                 ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
             var get_if = db.GET_DATA_FROM_SQL("select INT_STEP, CHR_MAIL_NGUOITAO, Urgent from [PE_REQUEST_CONFIRM_GA] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request where b.Code_Request = '" + madon.Split("_")[0] + "' ");
 
-            string subject = "Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+            string subject = "Xin phê duyệt đơn yêu cầu xuất kho /出庫依頼承認のお願い";
 
             if (get_if.Rows[0][2].ToString() == "True")
             {
-                subject = "[Gấp] Xác nhận phê duyệt đơn yêu cầu hàng hóa";
+                subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
             // Gửi mail
 
@@ -524,15 +536,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var get_id = db.ReturnString("select [Id_Request] from [REQUEST] where [Code_Request] = '" + catmadon + "'");
 
             int buoc = int.Parse(get_if.Rows[0][0].ToString()!) + 1;
-            if (buoc == 5)
-            {
-                body = $@"Xin chào <br />
-                     Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
-                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-                     ※このメールは自動的に送付されたので, 返事をしないでください。";
-            }
+         
 
             var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + get_id + "'");
             // Định nghĩa cột email tương ứng với từng bước
@@ -550,29 +554,48 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             // Lấy địa chỉ email
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
-
+            var up = "";
             // Cập nhật lại nội dung Body
-          
+            if (int.Parse(get_if.Rows[0][0].ToString()!) == 5)
+            {
+                body = $@"Xin chào <br />
+                     Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
+                     Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
+                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+                     ※このメールは自動的に送付されたので, 返事をしないでください。";
+                 up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], get_if.Rows[0][0].ToString()!);
+                 REQUEST_PROCESS_GA._sendmail(body, "CHR_MAIL_NGUOITAO", subject);
+            }
+            else
+            {
+                 up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
+                REQUEST_PROCESS_GA._sendmail(body, mailTo!, subject);
+            }
             // update đơn
-            var up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
-            // gửi mail
-            REQUEST_PROCESS_GA._sendmail(body, mailTo!, subject);
-
+          
             return Json(up);
         }
         public JsonResult _reject(string id_request, string reason, string regency, string step, string urgent)
         {
-            string subject = "Từ chối phê duyệt đơn yêu cầu hàng hóa ";
+            string subject = "Từ chối phê duyệt đơn yêu cầu xuất kho / 出庫依頼ご承認却下のご連絡";
             if(urgent == "True")
             {
-                subject = "[GẤP] Từ chối phê duyệt đơn yêu cầu hàng hóa";
+                subject = "[GẤP] Từ chối phê duyệt đơn yêu cầu xuất kho / [緊急] 出庫依頼ご承認却下のご連絡";
             }
-            string body = @"Xin chào <br />
+            string body = @"Xin chào <br />こんにちは、
               Đơn yêu cầu mã : " + id_request + @" của bạn ở trạng thái TỪ CHỐI phê duyệt <br /><br />
               Lý do : " + reason + @"<br /><br />
+              ご申請いただいた出庫依頼は、承認却下の状態となっております。<br />
+              理由 : " + reason + @"<br /><br />
+
+              Bạn vui lòng click vào đường link dưới đây để xác nhận <br /> 下記リンクより内容をご確認ください。
               <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
+
+
+
             var stepMap = new Dictionary<string, string>
             {
                 { "0", "6" }, { "1", "7" }, { "2", "8" }, { "3", "9" },{ "4", "10" }
@@ -591,17 +614,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _huydon_prod(string id_request, string reason)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            //string subject = "Hủy đơn yêu cầu hàng hóa ";
+            string subject = "Hủy đơn yêu cầu hàng hóa ";
 
             var madon = _db.ReturnString("select Code_Request from REQUEST where [Id_Request] = '" + id_request + "'");
 
-            //string body = @"Xin chào <br />
-            //  Đơn yêu cầu mã : " + madon + @" bị hủy bỏ <br /><br />
-            //  Lý do : " + reason + @"<br /><br />            
+            string body = @"Xin chào <br />
+              Đơn yêu cầu mã : " + madon + @" bị hủy bỏ <br /><br />
+              Lý do : " + reason + @"<br /><br />            
 
-            //  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-            //  ※このメールは自動的に送付されたので、返事をしないでください。";
-           
+              ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
+              ※このメールは自動的に送付されたので、返事をしないでください。";
+
             var up = _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '15' where [ID_REQUEST] = '" + id_request+"'");
                     
             var mail_send = _db.ReturnString("select CHR_MAIL_NGUOITAO from PE_REQUEST_CONFIRM where ID_REQUEST = '" + id_request + "'");
@@ -609,8 +632,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _db.GET_DATA_FROM_SQL("Insert into PE_LOGHUYDON ([ID_REQUEST],[Lydo],[Madon]) values ('" + id_request + "',N'" + reason + "','" + madon + "')");
             _db.GET_DATA_FROM_SQL("update [REQUEST] set [Status] = 'REFUSE' where [Id_Request] = '" + id_request + "'");
             // Gửi về người tạo đơn
-            // mail_nguoidat = mail_send.Trim();
-            //REQUEST_PROCESS._sendmail(body, mail_nguoidat, subject);
+            var mail_nguoidat = mail_send.Trim();
+            REQUEST_PROCESS._sendmail(body, mail_nguoidat, subject);
 
             return Json("Hoàn thành !");
         }
@@ -642,17 +665,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult _reject_GA(string id_request, string reason, string regency, string step, string urgent)
         {
-            string subject = "Từ chối phê duyệt đơn yêu cầu hàng hóa ";
+            string subject = "Từ chối phê duyệt đơn yêu cầu xuất kho / 出庫依頼ご承認却下のご連絡";
             if (urgent == "True")
             {
-                subject = "[GẤP] Từ chối phê duyệt đơn yêu cầu hàng hóa";
+                subject = "[GẤP] Từ chối phê duyệt đơn yêu cầu xuất kho / [緊急] 出庫依頼ご承認却下のご連絡";
             }
-            string body = @"Xin chào <br />
+            string body = @"Xin chào <br />こんにちは、
               Đơn yêu cầu mã : " + id_request + @" của bạn ở trạng thái TỪ CHỐI phê duyệt <br /><br />
               Lý do : " + reason + @"<br /><br />
+              ご申請いただいた出庫依頼は、承認却下の状態となっております。<br />
+              理由 : " + reason + @"<br /><br />
+
+              Bạn vui lòng click vào đường link dưới đây để xác nhận <br /> 下記リンクより内容をご確認ください。
               <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
+
             var stepMap = new Dictionary<string, string>
             {
                 { "0", "6" }, { "1", "7" }, { "2", "8" }, { "3", "9" },{ "4", "10" }
@@ -770,7 +798,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 Aim = N'{rq[i].Aim}',
                                 Total_exchange = '{rq[i].Total_exchange}',
                                 Phongchiuchiphi = '{rq[i].Phongchiuchiphi!.Split(':')[0]}',
-                                [Status] = '',
+                                [Status] = ''
 
                             WHERE Code_Request = '{Code_Request}' AND Material_Code = '{rq[i].Material_Code}'
                         END
@@ -797,6 +825,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json("OK");
         }
         public ActionResult RequestAll()
+        {
+            return View();
+        }
+        public ActionResult RequestAll_GA_PROD()
         {
             return View();
         }
@@ -837,7 +869,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {gia}
                     AND Group_Code like N'%{Group_Code}%'
                     AND Cost_Center in (SELECT Cost_Center FROM USER_DEPT WHERE CHR_USERID = '{us}') 
-                    ORDER BY REQUEST.[Id_Request] DESC";
+                    ORDER BY [Id_Request] DESC";
 
             DataTable dataTable = _db.GET_DATA_FROM_SQL(sql);
 
@@ -855,5 +887,98 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(resultList);
         }
 
+        public JsonResult view_rqall_GA_PROD(string StartDate, string EndDate, string us, string Group_Code, string loaicp, string Code_Request, string Urgent, string Cost_Center, string Tinhtrang, double Total)
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            // 1. Lấy dữ liệu chính
+            var Truongdulieu = "REQUEST.[Id_Request],[Code_Request],[Group_Code],[Cost_Center],[Request_Date],[Declaration],[Dealine],[Dealine_Real],[Total],[Total_Real],[Kind],[Type],[Status],[Create_Date],[User_Create],[Last_Update],[User_Update],[Reason],[Action],[Note] AS Chitiet,[Chophepin],[INT_STEP] ";
+            string gia = "";
+            var chkk = _db.ReturnString("select Count(*) from [PE_USERNAME] where [Adid] = '" + us + "'");
+            if(chkk != "0")
+            {
+                if (Total > 0 && Total < 3000)
+                {
+                    gia = "and b.Total < '3000'";
+                }
+                if (Total >= 3000 && Total < 10000)
+                {
+                    gia = "and b.Total >= '3000' and b.Total < '10000'";
+                }
+                if (Total >= 10000)
+                {
+                    gia = "and b.Total >= '10000'";
+                }
+                string bang = "PE_REQUEST_CONFIRM";
+                if (Group_Code == "GA")
+                {
+                    bang = "PE_REQUEST_CONFIRM_GA";
+                }
+                string sql = $@"SELECT TOP (300) {Truongdulieu} FROM REQUEST  left join {bang} on REQUEST.Id_Request = {bang}.ID_REQUEST
+                    WHERE Request_Date like '%{StartDate}%' 
+                    AND Dealine like '%{EndDate}%'
+                    AND KIND = 'IN'
+                    AND Urgent like N'%%'
+	                AND Group_Code like N'%{Group_Code}%'
+					AND Declaration like N'%{loaicp}%'
+                    AND [Status] like N'%{Tinhtrang}%'
+					AND Code_Request like N'%{Code_Request}%'
+					AND Cost_Center like N'%{Cost_Center}%'
+                    {gia}
+                    AND Group_Code like N'%{Group_Code}%'
+                    ORDER BY [Id_Request] DESC";
+
+                DataTable dataTable = _db.GET_DATA_FROM_SQL(sql);
+
+                var resultList = new List<Dictionary<string, object>>();
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    var dict = new Dictionary<string, object>();
+                    foreach (DataColumn col in dataTable.Columns)
+                    {
+                        dict[col.ColumnName] = row[col];
+                    }
+                    resultList.Add(dict);
+                }
+
+                return Json(resultList);
+            }
+            else
+            {
+                return Json(null);
+            }
+        }
+
+        public JsonResult resetdon(string mayeucau, string khoi)
+        {
+            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            //check id_rq
+            var id_rq = _db.ReturnString("select Id_Request from REQUEST where Code_Request = '" + mayeucau + "'");
+            //update trạng thái đơn request
+            _db.GET_DATA_FROM_SQL("update [REQUEST_DETAIL] set Status = '' where Code_Request = '" + mayeucau + "'");
+            _db.GET_DATA_FROM_SQL("update REQUEST set Status = 'WAITCONFIRM' where Code_Request = '" + mayeucau + "'");
+            if (khoi == "GA")
+            {
+                _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '5' where ID_REQUEST = '" + id_rq + "'");
+            }
+            if (khoi == "PROD")
+            {
+                _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '4' where ID_REQUEST = '" + id_rq + "'");
+            }
+
+            // update kho
+            var list_return = _db.GET_DATA_FROM_SQL("select *  from KHO_NHAPXUAT where Hanhdong like '%" + mayeucau + "%'");
+            for (int i = 0; i < list_return.Rows.Count; i++)
+            {
+                var malinhkien = list_return.Rows[i]["MaNguyenLieu"].ToString();
+                var soluong = list_return.Rows[i]["Soluong"].ToString();
+                var kho = list_return.Rows[i]["Kho"].ToString();
+
+                _db.GET_DATA_FROM_SQL("update KHO set Hientai = Hientai + " + soluong + " where MaNguyenLieu = '" + malinhkien + "' and Kho = '" + kho + "'");
+            }
+
+            _db.GET_DATA_FROM_SQL("delete from KHO_NHAPXUAT where Hanhdong like '%" + mayeucau + "%'");
+
+            return Json("Reset OK");
+        }
     }
 }

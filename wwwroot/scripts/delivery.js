@@ -158,7 +158,7 @@ async function SearchPoDel() {
             }
            
             opt.innerHTML += `<tr class="${rowClass}"><td class="text-center"><input type="checkbox" class="item" value="${value.pO_Detail_Id}" /></td><td>${value.pO_Detail_Id}</td><td>${value.id_Goc}</td><td>${value.benxacnhantruoc}</td><td>${value.soPO}</td><td>${value.mahang}</td><td>${value.good_Code}</td><td>${value.tentienganh}</td><td>${value.tentiengviet}</td><td id="soluong_${value.pO_Detail_Id}">${value.soluong}</td>`
-                + `<td><input type='number' style="background-color:lightyellow" class="form-control" id="luongvethucte_${value.pO_Detail_Id}" onblur="Check_luongvethucte('${value.pO_Detail_Id}')" value='${value.luongvekho}'></input></td><td>${value.luongvethucte}</td><td>${value.luongvekhoNgaynhap}</td><td>${value.luongvekhoNguoinhap}</td><td>${value.dovi}</td><td>${value.dongia}</td><td>${value.dieukiengiaohang}</td>`
+                + `<td><input type='number' style="background-color:lightyellow" class="form-control" min="0" id="luongvethucte_${value.pO_Detail_Id}" onblur="Check_luongvethucte('${value.pO_Detail_Id}')" value='${value.luongvekho}'></input></td><td>${value.luongvethucte}</td><td>${value.luongvekhoNgaynhap}</td><td>${value.luongvekhoNguoinhap}</td><td>${value.dovi}</td><td>${value.dongia}</td><td>${value.dieukiengiaohang}</td>`
                 + `<td>${value.diadiemgiaohang}</td><td>${value.phuongthucvanchuyen}</td><td>${value.sotien}</td><td>${value.vat}</td><td>${value.maphongyeucau}</td>`
                 + `<td>${value.tenphongyeucau}</td><td>${value.ngaygiaohangdukien}</td><td>${value.noigiaodukien}</td>`
                 + `<td>${value.thoigianthanhtoan}</td><td>${value.loaitien}</td>`

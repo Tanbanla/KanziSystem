@@ -184,7 +184,7 @@ async function loadToCombo(position, comboId) {
         for (var i = 0; i < result.Data.Data.length; i++) {
             document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
         }   
-        //document.getElementById("ten_" + comboId).innerHTML = `<option>${result.Data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
+        // xử lý trường hợp ủy quyền
         document.getElementById("cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
         document.getElementById("mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;      
     }

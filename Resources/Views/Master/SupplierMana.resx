@@ -321,4 +321,13 @@
   <data name="ExportMaster" xml:space="preserve">
     <value>Xuất dữ liệu master</value>
   </data>
+  <data name="UploadExcelVendor" xml:space="preserve">
+    <value>Tải lên Excel Vendor</value>
+  </data>
+  <data name="UploadExcelMaterial" xml:space="preserve">
+    <value>Tải lên Excel Vật tư</value>
+  </data>
+  <data name="TemplateImportExcel" xml:space="preserve">
+    <value>File mẫu nhập Excel</value>
+  </data>
 </root>

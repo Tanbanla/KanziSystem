@@ -288,6 +288,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                  .DistinctBy(l => new { l.CHR_MaDon, l.CHR_SectionCode })
                  .Select(l => (l.CHR_SectionCode, l.CHR_SectionName, l.CHR_MaDon, l.CHR_Gap, l.ID_StepBaoGia, l.CHR_UserApproval))
                  .ToList();
+                // update kì hạn báo giá
+                var listUpadte = insertedList.ToList();
                 if (SectionApporve != null)
                 {
                     _ = Task.Run(async () =>
@@ -296,7 +298,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             try
                             {
+                                
+                                var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                                //update kỳ hạn báo giá
+                                await baoGiaService.UpdateDeadlineAsync(listUpadte);
+
+                                // gửi mail thông báo phê duyệt cho requester và approver tiếp theo
                                 foreach (var item in SectionApporve)
                                 {
                                     if (item.ID_StepBaoGia == 4)
@@ -413,15 +422,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                 // Xác nhận loại hàng dựa trên CHR_Phanloai
                                                 //var typeMaterial = GetMaterialType(materialType);
                                                 var OutSide = "";
+                                                var Group = "";
                                                 switch (materialType)
                                                 {
-                                                    case "A":
-                                                    case "B":
+                                                    case "A":                                                   
                                                     case "E":
                                                         OutSide = "IN";
+                                                        Group = "PUR";
+                                                        break;
+                                                    case "B":
+                                                        OutSide = "IN";
+                                                        Group = "GA";
+                                                        break;
+                                                    case "I":
+                                                        OutSide = "OUT";
+                                                        Group = "IT";
                                                         break;
                                                     default:
                                                         OutSide = "OUT";
+                                                        Group = "PUR";
                                                         break;
                                                 }
 
@@ -439,7 +458,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                     UsedFor = firstMaterial.NVCHR_DongMay,
                                                     Purpose = firstMaterial.NVCHR_TinhNang,
                                                     CHR_MaterialOutSide = OutSide,
-                                                    Unit = firstMaterial.NVCHR_DonVi
+                                                    Unit = firstMaterial.NVCHR_DonVi,
+                                                    Group_Code = Group
                                                 };
 
                                                 MaterialNews.Add(newMaterial);
@@ -543,7 +563,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                             var mail = userCreate + "@brothergroup.net";
                             var emailResult = await sendMailService.SendMailAsync(mail, mail, 12,
-                                "Quote/HistoryQuote", isGap,
+                                "History/HistoryQuote", isGap,
                                 sectionName, maDon, currentUserId);
                             //var emailResult = await sendMailService.SendMailToConfirmItemAsync(12, 12, "Quote/HistoryQuote", true, "", "", currentUserId);
                         }

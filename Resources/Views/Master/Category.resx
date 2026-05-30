@@ -222,4 +222,7 @@
   <data name="ExportExcel" xml:space="preserve">
     <value>Xuất file mẫu</value>
   </data>
+  <data name="ExportMaster" xml:space="preserve">
+    <value>Xuất dữ liệu master</value>
+  </data>
 </root>

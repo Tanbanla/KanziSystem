@@ -222,4 +222,7 @@
   <data name="ExportExcel" xml:space="preserve">
     <value>テンプレート出力</value>
   </data>
+  <data name="ExportMaster" xml:space="preserve">
+    <value>エクスポートマスター</value>
+  </data>
 </root>

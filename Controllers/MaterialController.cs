@@ -505,7 +505,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                             item.UserCreate + "@brothergroup.net",
                                             string.Empty,
                                             18,
-                                            "Quote/SelectQuoteSection",
+                                            "SelectQuote/SelectQuoteSection",
                                             true,
                                             item.Section,
                                             item.MaDon,

@@ -95,7 +95,7 @@ $("#modal-7").fireModal({
     footerClass: 'bg-whitesmoke',
     autoFocus: false,
     created: function (modal) {
-        modal.find('.modal-dialog').css('max-width', '90%');
+        modal.find('.modal-dialog').css('max-width', '99%');
     },
     onFormSubmit: function (modal, e, form) {
         // Form Data
@@ -307,7 +307,7 @@ $("#modal-15").fireModal({
     footerClass: 'bg-whitesmoke',
     autoFocus: false,
     created: function (modal) {
-        modal.find('.modal-dialog').css('max-width', '90%');
+        modal.find('.modal-dialog').css('max-width', '99%');
         modal.find('.modal-content').css({
             'border': '1',
         });

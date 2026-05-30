@@ -1495,6 +1495,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var data = await _context.BaoGia_Request_of_Quotations.Where(c => c.CHR_MaDon == maDon).ToListAsync();
             if (!data.Any()) throw new Exception("No valid data to update");
+            // kiểm tra nếu đơn đã được phê duyệt thì không cho xóa
+            var isApproved = data.Any(d => d.ID_StepBaoGia > 5);
+            if (isApproved)
+            {
+                throw new Exception("Đơn đã được phê duyệt, không thể xóa. Vui lòng liên hệ PIC PUR để được hỗ trợ");
+            }
             // xoa mem
             foreach (var item in data)
             {
@@ -1523,6 +1529,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var data = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(c => c.ID == id);
             if (data == null) throw new Exception("No valid data to update");
+            // kiểm tra nếu đơn đã được phê duyệt thì không cho xóa
+            if (data.ID_StepBaoGia > 5)
+            {
+               throw new Exception("Đơn đã được phê duyệt, không thể xóa. Vui lòng liên hệ PIC PUR để được hỗ trợ");
+            }
             // xoa mem
             data.ID_Status = "DELETE";
             data.ID_StepBaoGia = 0;
@@ -1704,6 +1715,59 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
 
             return data;
+        }
+        // update thời hạn lựa chọn nhà cung cấp
+        public async Task<List<BaoGia_Request_of_Quotation>> UpdateDeadlineAsync(List<BaoGia_Request_of_Quotation> baoGias)
+        {
+            if (baoGias == null || !baoGias.Any())
+            {
+                throw new ArgumentNullException(nameof(baoGias), "No data to update");
+            }
+            // danh sach id cần update
+            var ids = baoGias.Select(b => b.ID).Where(id => id > 0).Distinct().ToList();
+            if (!ids.Any())
+            {
+                throw new ArgumentException("No valid IDs provided in the input list.");
+            }
+
+            var rq = await _context.BaoGia_Request_of_Quotations
+                .Where(c => ids.Contains(c.ID))
+                .ToListAsync();
+
+            if (!rq.Any())
+            {
+                throw new ArgumentException("No data to update");
+            }
+
+            var now = DateTime.Now;
+            foreach (var item in rq)
+            {
+                // Chỉ cập nhật khi đang ở bước 4 và có kỳ hạn
+                if (item.ID_StepBaoGia == 4 && item.DTM_KyHan.HasValue)
+                {
+                    // Tính số ngày còn lại (dùng Date để bỏ phần giờ)
+                    var daysLeft = (item.DTM_KyHan.Value.Date - now.Date).TotalDays;
+                    if (daysLeft <= 5)
+                    {
+                        item.DTM_KyHan = item.DTM_KyHan.Value.AddDays(5);
+                        item.DTM_UpdateLater = now;
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Đồng bộ lại giá trị DTM_KyHan/DTM_UpdateLater cho danh sách đầu vào
+            var rqDict = rq.ToDictionary(r => r.ID);
+            foreach (var b in baoGias)
+            {
+                if (rqDict.TryGetValue(b.ID, out var updated))
+                {
+                    b.DTM_KyHan = updated.DTM_KyHan;
+                    b.DTM_UpdateLater = updated.DTM_UpdateLater;
+                }
+            }
+            return baoGias;
         }
     }
 }

@@ -14,23 +14,23 @@
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
         <div class="btn-group me-2 mb-2 flex-wrap gap-2" role="group" style="gap: 8px;">
             <button type="button" class="btn btn-success" id="btnExportExcel" style="border-radius: 6px; padding: 8px 8px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">
-                <i class="fas fa-file-excel me-1"></i> Download Excel
+                <i class="fas fa-file-excel me-1"></i> @Localizer["DownloadExcel"]
             </button>
             <button type="button" class="btn btn-outline-secondary" id="btnImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; transition: all 0.2s ease;">
-                <i class="fas fa-upload me-1"></i> Upload Excel
+                <i class="fas fa-upload me-1"></i> @Localizer["UploadExcel"]
             </button>
             <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" style="border-radius: 6px; padding: 8px 6px; font-weight: 500;">
-                <i class="fas fa-upload me-1"></i> Upload Excel Vendor
+                <i class="fas fa-upload me-1"></i> @Localizer["UploadExcelVendor"]
             </button>
             <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
         
             <button type="button" class="btn btn-outline-danger" id="btnImportExcelMaterial" style="border-radius: 6px; padding: 8px 6px; font-weight: 500;">
-                <i class="fas fa-upload me-1"></i> Upload Excel Material
+                <i class="fas fa-upload me-1"></i> @Localizer["UploadExcelMaterial"]
             </button>
             <input type="file" id="itemsExcelFileInputMaterial" accept=".xlsx,.xls" style="display:none" />
         
             <button type="button" class="btn btn-primary" id="btnTemplateImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; background: linear-gradient(135deg, #0d6efd, #0b5ed7); border: none; box-shadow: 0 2px 6px rgba(13,110,253,0.2);">
-                <i class="fas fa-download me-1"></i> Template Import Excel
+                <i class="fas fa-download me-1"></i> @Localizer["TemplateImportExcel"]
             </button>
         </div>
 </div>
@@ -61,7 +61,7 @@
         <table class="table table-sm table-hover table-bordered align-middle" id="suppliersTable">
             <thead class="table-light">
                 <tr class="text-center align-middle">
-                    <th style="width: 80px">ID</th>
+                    <th style="width: 80px">@Localizer["ID"]</th>
                     <th style="width: 140px">@Localizer["SupplierCode"]</th>
                     <th>@Localizer["SupplierName"]</th>
                     <th>@Localizer["Address"]</th>
@@ -256,7 +256,7 @@
 <!-- Import Excel input (hidden) -->
 <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
 @section Scripts {
-   <script src="~/js/SupplierMana.js"></script>
+   <script src="~/js/SupplierMana.js"  asp-append-version="true"></script>
     <script>
         (function() {
             // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts

@@ -222,4 +222,7 @@
   <data name="ExportExcel" xml:space="preserve">
     <value>Export template file</value>
   </data>
+  <data name="ExportMaster" xml:space="preserve">
+    <value>Export Master</value>
+  </data>
 </root>

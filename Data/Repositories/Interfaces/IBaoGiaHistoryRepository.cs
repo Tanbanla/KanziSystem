@@ -1,6 +1,7 @@
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Threading.Tasks;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -25,5 +26,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Sreach lịch sử bảo giá
         Task<ListRequest<dynamic>> SearchHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
+        // Lấy thông tin phê duyệt báo giá của các đơn hàng
+        Task<List<dynamic>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
+        // Lấy thông tin lịch sử báo giá theo mã hàng nội bộ và số đơn
+        Task<List<dynamic>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
     }
 }

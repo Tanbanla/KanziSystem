@@ -124,8 +124,32 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     item.ShortName = shortName;
                 }
             }
+            // update Catergory
+            var categoryKeys = listBaoGiaNccCategory
+                .Where(x => !string.IsNullOrWhiteSpace(x.NVCHR_ChungLoai))
+                .Select(x => x.NVCHR_ChungLoai!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-            // Lưu 
+            var existingCategoryNames = await _context.TM_Categories
+                .Where(c => categoryKeys.Contains(c.NVCHR_Category))
+                .Select(c => c.NVCHR_Category)
+                .ToListAsync();
+            // Thêm mới 
+            var existingSet = new HashSet<string>(existingCategoryNames, StringComparer.OrdinalIgnoreCase);
+
+            var newCategories = categoryKeys
+                .Where(key => !existingSet.Contains(key))
+                .Select(key => new TM_Category
+                {
+                    NVCHR_Category = key
+                })
+                .ToList();
+
+            if (newCategories.Any())
+            {
+                await _context.TM_Categories.AddRangeAsync(newCategories);
+            }
             return await _context.SaveChangesAsync() > 0;
         }
         // update thong tin

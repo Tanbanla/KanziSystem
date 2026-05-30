@@ -490,6 +490,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.VCHR_UpdateBy = user;
                 row.DTM_UpdateDate = now;
                 row.CHR_StatusShip = "Rejected";
+                row.CHR_Status = "Rejected";
 
                 // Update infor request quote
                 //rq.ID_StepBaoGia = 6;

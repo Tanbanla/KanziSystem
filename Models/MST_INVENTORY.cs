@@ -91,7 +91,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public static List<string> _getname_material(string group_code, string loaichiphi)
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
-            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * from MATERIAL where Material_Code like '{loaichiphi}%' and Group_Code = '{group_code}'");
+            var groupcode = "and Group_Code = '" + group_code + "'";
+            if (group_code == "PROD")
+            {
+                groupcode = "and ( Group_Code = '" + group_code + "' or Group_Code = 'PUR' )";
+            }
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * from MATERIAL where Material_Code like '{loaichiphi}%' {groupcode}");
             List<string> material = new List<string>();
 
             for (int i = 0; i < _cmd.Rows.Count; i++)

@@ -59,9 +59,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // lấy tên mã hàng hiển thị trong combobox
         public JsonResult _load_material(string group_code, string loaichiphi)
         {
-            
+
             string mahang = "";
-            if(loaichiphi == "AUXILIARY")
+            if (loaichiphi == "AUXILIARY")
             {
                 mahang = "E";
             }
@@ -69,7 +69,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 mahang = "A";
             }
-            if(group_code == "GA")
+            if (group_code == "GA")
             {
                 mahang = "B";
             }
@@ -117,9 +117,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             List<PE_USERNAME> _ifor = REQUEST_PROCESS._load_userinventory("", id);
             return Json(_ifor);
         }
-        public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai,  string us)
+        public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai, string us)
         {
-            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai,  us);
+            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai, us);
             return Json(lst);
         }
         private readonly IWebHostEnvironment _env;
@@ -135,7 +135,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string templatePath = Path.Combine(path, "Form_Export_WH.xlsx");
             string tempFileName = $"Temp_{Guid.NewGuid()}.xlsx";
             string tempPath = Path.Combine(path, tempFileName);
-         
+
             try
             {
                 System.IO.File.Copy(templatePath, tempPath, true);
@@ -203,15 +203,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //{
             //    tongchiphi = tongchiphiold;
             //}
-           
+
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);
         }
-        public JsonResult _load_xuatkhohang(string us,string mayeucau, string nguoitao, string khoi)
+        public JsonResult _load_xuatkhohang(string us, string mayeucau, string nguoitao, string khoi)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             var chk = db.ReturnString($"select [Group_Code] from PE_USERNAME where Adid = '{us}'");
-            
+
 
             if (chk == "GA")
             {
@@ -224,8 +224,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us, mayeucau, nguoitao, khoi);
                 return Json(list);
             }
-            
-           
+
+
             return Json("Không có dữ liệu");
         }
         public JsonResult _load_body_detail(string code_request)
@@ -315,9 +315,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         wsLocation.Cells["A" + (idx + 2)].Value = DataLocation[idx];
                     }
-                   
+
                     var wsAccCost = package.Workbook.Worksheets[4];
-                    
+
                     var list = db.GET_DATA_FROM_SQL("Select null As Account_Code,null As Account_Name_EN Union ALL SELECT DISTINCT [Account_Code],[Account_Code]+':'+[Account_Name_EN] AS Account_Name_EN FROM [TM_ACCOUNT]");
                     List<string> maketoan = new List<string>();
                     for (int i = 0; i < list.Rows.Count; i++)
@@ -424,7 +424,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             rowData["price"] = dataOther.First().Price.ToString()!;
                             rowData["typePay"] = dataOther.First().Currency!.ToString()!;
                             resultList.Add(rowData);
-                        }                       
+                        }
                     }
                 }
             }
@@ -479,7 +479,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         int currentRow = startRow + i;
                         var item = list[i];
-                        ws.Cells["A" + currentRow].Value =  i + 1;
+                        ws.Cells["A" + currentRow].Value = i + 1;
                         ws.Cells["B" + currentRow].Value = item.Material_Code;
                         ws.Cells["C" + currentRow].Value = item.Material_Name;
                         ws.Cells["F" + currentRow].Value = item.Account_Code;
@@ -491,10 +491,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cells["L" + currentRow].Formula = (item.Amount * item.Price).ToString();
                         ws.Cells["M" + currentRow].Value = item.Aim;
                     }
-                  
-                    int totalRow = startRow  + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng
+
+                    int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng
                     ws.Cells["L" + totalRow + 12].Formula = $"SUM(L{startRow}:L{totalRow - 1})";
-                 
+
                     // Tính toán lại toàn bộ công thức trong sheet trước khi lưu
                     ws.Calculate();
                     package.Save();
@@ -517,7 +517,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public JsonResult chuyenkho(string malinhkien, string soluonghientai, string khochuyen, string khonhan, string vitri, string soluongchuyen, string ngaychuyen, string us)
         {
-            if(string.IsNullOrEmpty(ngaychuyen) || ngaychuyen == "1/1/0001 12:00:00 AM" || ngaychuyen.Contains("1900-01-01"))
+            if (string.IsNullOrEmpty(ngaychuyen) || ngaychuyen == "1/1/0001 12:00:00 AM" || ngaychuyen.Contains("1900-01-01"))
             {
                 ngaychuyen = DateTime.Now.ToString();
             }
@@ -530,7 +530,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             var list = db.GET_DATA_FROM_SQL("Select null As Account_Code,null As Account_Name_EN Union ALL SELECT DISTINCT [Account_Code],[Account_Code]+':'+[Account_Name_EN] AS Account_Name_EN FROM [TM_ACCOUNT]");
             List<string> maketoan = new List<string>();
-            for(int i = 0; i < list.Rows.Count; i++)
+            for (int i = 0; i < list.Rows.Count; i++)
             {
                 maketoan.Add(list.Rows[i][1].ToString()!);
             }
@@ -590,7 +590,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json("Đơn yêu cầu lỗi");
             }
         }
-        
+
         public List<REQUEST_DETAIL> GetListRequestDetail(string iD_REQUEST)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
@@ -598,10 +598,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //List<REQUEST> rq = new List<REQUEST>();
 
             var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST_DETAIL] where Id_Request = '" + iD_REQUEST + "'");
-            var get_vitri = db.ReturnString("select Place from [REQUEST] where [Id_Request] = '" + iD_REQUEST +"'");
+            var get_vitri = db.ReturnString("select Place from [REQUEST] where [Id_Request] = '" + iD_REQUEST + "'");
             List<REQUEST_DETAIL> rq_dt = new List<REQUEST_DETAIL>();
 
-            for(int i = 0; i < request_detail.Rows.Count; i++)
+            for (int i = 0; i < request_detail.Rows.Count; i++)
             {
                 rq_dt.Add(new REQUEST_DETAIL
                 {
@@ -629,7 +629,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST] where Id_Request = '" + iD_REQUEST + "'");
             List<REQUEST> rq_dt = new List<REQUEST>();
-      
+
             for (int i = 0; i < request_detail.Rows.Count; i++)
             {
                 rq_dt.Add(new REQUEST
@@ -658,5 +658,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View(model);
         }
 
+      
     }
 }

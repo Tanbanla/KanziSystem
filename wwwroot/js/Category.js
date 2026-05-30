@@ -182,6 +182,39 @@ function initCategories() {
         }
     });
 
+    // Export master category data 
+    document.getElementById('btnExportMaster').addEventListener('click', async function () {
+        try {
+            const apiUrl = (window.apiBaseUrl || '') + '/Master/ExportExcelMasterCategory';
+            const res = await fetch(apiUrl, { method: 'GET' });
+            if (!res.ok) {
+                const errObj = await res.json().catch(() => null);
+                throw new Error(errObj?.message || 'Export failed');
+            }
+            const blob = await res.blob();
+
+            let filename = 'ExportMasterCategory.xlsx';
+            const cd = res.headers.get('content-disposition');
+            if (cd) {
+                const fnMatch = cd.match(/filename\*=(?:UTF-8'')?([^;\n]+)/i) || cd.match(/filename=\"?([^\";]+)\"?/i);
+                if (fnMatch && fnMatch[1]) {
+                    try { filename = decodeURIComponent(fnMatch[1].replace(/\u0022/g, '')); } catch { filename = fnMatch[1]; }
+                }
+            }
+
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (err) {
+            showDialog(window.i18nCategory.ErrorTitle, (err && err.message) || window.i18nCategory.ErrorConnection);
+        }
+    });
+
     document.getElementById('excelFileInput').addEventListener('change', async function (e) {
         const file = e.target.files[0];
         if (!file) return;

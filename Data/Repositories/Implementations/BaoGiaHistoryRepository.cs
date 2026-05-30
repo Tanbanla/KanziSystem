@@ -247,5 +247,191 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 TotalCount = totalCount
             };
         }
+        // Lấy thông tin phê duyệt báo giá của các đơn hàng
+        public async Task<List<dynamic>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        {
+            var sql = @"
+                WITH Ranked AS (
+                    SELECT h.*, q.ID_Status,
+                        ROW_NUMBER() OVER (PARTITION BY h.CHR_MaDon, h.CHR_ActionType ORDER BY h.CHR_Updatedate DESC) AS rn
+                    FROM [COST_MANAGEMENT].[dbo].[BaoGia_History_Request_of_Quotation] h
+                    INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] q ON q.ID = h.ID_RequestQuote
+                    INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] s ON q.CHR_SectionCode = s.CHR_CodeSection
+                    WHERE (@MaDon IS NULL OR q.CHR_MaDon = @MaDon)
+                      AND (@MaNcc IS NULL OR q.CHR_MaNCC LIKE '%' + @MaNcc + '%')
+                      AND (@ChungLoai IS NULL OR q.NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
+                      AND (@Section IS NULL OR q.CHR_SectionCode LIKE '%' + @Section + '%')
+                      AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
+                      AND (@MaHang IS NULL OR q.CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
+                      AND (@Step IS NULL OR q.ID_StepBaoGia = @Step)
+                      AND (s.CHR_UserAdid = @Adid)
+                )
+                SELECT 
+                    CHR_MaDon AS maDon,
+                    ID_RequestQuote,
+                    MAX(CASE WHEN CHR_ActionType = 'INSERT' THEN CHR_UpdateBy END) AS userInsert,
+                    MAX(CASE WHEN CHR_ActionType = 'INSERT' THEN CHR_Updatedate END) AS timeInsert,
+                    MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS userChief,
+                    MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN CHR_Updatedate END) AS timeChief,
+                    MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS userSection,
+                    MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN CHR_Updatedate END) AS timeSection,
+                    MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS userPIC,
+                    MAX(CASE WHEN CHR_ActionType = 'PIC' THEN CHR_Updatedate END) AS timePIC,
+                    MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS userPur,
+                    MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN CHR_Updatedate END) AS timePur
+                FROM Ranked
+            ";
+
+            var statusSql = "1=1";
+            switch (status)
+            {
+                case "RETURN":
+                    statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DONE":
+                    statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "APPROVAL":
+                    statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "WAIT":
+                    statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DELETE":
+                    statusSql = "ID_Status LIKE 'DELETE'";
+                    break;
+                default:
+                    statusSql = "ID_Status NOT LIKE 'DELETE'";
+                    break;
+            }
+
+            sql += " WHERE (" + statusSql + ")";
+            sql += @"
+                GROUP BY CHR_MaDon, ID_RequestQuote
+                ORDER BY maDon DESC
+            ";
+
+            var parameters = new
+            {
+                MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
+                MaNcc = string.IsNullOrEmpty(MaNcc) ? null : MaNcc,
+                Section = string.IsNullOrEmpty(Section) ? null : Section,
+                NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
+                MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
+                Step = step,
+                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
+                Adid = user
+            };
+
+            var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            return data;
+        }
+        // Lấy thông tin lịch sử báo giá theo mã hàng nội bộ và số đơn
+        public async Task<List<dynamic>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        {
+            var sql = @"
+                WITH CTE_MaxStep AS (
+                    SELECT 
+                        q.*,
+                        d.BIT_Select,
+                        d.NVCHR_ReasonPick,
+                        d.NVCHR_File,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY q.CHR_MaDon, q.CHR_MaHangNoiBo
+                            ORDER BY q.ID_StepBaoGia DESC
+                        ) AS rn
+                    FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] q
+                    INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] s
+                        ON q.CHR_SectionCode = s.CHR_CodeSection
+                    LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] d
+                        ON q.ID = d.ID_RequestQuote
+                    WHERE (@MaDon IS NULL OR q.CHR_MaDon = @MaDon)
+                      AND (@MaNcc IS NULL OR q.CHR_MaNCC LIKE '%' + @MaNcc + '%')
+                      AND (@ChungLoai IS NULL OR q.NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
+                      AND (@Section IS NULL OR q.CHR_SectionCode LIKE '%' + @Section + '%')
+                      AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
+                      AND (@MaHang IS NULL OR q.CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
+                      AND (@Step IS NULL OR q.ID_StepBaoGia = @Step)
+                      AND (s.CHR_UserAdid = @Adid)
+            ";
+
+            var statusSql = "1=1";
+            switch (status)
+            {
+                case "RETURN":
+                    statusSql = "q.ID_Status LIKE '%RETURN%' AND q.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DONE":
+                    statusSql = "q.ID_Status = 'DONE' AND q.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "APPROVAL":
+                    statusSql = "q.ID_Status LIKE 'APPROVAL%' AND q.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "WAIT":
+                    statusSql = "q.ID_Status LIKE '%WAIT%' AND q.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DELETE":
+                    statusSql = "q.ID_Status LIKE 'DELETE'";
+                    break;
+                default:
+                    statusSql = "q.ID_Status NOT LIKE 'DELETE'";
+                    break;
+            }
+
+            sql += " AND (" + statusSql + ")";
+            sql += @"
+                )
+                SELECT 
+                    CHR_MaDon,
+                    CHR_MaHangNoiBo,
+                    BIT_IsTemplate,
+                    BIT_LayBaoGia,
+                    CHR_CreateBy,
+                    CHR_Gap,
+                    CHR_MaHangNCC,
+                    CHR_MaNCC,
+                    CHR_MaThietBi,
+                    CHR_NameEN,
+                    CHR_Phanloai,
+                    CHR_SectionCode,
+                    CHR_SectionName,
+                    DTM_Deadline,
+                    DTM_KyHan,
+                    DTM_NgayMuonNhan,
+                    ID_Status,
+                    NVCHR_ChungLoai,
+                    NVCHR_DonVi,
+                    NVCHR_FileThietKe,
+                    NVCHR_LyDo,
+                    NVCHR_NameVN,
+                    NVCHR_NhaSanXuat,
+                    NVCHR_TenNCC,
+                    INT_SoLuong,
+                    ID_StepBaoGia,
+                    NVCHR_ReasonQuotation,
+                    CHR_LinkFile,
+                    BIT_Select,
+                    NVCHR_ReasonPick,
+                    NVCHR_File
+                FROM CTE_MaxStep
+                WHERE rn = 1
+                ORDER BY CTE_MaxStep.CHR_MaDon, CTE_MaxStep.CHR_MaHangNoiBo
+            ";
+
+            var parameters = new
+            {
+                MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
+                MaNcc = string.IsNullOrEmpty(MaNcc) ? null : MaNcc,
+                Section = string.IsNullOrEmpty(Section) ? null : Section,
+                NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
+                MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
+                Step = step,
+                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
+                Adid = user
+            };
+
+            var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            return data;
+        }
     }
 }

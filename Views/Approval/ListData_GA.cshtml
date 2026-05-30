@@ -41,11 +41,21 @@
             font-weight: bold;
         }
 
-    /* 4. Đưa dấu chấm phân trang vào giữa 2 nút */
+    /* 4. Đưa số phân trang vào giữa 2 nút */
     .swiper-pagination {
         position: static !important;
         width: auto !important;
-        padding: 0 10px;
+        padding: 0 15px;
+        font-size: 16px !important; /* Tăng kích thước chữ số */
+        font-weight: bold !important; /* Làm đậm số */
+        color: #495057 !important; /* Màu sắc của số hiển thị */
+        display: flex;
+        align-items: center;
+    }
+
+    /* Tùy chỉnh màu sắc riêng cho số trang hiện tại */
+    .swiper-pagination-current {
+        color: #28a745 !important; /* Đổi số trang hiện tại thành màu xanh lá giống màu nút */
     }
 
     /* Hiệu ứng khi di chuột qua nút */
@@ -66,21 +76,21 @@
     #modal-silder .table thead tr:nth-child(1) th {
         position: sticky;
         top: 0;
-        background-color: #d7ebff8f !important; /* Phải có màu nền để không lộ chữ bên dưới */
+        background-color: #e8f3ff !important; /* Phải có màu nền để không lộ chữ bên dưới */
         z-index: 1000;
         border-bottom: 1px solid #dee2e6;
     }
 
     /* Dòng header thứ hai: Dính bên dưới dòng thứ nhất */
-    /* Bạn phải kiểm tra chiều cao thực tế của dòng 1, thường là khoảng 45px đến 55px */
     #modal-silder .table thead tr:nth-child(2) td,
     #modal-silder .table thead tr:nth-child(2) th {
         position: sticky;
         top: 52px; /* TĂNG/GIẢM số này cho đến khi khít với dòng 1 */
-        background-color: #d7ebff8f !important;
+        background-color: #e8f3ff !important;
         z-index: 999;
     }
 </style>
+
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
@@ -93,7 +103,6 @@
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 50px">
                     <div class="input-group mb-2">
-                        @*  <input type="text" class="form-control" list="tt" id="trangthaidon" placeholder="@Languages.Tinhtrangdon"> *@
                         <select class="form-control" id="trangthaidon">
                             <option value=""> -- @Languages.Tinhtrangdon --</option>
                             <option value="1">Gấp</option>
@@ -122,7 +131,6 @@
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 10px">
                     <div class="input-group mb-2">
-                        @*   <input type="text" list="donh" id="giadonhang" class="form-control" placeholder="--- @Languages.Giatien ---" /> *@
                         <select class="form-control" id="giadonhang">
                             <option value="">---  @Languages.Giatien  ---</option>
                             <option value="2999">Dưới 3000</option>
@@ -131,7 +139,7 @@
                         </select>
                     </div>
                 </div>
-                <button type="button" class="btn btn-success ml-3" onclick="_load_confirm()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                <button type="button" class="btn btn-success ml-3" onclick="_load_confirm_GA()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
                 <button type="button" class="btn btn-info ml-3" onclick="_reset()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button>
 
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
@@ -139,9 +147,9 @@
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div style="max-height: 600px; overflow-y: auto; border: 1px solid #dee2e6;">
                     <table class="table table-bordered">
-                        <thead class="bg-primary" style="position: sticky; top: 0; background: #d7ebff8f; z-index: 999;">
+                        <thead class="bg-primary" style="position: sticky; top: 0; background: #e8f3ff; z-index: 999;">
                             <tr>
-                                <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" id="idd" /></th>                                
+                                <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" id="idd" /></th>
                                 <th rowspan="2">@Languages.chitiet</th>
                                 <th rowspan="2">No.</th>
                                 <th rowspan="2">@Languages.Tinhtrangdon</th>
@@ -154,13 +162,12 @@
                                 <th rowspan="2">@Languages.nguoitao</th>
                                 <th colspan="3">@Languages.phongbanyeucau</th>
                                 <th colspan="3">@Languages.phongtiepnhan</th>
-                                @* <th rowspan="2">@Languages.nguoinhan</th> *@
                             </tr>
                             <tr>
                                 <th>@Languages.nguoiduthao</th>
                                 <th>@Languages.nguoithamtra</th>
                                 <th>@Languages.nguoipheduyet</th>
-                               
+
                                 <th>@Languages.Damnhiem</th>
                                 <th>@Languages.dongyboi QLSC</th>
                                 <th>@Languages.dongyboi QLTC</th>
@@ -177,14 +184,16 @@
 <button id="modal-7" hidden></button>
 @await Html.PartialAsync("_modal", "Approval")
 <script src="~/scripts/request.js"></script>
+
 <script>
-    window.onload = function()
-    {
+    let swiper; // Định nghĩa biến Swiper toàn cục
+    let lst = [];
+    const checkAll = document.getElementById('idd');
+
+    window.onload = function() {
         var us = document.getElementById("us").innerHTML;
         _load_confirm_GA(us);
     }
-    let lst = [];
-    const checkAll = document.getElementById('idd');
 
     document.addEventListener('change', function(e) {
         // 1. Xử lý logic Click vào nút "Chọn tất cả" (Check All)
@@ -200,29 +209,23 @@
         const checkedItems = document.querySelectorAll('.item:checked');
 
         if (checkAll) {
-            // Tích chọn nếu tất cả con được chọn
             checkAll.checked = (allItems.length > 0 && allItems.length === checkedItems.length);
-            // Gạch ngang nếu có ít nhất 1 cái chọn nhưng không phải tất cả
             checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
         }
 
         // 3. GÁN GIÁ TRỊ VÀO LST
-        // Dù là chọn tất cả hay chọn lẻ, ta chỉ cần lấy tất cả những ô đang được checked
         lst = Array.from(checkedItems).map(cb => cb.value);
-
         console.log("Danh sách giá trị hiện tại:", lst);
     });
 
-    function _list_view()
-    {
-        //Gán nút button theo khối
-   
+    function _list_view() {
         document.getElementById('slider').innerHTML = "";
+        let ajaxPromises = []; // Mảng đồng bộ hóa hàng đợi AJAX
+
+        // 1. Khởi tạo cấu trúc khung HTML của các slide trước
         for(let i = 0; i < lst.length; i++){
             var mayeucau = lst[i].split('_')[0];
             var buoc = lst[i].split('_')[1];
-
-            // tạo giao diện
 
             document.getElementById('slider').innerHTML += `
             <div class="swiper-slide p-3">
@@ -234,45 +237,25 @@
                         <td>Urgent : <i id="urgent${i}"></i></td>
                     </tr>
                     <tr>
-                            <th rowspan="2" colspan="4" style="font-size:18px;background-color:#d7ebff8f">
+                        <th rowspan="2" colspan="4" style="font-size:18px;background-color:#e8f3ff">
                             Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
                             物品依頼書（共通間材・比例間材用・消耗品）　
                         </th>
-                            <th colspan="2" id="madonhang${i}" style="background-color:#d7ebff8f; font-size:18px"></th>
+                        <th colspan="2" id="madonhang${i}" style="background-color:#e8f3ff; font-size:18px"></th>
                     </tr>
                     <tr>
-                        <th>
-                            Phòng tiếp nhận　受け部門：
-                        </th>
-                            <td style="background-color:#d7ebff8f" id="khoi${i}"></td>
+                        <th>Phòng tiếp nhậnを受け部門：</th>
+                        <td style="background-color:#e8f3ff" id="khoi${i}"></td>
                     </tr>
                     <tr>
-                        <td>
-                            ※Mã bộ phận yêu cầu<br />
-                            依頼部門 コード
-                        </td>
-                        <td>
-                            ※ Mã phòng ban yêu cầu<br />
-                            依頼部門コストセンター
-                        </td>
-                        <td>
-                            ※ Tên phòng ban<br />
-                            依頼部門名
-                        </td>
-                        <td>
-                            ※Chuyền<br />
-                            ライン
-                        </td>
-                        <td>
-                            ※Ngày yêu cầu<br />
-                            依頼日
-                        </td>
-                        <td>
-                            ※Thời hạn mong muốn<br />
-                            希望期限
-                        </td>
+                        <td>※Mã bộ phận yêu cầu<br />依頼部門 コード</td>
+                        <td>※ Mã phòng ban yêu cầu<br />依頼部門コストセンター</td>
+                        <td>※ Tên phòng ban<br />依頼部門名</td>
+                        <td>※Chuyền<br />ライン</td>
+                        <td>※Ngày yêu cầu<br />依頼日</td>
+                        <td>※Thời hạn mong muốn<br />希望期限</td>
                     </tr>
-                        <tr style="height:60px; background-color : #d7ebff8f">
+                    <tr style="height:60px; background-color : #e8f3ff">
                         <td id="mbp${i}"></td>
                         <td id="mpb_yc${i}"></td>
                         <td id="tenphongban${i}"></td>
@@ -281,107 +264,118 @@
                         <td id="thmm${i}"></td>
                     </tr>
                 </table>
-                  <div class="table-responsive-custom">
+                <div class="table-responsive-custom">
                     <table class="table table-bordered">
-                            <thead class="text-center"  style="position: sticky; top: 0; background: #d7ebff8f; z-index: 999;">
+                        <thead class="text-center" style="position: sticky; top: 0; background: #e8f3ff; z-index: 999;">
                             <tr class="bg-white">
-                                <td colspan="8" class="text-right">
-                                    Tổng tiền 合計
-                                </td>
+                                <td colspan="8" class="text-right">Tổng tiền 合計</td>
                                 <td id="tongtien_${i}" class="bg-warning"></td>
-                                  <td colspan="4" class="text-center">
-                                       <div id="cls_${i}">
-                                            <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_GA('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
-                                            <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-22"><i class="ion ion-android-close"></i> Từ chối </button>
-                                       </div>
+                                <td colspan="4" class="text-center">
+                                     <div id="cls_${i}">
+                                          <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_GA_Slide('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
+                                          <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-22"><i class="ion ion-android-close"></i> Từ chối </button>
+                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                            <td rowspan="2">No</td>
-                            <td rowspan="2">※ Mã đơn <br />システムコード</td>
-                            <td rowspan="2">※ Tên hàng <br />品名</td>
-                            <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
-                            <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
-                            <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
-                            <td colspan="2">Yêu cầu <br />依頼</td>
-                            <td colspan="2">Già thành<br />単価</td>
-                            <td rowspan="2">Tổng chi phí <br />金額合計</td>
-                            <td rowspan="2">※ Mục đích <br />目的</td>
-                            <td rowspan="2">※ Ghi chú <br />備考</td>
-                        </tr>
-                        <tr>
-                            <td>※ Số lượng <br />数量</td>
-                            <td>Đơn vị<br />単位</td>
-                            <td>Đơn giá<br />単価</td>
-                            <td>Đơn vị tiền tệ <br />通貨単位</td>
-                        </tr>
+                                <td rowspan="2">No</td>
+                                <td rowspan="2">※ Mã đơn <br />システムコード</td>
+                                <td rowspan="2">※ Tên hàng <br />品名</td>
+                                <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
+                                <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
+                                <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
+                                <td colspan="2">Yêu cầu <br />依頼</td>
+                                <td colspan="2">Già thành<br />単価</td>
+                                <td rowspan="2">Tổng chi phí <br />金額合計</td>
+                                <td rowspan="2">※ Mục đích <br />目的</td>
+                                <td rowspan="2">※ Ghi chú <br />備考</td>
+                            </tr>
+                            <tr>
+                                <td>※ Số lượng <br />数量</td>
+                                <td>Đơn vị<br />単位</td>
+                                <td>Đơn giá<br />単価</td>
+                                <td>Đơn vị tiền tệ <br />通貨単位</td>
+                            </tr>
                         </thead>
                         <tbody id="load_detail${i}"></tbody>
-                       
                     </table>
                 </div>
                 <br />
-           
-            </div>`
-            $.ajax({
-            url: '/Request/_get_request',
-            type: 'POST',
-            dataType: 'JSON',
-            data: {
-                cost_request: mayeucau
-            },
-            success: function (response) {
-                console.log(response);
-                document.getElementById("load_detail" + i).innerHTML = "";
-                document.getElementById("madonhang" + i).innerHTML = "*" + response[0].code_Request + "*";
-                document.getElementById("mbp" + i).innerHTML = response[0].cost_Center_Group;
-                document.getElementById("mpb_yc" + i).innerHTML = response[0].cost_Center;
-                document.getElementById("tenphongban" + i).innerHTML = response[0].name_Dept;
-                document.getElementById("nyc" + i).innerHTML = response[0].creat_Date.split(' ')[0];
-                document.getElementById("thmm" + i).innerHTML = response[0].dealine.split(' ')[0];
-                document.getElementById("khoi" + i).innerHTML = response[0].group_Code.split(' ')[0];
-                document.getElementById("id_request" + i).innerHTML = response[0].id_Request;
-                document.getElementById("urgent" + i).innerHTML = response[0].urgent;
-                document.getElementById("step" + i).innerHTML = buoc;
-                document.getElementById("chuyen" + i).innerHTML = response[0].place;
-                if (buoc == "0") {
-                    document.getElementById("regency" + i).innerHTML = "NGUOIYEUCAU";
-                }
-                if (buoc == "1") {
-                    document.getElementById("regency" + i).innerHTML = "NGUOITHAMTRA";
-                }
-                if (buoc == "2") {
-                    document.getElementById("regency"+ i).innerHTML = "NGUOIPHEDUYET";
-                }
-                if (buoc == "3") {
-                    document.getElementById("regency"+ i).innerHTML = "XUATKHO";
-                }
-                if (buoc == "4") {
-                    document.getElementById("regency"+ i).innerHTML = "QLSC";
-                }
-                 if (buoc == "5") {
-                    document.getElementById("regency"+ i).innerHTML = "QLTC";
-                }
-                var tongdon = 0;
-                for (var a = 0; a < response.length; a++) {
-                    var tongtien = response[a].total_exchange;
-                                    document.getElementById("load_detail" + i).innerHTML += `<td>${a+ 1}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td>${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td>${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td>`;
-                    tongdon += parseFloat(tongtien);
-                }
-                document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US');
-            }
-        })
-    }
-}
+            </div>`;
 
-function _dongy_all_GA() {
+            // 2. Đưa các lệnh gọi AJAX vào danh sách theo dõi
+            let ajaxRequest = $.ajax({
+                url: '/Request/_get_request_GA',
+                type: 'POST',
+                dataType: 'JSON',
+                data: { cost_request: mayeucau },
+                success: function (response) {
+                    console.log(response);
+                    document.getElementById("load_detail" + i).innerHTML = "";
+                    document.getElementById("madonhang" + i).innerHTML = "*" + response[0].code_Request + "*";
+                    document.getElementById("mbp" + i).innerHTML = response[0].cost_Center_Group;
+                    document.getElementById("mpb_yc" + i).innerHTML = response[0].cost_Center;
+                    document.getElementById("tenphongban" + i).innerHTML = response[0].name_Dept;
+                    document.getElementById("nyc" + i).innerHTML = response[0].creat_Date.split(' ')[0];
+                    document.getElementById("thmm" + i).innerHTML = response[0].dealine.split(' ')[0];
+                    document.getElementById("khoi" + i).innerHTML = response[0].group_Code.split(' ')[0];
+                    document.getElementById("id_request" + i).innerHTML = response[0].id_Request;
+                    document.getElementById("urgent" + i).innerHTML = response[0].urgent;
+                    document.getElementById("step" + i).innerHTML = buoc;
+                    document.getElementById("chuyen" + i).innerHTML = response[0].place;
 
-    const checkboxes = document.querySelectorAll('input.item:checked');
-    checkboxes.forEach((item) => {
-        if (item.checked) {
-            _update_request_all_GA(item.value);
+                    if (buoc == "0") document.getElementById("regency" + i).innerHTML = "NGUOIYEUCAU";
+                    if (buoc == "1") document.getElementById("regency" + i).innerHTML = "NGUOITHAMTRA";
+                    if (buoc == "2") document.getElementById("regency" + i).innerHTML = "NGUOIPHEDUYET";
+                    if (buoc == "3") document.getElementById("regency" + i).innerHTML = "XUATKHO";
+                    if (buoc == "4") document.getElementById("regency" + i).innerHTML = "QLSC";
+                    if (buoc == "5") document.getElementById("regency" + i).innerHTML = "QLTC";
+
+                    var tongdon = 0;
+                    for (var a = 0; a < response.length; a++) {
+                        var tongtien = response[a].total_exchange;
+                        // Sửa lỗi: Đã bọc các cột td vào trong cặp thẻ tr
+                        document.getElementById("load_detail" + i).innerHTML += `<tr><td>${a + 1}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td class="text-right">${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td class="text-right">${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td class="text-right">${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td></tr>`;
+                        tongdon += parseFloat(tongtien);
+                    }
+                    document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US');
+                }
+            });
+            ajaxPromises.push(ajaxRequest);
         }
-    });
-    alert("Hoàn thành !");
-}
+
+        // 3. Đợi toàn bộ các tiến trình AJAX hoàn tất thì mới bật Swiper số lên
+        $.when.apply($, ajaxPromises).then(function() {
+            // Huỷ cơ chế Swiper cũ nếu đang tồn tại để không dính lỗi cache slide
+            if (swiper) {
+                swiper.destroy(true, true);
+            }
+
+            // Tiến hành khởi tạo thực thể Swiper mới hoàn toàn
+            swiper = new Swiper(".mySwiper", {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev",
+                },
+                pagination: {
+                    el: ".swiper-pagination",
+                    type: "fraction", // <--- Chuyển nút tròn thành số trang phân số (1 / 5)
+                },
+                mousewheel: true,
+                keyboard: true,
+            });
+        });
+    }
+
+    function _dongy_all_GA() {
+        const checkboxes = document.querySelectorAll('input.item:checked');
+        checkboxes.forEach((item) => {
+            if (item.checked) {
+                _update_request_all_GA(item.value);
+            }
+        });
+        alert("Hoàn thành !");
+    }
 </script>

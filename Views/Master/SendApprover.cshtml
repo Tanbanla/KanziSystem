@@ -176,7 +176,7 @@
     <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
 </div>
 @section Scripts {
-    <script src="/js/sendApprover.js"></script>
+    <script src="/js/sendApprover.js"  asp-append-version="true"></script>
     <script>
         window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
         window.i18nSendApprover = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {

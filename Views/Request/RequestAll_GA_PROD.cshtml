@@ -1,0 +1,441 @@
+@using PRJ_WAREHOUSE_BIVN.Language
+@{
+    ViewData["Title"] = "Tất cả các đơn";
+}
+<style>
+    .form-control, .input-group-text, .custom-select, .custom-file-label {
+        border-color: #6e75c4;
+    }
+</style>
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+                <div class="table-responsive card">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <td>
+                                    <select class="form-control" id="khoi" onchange="_load_request_all()">
+                                        <option value="PROD">PROD</option>
+                                        <option value="GA">GA</option>
+                                        <option value="IT">IT</option>
+                                        <option value="PUR">PUR</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="trangthaidon" class="form-control">
+                                        <option value=""> ---  Chọn ---</option>
+                                        <option value="1">Gấp</option>
+                                        <option value="0">Thông thường</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-control" id="tinhtrangdon">
+                                        <option value=""> ---  Chọn ---</option>
+                                        <option value="WAITCONFIRM">Đang chờ xác nhận</option>
+                                        <option value="REFUSE">Hủy bỏ</option>
+                                        <option value="DONE">	Hoàn thành</option>
+
+                                    </select>
+                                </td>
+                                <td width="125">
+                                    <input type="text" class="form-control" id="mnl">
+                                </td>
+                                <td width="80">
+                                    <input type="text" class="form-control" id="cost">
+                                </td>
+                                <td hidden>
+                                    <input type="text" class="form-control" id="costt_ct">
+                                </td>
+                                <td>
+                                    <input type="date" class="form-control" id="ngayyc">
+                                </td>
+                                <td>
+                                    <input type="date" class="form-control" id="ngaymn">
+                                </td>
+                                <td width="180">
+                                    <select class="form-control" id="loaicp">
+                                        <option></option>
+                                        <option value="AUXILIARY">@Languages.cpbiendoitheosanluong</option>
+                                        <option value="EUQIMENT">@Languages.chiphicodinh</option>
+                                        <option value="FIXED">@Languages.taisancodinh</option>
+                                        <option value="COMMON">@Languages.Chiphichung</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="giadonhang" class="form-control">
+                                        <option value="0"> ---  Chọn ---</option>
+                                        <option value="2999">Dưới 3000</option>
+                                        <option value="3000">Dưới 10,000</option>
+                                        <option value="10000">Trên 10,000</option>
+                                    </select>
+                                </td>
+                                <td colspan="9">
+                                    <div id="hienthitimkiem">
+                                        <button type="button" class="btn btn-info ml-3" onclick="_load_request_all()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                                        <button type="button" class="btn btn-secondary ml-3" onclick="_load_request_all()"><i class="ion ion-refresh"></i> Refresh </button>
+
+                                    </div>
+                                    <div id="hienthitimkiem_GA">
+                                        <button type="button" class="btn btn-info ml-3" onclick="_load_request_condition_ga()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                                        <button type="button" class="btn btn-secondary ml-3" onclick="_load_request_condition_ga()"><i class="ion ion-refresh"></i> Refresh </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                            <tr class="bg-primary">
+                                <th rowspan="2">@Languages.chitiet</th>
+                                <th rowspan="2">@Languages.Tinhtrangdon</th>
+                                <th rowspan="2">@Languages.Trangthaidon</th>
+                                <th rowspan="2">@Languages.mayeucau</th>
+                                <th rowspan="2">Cost Center</th>
+                                <th rowspan="2">@Languages.Ngayyeucau</th>
+
+                                <th rowspan="2">@Languages.thoihanmuonnhan</th>
+                                <th rowspan="2">@Languages.loaichiphi</th>
+                                <th rowspan="2">@Languages.tongtien</th>
+                                <th rowspan="2">@Languages.nguoitao</th>
+
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr id="loadhangmuc">
+                            </tr>
+                        </thead>
+                        <tbody id="list_approve"></tbody>
+                    </table>
+                    <ul class="pagination" id="pagination-controls"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalLyDoHuyn" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Lý do hủy đơn</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id_huy">
+                <div class="form-group">
+                    <label>Vui lòng nhập lý do:</label>
+                    <textarea class="form-control" id="txtLyDo" rows="4" ></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-danger" onclick="Huy_don()">Xác nhận hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_modal", "Request")
+<button id="modal-7" hidden></button>
+<button id="modal-23" hidden></button>
+<script src="~/scripts/request.js"></script>
+<script>
+    window.onload = function () {
+        // Gọi hàm load dữ liệu khi trang đã tải xong
+        _load_request_all();
+         document.getElementById("hienthitimkiem_GA").style.display = 'none';
+    };
+    function _load_request_all() {
+        // Giả sử bạn lấy user hiện tại từ một biến global hoặc input ẩn
+        var user = document.getElementById("us").innerHTML;
+
+        var Group_Code = document.getElementById("khoi").value;
+        var Code_Request = document.getElementById("mnl").value;
+        var Tinhtrang = document.getElementById("tinhtrangdon").value;
+        var Cost_Center = document.getElementById("cost").value;
+        var Request_Date = document.getElementById("ngayyc").value;
+        var Total = document.getElementById("giadonhang").value;
+        var Urgent = document.getElementById("trangthaidon").value;
+
+        var ngayyc = document.getElementById("ngaymn").value;
+        var loaicp = document.getElementById("loaicp").value;
+
+        $.ajax({
+            url: '/Request/view_rqall_GA_PROD', // Thay YourControllerName bằng tên Controller của bạn
+            type: 'GET',
+            data: {
+                StartDate: Request_Date,
+                EndDate: ngayyc,
+                us: user,
+                Group_Code : Group_Code,
+                Code_Request: Code_Request,
+                Tinhtrang : Tinhtrang,
+                Cost_Center : Cost_Center,
+                Total : Total,
+                Urgent : Urgent,
+                loaicp :loaicp
+            },
+            success: function (data) {
+              if(Group_Code == "PROD"){
+                      var html = '';
+                if (data && data.length > 0) {
+                    console.log(data);
+                    $.each(data, function (index, item) {
+                         var resetdon = "";
+                       
+                       resetdon = `<button class="btn btn-info" onclick="moModalHuyDon('${item.Id_Request}')" ><i class="fa fa-reply text-white" style="cursor:pointer"  ></i> Reset đơn</button>`;
+                       domau = "text-secondary";
+                        if(parseFloat(item.INT_STEP) <= 4 && item.Group_Code == "PROD" )
+                        {
+                            domau = "text-danger";
+                        }
+                        if(parseFloat(item.INT_STEP) == 5 && item.Group_Code == "PROD" )
+                        {
+                            domau = "text-warning";
+                        }
+                        if(item.Status == "REFUSE" )
+                        {
+                            domau = "text-secondary";
+                        }
+                        if(item.Status == "DONE" )
+                        {
+                            domau = "text-dark";
+                        }
+                        var loaichiphi = "";
+                        if(item.Declaration == "AUXILIARY") {loaichiphi = "Chi phí biến đổi theo sản lượng"}
+                        if(item.Declaration == "EUQIMENT") {loaichiphi = "Chi phí cố định"}
+                        if(item.Declaration == "FIXED") {loaichiphi = "Tài sản cố định"}
+                        if(item.Declaration == "COMMON") {loaichiphi = "Chi phí chung"}
+                        if(item.Declaration == "OTHER") {loaichiphi = "OTHER"}
+                        html += `<tr class="${domau}">`;
+                        html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info(this.id, '${item.INT_STEP}')">Xem</button></td>`;
+                        html += `<td>${item.Type == 1 ? '<span class="badge badge-danger">Gấp</span>' : 'Thông thường'}</td>`;
+                        html += `<td>${getStatusName(item.INT_STEP)}</td>`;
+                        html += `<td>${item.Code_Request}</td>`;
+                        html += `<td>${item.Cost_Center}</td>`;
+                        html += `<td>${formatDate(item.Request_Date)}</td>`;
+                        html += `<td>${formatDate(item.Dealine)}</td>`;
+                        html += `<td>${loaichiphi}</td>`;
+                        html += `<td>${item.Total.toLocaleString()}</td>`;
+                        html += `<td>${item.User_Create}</td>`;
+                        html += `<td colspan="3"> ${resetdon}</td>`;
+                        html += '</tr>';
+                    });
+                } else {
+                    html = '<tr><td colspan="15" class="text-center">Không có dữ liệu</td></tr>';
+                }
+                $('#list_approve').html(html);
+              }
+             if(Group_Code == "GA"){
+                     var html = '';
+                if (data && data.length > 0) {
+                    console.log(data);
+                    $.each(data, function (index, item) {
+                         var huydon = "";
+                        if(item.Status == "WAITCONFIRM" ){
+
+                             huydon = `<button class="btn btn-danger" onclick="moModalHuyDon('${item.Id_Request}')" ><i class=" fa fa-reply text-white" style="cursor:pointer"  ></i> Hủy đơn</button>`;
+                        }
+                        var domau = "";
+                        if(parseFloat(item.INT_STEP) <= 6)
+                        {
+                            domau = "text-danger";
+                        }
+                        if(item.Status == "REFUSE" )
+                        {
+                            domau = "text-secondary";
+                        }
+                        if(item.Status == "DONE" )
+                        {
+                            domau = "text-dark";
+                        }
+                        var loaichiphi = "";
+                        if(item.Declaration == "AUXILIARY") {loaichiphi = "Chi phí biến đổi theo sản lượng"}
+                        if(item.Declaration == "EUQIMENT") {loaichiphi = "Chi phí cố định"}
+                        if(item.Declaration == "FIXED") {loaichiphi = "Tài sản cố định"}
+                        if(item.Declaration == "COMMON") {loaichiphi = "Chi phí chung"}
+                        if(item.Declaration == "OTHER") {loaichiphi = "OTHER"}
+                        html += `<tr class="${domau}">`;
+                        html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info(this.id, '${item.INT_STEP}')">Xem</button></td>`;
+                        html += `<td>${item.Type == 1 ? '<span class="badge badge-danger">Gấp</span>' : 'Thông thường'}</td>`;
+                        html += `<td>${getStatusName_GA(item.INT_STEP)}</td>`;
+                        html += `<td>${item.Code_Request}</td>`;
+                        html += `<td>${item.Cost_Center}</td>`;
+                        html += `<td>${formatDate(item.Request_Date)}</td>`;
+                        html += `<td>${formatDate(item.Dealine)}</td>`;
+                        html += `<td>${loaichiphi}</td>`;
+                        html += `<td>${item.Total.toLocaleString()}</td>`;
+                        html += `<td>${item.User_Create}</td>`;
+                        html += `<td colspan="3"> ${huydon}</td>`;
+                        html += '</tr>';
+                    });
+                } else {
+                    html = '<tr><td colspan="15" class="text-center">Không có dữ liệu</td></tr>';
+                }
+                $('#list_approve').html(html);
+             }
+            },
+            error: function (err) {
+                console.error("Lỗi khi tải dữ liệu:", err);
+            }
+        });
+    }
+
+    // Hàm bổ trợ định dạng ngày tháng
+    function formatDate(dateString) {
+        if (!dateString) return "";
+        var date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN');
+    }
+
+    // Hàm bổ trợ lấy tên trạng thái
+    function getStatusName(status) {
+        var statuses = {
+                "0": "Đợi người dự thảo",
+                "1":"Đợi người thẩm tra",
+                "2": "Đợi người phê duyệt",
+                "3": "Đợi bên tiếp nhận",
+                "4": "Đợi phụ trách kho",
+                "5": "Hoàn thành",
+                "6": "Bị từ chối",
+                "7": "Bị từ chối",
+                "8": "Bị từ chối",
+                "9": "Bị từ chối",
+                "10": "Bị từ chối",
+                "15" : "Hủy bỏ"
+        };
+        return statuses[status] || "Không xác định";
+    }
+
+    function getStatusName_GA(status) {
+         const statuses = {
+                "0": "Đợi người dự thảo",
+                "1": "Đợi người thẩm tra",
+                "2": "Đợi người phê duyệt",
+                "3": "Đợi đảm nhiệm kho",
+                "4": "Đợi QLSC phòng tiếp nhận",
+                "5": "Đợi QLTC phòng tiếp nhận",
+                "6": "Bị từ chối",
+                "7": "Bị từ chối",
+                "8": "Bị từ chối",
+                "9": "Bị từ chối",
+                "10": "Bị từ chối",
+                "11": "Hoàn thành",
+                "15" : "Hủy bỏ"
+            };
+            return statuses[status] || "Không xác định";
+    }
+    function xoa_don_prod(iD_REQUEST){
+    var x = confirm("Bạn có muốn xóa đơn không !");
+    if(x){
+            const params = new URLSearchParams();
+            params.append('iD_REQUEST', iD_REQUEST);
+
+            fetch('/Import/_XOADONPROD', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+            })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+            .then(data => {
+                alert(data);
+                    _load_request_condition();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+
+        }
+    }
+    function xoa_don_GA(iD_REQUEST){
+    var x = confirm("Bạn có muốn xóa đơn không !");
+    if(x){
+            const params = new URLSearchParams();
+            params.append('iD_REQUEST', iD_REQUEST);
+
+            fetch('/Import/_XOADONGA', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+            })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+            .then(data => {
+                alert(data);
+                    _load_request_condition_ga();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+
+        }
+    }
+    function _modal_sua(iD_REQUEST) {
+        document.getElementById("modal-23").click();
+
+        const params = new URLSearchParams();
+        params.append('iD_REQUEST', iD_REQUEST);
+
+        fetch('/Import/_Suadonhang', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`Lỗi hệ thống: ${response.status}`);
+            return response.json(); // Hoặc .text() nếu server trả về HTML
+        })
+        .then(data => {
+            console.log(data);
+            document.getElementById("load_suadulieu").innerHTML = "";
+            for(var i = 0; i < data.length; i++){
+                document.getElementById("load_suadulieu").innerHTML += `
+                <td>${i+1}</td>
+                <td>${data[i].material_Name}</td>
+                <td>${data[i].account_Code}</td>
+                <td>${data[i].amount}</td>
+                <td>${data[i].unit}</td>
+                <td>${data[i].price}</td>
+                <td>${data[i].currency}</td>
+                <td>${data[i].total_exchange}</td>
+                <td>${data[i].aim}</td>
+                <td>${data[i].phongchiuchiphi}</td>
+                <td>${data[i].vitri}</td>
+                <td>${data[i].poisition}</td>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi Fetch:', error);
+            alert("Không thể tải dữ liệu đơn hàng!");
+        });
+    }
+    function moModalHuyDon(id) {
+        document.getElementById("id_huy").value = id;
+        document.getElementById("txtLyDo").value = "";
+
+        // Mở modal
+        $('#modalLyDoHuyn').modal('show');
+
+        // Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
+        // Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
+        $('#modalLyDoHuyn').appendTo("body");
+    }
+
+</script>

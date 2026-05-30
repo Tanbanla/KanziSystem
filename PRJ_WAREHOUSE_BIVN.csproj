@@ -51,6 +51,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="EPPlus" Version="7.7.3" />
+    <PackageReference Include="MiniExcel" Version="1.44.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.2" />
   </ItemGroup>
@@ -126,6 +127,42 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Languages.Designer.cs</LastGenOutput>
       <CustomToolNamespace>PRJ_WAREHOUSE_BIVN.Language</CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\InputQuotation\InputQuote.en.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\InputQuotation\InputQuote.ja.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\InputQuotation\InputQuote.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\InputQuotation\InputQuoteDetail.en.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\InputQuotation\InputQuoteDetail.ja.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\InputQuotation\InputQuoteDetail.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\QuoteResults\Quotation_Results.en.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\QuoteResults\Quotation_Results.ja.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\QuoteResults\Quotation_Results.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\SelectQuote\SelectQuoteSection.en.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\SelectQuote\SelectQuoteSection.ja.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\SelectQuote\SelectQuoteSection.resx">
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
 

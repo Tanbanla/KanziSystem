@@ -507,5 +507,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // update thời hạn lựa chọn nhà cung cấp
+        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdateDeadlineAsync(List<BaoGia_Request_of_QuotationDTO> baoGias)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
+            try
+            {
+                var data = _mapper.Map<List<BaoGia_Request_of_Quotation>>(baoGias);
+                var updated = await _repo.UpdateDeadlineAsync(data);
+                result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(updated);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

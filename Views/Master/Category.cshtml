@@ -14,6 +14,7 @@
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-primary" id="btnImportExcel"><i class="fas fa-upload"></i> @Localizer["ImportExcel"]</button>
                 <button type="button" class="btn btn-outline-warning" id="btnExportExcel"><i class="fas fa-download"></i> @Localizer["ExportExcel"]</button>
+                <button type="button" class="btn btn-outline-info" id="btnExportMaster"><i class="fas fa-file-export"></i> @Localizer["ExportMaster"]</button>
                 <button type="button" class="btn btn-outline-success" id="btnAddCategory"><i class="fas fa-plus"></i> @Localizer["Add"]</button>
             </div>
         </div>
@@ -120,13 +121,15 @@
 <!-- Import Excel input (hidden) -->
 <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
 
-<script src="~/js/Category.js"></script>
-<script>
+<script src="~/js/Category.js" asp-append-version="true"></script>
+    <script>
     window.i18nCategory = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         Search = Localizer["Search"].Value,
         Add = Localizer["Add"].Value,
         Refresh = Localizer["Refresh"].Value,
         ImportExcel = Localizer["ImportExcel"].Value,
+        ExportExcel = Localizer["ExportExcel"].Value,
+        ExportMaster = Localizer["ExportMaster"].Value,
         Actions = Localizer["Actions"].Value,
         NoData = Localizer["NoData"].Value,
         Loading = Localizer["Loading"].Value,

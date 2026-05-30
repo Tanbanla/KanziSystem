@@ -61,11 +61,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // Load data based on tab
             if (target === '#request-list') {
                 this.loadRequestList();
-                // reapply open-groups and column visibility after data is (re)rendered
-                // searchItems will call reapply after it finishes rendering
             } else if (target === '#supplier-input') {
                 this.loadSupplierInput();
-                // ensure columns visibility applied for supplier table
+
                 this.applyAdditionalColumnsVisibility();
             }
         },
@@ -93,14 +91,9 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         loadRequestList: function () {
-            // Load data for request list tab
-            // This would call the API to get the summarized request data
-            // For now, populate with existing logic or placeholder
-            this.searchItems(); // Reuse existing search logic
+            this.searchItems();
         },
         loadSupplierInput: function () {
-            // Load data for supplier input tab
-            // Similar to InputQuote supplier search
             this.loadSupplierData();
         },
         loadSupplierData: function () {
@@ -115,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             const T = window.i18nQuotationResults || {};
             //SearchInputQuote
-            fetch((window.apiBaseUrl || '') + '/Quote/SearchSupplierQuoteBody', {
+            fetch((window.apiBaseUrl || '') + '/QuoteResults/SearchSupplierQuoteBody', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -235,7 +228,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }).join('');
 
             tbody.innerHTML = rowsHtml;
-            // reapply columns visibility for newly rendered rows
             this.applyAdditionalColumnsVisibility();
         },
         // mapping status supplier tab
@@ -267,7 +259,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     this.toggleSupplierDetails(btn);
                 }
 
-                // Open edit modal for request detail buttons inside supplier list
                 const detailBtn = e.target.closest('button[data-action="detail-request"]');
                 if (detailBtn) {
                     const id = detailBtn.getAttribute('data-id');
@@ -346,34 +337,28 @@ document.addEventListener('DOMContentLoaded', function () {
             if (btnImportSupplier) {
                 btnImportSupplier.addEventListener('click', this.ImportSupplier.bind(this));
             }
-            // Delegate: enforce only one supplier per maDon AND handle supplier-choice selects
+ 
             document.addEventListener('change', (e) => {
-                // Handle checkbox selection inside expanded supplier-group (old style)
                 const cb = e.target.closest('.supplier-select');
                 if (cb) {
                     if (!cb.checked) return;
-                    // Find current supplier group and derive maDon from groupId pattern: CHR_MaDon-CHR_MaHangNoiBo
                     const row = cb.closest('tr');
                     const groupContainer = row?.closest('.supplier-group');
                     const groupId = groupContainer?.id?.replace('sup-rows-', '') || '';
                     const maDon = groupId.split('-')[0] || '';
                     const maHang = groupId.split('-')[1] || '';
                     if (!maDon) return;
-                    // Uncheck other supplier-select in all groups matching same maDon, except current checkbox
                     document.querySelectorAll('.supplier-group[id^="sup-rows-' + maDon + '-"] .supplier-select').forEach(other => {
                         if (other !== cb) other.checked = false;
                     });
 
-                    // Also sync main supplier table selects: set matching supplier select to true, others in same group to false
                     const supplierId = cb.getAttribute('data-id') || cb.value || '';
                     if (supplierId) {
                         const selMatch = document.querySelector(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"][data-id="${supplierId}"]`);
                         if (selMatch) {
-                            // find reason input in expanded row
                             const reasonEl = row.querySelector('.reason-input');
                             const reason = reasonEl?.value?.trim() || '';
                             if (!reason) {
-                                // prompt for reason
                                 showPrompt({ title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do', message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp', placeholder: '' })
                                     .then(r => {
                                         if (!r) {
@@ -388,14 +373,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                 return;
                             }
                             selMatch.value = 'true';
-                            // set other selects in same group to false
                             document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => { if (s !== selMatch) s.value = 'false'; });
                         }
                     }
                     return;
                 }
-
-                // Handle select change in supplierQuoteTable rows
                 const sel = e.target.closest('.supplier-choice');
                 if (sel) {
                     const val = sel.value;
@@ -420,7 +402,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 });
                             return;
                         }
-                        // set other suppliers in same maDon+maHang to false
                         document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => {
                             if (s !== sel) s.value = 'false';
                         });
@@ -428,7 +409,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         },
-        // Save selections from supplier table to server using SavePickSupplier endpoint
         saveTab2: async function () {
             const T = window.i18nQuotationResults || {};
             const btn = document.getElementById('SaveTab2');
@@ -439,7 +419,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 rows.forEach(row => {
                     const sel = row.querySelector('select.supplier-choice');
                     if (!sel) return;
-                    // include only rows where selection is explicitly set (true/false)
                     const val = sel.value;
                     if (val === '') return;
                     const idAttr = row.getAttribute('data-id') || sel.getAttribute('data-id') || '';
@@ -456,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 var payloadWithApprover = { UserApproverNext: approverNext, listPick: payload };
                 showLoading((T && T.LoadingData) ? T.LoadingData : 'Đang lưu...');
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/SavePickSupplier', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/SavePickSupplier', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadWithApprover)
@@ -482,9 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
 
-        // Open approver selection modal, fetch approvers and on confirm call saveTab2 with approver
         openApproverSelector: function (stepNumber, sectionCode) {
-            // follow the same pattern used in Approval_Quote.js: return a Promise resolving to selected approver object or null
             return new Promise(async (resolve, reject) => {
                 try {
                     const modal = document.getElementById('selectApproverModal');
@@ -498,18 +475,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     placeholderOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.SelectPlaceholder) || '-- Chọn --';
                     sel.appendChild(placeholderOpt);
 
-                    // fetch approvers from Quote controller
                     const body = { Step: stepNumber, SectionCost: sectionCode };
                     let list = [];
                     try {
-                        const resp = await fetch((window.apiBaseUrl || '') + '/Quote/GetListApprovel', {
+                        const resp = await fetch((window.apiBaseUrl || '') + '/QuoteResults/GetListApprovel', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                             body: JSON.stringify(body)
                         });
                         if (resp.ok) {
                             const data = await resp.json();
-                            // controller returns data (could be array or wrapper)
                             list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
                         }
                     } catch (e) { console.warn('Failed to load approvers', e); }
@@ -590,12 +565,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const section = document.getElementById('supplierSearchSection')?.value || document.getElementById('searchPhongBan')?.value || '';
                 const selected = await this.openApproverSelector(step, section);
                 if (!selected) return; // cancelled
-                // normalize selected id field
-                const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? ''; // robust fallback
-                // fallback to value if object has none
+                const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? '';
                 const finalId = approverId || (selected.value || selected.Value || '');
                 if (!finalId) {
-                    // still save without approver
                     await this.saveTab2();
                     return;
                 }
@@ -675,7 +647,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         openEditRequestModal: async function (id) {
             try {
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/SearchID', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/SearchID', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(id)
@@ -761,7 +733,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const T = window.i18nQuotationResults || {};
                 showLoading(T.LoadingData || 'Đang xử lý...');
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelQuotationResult', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ExportFileExcelQuotationResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -818,7 +790,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('file', file);
                 // Gửi request
                 try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
-                fetch((window.apiBaseUrl || '') + '/Quote/ImportApprovalQuotianExcel', {
+                fetch((window.apiBaseUrl || '') + '/QuoteResults/ImportApprovalQuotianExcel', {
                     method: 'POST',
                     body: formData
                 })
@@ -855,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         const approverId = selected.CHR_UserAdid || selected.chR_UserAdid || selected.ADID || selected.Id || selected.id || selected.value || '';
                                         const payload = { SelectedApprover: approverId, Items: data.items };
                                         try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
-                                        const res2 = await fetch((window.apiBaseUrl || '') + '/Quote/ConfirmImportedApprovals', {
+                                        const res2 = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ConfirmImportedApprovals', {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify(payload)
@@ -885,9 +857,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         document.body.removeChild(fileInput);
                     });
             });
-            this.loadSupplierData(); // refresh data before opening file dialog
+            this.loadSupplierData(); 
             try {
-                // open native file dialog
                 fileInput.click();
             } catch (e) {
                 console.error('Could not open file dialog', e);
@@ -927,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fd.append('userNextApproval', selectedApproverTab2?.chR_UserAdid || '');
                 // Gửi request
                 try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
-                fetch((window.apiBaseUrl || '') + '/Quote/ImportQuotianExcel', {
+                fetch((window.apiBaseUrl || '') + '/QuoteResults/ImportQuotianExcel', {
                     method: 'POST',
                     body: fd
                 })
@@ -966,9 +937,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         document.body.removeChild(fileInput);
                     });
             });
-            this.loadSupplierData(); // refresh data before opening file dialog
+            this.loadSupplierData(); 
             try {
-                // open native file dialog
                 fileInput.click();
             } catch (e) {
                 console.error('Could not open file dialog', e);
@@ -983,14 +953,12 @@ document.addEventListener('DOMContentLoaded', function () {
             targetRow.classList.toggle('d-none');
             button.setAttribute('aria-expanded', (!willOpen).toString());
 
-            // Toggle icon if exists
             const icon = button.querySelector('i');
             if (icon) {
                 icon.classList.toggle('fa-chevron-down');
                 icon.classList.toggle('fa-chevron-up');
             }
 
-            // Only load suppliers when opening and not loaded yet
             if (willOpen) {
                 const madon = button.getAttribute('data-madon') || '';
                 const mahang = button.getAttribute('data-mahang') || '';
@@ -1008,7 +976,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         pageSize: 30,
                         pageIndex: 0
                     };
-                    const res = await fetch((window.apiBaseUrl || '') + '/Quote/SearchInputQuote', {
+                    const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/SearchInputQuote', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1071,7 +1039,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error('Load supplier details failed', err);
                 }
             }
-            // persist open/closed state for this group so switching tabs doesn't lose it
             try {
                 const groupId = (button.getAttribute('data-madon') || '') + '-' + (button.getAttribute('data-mahang') || '');
                 window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
@@ -1097,7 +1064,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         },
         searchItems: async function () {
-            // Use select IDs from the view: searchMaDon, searchMaterial, searchPhongBan, searchStatus
             const maDon = document.getElementById('searchMaDon')?.value || '';
             const maHang = document.getElementById('searchMaterial')?.value || '';
             const section = document.getElementById('searchPhongBan')?.value || '';
@@ -1111,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 pageSize: requestListState.pageSize
             };
             try {
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetThongTinBaoGiaGomNhom', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/GetThongTinBaoGiaGomNhom', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1193,7 +1159,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Render pagination
                 this.renderRequestListPaginationControls();
 
-                // Reapply persisted open-groups state so previously expanded supplier groups remain expanded
                 try {
                     const state = window._quotationResultsState || { openGroups: {} };
                     Object.keys(state.openGroups || {}).forEach(gid => {
@@ -1218,9 +1183,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         } catch (e) { }
                     });
                 } catch (e) { }
-                // Also reapply additional columns visibility
+
                 this.applyAdditionalColumnsVisibility();
-                // Wire up click on row to open approval modal (avoid clicks on toggle button / checkbox)
                 document.querySelectorAll('#quotationResultsTableBody .item-row').forEach(row => {
                     const detailBtn = row.querySelector('.toggle-sup');
                     if (detailBtn) {
@@ -1360,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const T = window.i18nQuotationResults || {};
                 showLoading(T.LoadingData || 'Đang xử lý...');
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportFileExcelApproverResult', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ExportFileExcelApproverResult', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(selectedMaDons)
@@ -1391,12 +1355,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 hideLoading();
             }
         },
-        // Open approval modal by request id and populate fields
         openApprovalModal: async function (maDon) {
             if (!maDon) return;
             try {
                 const T = window.i18nQuotationResults || {};
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetSupplierApprovalInfor', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/GetSupplierApprovalInfor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(maDon)
@@ -1408,7 +1371,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 const data = await res.json();
 
-                // Helper to safely get possible property names (case-insensitive)
                 const getVal = (obj, ...names) => {
                     if (!obj) return '';
                     for (const n of names) {
@@ -1428,13 +1390,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     return String(val || '');
                 };
 
-                // Determine master record to populate modal header/footer (use first detail if API returned array)
                 let master = data;
                 if (Array.isArray(data) && data.length > 0) {
                     master = data[0];
                 }
 
-                // populate modal header/footer fields using master record
                 try { document.getElementById('madonhang').textContent = getVal(master, 'CHR_MaDon', 'chR_MaDon', 'ID') || maDon; } catch { }
                 try { document.getElementById('khoi').textContent = getVal(master, 'CHR_SectionName', 'chR_SectionName') || ''; } catch { }
                 try { document.getElementById('mpb_yc').textContent = getVal(master, 'CHR_SectionCode', 'chR_SectionCode', 'chR_CostCenter') || ''; } catch { }
@@ -1445,7 +1405,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 try { document.getElementById('id_request').textContent = getVal(master, 'ID', 'iD', 'CHR_MaDon') || maDon; } catch { }
                 try { document.getElementById('step').textContent = getVal(master, 'ID_StepBaoGia', 'iD_StepBaoGia') || ''; } catch { }
 
-                // urgent badge
                 try {
                     const ub = document.getElementById('urgent-badge');
                     const gap = getVal(data, 'CHR_Gap', 'chR_Gap');
@@ -1453,7 +1412,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (ub) ub.style.display = isUrgent ? '' : 'none';
                 } catch { }
 
-                // Prepare details array: controller might return object with .Detail or an array
                 let details = [];
                 if (Array.isArray(data)) {
                     details = data;
@@ -1742,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 UserApproverNext: userApproverNext
                             };
 
-                            const response = await fetch((window.apiBaseUrl || '') + '/Quote/ConfirmApprover', {
+                            const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ConfirmApprover', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(payload)
@@ -1804,7 +1762,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const totalPages = requestListState.totalCount ? Math.ceil(requestListState.totalCount / requestListState.pageSize) : 1;
 
-            // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.type = 'button';
             prevBtn.className = 'btn btn-sm btn-outline-secondary';
@@ -1818,7 +1775,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             container.appendChild(prevBtn);
 
-            // Render a small range of page buttons around current page
             const range = 2;
             const start = Math.max(1, Math.min(requestListState.pageIndex - range, Math.max(1, totalPages - (range * 2))));
             const pages = [];
@@ -1871,7 +1827,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const totalPages = supplierState.totalCount ? Math.ceil(supplierState.totalCount / supplierState.pageSize) : 1;
 
-            // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.type = 'button';
             prevBtn.className = 'btn btn-sm btn-outline-secondary';
@@ -1885,7 +1840,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             container.appendChild(prevBtn);
 
-            // Render a small range of page buttons around current page
             const range = 2;
             const start = Math.max(1, Math.min(supplierState.pageIndex - range, Math.max(1, totalPages - (range * 2))));
             const pages = [];
@@ -1933,7 +1887,6 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         resetFilters: function () {
-            // Reset select filters (set value and dispatch change so enhanced dropdown UI updates)
             const selIds = ['searchMaDon', 'searchPhongBan', 'searchMaterial'];
             selIds.forEach(id => {
                 const el = document.getElementById(id);
@@ -1951,7 +1904,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 try { statusEl.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
             }
 
-            // Ensure underlying selects are updated
             ['searchMaDon', 'searchPhongBan', 'searchMaterial', 'searchStatus'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -1969,7 +1921,6 @@ document.addEventListener('DOMContentLoaded', function () {
             this.searchItems();
         },
         resetFiltersTab2: function () {
-            // Reset select filters (set value and dispatch change so enhanced dropdown UI updates)
             const selIds = ['supplierSearchSection', 'supplierSearchMaVatTu', 'supplierSearchMaNcc', 'supplierSearchMaDon'];
             selIds.forEach(id => {
                 const el = document.getElementById(id);
@@ -1987,7 +1938,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 try { statusEl.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
             }
 
-            // Ensure underlying selects are updated
             ['supplierSearchSection', 'supplierSearchMaVatTu', 'supplierSearchMaNcc', 'supplierSearchMaDon', 'searchStatusTab2'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -2077,7 +2027,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Warn if there are selections without reason (not mandatory)
             const missingReasons = selections.filter(x => (!x.NVCHR_ReasonPick || x.NVCHR_ReasonPick.trim() === '')).length;
             if (missingReasons > 0) {
                 const T = window.i18nQuotationResults || {};
@@ -2085,7 +2034,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             try {
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ChonNhaCungCapBaoGia', {
+                const res = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ChonNhaCungCapBaoGia', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(selections)
@@ -2123,7 +2072,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgExportSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp hoặc sản phẩm để xuất.'), type: 'info' });
                 return;
             }
-            fetch((window.apiBaseUrl || '') + '/Quote/ExportSelection', {
+            fetch((window.apiBaseUrl || '') + '/QuoteResults/ExportSelection', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selected)
@@ -2169,15 +2118,12 @@ function showModal() {
             const m = bs.Modal.getOrCreateInstance(modalEl);
             m.show();
         } else {
-            // Fallback: manually show modal
             modalEl.style.display = 'block';
             modalEl.classList.add('show');
             modalEl.setAttribute('aria-hidden', 'false');
-            // prevent body scroll
             document.body.classList.add('modal-open');
         }
     } catch {
-        // Fallback: manually show modal
         modalEl.style.display = 'block';
         modalEl.classList.add('show');
         modalEl.setAttribute('aria-hidden', 'false');
@@ -2196,7 +2142,6 @@ function showDialog({ title = (window.i18nQuotationResults && window.i18nQuotati
     const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
     if (!overlay) return alert(message);
 
-    // Ensure overlay is attached to body so fixed positioning is not clipped by parent containers
     try {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
     } catch (e) { /* ignore */ }
@@ -2217,7 +2162,6 @@ function showDialog({ title = (window.i18nQuotationResults && window.i18nQuotati
     overlay.style.display = 'flex';
     attachDialogCloseHandlers();
 }
-// Prompt dialog that returns a Promise resolving to the entered text, or null if cancelled
 function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', placeholder = '', defaultValue = '' } = {}) {
     return new Promise((resolve) => {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();

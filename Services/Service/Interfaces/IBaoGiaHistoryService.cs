@@ -24,5 +24,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Sreach lịch sử bảo giá
         Task<GenericResponse<ListRequest<dynamic>>> SearchHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
+        // Lấy thông tin phê duyệt báo giá của các đơn hàng
+        Task<GenericResponse<List<dynamic>>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
+        // Lấy thông tin lịch sử báo giá theo mã hàng nội bộ và số đơn
+        Task<GenericResponse<List<dynamic>>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
     }
 }

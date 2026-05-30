@@ -38,7 +38,7 @@ function _insert_request() {
     var Kind = "IN";
     var Type = document.getElementById("typee").value;
     var Status = "WAITCONFIRM";
-    var Place = name_dept.split(':')[1];
+    var Place = document.getElementById("placee").value;
     var Loaihinhtokhai = "LOAIKHAC";
     var Group_Code = document.getElementById("group_code").value;
     var Chophepin = '1';
@@ -165,7 +165,7 @@ function _insert_request_GA() {
     var Kind = "IN";
     var Typee = document.getElementById("typee").value;
     var Status = "WAITCONFIRM";
-    var Place = name_dept.split(':')[1];
+    var Place = document.getElementById("placee").value;
     var Loaihinhtokhai = "LOAIKHAC";
     var Group_Code = document.getElementById("group_code").value;
     var Chophepin = '1';
@@ -496,8 +496,8 @@ async function _load_confirm_GA() {
                 "1": ["Đợi người thẩm tra", "info", 2],
                 "2": ["Đợi người phê duyệt", "pink", 3],
                 "3": ["Đợi đảm nhiệm kho", "success", 4],
-                "4": ["Đợi QLSC phòng tiếp nhận", "light", 5],
-                "5": ["Đợi QLTC phòng tiếp nhận", "secondary", 6], // Vị trí 6 để tất cả 5 chấm đều success
+                "4": ["Đợi QLSC phòng tiếp nhận", "success", 5],
+                "5": ["Đợi QLTC phòng tiếp nhận", "success", 6], // Vị trí 6 để tất cả 5 chấm đều success
                 "6": ["Bị từ chối", "danger", 1],
                 "7": ["Bị từ chối", "danger", 2],
                 "8": ["Bị từ chối", "danger", 3],
@@ -558,6 +558,7 @@ function _modal_info(cost_request, step) {
         },
         traditional: true,
         success: function (response) {
+            console.log(response);
             document.getElementById("modal-7").click();
             document.getElementById("load_detail_0").innerHTML = "";
             document.getElementById("madonhang_0").innerHTML = "*" + response[0].code_Request + "*";
@@ -571,29 +572,49 @@ function _modal_info(cost_request, step) {
             document.getElementById("urgent_0").innerHTML = response[0].urgent;
             document.getElementById("step_0").innerHTML = step;
             document.getElementById("chuyen_0").innerHTML = response[0].place;
+            if (response[0].group_Code.split(' ')[0] == "PROD") {
+                if (step == "0") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIYEUCAU";
+                }
+                if (step == "1") {
+                    document.getElementById("regency_0").innerHTML = "NGUOITHAMTRA";
+                }
+                if (step == "2") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIPHEDUYET";
+                }
+                if (step == "3") {
+                    document.getElementById("regency_0").innerHTML = "XACNHAN";
+                }
+                if (step == "4") {
+                    document.getElementById("regency_0").innerHTML = "XUATKHO";
+                }
+            }
+            else {
+                if (step == "0") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIYEUCAU";
+                }
+                if (step == "1") {
+                    document.getElementById("regency_0").innerHTML = "NGUOITHAMTRA";
+                }
+                if (step == "2") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIPHEDUYET";
+                }
+                if (step == "3") {
+                    document.getElementById("regency_0").innerHTML = "XUATKHO";
+                }
+                if (step == "4") {
+                    document.getElementById("regency_0").innerHTML = "QLSC";
+                }
+                if (step == "5") {
+                    document.getElementById("regency_0").innerHTML = "QLTC";
+                }
+            }
            
-            if (step == "0") {
-                document.getElementById("regency_0").innerHTML = "NGUOIYEUCAU";
-            }
-            if (step == "1") {
-                document.getElementById("regency_0").innerHTML = "NGUOITHAMTRA";
-            }
-            if (step == "2") {
-                document.getElementById("regency_0").innerHTML = "NGUOIPHEDUYET";
-            }
-            if (step == "3") {
-                document.getElementById("regency_0").innerHTML = "XACNHAN";
-            }
-            if (step == "4") {
-                document.getElementById("regency_0").innerHTML = "XUATKHO";
-            }
-            if (step == "5" && response[0].group_Code.split(' ')[0] == "GA") {
-                document.getElementById("regency_0").innerHTML = "XUATKHO";
-            }
+       
             var tongdon = 0;
             for (var i = 0; i < response.length; i++) {
                 var tongtien = response[i].total_exchange;
-                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td>${response[i].amount.toLocaleString('en-US')}</td><td>${response[i].unit}</td><td>${response[i].price.toLocaleString('en-US')}</td><td>${response[i].currency}</td><td>${tongtien.toLocaleString('en-US')}</td><td>${response[i].aim}</td><td>${response[i].poisition}</td>`;
+                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td class="text-right">${response[i].amount.toLocaleString('en-US')}</td><td>${response[i].unit}</td><td class="text-right">${response[i].price.toLocaleString('en-US')}</td><td>${response[i].currency}</td><td class="text-right">${tongtien.toLocaleString('en-US')}</td><td>${response[i].aim}</td><td>${response[i].poisition}</td>`;
                 tongdon += parseFloat(tongtien);
             }
             document.getElementById("tongtientrongdon_0").innerHTML = tongdon.toLocaleString('en-US');
@@ -669,6 +690,29 @@ function _update_request(id) {
         }
     })  
 }
+function _update_request_PROD_Slide(id) {
+
+    var id_request = document.getElementById("id_request" + id).innerHTML;
+    var regency = document.getElementById("regency" + id).innerHTML;
+    var step = document.getElementById("step" + id).innerHTML;
+    var urgent = document.getElementById("urgent" + id).innerHTML;
+
+    $.ajax({
+        url: '/Request/_update_request',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            id_request: id_request, regency: regency, step: step, urgent: urgent
+        },
+        success: function (response) {
+            alert(response);
+            //document.querySelectorAll('.close').forEach(button => button.click());
+            document.getElementById("cls_" + id).innerHTML = "";
+            var us = document.getElementById("us").innerHTML;
+            _load_confirm(us);
+        }
+    })
+}
 function _update_request_GA(id) {
 
     var id_request = document.getElementById("id_request" + id).innerHTML;
@@ -698,6 +742,43 @@ function _update_request_GA(id) {
             alert(data);
                document.querySelectorAll('.close').forEach(button => button.click());
             //document.getElementById("cls" + id).innerHTML = "";
+            var us = document.getElementById("us").innerHTML;
+            _load_confirm_GA(us);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+
+}
+function _update_request_GA_Slide(id) {
+
+    var id_request = document.getElementById("id_request" + id).innerHTML;
+    var regency = document.getElementById("regency" + id).innerHTML;
+    var step = document.getElementById("step" + id).innerHTML;
+    var urgent = document.getElementById("urgent" + id).innerHTML;
+
+    const params = new URLSearchParams();
+    params.append('id_request', id_request);
+    params.append('regency', regency);
+    params.append('step', step);
+    params.append('urgent', urgent);
+
+    fetch('/Request/_update_request_GA', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString()
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+        .then(data => {
+            alert(data);
+            //document.querySelectorAll('.close').forEach(button => button.click());
+            document.getElementById("cls_" + id).innerHTML = "";
             var us = document.getElementById("us").innerHTML;
             _load_confirm_GA(us);
         })

@@ -225,7 +225,7 @@
             PageSize: pageSize,
             Date: (from && to) ? { From: from, To: to } : null
         };
-        fetch((window.apiBaseUrl || '') + '/Quote/SearchHistoryBaoGia', {
+        fetch((window.apiBaseUrl || '') + '/History/SearchHistoryBaoGia', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -308,7 +308,7 @@
         const T = window.i18nHistoryQuote || {};
         try {
             showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportManagerHistory', {
+            const res = await fetch((window.apiBaseUrl || '') + '/History/ExportManagerHistory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -365,7 +365,7 @@
         const T = window.i18nHistoryQuote || {};
         try {
             showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch((window.apiBaseUrl || '') + '/Quote/ExportManagerHistory', {
+            const res = await fetch((window.apiBaseUrl || '') + '/History/ExportManagerHistory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -423,7 +423,7 @@
             } catch (e) { }
 
             try {
-                const response = await fetch((window.apiBaseUrl || '') + '/Quote/ImportFileExcelEditHistory', {
+                const response = await fetch((window.apiBaseUrl || '') + '/History/ImportFileExcelEditHistory', {
                     method: 'POST',
                     body: formData
                 });
@@ -476,7 +476,7 @@
                 };
 
                 // Gọi API lưu người phê duyệt
-                const updateResponse = await fetch((window.apiBaseUrl || '') + '/Quote/UpdateUserApprovalHistory', {
+                const updateResponse = await fetch((window.apiBaseUrl || '') + '/History/UpdateUserApprovalHistory', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -520,7 +520,7 @@
         if (t.dataset.action === 'view-history') {
             const id = Number(t.dataset.id);
             if (!id) return;
-            fetch((window.apiBaseUrl || '') + '/Quote/GetHistoryDataByID', {
+            fetch((window.apiBaseUrl || '') + '/History/GetHistoryDataByID', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(id)
@@ -548,7 +548,7 @@
             try {
                 showLoading(T.Deleting || 'Đang xóa...');
                 const payloadId = { id: id, reason: reason };
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByID', {
+                const res = await fetch((window.apiBaseUrl || '') + '/History/DeleteDanhSachBaoGiaByID', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadId)
@@ -580,7 +580,7 @@
                     try {
                         showLoading();
                         const maDonValue = group?.code || groupId;
-                        const res = await fetch((window.apiBaseUrl || '') + '/Quote/GetByMaBaoGia', {
+                        const res = await fetch((window.apiBaseUrl || '') + '/History/GetByMaBaoGia', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(maDonValue)
@@ -626,7 +626,7 @@
                 showLoading(T.Exporting || 'Đang xử lý...');
 
                 const payload = { maDon: madon, reason: reason };
-                const res = await fetch((window.apiBaseUrl || '') + '/Quote/ReturnQuotation', {
+                const res = await fetch((window.apiBaseUrl || '') + '/History/ReturnQuotation', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -648,7 +648,7 @@
             const soDon = group?.code || groupId;
             if (!soDon) return;
             // View history for the whole group (by SoDon)
-            fetch((window.apiBaseUrl || '') + '/Quote/GetHistoryDataBySoDon', {
+            fetch((window.apiBaseUrl || '') + '/History/GetHistoryDataBySoDon', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(soDon)
@@ -684,7 +684,7 @@
                 showLoading(T.Deleting || 'Đang xóa...');
 
                 const payloadGroup = { maDon: groupId, reason: reason };
-                const resGroup = await fetch((window.apiBaseUrl || '') + '/Quote/DeleteDanhSachBaoGiaByMaDon', {
+                const resGroup = await fetch((window.apiBaseUrl || '') + '/History/DeleteDanhSachBaoGiaByMaDon', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadGroup)
@@ -724,7 +724,7 @@
                 const body = { Step: stepNumber, SectionCost: sectionCode };
                 let list = [];
                 try {
-                    const resp = await fetch((window.apiBaseUrl || '') + '/Quote/GetListApprovel', {
+                    const resp = await fetch((window.apiBaseUrl || '') + '/History/GetListApprovel', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify(body)
@@ -1200,7 +1200,7 @@
 
     // Open edit modal using latest history CHR_NewData
     function openEditModal(requestId) {
-        fetch((window.apiBaseUrl || '') + '/Quote/SearchID', {
+        fetch((window.apiBaseUrl || '') + '/History/SearchID', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(parseInt(requestId))
@@ -1361,7 +1361,7 @@
         const dto = collectEditFormDto();
         if (!dto) return;
         // UpdateBaoGiaById expects a list
-        fetch((window.apiBaseUrl || '') + '/Quote/UpdateBaoGiaById', {
+        fetch((window.apiBaseUrl || '') + '/History/UpdateBaoGiaById', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dto)

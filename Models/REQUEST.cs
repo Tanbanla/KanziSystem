@@ -634,11 +634,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 string sqlUpdateKho = $"UPDATE [KHO] SET [Hientai] = [Hientai] - {slXuat} WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
                 _db.GET_DATA_FROM_SQL(sqlUpdateKho);
 
-              
+                var sotaikhoan = _db.ReturnString("select Account_Code from REQUEST_DETAIL where Code_Request ='" + code_request + "' and Material_Code = '" + manguyenlieu + "' ");
+
                 string hanhdong = $"Xuất kho {kho} cho request: {code_request}";
                 string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
-                    ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi])
-                    VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', GETDATE(), N'{nguoixuatkho}', '{kho}', '{khoi}', '{phong}', N'{vitri}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}')";
+                    ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi],[Sotaikhoan])
+                    VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', GETDATE(), N'{nguoixuatkho}', '{kho}', '{khoi}', '{phong}', N'{vitri}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}','{sotaikhoan}')";
 
                 _db.GET_DATA_FROM_SQL(sqlLog);
 
@@ -646,6 +647,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 // Ghi log vào bảng lịch sử KHO_NHAPXUAT
                 if (khoi == "GA")
                 {
+                    var laytigia = _db.ReturnString(" select Exchange_rate from REQUEST where Code_Request = '" + code_request + "'");
                     // Cập nhật trạng thái trong REQUEST_DETAIL
                     string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
                             [Amount_Real] = '{slXuat}', 
@@ -653,7 +655,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Total_exchange_real] = '{tongchiphi}',
                             [Status] = 'DONE',
                             [Last_Update] = GETDATE(),
-                            [Total_Real] = '{tongchiphi}',
+                            [Total_Real] = ROUND(({tongchiphi}/{laytigia}),2),
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}'
                             WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
@@ -705,7 +707,6 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     _db.GET_DATA_FROM_SQL(UpdateRequest);
                 }
                   
-
               
                 var idrq = _db.ReturnString("SELECT Id_Request FROM REQUEST WHERE Code_Request = '" + code_request + "'");
                 CheckDone(code_request, idrq);
@@ -735,7 +736,6 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 _db.GET_DATA_FROM_SQL("UPDATE [REQUEST] SET [Status] = 'DONE' WHERE [Code_Request] = '" + Code_Request + "' ");
                 _db.GET_DATA_FROM_SQL("Update [PE_REQUEST_CONFIRM] set INT_STEP = '5' where ID_REQUEST = '" + id_rq + "'");
                 _db.GET_DATA_FROM_SQL("Update [PE_REQUEST_CONFIRM_GA] set INT_STEP = '11' where ID_REQUEST = '" + id_rq + "'");
-
             }
         }
         public static List<PE_REQUEST_CONFIRM> _load_tonkhoxuathang(string us,string madonhang, string nguoitao, string khoi)
@@ -791,49 +791,66 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             List<REQUEST_DETAIL> rq_lst = new List<REQUEST_DETAIL>();
-            var lst = db.GET_DATA_FROM_SQL("SELECT * FROM [REQUEST_DETAIL] WHERE [Code_Request] = '" + code_request + "' and [Status] <> 'DONE'");
+
+            // Sử dụng Parameterized Query nếu có thể để tránh SQL Injection (ở đây tạm giữ nguyên cấu trúc của bạn)
+            var lst = db.GET_DATA_FROM_SQL("SELECT * FROM [REQUEST_DETAIL] WHERE [Code_Request] = '" + code_request + "' and ([Status] <> 'DONE' OR [Status] is null) ");
+
             for (int i = 0; i < lst.Rows.Count; i++)
             {
-                var list = db.GET_DATA_FROM_SQL("select Hientai, Kho from KHO where MaNguyenLieu = '" + lst.Rows[i]["Material_Code"].ToString() + "' ");
+                var row = lst.Rows[i];
+                string materialCode = row["Material_Code"]?.ToString() ?? "";
+
+                // Lấy dữ liệu kho
+                var list = db.GET_DATA_FROM_SQL("select Hientai, Kho from KHO where MaNguyenLieu = '" + materialCode + "' ");
                 List<SOLUONGKHO> sl = new List<SOLUONGKHO>();
+
                 for (int a = 0; a < list.Rows.Count; a++)
                 {
+                    var khoRow = list.Rows[a];
                     sl.Add(new SOLUONGKHO
                     {
-                        tenkho = list.Rows[a]["Kho"].ToString(),
-                        soluong = list.Rows[a]["Hientai"].ToString()
+                        tenkho = string.IsNullOrEmpty(khoRow["Kho"]?.ToString()) ? "F2" : khoRow["Kho"].ToString(),
+                        soluong = string.IsNullOrEmpty(khoRow["Hientai"]?.ToString()) ? "0" : khoRow["Hientai"].ToString()
                     });
                 }
+
+                // Ép kiểu an toàn 
+                float.TryParse(row["Amount"]?.ToString(), System.Globalization.CultureInfo.InvariantCulture, out float amount);
+                float.TryParse(row["Amount_Real"]?.ToString(), System.Globalization.CultureInfo.InvariantCulture, out float amountReal);
+                float.TryParse(row["Price"]?.ToString(), System.Globalization.CultureInfo.InvariantCulture, out float price);
+                float.TryParse(row["Total_exchange"]?.ToString(), System.Globalization.CultureInfo.InvariantCulture, out float totalExchange);
+
+                //Add vào danh sách
                 rq_lst.Add(new REQUEST_DETAIL
                 {
-                    Id_RequestDetail = int.Parse(lst.Rows[i]["Id_RequestDetail"].ToString()!),
-                    Code_Request = lst.Rows[i]["Code_Request"].ToString()!,
-                    Material_Code = lst.Rows[i]["Material_Code"].ToString()!,
-                    Material_Name = lst.Rows[i]["Material_Name"].ToString()!,
-                    Material_Name_EN = lst.Rows[i]["Material_Name_EN"].ToString()!,
-                    Material_Name_ENJP = lst.Rows[i]["Material_Name_ENJP"].ToString()!,
-                    Brand = lst.Rows[i]["Brand"].ToString()!,
-                    Good_Code = lst.Rows[i]["Good_Code"].ToString()!,
-                    Account_Code = lst.Rows[i]["Account_Code"].ToString()!,
-                    Account_Name = lst.Rows[i]["Account_Name"].ToString()!,
-                    Amount = float.Parse(lst.Rows[i]["Amount"].ToString()! == null ? "0" : lst.Rows[i]["Amount"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                    Amount_Real = float.Parse(lst.Rows[i]["Amount_Real"].ToString()! == null ? "0" : lst.Rows[i]["Amount_Real"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                    Unit = lst.Rows[i]["Unit"].ToString()!,
-                    Unit_Note = lst.Rows[i]["Unit_Note"].ToString()! ,
-                    Price = float.Parse(lst.Rows[i]["Price"].ToString()! == null ? "0" : lst.Rows[i]["Price"].ToString()!, System.Globalization.CultureInfo.InvariantCulture) ,
-                    Price_Real =  lst.Rows[i]["Price_Real"].ToString()! == null ? "0" : lst.Rows[i]["Price_Real"].ToString()!,
-                    VAT = lst.Rows[i]["VAT"].ToString()! == null ? "0" : lst.Rows[i]["VAT"].ToString()!,
-                    Total_exchange = float.Parse(lst.Rows[i]["Total_exchange"].ToString()! == null ? "0" : lst.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture) ,
-                    Total_exchange_real = lst.Rows[i]["Total_exchange_real"].ToString()! == null ? "0" : lst.Rows[i]["Total_exchange_real"].ToString()!,
-                    PO = lst.Rows[i]["PO"].ToString()!,
-                    Dealine_Real = lst.Rows[i]["Dealine_Real"].ToString()!,
-                    Aim = lst.Rows[i]["Aim"].ToString()!,
-                    Phongchiuchiphi = lst.Rows[i]["Phongchiuchiphi"].ToString()!,
-                    Vitri = lst.Rows[i]["Vitri"].ToString()!,
-                    Last_Update = lst.Rows[i]["Last_Update"].ToString()!,
-                    User_Update = lst.Rows[i]["User_Update"].ToString()!,
-                    Status = lst.Rows[i]["Status"].ToString()!,
-                    MaHangTem = lst.Rows[i]["MaHangTem"].ToString()!,
+                    Id_RequestDetail = Convert.ToInt32(row["Id_RequestDetail"]),
+                    Code_Request = row["Code_Request"]?.ToString() ?? "",
+                    Material_Code = materialCode,
+                    Material_Name = row["Material_Name"]?.ToString() ?? "",
+                    Material_Name_EN = row["Material_Name_EN"]?.ToString() ?? "",
+                    Material_Name_ENJP = row["Material_Name_ENJP"]?.ToString() ?? "",
+                    Brand = row["Brand"]?.ToString() ?? "",
+                    Good_Code = row["Good_Code"]?.ToString() ?? "",
+                    Account_Code = row["Account_Code"]?.ToString() ?? "",
+                    Account_Name = row["Account_Name"]?.ToString() ?? "",
+                    Amount = amount,
+                    Amount_Real = amountReal,
+                    Unit = row["Unit"]?.ToString() ?? "",
+                    Unit_Note = row["Unit_Note"]?.ToString() ?? "",
+                    Price = price,
+                    Price_Real = row["Price_Real"]?.ToString() ?? "0",
+                    VAT = row["VAT"]?.ToString() ?? "0",
+                    Total_exchange = totalExchange,
+                    Total_exchange_real = row["Total_exchange_real"]?.ToString() ?? "0",
+                    PO = row["PO"]?.ToString() ?? "",
+                    Dealine_Real = row["Dealine_Real"]?.ToString() ?? "",
+                    Aim = row["Aim"]?.ToString() ?? "",
+                    Phongchiuchiphi = row["Phongchiuchiphi"]?.ToString() ?? "",
+                    Vitri = row["Vitri"]?.ToString() ?? "",
+                    Last_Update = row["Last_Update"]?.ToString() ?? "",
+                    User_Update = row["User_Update"]?.ToString() ?? "",
+                    Status = row["Status"]?.ToString() ?? "",
+                    MaHangTem = row["MaHangTem"]?.ToString() ?? "",
                     slk = sl
                 });
             }

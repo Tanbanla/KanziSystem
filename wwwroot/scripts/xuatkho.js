@@ -430,8 +430,8 @@ function _modal_chitietxuatkho(code_request) {
                 <td id="slpo_${i}">${item.amount}</td>                  
                 <td id="donvi_${i}">${item.unit}</td>
                 <td>${item.price}</td>
-                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="slthucte_${i}" value="${item.amount}" onblur="_tinhthucte('${i}')" onchange="_tinhthucte('${i}')" /></td>
-                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="dgthucte_${i}" value="${item.price}" onblur="_tinhthucte('${i}')" onchange="_tinhthucte('${i}')" /></td>
+                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="slthucte_${i}" value="${item.amount}" min="0" onblur="_tinhthucte('${i}')" onchange="_tinhthucte('${i}')" /></td>
+                <td><input type="number" class="form-control" style="background-color:#d0ffd8ab" id="dgthucte_${i}" value="${item.price}" min="0" onblur="_tinhthucte('${i}')" onchange="_tinhthucte('${i}')" /></td>
                 <td>${item.vat} %</td>
                 <td id="tongchiphiold_${i}">${item.total_exchange}</td>
                 <td style="background-color:#d0ffd8ab" id="ttthucte_${i}">${item.total_exchange}</td>
@@ -496,6 +496,9 @@ function _tinhthucte(id) {
     var solgPo = parseFloat(document.getElementById("slpo_" + id).innerHTML);
     var solgThucte = parseFloat(document.getElementById("slthucte_" + id).value);
     var hienThiSoLuong = parseFloat(document.getElementById("hienThiSoLuong_" + id).innerHTML);
+    if (solgThucte < 0) {
+        document.getElementById("slthucte_" + id).value = "0";
+    }
     if (solgThucte > solgPo) {
         alert("Số lượng thực tế quá số lượng trong đơn !");
         document.getElementById("slthucte_" + id).value = solgPo;

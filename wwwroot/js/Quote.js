@@ -4,7 +4,6 @@
         insertListBaoGia: (window.apiBaseUrl || '') + '/Quote/InsertDanhSachBaoGia',
         getMaterials: (keyword) => (window.apiBaseUrl || '') + `/Quote/GetMaterialsByNameOrCode?keyword=${encodeURIComponent(keyword || '')}`,
         searchMaterials: (window.apiBaseUrl || '') + '/Quote/GetSearchMaterial'
-        , getSuppliersByMaHang: (window.apiBaseUrl || '') + '/Quote/GetNhaCungCapByMaHang'
         , uploadQuoteExcel: (window.apiBaseUrl || '') + '/Quote/UploadQuoteExcel'//UploadQuoteExcelBackup
         , exportAutoRender: (window.apiBaseUrl || '') + '/Quote/ExportAutoRender'
         , getNCCByCategory: (window.apiBaseUrl || '') + '/Quote/GetNCCByCategory'

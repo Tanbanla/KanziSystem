@@ -142,27 +142,27 @@
                                 @if (User.FindFirst("Roles")?.Value == "UserPUR")
                                 {
                                     <li>
-                                        <a class="dropdown-item py-2" href="~/Quote/InputQuote">
+                                        <a class="dropdown-item py-2" href="~/InputQuotation/InputQuote">
                                             <i class="fas fa-inbox me-2"></i>
                                             <span class="small">@Localizer["MenuQuoteInput"]</span>
                                         </a>
                                     </li>
 
                                     <li>
-                                        <a class="dropdown-item py-2" href="~/Quote/Quotation_Results">
+                                        <a class="dropdown-item py-2" href="~/QuoteResults/Quotation_Results">
                                             <i class="fas fa-clipboard-list me-2"></i>
                                             <span class="small">@Localizer["MenuQuoteResults"]</span>
                                         </a>
                                     </li>
                                 }
                                 <li>
-                                    <a class="dropdown-item py-2" href="~/Quote/SelectQuoteSection">
+                                    <a class="dropdown-item py-2" href="~/SelectQuote/SelectQuoteSection">
                                         <i class="fas fa-baseball-ball me-2"></i>
                                         <span class="small">@Localizer["MenuQuoteRequest"]</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item py-2" href="~/Quote/HistoryQuote">
+                                    <a class="dropdown-item py-2" href="~/History/HistoryQuote">
                                         <i class="fas fa-history me-2"></i>
                                         <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                     </a>

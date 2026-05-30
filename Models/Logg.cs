@@ -34,7 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
 
-            string khoii = _db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
+           // string khoii = _db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
 
             string timngay = "";
             if (ngay_tu != null || ngay_den != null)
@@ -48,7 +48,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
            
             List<KHO_NHAPXUAT> lis_kho = new List<KHO_NHAPXUAT>();
-            var lst = _db.GET_DATA_FROM_SQL($"SELECT TOP(200) * FROM [COST_MANAGEMENT].[dbo].[KHO_NHAPXUAT] where Hanhdong like '%{madon}%' {timngay} and Kho like '%{kho}%' and Khoi = '{khoii}' and MaNguyenLieu like '%{manguyenlieu}%' and {timloai} order by Id_Lichsu desc");
+            var lst = _db.GET_DATA_FROM_SQL($"SELECT TOP(200) * FROM [COST_MANAGEMENT].[dbo].[KHO_NHAPXUAT] where Hanhdong like '%{madon}%' {timngay} and Kho like '%{kho}%' and MaNguyenLieu like '%{manguyenlieu}%' and {timloai} order by Id_Lichsu desc");
             for (int i = 0; i < lst.Rows.Count; i++)
             {
                 lis_kho.Add(new KHO_NHAPXUAT

@@ -66,7 +66,7 @@
     // Load detail data for the current request
     async function loadDetailData() {
         // Load request details
-        await callApi((window.apiBaseUrl || '') + '/Quote/SearchBaoGia', {
+        await callApi((window.apiBaseUrl || '') + '/InputQuotation/SearchBaoGia', {
             idRequestQuote: 0,
             maDon: window.inputQuoteDetailData?.maDon,
             MaHang: document.getElementById('pageInternalItemCodeSelect')?.value || '',
@@ -86,7 +86,7 @@
             .catch(err => showAlert('danger', window.i18nInputQuoteDetail.ErrorLoadingDetails + err));
 
         // Load detail items
-        callApi((window.apiBaseUrl || '') + '/Quote/SearchInputQuote', {
+        callApi((window.apiBaseUrl || '') + '/InputQuotation/SearchInputQuote', {
             idRequestQuote: 0,
             maDon: window.inputQuoteDetailData?.maDon,
             maVatTu: document.getElementById('pageInternalItemCodeSelect')?.value || '',
@@ -300,7 +300,7 @@
 
         const items = collectQuoteItems();
         // Call API to save
-        callApi((window.apiBaseUrl || '') + '/Quote/UpdateQuoteDetail', items)
+        callApi((window.apiBaseUrl || '') + '/InputQuotation/UpdateQuoteDetail', items)
             .then(data => {
                 showAlert('success', window.i18nInputQuoteDetail.DataFilteredSuccessfully);
             })
@@ -366,7 +366,7 @@
             baoGiaDetail: items
         };
         // Call API to insert
-        callApi((window.apiBaseUrl || '') + '/Quote/InsertInputQuote', body)
+        callApi((window.apiBaseUrl || '') + '/InputQuotation/InsertInputQuote', body)
             .then(data => {
                 showAlert('success', window.i18nInputQuoteDetail.SendMailSuccess);
                 // Reload the quote input table

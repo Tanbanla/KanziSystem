@@ -415,7 +415,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("File không có dữ liệu hợp lệ");
                 }
-                await _baoGiaNccCategoryService.AddListBaoGiaNccCategory(items);
+                var reasult = await _baoGiaNccCategoryService.AddListBaoGiaNccCategory(items);
+                if (!reasult.Success)
+                {
+                    return BadRequest("Error Insert database: " + reasult.Message);
+                }
                 return Ok(items);
             }
             catch (Exception ex)
@@ -1297,18 +1301,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 for (int r = startRow; r <= lastRow; r++)
                 {
-                    var phanLoai = ws.Cell(r, 1).GetString();
+                    var phanLoai = ws.Cell(r, 1).GetString().Trim();
                     if (string.IsNullOrWhiteSpace(phanLoai)) continue;
 
-                    var nameVN = ws.Cell(r, 4).GetString();
-                    var codeSupplier = ws.Cell(r, 3).GetString();
+                    var nameVN = ws.Cell(r, 4).GetString().Trim();
+                    var codeSupplier = ws.Cell(r, 3).GetString().Trim();
 
                     rows.Add((
                         phanLoai: phanLoai,
                         codeSupplier: codeSupplier,
                         nameVN: nameVN,
-                        nameEN: ws.Cell(r, 5).GetString(),
-                        category: ws.Cell(r, 6).GetString()
+                        nameEN: ws.Cell(r, 5).GetString().Trim(),
+                        category: ws.Cell(r, 6).GetString().Trim()
                     ));
                 }
 
@@ -1354,12 +1358,58 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (!materialNews.Any())
                     return BadRequest("Không có dữ liệu hợp lệ để import");
 
-                await _materialService.UpdateListThongTinNoList(materialNews);
+               var rq =  await _materialService.UpdateListThongTinNoList(materialNews);
+                if (!rq.Success)
+                {
+                    return BadRequest("Insert table Error: "+rq.Message);
+                }
                 return Ok(new { success = true, count = materialNews.Count });
             }
             catch (Exception ex)
             {
                 return BadRequest($"Error: {ex.Message}");
+            }
+        }
+        // Xuất dữ liệu master Category
+        [HttpGet]
+        public async Task<IActionResult> ExportExcelMasterCategory()
+        {
+            try
+            {
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemplateCategory.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemplateCategory.xlsx");
+                }
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+                var dataAsync = await _tmCategoryService.GetAllAsync();
+                if (dataAsync == null || !dataAsync.Success || dataAsync.Data == null)
+                {
+                    return BadRequest("Error exporting master category data: " + dataAsync?.Message);
+                }
+                int startRow = 2;
+                foreach (var item in dataAsync.Data)
+                {
+                    ws.Cell(startRow, 1).Value = item.NVCHR_Category ?? string.Empty;
+                    startRow++;
+                }
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"ExportMasterCategory_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
         // Xác định mã loại vật liệu dựa trên phân loại (I hoặc O)

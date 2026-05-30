@@ -74,8 +74,8 @@
                                 <td><input type="text" class="form-control" id="mayeucau" placeholder="@Languages.mayeucau "></td>
                                 <td><input type="text" class="form-control" id="nguoitao" placeholder="@Languages.nguoitao"></td>
                                 <td><button type="button" class="btn btn-success ml-3" onclick="_load_xuatkho()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button></td>
-                                <td><button type="button" class="btn btn-info ml-3" onclick="resett()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button></td>
-                                <td><button type="button" class="btn btn-info ml-3" onclick="resett_don()"><i class="ion ion-ios-refresh"></i> Reset Đơn</button></td>
+                                <td><button type="button" class="btn btn-info ml-3" onclick="resett()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button></td>                   
+                                <td><a href="~/Request/RequestAll_GA_PROD" target="_blank" class="btn btn-success">Kiểm tra Đơn</a></td>
                             </tr>
                             <tr class="bg-primary">                          
                                 <th width="100px"></th>
@@ -116,7 +116,7 @@
         document.getElementById("nguoitao").value = "";
         _load_xuatkho();
     }
-    //       let checkAll = document.getElementById('checkAll');
+    //  let checkAll = document.getElementById('checkAll');
     // document.addEventListener('change', function(e) {
 
     //     if (e.target && e.target.id === 'checkAll') {
@@ -159,4 +159,37 @@
         }
 
      });
+
+    function resett_don() {
+        let maYeuCau = document.getElementById("mayeucau").value.trim();
+
+        if (maYeuCau === "") {
+            alert("Vui lòng nhập Mã yêu cầu cần reset vào ô tìm kiếm!");
+            return;
+        }
+
+        if (confirm(`Bạn có chắc chắn muốn reset đơn ${maYeuCau} không?`)) {
+            // Gọi API bằng fetch (hoặc $.ajax nếu dự án dùng jQuery)
+            fetch('/Warehouse/ResetDon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ maYeuCau: maYeuCau })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Reset đơn thành công!");
+                    _load_xuatkho(); // Tải lại danh sách
+                } else {
+                    alert("Có lỗi xảy ra: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Không thể kết nối đến server.");
+            });
+        }
+    }
 </script>

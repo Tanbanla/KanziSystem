@@ -461,7 +461,7 @@ async function UploadFileFormat() {
         alert("Vui lòng chọn một file Excel trước!");
         return;
     }
-    console.log("Đang tải file: " + file.name);
+  
     const formData = new FormData();
     formData.append("file", file);
     formData.append("us", us);
@@ -498,7 +498,7 @@ async function UploadFileFormat() {
             data += `<td><input type="text" class="form-control dv" id="dv_${index}" readonly value="${item.unit}"></td>`;
             data += `<td><input type="number" class="form-control dg" id="dg_${index}" readonly value="${item.price.replace(',', '.') }"></td>`;
             data += `<td><input type="text" class="form-control nt" id="nt_${index}" readonly value="${item.typePay}"></td>`;
-            data += `<td><input type="text" class="form-control tcp" id="tcp_${index}" readonly value="${(parseFloat(item.price.replace(',', '.')) * parseFloat(item.quantity)) }"></td>`;
+            data += `<td><input type="text" class="form-control tcp" id="tcp_${index}" readonly value="${(parseFloat(item.price.replace(',', '.')) * parseFloat(item.quantity)).toFixed(2)}"></td>`;
             data += `<td><input type="text" class="form-control md" id="md_${index}" value="${item.purpose}"></td>`;
             data += `<td>`;
             data += `<select class="form-control pcp" onchange="" id="pcp_${index}"><option selected>${item.deptCost}</option></select>`;

@@ -109,7 +109,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     ) 
                     VALUES (
                          
-                        @NewCode, '{Cost_Center}', GETDATE(), N'{Declaration}', '{Dealine}','{Total_exchange}', '{Exchange_rate}', '{Currency}', '{Total}',  
+                        @NewCode, '{Cost_Center}', GETDATE(), N'{Declaration}', '{Dealine}',({Total_exchange} * {Exchange_rate}) , '{Exchange_rate}', '{Currency}','{Total}',  
                         '{Kind}', '{Type}', '{Status}',GETDATE(), '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
                     );
                     SELECT @NewCode AS NextCode, SCOPE_IDENTITY() AS NewID;";
@@ -138,11 +138,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                                              '{item.Total_exchange}', '{item.Rate}', '{item.Currency}',ROUND('{tongtien}',2), '{item.Amount_Real}', '{item.Price_Real}', 
                                             '{item.VAT}', '{item.Total_exchange_real}', '{item.Rate_Real}', '{item.Currency_Real}', 
                                             N'{item.Poisition}', N'{item.Aim}', '{item.Status}', GETDATE(), 
-                                            '{item.User_Update}', '{item.PO}', N'{item.Unit_Note}', N'{item.Phongchiuchiphi}', N'{item.Vitri}', '{item.Id_LichsuXuat}', '{item.Kho}'
-                                        )";
+                                            '{item.User_Update}', '{item.PO}', N'{item.Unit_Note}', N'{item.Phongchiuchiphi}', N'{item.Vitri}', '{item.Id_LichsuXuat}', '{item.Kho}')";
                 _db.GET_DATA_FROM_SQL(_cmdDetail);
                 //File.AppendAllText(pathLog, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] SQL Command for Request: {Environment.NewLine}{_cmdRequest}{Environment.NewLine}");
-
             }
             ten_qlsc = ten_qlsc.Split('_')[1];
             ten_qltc = ten_qltc.Split('_')[1];
@@ -205,7 +203,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 "OR (a.INT_STEP = 2 AND CHR_ADID_NGUOIPHEDUYET = '" + us + "') " +
                 "OR (a.INT_STEP = 3 AND CHR_ADID_XUATKHO = '" + us + "' ) " +
                 "OR (a.INT_STEP = 4 AND CHR_ADID_QLSC = '" + us + "') " +
-                "OR (a.INT_STEP = 5 AND CHR_ADID_QLTC = '" + us + "')) and INT_STEP < 6 " +
+                "OR (a.INT_STEP = 5 AND CHR_ADID_QLTC = '" + us + "' AND CONFIRM_QLTC = '0')) and INT_STEP < 6 " +
                 $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%'");
             for (int i = 0; i < list.Rows.Count; i++)
             {
@@ -245,9 +243,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Urgent = list.Rows[i]["Urgent"].ToString()!
                 });
             }
-            pe_ = pe_.GroupBy(x => x.Code_Request)
-             .Select(g => g.First())
-             .ToList();
+            //pe_ = pe_.GroupBy(x => x.Code_Request)
+            // .Select(g => g.First())
+            // .ToList();
             return pe_;
         }
         public static List<PE_REQUEST_CONFIRM_GA> get_requestcondition(string loaicp, string ngayyc, string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent, string costt_ct)
@@ -475,73 +473,74 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             return ctxk;
         }
-        public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string id_rq)
-        {
-            SQL_Connect_DB20 _db = new SQL_Connect_DB20();
-            try
-            {
+        //public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, string thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string id_rq)
+        //{
+        //    SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+        //    try
+        //    {
 
-                if (string.IsNullOrEmpty(thoigian.ToString()) || thoigian.ToString().Contains("1/1/0001") || thoigian.ToString().Contains("1900-01-01"))
-                {
-                    thoigian = DateTime.Now.ToString();
-                }
-                // Kiểm tra tồn kho hiện tại trước khi xuất
-                string sqlCheckKho = $"SELECT [Hientai] FROM [KHO] WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
-                DataTable dtKho = _db.GET_DATA_FROM_SQL(sqlCheckKho);
+        //        if (string.IsNullOrEmpty(thoigian.ToString()) || thoigian.ToString().Contains("1/1/0001") || thoigian.ToString().Contains("1900-01-01"))
+        //        {
+        //            thoigian = DateTime.Now.ToString();
+        //        }
+        //        // Kiểm tra tồn kho hiện tại trước khi xuất
+        //        string sqlCheckKho = $"SELECT [Hientai] FROM [KHO] WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
+        //        DataTable dtKho = _db.GET_DATA_FROM_SQL(sqlCheckKho);
 
-                if (dtKho.Rows.Count == 0)
-                    return " Mã hàng không tồn tại trong kho này.";
+        //        if (dtKho.Rows.Count == 0)
+        //            return " Mã hàng không tồn tại trong kho này.";
 
-                double slHienTai = Convert.ToDouble(dtKho.Rows[0]["Hientai"]);
-                double slXuat = Convert.ToDouble(soluong);
+        //        double slHienTai = Convert.ToDouble(dtKho.Rows[0]["Hientai"]);
+        //        double slXuat = Convert.ToDouble(soluong);
 
-                if (slXuat > slHienTai)
-                    return $" Kho không đủ. Hiện có: {slHienTai}";
+        //        if (slXuat > slHienTai)
+        //            return $" Kho không đủ. Hiện có: {slHienTai}";
 
-                // Thực hiện trừ kho
-                string sqlUpdateKho = $"UPDATE [KHO] SET [Hientai] = [Hientai] - {slXuat} WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
-                _db.GET_DATA_FROM_SQL(sqlUpdateKho);
+        //        // Thực hiện trừ kho
+        //        string sqlUpdateKho = $"UPDATE [KHO] SET [Hientai] = [Hientai] - {slXuat} WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
+        //        _db.GET_DATA_FROM_SQL(sqlUpdateKho);
 
-                // Ghi log vào bảng lịch sử KHO_NHAPXUAT
+        //        // Ghi log vào bảng lịch sử KHO_NHAPXUAT
 
-                string hanhdong = $"Xuất kho {kho} cho request: {code_request}";
-                string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
-                    ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi])
-                    VALUES ('{manguyenlieu}', '{hanhdong}', '{slXuat}', 'XUAT', GETDATE(), '{nguoixuatkho}', '{kho}', '{khoi}', '{phong}', N'{vitri}', '{thoigian}', '{slHienTai}', '{slHienTai - slXuat}')";
+        //        string hanhdong = $"Xuất kho {kho} cho request: {code_request}";
+        //        string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
+        //            ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi])
+        //            VALUES ('{manguyenlieu}', '{hanhdong}', '{slXuat}', 'XUAT', GETDATE(), '{nguoixuatkho}', '{kho}', '{khoi}', '{phong}', N'{vitri}', '{thoigian}', '{slHienTai}', '{slHienTai - slXuat}')";
 
-                _db.GET_DATA_FROM_SQL(sqlLog);
+        //        _db.GET_DATA_FROM_SQL(sqlLog);
 
-                // Cập nhật trạng thái trong REQUEST_DETAIL
-                string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
-                            [Amount_Real] = '{slXuat}', 
-                            [Price_Real] = '{giathucte}',
-                            [Total_exchange_real] = '{tongchiphi}',
-                            [Status] = 'DONE',
-                            [Last_Update] = GETDATE(),
-                            [User_Update] = '{nguoixuatkho}'
-                            WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
+        //        // Cập nhật trạng thái trong REQUEST_DETAIL
+        //        string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
+        //                    [Amount_Real] = '{slXuat}', 
+        //                    [Price_Real] = '{giathucte}',
+        //                    [Total_exchange_real] = '{tongchiphi}',
+        //                    [Status] = 'DONE',
+        //                    [Last_Update] = GETDATE(),
+        //                    [User_Update] = '{nguoixuatkho}',
+        //                    [Total_Real] = ROUND(({tongchiphi}/))v
+        //                    WHERE [Code_Request] = '{code_request}' AND [Material_Code] = '{manguyenlieu}'";
 
-                _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
+        //        _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
 
-                string UpdateRequest = "";
-                UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongchiphi + "'";
-                UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
-                UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
-                UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongchiphi + "' ,[Status] = 'PROGRESS' ";
-                UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
-                UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
+        //        string UpdateRequest = "";
+        //        UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongchiphi + "'";
+        //        UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
+        //        UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
+        //        UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongchiphi + "' ,[Status] = 'PROGRESS' ";
+        //        UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
+        //        UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
 
-                _db.GET_DATA_FROM_SQL(UpdateRequest);
+        //        _db.GET_DATA_FROM_SQL(UpdateRequest);
 
-                CheckDone(code_request, id_rq);
-                return "OK";
+        //        CheckDone(code_request, id_rq);
+        //        return "OK";
 
-            }
-            catch (Exception ex)
-            {
-                return "ERR: " + ex.Message;
-            }
-        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return "ERR: " + ex.Message;
+        //    }
+        //}
         public static void CheckDone(string Code_Request, string id_rq)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
@@ -568,7 +567,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             var list = _db.GET_DATA_FROM_SQL($@"select b.*,a.ID_REQUEST from [PE_REQUEST_CONFIRM_GA] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
-                        WHERE (a.INT_STEP = '6')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
+                        WHERE (a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
                         and b.Group_Code like '%{khoi}%' order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)

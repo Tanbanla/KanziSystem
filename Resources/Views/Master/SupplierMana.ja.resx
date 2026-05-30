@@ -321,4 +321,13 @@
   <data name="ExportMaster" xml:space="preserve">
     <value>Export master data</value>
   </data>
+  <data name="UploadExcelVendor" xml:space="preserve">
+    <value>ベンダーExcelアップロード</value>
+  </data>
+  <data name="UploadExcelMaterial" xml:space="preserve">
+    <value>材料Excelアップロード</value>
+  </data>
+  <data name="TemplateImportExcel" xml:space="preserve">
+    <value>Excelインポートテンプレート</value>
+  </data>
 </root>

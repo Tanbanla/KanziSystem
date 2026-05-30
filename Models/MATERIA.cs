@@ -32,9 +32,13 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 code_mt = para.Material_Code!.Split(":")[0].Length > 0 ? para.Material_Code!.Split(":")[0] : para.Material_Code!;
                 timcode = "a.Material_Code = N'" + code_mt + "' and";
             }
-                    
+            var groupcode = " a.Group_Code like '%" + para.Group_Code + "%' ";
+            if(para.Group_Code == "PROD")
+            {
+                groupcode = " (a.Group_Code like '%" + para.Group_Code + "%' or a.Group_Code like 'PUR')";
+            }
             //var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode} a.Material_Name_VN like N'%" + para.Material_Name_VN + "%' and a.Account_Name_VN like N'%" + para.Account_Name_VN + "%' and a.Group_Code like '%" + para.Group_Code + "%' ");
-            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode}  a.Group_Code like '%" + para.Group_Code + "%' ");
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * FROM [MATERIAL_ACOUNTCODE] as a left join KHO as b on a.Material_Code = b.MaNguyenLieu WHERE {timcode} {groupcode}  and CHR_MaterialOutSide = 'IN'");
             List<PARAS> _material = new List<PARAS>();
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {
@@ -50,7 +54,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Account_Name_VN = _cmd.Rows[i]["Account_Name_VN"].ToString(),
                     Unit = _cmd.Rows[i]["Unit"].ToString(),
                     Unit_Note = _cmd.Rows[i]["Unit_Note"].ToString(),
-                    Price = Math.Round(decimal.Parse(_cmd.Rows[i]["Price"].ToString()!),3),
+                    Price = Math.Round((_cmd.Rows[i]["Price"] as decimal?) ?? 0, 3),
                     Currency = _cmd.Rows[i]["Currency"].ToString(),
                     Group_Code = _cmd.Rows[i]["Group_Code"].ToString(),
                     GoodKind = _cmd.Rows[i]["GoodKind"].ToString(),
