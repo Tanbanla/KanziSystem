@@ -1054,19 +1054,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sc.LyDoQltc
             FROM BaoGia_Request_of_Quotation r
             LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-            INNER JOIN StatusCheck sc ON r.id = sc.id
+            LEFT JOIN StatusCheck sc ON r.id = sc.id
             WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
 
-            if (!string.IsNullOrEmpty(adid))
-            {
-                sql.Append(" AND r.CHR_UserApproval = @Adid");
-                parameters.Add("Adid", adid);
-            }
-            if (listMaDon != null && listMaDon.Any())
-            {
-                sql.Append(" AND r.CHR_MaDon IN @MaDonList");
-                parameters.Add("MaDonList", listMaDon);
-            }
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon, r.CHR_MaThietBi, r.CHR_MaNCC, r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
             return data;
