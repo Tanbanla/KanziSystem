@@ -96,7 +96,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             {
                 groupcode = "and ( Group_Code = '" + group_code + "' or Group_Code = 'PUR' )";
             }
-            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * from MATERIAL where Material_Code like '{loaichiphi}%' {groupcode}");
+            var _cmd = _context.GET_DATA_FROM_SQL($"SELECT * from MATERIAL where Material_Code like '{loaichiphi}%' {groupcode} AND CHR_MaterialOutSide = 'IN'");
             List<string> material = new List<string>();
 
             for (int i = 0; i < _cmd.Rows.Count; i++)

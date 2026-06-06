@@ -111,6 +111,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
 
             string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
+          
             List<string> materials = MST_INVENTORY._getname_material(khoi, "");
             var checklistData = new List<object>();
 

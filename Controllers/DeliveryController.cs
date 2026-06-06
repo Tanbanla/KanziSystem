@@ -226,11 +226,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var get_khoi = db.GET_DATA_FROM_SQL("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[PO] WHERE  PO_Detail_Id = '" + data.Id_nhapkho + "'");
             // nếu khối Prod về kho F2, GA về GA, IT về IT, PUR về PUR
             string khoi = get_khoi.Rows[0][0].ToString()!;
-            data.KhoNhan = data.Mahang switch
+            data.KhoNhan = data.Mahang!.Substring(0,1) switch
             {
-                var s when s!.Contains("E") || s.Contains("A") => "F2",
-                var s when s!.Contains("I") => "IT",
-                var s when s!.Contains("B") || s.Contains("C") => "F1",
+                var s when s! == ("E") || s == ("A") => "F2",
+                var s when s! == ("I") => "IT",
+                var s when s! == ("B") || s == ("C") => "F1",
                 _ => khoi switch // không có mã hàng sẽ gán theo khối
                 {
                     "PROD" => "F2",
@@ -561,9 +561,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string khoi = get_khoi.Rows[0][0].ToString()!;
             data.KhoNhan = data.Mahang switch
             {
-                var s when s!.Contains("E") || s!.Contains("A") => "F2",
-                var s when s!.Contains("I") => "IT",
-                var s when s!.Contains("B") || s!.Contains("C") => "F1",
+                var s when s! == ("E") || s! == ("A") => "F2",
+                var s when s! == ("I") => "IT",
+                var s when s! == ("B") || s! == ("C") => "F1",
                 _ => khoi switch // không có mã hàng sẽ gán theo khối
                 {
                     "PROD" => "F2",

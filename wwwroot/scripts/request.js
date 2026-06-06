@@ -24,9 +24,12 @@ function _insert_request() {
           
         };
         // Thêm đối tượng vào danh sách tổng
-
         dataList.push(rowData);
     });
+    var mucdichkhac = "";
+    if (document.getElementById('mdk').checked == true) {
+        mucdichkhac = "OTHER AIM";
+    }
     var name_dept = document.getElementById("name_dept").value;
     var Cost_Center = name_dept.split(':')[0];
     var Declaration = document.getElementById("loaichiphi").value;
@@ -113,7 +116,8 @@ function _insert_request() {
                 ten_xk: ten_xk,
                 mail_xk: mail_xk,
                 adidnguoitao: adidnguoitao,
-                mailnguoitao: mailnguoitao
+                mailnguoitao: mailnguoitao,
+                Note: mucdichkhac
             }),
             success: function (response) {
                 alert(response);
@@ -153,7 +157,11 @@ function _insert_request_GA() {
         // Thêm đối tượng vào danh sách tổng
         dataList.push(rowData);
     });
-  
+
+    var mucdichkhac = "";
+    if (document.getElementById('mdk').checked == true) {
+        mucdichkhac = "OTHER AIM";
+    }
     var name_dept = document.getElementById("name_dept").value;
     var Cost_Center = name_dept.split(':')[0];
     var Declaration = document.getElementById("loaichiphi").value;
@@ -252,7 +260,8 @@ function _insert_request_GA() {
                 adid_qlsc: adid_qlsc,
                 ten_qltc: ten_qltc,
                 adid_qltc: adid_qltc,
-                mail_qltc: mail_qltc
+                mail_qltc: mail_qltc,
+                Note: mucdichkhac
             }),
             success: function (response) {
                 alert(response);
@@ -549,6 +558,7 @@ async function _load_confirm_GA() {
         .catch(err => console.error('Fetch error:', err));
 }
 function _modal_info(cost_request, step) {
+
     $.ajax({
         url: '/Request/_get_request',
         type: 'POST',
@@ -1031,4 +1041,97 @@ function Huy_don_GA() {
             });
     }
 
+}
+
+function _modal_info_tongdon(cost_request, step) {
+
+    $.ajax({
+        url: '/Request/_load_modal_tongdon',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {
+            cost_request: cost_request
+        },
+        traditional: true,
+        success: function (response) {
+            console.log(response);
+            document.getElementById("modal-7").click();
+            document.getElementById("load_detail_0").innerHTML = "";
+            document.getElementById("madonhang_0").innerHTML = "*" + response[0].code_Request + "*";
+            document.getElementById("mbp_0").innerHTML = response[0].cost_Center_Group;
+            document.getElementById("mpb_yc_0").innerHTML = response[0].cost_Center;
+            document.getElementById("tenphongban_0").innerHTML = response[0].name_Dept;
+            document.getElementById("nyc_0").innerHTML = response[0].creat_Date.split(' ')[0];
+            document.getElementById("thmm_0").innerHTML = response[0].dealine.split(' ')[0];
+            document.getElementById("khoi_0").innerHTML = response[0].group_Code.split(' ')[0];
+            document.getElementById("id_request_0").innerHTML = response[0].id_Request;
+            document.getElementById("urgent_0").innerHTML = response[0].urgent;
+            document.getElementById("step_0").innerHTML = step;
+            document.getElementById("chuyen_0").innerHTML = response[0].place;
+            if (response[0].group_Code.split(' ')[0] == "PROD") {
+                if (step == "0") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIYEUCAU";
+                }
+                if (step == "1") {
+                    document.getElementById("regency_0").innerHTML = "NGUOITHAMTRA";
+                }
+                if (step == "2") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIPHEDUYET";
+                }
+                if (step == "3") {
+                    document.getElementById("regency_0").innerHTML = "XACNHAN";
+                }
+                if (step == "4") {
+                    document.getElementById("regency_0").innerHTML = "XUATKHO";
+                }
+            }
+            else {
+                if (step == "0") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIYEUCAU";
+                }
+                if (step == "1") {
+                    document.getElementById("regency_0").innerHTML = "NGUOITHAMTRA";
+                }
+                if (step == "2") {
+                    document.getElementById("regency_0").innerHTML = "NGUOIPHEDUYET";
+                }
+                if (step == "3") {
+                    document.getElementById("regency_0").innerHTML = "XUATKHO";
+                }
+                if (step == "4") {
+                    document.getElementById("regency_0").innerHTML = "QLSC";
+                }
+                if (step == "5") {
+                    document.getElementById("regency_0").innerHTML = "QLTC";
+                }
+            }
+
+
+            var tongdon = 0;
+            var tongdonthucte = 0;
+            for (var i = 0; i < response.length; i++) {
+                var tongtien = response[i].total_exchange;
+                var tongtienthucte = response[i].total_Real;
+                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td class="text-right">${response[i].amount.toLocaleString('en-US')}</td>
+                <td class="text-right bg-info">${response[i].amount_Real}</td><td>${response[i].unit}</td><td class="text-right">${response[i].price.toLocaleString('en-US')}</td><td class="text-right bg-info">${response[i].price_Real}</td><td>${response[i].currency}</td><td class="text-right">${response[i].total_exchange.toLocaleString('en-US')}</td><td class="text-right bg-info">${response[i].total_exchange_real.toLocaleString('en-US')}</td><td>${response[i].aim}</td><td>${response[i].phongchiuchiphi}</td><td>${response[i].vitri}</td><td>${response[i].poisition}</td>`;
+                tongdon += parseFloat(tongtien);
+                tongdonthucte += parseFloat(tongtienthucte);
+            }
+            document.getElementById("tongtientrongdon_0").innerHTML = tongdon.toLocaleString('en-US');
+            document.getElementById("tongtienthucte_0").innerHTML = tongdonthucte.toLocaleString('en-US');
+
+            // Gán nút hiển thị theo khối
+            try {
+                if (response[0].group_Code.split(' ')[0] == "PROD") {
+                    document.getElementById("hiennutGA").style.display = 'none';
+                    document.getElementById("hiennutPROD").style.display = '';
+                }
+                if (response[0].group_Code.split(' ')[0] == "GA") {
+                    document.getElementById("hiennutPROD").style.display = 'none';
+                    document.getElementById("hiennutGA").style.display = '';
+                }
+            }
+            catch { }
+        }
+    })
 }

@@ -549,4 +549,7 @@
   <data name="Donhang" xml:space="preserve">
     <value>Request</value>
   </data>
+  <data name="uyquyen" xml:space="preserve">
+    <value>Delegate</value>
+  </data>
 </root>

@@ -247,7 +247,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public async Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<int> baoGia, string user)
+        public async Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user)
         {
             var result = new GenericResponse<bool>();
             try

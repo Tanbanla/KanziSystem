@@ -549,4 +549,7 @@
   <data name="Donhang" xml:space="preserve">
     <value>注文書</value>
   </data>
+  <data name="uyquyen" xml:space="preserve">
+    <value>権限を与える</value>
+  </data>
 </root>

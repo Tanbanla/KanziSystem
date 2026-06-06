@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <tr class="text-center" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
                     <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
-                    <td style="padding: 2px 4px; text-align: center;">${this.MappingStatusSupplier(d.status || '')}</td>
+                    <td style="padding: 2px 4px; text-align: center;">${d.status || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaThietBi || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNoiBo || ''}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.CHR_MaHangNCC || ''}</td>
@@ -231,17 +231,17 @@ document.addEventListener('DOMContentLoaded', function () {
             this.applyAdditionalColumnsVisibility();
         },
         // mapping status supplier tab
-        MappingStatusSupplier: function (codeStatus) {
-            const T = window.i18nQuotationResults || {};
-            switch (codeStatus) {
-                case 'WAIT_PICK_NCC': return T.WaitPickSupplier || 'Chờ chọn nhà cung cấp';
-                case 'PICKED': return T.SupplierSelected || 'Đã chọn nhà cung cấp';
-                case 'WAIT_CONFIRM_NAME': return T.WaitConfirmName || 'Chờ xác nhận tên';
-                case 'CONFIRMED': return T.WaitApproval || 'Chờ phê duyệt';
-                case 'WAIT_NCC': return T.WaitSupplierQuote || 'Chờ báo giá nhà cung cấp';
-                default: return '';
-            }
-        },
+        //MappingStatusSupplier: function (codeStatus) {
+        //    const T = window.i18nQuotationResults || {};
+        //    switch (codeStatus) {
+        //        case 'WAIT_PICK_NCC': return T.WaitPickSupplier || 'Chờ chọn nhà cung cấp';
+        //        case 'PICKED': return T.SupplierSelected || 'Đã chọn nhà cung cấp';
+        //        case 'WAIT_CONFIRM_NAME': return T.WaitConfirmName || 'Chờ xác nhận tên';
+        //        case 'CONFIRMED': return T.WaitApproval || 'Chờ phê duyệt';
+        //        case 'WAIT_NCC': return T.WaitSupplierQuote || 'Chờ báo giá nhà cung cấp';
+        //        default: return '';
+        //    }
+        //},
         // đóng modal 
         closeEdit: function () {
             document.getElementById('btnCloseEdit_1')?.addEventListener('click', function () {
@@ -276,7 +276,12 @@ document.addEventListener('DOMContentLoaded', function () {
             // Tìm kiếm
             const btnSearch = document.getElementById('btnSearch');
             if (btnSearch) {
-                btnSearch.addEventListener('click', this.searchItems.bind(this));
+                btnSearch.addEventListener('click',
+                    () => {
+                        requestListState.pageIndex = 0;
+                        this.searchItems();
+                    }
+                );
             }
             // Reset (button id in view is 'btnClear')
             const btnClear = document.getElementById('btnClear');
@@ -325,7 +330,12 @@ document.addEventListener('DOMContentLoaded', function () {
             // Supplier search
             const supplierSearchBtn = document.getElementById('supplierSearchBtn');
             if (supplierSearchBtn) {
-                supplierSearchBtn.addEventListener('click', this.loadSupplierData.bind(this));
+                supplierSearchBtn.addEventListener('click',
+                    () => {
+                        supplierState.pageIndex = 1;
+                        this.loadSupplierData();
+                    }
+                );
             }
             // Dowload file templeate tab 2
             const btnDownloadTem = document.getElementById('btnDownloadTem');

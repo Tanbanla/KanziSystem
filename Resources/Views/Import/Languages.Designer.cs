@@ -1312,6 +1312,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ủy quyền.
+        /// </summary>
+        public static string uyquyen {
+            get {
+                return ResourceManager.GetString("uyquyen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to VAT(%).
         /// </summary>
         public static string vat {

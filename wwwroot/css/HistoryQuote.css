@@ -1,4 +1,4 @@
-﻿/* make main group table scrollable and keep header fixed */
+/* make main group table scrollable and keep header fixed */
 #historyGroupTableContainer {
     max-height: 480px;
     overflow: auto;
@@ -27,3 +27,98 @@
     background: #fff;
     z-index: 1;
 }
+/* Inline styles scoped to this table to avoid touching global CSS */
+.approval-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+}
+
+    .approval-table th, .approval-table td {
+        border: 1px solid #333;
+        padding: 6px;
+        text-align: center;
+    }
+
+    .approval-table thead th {
+        background-color: #ddd;
+    }
+
+    .approval-table .group1 {
+        background-color: #e7b38c;
+    }
+
+    .approval-table .group2 {
+        background-color: #9fb6c8;
+    }
+
+    .approval-table .status {
+        width: 90px;
+    }
+
+    .approval-table .action {
+        width: 80px;
+    }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+}
+
+    .legend .item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #333;
+    }
+
+    .legend .swatch {
+        width: 18px;
+        height: 18px;
+        border: 1px solid #999;
+        display: inline-block;
+    }
+
+        .legend .swatch.yellow {
+            background: #f1c232;
+        }
+
+        .legend .swatch.green {
+            background: #cfe3c6;
+        }
+
+        .legend .swatch.white {
+            background: #ffffff;
+        }
+
+        .legend .swatch.red {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+    .legend .separator {
+        width: 1px;
+        height: 20px;
+        background: #e9e9e9;
+        margin: 0 8px;
+    }
+.badge.rounded-pill {
+    border-radius: 50% !important;
+    width: 10px !important;
+    height: 10px !important;
+    padding: 0 !important;
+    display: inline-block;
+}
+
+.d-flex.align-items-center.gap-2 .small {
+    font-size: 0.8rem;
+}
+
+    .d-flex.align-items-center.gap-2 .small strong {
+        font-weight: 600;
+        margin-left: 2px;
+    }

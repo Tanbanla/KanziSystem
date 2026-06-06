@@ -343,7 +343,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 // Tạo file Excel tổng hợp cho nhà cung cấp này
                 string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template", "TmSendMailNew.xlsx");
-                string tempFileName = $"{supplier}_{DateTime.Now:yyyyMMdd}.xlsx";
+                string tempFileName = $"{supplier}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
                 string tempFilePath = Path.Combine(Path.GetTempPath(), tempFileName);
                 // bảng thông tin PIC
                 var tablePicInfo = new StringBuilder();
@@ -552,6 +552,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template", "TmSendMailNew.xlsx");
             // danh sach cac don da gui mail
             var listSended = new List<int>();
+            var listBaoGiaDetail = new List<BaoGia_Detail_of_Quotation>();
 
             foreach (var item in suppliers)
             {
@@ -632,6 +633,34 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                         worksheet.Cell(rowIndex, 32).Value = rq.ID ?? "";
 
+                        var itemDetail = new BaoGia_Detail_of_Quotation
+                        {
+                            ID_RequestQuote = rq.ID,
+                            CHR_CodeNCC = rq.CHR_MaNCC ?? "",
+                            NVCHR_NameNCC = rq.NVCHR_TenNCC ?? "",
+                            DTM_CreateDate = DateTime.Now,
+                            CHR_CreateBy = "System Send Mail",
+                            CHR_MaHangNCC = rq.CHR_MaHangNCC,
+                            NVCHR_TenHangHQ = rq.NVCHR_NameVN,
+                            NVCHR_DonVi = "",
+                            INT_SoLuong = 0,
+                            FL_USD = 0,
+                            FL_VND = 0,
+                            NVCHR_MOQ = "",
+                            DTM_LeadTime = "",
+                            DTM_ShipTime = null,
+                            VCHR_Rohs = "",
+                            VCHR_COCQ = "",
+                            VCHR_MSDS = "",
+                            VCHR_AnToan = "",
+                            VCHR_CamKet = "",
+                            NVCHR_DeliveryTerm = "",
+                            NVCHR_PaymentTerm = "",
+                            NVCHR_File = ""
+                        };
+                        listBaoGiaDetail.Add(itemDetail);
+
+
                         dearMail = "nhà cung cấp " + rq.Ten + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
                         mailTk = maiUserCreate;
                         titleMail = (rq.ShortName ?? rq.Ten) + " - Deadline: " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
@@ -682,6 +711,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             if (listSended.Count != 0)
             {
                 await _repo.UpdateMailSentStatusAsync(listSended);
+            }
+            if (listBaoGiaDetail.Any())
+            {
+                await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
             }
             return new GenericResponse<bool>
             {

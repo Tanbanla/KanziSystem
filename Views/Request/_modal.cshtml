@@ -58,6 +58,7 @@
         </table>
         <table class="table table-bordered">
             <thead class="text-center">
+              
                 <tr>
                     <td rowspan="2">No</td>
                     <td rowspan="2">※ Mã đơn <br />システムコード</td>
@@ -65,28 +66,29 @@
                     <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
                     <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
                     <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
-                    <td colspan="2">Yêu cầu <br />依頼</td>
-                    <td colspan="2">Già thành<br />単価</td>
-                    <td rowspan="2">Tổng chi phí <br />金額合計</td>
-                    <td ro`q  wspan="2">※ Mục đích <br />目的</td>
-                    <td rowspan="2">※ Ghi chú <br />備考</td>
-                </tr>
-                <tr>
                     <td>※ Số lượng <br />数量</td>
+                    <td class="bg-info">※ Số lượng thực tế</td>
                     <td>Đơn vị<br />単位</td>
                     <td>Đơn giá<br />単価</td>
+                    <td class="bg-info">Đơn giá thực tế</td>
                     <td>Đơn vị tiền tệ <br />通貨単位</td>
+                    <td rowspan="2">Tổng chi phí <br />金額合計</td>
+                    <td rowspan="2" class="bg-info">Tổng chi phí thực thế <br />金額合計</td>
+                    <td rowspan="2">※ Mục đích <br />目的</td>
+                    <td rowspan="2">※ Phòng chịu chi phí <br />目的</td>
+                    <td rowspan="2">※ Vị trí <br />目的</td>
+                    <td rowspan="2">※ Ghi chú <br />備考</td>
                 </tr>
             </thead>
             <tbody id="load_detail_0"></tbody>
             <tr>
-                <td colspan="10" class="text-center">
+                <td colspan="9" class="text-center">
                     Tổng tiền 合計
                 </td>
                 <td id="tongtientrongdon_0"></td>
+                <td id="tongtienthucte_0"></td>
             </tr>
-        </table>
-       
+        </table>       
         <br /><br />
     </div>
 </form>

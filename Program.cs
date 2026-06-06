@@ -40,7 +40,7 @@ builder.Services.AddControllersWithViews(options =>
 // Cấu hình Session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(10); // Session timeout 3 tiếng
+    options.IdleTimeout = TimeSpan.FromHours(10); // Session timeout 10 tiếng
     options.Cookie.HttpOnly = true; // Bảo mật cookie
     options.Cookie.IsEssential = true; // Cookie cần thiết
     options.Cookie.Name = ".PRJ_WAREHOUSE_BIVN.Session";

@@ -61,9 +61,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             if (!string.IsNullOrWhiteSpace(SoDon))
             {
-                var md = SoDon.Trim();
-                whereBuilder.Append(" AND ISNULL(ID_RequestQuote, '') LIKE @SoDon");
-                parameters.Add("@SoDon", $"%{md}%");
+                var md = int.Parse(SoDon.Trim());
+                whereBuilder.Append(" AND c.ID = @SoDon");
+                parameters.Add("@SoDon", md);
             }
             if (!string.IsNullOrWhiteSpace(section))
             {
@@ -84,7 +84,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
                 {
                     whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
-                }else
+                }
+                else
                 {
                     whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
                 }
@@ -236,55 +237,111 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Luu thong tin
-        //public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
-        //{
-        //    // Lấy thông tin tên hải quan của nhà cung cấp
-        //    foreach (var item in confirmNames)
-        //    {
-        //        var rq = await _context.BaoGia_Detail_of_Quotations.FirstOrDefaultAsync(x => x.ID_RequestQuote == item.ID_RequestQuote);
-        //        if (rq != null)
-        //        {
-        //            if (rq.NVCHR_TenHangHQ != null && !string.IsNullOrWhiteSpace(rq.NVCHR_TenHangHQ))
-        //            {
-        //                item.VCHR_TenHaiQuan = rq.NVCHR_TenHangHQ;
-        //            }
-        //        }
-        //    }
-        //    await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
-        //    await _context.SaveChangesAsync();
-        //    return true;
-        //}
-        // Luu thong tin
         public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
         {
             if (confirmNames == null || !confirmNames.Any()) return false;
 
+            //var requestIds = confirmNames
+            //    .Select(x => x.ID_RequestQuote)
+            //    .Distinct()
+            //    .ToList();
+
+            //var details = await _context.BaoGia_Detail_of_Quotations
+            //    .Where(d => requestIds.Contains(d.ID_RequestQuote) && !string.IsNullOrWhiteSpace(d.NVCHR_TenHangHQ))
+            //    .ToListAsync();
+
+            //var request = await _context.BaoGia_Request_of_Quotations
+            //    .Where(r => requestIds.Contains(r.ID) && !string.IsNullOrWhiteSpace(r.NVCHR_NameVN))
+            //    .ToListAsync();
+
+            //var nameByRequest = details
+            //    .GroupBy(d => d.ID_RequestQuote)
+            //    .ToDictionary(g => g.Key, g => g.First().NVCHR_TenHangHQ);
+
+            //foreach (var item in confirmNames)
+            //{
+            //    if (item == null) continue;
+            //    //if (item.VCHR_TenHaiQuan != null && !string.IsNullOrWhiteSpace(item.VCHR_TenHaiQuan)) continue;
+
+            //    if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan))
+            //    {
+            //        if (!string.IsNullOrWhiteSpace(tenHaiQuan))
+            //            item.VCHR_TenRecomment = tenHaiQuan;
+            //    }
+            //    // Cập nhật trạng thái
+            //    var rq = request.FirstOrDefault(r => r.ID == item.ID_RequestQuote);
+            //    if (rq != null)
+            //    {
+            //        rq.ID_StepBaoGia = 12; // Đang xác nhận tên hàng
+            //        rq.ID_Status = "WAIT_CONFIRM_NAME";
+            //    }
+            //}
+
+            //await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
+            //await _context.SaveChangesAsync();
+            //return true;
             var requestIds = confirmNames
-                .Select(x => x.ID_RequestQuote)
-                .Distinct()
+            .Select(x => x.ID_RequestQuote)
+            .Distinct()
+            .ToList();
+
+            // 1. Kiểm tra trùng lặp
+            var existingIds = await _context.BaoGia_Confirm_Name_Quotations
+                .Where(c => requestIds.Contains(c.ID_RequestQuote))
+                .Select(c => c.ID_RequestQuote)
+                .ToListAsync();
+
+            var newConfirmNames = confirmNames
+                .Where(c => !existingIds.Contains(c.ID_RequestQuote))
                 .ToList();
+
+            if (!newConfirmNames.Any())
+            {
+                return false; 
+            }
 
             var details = await _context.BaoGia_Detail_of_Quotations
                 .Where(d => requestIds.Contains(d.ID_RequestQuote) && !string.IsNullOrWhiteSpace(d.NVCHR_TenHangHQ))
                 .ToListAsync();
 
+            var requests = await _context.BaoGia_Request_of_Quotations
+                .Where(r => requestIds.Contains(r.ID) && !string.IsNullOrWhiteSpace(r.NVCHR_NameVN))
+                .ToListAsync();
+
+ 
             var nameByRequest = details
                 .GroupBy(d => d.ID_RequestQuote)
                 .ToDictionary(g => g.Key, g => g.First().NVCHR_TenHangHQ);
 
-            foreach (var item in confirmNames)
+            var requestDict = requests.ToDictionary(r => r.ID, r => r);
+
+            foreach (var item in newConfirmNames)
             {
                 if (item == null) continue;
-                //if (item.VCHR_TenHaiQuan != null && !string.IsNullOrWhiteSpace(item.VCHR_TenHaiQuan)) continue;
 
-                if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan))
+                // Gán tên gợi ý từ detail
+                if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan)
+                    && !string.IsNullOrWhiteSpace(tenHaiQuan))
                 {
-                    if (!string.IsNullOrWhiteSpace(tenHaiQuan))
-                        item.VCHR_TenRecomment = tenHaiQuan;
+                    item.VCHR_TenRecomment = tenHaiQuan;
+                }
+
+                // Cập nhật trạng thái request
+                if (requestDict.TryGetValue(item.ID_RequestQuote, out var rq))
+                {
+                    rq.ID_StepBaoGia = 12; // Đang xác nhận tên hàng
+                    rq.ID_Status = "WAIT_CONFIRM_NAME";
                 }
             }
 
-            await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
+            await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(newConfirmNames);
+
+
+            foreach (var rq in requests.Where(r => newConfirmNames.Select(c => c.ID_RequestQuote).Contains(r.ID)))
+            {
+                _context.Entry(rq).State = EntityState.Modified;
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }
@@ -297,7 +354,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var now = DateTime.Now;
             foreach (var i in confirmNames)
             {
-                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID== i.ID);
+                var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == i.ID);
                 if (row == null) continue;
 
 
@@ -410,7 +467,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .ToListAsync();
                 if (rq == null) return false;
                 var now = DateTime.Now;
-                if(item.pheDuyet == true)
+                if (item.pheDuyet == true)
                 {
                     row.CHR_Status = "Confirmed";
                     row.VCHR_UserPUR = user;
@@ -485,12 +542,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 // Update infor data confirm name
                 row.CHR_Status = "";
                 row.NVCHR_LyDo = item.LyDo;
-                row.VCHR_UserPUR = user;
-                row.DTM_UserPUR = now;
+                row.DTM_UserShip = now;
                 row.VCHR_UpdateBy = user;
                 row.DTM_UpdateDate = now;
                 row.CHR_StatusShip = "Rejected";
                 row.CHR_Status = "Rejected";
+                row.VCHR_UserShip = item.PicShip;
 
                 // Update infor request quote
                 //rq.ID_StepBaoGia = 6;
@@ -522,7 +579,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 throw new Exception("Invalid list of IDs.");
 
             string sql = @"
-               SELECT DISTINCT r.CHR_MaDon as MaDon, r.CHR_SectionCode as Section, r.CHR_CreateBy as UserCreate
+               SELECT DISTINCT r.CHR_MaDon as MaDon, r.CHR_SectionCode as Section, r.CHR_CreateBy as UserCreate, r.ID as ID
                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
                LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] as c 
                    ON r.ID = c.ID_RequestQuote
@@ -545,6 +602,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<bool> UpdateRequestFromFileAsync(List<BaoGia_Request_of_Quotation> baoGia, string user)
         {
             if (baoGia == null || !baoGia.Any()) return false;
+            bool hasChanges = false;
             foreach (var item in baoGia)
             {
                 var confirmName = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.ID);
@@ -552,36 +610,55 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var rq = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(x => x.ID == confirmName.ID_RequestQuote);
                 if (rq == null) continue;
                 // Update infor request quote
-                rq.NVCHR_HinhDang = item.NVCHR_HinhDang;
-                rq.NVCHR_ChatLieu = item.NVCHR_ChatLieu;
-                rq.NVCHR_ThanhPhan = item.NVCHR_ThanhPhan;
-                rq.NVCHR_KichThuoc = item.NVCHR_KichThuoc;
-                rq.NVCHR_DongMay = item.NVCHR_DongMay;
-                rq.NVCHR_TinhNang = item.NVCHR_TinhNang;
-                rq.CHR_MaThietBi = item.CHR_MaThietBi;
-                rq.CHR_MaHangNCC = item.CHR_MaHangNCC;
+                if (rq.NVCHR_HinhDang != item.NVCHR_HinhDang ||
+                       rq.NVCHR_ChatLieu != item.NVCHR_ChatLieu ||
+                       rq.NVCHR_ThanhPhan != item.NVCHR_ThanhPhan ||
+                       rq.NVCHR_KichThuoc != item.NVCHR_KichThuoc ||
+                       rq.NVCHR_DongMay != item.NVCHR_DongMay ||
+                       rq.NVCHR_TinhNang != item.NVCHR_TinhNang ||
+                       rq.CHR_MaThietBi != item.CHR_MaThietBi ||
+                       rq.CHR_MaHangNCC != item.CHR_MaHangNCC)
+                {
+                    // Update infor request quote
+                    rq.NVCHR_HinhDang = item.NVCHR_HinhDang;
+                    rq.NVCHR_ChatLieu = item.NVCHR_ChatLieu;
+                    rq.NVCHR_ThanhPhan = item.NVCHR_ThanhPhan;
+                    rq.NVCHR_KichThuoc = item.NVCHR_KichThuoc;
+                    rq.NVCHR_DongMay = item.NVCHR_DongMay;
+                    rq.NVCHR_TinhNang = item.NVCHR_TinhNang;
+                    rq.CHR_MaThietBi = item.CHR_MaThietBi;
+                    rq.CHR_MaHangNCC = item.CHR_MaHangNCC;
+
+                    hasChanges = true;
+                }
                 // update confirm name
                 confirmName.CHR_Status = "";
                 confirmName.CHR_StatusShip = "Confirming";
                 confirmName.DTM_UserPUR = DateTime.Now;
                 confirmName.VCHR_UserPUR = user;
+                hasChanges = true;
             }
-            await _context.SaveChangesAsync();
-            return true;
+            if (hasChanges)
+            {
+                int result = await _context.SaveChangesAsync();
+                return result > 0;
+            }
+            return false;
         }
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public async Task<bool> UpdateRequestForPICPURAsync(List<int> baoGia, string user)
+        public async Task<bool> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user)
         {
-            if(baoGia == null || !baoGia.Any()) return false;
-            foreach (var id in baoGia)
+            if (baoGia == null || !baoGia.Any()) return false;
+            foreach (var item in baoGia)
             {
-                var confirmName = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == id);
+                var confirmName = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.ID);
                 if (confirmName == null) continue;
                 confirmName.CHR_Status = "Confirming";
-                confirmName.DTM_UserPUR = DateTime.Now;
-                confirmName.VCHR_UserPUR = user;
+                confirmName.DTM_UserShip = DateTime.Now;
+                confirmName.VCHR_UserShip = user;
                 confirmName.NVCHR_LyDo = "Tên xác nhận của Ship và nhà cung cấp khác nhau";
                 confirmName.CHR_StatusShip = "Rejected";
+                confirmName.VCHR_TenHaiQuan = item.VCHR_TenHaiQuan;
             }
             await _context.SaveChangesAsync();
             return true;
@@ -589,7 +666,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         //Export file ten hanh xac nhan
         public async Task<List<dynamic>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user)
         {
-            // sửa lại  phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r 

@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>REQUEST FOR QUOTATION HISTORY</value>
+  </data>
+  <data name="PageSubtitle" xml:space="preserve">
+    <value>History of Request for Quotation</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="OrderCode" xml:space="preserve">
+    <value>Order code</value>
+  </data>
+  <data name="SelectOrderCode" xml:space="preserve">
+    <value>-- Select order code --</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Department</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>Select department</value>
+  </data>
+  <data name="Creator" xml:space="preserve">
+    <value>Creator</value>
+  </data>
+  <data name="EnterCreator" xml:space="preserve">
+    <value>Enter creator</value>
+  </data>
+  <data name="MaterialCode" xml:space="preserve">
+    <value>Material code</value>
+  </data>
+  <data name="SelectMaterialCode" xml:space="preserve">
+    <value>Select material code</value>
+  </data>
+  <data name="Supplier" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="SelectSupplier" xml:space="preserve">
+    <value>Select supplier</value>
+  </data>
+  <data name="OrderStatus" xml:space="preserve">
+    <value>Order status</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="DateRange" xml:space="preserve">
+    <value>Date range</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="GroupListByOrder" xml:space="preserve">
+    <value>Group list by order code</value>
+  </data>
+  <data name="OrderCodeGroup" xml:space="preserve">
+    <value>Order code (Group)</value>
+  </data>
+  <data name="Requester" xml:space="preserve">
+    <value>Requester</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>Created date</value>
+  </data>
+  <data name="CurrentStatus" xml:space="preserve">
+    <value>Current status</value>
+  </data>
+  <data name="TotalOrders" xml:space="preserve">
+    <value>Total orders</value>
+  </data>
+  <data name="RelatedSuppliers" xml:space="preserve">
+    <value>Related suppliers</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>Notification</value>
+  </data>
+  <data name="SearchEllipsis" xml:space="preserve">
+    <value>Search...</value>
+  </data>
+  <data name="SelectPlaceholder" xml:space="preserve">
+    <value>-- Select --</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>No results</value>
+  </data>
+  <data name="MsgSearchFailed" xml:space="preserve">
+    <value>Search failed</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Export file failed</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Invalid file type</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Cannot export file</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>File imported successfully</value>
+  </data>
+  <data name="MsgLoadHistoryFailed" xml:space="preserve">
+    <value>Cannot load history.</value>
+  </data>
+  <data name="PageTitleHistory" xml:space="preserve">
+    <value>Single history</value>
+  </data>
+  <data name="ConfirmDeleteItem" xml:space="preserve">
+    <value>Confirm delete item</value>
+  </data>
+  <data name="ConfirmDeleteGroup" xml:space="preserve">
+    <value>Confirm delete group</value>
+  </data>
+  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
+    <value>Are you sure you want to delete this entire order?</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>Deleting...</value>
+  </data>
+  <data name="DeleteFailed" xml:space="preserve">
+    <value>Delete failed</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>Deleted successfully.</value>
+  </data>
+  <data name="MsgSelectGroupFailed" xml:space="preserve">
+    <value>Please select the order code!</value>
+  </data>
+  <data name="MsgNoHistory" xml:space="preserve">
+    <value>No history.</value>
+  </data>
+  <data name="MsgNoDataToEdit" xml:space="preserve">
+    <value>No data to edit.</value>
+  </data>
+  <data name="MsgNotFoundData" xml:space="preserve">
+    <value>Data not found.</value>
+  </data>
+  <data name="MsgSaveFailed" xml:space="preserve">
+    <value>Save failed: {0}</value>
+  </data>
+  <data name="MsgSaveSuccess" xml:space="preserve">
+    <value>Saved successfully.</value>
+  </data>
+  <data name="PaginationInfo" xml:space="preserve">
+    <value>Showing {0} - {1} / {2} groups</value>
+  </data>
+  <data name="Material" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="UpdatedDate" xml:space="preserve">
+    <value>Updated date</value>
+  </data>
+  <data name="HistoryTime" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="RequestNo" xml:space="preserve">
+    <value>Request No</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>Updated by</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Expand" xml:space="preserve">
+    <value>Expand</value>
+  </data>
+  <data name="ViewHistory" xml:space="preserve">
+    <value>View history</value>
+  </data>
+  <data name="Approval" xml:space="preserve">
+    <value>Approval</value>
+  </data>
+  <data name="DepartmentCode" xml:space="preserve">
+    <value>Department code</value>
+  </data>
+  <data name="InternalMaterialCode" xml:space="preserve">
+    <value>Internal material code</value>
+  </data>
+  <data name="EquipmentCode" xml:space="preserve">
+    <value>Equipment code</value>
+  </data>
+  <data name="SupplierItemCode" xml:space="preserve">
+    <value>Supplier item code</value>
+  </data>
+  <data name="ItemNameVN" xml:space="preserve">
+    <value>Item name (VN)</value>
+  </data>
+  <data name="ItemNameEN" xml:space="preserve">
+    <value>Item name (EN)</value>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>Unit</value>
+  </data>
+  <data name="Shape" xml:space="preserve">
+    <value>Shape</value>
+  </data>
+  <data name="Composition" xml:space="preserve">
+    <value>Composition</value>
+  </data>
+  <data name="Dimensions" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="UsedForMachine" xml:space="preserve">
+    <value>Used for machine</value>
+  </data>
+  <data name="Feature" xml:space="preserve">
+    <value>Feature</value>
+  </data>
+  <data name="Rohs" xml:space="preserve">
+    <value>ROHS</value>
+  </data>
+  <data name="COCQ" xml:space="preserve">
+    <value>CO/CQ</value>
+  </data>
+  <data name="MSDS" xml:space="preserve">
+    <value>MSDS</value>
+  </data>
+  <data name="SafetyStandard" xml:space="preserve">
+    <value>Safety standard</value>
+  </data>
+  <data name="DesignFile" xml:space="preserve">
+    <value>Design file</value>
+  </data>
+  <data name="Manufacturer" xml:space="preserve">
+    <value>Manufacturer</value>
+  </data>
+  <data name="GetQuotation" xml:space="preserve">
+    <value>Get quotation</value>
+  </data>
+  <data name="DesiredReceiveDate" xml:space="preserve">
+    <value>Desired receive date</value>
+  </data>
+  <data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Supplier selection deadline</value>
+  </data>
+  <data name="Urgent" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="FooterHint" xml:space="preserve">
+    <value>Select group CHR_MaDon to see details of orders in group.</value>
+  </data>
+  <data name="EditModalTitle" xml:space="preserve">
+    <value>Edit quotation request</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="DialogOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="DeleteReasonTitle" xml:space="preserve">
+    <value>Delete reason</value>
+  </data>
+  <data name="DeleteReasonLabel" xml:space="preserve">
+    <value>Reason for deletion</value>
+  </data>
+  <data name="EnterDeleteReasonPlaceholder" xml:space="preserve">
+    <value>Enter delete reason...</value>
+  </data>
+  <data name="DeleteReasonRequired" xml:space="preserve">
+    <value>Delete reason is required</value>
+  </data>
+  <data name="ReturnReasonTitle" xml:space="preserve">
+    <value>Return reason</value>
+  </data>
+  <data name="ReturnReasonLabel" xml:space="preserve">
+    <value>Please enter reason for return</value>
+  </data>
+  <data name="EnterReturnReasonPlaceholder" xml:space="preserve">
+    <value>Enter return reason...</value>
+  </data>
+  <data name="ReturnReasonRequired" xml:space="preserve">
+    <value>Return reason is required</value>
+  </data>
+  <data name="Classification" xml:space="preserve">
+    <value>Classification</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Approving" xml:space="preserve">
+    <value>Awaiting approval</value>
+  </data>
+  <data name="Waiting" xml:space="preserve">
+    <value>Waiting for a quote.</value>
+  </data>
+  <data name="RETURN" xml:space="preserve">
+    <value>Return</value>
+  </data>
+  <data name="DONE" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ImportFileExcel" xml:space="preserve">
+    <value>Import edited files</value>
+  </data>
+  <data name="ConfirmDeleteItemBody" xml:space="preserve">
+    <value>Are you sure you want to delete this item?</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>Return Failed!</value>
+  </data>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>Return Success!</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>Next approver</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>Select next approver</value>
+  </data>
+  <data name="SenedSupperlier" xml:space="preserve">
+    <value>suppliers have submitted quotations</value>
+  </data>
+</root>

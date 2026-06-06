@@ -1,25 +1,11 @@
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
-using PRJ_WAREHOUSE_BIVN.Models_Working;
-using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
-using System;
-using System.Collections.Immutable;
-using System.Drawing.Printing;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using Path = System.IO.Path;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -134,7 +120,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         //    if (currentStep <= requiredStep) return "";
         //    return string.IsNullOrEmpty(reason) ? "OK" : "NG";
         //}
- 
+
 
 
         // MARK: Lấy các thông tin
@@ -447,7 +433,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NameEN = ws.Cell(row, 9).GetString(),
                 SoLuong = ws.Cell(row, 10).GetString(),
                 DonVi = ws.Cell(row, 11).GetString(),
-                ChungLoai = ws.Cell(row, 12).GetString()?.Trim(),
+                ChungLoai = ws.Cell(row, 12).GetString().Trim(),
                 HinhDang = ws.Cell(row, 13).GetString(),
                 ChatLieu = ws.Cell(row, 14).GetString(),
                 ThanhPhan = ws.Cell(row, 15).GetString(),
@@ -875,151 +861,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi xuất file: {ex.Message}");
             }
         }
-        // Nhập file excel
-        [HttpPost]
-        [RequestSizeLimit(20_000_000)]
-        public async Task<IActionResult> UploadQuoteExcelBackup(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest(new { success = false, message = "File không hợp lệ" });
 
-            var items = new List<BaoGia_Request_of_Quotation>();
-            var errors = new List<string>();
-
-            try
-            {
-                using var stream = file.OpenReadStream();
-                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
-                var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null)
-                    return BadRequest(new { success = false, message = "Không tìm thấy worksheet" });
-
-                // Dữ liệu bắt đầu từ dòng 10
-                int startRow = 2;
-                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
-                int successCount = 0;
-
-                for (int r = startRow; r <= lastRow; r++)
-                {
-                    try
-                    {
-                        // Kiểm tra dòng trống (cột Mã phòng ban hoặc Mã đơn hàng)
-                        var maDon = ws.Cell(r, 2).GetString();
-                        if (string.IsNullOrWhiteSpace(maDon))
-                        {
-                            break; // kết thúc nếu gặp dòng trống
-                        }
-
-                        var item = new BaoGia_Request_of_Quotation
-                        {
-                            // Cột 1: ID (bỏ qua vì tự động sinh)
-                            CHR_MaDon = maDon,
-                            CHR_MaThietBi = ws.Cell(r, 3).GetString(),
-                            CHR_Phanloai = ws.Cell(r, 4).GetString(),
-                            CHR_MaHangNoiBo = ws.Cell(r, 5).GetString(),
-                            CHR_MaHangNCC = ws.Cell(r, 6).GetString(),
-                            NVCHR_NameVN = ws.Cell(r, 7).GetString(),
-                            CHR_NameEN = ws.Cell(r, 8).GetString(),
-
-                            // Số lượng
-                            INT_SoLuong = ws.Cell(r, 9).TryGetValue<int>(out var soLuong) ? soLuong : 0,
-
-                            NVCHR_DonVi = ws.Cell(r, 10).GetString(),
-                            NVCHR_ChungLoai = ws.Cell(r, 11).GetString(),
-                            NVCHR_HinhDang = ws.Cell(r, 12).GetString(),
-                            NVCHR_ChatLieu = ws.Cell(r, 13).GetString(),
-                            NVCHR_ThanhPhan = ws.Cell(r, 14).GetString(),
-                            NVCHR_KichThuoc = ws.Cell(r, 15).GetString(),
-                            NVCHR_DongMay = ws.Cell(r, 16).GetString(),
-                            NVCHR_TinhNang = ws.Cell(r, 17).GetString(),
-                            NVCHR_Rohs = ws.Cell(r, 18).GetString(),
-                            NVCHR_COCQ = ws.Cell(r, 19).GetString(),
-                            NVCHR_MSDS = ws.Cell(r, 20).GetString(),
-                            NVCHR_AnToan = ws.Cell(r, 21).GetString(),
-                            NVCHR_FileThietKe = ws.Cell(r, 22).GetString(),
-                            NVCHR_NhaSanXuat = ws.Cell(r, 23).GetString(),
-                            CHR_MaNCC = ws.Cell(r, 24).GetString(),
-                            NVCHR_TenNCC = ws.Cell(r, 25).GetString(),
-
-                            // BIT_LayBaoGia (cột 26)
-                            BIT_LayBaoGia = ws.Cell(r, 26).TryGetValue<bool>(out var layBaoGia) ? layBaoGia : true,
-
-                            NVCHR_LyDo = ws.Cell(r, 27).GetString(),
-
-                            // Ngày tháng
-                            DTM_NgayMuonNhan = ws.Cell(r, 28).TryGetValue<DateTime>(out var ngayMuonNhan) ? ngayMuonNhan : (DateTime?)null,
-                            DTM_KyHan = ws.Cell(r, 29).TryGetValue<DateTime>(out var kyHan) ? kyHan : (DateTime?)null,
-
-                            CHR_Gap = ws.Cell(r, 30).GetString(),
-                            CHR_SectionCode = ws.Cell(r, 31).GetString(),
-                            CHR_SectionName = ws.Cell(r, 32).GetString(),
-                            CHR_CreateBy = ws.Cell(r, 33).GetString(),
-
-                            // DTM_CreateDate (cột 34) - nếu không có thì lấy ngày hiện tại
-                            DTM_CreateDate = ws.Cell(r, 34).TryGetValue<DateTime>(out var createDate) ? createDate : DateTime.Now,
-
-                            // Cột 35: ID_StepBaoGia (bỏ qua hoặc set mặc định)
-                            ID_StepBaoGia = ConvertHelper.ParseInt(ws.Cell(r, 35).GetString()),
-                            // Cột 36: ID_Status
-                            ID_Status = ws.Cell(r, 36).GetString(),
-
-                            // INT_SoLanUpdate (cột 37)
-                            INT_SoLanUpdate = ws.Cell(r, 37).TryGetValue<int>(out var soLanUpdate) ? soLanUpdate : 0,
-
-                            // DTM_UpdateLater (cột 38)
-                            DTM_UpdateLater = ws.Cell(r, 38).TryGetValue<DateTime>(out var updateLater) ? updateLater : (DateTime?)null,
-
-                            // DTM_Deadline (cột 39)
-                            DTM_Deadline = ws.Cell(r, 39).TryGetValue<DateTime>(out var deadline) ? deadline : (DateTime?)null,
-
-                            // BIT_IsTemplate (cột 40)
-                            BIT_IsTemplate = ws.Cell(r, 40).TryGetValue<bool>(out var isTemplate) ? isTemplate : false,
-
-                            CHR_UserApproval = ws.Cell(r, 41).GetString(),
-                            NVCHR_UserRequest = ws.Cell(r, 42).GetString()
-                        };
-
-                        // Validate dữ liệu cơ bản
-                        if (string.IsNullOrEmpty(item.CHR_MaDon))
-                        {
-                            errors.Add($"Dòng {r}: Mã đơn hàng không được để trống");
-                            continue;
-                        }
-
-                        items.Add(item);
-                        successCount++;
-                    }
-                    catch (Exception ex)
-                    {
-                        errors.Add($"Dòng {r}: Lỗi xử lý - {ex.Message}");
-                    }
-                }
-
-                if (items.Count == 0)
-                {
-                    return BadRequest(new { success = false, message = "Không có dữ liệu hợp lệ để nhập", errors });
-                }
-
-                // Lưu vào database
-                var a = await _baoGiaService.AddMultiAsync(items);
-                if (!a.Success)
-                {
-                    return BadRequest(a.Message);
-                }
-                return Ok(new
-                {
-                    success = true,
-                    message = $"Nhập thành công {successCount} dòng",
-                    totalRows = items.Count,
-                    errors = errors.Count > 0 ? errors : null
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { success = false, message = $"Lỗi xử lý file: {ex.Message}" });
-            }
-        }
-       
         // check NCC
         [HttpPost]
         public async Task<IActionResult> CheckNCC([FromBody] string maNcc, string catergory)
@@ -1034,6 +876,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result.Message);
             }
             return Ok(result.Data);
+        }
+        // Check nhà cung cấp có theo chủng loại hàng hay không
+        [HttpPost]
+        public async Task<IActionResult> CheckNCCByCategory([FromBody] List<CheckSupplierByCategoryModel> request)
+        {
+            if (request == null || request.Count == 0)
+            {
+                return BadRequest("Danh sách yêu cầu không được để trống");
+            }
+            var result = await _baoGiaNccCategoryService.CheckSupperlierByCategory(request);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            if(result.Data.Count > 0)
+            {
+                return BadRequest("Các nhà cung cấp không tồn tại chủng loại: " + string.Join(", ", result.Data.Select(d => $"{d.MaDon}-{d.ChungLoai}")));
+            }
+            return Ok();
         }
     }
 }

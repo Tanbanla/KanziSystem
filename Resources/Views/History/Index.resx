@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>LỊCH SỬ YÊU CẦU BÁO GIÁ</value>
+  </data>
+  <data name="PageSubtitle" xml:space="preserve">
+    <value>History of Request for Quotation</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Xuất file</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Bộ lọc / Filters</value>
+  </data>
+  <data name="OrderCode" xml:space="preserve">
+    <value>Mã đơn</value>
+  </data>
+  <data name="SelectOrderCode" xml:space="preserve">
+    <value>-- Chọn mã đơn --</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>Phòng ban</value>
+  </data>
+  <data name="SelectDepartment" xml:space="preserve">
+    <value>Chọn phòng ban</value>
+  </data>
+  <data name="Creator" xml:space="preserve">
+    <value>Người tạo đơn</value>
+  </data>
+  <data name="EnterCreator" xml:space="preserve">
+    <value>Nhập người tạo</value>
+  </data>
+  <data name="MaterialCode" xml:space="preserve">
+    <value>Mã nguyên vật liệu</value>
+  </data>
+  <data name="SelectMaterialCode" xml:space="preserve">
+    <value>Chọn mã nguyên vật liệu</value>
+  </data>
+  <data name="Supplier" xml:space="preserve">
+    <value>Nhà cung cấp</value>
+  </data>
+  <data name="SelectSupplier" xml:space="preserve">
+    <value>Chọn nhà cung cấp</value>
+  </data>
+  <data name="OrderStatus" xml:space="preserve">
+    <value>Trạng thái đơn</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Tất cả</value>
+  </data>
+  <data name="DateRange" xml:space="preserve">
+    <value>Khoảng thời gian</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Lọc</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="GroupListByOrder" xml:space="preserve">
+    <value>Danh sách nhóm đơn (theo Mã đơn)</value>
+  </data>
+  <data name="OrderCodeGroup" xml:space="preserve">
+    <value>Mã đơn (Nhóm)</value>
+  </data>
+  <data name="Requester" xml:space="preserve">
+    <value>Người yêu cầu</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>Ngày tạo</value>
+  </data>
+  <data name="CurrentStatus" xml:space="preserve">
+    <value>Trạng thái hiện tại</value>
+  </data>
+  <data name="TotalOrders" xml:space="preserve">
+    <value>Tổng số đơn</value>
+  </data>
+  <data name="RelatedSuppliers" xml:space="preserve">
+    <value>NCC liên quan</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Thao tác</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Có</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Hủy</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="SearchEllipsis" xml:space="preserve">
+    <value>Tìm...</value>
+  </data>
+  <data name="SelectPlaceholder" xml:space="preserve">
+    <value>-- Chọn --</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>Không có kết quả</value>
+  </data>
+  <data name="MsgSearchFailed" xml:space="preserve">
+    <value>Tìm kiếm thất bại</value>
+  </data>
+  <data name="Exporting" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="ExportError" xml:space="preserve">
+    <value>Xuất file thất bại</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Loại file không hợp lệ</value>
+  </data>
+  <data name="ErrorPrefix" xml:space="preserve">
+    <value>Không thể xuất file</value>
+  </data>
+  <data name="DataUpdatedSuccessfully" xml:space="preserve">
+    <value>Nhập file thành công</value>
+  </data>
+  <data name="MsgLoadHistoryFailed" xml:space="preserve">
+    <value>Không tải được lịch sử.</value>
+  </data>
+  <data name="PageTitleHistory" xml:space="preserve">
+    <value>Lịch sử đơn</value>
+  </data>
+  <data name="ConfirmDeleteItem" xml:space="preserve">
+    <value>Xác nhận xóa mục</value>
+  </data>
+  <data name="ConfirmDeleteGroup" xml:space="preserve">
+    <value>Xác nhận xóa nhóm</value>
+  </data>
+  <data name="ConfirmDeleteGroupBody" xml:space="preserve">
+    <value>Bạn có chắc chắn muốn xóa toàn bộ đơn này?</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>Đang xóa...</value>
+  </data>
+  <data name="DeleteFailed" xml:space="preserve">
+    <value>Xóa thất bại</value>
+  </data>
+  <data name="DeleteSuccess" xml:space="preserve">
+    <value>Đã xóa thành công.</value>
+  </data>
+  <data name="MsgSelectGroupFailed" xml:space="preserve">
+    <value>Vui lòng chọn mã đơn!</value>
+  </data>
+  <data name="MsgNoHistory" xml:space="preserve">
+    <value>Không có lịch sử.</value>
+  </data>
+  <data name="MsgNoDataToEdit" xml:space="preserve">
+    <value>Không có dữ liệu để chỉnh sửa.</value>
+  </data>
+  <data name="MsgNotFoundData" xml:space="preserve">
+    <value>Không tìm thấy dữ liệu.</value>
+  </data>
+  <data name="MsgSaveFailed" xml:space="preserve">
+    <value>Lưu thất bại: {0}</value>
+  </data>
+  <data name="MsgSaveSuccess" xml:space="preserve">
+    <value>Đã lưu thành công.</value>
+  </data>
+  <data name="PaginationInfo" xml:space="preserve">
+    <value>Hiển thị {0} - {1} / {2} nhóm</value>
+  </data>
+  <data name="Material" xml:space="preserve">
+    <value>Vật tư</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+  <data name="UpdatedDate" xml:space="preserve">
+    <value>Ngày cập nhật</value>
+  </data>
+  <data name="HistoryTime" xml:space="preserve">
+    <value>Thời gian</value>
+  </data>
+  <data name="RequestNo" xml:space="preserve">
+    <value>Số Request</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Hành động</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>Người cập nhật</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Lý do</value>
+  </data>
+  <data name="Expand" xml:space="preserve">
+    <value>Mở rộng</value>
+  </data>
+  <data name="ViewHistory" xml:space="preserve">
+    <value>Xem lịch sử</value>
+  </data>
+  <data name="Approval" xml:space="preserve">
+    <value>Phê duyệt</value>
+  </data>
+  <data name="DepartmentCode" xml:space="preserve">
+    <value>Mã phòng ban</value>
+  </data>
+  <data name="InternalMaterialCode" xml:space="preserve">
+    <value>Mã hàng nội bộ</value>
+  </data>
+  <data name="EquipmentCode" xml:space="preserve">
+    <value>Mã thiết bị</value>
+  </data>
+  <data name="SupplierItemCode" xml:space="preserve">
+    <value>Mã hàng NCC</value>
+  </data>
+  <data name="ItemNameVN" xml:space="preserve">
+    <value>Tên hàng VN</value>
+  </data>
+  <data name="ItemNameEN" xml:space="preserve">
+    <value>Tên hàng EN</value>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>Đơn vị</value>
+  </data>
+  <data name="Shape" xml:space="preserve">
+    <value>Hình dáng</value>
+  </data>
+  <data name="Composition" xml:space="preserve">
+    <value>Thành phần</value>
+  </data>
+  <data name="Dimensions" xml:space="preserve">
+    <value>Kích thước</value>
+  </data>
+  <data name="UsedForMachine" xml:space="preserve">
+    <value>Dùng cho máy</value>
+  </data>
+  <data name="Feature" xml:space="preserve">
+    <value>Tính năng</value>
+  </data>
+  <data name="Rohs" xml:space="preserve">
+    <value>ROHS</value>
+  </data>
+  <data name="COCQ" xml:space="preserve">
+    <value>CO/CQ</value>
+  </data>
+  <data name="MSDS" xml:space="preserve">
+    <value>MSDS</value>
+  </data>
+  <data name="SafetyStandard" xml:space="preserve">
+    <value>Tiêu chuẩn an toàn</value>
+  </data>
+  <data name="DesignFile" xml:space="preserve">
+    <value>File thiết kế</value>
+  </data>
+  <data name="Manufacturer" xml:space="preserve">
+    <value>Nhà sản xuất</value>
+  </data>
+  <data name="GetQuotation" xml:space="preserve">
+    <value>Lấy báo giá</value>
+  </data>
+  <data name="DesiredReceiveDate" xml:space="preserve">
+    <value>Ngày muốn nhận</value>
+  </data>
+  <data name="SupplierSelectionDeadline" xml:space="preserve">
+    <value>Kỳ hạn lựa chọn NCC</value>
+  </data>
+  <data name="Urgent" xml:space="preserve">
+    <value>Gấp</value>
+  </data>
+  <data name="FooterHint" xml:space="preserve">
+    <value>Chọn nhóm CHR_MaDon để xem chi tiết các đơn trong nhóm.</value>
+  </data>
+  <data name="EditModalTitle" xml:space="preserve">
+    <value>Chỉnh sửa yêu cầu báo giá</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Lưu</value>
+  </data>
+  <data name="DialogOk" xml:space="preserve">
+    <value>Đồng ý</value>
+  </data>
+  <data name="DeleteReasonTitle" xml:space="preserve">
+    <value>Lý do xóa</value>
+  </data>
+  <data name="DeleteReasonLabel" xml:space="preserve">
+    <value>Vui lòng nhập lý do xóa</value>
+  </data>
+  <data name="EnterDeleteReasonPlaceholder" xml:space="preserve">
+    <value>Nhập lý do xóa...</value>
+  </data>
+  <data name="DeleteReasonRequired" xml:space="preserve">
+    <value>Vui lòng nhập lý do xóa</value>
+  </data>
+  <data name="ReturnReasonTitle" xml:space="preserve">
+    <value>Lý do trả lại</value>
+  </data>
+  <data name="ReturnReasonLabel" xml:space="preserve">
+    <value>Vui lòng nhập lý do trả lại</value>
+  </data>
+  <data name="EnterReturnReasonPlaceholder" xml:space="preserve">
+    <value>Nhập lý do trả lại...</value>
+  </data>
+  <data name="ReturnReasonRequired" xml:space="preserve">
+    <value>Vui lòng nhập lý do trả lại</value>
+  </data>
+  <data name="Classification" xml:space="preserve">
+    <value>Phân loại</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Chủng loại hàng</value>
+  </data>
+  <data name="Approving" xml:space="preserve">
+    <value>Đang chờ phê duyệt</value>
+  </data>
+  <data name="Waiting" xml:space="preserve">
+    <value>Đang chờ báo giá</value>
+  </data>
+  <data name="RETURN" xml:space="preserve">
+    <value>Trả lại</value>
+  </data>
+  <data name="DONE" xml:space="preserve">
+    <value>Hoàn thành</value>
+  </data>
+  <data name="ImportFileExcel" xml:space="preserve">
+    <value>Nhập file sửa</value>
+  </data>
+  <data name="ConfirmDeleteItemBody" xml:space="preserve">
+    <value>Bạn có chắc chắn muốn xóa mục này?</value>
+  </data>
+  <data name="DELETE" xml:space="preserve">
+    <value>Xóa</value>
+  </data>
+  <data name="ReturnFailed" xml:space="preserve">
+    <value>Trả lại thất bại!</value>
+  </data>
+  <data name="ReturnSuccess" xml:space="preserve">
+    <value>Trả về thành công.</value>
+  </data>
+  <data name="NextApproverLabel" xml:space="preserve">
+    <value>Người phê duyệt bước tiếp theo</value>
+  </data>
+  <data name="SelectNextApprover" xml:space="preserve">
+    <value>Chọn người phê duyệt tiếp theo</value>
+  </data>
+  <data name="SenedSupperlier" xml:space="preserve">
+    <value>NCC đã gửi  báo giá</value>
+  </data>
+</root>

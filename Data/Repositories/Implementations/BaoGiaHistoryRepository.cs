@@ -345,40 +345,75 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         ON q.CHR_SectionCode = s.CHR_CodeSection
                     LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] d
                         ON q.ID = d.ID_RequestQuote
-                    WHERE (@MaDon IS NULL OR q.CHR_MaDon = @MaDon)
-                      AND (@MaNcc IS NULL OR q.CHR_MaNCC LIKE '%' + @MaNcc + '%')
-                      AND (@ChungLoai IS NULL OR q.NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
-                      AND (@Section IS NULL OR q.CHR_SectionCode LIKE '%' + @Section + '%')
-                      AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
-                      AND (@MaHang IS NULL OR q.CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
-                      AND (@Step IS NULL OR q.ID_StepBaoGia = @Step)
-                      AND (s.CHR_UserAdid = @Adid)
             ";
 
-            var statusSql = "1=1";
-            switch (status)
+
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
+
+            if (!string.IsNullOrEmpty(MaDon))
             {
-                case "RETURN":
-                    statusSql = "q.ID_Status LIKE '%RETURN%' AND q.ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DONE":
-                    statusSql = "q.ID_Status = 'DONE' AND q.ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "APPROVAL":
-                    statusSql = "q.ID_Status LIKE 'APPROVAL%' AND q.ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "WAIT":
-                    statusSql = "q.ID_Status LIKE '%WAIT%' AND q.ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DELETE":
-                    statusSql = "q.ID_Status LIKE 'DELETE'";
-                    break;
-                default:
-                    statusSql = "q.ID_Status NOT LIKE 'DELETE'";
-                    break;
+                whereClauses.Add("q.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereClauses.Add("q.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(chungLoai))
+            {
+                whereClauses.Add("q.NVCHR_ChungLoai LIKE @ChungLoai");
+                parameters.Add("ChungLoai", "%" + chungLoai + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereClauses.Add("q.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereClauses.Add("q.CHR_CreateBy LIKE @NguoiYeuCau");
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereClauses.Add("q.CHR_MaHangNoiBo LIKE @MaHang");
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (step.HasValue)
+            {
+                whereClauses.Add("q.ID_StepBaoGia = @Step");
+                parameters.Add("Step", step);
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
             }
 
-            sql += " AND (" + statusSql + ")";
+            if (!string.IsNullOrEmpty(status))
+            {
+                string statusSql = status switch
+                {
+                    "RETURN" => "q.ID_Status LIKE '%RETURN%' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "DONE" => "q.ID_Status = 'DONE' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "APPROVAL" => "q.ID_Status LIKE 'APPROVAL%' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "WAIT" => "q.ID_Status LIKE '%WAIT%' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "DELETE" => "q.ID_Status LIKE 'DELETE'",
+                    _ => "q.ID_Status NOT LIKE 'DELETE'"
+                };
+                whereClauses.Add("(" + statusSql + ")");
+            }
+            else
+            {
+                whereClauses.Add("q.ID_Status NOT LIKE 'DELETE'");
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " WHERE " + string.Join(" AND ", whereClauses);
+            }
             sql += @"
                 )
                 SELECT 
@@ -418,20 +453,29 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 ORDER BY CTE_MaxStep.CHR_MaDon, CTE_MaxStep.CHR_MaHangNoiBo
             ";
 
-            var parameters = new
-            {
-                MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
-                MaNcc = string.IsNullOrEmpty(MaNcc) ? null : MaNcc,
-                Section = string.IsNullOrEmpty(Section) ? null : Section,
-                NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
-                MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
-                Step = step,
-                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
-                Adid = user
-            };
-
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return data;
+        }
+        // tính tổng số đơn đến hạn
+        public async Task<List<dynamic>> GetCountQuotation(string user)
+        {
+            var sql = @"
+                SELECT 
+                    SUM(CASE WHEN CAST(r.DTM_KyHan AS DATE) = CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) AS DenHanLuaChon,
+                    SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) = 1 THEN 1 ELSE 0 END) AS ConMotNgayHetHan,
+                    SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) > 1 THEN 1 ELSE 0 END) AS ConLai,
+                    SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) < 0 THEN 1 ELSE 0 END) AS QuaHan
+                FROM [BaoGia_Request_of_Quotation] as r
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
+                WHERE r.BIT_LayBaoGia = 1
+                  AND r.ID_StepBaoGia > 2 AND r.ID_StepBaoGia < 12
+                  AND r.DTM_KyHan IS NOT NULL
+                  AND s.CHR_UserAdid = @Adid
+            ";
+
+            var parameters = new { Adid = user };
+            var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            return result;
         }
     }
 }

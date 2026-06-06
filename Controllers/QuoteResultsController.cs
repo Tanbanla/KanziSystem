@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Globalization;
@@ -473,7 +474,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Error list Approver: " + result.Message);
                 }
                 var approvers = result.Data.FirstOrDefault();
-                return await PheDuyetBaoGia(listApproval, approvers?.CHR_UserAdid ?? "sawazato");
+                return await PheDuyetBaoGia(listApproval, approvers?.CHR_UserAdid ?? "khanhmf");
             }
             catch (Exception ex)
             {
@@ -511,6 +512,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                 var baoGiaConfirmNameService = scope.ServiceProvider.GetRequiredService<IBaoGiaConfirmNameService>();
                                 var baoGiaDetailService = scope.ServiceProvider.GetRequiredService<IBaoGiaDetailService>();
+                                var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
+                                var checkSendMail = true;
+
 
                                 var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
                                 foreach (var material in listOk)
@@ -527,31 +531,47 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         var cf = new BaoGia_Confirm_Name_QuotationDTO();
                                         cf.ID_RequestQuote = material.ID;
                                         cf.DTM_CreateDate = DateTime.Now;
-                                        cf.VCHR_CreateBy = currentUserId;
+                                        cf.VCHR_CreateBy = "System";
                                         cf.VCHR_TenRecomment = material.NVCHR_NameVN;
                                         cf.CHR_Status = "";
                                         cf.CHR_StatusACC = "Confirmed";
                                         cf.CHR_StatusShip = "Confirming";
                                         cf.NVCHR_Note = material.CHR_MaHangNCC;
                                         listConfirm.Add(cf);
+                                        checkSendMail = false;
                                     }
                                 }
                                 if (string.IsNullOrEmpty(userSend))
                                 {
                                     var approverNext = await sendMailService.SendMailToRequesterAsync("", 11);
                                     userSend = approverNext?.Data ?? "";
+                                    // update ngươì phê duyệt
+                                    if(!string.IsNullOrEmpty(userSend))
+                                    {
+                                        var item = new UpdateHistoryResult
+                                        {
+                                            sectionCode = userSend.Replace("@brothergroup.net", "") ?? "",
+                                            listUpdate = listOk.Select(c => c.ID).ToList(),
+                                            isReturn = false
+                                        };
+                                        await baoGiaService.UpdateUserApprovalHistory(item);
+                                    }
                                 }
                                 else
                                 {
                                     userSend = userSend + "@brothergroup.net";
                                 }
-                                await sendMailService.SendMailAsync(userSend, "", 14, "QuoteResults/Quotation_Results",
+                                // gửi mail thông báo phê duyệt thành công
+                                if (checkSendMail)
+                                {
+                                    await sendMailService.SendMailAsync(userSend, "", 14, "QuoteResults/Quotation_Results",
                                     listOk.FirstOrDefault()?.CHR_Gap == "false" ? false : true, listOk.FirstOrDefault()?.CHR_SectionCode ?? "",
                                     listOk.FirstOrDefault()?.CHR_MaDon ?? "", currentUserId);
+                                }
                                 // Send mail confirm name
                                 if (listConfirm.Any())
                                 {
-                                    // bỏ gửi mail và lưu thông tin xác nhận tên
+                                    // lưu thông tin xác nhận tên
                                     await baoGiaConfirmNameService.AddListAsync(listConfirm);
                                     //gửi mail thông báo có yêu cầu xác nhận tên mới
                                     var emailResult = await sendMailService.SendMailToConfirmItemAsync(13, 17, "Material/ConfirmName", true, "", "", currentUserId);
@@ -620,7 +640,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     });
                 }
                 var approverAdid = req.SelectedApprover ?? "";
-                return await PheDuyetBaoGia(listApproval, approverAdid == string.Empty ? "vuthipt" : approverAdid);
+                return await PheDuyetBaoGia(listApproval, approverAdid == string.Empty ? "khanhmf" : approverAdid);
             }
             catch (Exception ex)
             {

@@ -204,4 +204,10 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public int ID_Step { get; set; }
         public string Errors { get; set; }
     }
+    // Check nhà cung cấp theo chủng loại hàng
+    public class CheckSupplierByCategoryModel
+    {
+        public string MaDon { get; set; } = string.Empty;
+        public string ChungLoai { get; set; } = string.Empty;
+    }
 }

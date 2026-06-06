@@ -262,7 +262,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }).ToList();
                 if (approverHistories.Any())
                 {
-                    await _historyApproverServive.AddHistoryListAsync(approverHistories);
+                   await _historyApproverServive.AddHistoryListAsync(approverHistories);
                 }
                 // Luu lich su thay doi trang thai bao gia
                 var histories = insertedList.Select(b => new BaoGia_History_Request_of_QuotationDTO

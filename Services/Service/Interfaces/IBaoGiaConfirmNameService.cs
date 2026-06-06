@@ -35,7 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Cập nhật thông tin đơn báo giá sau khi trả lại
         public Task<GenericResponse<bool>> UpdateRequestFromFileAsync(List<BaoGia_Request_of_QuotationDTO> baoGia, string user);
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<int> baoGia, string user);
+        public Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user);
         //Export file ten hanh xac nhan
         Task<GenericResponse<List<dynamic>>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user);
     }

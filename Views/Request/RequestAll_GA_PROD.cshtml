@@ -182,10 +182,12 @@
                 if (data && data.length > 0) {
                     console.log(data);
                     $.each(data, function (index, item) {
-                         var resetdon = "";
-                       
-                       resetdon = `<button class="btn btn-info" onclick="moModalHuyDon('${item.Id_Request}')" ><i class="fa fa-reply text-white" style="cursor:pointer"  ></i> Reset đơn</button>`;
-                       domau = "text-secondary";
+                        var resetdon = "";                     
+                        if(item.Status == "DONE" ){
+                             resetdon = `<button class="btn btn-info" onclick="_resetdon('${item.Code_Request}')" ><i class=" fa fa-reply text-white" style="cursor:pointer"  ></i> Reset đơn</button>`;
+                        }
+
+                        domau = "text-secondary";
                         if(parseFloat(item.INT_STEP) <= 4 && item.Group_Code == "PROD" )
                         {
                             domau = "text-danger";
@@ -232,10 +234,10 @@
                 if (data && data.length > 0) {
                     console.log(data);
                     $.each(data, function (index, item) {
-                         var huydon = "";
-                        if(item.Status == "WAITCONFIRM" ){
+                         var reset_don = "";
+                        if(item.Status == "DONE" ){
 
-                             huydon = `<button class="btn btn-danger" onclick="moModalHuyDon('${item.Id_Request}')" ><i class=" fa fa-reply text-white" style="cursor:pointer"  ></i> Hủy đơn</button>`;
+                             reset_don = `<button class="btn btn-danger" ><i class=" fa fa-reply text-white" style="cursor:pointer" onclick="_resetdon('${item.Code_Request}')" ></i> Reset đơn</button>`;
                         }
                         var domau = "";
                         if(parseFloat(item.INT_STEP) <= 6)
@@ -267,7 +269,7 @@
                         html += `<td>${loaichiphi}</td>`;
                         html += `<td>${item.Total.toLocaleString()}</td>`;
                         html += `<td>${item.User_Create}</td>`;
-                        html += `<td colspan="3"> ${huydon}</td>`;
+                        html += `<td colspan="3"> ${reset_don}</td>`;
                         html += '</tr>';
                     });
                 } else {
@@ -426,16 +428,35 @@
             alert("Không thể tải dữ liệu đơn hàng!");
         });
     }
-    function moModalHuyDon(id) {
-        document.getElementById("id_huy").value = id;
-        document.getElementById("txtLyDo").value = "";
+    function _resetdon(code_request){
+        var x = confirm("Bạn có muốn reset đơn không !");
+        if(x){
+            var khoi = document.getElementById("khoi").value;
+                const params = new URLSearchParams();
+                params.append('khoi', khoi);
+                params.append('mayeucau', code_request);
 
-        // Mở modal
-        $('#modalLyDoHuyn').modal('show');
-
-        // Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
-        // Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
-        $('#modalLyDoHuyn').appendTo("body");
-    }
-
+                fetch('/Request/resetdon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
+                })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+                .then(data => {
+                    alert(data);
+                        _load_request_condition_ga();
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+            }
+        }
+    
 </script>

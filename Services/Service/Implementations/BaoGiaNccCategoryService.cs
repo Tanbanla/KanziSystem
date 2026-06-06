@@ -4,6 +4,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
@@ -125,6 +126,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             try
             {
                 result.Data = await _repo.CheckSupperlier(codeSupperlier, catergory);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // check category exist - return list of missing supplier/category pairs
+        public async Task<GenericResponse<List<CheckSupplierByCategoryModel>>> CheckSupperlierByCategory(List<CheckSupplierByCategoryModel> request)
+        {
+            var result = new GenericResponse<List<CheckSupplierByCategoryModel>>();
+            try
+            {
+                var missing = await _repo.CheckSupperlierByCategory(request);
+                result.Data = missing;
                 result.Success = true;
             }
             catch (Exception ex)

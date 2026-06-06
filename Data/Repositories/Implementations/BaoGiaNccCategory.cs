@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -163,6 +164,40 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var result = await _context.BaoGia_NCC_Categories.AnyAsync(x => x.CHR_MaNCC == codeSupperlier && x.NVCHR_ChungLoai == catergory);
             return result;
+        }
+        public async Task<List<CheckSupplierByCategoryModel>> CheckSupperlierByCategory(List<CheckSupplierByCategoryModel> request)
+        {
+            var missing = new List<CheckSupplierByCategoryModel>();
+            if (request == null || !request.Any())
+                return missing;
+
+            var normalizedRequest = request
+                .Select(r => new CheckSupplierByCategoryModel
+                {
+                    MaDon = (r.MaDon ?? string.Empty).Trim(),
+                    ChungLoai = (r.ChungLoai ?? string.Empty).Trim()
+                })
+                .Where(r => !string.IsNullOrEmpty(r.MaDon))
+                .DistinctBy(r => (r.MaDon, r.ChungLoai))
+                .ToList();
+
+            if (!normalizedRequest.Any())
+                return missing;
+
+            var maDonList = normalizedRequest.Select(r => r.MaDon).Distinct().ToList();
+
+            var existing = await _context.BaoGia_NCC_Categories
+                .Where(c => maDonList.Contains(c.CHR_MaNCC))
+                .Select(c => new { Ma = (c.CHR_MaNCC ?? string.Empty).Trim(), ChungLoai = (c.NVCHR_ChungLoai ?? string.Empty).Trim() })
+                .ToListAsync();
+
+            var existingSet = new HashSet<string>(existing.Select(e => (e.Ma + "|" + e.ChungLoai).ToLowerInvariant()));
+
+            missing = normalizedRequest
+                .Where(r => !existingSet.Contains((r.MaDon + "|" + r.ChungLoai).ToLowerInvariant()))
+                .ToList();
+
+            return missing;
         }
     }
 }

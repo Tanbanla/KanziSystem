@@ -1,5 +1,7 @@
 using Microsoft.Identity.Client;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -19,6 +21,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> UpdateBaoGiaNccCategory(BaoGia_NCC_Category baoGiaNccCategory);
         // Check Supperlier and Catergory
         public Task<bool> CheckSupperlier(string codeSupperlier, string catergory);
-
+        // check category exist - returns list of supplier/category pairs that are NOT present in the database
+        Task<List<CheckSupplierByCategoryModel>> CheckSupperlierByCategory(List<CheckSupplierByCategoryModel> request);
     }
 }

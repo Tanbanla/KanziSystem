@@ -2,8 +2,10 @@ using Azure.Core;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Vml;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using OfficeOpenXml.Utils;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.SqlClient;
 using System.DirectoryServices.AccountManagement;
@@ -82,7 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
     }
     public class REQUEST_PROCESS_GA
     {
-       public static string Insert_request_GA(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_qlsc, string adid_qlsc, string mail_qlsc, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao, string ten_qltc, string adid_qltc, string mail_qltc)
+       public static string Insert_request_GA(string Cost_Center, string Declaration, string Dealine, float Total_exchange, string Exchange_rate, string Currency, float Total, string Kind, string Type, string Status, string Place, string Loaihinhtokhai, string Group_Code, string Chophepin, string Urgent, string User_Create, List<REQUEST_DETAIL>? rq_dt, string adid_dt, string adid_tt, string adid_pd, string mail_dt, string mail_tt, string mail_pd, string ten_dt, string ten_tt, string ten_pd, string ten_qlsc, string adid_qlsc, string mail_qlsc, string ten_xk, string adid_xk, string mail_xk, string adidnguoitao, string mailnguoitao, string ten_qltc, string adid_qltc, string mail_qltc, string note)
         {
             //string pathLog = @"\\apbivndb20\21_WAREHOUSE_BIVN\LogFile.txt";
             //if (!File.Exists(pathLog)) File.Create(pathLog);
@@ -105,12 +107,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     END
                     INSERT INTO [dbo].[REQUEST] (
                         [Code_Request], [Cost_Center], [Request_Date], [Declaration], [Dealine], [Total_exchange], [Exchange_rate], [Currency], [Total],  
-                        [Kind], [Type], [Status], [Create_Date], [User_Create],[Place], [Loaihinhtokhai], [Group_Code],  [Chophepin], [Urgent] 
+                        [Kind], [Type], [Status], [Create_Date], [User_Create],[Place], [Loaihinhtokhai], [Group_Code],  [Chophepin], [Urgent] , [Note]
                     ) 
                     VALUES (
                          
                         @NewCode, '{Cost_Center}', GETDATE(), N'{Declaration}', '{Dealine}',({Total_exchange} * {Exchange_rate}) , '{Exchange_rate}', '{Currency}','{Total}',  
-                        '{Kind}', '{Type}', '{Status}',GETDATE(), '{User_Create}', '{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' 
+                        '{Kind}', '{Type}', '{Status}',GETDATE(), '{User_Create}', N'{Place}', '{Loaihinhtokhai}', '{Group_Code}', '{Chophepin}', '{Urgent}' , '{note}'
                     );
                     SELECT @NewCode AS NextCode, SCOPE_IDENTITY() AS NewID;";
             var dtBase = _db.GET_DATA_FROM_SQL(_cmdRequest);
@@ -142,6 +144,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 _db.GET_DATA_FROM_SQL(_cmdDetail);
                 //File.AppendAllText(pathLog, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] SQL Command for Request: {Environment.NewLine}{_cmdRequest}{Environment.NewLine}");
             }
+
+            var tinhtongtien = _db.ReturnString("select SUM(Total) from REQUEST_DETAIL where Code_Request = '" + newCode + "'");
+            var tienex = _db.ReturnString("select SUM(Total_exchange) from REQUEST_DETAIL where Code_Request = '" + newCode + "'");
+            var updatetongtien = _db.GET_DATA_FROM_SQL("update REQUEST set Total = '" + tinhtongtien + "', Total_exchange = '" + tienex + "' where Code_Request = '" + newCode + "'");
+
             ten_qlsc = ten_qlsc.Split('_')[1];
             ten_qltc = ten_qltc.Split('_')[1];
             ten_xk = ten_xk.Split('_')[1];
@@ -284,6 +291,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     CHR_ADID_QLTC = list.Rows[i]["CHR_ADID_QLTC"].ToString()!,
                     CONFIRM_NGUOITHAMTRA = list.Rows[i]["CONFIRM_NGUOITHAMTRA"].ToString()!,
                     CONFIRM_NGUOIPHEDUYET = list.Rows[i]["CONFIRM_NGUOIPHEDUYET"].ToString()!,
+                    CONFIRM_QLTC = list.Rows[i]["CONFIRM_QLTC"].ToString()!,
                     DTM_QLSC = list.Rows[i]["DTM_QLSC"].ToString()!,
                     DTM_QLTC = list.Rows[i]["DTM_QLTC"].ToString()!,
                     DTM_NGUOITHAMTRA = list.Rows[i]["DTM_NGUOITHAMTRA"].ToString()!,
@@ -564,11 +572,17 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM_GA> pe_ = new List<PE_REQUEST_CONFIRM_GA>();
 
+            var check_khoi = "b.Group_Code like '%" + khoi + "%'";
+            if (khoi == "PROD")
+            {
+                check_khoi = "(b.Group_Code like '%" + khoi + "%' or b.Group_Code like 'PUR' )";
+            }
+
             var list = _db.GET_DATA_FROM_SQL($@"select b.*,a.ID_REQUEST from [PE_REQUEST_CONFIRM_GA] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
                         WHERE (a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
-                        and b.Group_Code like '%{khoi}%' order by ID desc");
+                        and {check_khoi} order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)
             {

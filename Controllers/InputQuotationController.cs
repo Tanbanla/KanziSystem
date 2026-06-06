@@ -417,25 +417,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 // Convert List<dynamic> to List<BaoGia_Detail_of_QuotationDTO>
-                var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var dtoList = new List<BaoGia_Detail_of_QuotationDTO>();
-                foreach (var item in model.baoGiaDetail)
-                {
-                    // Serialize dynamic to JSON then deserialize to DTO
-                    var json = System.Text.Json.JsonSerializer.Serialize(item);
-                    var dto = System.Text.Json.JsonSerializer.Deserialize<BaoGia_Detail_of_QuotationDTO>(json, options);
-                    if (dto != null)
-                        dtoList.Add(dto);
-                }
+                //var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                //var dtoList = new List<BaoGia_Detail_of_QuotationDTO>();
+                //foreach (var item in model.baoGiaDetail)
+                //{
+                //    // Serialize dynamic to JSON then deserialize to DTO
+                //    var json = System.Text.Json.JsonSerializer.Serialize(item);
+                //    var dto = System.Text.Json.JsonSerializer.Deserialize<BaoGia_Detail_of_QuotationDTO>(json, options);
+                //    if (dto != null)
+                //        dtoList.Add(dto);
+                //}
 
-                var result = await _baoGiaDetailService.InsertListBaoGiaDetailAsync(dtoList);
-                if (!result.Success)
-                {
-                    return BadRequest(result.Message);
-                }
+                //var result = await _baoGiaDetailService.InsertListBaoGiaDetailAsync(dtoList);
+                //if (!result.Success)
+                //{
+                //    return BadRequest(result.Message);
+                //}
                 // gửi mail thông báo có báo giá mới cho người yêu cầu báo giá
                 var sendMail = await _sendMailService.SendMailToSupplierByRequestCodeAsync(model.MaDon);
-                return Ok(result.Data);
+                return Ok(sendMail.Data);
             }
             catch (Exception ex)
             {

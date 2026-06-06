@@ -186,6 +186,19 @@ async function loadToCombo_GA(position, comboId) {
         document.getElementById("GA_ten_" + comboId).innerHTML = "";
         for (var i = 0; i < result.Data.Data.length; i++) {
             document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+            // lấy danh sách user ủy quyền
+            var usUQ = result.Data.Data[i].CHR_EMPLOYEE_ADID;
+            const params = new URLSearchParams();
+            params.append('adid', usUQ);
+
+            const rsUQ = await fetch('/User/Load_UQ', {
+                method: 'POST',
+                body: params
+            });
+            const kq = await rsUQ.json();
+            for (var a = 0; a < kq.length; a++) {
+                document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${kq[a].chR_ADID_NguoiduocUQ}">${kq[a].chR_TEN_NguoiduocUQ}</option>`;
+            }
         }
         //document.getElementById("ten_" + comboId).innerHTML = `<option>${result.Data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
         document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
@@ -220,6 +233,20 @@ async function loadToCombo_GD_GA(position, comboId) {
     document.getElementById("GA_ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
         document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+
+        // lấy danh sách user ủy quyền
+        var usUQ = result.Data.Data[i].CHR_EMPLOYEE_ADID;
+        const params = new URLSearchParams();
+        params.append('adid', usUQ);
+
+        const rsUQ = await fetch('/User/Load_UQ', {
+            method: 'POST',
+            body: params
+        });
+        const kq = await rsUQ.json();
+        for (var a = 0; a < kq.length; a++) {
+            document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${kq[a].chR_ADID_NguoiduocUQ}">${kq[a].chR_TEN_NguoiduocUQ}</option>`;
+        }
     }
     document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
     document.getElementById("GA_mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
@@ -248,6 +275,20 @@ async function loadToCombo_TBP_GA(position, comboId) {
     document.getElementById("GA_ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
         document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+
+        // lấy danh sách user ủy quyền
+        var usUQ = result.Data.Data[i].CHR_EMPLOYEE_ADID;
+        const params = new URLSearchParams();
+        params.append('adid', usUQ);
+
+        const rsUQ = await fetch('/User/Load_UQ', {
+            method: 'POST',
+            body: params
+        });
+        const kq = await rsUQ.json();
+        for (var a = 0; a < kq.length; a++) {
+            document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${kq[a].chR_ADID_NguoiduocUQ}">${kq[a].chR_TEN_NguoiduocUQ}</option>`;
+        }
     }
      
     document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;

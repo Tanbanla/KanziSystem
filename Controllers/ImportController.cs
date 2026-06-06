@@ -434,11 +434,41 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public ActionResult ExportModalDetail(string code_request)
         {
+            SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             code_request = code_request.Replace("*", "");
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            var list = REQUEST_PROCESS._load_body_detail(code_request);
+            var list = REQUEST_PROCESS._load_body_detail_export(code_request);
             var load = REQUEST_PROCESS._load_request(code_request);
+            var get_id = sql.ReturnString("select Id_Request from REQUEST where Code_Request = '" + code_request + "'");
+            var get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM] where ID_REQUEST = '" + get_id + "'");
 
+            string nguoilamdon = "";
+            string qltc = "";
+            string qlcc = "";
+            string xuatkho = "";
+            string quanlytiepnhan = "";
+            string dongy = "";
+            if (get_adid.Rows.Count > 0)
+            {
+                 nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!;
+                 qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!;
+                 qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIPHEDUYET"].ToString()!;
+                 xuatkho = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XUATKHO"].ToString()!;
+                 quanlytiepnhan = get_adid.Rows[0]["CHR_ADID_XACNHAN"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XACNHAN"].ToString()!;
+                 dongy = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XUATKHO"].ToString()!;
+            }
+            else
+            {
+                get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM_GA] where ID_REQUEST = '" + get_id + "'");
+                 nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!;
+                 qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!;
+                 qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIPHEDUYET"].ToString()!;
+                 xuatkho = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XUATKHO"].ToString()!;
+                 quanlytiepnhan = get_adid.Rows[0]["CHR_ADID_QLTC"].ToString()! + " \n " + get_adid.Rows[0]["DTM_QLTC"].ToString()!;
+                 dongy = get_adid.Rows[0]["CHR_ADID_QLSC"].ToString()! + " \n " + get_adid.Rows[0]["DTM_QLSC"].ToString()!;
+
+            }
+            
             string pathDir = Path.Combine(_env.ContentRootPath, "Data");
             string templatePath = Path.Combine(pathDir, "Template_HangTrongDanhMuc.xlsm");
             string tempFileName = $"HangTrongDanhMuc_{Guid.NewGuid()}.xlsm";
@@ -469,8 +499,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // 1. Nếu danh sách > 12, chèn thêm dòng
                     if (totalItems > 12)
                     {
-                        // Chèn thêm (totalItems - 12) dòng tính từ dòng 21 (9 + 12)
-                        // Việc chèn dòng này giúp giữ nguyên định dạng (format) của các dòng phía dưới (như chữ ký, tổng cộng)
                         ws.InsertRow(startRow + 12, totalItems - 12, startRow + 11);
                     }
 
@@ -495,6 +523,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng
                     ws.Cells["L" + totalRow + 12].Formula = $"SUM(L{startRow}:L{totalRow - 1})";
 
+
+                    ws.Cells["O5"].Value = nguoilamdon;
+                    ws.Cells["M5"].Value = qltc;
+                    ws.Cells["K5"].Value = qlcc;
+                    ws.Cells["D24"].Value = xuatkho;
+                    ws.Cells["C24"].Value = xuatkho;
+                    ws.Cells["A24"].Value = quanlytiepnhan;
+                    string checkgia = string.IsNullOrEmpty(firstLoad.Total_Real) ? "0" : firstLoad.Total_Real;
+                    if (float.Parse(checkgia) >= 10000)
+                    {
+                         ws.Cells["H5"].Value = qlcc;
+                    }
                     // Tính toán lại toàn bộ công thức trong sheet trước khi lưu
                     ws.Calculate();
                     package.Save();
@@ -599,6 +639,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST_DETAIL] where Id_Request = '" + iD_REQUEST + "'");
             var get_vitri = db.ReturnString("select Place from [REQUEST] where [Id_Request] = '" + iD_REQUEST + "'");
+
+            var get_phongban = db.ReturnString("select [Name] from DEPARTMENT as a left join REQUEST as b on a.Cost_Center = b.Cost_Center where b.Code_Request = '" + request_detail.Rows[0]["Code_Request"].ToString() + "'");
+       
             List<REQUEST_DETAIL> rq_dt = new List<REQUEST_DETAIL>();
 
             for (int i = 0; i < request_detail.Rows.Count; i++)
@@ -613,7 +656,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     Currency = request_detail.Rows[i]["Currency"].ToString(),
                     Total_exchange = float.Parse(request_detail.Rows[i]["Total_exchange"].ToString()!),
                     Aim = request_detail.Rows[i]["Aim"].ToString(),
-                    Phongchiuchiphi = request_detail.Rows[i]["Phongchiuchiphi"].ToString() + ":" + request_detail.Rows[i]["Vitri"].ToString(),
+                    Phongchiuchiphi = request_detail.Rows[i]["Phongchiuchiphi"].ToString() + ":" + get_phongban.ToString(),
                     Vitri = request_detail.Rows[i]["Vitri"].ToString(),
                     Poisition = request_detail.Rows[i]["Poisition"].ToString(),
                     Id_RequestDetail = int.Parse(request_detail.Rows[i]["Id_RequestDetail"].ToString()!)
@@ -629,7 +672,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST] where Id_Request = '" + iD_REQUEST + "'");
             List<REQUEST> rq_dt = new List<REQUEST>();
-
+            var get_namesec = request_detail.Rows[0]["Cost_Center"].ToString();
             for (int i = 0; i < request_detail.Rows.Count; i++)
             {
                 rq_dt.Add(new REQUEST
@@ -647,8 +690,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     Loaihinhtokhai = request_detail.Rows[i]["Loaihinhtokhai"].ToString(),
                     Group_Code = request_detail.Rows[i]["Group_Code"].ToString(),
                     Urgent = request_detail.Rows[i]["Urgent"].ToString(),
+                    Place = request_detail.Rows[i]["Place"].ToString(),
                 });
             }
+           
             return Json(rq_dt);
         }
         public ActionResult Suadon(string iD_REQUEST)

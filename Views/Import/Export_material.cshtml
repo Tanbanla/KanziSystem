@@ -135,9 +135,9 @@
                     </div>
                     <div class="form-group col-md-1"> 
                         <label>@Languages.loaihang </label>
-                        <select class="form-control" id="typee" style="background-color:#ffff0029">
+                        <select class="form-control" id="typee" style="background-color:#ffff0029" read>
                             <option>NEW</option>
-                            <option>REUSE</option>
+                           @*  <option>REUSE</option> *@
                         </select>
                     </div>
                     <div class="form-group col-md-1">
@@ -166,7 +166,7 @@
                         <table class="table table-bordered align-middle" id="dynamic-table">
                             <thead>
                                 <tr style="border-top:1px solid #e9e9e9">
-                                    <td colspan="15"><input type="checkbox" onchange="mucdichkhac(this)" /> &nbsp; Mục đích khác </td>
+                                    <td colspan="15"><input type="checkbox" onchange="mucdichkhac(this)" id="mdk" /> &nbsp; Mục đích khác </td>
                                 </tr>
                                 <tr class="bg-primary text-white text-center">
                                     <th style="width: 50px;">No.</th>
@@ -457,26 +457,31 @@
         tinhTongTatCa();
     }
 
-       function tinhTongTatCa() {
+    function tinhTongTatCa() {
         let tongMoi = 0;
         const allTcp = document.querySelectorAll('.tcp');
 
+        // Hàm phụ để "làm sạch" số: Xóa toàn bộ dấu phẩy
+        const parseNumber = (val) => {
+            if (!val) return 0;
+            // Xóa dấu phẩy: "1,234.56" -> "1234.56"
+            let cleanedStr = val.toString().replace(/,/g, '');
+            return parseFloat(cleanedStr) || 0;
+        };
+
         allTcp.forEach(input => {
-            let val = parseFloat(input.value) || 0;
-            tongMoi += val;
+            tongMoi += parseNumber(input.value);
         });
 
-        // Nếu có tỷ giá GA
         const groupCode = document.getElementById("group_code").value;
         if (groupCode === "GA") {
-            var tigia = parseFloat(document.getElementById("rate").value) || 1;
+            let tigia = parseNumber(document.getElementById("rate").value) || 1;
             tongMoi = tongMoi / tigia;
         }
 
         const displayTotal = document.getElementById("thanhtien");
-        if (displayTotal) {
-            // Hiển thị số có dấu phẩy ngăn cách hàng nghìn
-            displayTotal.value = tongMoi.toFixed(2);
+        if (displayTotal) {         
+            displayTotal.value = tongMoi.toFixed(2)
         }
     }
 

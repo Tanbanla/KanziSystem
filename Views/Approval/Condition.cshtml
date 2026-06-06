@@ -297,10 +297,18 @@ function _load_request_condition() {
             const trangthai = `<div class="badge badge-pill badge-${config[1]} mb-1">${config[0]}</div>`;
 
                 var quyen = "<td></td><td></td>";
-                    if(item.user_Create == us){
-                                    quyen = `<td  title="Xóa đơn" ><i class="fa fa-trash text-danger" onclick="xoa_don_prod('${item.iD_REQUEST}')"/></i></td>
-                                             <td title="Sửa đơn" ><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
-                                             <td title="Hủy đơn"><i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon('${item.iD_REQUEST}')" ></i></td>`;
+                    var suadon = ``;
+                    var huydon = ``;
+
+                    if(parseFloat(item.inT_STEP) <= 4){
+                            suadon = `<a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a>`;
+                            huydon = `<i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon('${item.iD_REQUEST}')" ></i>`;
+                    }
+                    if(item.user_Create == us)
+                    {
+                        quyen = `<td  title="Xóa đơn" ><i class="fa fa-trash text-danger" onclick="xoa_don_prod('${item.iD_REQUEST}')"/></i></td>
+                                <td title="Sửa đơn" >${suadon}</td>
+                                <td title="Hủy đơn" >${huydon}</td>`;
                     }
             return `
                     <tr>
@@ -331,17 +339,17 @@ function _load_request_condition() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-function moModalHuyDon(id) {
-document.getElementById("id_huy").value = id;
-document.getElementById("txtLyDo").value = "";
+    function moModalHuyDon(id) {
+        document.getElementById("id_huy").value = id;
+        document.getElementById("txtLyDo").value = "";
 
-// Mở modal
-$('#modalLyDoHuyn').modal('show');
+        // Mở modal
+        $('#modalLyDoHuyn').modal('show');
 
-// Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
-// Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
-$('#modalLyDoHuyn').appendTo("body");
-}
+        // Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
+        // Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
+        $('#modalLyDoHuyn').appendTo("body");
+    }
 
 // GA
 async function _load_request_condition_ga() {
@@ -373,6 +381,7 @@ async function _load_request_condition_ga() {
         return response.json();
     })
     .then(data => {
+        console.log(data);
            document.getElementById('list_approve').innerHTML = "";
         if (data.length === 0) {
             document.getElementById('list_approve').innerHTML = `<tr><td colspan="15" class="text-center">Không có dữ liệu !</td></tr>`;
@@ -416,11 +425,19 @@ async function _load_request_condition_ga() {
                 return "<span></span>";
             });
                 var quyen = "<td></td><td></td>";
-                if(item.user_Create == us){
-                            quyen = `<td title="Xóa đơn"><i class="fa fa-trash text-danger" onclick="xoa_don_GA('${item.iD_REQUEST}')" /></i></td>
-                                    <td title="Sửa đơn"><a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
-                                  <td title="Hủy đơn"><i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon_GA('${item.iD_REQUEST}')" ></i></td>`;
+                var suadon = ``;
+                var huydon = ``;
+                if (parseFloat(item.inT_STEP) <= 5 )
+                {
+                    suadon = `<a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a>`;
+                    huydon = `<i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon('${item.iD_REQUEST}')" ></i>`;
                 }
+                if(item.user_Create == us)
+                {
+                        quyen = `<td  title="Xóa đơn" ><i class="fa fa-trash text-danger" onclick="xoa_don_GA('${item.iD_REQUEST}')"/></i></td>
+                            <td title="Sửa đơn" >${suadon}</td>
+                            <td title="Hủy đơn" >${huydon}</td>`;
+                }        
             return `
                 <tr>
                     <td class="text-center" onclick="_modal_info('${item.code_Request}', '${item.inT_STEP}')">

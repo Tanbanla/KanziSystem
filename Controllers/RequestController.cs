@@ -34,6 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? Chophepin { get; set; }
         public string? Urgent { get; set; }
         public string? User_Create { get; set; }
+        public string? Note { get; set; }
         public string? adid_dt { get; set; }
         public string? adid_tt { get; set; }
         public string? adid_pd { get; set; }
@@ -71,6 +72,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? Chophepin { get; set; }
         public string? Urgent { get; set; }
         public string? User_Create { get; set; }
+        public string? Note { get; set; }
         public string? adid_dt { get; set; }
         public string? adid_tt { get; set; }
         public string? adid_pd { get; set; }
@@ -156,7 +158,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 model.mailnguoitao = model.adidnguoitao + "@brothergroup.net";
             }
 
-            var rq_detail = REQUEST_PROCESS.Insert_request(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_dy, model.adid_dy, model.mail_dy, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao);
+            var rq_detail = REQUEST_PROCESS.Insert_request(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_dy, model.adid_dy, model.mail_dy, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao,model.Note);
 
             string body = $@"Xin chào <br />こんにちは、 <br />
                  Đơn yêu cầu xuất kho :  {rq_detail}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
@@ -247,7 +249,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 model.mailnguoitao = model.adidnguoitao + "@brothergroup.net";
             }
-            var rq_detail = REQUEST_PROCESS_GA.Insert_request_GA(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_qlsc, model.adid_qlsc, model.mail_qlsc, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao, model.ten_qltc, model.adid_qltc, model.mail_qltc);
+            var rq_detail = REQUEST_PROCESS_GA.Insert_request_GA(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_qlsc, model.adid_qlsc, model.mail_qlsc, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao, model.ten_qltc, model.adid_qltc, model.mail_qltc, model.Note);
 
             string body = $@"Xin chào <br />こんにちは、 <br />
                  Đơn yêu cầu xuất kho :  {rq_detail}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
@@ -281,11 +283,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult _get_phongchiuphi()
         {
+            List<string> pcp = REQUEST_PROCESS.costphongban();
+            return Json(pcp);
+        }
+        public JsonResult _get_phongchiuphi_xuatkho()
+        {
             List<string> pcp = REQUEST_PROCESS.phongchiuphi();
             return Json(pcp);
         }
         public JsonResult _get_vitri(string cost)
         {
+            cost = cost.Split(':')[0];
             List<string> vitri = REQUEST_PROCESS.vitri(cost);
             return Json(vitri);
         }
@@ -373,7 +381,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 REQUEST_PROCESS._sendmail(body, guiden, subject);
             }
             // Gửi mail 
-          
+            REQUEST_PROCESS._sendmail(body, "maithi.tuyen@brother-bivn.com.vn", subject);
             return Json(up);
         }
         public JsonResult _update_request_GA(string id_request, string regency, string step, string urgent)
@@ -536,8 +544,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var get_id = db.ReturnString("select [Id_Request] from [REQUEST] where [Code_Request] = '" + catmadon + "'");
 
             int buoc = int.Parse(get_if.Rows[0][0].ToString()!) + 1;
-         
 
+        
+            if (get_if.Rows[0][0].ToString()! == "5")
+            {
+                buoc = 5;
+            }
             var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + get_id + "'");
             // Định nghĩa cột email tương ứng với từng bước
             string? columnName = buoc switch
@@ -554,6 +566,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             // Lấy địa chỉ email
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
+            string mailTohoanthanh = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
             var up = "";
             // Cập nhật lại nội dung Body
             if (int.Parse(get_if.Rows[0][0].ToString()!) == 5)
@@ -565,11 +578,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
                  up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], get_if.Rows[0][0].ToString()!);
-                 REQUEST_PROCESS_GA._sendmail(body, "CHR_MAIL_NGUOITAO", subject);
+                 REQUEST_PROCESS_GA._sendmail(body, mailTohoanthanh, subject);
             }
             else
             {
-                 up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
+                up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
                 REQUEST_PROCESS_GA._sendmail(body, mailTo!, subject);
             }
             // update đơn
@@ -735,14 +748,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
          
         }
         [HttpPost]
-        public JsonResult _sua_request(string Cost_Center,string Declaration,string Code_Request, string iD_REQUEST, string Dealine, float Total_exchange, string Exchange_rate, float Total, string Place, string Urgent, string User_Create, List<Models.REQUEST_DETAIL> rq)
+        public JsonResult _sua_request(string Cost_Center,string Declaration,string Code_Request, string iD_REQUEST, string Dealine, float Total_exchange, string Exchange_rate, float Total, string Place, string Urgent, string User_Create, List<Models.REQUEST_DETAIL> rq, string Note)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
            
-                var list = db.ReturnString("select count(*) from [PE_REQUEST_CONFIRM] where INT_STEP = '0' and  [ID_REQUEST] = '" + iD_REQUEST + "' ");
+                var list = db.ReturnString("select count(*) from [PE_REQUEST_CONFIRM] where [ID_REQUEST] = '" + iD_REQUEST + "' ");
                 if(list == "0")
                 {
-                    list = db.ReturnString("select count(*) from [PE_REQUEST_CONFIRM_PE] where INT_STEP = '0' and  [ID_REQUEST] = '" + iD_REQUEST + "' ");
+                    list = db.ReturnString("select count(*) from [PE_REQUEST_CONFIRM_GA] where  [ID_REQUEST] = '" + iD_REQUEST + "' ");
                 }
                 if (list != "0")
                 {
@@ -785,21 +798,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             -- Thực hiện Update
                             UPDATE REQUEST_DETAIL
                             SET 
-                                Material_Name = N'{rq[i].Material_Name}',
-                                Account_Name = N'{rq[i].Account_Name}',
-                                Account_Code = '{rq[i].Account_Code}',
-                                Unit = N'{rq[i].Unit}',
-                                Amount = '{rq[i].Amount}',
-                                Price = '{rq[i].Price}',
-                                Total = '{rq[i].Total_exchange}',
-                                Vitri = '{rq[i].Vitri}',
+                                Material_Name = N'{rq[i].Material_Name}',                             
+                                Vitri = N'{rq[i].Vitri}',
                                 Poisition = N'{rq[i].Poisition}',
                                 Currency = N'{rq[i].Currency!.Trim()}',
                                 Aim = N'{rq[i].Aim}',
-                                Total_exchange = '{rq[i].Total_exchange}',
                                 Phongchiuchiphi = '{rq[i].Phongchiuchiphi!.Split(':')[0]}',
+                                Account_Code = '{rq[i].Account_Code}',
+                                Account_Name = N'{rq[i].Account_Name}',
                                 [Status] = ''
-
                             WHERE Code_Request = '{Code_Request}' AND Material_Code = '{rq[i].Material_Code}'
                         END
                         ELSE
@@ -809,7 +816,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             VALUES ('{Code_Request}',N'{rq[i].Material_Name}','{rq[i].Material_Code}','{rq[i].Account_Name}','{rq[i].Account_Code}',N'{rq[i].Unit}','{rq[i].Amount}','{rq[i].Price}','{rq[i].Total_exchange}','{rq[i].Vitri}',N'{rq[i].Poisition}',N'{rq[i].Currency!.Trim()}',N'{rq[i].Aim}','{iD_REQUEST}','{rq[i].Total_exchange}','1','','','{rq[i].Phongchiuchiphi!.Split(':')[0]}')
                         END");
                     }
-                    db.GET_DATA_FROM_SQL($"Update [REQUEST] set [Declaration] = '{Declaration}', [Total_exchange] = '{Total_exchange}', Exchange_rate = '{Exchange_rate}', [Dealine] = '{Dealine}', Total = '{Total}',Place = N'{Place}',Urgent = '{Urgent}', User_Create = '{User_Create}', Create_Date = GETDATE() where Id_Request = '{iD_REQUEST}'");
+                    if(Note == "OTHER AIM")
+                    {
+                        db.GET_DATA_FROM_SQL($"Update [REQUEST] set Note = 'OTHER AIM' where Id_Request = '{iD_REQUEST}'");
+                    }
+                    db.GET_DATA_FROM_SQL($"Update [REQUEST] set [Dealine] = '{Dealine}', [Declaration] = '{Declaration}', Place = N'{Place}',  Exchange_rate = '{Exchange_rate}' where Id_Request = '{iD_REQUEST}'");
 
                     return Json("OK");
                 }
@@ -956,9 +967,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //update trạng thái đơn request
             _db.GET_DATA_FROM_SQL("update [REQUEST_DETAIL] set Status = '' where Code_Request = '" + mayeucau + "'");
             _db.GET_DATA_FROM_SQL("update REQUEST set Status = 'WAITCONFIRM' where Code_Request = '" + mayeucau + "'");
+
             if (khoi == "GA")
             {
-                _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '5' where ID_REQUEST = '" + id_rq + "'");
+                _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '5', CONFIRM_QLTC = 0 where ID_REQUEST = '" + id_rq + "'");
             }
             if (khoi == "PROD")
             {
@@ -979,6 +991,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _db.GET_DATA_FROM_SQL("delete from KHO_NHAPXUAT where Hanhdong like '%" + mayeucau + "%'");
 
             return Json("Reset OK");
+        }
+
+        public JsonResult _load_modal_tongdon(string cost_request)
+        {
+            var td = REQUEST_PROCESS._load_modal_tongdon(cost_request);
+            return Json(td);
         }
     }
 }

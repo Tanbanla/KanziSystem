@@ -549,4 +549,7 @@
   <data name="Donhang" xml:space="preserve">
     <value>Đơn hàng</value>
   </data>
+  <data name="uyquyen" xml:space="preserve">
+    <value>Ủy quyền</value>
+  </data>
 </root>

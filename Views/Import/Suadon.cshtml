@@ -84,7 +84,7 @@
                     </div>
                     <div class="form-group col-md-2" hidden>
                         <label>@Languages.tenphongyeucau</label>
-                        <input type="text" class="form-control" id="dept" readonly required>
+                        <input type="text" class="form-control" id="dept"  required>
                     </div>
                     <div class="form-group col-md-2" hidden>
                         <label>@Languages.Bophan</label>
@@ -92,7 +92,7 @@
                     </div>
                     <div class="form-group col-md-1">
                         <label>@Languages.phongchiuphi</label>
-                        <input type="text" class="form-control" id="cost_center" readonly>
+                        <input type="text" class="form-control" id="cost_center" style="background-color:#ffff0029">
                     </div>
                     <div class="form-group col-md-1">
                         <label>@Languages.vitri</label>
@@ -152,11 +152,11 @@
                         <label for="inputCity">@Languages.thanhtien  </label> <code style="float:right"><b>USD</b></code>
                         <input type="text" class="form-control" id="thanhtien" value="0" readonly>
                     </div>
-                    <div class="form-group col-md-2">
+                    <div class="form-group col-md-2" hidden>
                         <label for="inputCity">Chọn file  </label> <code style="float:right"><b></b></code>
                         <input id="mstFile" accept=".xlsx" type="file" class="form-control" />
                     </div>
-                    <div class="form-group col-md-1">
+                    <div class="form-group col-md-1" hidden>
                         <label for="inputCity"><a href="/Import/ExportToExcel"> File mẫu excel </a></label> <code style="float:right"><b></b></code>
                         <button id="btnUpload" onclick="UploadFileFormat()" type="button" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Import file</button>
                     </div>
@@ -166,7 +166,7 @@
                         <table class="table table-bordered align-middle" id="dynamic-table">
                             <thead>
                                 <tr style="border-top:1px solid #e9e9e9">
-                                    <td colspan="15"><input type="checkbox" onclick="check_mucdichkhac()" /> &nbsp; Mục đích khác </td>
+                                    <td colspan="15"><input type="checkbox" id="mdk" /> &nbsp; Mục đích khác </td>
                                 </tr>
                                 <tr class="bg-primary text-white text-center">
                                     <th style="width: 50px;">No.</th>
@@ -181,7 +181,7 @@
                                     <th>@Languages.phongchiuphi</th>
                                     <th>@Languages.vitri</th>
                                     <th>@Languages.Ghichu</th>
-                                    <th style="width: 50px;"></th>
+                                 
                                 </tr>
                             </thead>
                           
@@ -191,7 +191,7 @@
                                     <tr class="input-row">
                                         <td class="row-number text-center fw-bold">@item.Id_RequestDetail</td>
                                         <td>
-                                            <select class="form-control select2 tenhang" id="tenhang_1" onchange="_load_material_1(this.value, this.id)">
+                                            <select class="form-control tenhang" id="tenhang_1" style="background-color:#e9ecef">
                                                 <option>@item.Material_Name</option>
                                             </select>
                                         </td>
@@ -200,7 +200,7 @@
                                                 <option>@item.Account_Code</option>
                                             </select> 
                                         </td>
-                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_1" min="0"></td>
+                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_1" min="0" readonly></td>
                                         <td><input type="text" class="form-control dv" id="dv_1" value="@item.Unit" readonly></td>
                                         <td><input type="number" class="form-control dg" id="dg_1" value="@item.Price" readonly></td>
                                         <td><input type="text" class="form-control nt" id="nt_1" value="@item.Currency" readonly></td>
@@ -213,16 +213,16 @@
                                         </td>
                                         <td><input type="text" class="form-control vt" id="vt_1" value="@item.Vitri"></td>
                                         <td><input type="text" class="form-control" id="gc_1" value="@item.Poisition"></td>
-                                        <td>
+                                       @*  <td>
                                             <button type="button" id="xoa_1" onclick="_xoadong('@item.Id_RequestDetail')" class="btn btn-outline-danger btn-remove">&times;</button>
-                                        </td>                                      
+                                        </td>  *@                                     
                                     </tr>
                                 }
                             </tbody>
                         </table>
 
                     </div>
-                    <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button>
+                 @*    <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button> *@
                 </div>
              
                 <button class="btn btn-info float-right" onclick="_luu()"><i class="fa fa-save"></i> Sửa đơn</button>
@@ -240,14 +240,15 @@
 <script src="~/scripts/get_api_ga.js"></script>
 <script>
     window.onload = function(){
+        _load_request();
         _load_rate();
         _load_phongchiuphi_1();
         _load_account_1();
-        _load_request();
+      
         
         //_load_name_inv1(document.getElementById("group_code").value);
     }
-        function check_mucdichkhac() {
+    function check_mucdichkhac() {
         // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
         const lstMaterial = document.getElementById("lstMaterial");
         if (lstMaterial) lstMaterial.innerHTML = "";
@@ -290,66 +291,66 @@
     }
          // Đảm bảo dùng jQuery chính xác
            // Đảm bảo dùng jQuery chính xác
-    (function($) {
-        "use strict";
+    // (function($) {
+    //     "use strict";
 
-        document.getElementById('btn-add-row').addEventListener('click', function() {
-            const tbody = document.querySelector('#dynamic-table tbody');
-            const firstRow = tbody.querySelector('.input-row');
+    //     document.getElementById('btn-add-row').addEventListener('click', function() {
+    //         const tbody = document.querySelector('#dynamic-table tbody');
+    //         const firstRow = tbody.querySelector('.input-row');
 
-            // 1. Clone dòng đầu tiên (Đã bao gồm đầy đủ danh sách option của stk và pcp)
-            const newRow = firstRow.cloneNode(true);
-            const lastRow = tbody.querySelector('.input-row:last-child');
+    //         // 1. Clone dòng đầu tiên (Đã bao gồm đầy đủ danh sách option của stk và pcp)
+    //         const newRow = firstRow.cloneNode(true);
+    //         const lastRow = tbody.querySelector('.input-row:last-child');
 
-            // Xóa bỏ container Select2 cũ bị clone theo (nếu có) để select2 khởi tạo lại sạch sẽ
-            $(newRow).find('.select2-container').remove();
-            $(newRow).find('select').show(); // Đảm bảo select ẩn của select2 hiện lại để khởi tạo lại
+    //         // Xóa bỏ container Select2 cũ bị clone theo (nếu có) để select2 khởi tạo lại sạch sẽ
+    //         $(newRow).find('.select2-container').remove();
+    //         $(newRow).find('select').show(); // Đảm bảo select ẩn của select2 hiện lại để khởi tạo lại
 
-            // 2. Kế thừa dữ liệu phòng chịu phí và mục đích từ dòng cuối cùng
-            if (lastRow) {
-                const lastPcpValue = $(lastRow).find('.pcp').val();
-                $(newRow).find('.pcp').val(lastPcpValue);
+    //         // 2. Kế thừa dữ liệu phòng chịu phí và mục đích từ dòng cuối cùng
+    //         if (lastRow) {
+    //             const lastPcpValue = $(lastRow).find('.pcp').val();
+    //             $(newRow).find('.pcp').val(lastPcpValue);
 
-                const lastmdValue = $(lastRow).find('.md').val();
-                $(newRow).find('.md').val(lastmdValue);
+    //             const lastmdValue = $(lastRow).find('.md').val();
+    //             $(newRow).find('.md').val(lastmdValue);
 
-                // Có thể kế thừa luôn số tài khoản của dòng cuối cho tiện nếu muốn:
-                const lastStkValue = $(lastRow).find('.stk').val();
-                $(newRow).find('.stk').val(lastStkValue);
-            }
+    //             // Có thể kế thừa luôn số tài khoản của dòng cuối cho tiện nếu muốn:
+    //             const lastStkValue = $(lastRow).find('.stk').val();
+    //             $(newRow).find('.stk').val(lastStkValue);
+    //         }
 
-            // 3. Đặt lại giá trị rỗng cho các ô nhập số lượng, đơn giá, thành tiền
-            const $elements = $(newRow).find('select, input, textarea');
-            $elements.each(function() {
-                const $el = $(this);
-                const id = $el.attr('id') || '';
-                // Nếu là các ô nhập liệu số lượng, thành tiền, đơn giá thì xóa trống text
-                if (id.includes('sl_') || id.includes('dv_') || id.includes('dg_') || id.includes('nt_') || id.includes('tcp_')) {
-                    $el.val('');
-                }
-            });
+    //         // 3. Đặt lại giá trị rỗng cho các ô nhập số lượng, đơn giá, thành tiền
+    //         const $elements = $(newRow).find('select, input, textarea');
+    //         $elements.each(function() {
+    //             const $el = $(this);
+    //             const id = $el.attr('id') || '';
+    //             // Nếu là các ô nhập liệu số lượng, thành tiền, đơn giá thì xóa trống text
+    //             if (id.includes('sl_') || id.includes('dv_') || id.includes('dg_') || id.includes('nt_') || id.includes('tcp_')) {
+    //                 $el.val('');
+    //             }
+    //         });
 
-            // 4. Hiển thị nút xóa cho dòng mới
-            const removeBtn = newRow.querySelector('.btn-remove');
-            if (removeBtn) {
-                removeBtn.style.display = 'inline-block';
-            }
+    //         // 4. Hiển thị nút xóa cho dòng mới
+    //         const removeBtn = newRow.querySelector('.btn-remove');
+    //         if (removeBtn) {
+    //             removeBtn.style.display = 'inline-block';
+    //         }
 
-            // 5. Thêm dòng mới vào bảng
-            tbody.appendChild(newRow);
+    //         // 5. Thêm dòng mới vào bảng
+    //         tbody.appendChild(newRow);
 
-            // 6. Cập nhật số thứ tự STT và ID gán hậu tố _i (ví dụ: stk_2, stk_3)
-            updateRowNumbers();
+    //         // 6. Cập nhật số thứ tự STT và ID gán hậu tố _i (ví dụ: stk_2, stk_3)
+    //         updateRowNumbers();
 
-            // 7. Khởi tạo lại Select2 cho dòng vừa mới thêm
-            if ($.fn.select2) {
-                $(newRow).find('.select2, .pcp, .stk').select2({
-                    width: '100%',
-                });
-            }
-        });
+    //         // 7. Khởi tạo lại Select2 cho dòng vừa mới thêm
+    //         if ($.fn.select2) {
+    //             $(newRow).find('.select2, .pcp, .stk').select2({
+    //                 width: '100%',
+    //             });
+    //         }
+    //     });
 
-    })(jQuery);
+    // })(jQuery);
 
     function caculator(id) {
         // Lấy số thứ tự dòng từ ID (ví dụ: sl_1 -> 1)
@@ -391,68 +392,62 @@
         }
     }
     function _load_phongchiuphi_1() {
-    fetch('/Request/_get_phongchiuphi', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        fetch('/Request/_get_phongchiuphi', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
             }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
-            const selectElements = document.querySelectorAll('.pcp'); // Khuyên dùng querySelectorAll
+            // 1. Khởi tạo chuỗi HTML gom tất cả các option một lần duy nhất
+            let optionsHtml = '';
+            data.forEach(item => {
+                optionsHtml += `<option value="${item}">${item}</option>`;
+            });
+
+            // 2. Gán chuỗi vừa tạo vào các select box
+            const selectElements = document.querySelectorAll('.pcp');
             selectElements.forEach(select => {
-                // Xóa trắng hoặc giữ lại option mặc định trước khi gán
-                   
-                data.forEach(item => {
-                    select.innerHTML += `<option value="${item}">${item}</option>`;
-                });
+                select.insertAdjacentHTML('beforeend', optionsHtml);
             });
         })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-}
-       function _load_account_1() {
+        .catch(error => console.error('Lỗi fetch:', error));
+    }
+    function _load_account_1() {
         fetch('/Import/_load_account', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
-            console.log(data);
-
-            // Tìm tất cả các select có class 'stk' trên màn hình
             const stkSelects = document.querySelectorAll('.stk');
 
             stkSelects.forEach(select => {
-                // Giữ lại giá trị hiện tại (nếu đơn hàng cũ đã có sẵn số tài khoản)
                 const currentValue = select.value;
+                // 1. Tạo chuỗi khởi đầu với giá trị mặc định
+                let optionsHtml = currentValue ? `<option selected>${currentValue}</option>` : '';
 
-                // Xóa bớt các option cũ để tránh bị trùng lặp dữ liệu (trừ option đầu tiên nếu cần)
-                select.innerHTML = currentValue ? `<option selected>${currentValue}</option>` : '';
-
-                // Nạp danh sách tài khoản vào
+                // 2. Nối thêm các option khác vào biến chuỗi
                 data.forEach(account => {
                     if (account !== currentValue) {
-                        select.innerHTML += `<option value="${account}">${account}</option>`;
+                        optionsHtml += `<option value="${account}">${account}</option>`;
                     }
                 });
+
+                // 3. Gán chuỗi vào DOM ĐÚNG 1 LẦN cho mỗi thẻ select
+                select.innerHTML = optionsHtml;
             });
         })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+        .catch(error => console.error('Lỗi fetch:', error));
     }
     function _load_request(){
         var iD_REQUEST = document.getElementById("idrq").innerHTML;
@@ -476,8 +471,7 @@
                 return response.json();
             })
             .then(data => {
-               
-                console.log('request data', data);
+                console.log(data);
                 document.getElementById("group_code").value = data[0].group_Code;
                 document.getElementById("madon").value = data[0].code_Request;
                 document.getElementById("name_dept").value = data[0].cost_Center;
@@ -488,54 +482,55 @@
                 document.getElementById("loaichiphi").value = data[0].declaration;
                 //document.getElementById("loaichiphi").value = loaichiphi;
                 document.getElementById("cost_center").value = data[0].cost_Center;
+                document.getElementById("place").value = data[0].place;
                 lcp = data[0].declaration;
                 gr = data[0].group_Code;
                 if (data[0].urgent == true) {
                     document.getElementById("gap").checked = true;
                 }
 
-                // Gọi _load_material sau khi gr và lcp đã có giá trị
-                $.ajax({
-                    url: '/Import/_load_material',
-                    type: 'POST',
-                    dataType: 'JSON',
-                    data: {
-                        group_code: gr,
-                        loaichiphi: lcp
-                    },
-                     success: function (response) {
-                        console.log(response);
+                // // Gọi _load_material sau khi gr và lcp đã có giá trị
+                // $.ajax({
+                //     url: '/Import/_load_material',
+                //     type: 'POST',
+                //     dataType: 'JSON',
+                //     data: {
+                //         group_code: gr,
+                //         loaichiphi: lcp
+                //     },
+                //      success: function (response) {
+                //         console.log(response);
 
-                        // Tìm tất cả các ô select tên hàng đang có trên màn hình
-                        const allTenHangSelects = document.querySelectorAll('.tenhang');
+                //         // Tìm tất cả các ô select tên hàng đang có trên màn hình
+                //         const allTenHangSelects = document.querySelectorAll('.tenhang');
 
-                        allTenHangSelects.forEach(select => {
-                            // Giữ lại giá trị hiện tại của dòng đó (giá trị từ database đổ ra)
-                            const currentValue = select.value;
+                //         allTenHangSelects.forEach(select => {
+                //             // Giữ lại giá trị hiện tại của dòng đó (giá trị từ database đổ ra)
+                //             const currentValue = select.value;
 
-                            // Xóa trắng để nạp lại, giữ lại item hiện tại làm mặc định
-                            select.innerHTML = currentValue ? `<option selected>${currentValue}</option>` : '';
+                //             // Xóa trắng để nạp lại, giữ lại item hiện tại làm mặc định
+                //             select.innerHTML = currentValue ? `<option selected>${currentValue}</option>` : '';
 
-                            // Duyệt qua danh sách nguyên liệu trả về từ API để nạp vào select
-                            for(var i = 0 ; i < response.length; i++){
-                                // Tránh add trùng tên mặt hàng hiện tại đã add ở trên
-                                if (response[i] !== currentValue) {
-                                    select.innerHTML += `<option value="${response[i]}">${response[i]}</option>`;
-                                }
-                            }
-                        });
+                //             // Duyệt qua danh sách nguyên liệu trả về từ API để nạp vào select
+                //             for(var i = 0 ; i < response.length; i++){
+                //                 // Tránh add trùng tên mặt hàng hiện tại đã add ở trên
+                //                 if (response[i] !== currentValue) {
+                //                     select.innerHTML += `<option value="${response[i]}">${response[i]}</option>`;
+                //                 }
+                //             }
+                //         });
 
-                        // Sau khi nạp dữ liệu xong, kích hoạt (hoặc refresh) lại Select2 để cập nhật giao diện
-                        if ($.fn.select2) {
-                            $('.tenhang').select2({
-                                width: '100%'
-                            });
-                        }
-                    },
-                    error: function (xhr, status, err) {
-                        console.error('AJAX error', status, err);
-                    }
-                });
+                //         // Sau khi nạp dữ liệu xong, kích hoạt (hoặc refresh) lại Select2 để cập nhật giao diện
+                //         if ($.fn.select2) {
+                //             $('.tenhang').select2({
+                //                 width: '100%'
+                //             });
+                //         }
+                //     },
+                //     error: function (xhr, status, err) {
+                //         console.error('AJAX error', status, err);
+                //     }
+                // });
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
@@ -600,52 +595,52 @@
     }
 }
 
-    async function _load_material_1(Material_Code, id) {
+//     async function _load_material_1(Material_Code, id) {
 
-    let idd = id.split('_')[1];
-    var groupcode = document.getElementById("group_code").value;
-    const params = new URLSearchParams();
-    params.append('Material_Code', Material_Code);
-    params.append('Material_Name_VN', '');
-    params.append('Account_Name_VN', '');
-    params.append('Group_Code', groupcode);
+//     let idd = id.split('_')[1];
+//     var groupcode = document.getElementById("group_code").value;
+//     const params = new URLSearchParams();
+//     params.append('Material_Code', Material_Code);
+//     params.append('Material_Name_VN', '');
+//     params.append('Account_Name_VN', '');
+//     params.append('Group_Code', groupcode);
 
-    fetch('/Import/_info_material', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString()
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data);
-            console.log(id);
-            document.getElementById("stk_" + idd).value = data[0].account_Code + ":" + data[0].account_Name_EN;
-            if (data[0].unit_Note == "" || data[0].unit_Note == "-") {
-                document.getElementById("dv_" + idd).value = data[0].unit;
-            }
-            else {
-                document.getElementById("dv_" + idd).value = data[0].unit + "(" + data[0].unit_Note + ")";
-            }
-            document.getElementById("dg_" + idd).value = data[0].price;
-            document.getElementById("nt_" + idd).value = data[0].currency;
-                if (document.getElementById("sl_" + idd).value != "") {
-                var pr = parseFloat(data[0].price) || 0;
-                var sq = parseFloat(document.getElementById("sl_" + idd).value) || 0;
-                document.getElementById("tcp_" + idd).value = (pr * sq).toFixed(2);
-             }
-                tinhTongTatCa();
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-}
+//     fetch('/Import/_info_material', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded',
+//         },
+//         body: params.toString()
+//     })
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error(`HTTP error! status: ${response.status}`);
+//             }
+//             return response.json();
+//         })
+//         .then(data => {
+//             console.log(data);
+//             console.log(id);
+//             document.getElementById("stk_" + idd).value = data[0].account_Code + ":" + data[0].account_Name_EN;
+//             if (data[0].unit_Note == "" || data[0].unit_Note == "-") {
+//                 document.getElementById("dv_" + idd).value = data[0].unit;
+//             }
+//             else {
+//                 document.getElementById("dv_" + idd).value = data[0].unit + "(" + data[0].unit_Note + ")";
+//             }
+//             document.getElementById("dg_" + idd).value = data[0].price;
+//             document.getElementById("nt_" + idd).value = data[0].currency;
+//                 if (document.getElementById("sl_" + idd).value != "") {
+//                 var pr = parseFloat(data[0].price) || 0;
+//                 var sq = parseFloat(document.getElementById("sl_" + idd).value) || 0;
+//                 document.getElementById("tcp_" + idd).value = (pr * sq).toFixed(2);
+//              }
+//                 tinhTongTatCa();
+//         })
+//         .catch(error => {
+//             console.error('There was a problem with the fetch operation:', error);
+//         });
+// }
 
     function _luu(){
     var x = confirm("Bạn có muốn sửa đơn không ?");
@@ -672,7 +667,7 @@
                 const s = (val || '').toString().split(':');
                 return [s[0] || '', s.slice(1).join(':') || ''];
             };
-
+           
             const [materialCode, materialName] = splitPair(tenhangEl ? tenhangEl.value : '');
             const [accountCode, accountName] = splitPair(stkEl ? stkEl.value : '');
 
@@ -697,6 +692,10 @@
 
             dataList.push(rowData);
         });
+        var mucdichkhac = "";
+        if (document.getElementById('mdk').checked == true) {
+            mucdichkhac = "OTHER AIM";
+        }
         var iD_REQUEST = document.getElementById("idrq").innerHTML;
         var Code_Request = document.getElementById("madon").value;
         var Dealine = document.getElementById("thoihan").value;
@@ -707,9 +706,10 @@
         var urgentValue = (document.querySelector('input[name="value"]:checked') && document.querySelector('input[name="value"]:checked').value) || 0;
         var Urgent = urgentValue;
         var User_Create = document.getElementById("us").innerHTML;
-        var Place = document.getElementById("place").value;
+            var Place = document.getElementById("place").value;
         var Declaration = document.getElementById("loaichiphi").value;
         var cost_center = document.getElementById("cost_center").value;
+      
         if (Dealine == "") {
             alert("Vui lòng điền đủ thông tin vào đơn !")
         }
@@ -731,7 +731,8 @@
                     rq : dataList,
                     Code_Request : Code_Request,
                     Declaration : Declaration,
-                    Cost_Center : cost_center
+                    Cost_Center : cost_center,
+                    Note : mucdichkhac,
                 },
                 success: function (response) {
                     alert(response);
@@ -742,20 +743,24 @@
         }
     }
 }
-    function _xoadong(id_rq){        
-            $.ajax({
-                url: '/Request/_Xoadong',
-                type: 'POST',
-                dataType: 'JSON',
-                      
-                data: {
-                        id: id_rq,                           
-                },
-                success: function (response) {
-                 tinhTongTatCa();
-                }
-            })           
-    }
+    // function _xoadong(id_rq){
+    //     var x = confirm("Xóa mã sẽ mất mã linh kiện trong đơn. Bạn có muốn xóa không ? ")
+    //     if(x){
+    //         $.ajax({
+    //         url: '/Request/_Xoadong',
+    //         type: 'POST',
+    //         dataType: 'JSON',
+
+    //         data: {
+    //                 id: id_rq,
+    //         },
+    //         success: function (response) {
+    //             tinhTongTatCa();
+    //         }
+    //         })
+    //     }
+                
+    // }
 
     async function _load_name_inv1(group_code) {
     const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
@@ -775,37 +780,37 @@
                 document.getElementById("modal-6").style.display = '';
 
             }
-            globalMaterialData = data; // Lưu lại để dùng sau
-            const $allSelects = $('.select2');
-            // Nạp data cho toàn bộ select2 đang có trên màn hình
-            fillDataToSelect($allSelects, data);
+            // globalMaterialData = data; // Lưu lại để dùng sau
+            // const $allSelects = $('.select2');
+            // // Nạp data cho toàn bộ select2 đang có trên màn hình
+            // fillDataToSelect($allSelects, data);
         });
     }
 
-        // Đặt đoạn này vào vùng script chung để tự động bắt sự kiện cho TẤT CẢ các dòng (kể cả dòng mới thêm)
-    $(document).on('input change blur', '#dynamic-table .sl', function() {
-        // 'this' chính là ô input số lượng (.sl) vừa thay đổi
-        var $row = $(this).closest('tr'); // Tìm đến dòng <tr> chứa ô số lượng này
+    // Đặt đoạn này vào vùng script chung để tự động bắt sự kiện cho TẤT CẢ các dòng (kể cả dòng mới thêm)
+    // $(document).on('input change blur', '#dynamic-table .sl', function() {
+    //     // 'this' chính là ô input số lượng (.sl) vừa thay đổi
+    //     var $row = $(this).closest('tr'); // Tìm đến dòng <tr> chứa ô số lượng này
 
-        // Lấy giá trị đơn giá (.dg) và số lượng (.sl) ngay trong dòng đó mà không cần quan tâm ID
-        var priceVal = $row.find('.dg').val() || 0;
-        var qtyVal = $(this).val() || 0;
+    //     // Lấy giá trị đơn giá (.dg) và số lượng (.sl) ngay trong dòng đó mà không cần quan tâm ID
+    //     var priceVal = $row.find('.dg').val() || 0;
+    //     var qtyVal = $(this).val() || 0;
 
-        // Xử lý chuẩn hóa đơn giá nếu chuỗi chứa dấu phân cách lỗi (phòng trường hợp Excel lỗi)
-        if (typeof priceVal === 'string') {
-            priceVal = priceVal.replace(/\./g, '').replace(',', '.');
-        }
+    //     // Xử lý chuẩn hóa đơn giá nếu chuỗi chứa dấu phân cách lỗi (phòng trường hợp Excel lỗi)
+    //     if (typeof priceVal === 'string') {
+    //         priceVal = priceVal.replace(/\./g, '').replace(',', '.');
+    //     }
 
-        var price = parseFloat(priceVal) || 0;
-        var qty = parseFloat(qtyVal) || 0;
+    //     var price = parseFloat(priceVal) || 0;
+    //     var qty = parseFloat(qtyVal) || 0;
 
-        // Tính thành tiền
-        var totalRow = price * qty;
+    //     // Tính thành tiền
+    //     var totalRow = price * qty;
 
-        // Gán giá trị định dạng vào ô thành tiền (.tcp) của đúng dòng đó
-        $row.find('.tcp').val(isNaN(totalRow) ? "0.00" : totalRow.toFixed(2));
+    //     // Gán giá trị định dạng vào ô thành tiền (.tcp) của đúng dòng đó
+    //     $row.find('.tcp').val(isNaN(totalRow) ? "0.00" : totalRow.toFixed(2));
 
-        // Cập nhật lại tổng tiền của toàn bộ đơn hàng
-        tinhTongTatCa();
-    });
+    //     // Cập nhật lại tổng tiền của toàn bộ đơn hàng
+    //     tinhTongTatCa();
+    // });
 </script>

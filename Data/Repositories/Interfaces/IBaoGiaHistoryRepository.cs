@@ -30,5 +30,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<dynamic>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
         // Lấy thông tin lịch sử báo giá theo mã hàng nội bộ và số đơn
         Task<List<dynamic>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
+        // tính tổng số đơn đến hạn
+        Task<List<dynamic>> GetCountQuotation(string user);
+
     }
 }

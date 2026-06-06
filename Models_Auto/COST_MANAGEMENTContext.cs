@@ -1811,7 +1811,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasColumnName("Material");
             entity.Property(e => e.Material_Name_EN).HasMaxLength(500);
             entity.Property(e => e.Material_Name_JP).HasMaxLength(500);
-            entity.Property(e => e.Material_Name_VN).HasMaxLength(500);
+            entity.Property(e => e.Material_Name_VN);
             entity.Property(e => e.Purpose).HasMaxLength(250);
             entity.Property(e => e.Shape).HasMaxLength(250);
             entity.Property(e => e.Unit).HasMaxLength(50);

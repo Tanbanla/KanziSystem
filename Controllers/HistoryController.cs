@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using MiniExcel = MiniExcelLibs.MiniExcel;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
@@ -71,6 +72,319 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result);
         }
+
+        // Xuất file quản lý tiến độ màn hình lịch sử báo giá bằng MiniExcel
+        [HttpPost]
+        public async Task<IActionResult> ExportManagerHistoryMiniExcel([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+
+                var result = await _baoGiaService.ExportHistoryBaoGiaAsync(searchModel.MaDon,
+                    searchModel.MaNcc, searchModel.Section,
+                    searchModel.NguoiYeuCau, searchModel.MaHang,
+                    searchModel.TrangThai, searchModel.Step, userId, searchModel.ChungLoai);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+
+                var historyApprover = await _baoGiaHistoryService.GetHistoryApprover(searchModel.MaDon,
+                    searchModel.MaNcc, searchModel.Section,
+                    searchModel.NguoiYeuCau, searchModel.MaHang,
+                    searchModel.TrangThai, searchModel.Step, userId, searchModel.ChungLoai);
+                if (!historyApprover.Success)
+                {
+                    return BadRequest(historyApprover.Message);
+                }
+
+                var historyByMaterial = await _baoGiaHistoryService.GetHistoryByMaterialCode(searchModel.MaDon,
+                    searchModel.MaNcc, searchModel.Section,
+                    searchModel.NguoiYeuCau, searchModel.MaHang,
+                    searchModel.TrangThai, searchModel.Step, userId, searchModel.ChungLoai);
+                if (!historyByMaterial.Success)
+                {
+                    return BadRequest(historyByMaterial.Message);
+                }
+
+                var historyData = result.Data;
+                if (historyData == null || !historyData.Any())
+                {
+                    return BadRequest("Không có dữ liệu để xuất");
+                }
+
+                var historyMaterialData = historyByMaterial.Data ?? new List<dynamic>();
+
+                var statusResult = await _baoGiaStatusService.GetListStatusAsync();
+                if (statusResult == null || !statusResult.Success)
+                {
+                    return BadRequest("Lỗi lấy danh sách trạng thái");
+                }
+
+                var stepsResult = await _baoGiaStepService.GetAll();
+                if (stepsResult == null || !stepsResult.Success)
+                {
+                    return BadRequest("Lỗi lấy danh sách step");
+                }
+
+                var statusMap = statusResult.Data?
+                    .Where(s => !string.IsNullOrWhiteSpace(s.VCHR_CodeStatus))
+                    .GroupBy(s => s.VCHR_CodeStatus)
+                    .ToDictionary(g => g.Key!, g => g.First().NVCHR_TenStatus ?? string.Empty)
+                    ?? new Dictionary<string, string>();
+
+                var stepMap = stepsResult.Data?
+                    .Where(s => s.INT_StepNumber.HasValue)
+                    .GroupBy(s => s.INT_StepNumber!.Value)
+                    .ToDictionary(g => g.Key, g => g.First().CHR_StepName ?? string.Empty)
+                    ?? new Dictionary<int, string>();
+
+                static bool IsReturnStatus(string? statusCode)
+                    => !string.IsNullOrWhiteSpace(statusCode)
+                       && statusCode.IndexOf("RETURN", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                static string ToDateString(DateTime? date)
+                    => date?.ToString("dd/MM/yyyy") ?? string.Empty;
+
+                string GetStatusName(string? statusCode)
+                    => (!string.IsNullOrWhiteSpace(statusCode) && statusMap.TryGetValue(statusCode, out var statusName))
+                        ? statusName
+                        : string.Empty;
+
+                string GetStepName(object? stepValue)
+                {
+                    if (stepValue == null) return string.Empty;
+
+                    try
+                    {
+                        var stepNumber = Convert.ToInt32(stepValue);
+                        return stepMap.TryGetValue(stepNumber, out var stepName) ? stepName : string.Empty;
+                    }
+                    catch
+                    {
+                        return string.Empty;
+                    }
+                }
+
+                static bool IsSelectedValue(object? selectValue)
+                {
+                    if (selectValue == null) return false;
+
+                    try
+                    {
+                        return Convert.ToBoolean(selectValue);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+
+                static bool IsStepLessOrEqualSix(object? stepValue)
+                {
+                    if (stepValue == null) return false;
+
+                    try
+                    {
+                        return Convert.ToInt32(stepValue) <= 6;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+
+                static string GetSelectMark(object? selectValue, object? stepValue)
+                {
+                    bool? isSelected = null;
+
+                    try
+                    {
+                        if (selectValue != null)
+                        {
+                            isSelected = Convert.ToBoolean(selectValue);
+                        }
+                    }
+                    catch
+                    {
+                        isSelected = null;
+                    }
+
+                    if (isSelected == null || (isSelected == false && IsStepLessOrEqualSix(stepValue)))
+                    {
+                        return string.Empty;
+                    }
+
+                    return isSelected == true ? "O" : "X";
+                }
+
+                var listReason = new List<ReasonQuotition>();
+                var returnIds = historyData
+                    .Where(rq => rq != null && IsReturnStatus(rq?.ID_Status))
+                    .Select(rq => rq.ID)
+                    .Distinct()
+                    .ToList();
+
+                if (returnIds.Any())
+                {
+                    var reasons = await _baoGiaHistoryService.GetReasonsAsync(returnIds);
+                    if (!reasons.Success)
+                    {
+                        return BadRequest("Lỗi lấy lý do trả");
+                    }
+                    listReason = reasons.Data ?? new List<ReasonQuotition>();
+                }
+
+                var reasonMap = listReason
+                    .GroupBy(r => r.Id)
+                    .ToDictionary(g => g.Key, g => g.First().Reason ?? string.Empty);
+
+                string GetReason(object? idValue, string? statusCode)
+                {
+                    if (!IsReturnStatus(statusCode) || idValue == null)
+                    {
+                        return string.Empty;
+                    }
+
+                    try
+                    {
+                        var id = Convert.ToInt32(idValue);
+                        return reasonMap.TryGetValue(id, out var reason) ? reason : string.Empty;
+                    }
+                    catch
+                    {
+                        return string.Empty;
+                    }
+                }
+
+                var mainRows = new List<Dictionary<string, object?>>(historyData.Count);
+                int stt = 1;
+
+                foreach (var rq in historyData)
+                {
+                    if (rq == null) continue;
+
+                    var selectMark = GetSelectMark(rq.BIT_Select, rq.ID_StepBaoGia);
+                    var isSelected = rq.BIT_Select == true;
+
+                    mainRows.Add(new Dictionary<string, object?>
+                    {
+                        ["No"] = stt++,
+                        ["Mã đơn yêu cầu báo giá"] = rq.CHR_MaDon ?? string.Empty,
+                        ["Số chi tiết đơn yêu cầu báo giá"] = rq.ID,
+                        ["Section (*)\nTên phòng"] = string.Join(" - ", new[] { rq.CHR_SectionCode, rq.CHR_SectionName }.Where(s => !string.IsNullOrWhiteSpace(s))),
+                        ["Phân loại\nCategory\n(A/B/C/E/I/non list)"] = rq.CHR_Phanloai ?? string.Empty,
+                        ["Mã thiết bị\nEquipment code"] = rq.CHR_MaThietBi ?? string.Empty,
+                        ["Mã hàng nội bộ\nBIVN's part code"] = rq.CHR_MaHangNoiBo ?? string.Empty,
+                        ["Mã hàng của NCC\nVendor's good code"] = rq.CHR_MaHangNCC ?? string.Empty,
+                        ["Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)\nPart name (Vietnamese)"] = rq.NVCHR_NameVN ?? string.Empty,
+                        ["Tên hàng tiếng anh(*)\nPart name (English)"] = rq.CHR_NameEN ?? string.Empty,
+                        ["Số lượng\nQuanlity(*)"] = rq.INT_SoLuong ?? 0,
+                        ["Đơn vị \nUnit(*)"] = rq.NVCHR_DonVi ?? string.Empty,
+                        ["Chủng loại hàng\nPart category"] = rq.NVCHR_ChungLoai ?? string.Empty,
+                        ["Mã nhà cung cấp\nVendor code"] = rq.CHR_MaNCC ?? string.Empty,
+                        ["Tên nhà cung cấp\nVendor name"] = rq.NVCHR_TenNCC ?? string.Empty,
+                        ["Lấy báo giá?\nIs it a quotation request(*)"] = rq.BIT_LayBaoGia == false ? "X" : "O",
+                        ["Lý do không lấy báo giá  \nReason for not making a request"] = rq.NVCHR_LyDo ?? string.Empty,
+                        ["Ngày muốn nhận hàng\nDesired delivery date(*)"] = ToDateString(rq.DTM_NgayMuonNhan),
+                        ["Kỳ hạn lựa chọn NCC\nDeadline for deciding vendor(*)"] = ToDateString(rq.DTM_KyHan),
+                        ["Người yêu cầu \nRequest person in charge"] = rq.NVCHR_UserRequest ?? string.Empty,
+                        ["Trạng thái mã"] = GetStatusName(rq.ID_Status),
+                        ["Trạng thái đơn"] = GetStepName(rq.ID_StepBaoGia),
+                        ["Lý do trả lại"] = GetReason(rq.ID, rq.ID_Status),
+                        ["Lựa chọn nhà cung cấo"] = selectMark,
+                        ["Lý do lựa chọn"] = isSelected ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
+                        ["Link báo giá"] = isSelected ? rq.NVCHR_File ?? string.Empty : string.Empty
+                    });
+                }
+
+                var approverData = historyApprover.Data ?? Enumerable.Empty<dynamic>();
+                var approverRows = new List<Dictionary<string, object?>>();
+                int sttApprover = 1;
+
+                foreach (var item in approverData)
+                {
+                    if (item == null) continue;
+
+                    approverRows.Add(new Dictionary<string, object?>
+                    {
+                        ["STT"] = sttApprover++,
+                        ["Mã đơn"] = item.maDon ?? string.Empty,
+                        ["ID yêu cầu"] = item.ID_RequestQuote,
+                        ["Người tạo"] = item.userInsert ?? string.Empty,
+                        ["Thời gian tạo"] = item.timeInsert?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        ["Người duyệt Chief"] = item.userChief ?? string.Empty,
+                        ["Thời gian duyệt Chief"] = item.timeChief?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        ["Người duyệt Section"] = item.userSection ?? string.Empty,
+                        ["Thời gian duyệt Section"] = item.timeSection?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        ["Người duyệt PIC"] = item.userPIC ?? string.Empty,
+                        ["Thời gian duyệt PIC"] = item.timePIC?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        ["Người duyệt Pur"] = item.userPur ?? string.Empty,
+                        ["Thời gian duyệt Pur"] = item.timePur?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty
+                    });
+                }
+
+                var materialRows = new List<Dictionary<string, object?>>(historyMaterialData.Count);
+                int sttMaterial = 1;
+
+                foreach (var item in historyMaterialData)
+                {
+                    if (item == null) continue;
+
+                    var selectMark = GetSelectMark(item.BIT_Select, item.ID_StepBaoGia);
+                    var isSelected = IsSelectedValue(item.BIT_Select);
+
+                    materialRows.Add(new Dictionary<string, object?>
+                    {
+                        ["No"] = sttMaterial++,
+                        ["Mã đơn yêu cầu báo giá"] = item.CHR_MaDon ?? string.Empty,
+                        ["Số chi tiết đơn yêu cầu báo giá"] = item.ID,
+                        ["Section (*)\nTên phòng"] = string.Join(" - ", new[] { (string?)item.CHR_SectionCode, (string?)item.CHR_SectionName }.Where(s => !string.IsNullOrWhiteSpace(s))),
+                        ["Phân loại\nCategory\n(A/B/C/E/I/non list)"] = item.CHR_Phanloai ?? string.Empty,
+                        ["Mã thiết bị\nEquipment code"] = item.CHR_MaThietBi ?? string.Empty,
+                        ["Mã hàng nội bộ\nBIVN's part code"] = item.CHR_MaHangNoiBo ?? string.Empty,
+                        ["Mã hàng của NCC\nVendor's good code"] = item.CHR_MaHangNCC ?? string.Empty,
+                        ["Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)\nPart name (Vietnamese)"] = item.NVCHR_NameVN ?? string.Empty,
+                        ["Tên hàng tiếng anh(*)\nPart name (English)"] = item.CHR_NameEN ?? string.Empty,
+                        ["Số lượng\nQuanlity(*)"] = item.INT_SoLuong ?? 0,
+                        ["Đơn vị \nUnit(*)"] = item.NVCHR_DonVi ?? string.Empty,
+                        ["Chủng loại hàng\nPart category"] = item.NVCHR_ChungLoai ?? string.Empty,
+                        ["Mã nhà cung cấp\nVendor code"] = item.CHR_MaNCC ?? string.Empty,
+                        ["Tên nhà cung cấp\nVendor name"] = item.NVCHR_TenNCC ?? string.Empty,
+                        ["Lấy báo giá?\nIs it a quotation request(*)"] = item.BIT_LayBaoGia == false ? "X" : "O",
+                        ["Lý do không lấy báo giá  \nReason for not making a request"] = item.NVCHR_LyDo ?? string.Empty,
+                        ["Ngày muốn nhận hàng\nDesired delivery date(*)"] = ToDateString(item.DTM_NgayMuonNhan),
+                        ["Kỳ hạn lựa chọn NCC\nDeadline for deciding vendor(*)"] = ToDateString(item.DTM_KyHan),
+                        ["Người yêu cầu \nRequest person in charge"] = item.NVCHR_UserRequest ?? string.Empty,
+                        ["Trạng thái mã"] = GetStatusName(item.ID_Status),
+                        ["Trạng thái đơn"] = GetStepName(item.ID_StepBaoGia),
+                        ["Lý do trả lại"] = GetReason(item.ID, item.ID_Status),
+                        ["Lựa chọn nhà cung cấo"] = selectMark,
+                        ["Lý do lựa chọn"] = isSelected ? item.NVCHR_ReasonPick ?? string.Empty : string.Empty,
+                        ["Link báo giá"] = isSelected ? (item.CHR_LinkFile ?? item.NVCHR_File ?? string.Empty) : string.Empty
+                    });
+                }
+
+                var sheets = new Dictionary<string, object>
+                {
+                    ["Lịch sử báo giá"] = mainRows,
+                    ["Lịch sử phê duyệt"] = approverRows,
+                    ["Theo mã hàng nội bộ"] = materialRows
+                };
+
+                using var outStream = new MemoryStream();
+                await MiniExcel.SaveAsAsync(outStream, sheets);
+                var bytes = outStream.ToArray();
+                var fileName = $"HistoryManagerQuote_MiniExcel_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xuất file MiniExcel: {ex.Message}");
+            }
+        }
         // Xuất file quản lý tiến độ màn hình lịch sử báo giá
         [HttpPost]
         public async Task<IActionResult> ExportManagerHistory([FromBody] SearchBaoGiaViewModel searchModel)
@@ -112,25 +426,120 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không có dữ liệu để xuất");
                 }
 
+                var historyMaterialData = historyByMaterial.Data ?? new List<dynamic>();
+
                 // Lấy thông tin status
-                var Status = await _baoGiaStatusService.GetListStatusAsync();
-                if (Status == null || !Status.Success)
+                var statusResult = await _baoGiaStatusService.GetListStatusAsync();
+                if (statusResult == null || !statusResult.Success)
                 {
                     return BadRequest("Lỗi lấy danh sách trạng thái");
                 }
 
                 // Lấy thông tin step
-                var Steps = await _baoGiaStepService.GetAll();
-                if (Steps == null || !Steps.Success)
+                var stepsResult = await _baoGiaStepService.GetAll();
+                if (stepsResult == null || !stepsResult.Success)
                 {
                     return BadRequest("Lỗi lấy danh sách step");
+                }
+
+                // Chuẩn bị dictionary để tra cứu nhanh O(1) thay vì FirstOrDefault trong mỗi dòng.
+                var statusMap = statusResult.Data?
+                    .Where(s => !string.IsNullOrWhiteSpace(s.VCHR_CodeStatus))
+                    .GroupBy(s => s.VCHR_CodeStatus)
+                    .ToDictionary(g => g.Key!, g => g.First().NVCHR_TenStatus ?? string.Empty)
+                    ?? new Dictionary<string, string>();
+
+                var stepMap = stepsResult.Data?
+                    .Where(s => s.INT_StepNumber.HasValue)
+                    .GroupBy(s => s.INT_StepNumber!.Value)
+                    .ToDictionary(g => g.Key, g => g.First().CHR_StepName ?? string.Empty)
+                    ?? new Dictionary<int, string>();
+
+                static bool IsReturnStatus(string? statusCode)
+                    => !string.IsNullOrWhiteSpace(statusCode)
+                       && statusCode.IndexOf("RETURN", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                static string ToDateString(DateTime? date)
+                    => date?.ToString("dd/MM/yyyy") ?? string.Empty;
+
+                string GetStatusName(string? statusCode)
+                    => (!string.IsNullOrWhiteSpace(statusCode) && statusMap.TryGetValue(statusCode, out var statusName))
+                        ? statusName
+                        : string.Empty;
+
+                string GetStepName(object? stepValue)
+                {
+                    if (stepValue == null) return string.Empty;
+
+                    try
+                    {
+                        var stepNumber = Convert.ToInt32(stepValue);
+                        return stepMap.TryGetValue(stepNumber, out var stepName) ? stepName : string.Empty;
+                    }
+                    catch
+                    {
+                        return string.Empty;
+                    }
+                }
+
+                static bool IsSelectedValue(object? selectValue)
+                {
+                    if (selectValue == null) return false;
+
+                    try
+                    {
+                        return Convert.ToBoolean(selectValue);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+
+                static bool IsStepLessOrEqualSix(object? stepValue)
+                {
+                    if (stepValue == null) return false;
+
+                    try
+                    {
+                        return Convert.ToInt32(stepValue) <= 6;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+
+                static string GetSelectMark(object? selectValue, object? stepValue)
+                {
+                    bool? isSelected = null;
+
+                    try
+                    {
+                        if (selectValue != null)
+                        {
+                            isSelected = Convert.ToBoolean(selectValue);
+                        }
+                    }
+                    catch
+                    {
+                        isSelected = null;
+                    }
+
+                    if (isSelected == null || (isSelected == false && IsStepLessOrEqualSix(stepValue)))
+                    {
+                        return string.Empty;
+                    }
+
+                    return isSelected == true ? "O" : "X";
                 }
 
                 // Lấy các đơn trả về có trạng thái RETURN để lấy lý do trả
                 var listReason = new List<ReasonQuotition>();
                 var returnIds = historyData
-                    .Where(rq => rq != null && rq?.ID_Status != null && rq?.ID_Status.Contains("RETURN"))
+                    .Where(rq => rq != null && IsReturnStatus(rq?.ID_Status))
                     .Select(rq => rq.ID)
+                    .Distinct()
                     .ToList();
 
                 if (returnIds.Any())
@@ -141,6 +550,28 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         return BadRequest("Lỗi lấy lý do trả");
                     }
                     listReason = reasons.Data ?? new List<ReasonQuotition>();
+                }
+
+                var reasonMap = listReason
+                    .GroupBy(r => r.Id)
+                    .ToDictionary(g => g.Key, g => g.First().Reason ?? string.Empty);
+
+                string GetReason(object? idValue, string? statusCode)
+                {
+                    if (!IsReturnStatus(statusCode) || idValue == null)
+                    {
+                        return string.Empty;
+                    }
+
+                    try
+                    {
+                        var id = Convert.ToInt32(idValue);
+                        return reasonMap.TryGetValue(id, out var reason) ? reason : string.Empty;
+                    }
+                    catch
+                    {
+                        return string.Empty;
+                    }
                 }
 
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
@@ -164,200 +595,151 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không tìm thấy sheet 2 trong template");
                 }
 
-                int row = 4;
+                var wsMaterial = workbook.Worksheets.Count >= 3 ? workbook.Worksheet(3) : null;
+                if (wsMaterial == null)
+                {
+                    return BadRequest("Không tìm thấy sheet 3 trong template");
+                }
+
+                var mainRows = new List<object[]>(historyData.Count);
                 int stt = 1;
 
                 foreach (var rq in historyData)
                 {
                     if (rq == null) continue;
 
-                    int col = 1;
-                    ws.Cell(row, col++).SetValue(stt++);
-                    ws.Cell(row, col++).SetValue(rq.CHR_MaDon ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.ID);
-                    ws.Cell(row, col++).SetValue(rq.CHR_SectionCode ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_SectionName ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_Phanloai ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_MaThietBi ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_MaHangNoiBo ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_MaHangNCC ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_NameVN ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_NameEN ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.INT_SoLuong ?? 0);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_DonVi ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_ChungLoai ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_HinhDang ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_ChatLieu ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_ThanhPhan ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_KichThuoc ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_DongMay ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_TinhNang ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_Rohs ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_COCQ ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_MSDS ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_AnToan ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_FileThietKe ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_NhaSanXuat ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_MaNCC ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_TenNCC ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.BIT_LayBaoGia == false ? "X" : "O");
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_LyDo ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
-                    ws.Cell(row, col++).SetValue(rq.CHR_Gap == "false" ? "X" : "O");
-                    ws.Cell(row, col++).SetValue(rq.NVCHR_UserRequest ?? string.Empty);
+                    var selectMark = GetSelectMark(rq.BIT_Select, rq.ID_StepBaoGia);
 
-                    // Lấy lý do trả (chỉ khi có RETURN)
-                    var reason = (rq.ID_Status != null && rq.ID_Status.Contains("RETURN"))
-                        ? (listReason.FirstOrDefault(c => c.Id == rq.ID)?.Reason ?? "")
-                        : "";
-
-                    // Lấy tên trạng thái
-                    var statusName = Status.Data?
-                        .FirstOrDefault(s => s.VCHR_CodeStatus == rq.ID_Status)?
-                        .NVCHR_TenStatus ?? string.Empty;
-
-                    // Lấy tên step
-                    var stepName = Steps.Data?
-                        .FirstOrDefault(s => s.INT_StepNumber == rq.ID_StepBaoGia)?
-                        .CHR_StepName ?? string.Empty;
-
-                    ws.Cell(row, col++).SetValue(statusName);
-                    ws.Cell(row, col++).SetValue(stepName);
-                    ws.Cell(row, col++).SetValue(reason);
-                    if (rq.BIT_Select == null || (rq.BIT_Select == false && rq.ID_StepBaoGia <= 6))
+                    var isSelected = rq.BIT_Select == true;
+                    mainRows.Add(new object[]
                     {
-                        ws.Cell(row, col++).SetValue("");
-                    }
-                    else
-                    {
-                        ws.Cell(row, col++).SetValue(rq.BIT_Select == true ? "O" : "X");
-                    }
-
-                    // Lý do pick & file (chỉ khi có chọn)
-                    if (rq.BIT_Select == true)
-                    {
-                        ws.Cell(row, col++).SetValue(rq.NVCHR_ReasonPick ?? string.Empty);
-                        ws.Cell(row, col++).SetValue(rq.NVCHR_File ?? string.Empty);
-                    }
-                    else
-                    {
-                        ws.Cell(row, col++).SetValue(string.Empty);
-                        ws.Cell(row, col++).SetValue(string.Empty);
-                    }
-
-                    row++;
+                        stt++,
+                        rq.CHR_MaDon ?? string.Empty,
+                        rq.ID,
+                        rq.CHR_SectionCode ?? string.Empty,
+                        rq.CHR_SectionName ?? string.Empty,
+                        rq.CHR_Phanloai ?? string.Empty,
+                        rq.CHR_MaThietBi ?? string.Empty,
+                        rq.CHR_MaHangNoiBo ?? string.Empty,
+                        rq.CHR_MaHangNCC ?? string.Empty,
+                        rq.NVCHR_NameVN ?? string.Empty,
+                        rq.CHR_NameEN ?? string.Empty,
+                        rq.INT_SoLuong ?? 0,
+                        rq.NVCHR_DonVi ?? string.Empty,
+                        rq.NVCHR_ChungLoai ?? string.Empty,
+                        rq.NVCHR_HinhDang ?? string.Empty,
+                        rq.NVCHR_ChatLieu ?? string.Empty,
+                        rq.NVCHR_ThanhPhan ?? string.Empty,
+                        rq.NVCHR_KichThuoc ?? string.Empty,
+                        rq.NVCHR_DongMay ?? string.Empty,
+                        rq.NVCHR_TinhNang ?? string.Empty,
+                        rq.NVCHR_Rohs ?? string.Empty,
+                        rq.NVCHR_COCQ ?? string.Empty,
+                        rq.NVCHR_MSDS ?? string.Empty,
+                        rq.NVCHR_AnToan ?? string.Empty,
+                        rq.NVCHR_FileThietKe ?? string.Empty,
+                        rq.NVCHR_NhaSanXuat ?? string.Empty,
+                        rq.CHR_MaNCC ?? string.Empty,
+                        rq.NVCHR_TenNCC ?? string.Empty,
+                        rq.BIT_LayBaoGia == false ? "X" : "O",
+                        rq.NVCHR_LyDo ?? string.Empty,
+                        ToDateString(rq.DTM_NgayMuonNhan),
+                        ToDateString(rq.DTM_KyHan),
+                        rq.CHR_Gap == "false" ? "X" : "O",
+                        rq.NVCHR_UserRequest ?? string.Empty,
+                        GetStatusName(rq.ID_Status),
+                        GetStepName(rq.ID_StepBaoGia),
+                        GetReason(rq.ID, rq.ID_Status),
+                        selectMark,
+                        isSelected ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
+                        isSelected ? rq.NVCHR_File ?? string.Empty : string.Empty
+                    });
                 }
 
+                ws.Cell(4, 1).InsertData(mainRows);
+
                 // Export dữ liệu lịch sử phê duyệt vào sheet 2
-                var approverData = historyApprover.Data ?? new List<dynamic>();
-                int rowApprover = 4;
+                var approverData = historyApprover.Data ?? Enumerable.Empty<dynamic>();
+                var approverRows = new List<object[]>();
                 int sttApprover = 1;
 
                 foreach (var item in approverData)
                 {
                     if (item == null) continue;
 
-                    int colApprover = 1;
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(sttApprover++); // No
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.maDon ?? string.Empty); // Mã đơn yêu cầu báo giá
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.ID_RequestQuote); // Số chi tiết đơn yêu cầu báo giá
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.userInsert ?? string.Empty); // PIC phòng ban yêu cầu
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.timeInsert?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty); // Thời gian tạo đơn yêu cầu báo giá
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.userChief ?? string.Empty); // QLSC Phê duyệt
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.timeChief?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty); // Thời gian QLSC phê duyệt
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.userSection ?? string.Empty); // QLTC Phê duyệt
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.timeSection?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty); // Thời gian QLTC phê duyệt
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.userPIC ?? string.Empty); // PIC phòng PUR tiếp nhận
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.timePIC?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty); // Thời gian PIC PUR tiếp nhận
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.userPur ?? string.Empty); // QLSC phòng PUR tiếp nhận
-                    wsApprover.Cell(rowApprover, colApprover++).SetValue(item.timePur?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty); // Thời gian QLSC PUR phê duyệt
-
-                    rowApprover++;
-                }
-                // Export dữ liệu trạng thái theo mã hàng nội bộ vào sheet 3
-                var historyMaterialData = historyByMaterial.Data ?? new List<dynamic>();
-                var wsMaterial = workbook.Worksheets.Count >= 3 ? workbook.Worksheet(3) : null;
-
-                if (wsMaterial != null)
-                {
-                    int rowMaterial = 4;
-                    int sttMaterial = 1;
-
-                    foreach (var item in historyMaterialData)
+                    approverRows.Add(new object[]
                     {
-                        if (item == null) continue;
-
-                        int colMaterial = 1;
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(sttMaterial++); // No
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_MaDon ?? string.Empty); // Mã đơn yêu cầu báo giá
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty); // Mã hàng nội bộ
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_SectionCode ?? string.Empty); // Mã phòng
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_SectionName ?? string.Empty); // Tên phòng
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_Phanloai ?? string.Empty); // Phan loại
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_MaThietBi ?? string.Empty); // Mã thiết bị
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_MaHangNCC ?? string.Empty); // Mã hàng NCC
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_NameVN ?? string.Empty); // Tên hàng Việt Nam
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_NameEN ?? string.Empty); // Tên hàng English
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.INT_SoLuong ?? 0); // Số lượng
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_DonVi ?? string.Empty); // Đơn vị
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_ChungLoai ?? string.Empty); // Chủng loại
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_File ?? string.Empty); // link Box
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_LinkFile ?? string.Empty); // file thiet ke
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Nhà sản xuất 
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_MaNCC ?? string.Empty); // Mã NCC
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_TenNCC ?? string.Empty); // Tên NCC
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.BIT_LayBaoGia == false ? "X" : "O"); ; // Lý do
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_LyDo ?? string.Empty); // Lý do
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty); // Ngày muốn nhận
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty); // Kỳ hạn
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.CHR_Gap == "false" ? "X" : "O"); // Gấp
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_UserRequest ?? string.Empty); // Người yêu cầu
-                                                                                                                      // Lấy lý do trả (chỉ khi có RETURN)
-                        var reason = (item.ID_Status != null && item.ID_Status.Contains("RETURN"))
-                            ? (listReason.FirstOrDefault(c => c.Id == item.ID)?.Reason ?? "")
-                            : "";
-
-                        // Lấy tên trạng thái
-                        var statusName = Status.Data?
-                            .FirstOrDefault(s => s.VCHR_CodeStatus == item.ID_Status)?
-                            .NVCHR_TenStatus ?? string.Empty;
-
-                        // Lấy tên step
-                        var stepName = Steps.Data?
-                            .FirstOrDefault(s => s.INT_StepNumber == item.ID_StepBaoGia)?
-                            .CHR_StepName ?? string.Empty;
-
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(statusName);
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(stepName);
-                        wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(reason);
-                        if (item.BIT_Select == null || (item.BIT_Select == false && item.ID_StepBaoGia <= 6))
-                        {
-                            wsMaterial.Cell(rowMaterial, colMaterial++).SetValue("");
-                        }
-                        else
-                        {
-                            wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.BIT_Select == true ? "O" : "X");
-                        }
-
-                        // Lý do pick & file (chỉ khi có chọn)
-                        if (item.BIT_Select == true)
-                        {
-                            wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_ReasonPick ?? string.Empty);
-                            wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(item.NVCHR_File ?? string.Empty);
-                        }
-                        else
-                        {
-                            wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(string.Empty);
-                            wsMaterial.Cell(rowMaterial, colMaterial++).SetValue(string.Empty);
-                        }
-
-                        rowMaterial++;
-                    }
+                        sttApprover++,
+                        item.maDon ?? string.Empty,
+                        item.ID_RequestQuote,
+                        item.userInsert ?? string.Empty,
+                        item.timeInsert?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        item.userChief ?? string.Empty,
+                        item.timeChief?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        item.userSection ?? string.Empty,
+                        item.timeSection?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        item.userPIC ?? string.Empty,
+                        item.timePIC?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty,
+                        item.userPur ?? string.Empty,
+                        item.timePur?.ToString("dd/MM/yyyy HH:mm:ss") ?? string.Empty
+                    });
                 }
-                else
+
+                if (approverRows.Count > 0)
                 {
-                    return BadRequest("Không tìm thấy sheet 3 trong template");
+                    wsApprover.Cell(4, 1).InsertData(approverRows);
+                }
+
+                // Export dữ liệu trạng thái theo mã hàng nội bộ vào sheet 3
+                var materialRows = new List<object[]>();
+                int sttMaterial = 1;
+
+                foreach (var item in historyMaterialData)
+                {
+                    if (item == null) continue;
+
+                    var selectMark = GetSelectMark(item.BIT_Select, item.ID_StepBaoGia);
+
+                    var isSelected = IsSelectedValue(item.BIT_Select);
+
+                    materialRows.Add(new object[]
+                    {
+                        sttMaterial++,
+                        item.CHR_MaDon ?? string.Empty,
+                        item.CHR_MaHangNoiBo ?? string.Empty,
+                        item.CHR_SectionCode ?? string.Empty,
+                        item.CHR_SectionName ?? string.Empty,
+                        item.CHR_Phanloai ?? string.Empty,
+                        item.CHR_MaThietBi ?? string.Empty,
+                        item.CHR_MaHangNCC ?? string.Empty,
+                        item.NVCHR_NameVN ?? string.Empty,
+                        item.CHR_NameEN ?? string.Empty,
+                        item.INT_SoLuong ?? 0,
+                        item.NVCHR_DonVi ?? string.Empty,
+                        item.NVCHR_ChungLoai ?? string.Empty,
+                        item.NVCHR_File ?? string.Empty,
+                        item.CHR_LinkFile ?? string.Empty,
+                        item.NVCHR_NhaSanXuat ?? string.Empty,
+                        item.CHR_MaNCC ?? string.Empty,
+                        item.NVCHR_TenNCC ?? string.Empty,
+                        item.BIT_LayBaoGia == false ? "X" : "O",
+                        item.NVCHR_LyDo ?? string.Empty,
+                        ToDateString(item.DTM_NgayMuonNhan),
+                        ToDateString(item.DTM_KyHan),
+                        item.CHR_Gap == "false" ? "X" : "O",
+                        item.NVCHR_UserRequest ?? string.Empty,
+                        GetStatusName(item.ID_Status),
+                        GetStepName(item.ID_StepBaoGia),
+                        GetReason(item.ID, item.ID_Status),
+                        selectMark,
+                        isSelected ? item.NVCHR_ReasonPick ?? string.Empty : string.Empty,
+                        isSelected ? item.NVCHR_File ?? string.Empty : string.Empty
+                    });
+                }
+
+                if (materialRows.Count > 0)
+                {
+                    wsMaterial.Cell(4, 1).InsertData(materialRows);
                 }
 
                 using var outStream = new MemoryStream();
@@ -450,7 +832,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (!listRequest.Any()) return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
 
                 // check điều kiện update đơn
-                var listMa = listRequest.Select(r => r.CHR_MaDon).Distinct().ToList();
+                var listMa = listRequest
+                    .Select(r => r.CHR_MaDon)
+                    .Where(ma => !string.IsNullOrWhiteSpace(ma))
+                    .Select(ma => ma!)
+                    .Distinct()
+                    .ToList();
                 var checkUpdate = await _baoGiaService.CheckDonReturnAsync(listMa);
                 if (checkUpdate.Data)
                 {
@@ -733,5 +1120,32 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View(vm);
         }
 
+
+
+        // MARK: - Index
+        public async Task<IActionResult> Index()
+        {
+            var nhomViTri = await LoadNhomViTriDataAsync();
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
+            var nccNews = await LoadNhaCungCapDataAsync();
+            var categorys = await LoadCategoryDataAsync();
+            var statusData = await _baoGiaStatusService.GetListStatusAsync();
+            var madons = await LoadMadonAsync(13);
+            var role = GetRolesUser();
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
+            var vm = new QuoteModel
+            {
+                DanhSachNhomViTri = nhomViTri,
+                DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
+                DanhSachNhaCungCap = nccNews,
+                DanhSachMaDon = madons,
+                DanhSachCategory = categorys,
+                DanhSachStatus = statusData.Data ?? new List<BaoGia_StatusDTO>(),
+                NguoiThaoTac = GetCurrentUserId() ?? "",
+                Role = role
+            };
+
+            return View(vm);
+        }
     }
 }

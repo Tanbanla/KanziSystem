@@ -371,7 +371,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var role = roleAsync.Success ? roleAsync.Data : string.Empty;
             var itemOK = new List<BaoGia_Confirm_Name_Quotation>();
             var itemNG = new List<ConfirmNameDTO>();
-            var listDifferent = new List<int>();
+            var listDifferent = new List<BaoGia_Confirm_Name_Quotation>();
             var listUpdateRequest = new List<BaoGia_Request_of_QuotationDTO>();
             var hasErrors = false;
             try
@@ -402,21 +402,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         case "UserShip":
                             var tenHaiQuan = ws.Cell(r, 24).GetString();
                             var tenRecomment = ws.Cell(r, 12).GetString();
-                            bool bitReturn = ws.Cell(r, 26).GetString().Trim().ToUpper() == "X" ? false : true;
+                            bool bitReturn = ws.Cell(r, 26).GetString().Trim().ToUpper() == "O";
                             var reasonReturn = ws.Cell(r, 27).GetString().Trim();
-                            if (string.IsNullOrEmpty(reasonReturn) && !bitReturn)
+                            if (string.IsNullOrEmpty(reasonReturn) && bitReturn)
                             {
                                 ws.Cell(r, 28).SetValue("Vui lòng nhập lý do trả lại");
                                 hasErrors = true;
                                 continue;
                             }
-                            if (!bitReturn)
+                            if (bitReturn)
                             {
                                 itemNG.Add(new ConfirmNameDTO
                                 {
                                     Id = int.Parse(ws.Cell(r, 3).GetString()),
                                     pheDuyet = bitReturn,
                                     LyDo = reasonReturn,
+                                    PicShip = ws.Cell(r, 25).GetString()
                                 });
                             }
                             else
@@ -429,7 +430,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 }
                                 if (tenHaiQuan != tenRecomment)
                                 {
-                                    listDifferent.Add(int.Parse(ws.Cell(r, 3).GetString()));
+                                    listDifferent.Add(new BaoGia_Confirm_Name_Quotation
+                                    {
+                                        ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                        VCHR_TenHaiQuan = tenHaiQuan,
+                                        DTM_UserShip = DateTime.Now,
+                                        VCHR_UserShip = ws.Cell(r, 25).GetString()
+                                    });
                                 }
                                 else
                                 {
@@ -437,8 +444,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     {
                                         ID = int.Parse(ws.Cell(r, 3).GetString()),
                                         VCHR_TenHaiQuan = tenHaiQuan,
-                                        VCHR_UserShip = GetCurrentUserId(),
-                                        DTM_UserShip = DateTime.Now
+                                        //VCHR_UserShip = GetCurrentUserId(),
+                                        DTM_UserShip = DateTime.Now,
+                                        VCHR_UserShip = ws.Cell(r, 25).GetString()
                                     });
                                 }
                             }
@@ -543,8 +551,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                                     var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
 
-                                    foreach (var item in listPIC.Data)
+                                    // lọc trùng
+                                    var distinctPIC = listPIC.Data.GroupBy(x => x.UserCreate).Select(g => g.First()).ToList();
+
+                                    foreach (var item in distinctPIC)
                                     {
+                                        var lydoNG = itemNG.FirstOrDefault(d => d.Id == item.ID)?.LyDo ?? string.Empty;
                                         // gửi mail thông báo chỉnh sửa thông tin xác nhận tên mới
                                         var emailResult = await sendMailService.SendMailAsync(
                                             item.UserCreate + "@brothergroup.net",
@@ -552,7 +564,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                             20,
                                             "Material/ConfirmName",
                                             true,
-                                            itemNG?.FirstOrDefault()?.LyDo ?? string.Empty,
+                                            lydoNG ?? string.Empty,
                                             item.MaDon,
                                             item.UserCreate);
                                     }
@@ -692,7 +704,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             ws.Cell(row, 24).Style.Fill.BackgroundColor = XLColor.DarkPink;
                         }
                     }
-                    ws.Cell(row, 25).SetValue(rq.VCHR_UserShip ?? "");
+                    ws.Cell(row, 25).SetValue(rq.VCHR_UserShip ?? (rq.VCHR_UpdateBy ?? ""));
 
                     // check tra lai
                     bool isReturn = rq.CHR_StatusShip == "Rejected";

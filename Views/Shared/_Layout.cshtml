@@ -162,7 +162,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item py-2" href="~/History/HistoryQuote">
+                                    <a class="dropdown-item py-2" href="~/History/Index">
                                         <i class="fas fa-history me-2"></i>
                                         <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                     </a>
@@ -211,11 +211,13 @@
                                 <li><a class="dropdown-item py-2" href="~/Master/Masters"><i class="ion ion-ios-home"></i> @Localizer["MenuMasterWarehouse"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/Master/master_vender"><i class="ion ion-social-snapchat"></i> @Localizer["MenuMasterVendor"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/Master/master_material"><i class="ion ion-android-options"></i> @Localizer["MenuMasterMaterial"]</a></li>
+                                <li><a class="dropdown-item py-2" href="~/User/QuanlyUyquyen"><i class="fas fa-handshake"></i> @Languages.uyquyen</a></li>
                                 @if (User.FindFirst("Roles")?.Value == "UserPUR")
                                 {
                                     <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> @Localizer["MenuMasterSendMail"]</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/SupplierMana"><i class="fas fa-handshake"></i> @Localizer["MenuMasterSupplierManage"]</a></li>
+                                 
                                 }
                             </ul>
                         </li>

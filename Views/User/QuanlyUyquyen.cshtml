@@ -1,0 +1,211 @@
+<style>
+    /* Đảm bảo Modal luôn nằm trên Backdrop của Bootstrap (thường có z-index là 1050) */
+    #uyQuyenModal {
+        z-index: 1055 !important;
+    }
+
+    /* Đảm bảo nội dung bên trong modal không bị mờ */
+    .modal-backdrop {
+        z-index: 1050 !important;
+    }
+</style>
+
+<h2 class="mb-4">Quản lý Ủy Quyền</h2>
+
+<button class="btn btn-success mb-3" onclick="openModal()">+ Thêm Ủy Quyền</button>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-bordered">
+        <tr class="bg-primary text-white">
+            <th>ID</th>
+            <th>Người Ủy Quyền (ADID)</th>
+            <th>Người Được UQ (ADID)</th>
+            <th>Tên Người Được UQ</th>
+            <th>Email</th>
+            <th>Ngày Hết Hạn</th>
+            <th>Phòng Ban</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+    </tbody>
+</table>
+
+<div class="modal fade" id="uyQuyenModal" tabindex="-1" data-bs-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thêm mới ủy quyền</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uyQuyenForm">
+                    <input type="hidden" id="ID">
+                    <div class="mb-2">
+                        <label>ADID Người Ủy Quyền</label>
+                        <input type="text" class="form-control" id="CHR_ADID_NguoiUQ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>ADID Người Được UQ</label>
+                        <input type="text" class="form-control" id="CHR_ADID_NguoiduocUQ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>Tên Người Được UQ</label>
+                        <input type="text" class="form-control" id="CHR_TEN_NguoiduocUQ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>Email Người Được UQ</label>
+                        <input type="email" class="form-control" id="CHR_MAIL_NguoiduocUQ">
+                    </div>
+                    <div class="mb-2">
+                        <label>Ngày Hết Hạn</label>
+                        <input type="date" class="form-control" id="DT_HethanUQ" required>
+                    </div>
+                    <div class="mb-2">
+                        <label>Phòng Ban</label>
+                        <input type="text" class="form-control" id="CHR_PHONGBAN">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success" onclick="saveData()">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let modal;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalElement = document.getElementById('uyQuyenModal');
+        document.body.appendChild(modalElement);
+        modal = new bootstrap.Modal(modalElement);
+
+        // Tải dữ liệu khi trang vừa load xong
+        loadData();
+    });
+
+    // 1. ĐỌC DỮ LIỆU (READ)
+    async function loadData() {
+        try {
+            const response = await fetch('/User/GetAll');
+            const data = await response.json();
+
+            let html = '';
+            data.forEach(item => {
+                // ASP.NET Core mặc định serialize JSON chuyển chữ cái đầu thành viết thường
+                // Xử lý ngày tháng an toàn
+                //const dateObj = new Date(item.dT_HethanUQ);
+                //const formattedDate = !isNaN(dateObj) ? dateObj.toLocaleDateString('vi-VN') : '';
+
+                html += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.chR_ADID_NguoiUQ || ''}</td>
+                        <td>${item.chR_ADID_NguoiduocUQ || ''}</td>
+                        <td>${item.chR_TEN_NguoiduocUQ || ''}</td>
+                        <td>${item.chR_MAIL_NguoiduocUQ || ''}</td>
+                        <td>${item.dT_HethanUQ}</td>
+                        <td>${item.chR_PHONGBAN || ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick='editItem(${JSON.stringify(item)})'>Sửa</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteData(${item.id})">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('tableBody').innerHTML = html;
+        } catch (error) {
+            console.error("Lỗi khi tải dữ liệu: ", error);
+        }
+    }
+
+    // 2. MỞ FORM THÊM MỚI
+    function openModal() {
+        document.getElementById('uyQuyenForm').reset();
+        document.getElementById('ID').value = '';
+        document.getElementById('modalTitle').innerText = 'Thêm mới ủy quyền';
+        modal.show();
+    }
+
+    // 3. MỞ FORM SỬA (Lấy dữ liệu đẩy lên Form)
+    function editItem(item) {
+        document.getElementById('ID').value = item.id;
+        document.getElementById('CHR_ADID_NguoiUQ').value = item.chR_ADID_NguoiUQ;
+        document.getElementById('CHR_ADID_NguoiduocUQ').value = item.chR_ADID_NguoiduocUQ;
+        document.getElementById('CHR_TEN_NguoiduocUQ').value = item.chR_TEN_NguoiduocUQ;
+        document.getElementById('CHR_MAIL_NguoiduocUQ').value = item.chR_MAIL_NguoiduocUQ;
+
+        if(item.dT_HethanUQ) {
+            document.getElementById('DT_HethanUQ').value = item.dT_HethanUQ.split('T')[0];
+        }
+        document.getElementById('CHR_PHONGBAN').value = item.chR_PHONGBAN;
+
+        document.getElementById('modalTitle').innerText = 'Chỉnh sửa ủy quyền';
+        modal.show();
+    }
+
+    // 4. LƯU DỮ LIỆU (CREATE & UPDATE)
+    async function saveData() {
+        const id = document.getElementById('ID').value;
+
+        // Tên thuộc tính ở đây phải khớp với Model C# (có thể bỏ qua phân biệt hoa thường)
+        const payload = {
+            ID: id ? parseInt(id) : 0,
+            CHR_ADID_NguoiUQ: document.getElementById('CHR_ADID_NguoiUQ').value,
+            CHR_ADID_NguoiduocUQ: document.getElementById('CHR_ADID_NguoiduocUQ').value,
+            CHR_TEN_NguoiduocUQ: document.getElementById('CHR_TEN_NguoiduocUQ').value,
+            CHR_MAIL_NguoiduocUQ: document.getElementById('CHR_MAIL_NguoiduocUQ').value,
+            DT_HethanUQ: document.getElementById('DT_HethanUQ').value,
+            CHR_PHONGBAN: document.getElementById('CHR_PHONGBAN').value
+        };
+
+        const url = id ? '/User/Update' : '/User/Create';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(result.message);
+                modal.hide();
+                loadData();
+            } else {
+                alert('Có lỗi: ' + (result.message || 'Vui lòng kiểm tra lại!'));
+            }
+        } catch (error) {
+            console.error("Lỗi:", error);
+            alert("Lỗi kết nối tới Server!");
+        }
+    }
+
+    // 5. XÓA DỮ LIỆU (DELETE)
+    async function deleteData(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa ủy quyền này?")) {
+            try {
+                const response = await fetch(`/User/Delete?id=${id}`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert(result.message);
+                    loadData();
+                } else {
+                    alert('Có lỗi: ' + (result.message || 'Không thể xóa dữ liệu!'));
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+                alert("Lỗi kết nối tới Server!");
+            }
+        }
+    }
+</script>

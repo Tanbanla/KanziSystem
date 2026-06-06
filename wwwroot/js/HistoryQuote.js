@@ -365,7 +365,7 @@
         const T = window.i18nHistoryQuote || {};
         try {
             showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch((window.apiBaseUrl || '') + '/History/ExportManagerHistory', {
+            const res = await fetch((window.apiBaseUrl || '') + '/History/ExportManagerHistoryMiniExcel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

@@ -4,7 +4,7 @@
         insertListBaoGia: (window.apiBaseUrl || '') + '/Quote/InsertDanhSachBaoGia',
         getMaterials: (keyword) => (window.apiBaseUrl || '') + `/Quote/GetMaterialsByNameOrCode?keyword=${encodeURIComponent(keyword || '')}`,
         searchMaterials: (window.apiBaseUrl || '') + '/Quote/GetSearchMaterial'
-        , uploadQuoteExcel: (window.apiBaseUrl || '') + '/Quote/UploadQuoteExcel'//UploadQuoteExcelBackup
+        , uploadQuoteExcel: (window.apiBaseUrl || '') + '/Quote/UploadQuoteExcel'
         , exportAutoRender: (window.apiBaseUrl || '') + '/Quote/ExportAutoRender'
         , getNCCByCategory: (window.apiBaseUrl || '') + '/Quote/GetNCCByCategory'
         , exportRenderOutSide: (window.apiBaseUrl || '') + '/Quote/ExportRenderOutSide'
@@ -12,7 +12,8 @@
         , searchApprover: (window.apiBaseUrl || '') + '/Quote/GetListApprovel'
         ,downloadMasterMaterial: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterMaterial`
         ,downloadMasterVendor: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterVendor`
-        ,checkNCC: (window.apiBaseUrl || '') + '/Quote/CheckNCC'
+        , checkNCC: (window.apiBaseUrl || '') + '/Quote/CheckNCC'
+        , checkNCCByCategory: (window.apiBaseUrl || '') + '/Quote/CheckNCCByCategory'
     };
 
     const qs = (sel, root = document) => root.querySelector(sel);
@@ -774,6 +775,35 @@
             return;
         }
         try {
+            try {
+                const pairs = (Array.isArray(payload) ? payload.map(it => ({
+                    MaDon: (it.CHR_MaNCC || it.chR_MaNCC || '').toString().trim(),
+                    ChungLoai: (it.NVCHR_ChungLoai || it.nvchR_ChungLoai || it.CHR_ChungLoai || '').toString().trim()
+                })) : [])
+                    .filter(p => p.MaDon && p.ChungLoai);
+
+                const seen = new Set();
+                const uniq = [];
+                for (const p of pairs) {
+                    const k = (p.MaDon + '|' + p.ChungLoai).toLowerCase();
+                    if (!seen.has(k)) { seen.add(k); uniq.push(p); }
+                }
+
+                if (uniq.length > 0) {
+                    const chkRes = await fetch(api.checkNCCByCategory, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(uniq)
+                    });
+                    if (!chkRes.ok) {
+                        const msg = await chkRes.text().catch(() => 'Một số nhà cung cấp không tồn tại theo chủng loại');
+                        throw new Error(msg || 'Kiểm tra nhà cung cấp thất bại');
+                    }
+                }
+            } catch (checkErr) {
+                throw checkErr; 
+            }
+
             showLoading((window.i18nQuote && window.i18nQuote.Exporting) || 'Đang xử lý...');
             const res = await fetch(api.insertListBaoGia, {
                 method: 'POST',
@@ -1541,7 +1571,6 @@
             const t = e.target;
             if (!t || !t.classList) return;
 
-            // Selecting an internal material code -> autofill fields from material service
             if (t.classList.contains('maHangNoiBo')) {
                 try {
                     await autofillFromMaterialSelect(t);

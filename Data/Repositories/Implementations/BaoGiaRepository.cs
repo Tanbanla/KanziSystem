@@ -511,26 +511,75 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize)
         {
             var sql = new StringBuilder(@"
-            WITH StatusCheck AS (
-                SELECT 
-                    distinct
-                    r.id,
-                    r.CHR_MaDon,
-                    r.CHR_MaHangNoiBo,
-                    MAX(CASE 
-                        WHEN r.CHR_MaHangNoiBo IS NULL 
-                            OR r.NVCHR_NameVN IS NULL 
-                            OR r.CHR_MaHangNoiBo = '' 
-                            OR r.NVCHR_NameVN = ''
-                        THEN 1 ELSE 0 
-                    END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS NeedConfirmName,
-                    MAX(CASE WHEN r.ID_StepBaoGia != 7 THEN 1 ELSE 0 END) 
-                        OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep,
-                     CASE WHEN r.ID_StepBaoGia >= 9 and r.ID_StepBaoGia <12 then 1 else 0 END as CofirmedName 
-                FROM BaoGia_Request_of_Quotation r
-                LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1");
+             SELECT r.*,
+                 d.[CHR_CodeNCC],
+                 d.[NVCHR_NameNCC],
+                 d.[CHR_MaHangNCC] as CodeEquipmentNCC,
+                 d.[NVCHR_TenHangHQ],
+                 d.[NVCHR_PaymentTerm],
+                 d.[NVCHR_Warranty],
+                 d.[NVCHR_DeliveryTerm],
+                 d.[VCHR_Rohs],
+                 d.[VCHR_COCQ],
+                 d.[VCHR_MSDS],
+                 d.[VCHR_AnToan],
+                 d.[VCHR_CamKet],
+                 d.[CHR_NameEN] as NameENByNCC,
+                 d.[INT_SoLuong] as soluong,
+                 d.[NVCHR_DonVi] as donvi,
+                 d.[NVCHR_NhaSanXuat],
+                 d.[DTM_EffectiveDate],
+                 d.[DTM_ExpiryDate],
+                 d.[NVCHR_Note],
+                 d.[NVCHR_File],
+                 d.[NVCHR_MOQ],
+                 d.[DTM_LeadTime],
+                 d.[DTM_ShipTime],
+                 d.[NVCHR_Packing],
+                 d.BIT_Select,
+                 d.NVCHR_ReasonPick,
+                 d.FL_USD,
+                 d.FL_VND,
+                 d.FL_Sum,
+                 CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
+                 CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
+                 CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
+                 CAST(CASE WHEN (r.INT_SoLuong = d.INT_SoLuong or d.INT_SoLuong = 0) THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
+                 CAST(CASE WHEN (r.NVCHR_DonVi = d.NVCHR_DonVi or d.NVCHR_DonVi is null) THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
+		            CAST(CASE 
+			            WHEN r.NVCHR_Rohs = N'Need' AND (d.VCHR_Rohs = N'NG' OR d.VCHR_Rohs = N'No need') THEN 0
+			            WHEN (r.NVCHR_Rohs = d.VCHR_Rohs OR d.VCHR_Rohs = N'OK' OR d.VCHR_Rohs = N'' )  THEN 1 
+			            WHEN(r.NVCHR_Rohs ='') THEN 1
+			            ELSE 0 
+		            END AS BIT) AS IsMatch_Rohs,
+		            CAST(CASE 
+			            WHEN r.NVCHR_COCQ = N'Need' AND (d.VCHR_COCQ = N'NG' OR d.VCHR_COCQ = N'No need') THEN 0
+			            WHEN (r.NVCHR_COCQ = d.VCHR_COCQ OR d.VCHR_COCQ = N'OK' OR d.VCHR_COCQ = N'') THEN 1 
+			            WHEN( R.NVCHR_COCQ ='') THEN 1
+			            ELSE 0 
+		            END AS BIT) AS IsMatch_COCQ,
+
+		            CAST(CASE 
+			            WHEN r.NVCHR_MSDS = N'Need' AND (d.VCHR_MSDS = N'NG' OR d.VCHR_MSDS = N'No need') THEN 0
+			            WHEN (r.NVCHR_MSDS = d.VCHR_MSDS OR d.VCHR_MSDS = N'OK' OR d.VCHR_MSDS = N'') THEN 1 
+			            WHEN(r.NVCHR_MSDS ='') THEN 1
+			            ELSE 0 
+		            END AS BIT) AS IsMatch_MSDS,
+
+		            CAST(CASE 
+			            WHEN r.NVCHR_AnToan = N'Need' AND (d.VCHR_AnToan = N'NG' OR d.VCHR_AnToan = N'No need') THEN 0
+			            WHEN (r.NVCHR_AnToan = d.VCHR_AnToan OR d.VCHR_AnToan = N'OK' OR d.VCHR_AnToan = N'') THEN 1 
+			            WHEN(r.NVCHR_AnToan ='') THEN 1
+			            ELSE 0 
+		            END AS BIT) AS IsMatch_AnToan,
+                 CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) or d.DTM_ShipTime is null ) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
+                 CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet,
+	             st.NVCHR_TenStatus  as status
+             FROM BaoGia_Request_of_Quotation r
+             LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+             LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
+             LEFT JOIN BaoGia_Status st on r.ID_Status = st.VCHR_CodeStatus
+             WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1 ");
 
             var parameters = new DynamicParameters();
             if (!string.IsNullOrEmpty(user))
@@ -558,110 +607,29 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sql.Append(" AND r.CHR_MaNCC = @MaNCC");
                 parameters.Add("MaNCC", maNCC);
             }
-
-            sql.Append(@"
-            )
-            SELECT r.*,
-                d.[CHR_CodeNCC],
-                d.[NVCHR_NameNCC],
-                d.[CHR_MaHangNCC] as CodeEquipmentNCC,
-                d.[NVCHR_TenHangHQ],
-                d.[NVCHR_PaymentTerm],
-                d.[NVCHR_Warranty],
-                d.[NVCHR_DeliveryTerm],
-                d.[VCHR_Rohs],
-                d.[VCHR_COCQ],
-                d.[VCHR_MSDS],
-                d.[VCHR_AnToan],
-                d.[VCHR_CamKet],
-                d.[CHR_NameEN] as NameENByNCC,
-                d.[INT_SoLuong] as soluong,
-                d.[NVCHR_DonVi] as donvi,
-                d.[NVCHR_NhaSanXuat],
-                d.[DTM_EffectiveDate],
-                d.[DTM_ExpiryDate],
-                d.[NVCHR_Note],
-                d.[NVCHR_File],
-                d.[NVCHR_MOQ],
-                d.[DTM_LeadTime],
-                d.[DTM_ShipTime],
-                d.[NVCHR_Packing],
-                d.BIT_Select,
-                d.NVCHR_ReasonPick,
-                d.FL_USD,
-                d.FL_VND,
-                d.FL_Sum,
-                CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
-                CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
-                CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
-                CAST(CASE WHEN (r.INT_SoLuong = d.INT_SoLuong or d.INT_SoLuong = 0) THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
-                CAST(CASE WHEN (r.NVCHR_DonVi = d.NVCHR_DonVi or d.NVCHR_DonVi is null) THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
-				CAST(CASE 
-					WHEN r.NVCHR_Rohs = N'Need' AND (d.VCHR_Rohs = N'NG' OR d.VCHR_Rohs = N'No need') THEN 0
-					WHEN (r.NVCHR_Rohs = d.VCHR_Rohs OR d.VCHR_Rohs = N'OK' OR d.VCHR_Rohs = N'' )  THEN 1 
-					WHEN(r.NVCHR_Rohs ='') THEN 1
-					ELSE 0 
-				END AS BIT) AS IsMatch_Rohs,
-				CAST(CASE 
-					WHEN r.NVCHR_COCQ = N'Need' AND (d.VCHR_COCQ = N'NG' OR d.VCHR_COCQ = N'No need') THEN 0
-					WHEN (r.NVCHR_COCQ = d.VCHR_COCQ OR d.VCHR_COCQ = N'OK' OR d.VCHR_COCQ = N'') THEN 1 
-					WHEN( R.NVCHR_COCQ ='') THEN 1
-					ELSE 0 
-				END AS BIT) AS IsMatch_COCQ,
-
-				CAST(CASE 
-					WHEN r.NVCHR_MSDS = N'Need' AND (d.VCHR_MSDS = N'NG' OR d.VCHR_MSDS = N'No need') THEN 0
-					WHEN (r.NVCHR_MSDS = d.VCHR_MSDS OR d.VCHR_MSDS = N'OK' OR d.VCHR_MSDS = N'') THEN 1 
-					WHEN(r.NVCHR_MSDS ='') THEN 1
-					ELSE 0 
-				END AS BIT) AS IsMatch_MSDS,
-
-				CAST(CASE 
-					WHEN r.NVCHR_AnToan = N'Need' AND (d.VCHR_AnToan = N'NG' OR d.VCHR_AnToan = N'No need') THEN 0
-					WHEN (r.NVCHR_AnToan = d.VCHR_AnToan OR d.VCHR_AnToan = N'OK' OR d.VCHR_AnToan = N'') THEN 1 
-					WHEN(r.NVCHR_AnToan ='') THEN 1
-					ELSE 0 
-				END AS BIT) AS IsMatch_AnToan,
-                CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) or d.DTM_ShipTime is null ) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
-                CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet,
-                CASE 
-                    WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME'
-                    WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC'
-		            WHEN SC.CofirmedName  = 1  THEN 'CONFIRMED'
-                    ELSE 'WAIT_NCC'
-                END AS status
-            FROM BaoGia_Request_of_Quotation r
-            LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-            INNER JOIN StatusCheck sc ON r.id = sc.id
-            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
-
-            if (!string.IsNullOrEmpty(maDon))
-            {
-                sql.Append(" AND r.CHR_MaDon = @MaDon");
-            }
-            if (!string.IsNullOrEmpty(maHang))
-            {
-                sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
-            }
-            if (!string.IsNullOrEmpty(section))
-            {
-                sql.Append(" AND r.CHR_SectionCode = @Section");
-            }
-            if (!string.IsNullOrEmpty(maNCC))
-            {
-                sql.Append(" AND r.CHR_MaNCC = @MaNCC");
-            }
-            // Filter by computed status coming from StatusCheck (WAIT_CONFIRM_NAME, WAIT_PICK_NCC, WAIT_NCC)
+            // Filter by status 
             if (!string.IsNullOrEmpty(status))
             {
-                sql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC' " +
-                    "WHEN sc.CofirmedName  = 1  THEN 'CONFIRMED' ELSE 'WAIT_NCC' END) = @Status");
-                parameters.Add("Status", status);
+                switch (status)
+                {
+                    case "WAIT_PICK_NCC":
+                        sql.Append(" AND (r.ID_StepBaoGia >5 and r.ID_StepBaoGia <=7)");
+                        break;
+                    case "WAIT_APPROVAL":
+                        sql.Append(" AND (r.ID_StepBaoGia >8 and r.ID_StepBaoGia <12)");
+                        break;
+                    case "RETURN_APPROVAL":
+                        sql.Append(" AND (r.ID_StepBaoGia = 8)");
+                        break;
+                    default:
+                        sql.Append(" AND 1=0"); 
+                        break;
+                }
             }
 
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon ,r.CHR_MaThietBi, r.CHR_MaNCC ,r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
 
-            if (pageSize > 0 && pageIndex > 0)
+            if (pageSize > 0 && pageIndex >= 0)
             {
                 sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
                 parameters.Add("Offset", (pageIndex - 1) * pageSize);
@@ -672,20 +640,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             // For total count, build a similar CTE so status filter and partition logic match the main query
             var countSql = new StringBuilder(@"
-            WITH StatusCheck AS (
-                SELECT distinct r.id,
-                       MAX(CASE 
-                           WHEN r.CHR_MaHangNoiBo IS NULL 
-                               OR r.NVCHR_NameVN IS NULL 
-                               OR r.CHR_MaHangNoiBo = '' 
-                               OR r.NVCHR_NameVN = ''
-                           THEN 1 ELSE 0 END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS NeedConfirmName,
-                           MAX(CASE WHEN r.ID_StepBaoGia != 7 THEN 1 ELSE 0 END) OVER (PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo) AS HasDifferentStep,
-                           CASE WHEN r.ID_StepBaoGia >= 9 and r.ID_StepBaoGia <12 then 1 else 0 END as CofirmedName 
+            SELECT COUNT(r.id)
                 FROM BaoGia_Request_of_Quotation r
-                LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
                 LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11");
+                WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1");
             if (!string.IsNullOrEmpty(user))
             {
                 countSql.Append(" AND s.CHR_UserAdid= @User");
@@ -706,35 +664,24 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 countSql.Append(" AND r.CHR_MaNCC = @MaNCC");
             }
-
-            countSql.Append(@")
-            SELECT COUNT(r.id)
-            FROM BaoGia_Request_of_Quotation r
-            INNER JOIN StatusCheck sc ON r.id = sc.id
-            WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1");
-
-            if (!string.IsNullOrEmpty(maDon))
-            {
-                countSql.Append(" AND r.CHR_MaDon = @MaDon");
-            }
-            if (!string.IsNullOrEmpty(maHang))
-            {
-                countSql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
-            }
-            if (!string.IsNullOrEmpty(section))
-            {
-                countSql.Append(" AND r.CHR_SectionCode = @Section");
-            }
-            if (!string.IsNullOrEmpty(maNCC))
-            {
-                countSql.Append(" AND r.CHR_MaNCC = @MaNCC");
-            }
             if (!string.IsNullOrEmpty(status))
             {
-                countSql.Append(" AND (CASE WHEN sc.NeedConfirmName > 0 THEN 'WAIT_CONFIRM_NAME' WHEN sc.HasDifferentStep = 0 THEN 'WAIT_PICK_NCC'" +
-                    "WHEN sc.CofirmedName  = 1  THEN 'CONFIRMED' ELSE 'WAIT_NCC' END) = @Status");
+                switch (status)
+                {
+                    case "WAIT_PICK_NCC":
+                        countSql.Append(" AND (r.ID_StepBaoGia >5 and r.ID_StepBaoGia <=7)");
+                        break;
+                    case "WAIT_APPROVAL":
+                        countSql.Append(" AND (r.ID_StepBaoGia >8 and r.ID_StepBaoGia <12)");
+                        break;
+                    case "RETURN_APPROVAL":
+                        countSql.Append(" AND (r.ID_StepBaoGia = 8)");
+                        break;
+                    default:
+                        countSql.Append(" AND 1=0");
+                        break;
+                }
             }
-
             var totalCount = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);
 
             return new ListRequest<dynamic>
@@ -1057,6 +1004,16 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             LEFT JOIN StatusCheck sc ON r.id = sc.id
             WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
 
+            if (!string.IsNullOrEmpty(adid))
+            {
+                sql.Append(" AND r.CHR_UserApproval = @Adid");
+                parameters.Add("Adid", adid);
+            }
+            if (listMaDon != null && listMaDon.Any())
+            {
+                sql.Append(" AND r.CHR_MaDon IN @MaDonList");
+                parameters.Add("MaDonList", listMaDon);
+            }
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon, r.CHR_MaThietBi, r.CHR_MaNCC, r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
             return data;
@@ -1422,7 +1379,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     data.DTM_UpdateLater = DateTime.Now;
                     if (data.ID_StepBaoGia >= 12)
                     {
-                        data.ID_Status = "WAIT_CONFIRM_NAME";
+                        data.ID_Status = "DONE";
+                        data.ID_StepBaoGia = 13;
                     }
 
                     var actionType = data.ID_StepBaoGia == 10 ? "QLSC_PICK_NCC" :
@@ -1641,69 +1599,84 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Export history báo giá
         public async Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
         {
-
             var sql = @"
                 SELECT DISTINCT q.*, d.BIT_Select, d.NVCHR_ReasonPick, d.NVCHR_File
                 FROM BaoGia_Request_of_Quotation as q
                 INNER JOIN [BaoGia_Master_Approver_Send_Mail] as s ON q.CHR_SectionCode = s.CHR_CodeSection
-                left join  BaoGia_Detail_of_Quotation as d
-                on q.ID = d.ID_RequestQuote
-                WHERE --(@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
-                  (@MaDon IS NULL OR CHR_MaDon = @MaDon)
-                  AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
-                  AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
-                  AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
-                  AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
-                  AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
-                  AND (@Step IS NULL OR ID_StepBaoGia = @Step)
-                  AND ( s.CHR_UserAdid = @Adid)
+                LEFT JOIN BaoGia_Detail_of_Quotation as d ON q.ID = d.ID_RequestQuote
             ";
 
-            var statusSql = "1=1";
-            switch (status)
+            var whereClauses = new List<string>();
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrEmpty(MaDon))
             {
-                case "RETURN":
-                    statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DONE":
-                    statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "APPROVAL":
-                    statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "WAIT":
-                    statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DELETE":
-                    statusSql = "ID_Status LIKE 'DELETE'";
-                    break;
-                default:
-                    statusSql = "ID_Status NOT LIKE 'DELETE'";
-                    break;
+                whereClauses.Add("q.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereClauses.Add("q.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(chungLoai))
+            {
+                whereClauses.Add("q.NVCHR_ChungLoai LIKE @ChungLoai");
+                parameters.Add("ChungLoai", "%" + chungLoai + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereClauses.Add("q.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereClauses.Add("q.CHR_CreateBy LIKE @NguoiYeuCau");
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereClauses.Add("q.CHR_MaHangNoiBo LIKE @MaHang");
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (step.HasValue)
+            {
+                whereClauses.Add("q.ID_StepBaoGia = @Step");
+                parameters.Add("Step", step);
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
             }
 
-            // append status filter
-            sql += " AND (" + statusSql + ")";
-
-            // Add ordering to main query
-            sql += @"
-                ORDER BY DTM_CreateDate DESC
-            ";
-
-            var parameters = new
+            // status handling
+            if (!string.IsNullOrEmpty(status))
             {
-                MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
-                MaNcc = string.IsNullOrEmpty(MaNcc) ? null : MaNcc,
-                Section = string.IsNullOrEmpty(Section) ? null : Section,
-                NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
-                MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
-                Step = step,
-                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
-                Adid = user
-            };
+                string statusSql = status switch
+                {
+                    "RETURN" => "q.ID_Status LIKE '%RETURN%' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "DONE" => "q.ID_Status = 'DONE' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "APPROVAL" => "q.ID_Status LIKE 'APPROVAL%' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "WAIT" => "q.ID_Status LIKE '%WAIT%' AND q.ID_Status NOT LIKE 'DELETE'",
+                    "DELETE" => "q.ID_Status LIKE 'DELETE'",
+                    _ => "q.ID_Status NOT LIKE 'DELETE'"
+                };
+                whereClauses.Add("(" + statusSql + ")");
+            }
+            else
+            {
+                whereClauses.Add("q.ID_Status NOT LIKE 'DELETE'");
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " WHERE " + string.Join(" AND ", whereClauses);
+            }
+
+            sql += " ORDER BY DTM_CreateDate DESC";
 
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
-
             return data;
         }
         // update thời hạn lựa chọn nhà cung cấp

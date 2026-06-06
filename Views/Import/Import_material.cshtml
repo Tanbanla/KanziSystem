@@ -212,7 +212,7 @@
         inputTenKho.value = khoFound ? khoFound.ten : "";
     }
     function _load_phongchiuphi() {
-    fetch('/Request/_get_phongchiuphi', {
+        fetch('/Request/_get_phongchiuphi_xuatkho', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

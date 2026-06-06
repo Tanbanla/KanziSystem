@@ -373,6 +373,7 @@
         const checkboxes = document.querySelectorAll('input.item:checked');
         checkboxes.forEach((item) => {
             if (item.checked) {
+
                 _update_request_all_GA(item.value);
             }
         });

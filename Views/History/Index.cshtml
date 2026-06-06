@@ -1,0 +1,443 @@
+@using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = "Lịch sử yêu cầu báo giá";
+    List<MATERIALDTO> listMaterials = Model.DanhSachVatTu;
+    List<DEPARTMENTDTO> listPhong = Model.DanhSachNhomViTri;
+    List<IM_NCC_NEWDTO> listNCC = Model.DanhSachNhaCungCap;
+    List<BaoGia_StatusDTO> listStatus = Model.DanhSachStatus;
+    List<string> madons = Model.DanhSachMaDon;
+    List<string> categoryS = Model.DanhSachCategory;
+    List<string> phanLoais = ["A", "B", "C", "E","I" ,"NO LIST"];
+    string role = Model.Role;
+     // determine UI language and prepare localized display names for steps and status
+    var uiLang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? "vi";
+    Func<BaoGia_StatusDTO, string> statusDisplay = s => uiLang == "en" ? (s.CHR_TenStatusEN ?? s.NVCHR_TenStatus) : uiLang == "ja" ? (s.CHR_TenStatusJP ?? s.NVCHR_TenStatus) : s.NVCHR_TenStatus;
+    var localizedStatus = listStatus.Select(s => new {
+        s.VCHR_CodeStatus,
+        s.NVCHR_TenStatus,
+        s.CHR_TenStatusEN,
+        s.CHR_TenStatusJP,
+        DisplayName = statusDisplay(s)
+    }).ToList();
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/HistoryQuote.css" />
+</head>
+
+<div class="container-fluid" id="quote-history">
+        <!-- Global loading overlay -->
+    <div id="globalLoading" aria-hidden="true">
+        <div class="loader-box">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="loader-msg">Đang xử lý...</div>
+        </div>
+    <!-- Modal: return reason (separate from delete) -->
+    <div class="modal fade" id="returnReasonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["ReturnReasonTitle"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="returnReasonText" class="form-label small">@Localizer["ReturnReasonLabel"]</label>
+                        <textarea id="returnReasonText" class="form-control" rows="4" placeholder="@Localizer["EnterReturnReasonPlaceholder"]"></textarea>
+                        <div id="returnReasonNotice" class="text-danger small mt-2" style="display:none;">@Localizer["ReturnReasonRequired"]</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-primary" id="confirmReturnWithReason">@Localizer["DialogOk"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal: delete reason -->
+    <div class="modal fade" id="deleteReasonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["DeleteReasonTitle"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="deleteReasonText" class="form-label small">@Localizer["DeleteReasonLabel"]</label>
+                        <textarea id="deleteReasonText" class="form-control" rows="4" placeholder="@Localizer["EnterDeleteReasonPlaceholder"]"></textarea>
+                        <div id="deleteReasonNotice" class="text-danger small mt-2" style="display:none;">@Localizer["DeleteReasonRequired"]</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteWithReason">@Localizer["Delete"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- Modal: select next approver -->
+    <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["SelectNextApprover"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="selectNextApprover" class="form-label small">@Localizer["NextApproverLabel"]</label>
+                        <select id="selectNextApprover" class="form-select">
+                            <option value="">@Localizer["SelectPlaceholder"]</option>
+                        </select>
+                    </div>
+                    <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"]</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-primary" id="confirmSelectApprover">@Localizer["Confirm"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
+            <small class="text-muted">@Localizer["PageSubtitle"]</small>
+        </div>
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+            <div class="btn-group me-2 mb-2" role="group">
+                <button type="button" class="btn btn-outline-success" id="btnImportHistory"><i class="fas fa-file-import"></i> @Localizer["ImportFileExcel"]</button>
+            </div>
+            <div style="margin-right: 6px;"></div>
+            <div class="btn-group me-2 mb-2" role="group">
+                <button type="button" class="btn btn-outline-primary" id="btnExportHistory"><i class="fas fa-file-export"></i> @Localizer["Export"]</button>
+            </div>
+            <div style="margin-right: 6px;"></div>
+            <div class="btn-group me-2 mb-2" role="group" hidden>
+                <button type="button" class="btn btn-outline-danger" id="btnExportManaHistory"><i class="fas fa-file-download"></i> Xuất file quản lý</button>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap">
+            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Filters"]</h6>
+            <div class="d-flex gap-4 flex-wrap">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
+                    <span class="small">Đến hạn: <strong id="statDueSoon">0</strong></span>
+                </div>
+                <div style="margin-right: 6px;"></div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-warning rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
+                    <span class="small">Còn 1 ngày: <strong id="statOneDayLeft">0</strong></span>
+                </div>
+                <div style="margin-right: 6px;"></div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-info rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
+                    <span class="small">Còn lại: <strong id="statRemaining">0</strong></span>
+                </div>
+                <div style="margin-right: 6px;"></div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
+                    <span class="small">Quá hạn: <strong id="statOverdue">0</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form id="historyFilterForm" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="searchMaDon" class="form-label">@Localizer["OrderCode"]</label>
+                    <select id="searchMaDon" name="searchMaDon" class="form-control searchMaDon searchable-select">
+                        <option value="">@Localizer["SelectOrderCode"]</option>
+                        @foreach (var s in madons)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="searchPhongBan" class="form-label">@Localizer["Department"]</label>
+                    <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
+                        <option value="" selected>@Localizer["SelectDepartment"]</option>
+                        @foreach (var s in listPhong)
+                        {
+                            <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="searchNguoiTao" class="form-label">@Localizer["Creator"]</label>
+                    <input type="text" class="form-control" id="searchNguoiTao" name="searchNguoiTao" placeholder="@Localizer["EnterCreator"]">
+                </div>
+                <div class="col-md-3">
+                    <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
+                    <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select">
+                        <option value="" selected>@Localizer["SelectMaterialCode"]</option>
+                        @foreach (var s in listMaterials)
+                        {
+                            <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="searchNhaCungCap" class="form-label">@Localizer["Supplier"]</label>
+                    <select id="searchNhaCungCap" name="searchNhaCungCap" class="form-select searchNhaCungCap searchable-select">
+                        <option value="" selected>@Localizer["SelectSupplier"]</option>
+                        @foreach (var s in listNCC)
+                        {
+                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="statusFilter" class="form-label small text-uppercase fw-semibold">@Localizer["OrderStatus"]</label>
+                    <select id="statusFilter" name="statusFilter" class="form-control statusFilter searchable-select">
+                        <option value="" selected>@Localizer["All"]</option>
+                        <option value="APPROVAL">@Localizer["Approving"]</option>
+                        <option value="WAIT">@Localizer["Waiting"]</option>
+                        <option value="RETURN">@Localizer["RETURN"]</option>
+                        <option value="DONE">@Localizer["DONE"]</option>
+                        <option value="DELETE">@Localizer["DELETE"]</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="dateRange" class="form-label">@Localizer["DateRange"]</label>
+                    <div class="d-flex gap-2">
+                        <input type="date" class="form-control" id="dateFrom" name="dateFrom">
+                        <input type="date" class="form-control" id="dateTo" name="dateTo">
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
+                    <div style="min-width: 8px"></div>
+                    <button type="button" class="btn btn-outline-secondary w-100" id="btnResetFilters"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Approval table -->
+    <div class="card mt-3">
+        <div class="card-header bg-white">
+            <h6 class="mb-0 text-secondary" style="color:black !important">Bảng lịch sử</h6>
+        </div>
+        <div class="card-body px-0">
+            <div class="table-responsive">
+                <div class="legend" aria-hidden="false" title="Chú thích màu">
+                    <div class="item"><span class="swatch yellow" aria-hidden="true"></span><span>Màu vàng: Từ chối báo giá</span></div>
+                    <div class="item"><span class="swatch green" aria-hidden="true"></span><span>Màu xanh lá (ô NCC): Đã gửi báo giá</span></div>
+                    <div class="item"><span class="swatch white" style="border:1px solid #ccc;" aria-hidden="true"></span><span>Màu trắng (ô NCC): Nhà cung cấp chưa gửi báo giá</span></div>
+                    <div class="item"><span class="swatch red" aria-hidden="true"></span><span>Màu đỏ: Quá hạn xin báo giá</span></div>
+                    <div class="separator" aria-hidden="true"></div>
+                    <div class="item"><span class="swatch green" aria-hidden="true"></span><span>Màu xanh lá (Phê duyệt đơn): Đã duyệt</span></div>
+                    <div class="item"><span class="swatch white" style="border:1px solid #ccc;" aria-hidden="true"></span><span>Màu trắng (Phê duyệt đơn): Chưa duyệt</span></div>
+                </div>
+                <table class="approval-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">STT</th>
+                            <th rowspan="2">Số đơn</th>
+                            <th rowspan="2">Mã nội bộ</th>
+                            <th rowspan="2">Mã hàng của NCC<br/>Vendor's good code</th>
+                            <th rowspan="2">Tên hàng tiếng anh (*)<br/>Part name (English)</th>
+                            <th rowspan="2">Nhà cung cấp 1</th>
+                            <th rowspan="2">Nhà cung cấp 2</th>
+                            <th rowspan="2">Nhà cung cấp 3</th>
+                            <th rowspan="2">Nhà cung cấp 4</th>
+                            <th rowspan="2">Nhà cung cấp 5</th>
+                            <th rowspan="2">Kì hạn lựa chọn</th>
+                            <th rowspan="2">Người làm đơn</th>
+                            <th class="group1" colspan="4">Phê duyệt đơn</th>
+                            <th class="group2" colspan="4">Phê duyệt chọn NCC</th>
+                           <th class="group3" colspan="4">Kết quả lựa chọn NCC</th>
+                            <th rowspan="2">Trạng thái</th>
+                            <th rowspan="2">Action</th>
+                        </tr>
+                        <tr>
+                            <th class="group1">QLSC</th>
+                            <th class="group1">QLTC</th>
+                            <th class="group1">PUR PIC</th>
+                            <th class="group1">QLSC</th>
+
+                            <th class="group2">PUR PIC</th>
+                            <th class="group2">QLSC</th>
+                            <th class="group2">QLTC</th>
+                            <th class="group2">QLCC</th>
+                                                        
+                            <th class="group3">Nhà cung cấp chọn</th>
+                            <th class="group3">Lý do chọn nhà cung cấp</th>
+                            <th class="group3">Link báo giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>RQ_222</td>
+                            <td>O0001123</td>
+                            <td>KH1</td>
+                            <td></td>
+                            <td style="background:#cfe3c6;">LAC</td>
+                            <td style="background:#cfe3c6;">Misumi</td>
+                            <td style="background:red;color:#fff;">HOANGHA</td>
+                            <td>ABC</td>
+                            <td></td>
+                            <td></td>
+                            <td>trada - ngày: 12/05/2026</td>
+                            <td>mai</td>
+                            <td>yen</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <div class="action-buttons" role="group" aria-label="Actions">
+                                    <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử"><i class="fas fa-history"></i></button>
+                                    <button type="button" class="btn btn-outline-secondary btn-view-return" title="Trả lại"><i class="fas ion-arrow-return-left"></i></button>
+                                    <button type="button" class="btn btn-outline-danger btn-delete-group" title="Xóa đơn"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>RQ_223</td>
+                            <td>O0001124</td>
+                            <td>KH2</td>
+                            <td></td>
+                            <td style="background:#cfe3c6;">LAC</td>
+                            <td style="background:#cfe3c6;">Misumi</td>
+                            <td style="background:red;color:#fff;">HOANGHA</td>
+                            <td>ABC</td>
+                            <td></td>
+                            <td></td>
+                            <td>trada</td>
+                            <td>mai</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <div class="action-buttons" role="group" aria-label="Actions">
+                                    <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử"><i class="fas fa-history"></i></button>
+                                    <button type="button" class="btn btn-outline-secondary btn-view-return" title="Trả lại"><i class="fas ion-arrow-return-left"></i></button>
+                                    <button type="button" class="btn btn-outline-danger btn-delete-group" title="Xóa đơn"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Dialogs reused from Quote -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer"></div>
+    </div>
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
+<script>
+    window.HistoryData = {
+        status: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(localizedStatus)),
+        role : @Html.Raw(System.Text.Json.JsonSerializer.Serialize(role))
+    };
+    window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
+    window.i18nHistoryQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+        PageTitle = Localizer["PageTitle"].Value,
+        PageSubtitle = Localizer["PageSubtitle"].Value,
+        Export = Localizer["Export"].Value,
+        Filters = Localizer["Filters"].Value,
+        OrderCode = Localizer["OrderCode"].Value,
+        SelectOrderCode = Localizer["SelectOrderCode"].Value,
+        Department = Localizer["Department"].Value,
+        SelectDepartment = Localizer["SelectDepartment"].Value,
+        Creator = Localizer["Creator"].Value,
+        EnterCreator = Localizer["EnterCreator"].Value,
+        MaterialCode = Localizer["MaterialCode"].Value,
+        SelectMaterialCode = Localizer["SelectMaterialCode"].Value,
+        Supplier = Localizer["Supplier"].Value,
+        SelectSupplier = Localizer["SelectSupplier"].Value,
+        OrderStatus = Localizer["OrderStatus"].Value,
+        All = Localizer["All"].Value,
+        DateRange = Localizer["DateRange"].Value,
+        Filter = Localizer["Filter"].Value,
+        Reset = Localizer["Reset"].Value,
+        GroupListByOrder = Localizer["GroupListByOrder"].Value,
+        OrderCodeGroup = Localizer["OrderCodeGroup"].Value,
+        Requester = Localizer["Requester"].Value,
+        CreatedDate = Localizer["CreatedDate"].Value,
+        CurrentStatus = Localizer["CurrentStatus"].Value,
+        TotalOrders = Localizer["TotalOrders"].Value,
+        RelatedSuppliers = Localizer["RelatedSuppliers"].Value,
+        Actions = Localizer["Actions"].Value,
+        Expand = Localizer["Expand"].Value,
+        ViewHistory = Localizer["ViewHistory"].Value,
+        Approval = Localizer["Approval"].Value,
+        Material = Localizer["Material"].Value,
+        Quantity = Localizer["Quantity"].Value,
+        Status = Localizer["Status"].Value,
+        UpdatedDate = Localizer["UpdatedDate"].Value,
+        PaginationInfo = Localizer["PaginationInfo", "{0}", "{1}", "{2}"].Value,
+        FooterHint = Localizer["FooterHint"].Value,
+        EditModalTitle = Localizer["EditModalTitle"].Value,
+        Close = Localizer["Close"].Value,
+        Save = Localizer["Save"].Value,
+        Notification = Localizer["Notification"].Value,
+        // JS messages
+        MsgSearchFailed = Localizer["MsgSearchFailed"].Value,
+        MsgLoadHistoryFailed = Localizer["MsgLoadHistoryFailed"].Value,
+        MsgNoHistory = Localizer["MsgNoHistory"].Value,
+        MsgNoDataToEdit = Localizer["MsgNoDataToEdit"].Value,
+        MsgNotFoundData = Localizer["MsgNotFoundData"].Value,
+        MsgSaveSuccess = Localizer["MsgSaveSuccess"].Value,
+        MsgSaveFailed = Localizer["MsgSaveFailed", "{0}"].Value,
+        DialogOk = Localizer["DialogOk"].Value,
+        SearchEllipsis = Localizer["SearchEllipsis"].Value,
+        NoResults = Localizer["NoResults"].Value,
+        SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
+        HistoryTime= Localizer["HistoryTime"].Value,
+        RequestNo= Localizer["RequestNo"].Value,
+        Action =Localizer["Action"].Value,
+        UpdatedBy=Localizer["UpdatedBy"].Value,
+        Reason = Localizer["Reason"].Value,
+        PageTitleHistory = Localizer["PageTitleHistory"].Value,
+        MsgSelectGroupFailed = Localizer["MsgSelectGroupFailed"].Value,
+        Exporting = Localizer["Exporting"].Value,
+        ReturnFailed  = Localizer["ReturnFailed"].Value,
+        ReturnSuccess = Localizer["ReturnSuccess"].Value,
+        SenedSupperlier = Localizer["SenedSupperlier"].Value,
+        Confirm = Localizer["Confirm"].Value
+    }));
+</script>
+@section Scripts {
+    <script src="~/js/HistoryV2.js"  asp-append-version="true"></script>
+    <script>
+        (function() {
+            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
+            var panel = document.getElementById('editHistoryModal');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        })();
+    </script>
+}
