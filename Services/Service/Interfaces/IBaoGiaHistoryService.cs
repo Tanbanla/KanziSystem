@@ -30,6 +30,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<List<dynamic>>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
         // tính tổng số đơn đến hạn
         Task<GenericResponse<List<dynamic>>> GetCountQuotation(string user);
-
+        // Lấy thông tin lịch sử báo giá
+        Task<GenericResponse<ListRequest<dynamic>>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai);
     }
 }

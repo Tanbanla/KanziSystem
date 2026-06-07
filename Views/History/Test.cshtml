@@ -1,0 +1,335 @@
+@using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = "Lịch sử yêu cầu báo giá";
+    List<MATERIALDTO> listMaterials = Model.DanhSachVatTu;
+    List<DEPARTMENTDTO> listPhong = Model.DanhSachNhomViTri;
+    List<IM_NCC_NEWDTO> listNCC = Model.DanhSachNhaCungCap;
+    List<BaoGia_StatusDTO> listStatus = Model.DanhSachStatus;
+    List<string> madons = Model.DanhSachMaDon;
+    List<string> categoryS = Model.DanhSachCategory;
+    List<string> phanLoais = ["A", "B", "C", "E", "I", "NO LIST"];
+    string role = Model.Role;
+
+    var uiLang = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? "vi";
+    Func<BaoGia_StatusDTO, string> statusDisplay = s => uiLang == "en" ? (s.CHR_TenStatusEN ?? s.NVCHR_TenStatus) : uiLang == "ja" ? (s.CHR_TenStatusJP ?? s.NVCHR_TenStatus) : s.NVCHR_TenStatus;
+    var localizedStatus = listStatus.Select(s => new
+    {
+        s.VCHR_CodeStatus,
+        s.NVCHR_TenStatus,
+        s.CHR_TenStatusEN,
+        s.CHR_TenStatusJP,
+        DisplayName = statusDisplay(s)
+    }).ToList();
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/HistoryQuote.css" />
+</head>
+
+<div class="container-fluid" id="quote-history">
+    <!-- Global loading overlay -->
+    <div id="globalLoading" aria-hidden="true">
+        <div class="loader-box">
+            <div class="spinner" aria-hidden="true"></div>
+            <div class="loader-msg">Đang xử lý...</div>
+        </div>
+    </div> <!-- SỬA LỖI: Đóng thẻ loading đúng vị trí tại đây -->
+    <!-- Modal: return reason -->
+    <div class="modal fade" id="returnReasonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["ReturnReasonTitle"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="returnReasonText" class="form-label small">@Localizer["ReturnReasonLabel"]</label>
+                        <textarea id="returnReasonText" class="form-control" rows="4" placeholder="@Localizer["EnterReturnReasonPlaceholder"]"></textarea>
+                        <div id="returnReasonNotice" class="text-danger small mt-2" style="display:none;">@Localizer["ReturnReasonRequired"]</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-primary" id="confirmReturnWithReason">@Localizer["DialogOk"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: delete reason -->
+    <div class="modal fade" id="deleteReasonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["DeleteReasonTitle"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="deleteReasonText" class="form-label small">@Localizer["DeleteReasonLabel"]</label>
+                        <textarea id="deleteReasonText" class="form-control" rows="4" placeholder="@Localizer["EnterDeleteReasonPlaceholder"]"></textarea>
+                        <div id="deleteReasonNotice" class="text-danger small mt-2" style="display:none;">@Localizer["DeleteReasonRequired"]</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteWithReason">@Localizer["Delete"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: select next approver -->
+    <div class="modal fade" id="selectApproverModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Localizer["SelectNextApprover"]</h5>
+                    <button type="button" class="btn btn-link p-1" data-bs-dismiss="modal" aria-label="@Localizer["Close"]">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="selectNextApprover" class="form-label small">@Localizer["NextApproverLabel"]</label>
+                        <select id="selectNextApprover" class="form-select">
+                            <option value="">@Localizer["SelectPlaceholder"]</option>
+                        </select>
+                    </div>
+                    <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"]</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-primary" id="confirmSelectApprover">@Localizer["Confirm"]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
+            <small class="text-muted">@Localizer["PageSubtitle"]</small>
+        </div>
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+            <button type="button" class="btn btn-outline-success me-2 mb-2" id="btnImportHistory"><i class="fas fa-file-import"></i> @Localizer["ImportFileExcel"]</button>
+            <button type="button" class="btn btn-outline-primary me-2 mb-2" id="btnExportHistory"><i class="fas fa-file-export"></i> @Localizer["Export"]</button>
+            <button type="button" class="btn btn-outline-danger mb-2" id="btnExportManaHistory" hidden><i class="fas fa-file-download"></i> Xuất file quản lý</button>
+        </div>
+    </div>
+
+    <!-- Filter & Summary Row -->
+    <div class="history-top-layout">
+        <div class="history-filter-column">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0 fw-bold text-dark">@Localizer["Filters"]</h6>
+                </div>
+                <div class="card-body">
+                    <form id="historyFilterForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="searchMaDon" class="form-label">@Localizer["OrderCode"]</label>
+                            <select id="searchMaDon" name="searchMaDon" class="form-control searchable-select">
+                                <option value="">@Localizer["SelectOrderCode"]</option>
+                                @foreach (var s in madons)
+                                {
+                                    <option value="@s">@s</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="searchPhongBan" class="form-label">@Localizer["Department"]</label>
+                            <select id="searchPhongBan" name="searchPhongBan" class="form-select searchable-select">
+                                <option value="" selected>@Localizer["SelectDepartment"]</option>
+                                @foreach (var s in listPhong)
+                                {
+                                    <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="searchNguoiTao" class="form-label">@Localizer["Creator"]</label>
+                            <input type="text" class="form-control" id="searchNguoiTao" name="searchNguoiTao" placeholder="@Localizer["EnterCreator"]">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
+                            <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchable-select">
+                                <option value="" selected>@Localizer["SelectMaterialCode"]</option>
+                                @foreach (var s in listMaterials)
+                                {
+                                    <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="searchNhaCungCap" class="form-label">@Localizer["Supplier"]</label>
+                            <select id="searchNhaCungCap" name="searchNhaCungCap" class="form-select searchable-select">
+                                <option value="" selected>@Localizer["SelectSupplier"]</option>
+                                @foreach (var s in listNCC)
+                                {
+                                    <option value="@s.Ma">@s.Ma - @s.Ten</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="statusFilter" class="form-label small text-uppercase fw-semibold">@Localizer["OrderStatus"]</label>
+                            <select id="statusFilter" name="statusFilter" class="form-control searchable-select">
+                                <option value="" selected>@Localizer["All"]</option>
+                                <option value="APPROVAL">@Localizer["Approving"]</option>
+                                <option value="WAIT">@Localizer["Waiting"]</option>
+                                <option value="RETURN">@Localizer["RETURN"]</option>
+                                <option value="DONE">@Localizer["DONE"]</option>
+                                <option value="DELETE">@Localizer["DELETE"]</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">@Localizer["DateRange"]</label>
+                            <div class="d-flex gap-2">
+                                <input type="date" class="form-control" id="dateFrom" name="dateFrom">
+                                <input type="date" class="form-control" id="dateTo" name="dateTo">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex gap-2 align-items-end">
+                            <button type="button" class="btn btn-primary flex-fill" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
+                            <button type="button" class="btn btn-outline-secondary flex-fill" id="btnResetFilters"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-summary-column">
+            <div class="card shadow-sm history-summary-card">
+                <div class="card-header bg-white"><h6 class="mb-0 fw-bold text-dark">Bảng 1: Tình trạng thời hạn</h6></div>
+                <div class="card-body p-0">
+                    <table class="summary-table mb-0">
+                        <tbody>
+                            <tr><td><span class="status-dot bg-primary"></span>Đến hạn</td><td><strong id="statDueSoon">0</strong></td></tr>
+                            <tr><td><span class="status-dot bg-warning"></span>Còn 1 ngày</td><td><strong id="statOneDayLeft">0</strong></td></tr>
+                            <tr><td><span class="status-dot bg-info"></span>Còn lại</td><td><strong id="statRemaining">0</strong></td></tr>
+                            <tr><td><span class="status-dot bg-danger"></span>Quá hạn</td><td><strong id="statOverdue">0</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card shadow-sm history-summary-card mt-3">
+                <div class="card-header bg-white"><h6 class="mb-0 fw-bold text-dark">Bảng 2: Tình trạng đơn</h6></div>
+                <div class="card-body p-0">
+                    <table class="summary-table mb-0">
+                        <tbody>
+                            <tr><td>Chờ PIC phòng ban</td><td><strong id="statWaitDeptPic">0</strong></td></tr>
+                            <tr><td>Chờ QLSC phòng ban</td><td><strong id="statWaitDeptQlsc">0</strong></td></tr>
+                            <tr><td>Chờ QLTC phòng ban</td><td><strong id="statWaitDeptQltc">0</strong></td></tr>
+                            <tr><td>Chờ PIC phòng đặt hàng</td><td><strong id="statWaitOrderPic">0</strong></td></tr>
+                            <tr><td>Chờ QLSC phòng đặt hàng</td><td><strong id="statWaitOrderQlsc">0</strong></td></tr>
+                            <tr><td>Số đơn hoàn thành</td><td><strong id="statCompletedOrders">0</strong></td></tr>
+                            <tr><td>Số đơn đang xử lý</td><td><strong id="statProcessingOrders">0</strong></td></tr>
+                            <tr><td>Số đơn chưa xử lý</td><td><strong id="statUnprocessedOrders">0</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="card mt-3 shadow-sm">
+        <div class="card-header bg-white">
+            <h6 class="mb-0 fw-bold text-dark">Bảng lịch sử phê duyệt</h6>
+        </div>
+        <div class="card-body px-0 py-2">
+            <div class="legend">
+                <div class="item"><span class="swatch yellow"></span><span>Từ chối báo giá</span></div>
+                <div class="item"><span class="swatch green"></span><span>Đã gửi báo giá</span></div>
+                <div class="item"><span class="swatch white"></span><span>Chưa gửi báo giá</span></div>
+                <div class="item"><span class="swatch red"></span><span>Quá hạn xin báo giá</span></div>
+                <div class="separator"></div>
+                <div class="item"><span class="swatch green"></span><span>Đã duyệt đơn</span></div>
+                <div class="item"><span class="swatch white"></span><span>Chưa duyệt đơn</span></div>
+            </div>
+
+            <!-- ID CONTAINER dùng cho Scroll Sticky Header -->
+            <div class="table-responsive" id="historyGroupTableContainer">
+                <table class="approval-table" id="historyGroupTable">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="min-width: 50px;">STT</th>
+                            <th rowspan="2" style="min-width: 100px;">Số đơn</th>
+                            <th rowspan="2" style="min-width: 100px;">Mã nội bộ</th>
+                            <th rowspan="2" style="min-width: 120px;">Mã hàng NCC</th>
+                            <th rowspan="2" style="min-width: 160px;">Tên hàng (EN)</th>
+                            <th rowspan="2" style="min-width: 100px;">NCC 1</th>
+                            <th rowspan="2" style="min-width: 100px;">NCC 2</th>
+                            <th rowspan="2" style="min-width: 100px;">NCC 3</th>
+                            <th rowspan="2" style="min-width: 100px;">NCC 4</th>
+                            <th rowspan="2" style="min-width: 100px;">NCC 5</th>
+                            <th rowspan="2" style="min-width: 110px;">Kì hạn chọn</th>
+                            <th rowspan="2" style="min-width: 150px;">Người làm đơn</th>
+                            <th class="group1" colspan="4">Phê duyệt đơn</th>
+                            <th class="group2" colspan="4">Phê duyệt chọn NCC</th>
+                            <th class="group3" colspan="3">Kết quả lựa chọn NCC</th>
+                            <th rowspan="2" style="min-width: 100px;">Trạng thái</th>
+                            <th rowspan="2" style="min-width: 120px;">Action</th>
+                        </tr>
+                        <tr>
+                            <th class="group1" style="min-width: 90px;">QLSC</th>
+                            <th class="group1" style="min-width: 90px;">QLTC</th>
+                            <th class="group1" style="min-width: 90px;">PUR PIC</th>
+                            <th class="group1" style="min-width: 90px;">QLSC</th>
+
+                            <th class="group2" style="min-width: 90px;">PUR PIC</th>
+                            <th class="group2" style="min-width: 90px;">QLSC</th>
+                            <th class="group2" style="min-width: 90px;">QLTC</th>
+                            <th class="group2" style="min-width: 90px;">QLCC</th>
+
+                            <th class="group3" style="min-width: 120px;">NCC chọn</th>
+                            <th class="group3" style="min-width: 180px;">Lý do chọn</th>
+                            <th class="group3" style="min-width: 100px;">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>RQ_222</td>
+                            <td>O0001123</td>
+                            <td>KH1</td>
+                            <td>Glass Tube</td>
+                            <td style="background:#cfe3c6;">LAC</td>
+                            <td style="background:#cfe3c6;">Misumi</td>
+                            <td style="background:#e74c3c; color:#fff;">HOANGHA</td>
+                            <td>ABC</td>
+                            <td></td>
+                            <td>15/06/2026</td>
+                            <td>trada - 12/05/2026</td>
+                            <td>mai</td>
+                            <td>yen</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge bg-warning">WAIT</span></td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử"><i class="fas fa-history"></i></button>
+                                    <button type="button" class="btn btn-outline-secondary btn-view-return" title="Trả lại"><i class="fas fa-undo"></i></button>
+                                    <button type="button" class="btn btn-outline-danger btn-delete-group" title="Xóa đơn"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -477,5 +477,201 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return result;
         }
+        // Lấy thông tin lịch sử báo giá
+        public async Task<ListRequest<dynamic>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
+        {
+            var sql = @"
+                WITH VendorHistory AS (
+                    SELECT 
+                        h.ID_RequestQuote,
+                        h.CHR_MaDon,
+                        h.NVCHR_NewValue AS VendorName,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY h.ID_RequestQuote, h.CHR_MaDon 
+                            ORDER BY h.CHR_Updatedate
+                        ) AS VendorRank
+                    FROM BaoGia_History_Request_of_Quotation h
+                    WHERE h.CHR_ActionType = 'Vendor'
+                      AND h.NVCHR_NewValue IS NOT NULL
+                ),
+                VendorPivot AS (
+                    SELECT 
+                        ID_RequestQuote,
+                        CHR_MaDon,
+                        MAX(CASE WHEN VendorRank = 1 THEN VendorName END) AS Vendor1,
+                        MAX(CASE WHEN VendorRank = 2 THEN VendorName END) AS Vendor2,
+                        MAX(CASE WHEN VendorRank = 3 THEN VendorName END) AS Vendor3,
+                        MAX(CASE WHEN VendorRank = 4 THEN VendorName END) AS Vendor4,
+                        MAX(CASE WHEN VendorRank = 5 THEN VendorName END) AS Vendor5
+                    FROM VendorHistory
+                    GROUP BY ID_RequestQuote, CHR_MaDon
+                )
+                SELECT 
+                    r.CHR_MaDon AS [SoDon],
+                    r.CHR_MaHangNoiBo AS [MaNoiBo],
+                    r.CHR_MaHangNCC AS [MaHangNCC],
+                    r.CHR_NameEN AS [TenEN],
+                    vp.Vendor1,
+                    vp.Vendor2,
+                    vp.Vendor3,
+                    vp.Vendor4,
+                    vp.Vendor5,
+                    r.DTM_Deadline AS [DeadLineSelectVendor],
+                    r.NVCHR_UserRequest AS [PIC],
+                    r.CHR_UserApproval AS [QLSC],
+                    NULL AS [QLTC],
+                    NULL AS [PUR_PIC],
+                    NULL AS [PUR_QLSC]
+                FROM BaoGia_Request_of_Quotation r
+                LEFT JOIN VendorPivot vp 
+                    ON vp.ID_RequestQuote = r.ID 
+                    AND vp.CHR_MaDon = r.CHR_MaDon
+            ";
+
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
+
+            if (!string.IsNullOrEmpty(MaDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(chungLoai))
+            {
+                whereClauses.Add("r.NVCHR_ChungLoai LIKE @ChungLoai");
+                parameters.Add("ChungLoai", "%" + chungLoai + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereClauses.Add("r.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (step.HasValue)
+            {
+                whereClauses.Add("r.ID_StepBaoGia = @Step");
+                parameters.Add("Step", step);
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+                // ensure join to master approver exists in WHERE via alias s - add join clause by referencing table in WHERE
+                // but since we don't have an explicit join here, include check by joining in where using EXISTS on BaoGia_Master_Approver_Send_Mail
+                whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
+            }
+
+            var statusSql = "1=1";
+            switch (status)
+            {
+                case "RETURN":
+                    statusSql = "r.ID_Status LIKE '%RETURN%' AND r.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DONE":
+                    statusSql = "r.ID_Status = 'DONE' AND r.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "APPROVAL":
+                    statusSql = "r.ID_Status LIKE 'APPROVAL%' AND r.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "WAIT":
+                    statusSql = "r.ID_Status LIKE '%WAIT%' AND r.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DELETE":
+                    statusSql = "r.ID_Status LIKE 'DELETE'";
+                    break;
+                default:
+                    statusSql = "r.ID_Status NOT LIKE 'DELETE'";
+                    break;
+            }
+            whereClauses.Add("(" + statusSql + ")");
+
+            // date range filters (use DTM_CreateDate)
+            if (dateFrom.HasValue)
+            {
+                whereClauses.Add("CAST(r.DTM_CreateDate AS DATE) >= CAST(@DateFrom AS DATE)");
+                parameters.Add("DateFrom", dateFrom.Value.Date);
+            }
+            if (dateTo.HasValue)
+            {
+                whereClauses.Add("CAST(r.DTM_CreateDate AS DATE) <= CAST(@DateTo AS DATE)");
+                parameters.Add("DateTo", dateTo.Value.Date);
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " WHERE " + string.Join(" AND ", whereClauses);
+            }
+
+            // add grouping
+            sql += @"
+                GROUP BY 
+                    r.CHR_MaDon,
+                    r.CHR_MaHangNoiBo,
+                    r.CHR_MaHangNCC,
+                    r.CHR_NameEN,
+                    vp.Vendor1,
+                    vp.Vendor2,
+                    vp.Vendor3,
+                    vp.Vendor4,
+                    vp.Vendor5,
+                    r.DTM_Deadline,
+                    r.NVCHR_UserRequest,
+                    r.CHR_UserApproval
+            ";
+
+            // build count sql
+            var countSql = "WITH VendorHistory AS (" +
+                " SELECT h.ID_RequestQuote, h.CHR_MaDon, h.NVCHR_NewValue AS VendorName, ROW_NUMBER() OVER (PARTITION BY h.ID_RequestQuote, h.CHR_MaDon ORDER BY h.CHR_Updatedate) AS VendorRank FROM BaoGia_History_Request_of_Quotation h WHERE h.CHR_ActionType = 'Vendor' AND h.NVCHR_NewValue IS NOT NULL" +
+                " ), VendorPivot AS ( SELECT ID_RequestQuote, CHR_MaDon, MAX(CASE WHEN VendorRank = 1 THEN VendorName END) AS Vendor1, MAX(CASE WHEN VendorRank = 2 THEN VendorName END) AS Vendor2, MAX(CASE WHEN VendorRank = 3 THEN VendorName END) AS Vendor3, MAX(CASE WHEN VendorRank = 4 THEN VendorName END) AS Vendor4, MAX(CASE WHEN VendorRank = 5 THEN VendorName END) AS Vendor5 FROM VendorHistory GROUP BY ID_RequestQuote, CHR_MaDon ) SELECT COUNT(*) FROM (" +
+                " SELECT r.CHR_MaDon FROM BaoGia_Request_of_Quotation r LEFT JOIN VendorPivot vp ON vp.ID_RequestQuote = r.ID AND vp.CHR_MaDon = r.CHR_MaDon";
+
+            if (whereClauses.Any())
+            {
+                countSql += " WHERE " + string.Join(" AND ", whereClauses);
+            }
+            countSql += " GROUP BY r.CHR_MaDon, r.CHR_MaHangNoiBo, r.CHR_MaHangNCC, r.CHR_NameEN, vp.Vendor1, vp.Vendor2, vp.Vendor3, vp.Vendor4, vp.Vendor5, r.DTM_Deadline, r.NVCHR_UserRequest, r.CHR_UserApproval ) T";
+
+            // add ordering and paging to main query
+            if (pageSize > 0 && pageIndex > 0)
+            {
+                sql += @"
+                    ORDER BY r.CHR_MaDon, r.CHR_MaHangNoiBo
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @PageSize ROWS ONLY
+                ";
+                parameters.Add("Offset", (pageIndex - 1) * pageSize);
+                parameters.Add("PageSize", pageSize);
+            }
+            else
+            {
+                sql += @"
+                    ORDER BY r.CHR_MaDon, r.CHR_MaHangNoiBo
+                ";
+            }
+
+            var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            var totalCount = (await _conn.ExecuteScalarAsync<long>(countSql, parameters));
+
+            return new ListRequest<dynamic>
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
+        }
     }
 }

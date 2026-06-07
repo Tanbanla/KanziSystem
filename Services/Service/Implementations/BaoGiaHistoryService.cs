@@ -217,5 +217,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Lấy thông tin lịch sử báo giá
+        public async Task<GenericResponse<ListRequest<dynamic>>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
+        {
+            var result = new GenericResponse<ListRequest<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetHistoryAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, pageIndex, pageSize, dateTo, dateFrom, chungLoai);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

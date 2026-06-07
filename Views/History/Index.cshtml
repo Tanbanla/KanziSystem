@@ -127,34 +127,15 @@
             </div>
         </div>
     </div>
-    <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap">
-            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Filters"]</h6>
-            <div class="d-flex gap-4 flex-wrap">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
-                    <span class="small">Đến hạn: <strong id="statDueSoon">0</strong></span>
+    <div class="history-top-layout">
+        <div class="history-filter-column">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Filters"]</h6>
                 </div>
-                <div style="margin-right: 6px;"></div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-warning rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
-                    <span class="small">Còn 1 ngày: <strong id="statOneDayLeft">0</strong></span>
-                </div>
-                <div style="margin-right: 6px;"></div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-info rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
-                    <span class="small">Còn lại: <strong id="statRemaining">0</strong></span>
-                </div>
-                <div style="margin-right: 6px;"></div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-danger rounded-pill" style="width:10px;height:10px;padding:0;">&nbsp;</span>
-                    <span class="small">Quá hạn: <strong id="statOverdue">0</strong></span>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <form id="historyFilterForm" class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="card-body">
+                    <form id="historyFilterForm" class="row g-3 align-items-end">
+                <div class="col-md-6">
                     <label for="searchMaDon" class="form-label">@Localizer["OrderCode"]</label>
                     <select id="searchMaDon" name="searchMaDon" class="form-control searchMaDon searchable-select">
                         <option value="">@Localizer["SelectOrderCode"]</option>
@@ -164,7 +145,7 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="searchPhongBan" class="form-label">@Localizer["Department"]</label>
                     <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select">
                         <option value="" selected>@Localizer["SelectDepartment"]</option>
@@ -174,11 +155,11 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="searchNguoiTao" class="form-label">@Localizer["Creator"]</label>
                     <input type="text" class="form-control" id="searchNguoiTao" name="searchNguoiTao" placeholder="@Localizer["EnterCreator"]">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
                     <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select">
                         <option value="" selected>@Localizer["SelectMaterialCode"]</option>
@@ -188,7 +169,7 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="searchNhaCungCap" class="form-label">@Localizer["Supplier"]</label>
                     <select id="searchNhaCungCap" name="searchNhaCungCap" class="form-select searchNhaCungCap searchable-select">
                         <option value="" selected>@Localizer["SelectSupplier"]</option>
@@ -198,7 +179,7 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="statusFilter" class="form-label small text-uppercase fw-semibold">@Localizer["OrderStatus"]</label>
                     <select id="statusFilter" name="statusFilter" class="form-control statusFilter searchable-select">
                         <option value="" selected>@Localizer["All"]</option>
@@ -209,19 +190,93 @@
                         <option value="DELETE">@Localizer["DELETE"]</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="dateRange" class="form-label">@Localizer["DateRange"]</label>
                     <div class="d-flex gap-2">
                         <input type="date" class="form-control" id="dateFrom" name="dateFrom">
                         <input type="date" class="form-control" id="dateTo" name="dateTo">
                     </div>
                 </div>
-                <div class="col-md-2 d-flex gap-2">
+                <div class="col-md-12 d-flex gap-2">
                     <button type="button" class="btn btn-primary w-100" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
                     <div style="min-width: 8px"></div>
                     <button type="button" class="btn btn-outline-secondary w-100" id="btnResetFilters"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
                 </div>
             </form>
+                </div>
+            </div>
+        </div>
+        <div class="history-summary-column">
+            <div class="card shadow-sm history-summary-card">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0 text-secondary" style="color:black !important">Bảng 1: Tình trạng thời hạn</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="summary-table mb-0">
+                        <tbody>
+                            <tr>
+                                <td><span class="status-dot bg-primary"></span>Đến hạn</td>
+                                <td><strong id="statDueSoon">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td><span class="status-dot bg-warning"></span>Còn 1 ngày</td>
+                                <td><strong id="statOneDayLeft">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td><span class="status-dot bg-info"></span>Còn lại</td>
+                                <td><strong id="statRemaining">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td><span class="status-dot bg-danger"></span>Quá hạn</td>
+                                <td><strong id="statOverdue">0</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card shadow-sm history-summary-card mt-3">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0 text-secondary" style="color:black !important">Bảng 2: Tình trạng đơn</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="summary-table mb-0">
+                        <tbody>
+                            <tr>
+                                <td>Chờ PIC phòng ban</td>
+                                <td><strong id="statWaitDeptPic">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Chờ QLSC phòng ban</td>
+                                <td><strong id="statWaitDeptQlsc">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Chờ QLTC phòng ban</td>
+                                <td><strong id="statWaitDeptQltc">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Chờ PIC phòng đặt hàng</td>
+                                <td><strong id="statWaitOrderPic">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Chờ QLSC phòng đặt hàng</td>
+                                <td><strong id="statWaitOrderQlsc">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Số đơn hoàn thành</td>
+                                <td><strong id="statCompletedOrders">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Số đơn đang xử lý</td>
+                                <td><strong id="statProcessingOrders">0</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Số đơn chưa xử lý</td>
+                                <td><strong id="statUnprocessedOrders">0</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Approval table -->
@@ -257,7 +312,7 @@
                             <th rowspan="2">Người làm đơn</th>
                             <th class="group1" colspan="4">Phê duyệt đơn</th>
                             <th class="group2" colspan="4">Phê duyệt chọn NCC</th>
-                           <th class="group3" colspan="4">Kết quả lựa chọn NCC</th>
+                           <th class="group3" colspan="3">Kết quả lựa chọn NCC</th>
                             <th rowspan="2">Trạng thái</th>
                             <th rowspan="2">Action</th>
                         </tr>
