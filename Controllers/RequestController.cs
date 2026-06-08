@@ -640,8 +640,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var up = _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '15' where [ID_REQUEST] = '" + id_request+"'");
                     
-            var mail_send = _db.ReturnString("select CHR_MAIL_NGUOITAO from PE_REQUEST_CONFIRM where ID_REQUEST = '" + id_request + "'");
-
+            var mail_send = _db.ReturnString("select CHR_MAIL_NGUOITAO from PE_REQUEST_CONFIRM where ID_REQUEST = '" + id_request + "'");  
             _db.GET_DATA_FROM_SQL("Insert into PE_LOGHUYDON ([ID_REQUEST],[Lydo],[Madon]) values ('" + id_request + "',N'" + reason + "','" + madon + "')");
             _db.GET_DATA_FROM_SQL("update [REQUEST] set [Status] = 'REFUSE' where [Id_Request] = '" + id_request + "'");
             // Gửi về người tạo đơn

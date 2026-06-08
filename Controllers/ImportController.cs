@@ -440,9 +440,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var list = REQUEST_PROCESS._load_body_detail_export(code_request);
             var load = REQUEST_PROCESS._load_request(code_request);
             var get_id = sql.ReturnString("select Id_Request from REQUEST where Code_Request = '" + code_request + "'");
-            var get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM] where ID_REQUEST = '" + get_id + "'");
-
+            var get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM] where ID_REQUEST = '" + get_id + "' and INT_STEP >= 3 and INT_STEP <= 5 ");
+           
             string nguoilamdon = "";
+            string nguoitao = "";
             string qltc = "";
             string qlcc = "";
             string xuatkho = "";
@@ -450,23 +451,27 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string dongy = "";
             if (get_adid.Rows.Count > 0)
             {
-                 nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!;
-                 qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!;
-                 qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIPHEDUYET"].ToString()!;
-                 xuatkho = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XUATKHO"].ToString()!;
-                 quanlytiepnhan = get_adid.Rows[0]["CHR_ADID_XACNHAN"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XACNHAN"].ToString()!;
-                 dongy = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XUATKHO"].ToString()!;
+                 nguoitao = get_adid.Rows[0]["CHR_ADID_NGUOITAO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
+                 nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
+                 qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
+                 qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
+                 xuatkho = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XACNHAN"].ToString()!.Split(' ')[0];
+                 quanlytiepnhan = get_adid.Rows[0]["CHR_ADID_XACNHAN"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XACNHAN"].ToString()!.Split(' ')[0];
+                 dongy = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XACNHAN"].ToString()!.Split(' ')[0];
             }
             else
             {
-                get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM_GA] where ID_REQUEST = '" + get_id + "'");
-                 nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!;
-                 qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!;
-                 qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIPHEDUYET"].ToString()!;
-                 xuatkho = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_XUATKHO"].ToString()!;
-                 quanlytiepnhan = get_adid.Rows[0]["CHR_ADID_QLTC"].ToString()! + " \n " + get_adid.Rows[0]["DTM_QLTC"].ToString()!;
-                 dongy = get_adid.Rows[0]["CHR_ADID_QLSC"].ToString()! + " \n " + get_adid.Rows[0]["DTM_QLSC"].ToString()!;
-
+                 get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM_GA] where ID_REQUEST = '" + get_id + "' and INT_STEP >= 3 and INT_STEP <= 5  ");
+                 if(get_adid.Rows.Count > 0)
+                 {
+                    nguoitao = get_adid.Rows[0]["CHR_ADID_NGUOITAO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
+                    nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
+                    qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
+                    qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
+                    xuatkho = get_adid.Rows[0]["CHR_ADID_XUATKHO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_QLSC"].ToString()!.Split(' ')[0];
+                    quanlytiepnhan = get_adid.Rows[0]["CHR_ADID_QLTC"].ToString()! + " \n " + get_adid.Rows[0]["DTM_QLTC"].ToString()!.Split(' ')[0];
+                    dongy = get_adid.Rows[0]["CHR_ADID_QLSC"].ToString()! + " \n " + get_adid.Rows[0]["DTM_QLSC"].ToString()!.Split(' ')[0];
+                 }
             }
             
             string pathDir = Path.Combine(_env.ContentRootPath, "Data");
@@ -524,16 +529,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cells["L" + totalRow + 12].Formula = $"SUM(L{startRow}:L{totalRow - 1})";
 
 
-                    ws.Cells["O5"].Value = nguoilamdon;
-                    ws.Cells["M5"].Value = qltc;
-                    ws.Cells["K5"].Value = qlcc;
+                    ws.Cells["O5"].Value = nguoitao;
+                    ws.Cells["K5"].Value = qltc;
+                    ws.Cells["H5"].Value = qlcc;
+
                     ws.Cells["D24"].Value = xuatkho;
-                    ws.Cells["C24"].Value = xuatkho;
-                    ws.Cells["A24"].Value = quanlytiepnhan;
+                    ws.Cells["A24"].Value = xuatkho;
+                    ws.Cells["C24"].Value = quanlytiepnhan;
+                    ws.Cells["E24"].Value = nguoitao.Split(' ')[0];
                     string checkgia = string.IsNullOrEmpty(firstLoad.Total_Real) ? "0" : firstLoad.Total_Real;
                     if (float.Parse(checkgia) >= 10000)
                     {
-                         ws.Cells["H5"].Value = qlcc;
+                        ws.Cells["M5"].Value = nguoilamdon;                           
                     }
                     // Tính toán lại toàn bộ công thức trong sheet trước khi lưu
                     ws.Calculate();

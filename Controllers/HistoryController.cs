@@ -27,10 +27,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly ITmNccNewService _tmNccNewService;
         private readonly IStringLocalizer<HistoryController> _localizer;
 
-        public HistoryController(IWebHostEnvironment env,IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
+        public HistoryController(IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<HistoryController> logger, IServiceScopeFactory serviceScopeFactory,
             IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration
-            ,ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService, IStringLocalizer<HistoryController> localizer
+            , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService, IStringLocalizer<HistoryController> localizer
             )
         {
             _env = env;
@@ -1146,6 +1146,88 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             };
 
             return View(vm);
+        }
+
+        // Search của màn hình Index
+        [HttpPost]
+        public async Task<IActionResult> SearchHistory([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            try
+            {
+                var result = await _baoGiaHistoryService.GetHistoryAsync(
+                    searchModel.MaDon,
+                    searchModel.MaNcc,
+                    searchModel.Section,
+                    searchModel.NguoiYeuCau,
+                    searchModel.MaHang,
+                    searchModel.TrangThai,
+                    GetCurrentUserId(),
+                    searchModel.PageIndex,
+                    searchModel.PageSize,
+                    searchModel.Date,
+                    searchModel.From,
+                    searchModel.ChungLoai
+                );
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
+            }
+        }
+        // Lấy dữ liệu bảng Tab1
+        [HttpPost]
+        public async Task<IActionResult> GetCountQuotation([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            try
+            {
+                var result = await _baoGiaHistoryService.GetCountQuotation(
+                    searchModel.MaDon,
+                    searchModel.MaNcc,
+                    searchModel.Section,
+                    searchModel.NguoiYeuCau,
+                    searchModel.MaHang,
+                    GetCurrentUserId()
+                );
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
+            }
+        }
+        // Lấy dữ liệu bảng Tab2
+        [HttpPost]
+        public async Task<IActionResult> GetCountStatus([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            try
+            {
+                var result = await _baoGiaHistoryService.GetCountStatus(
+                    searchModel.MaDon,
+                    searchModel.MaNcc,
+                    searchModel.Section,
+                    searchModel.NguoiYeuCau,
+                    searchModel.MaHang,
+                    GetCurrentUserId()
+                );
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
+            }
         }
     }
 }

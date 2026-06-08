@@ -202,12 +202,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // tính tổng số đơn đến hạn
-        public async Task<GenericResponse<List<dynamic>>> GetCountQuotation(string user)
+        public async Task<GenericResponse<List<dynamic>>> GetCountQuotation(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang, string? user)
         {
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                result.Data = await _repo.GetCountQuotation(user);
+                result.Data = await _repo.GetCountQuotation(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, user);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -219,12 +220,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         }
         // Lấy thông tin lịch sử báo giá
         public async Task<GenericResponse<ListRequest<dynamic>>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
-        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
+        string? MaHang, string? status, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.GetHistoryAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, pageIndex, pageSize, dateTo, dateFrom, chungLoai);
+                result.Data = await _repo.GetHistoryAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, user, pageIndex, pageSize, dateTo, dateFrom, chungLoai);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -232,6 +233,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = ex.Message;
                 result.Success = false;
             }
+            return result;
+        }
+        // Tính tổng theo trạng thái đơn
+        public async Task<GenericResponse<List<dynamic>>> GetCountStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang, string? user)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetCountStatus(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, user);
+                result.Success = true;
+            }
+            catch(Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
             return result;
         }
     }

@@ -77,17 +77,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 {
                     whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
                 }
-                else if (string.Equals(role, "UserAcc", StringComparison.OrdinalIgnoreCase))
-                {
-                    whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
-                }
+                //else if (string.Equals(role, "UserAcc", StringComparison.OrdinalIgnoreCase))
+                //{
+                //    whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
+                //}
                 else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
                 {
                     whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
                 }
                 else
                 {
-                    whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
+                    whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
                 }
                 parameters.Add("@TrangThai", TrangThai.Trim());
             }
@@ -546,7 +546,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.VCHR_UpdateBy = user;
                 row.DTM_UpdateDate = now;
                 row.CHR_StatusShip = "Rejected";
-                row.CHR_Status = "Rejected";
+                row.CHR_StatusACC = "Confirming";
                 row.VCHR_UserShip = item.PicShip;
 
                 // Update infor request quote
@@ -632,7 +632,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     hasChanges = true;
                 }
                 // update confirm name
-                confirmName.CHR_Status = "";
+                confirmName.CHR_Status = "Confirmed";
+                confirmName.CHR_StatusACC = "Confirmed";
                 confirmName.CHR_StatusShip = "Confirming";
                 confirmName.DTM_UserPUR = DateTime.Now;
                 confirmName.VCHR_UserPUR = user;

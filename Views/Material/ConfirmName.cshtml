@@ -75,10 +75,10 @@
                         @if (role == "User"|| role == "UserPUR")
                         {
                             <option value="">@Localizer["All"]</option>
-                            <option value="Confirming">@Localizer["StatusConfirming"]</option>
+                            <option value="Confirming" selected>@Localizer["StatusConfirming"]</option>
                             <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
                             // <option value="RejectedAcc">@Localizer["StatusRejectedAcc"]</option>
-                            <option value="Rejected" selected>@Localizer["StatusRejected"]</option>
+                            <option value="Rejected">@Localizer["StatusRejected"]</option>
                         }
                         else
                         {

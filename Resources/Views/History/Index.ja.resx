@@ -465,4 +465,7 @@
   <data name="SenedSupperlier" xml:space="preserve">
     <value>提出済みサプライヤー</value>
   </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>ページサイズ</value>
+  </data>
 </root>

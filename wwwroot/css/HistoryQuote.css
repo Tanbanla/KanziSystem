@@ -54,23 +54,23 @@
     border-collapse: collapse;
 }
 
-.summary-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #edf1f5;
-    vertical-align: middle;
-    font-size: 13px;
-}
+    .summary-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #edf1f5;
+        vertical-align: middle;
+        font-size: 13px;
+    }
 
-.summary-table tr:last-child td {
-    border-bottom: none;
-}
+    .summary-table tr:last-child td {
+        border-bottom: none;
+    }
 
-.summary-table td:last-child {
-    width: 72px;
-    text-align: right;
-    font-weight: 600;
-    color: #1f2937;
-}
+    .summary-table td:last-child {
+        width: 72px;
+        text-align: right;
+        font-weight: 600;
+        color: #1f2937;
+    }
 
 .status-dot {
     display: inline-block;
@@ -116,13 +116,18 @@
     .approval-table .group2 {
         background-color: #9fb6c8;
     }
-
+    .approval-table .group3 {
+        background-color: #cfe3c6;
+    }
+    .approval-table .group4 {
+        background-color: #FFF200;
+    }
     .approval-table .status {
         width: 90px;
     }
 
     .approval-table .action {
-        width: 80px;
+        width: 100px;
     }
 
 .legend {
@@ -185,12 +190,12 @@
 /*#historyGroupTable {
     width: max-content;
     min-width: 100%;
-    border-collapse: separate;*/ /* Bắt buộc để dùng sticky border không lỗi */
-    /*border-spacing: 0;
+    border-collapse: separate;  Bắt buộc để dùng sticky border không lỗi 
+border-spacing: 0;
 }*/
 
-    /* Đóng băng Header khi cuộn dọc xuống */
-    /*#historyGroupTable thead th {
+/* Đóng băng Header khi cuộn dọc xuống */
+/*#historyGroupTable thead th {
         position: sticky;
         top: 0;
         background: #f8f9fa;
@@ -198,10 +203,10 @@
         border-bottom: 2px solid #333 !important;
     }*/
 
-    /* Dòng header thứ 2 trong cột gộp cũng phải dính */
-    /*#historyGroupTable thead tr:nth-child(2) th {
-        top: 36px;*/ /* Khoảng cách bằng chiều cao dòng header thứ nhất */
-        /*z-index: 9;
+/* Dòng header thứ 2 trong cột gộp cũng phải dính */
+/*#historyGroupTable thead tr:nth-child(2) th {
+        top: 36px;  Khoảng cách bằng chiều cao dòng header thứ nhất 
+z-index: 9;
     }*/
 
 /* Custom CSS cho bảng lịch sử */

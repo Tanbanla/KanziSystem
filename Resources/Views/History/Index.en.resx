@@ -465,4 +465,7 @@
   <data name="SenedSupperlier" xml:space="preserve">
     <value>suppliers have submitted quotations</value>
   </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Page Size</value>
+  </data>
 </root>

@@ -534,7 +534,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         cf.VCHR_CreateBy = "System";
                                         cf.VCHR_TenRecomment = material.NVCHR_NameVN;
                                         cf.CHR_Status = "";
-                                        cf.CHR_StatusACC = "Confirmed";
+                                        cf.CHR_StatusACC = "";
                                         cf.CHR_StatusShip = "Confirming";
                                         cf.NVCHR_Note = material.CHR_MaHangNCC;
                                         listConfirm.Add(cf);

@@ -465,4 +465,7 @@
   <data name="SenedSupperlier" xml:space="preserve">
     <value>NCC đã gửi  báo giá</value>
   </data>
+  <data name="PageSize" xml:space="preserve">
+    <value>Số dòng</value>
+  </data>
 </root>

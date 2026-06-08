@@ -457,7 +457,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return data;
         }
         // tính tổng số đơn đến hạn
-        public async Task<List<dynamic>> GetCountQuotation(string user)
+        public async Task<List<dynamic>> GetCountQuotation(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang,string? user)
         {
             var sql = @"
                 SELECT 
@@ -470,67 +471,78 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 WHERE r.BIT_LayBaoGia = 1
                   AND r.ID_StepBaoGia > 2 AND r.ID_StepBaoGia < 12
                   AND r.DTM_KyHan IS NOT NULL
-                  AND s.CHR_UserAdid = @Adid
             ";
 
-            var parameters = new { Adid = user };
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
+
+            if (!string.IsNullOrEmpty(MaDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereClauses.Add("r.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " AND " + string.Join(" AND ", whereClauses);
+            }
+
             var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return result;
         }
         // Lấy thông tin lịch sử báo giá
         public async Task<ListRequest<dynamic>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
-        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
+        string? MaHang, string? status, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
         {
             var sql = @"
-                WITH VendorHistory AS (
+                WITH CTE AS (
                     SELECT 
-                        h.ID_RequestQuote,
-                        h.CHR_MaDon,
-                        h.NVCHR_NewValue AS VendorName,
+                        r.CHR_MaDon,
+                        r.CHR_MaHangNoiBo,
+                        r.CHR_MaHangNCC,
+                        r.CHR_NameEN,
+                        r.DTM_KyHan,
+                        r.CHR_CreateBy,
+                        CONVERT(DATE, r.DTM_CreateDate) AS DTM_Create,
+                        r.CHR_MaNCC,
+                        v.ShortName,
                         ROW_NUMBER() OVER (
-                            PARTITION BY h.ID_RequestQuote, h.CHR_MaDon 
-                            ORDER BY h.CHR_Updatedate
-                        ) AS VendorRank
-                    FROM BaoGia_History_Request_of_Quotation h
-                    WHERE h.CHR_ActionType = 'Vendor'
-                      AND h.NVCHR_NewValue IS NOT NULL
-                ),
-                VendorPivot AS (
-                    SELECT 
-                        ID_RequestQuote,
-                        CHR_MaDon,
-                        MAX(CASE WHEN VendorRank = 1 THEN VendorName END) AS Vendor1,
-                        MAX(CASE WHEN VendorRank = 2 THEN VendorName END) AS Vendor2,
-                        MAX(CASE WHEN VendorRank = 3 THEN VendorName END) AS Vendor3,
-                        MAX(CASE WHEN VendorRank = 4 THEN VendorName END) AS Vendor4,
-                        MAX(CASE WHEN VendorRank = 5 THEN VendorName END) AS Vendor5
-                    FROM VendorHistory
-                    GROUP BY ID_RequestQuote, CHR_MaDon
-                )
-                SELECT 
-                    r.CHR_MaDon AS [SoDon],
-                    r.CHR_MaHangNoiBo AS [MaNoiBo],
-                    r.CHR_MaHangNCC AS [MaHangNCC],
-                    r.CHR_NameEN AS [TenEN],
-                    vp.Vendor1,
-                    vp.Vendor2,
-                    vp.Vendor3,
-                    vp.Vendor4,
-                    vp.Vendor5,
-                    r.DTM_Deadline AS [DeadLineSelectVendor],
-                    r.NVCHR_UserRequest AS [PIC],
-                    r.CHR_UserApproval AS [QLSC],
-                    NULL AS [QLTC],
-                    NULL AS [PUR_PIC],
-                    NULL AS [PUR_QLSC]
-                FROM BaoGia_Request_of_Quotation r
-                LEFT JOIN VendorPivot vp 
-                    ON vp.ID_RequestQuote = r.ID 
-                    AND vp.CHR_MaDon = r.CHR_MaDon
+                            PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo
+                            ORDER BY r.CHR_MaNCC
+                        ) AS RN
+                    FROM BaoGia_Request_of_Quotation r
+                    LEFT JOIN IM_NCC_NEW v ON r.CHR_MaNCC = v.Ma
             ";
 
             var whereClauses = new List<string>();
             var parameters = new Dapper.DynamicParameters();
+
+            whereClauses.Add("r.CHR_MaNCC IS NOT NULL");
 
             if (!string.IsNullOrEmpty(MaDon))
             {
@@ -562,17 +574,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
                 parameters.Add("MaHang", "%" + MaHang + "%");
             }
-            if (step.HasValue)
-            {
-                whereClauses.Add("r.ID_StepBaoGia = @Step");
-                parameters.Add("Step", step);
-            }
             if (!string.IsNullOrEmpty(user))
             {
-                whereClauses.Add("s.CHR_UserAdid = @Adid");
                 parameters.Add("Adid", user);
-                // ensure join to master approver exists in WHERE via alias s - add join clause by referencing table in WHERE
-                // but since we don't have an explicit join here, include check by joining in where using EXISTS on BaoGia_Master_Approver_Send_Mail
                 whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
             }
 
@@ -617,40 +621,191 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sql += " WHERE " + string.Join(" AND ", whereClauses);
             }
 
-            // add grouping
             sql += @"
+                ),
+                HIS AS (
+                    SELECT 
+                        h.CHR_MaDon,
+                        h.CHR_ActionType,
+                        h.NVCHR_UpdateName,
+                        TRY_CONVERT(DATETIME, h.CHR_Updatedate) AS ApproveTime,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY h.CHR_MaDon, h.CHR_ActionType
+                            ORDER BY TRY_CONVERT(DATETIME, h.CHR_Updatedate) DESC
+                        ) AS RN
+                    FROM BaoGia_History_Request_of_Quotation h
+                    WHERE h.CHR_ActionType IN (
+                        'QLSC','QLTC','PIC',
+                        'QLSC_1',
+                        'PIC_PICK_NCC',
+                        'QLSC_PICK_NCC',
+                        'QLTC_PICK_NCC',
+                        'DEFT_PICK_NCC'
+                    )
+                ),
+                HIS_PIVOT AS (
+                    SELECT 
+                        CHR_MaDon,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
+                    FROM HIS
+                    WHERE RN = 1
+                    GROUP BY CHR_MaDon
+                )
+                SELECT 
+                    c.CHR_MaDon,
+                    c.CHR_MaHangNoiBo,
+                    c.CHR_MaHangNCC,
+                    c.CHR_NameEN,
+                    c.DTM_KyHan,
+                    c.CHR_CreateBy,
+                    c.DTM_Create,
+                    MAX(CASE WHEN c.RN = 1 THEN c.ShortName END) AS Vender1,
+                    MAX(CASE WHEN c.RN = 2 THEN c.ShortName END) AS Vender2,
+                    MAX(CASE WHEN c.RN = 3 THEN c.ShortName END) AS Vender3,
+                    MAX(CASE WHEN c.RN = 4 THEN c.ShortName END) AS Vender4,
+                    MAX(CASE WHEN c.RN = 5 THEN c.ShortName END) AS Vender5,
+                    h.PIC_Approve, h.PIC_Time,
+                    h.QLSC_Approve, h.QLSC_Time,
+                    h.QLTC_Approve, h.QLTC_Time,
+                    h.QLSC1_Approve, h.QLSC1_Time,
+                    h.PIC_PickNCC, h.PIC_PickNCC_Time,
+                    h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
+                    h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
+                    h.DEFT_PickNCC, h.DEFT_PickNCC_Time
+                FROM CTE c
+                LEFT JOIN HIS_PIVOT h 
+                    ON c.CHR_MaDon = h.CHR_MaDon
                 GROUP BY 
-                    r.CHR_MaDon,
-                    r.CHR_MaHangNoiBo,
-                    r.CHR_MaHangNCC,
-                    r.CHR_NameEN,
-                    vp.Vendor1,
-                    vp.Vendor2,
-                    vp.Vendor3,
-                    vp.Vendor4,
-                    vp.Vendor5,
-                    r.DTM_Deadline,
-                    r.NVCHR_UserRequest,
-                    r.CHR_UserApproval
+                    c.CHR_MaDon,
+                    c.CHR_MaHangNoiBo,
+                    c.CHR_MaHangNCC,
+                    c.CHR_NameEN,
+                    c.DTM_KyHan,
+                    c.DTM_Create,
+                    c.CHR_CreateBy,
+                    h.PIC_Approve, h.PIC_Time,
+                    h.QLSC_Approve, h.QLSC_Time,
+                    h.QLTC_Approve, h.QLTC_Time,
+                    h.QLSC1_Approve, h.QLSC1_Time,
+                    h.PIC_PickNCC, h.PIC_PickNCC_Time,
+                    h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
+                    h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
+                    h.DEFT_PickNCC, h.DEFT_PickNCC_Time
             ";
 
-            // build count sql
-            var countSql = "WITH VendorHistory AS (" +
-                " SELECT h.ID_RequestQuote, h.CHR_MaDon, h.NVCHR_NewValue AS VendorName, ROW_NUMBER() OVER (PARTITION BY h.ID_RequestQuote, h.CHR_MaDon ORDER BY h.CHR_Updatedate) AS VendorRank FROM BaoGia_History_Request_of_Quotation h WHERE h.CHR_ActionType = 'Vendor' AND h.NVCHR_NewValue IS NOT NULL" +
-                " ), VendorPivot AS ( SELECT ID_RequestQuote, CHR_MaDon, MAX(CASE WHEN VendorRank = 1 THEN VendorName END) AS Vendor1, MAX(CASE WHEN VendorRank = 2 THEN VendorName END) AS Vendor2, MAX(CASE WHEN VendorRank = 3 THEN VendorName END) AS Vendor3, MAX(CASE WHEN VendorRank = 4 THEN VendorName END) AS Vendor4, MAX(CASE WHEN VendorRank = 5 THEN VendorName END) AS Vendor5 FROM VendorHistory GROUP BY ID_RequestQuote, CHR_MaDon ) SELECT COUNT(*) FROM (" +
-                " SELECT r.CHR_MaDon FROM BaoGia_Request_of_Quotation r LEFT JOIN VendorPivot vp ON vp.ID_RequestQuote = r.ID AND vp.CHR_MaDon = r.CHR_MaDon";
+            var countSql = @"
+                WITH CTE AS (
+                    SELECT 
+                        r.CHR_MaDon,
+                        r.CHR_MaHangNoiBo,
+                        r.CHR_MaHangNCC,
+                        r.CHR_NameEN,
+                        r.DTM_KyHan,
+                        r.CHR_CreateBy,
+                        CONVERT(DATE, r.DTM_CreateDate) AS DTM_Create,
+                        r.CHR_MaNCC,
+                        v.ShortName,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo
+                            ORDER BY r.CHR_MaNCC
+                        ) AS RN
+                    FROM BaoGia_Request_of_Quotation r
+                    LEFT JOIN IM_NCC_NEW v ON r.CHR_MaNCC = v.Ma
+            ";
 
             if (whereClauses.Any())
             {
                 countSql += " WHERE " + string.Join(" AND ", whereClauses);
             }
-            countSql += " GROUP BY r.CHR_MaDon, r.CHR_MaHangNoiBo, r.CHR_MaHangNCC, r.CHR_NameEN, vp.Vendor1, vp.Vendor2, vp.Vendor3, vp.Vendor4, vp.Vendor5, r.DTM_Deadline, r.NVCHR_UserRequest, r.CHR_UserApproval ) T";
 
-            // add ordering and paging to main query
+            countSql += @"
+                ),
+                HIS AS (
+                    SELECT 
+                        h.CHR_MaDon,
+                        h.CHR_ActionType,
+                        h.NVCHR_UpdateName,
+                        TRY_CONVERT(DATETIME, h.CHR_Updatedate) AS ApproveTime,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY h.CHR_MaDon, h.CHR_ActionType
+                            ORDER BY TRY_CONVERT(DATETIME, h.CHR_Updatedate) DESC
+                        ) AS RN
+                    FROM BaoGia_History_Request_of_Quotation h
+                    WHERE h.CHR_ActionType IN (
+                        'QLSC','QLTC','PIC',
+                        'QLSC_1',
+                        'PIC_PICK_NCC',
+                        'QLSC_PICK_NCC',
+                        'QLTC_PICK_NCC',
+                        'DEFT_PICK_NCC'
+                    )
+                ),
+                HIS_PIVOT AS (
+                    SELECT 
+                        CHR_MaDon,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
+                    FROM HIS
+                    WHERE RN = 1
+                    GROUP BY CHR_MaDon
+                )
+                SELECT COUNT(*)
+                FROM (
+                    SELECT c.CHR_MaDon
+                    FROM CTE c
+                    LEFT JOIN HIS_PIVOT h ON c.CHR_MaDon = h.CHR_MaDon
+                    GROUP BY 
+                        c.CHR_MaDon,
+                        c.CHR_MaHangNoiBo,
+                        c.CHR_MaHangNCC,
+                        c.CHR_NameEN,
+                        c.DTM_KyHan,
+                        c.DTM_Create,
+                        c.CHR_CreateBy,
+                        h.PIC_Approve, h.PIC_Time,
+                        h.QLSC_Approve, h.QLSC_Time,
+                        h.QLTC_Approve, h.QLTC_Time,
+                        h.QLSC1_Approve, h.QLSC1_Time,
+                        h.PIC_PickNCC, h.PIC_PickNCC_Time,
+                        h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
+                        h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
+                        h.DEFT_PickNCC, h.DEFT_PickNCC_Time
+                ) T
+            ";
+
             if (pageSize > 0 && pageIndex > 0)
             {
                 sql += @"
-                    ORDER BY r.CHR_MaDon, r.CHR_MaHangNoiBo
+                    ORDER BY c.DTM_KyHan, c.CHR_MaDon, c.CHR_MaHangNoiBo
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY
                 ";
@@ -660,7 +815,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             else
             {
                 sql += @"
-                    ORDER BY r.CHR_MaDon, r.CHR_MaHangNoiBo
+                    ORDER BY c.DTM_KyHan, c.CHR_MaDon, c.CHR_MaHangNoiBo
                 ";
             }
 
@@ -673,5 +828,86 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 TotalCount = totalCount
             };
         }
+
+        // Tính tổng theo trạng thái đơn
+        public async Task<List<dynamic>> GetCountStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        string? MaHang,string? user)
+        {
+            var sql = @"
+            WITH DonHang AS (
+                SELECT 
+                    r.CHR_MaDon,
+                    MAX(CASE WHEN r.ID_StepBaoGia = 1 THEN 1 ELSE 0 END) AS PICSection,
+                    MAX(CASE WHEN r.ID_StepBaoGia = 2 THEN 1 ELSE 0 END) AS QLSCSection,
+                    MAX(CASE WHEN r.ID_StepBaoGia = 3 THEN 1 ELSE 0 END) AS QLTCSection,
+                    MAX(CASE WHEN r.ID_StepBaoGia = 4 THEN 1 ELSE 0 END) AS PICPur,
+                    MAX(CASE WHEN r.ID_StepBaoGia = 5 THEN 1 ELSE 0 END) AS QLSCPur,
+                    MAX(CASE WHEN r.ID_StepBaoGia = 13 THEN 1 ELSE 0 END) AS IsCompleted,
+                    MAX(CASE WHEN r.ID_StepBaoGia > 11 AND r.ID_StepBaoGia < 13 THEN 1 ELSE 0 END) AS IsProcessing
+                FROM BaoGia_Request_of_Quotation r
+                LEFT JOIN BaoGia_Master_Approver_Send_Mail s ON r.CHR_SectionCode = s.CHR_CodeSection
+                WHERE r.BIT_LayBaoGia = 1
+                    AND r.ID_Status NOT LIKE 'DELETE'
+                    AND r.ID_Status NOT LIKE 'RETURN%'
+            ";
+
+                        var whereClauses = new List<string>();
+                        var parameters = new Dapper.DynamicParameters();
+
+                        if (!string.IsNullOrEmpty(MaDon))
+                        {
+                            whereClauses.Add("r.CHR_MaDon = @MaDon");
+                            parameters.Add("MaDon", MaDon);
+                        }
+                        if (!string.IsNullOrEmpty(MaNcc))
+                        {
+                            whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
+                            parameters.Add("MaNcc", "%" + MaNcc + "%");
+                        }
+                        if (!string.IsNullOrEmpty(Section))
+                        {
+                            whereClauses.Add("r.CHR_SectionCode LIKE @Section");
+                            parameters.Add("Section", "%" + Section + "%");
+                        }
+                        if (!string.IsNullOrEmpty(nguoiYeuCau))
+                        {
+                            whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
+                            parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+                        }
+                        if (!string.IsNullOrEmpty(MaHang))
+                        {
+                            whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
+                            parameters.Add("MaHang", "%" + MaHang + "%");
+                        }
+                        if (!string.IsNullOrEmpty(user))
+                        {
+                            whereClauses.Add("s.CHR_UserAdid = @Adid");
+                            parameters.Add("Adid", user);
+                        }
+
+                        if (whereClauses.Any())
+                        {
+                            sql += " AND " + string.Join(" AND ", whereClauses);
+                        }
+
+                        sql += @"
+                GROUP BY r.CHR_MaDon, r.BIT_LayBaoGia
+            )
+
+            SELECT 
+                SUM(PICSection) AS PICSection,
+                SUM(QLSCSection) AS QLSCSection,
+                SUM(QLTCSection) AS QLTCSection,
+                SUM(PICPur) AS PICPur,
+                SUM(QLSCPur) AS QLSCPur,
+                SUM(IsCompleted) AS SoDonHoanThanh,
+                SUM(IsProcessing) AS SoDonDangXuLy,
+                SUM(CASE WHEN IsProcessing = 0 THEN 1 ELSE 0 END) AS SoDonChuaXuLy
+            FROM DonHang;";
+
+            var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            return result;
+        }
+
     }
 }
