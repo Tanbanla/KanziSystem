@@ -286,7 +286,7 @@
             <h6 class="mb-0 text-secondary" style="color:black !important">Bảng lịch sử</h6>
         </div>
         <div class="card-body px-0">
-            <div class="table-responsive">
+            <div id="historyGroupTableContainer" class="table-responsive">
                 <div class="legend" aria-hidden="false" title="Chú thích màu">
                     <div class="item"><span class="swatch yellow" aria-hidden="true"></span><span>Màu vàng: Từ chối báo giá</span></div>
                     <div class="item"><span class="swatch green" aria-hidden="true"></span><span>Màu xanh lá (ô NCC): Đã gửi báo giá</span></div>
@@ -297,7 +297,7 @@
                     <div class="item"><span class="swatch green" aria-hidden="true"></span><span>Màu xanh lá (Phê duyệt đơn): Đã duyệt</span></div>
                     <div class="item"><span class="swatch white" style="border:1px solid #ccc;" aria-hidden="true"></span><span>Màu trắng (Phê duyệt đơn): Chưa duyệt</span></div>
                 </div>
-                <table class="approval-table">
+                <table id="historyGroupTable" class="approval-table">
                     <thead>
                         <tr>
                             <th rowspan="2">STT</th>
@@ -351,13 +351,18 @@
                     <option value="100">100</option>
                     <option value="200">200</option>
                 </select>
-                            <nav>
-                <ul class="pagination pagination-sm mb-0" id="historyPagination">
-                    <li class="page-item disabled"><button class="page-link" data-page="prev">«</button></li>
-                    <li class="page-item active"><button class="page-link" data-page="1">1</button></li>
-                    <li class="page-item disabled"><button class="page-link" data-page="next">»</button></li>
-                </ul>
-            </nav>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="historyPagination">
+                        <li class="page-item disabled"><button class="page-link" data-page="prev">«</button></li>
+                        <li class="page-item active"><button class="page-link" data-page="1">1</button></li>
+                        <li class="page-item disabled"><button class="page-link" data-page="next">»</button></li>
+                    </ul>
+                </nav>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="small text-muted mb-0" for="historyPageIndex">@Localizer["Page"].Value</label>
+                    <input type="number" id="historyPageIndex" class="form-control form-control-sm" style="width:90px;margin-left:4px;" min="1" value="1" />
+                    <button type="button" id="historyGoPage" class="btn btn-sm btn-primary" style="margin-left:4px;">@Localizer["Go"].Value</button>
+                </div>
             </div>
         </div>
    </div>
