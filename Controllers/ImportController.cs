@@ -25,7 +25,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     }
     public class ImportController : Controller
     {
-
         public IActionResult Import_material()
         {
             return View();
@@ -198,12 +197,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(soluong);
         }
         public JsonResult _xuatkhothucte(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, DateTime thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string tongchiphiold, string id_rq)
-        {
-            //if (tongchiphi == "0")
-            //{
-            //    tongchiphi = tongchiphiold;
-            //}
-
+        {           
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);
         }
@@ -277,7 +271,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 "StudentList.xlsx"
             );
         }
-
         [HttpGet]
         public ActionResult ExportToExcel()
         {
@@ -345,7 +338,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi xử lý: {ex.Message}");
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> ImportFileExcel(IFormFile file, string us, string khoi)
         {
@@ -390,13 +382,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         "location",
                         "notetake"
                     };
-                    //"costKT",
-                    //    "warehouse",
-                    //    "stock",
-                    //    "unit",
-                    //    "price",
-                    //    "typePay"
-
+                  
                     for (int idx = 2; idx <= rowCount; idx++)
                     {
                         string nameMaterial = wsFormat.Cells["B" + idx].Text;
@@ -430,7 +416,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Json(resultList);
         }
-
         [HttpPost]
         public ActionResult ExportModalDetail(string code_request)
         {
@@ -439,8 +424,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             var list = REQUEST_PROCESS._load_body_detail_export(code_request);
             var load = REQUEST_PROCESS._load_request(code_request);
-            var get_id = sql.ReturnString("select Id_Request from REQUEST where Code_Request = '" + code_request + "'");
-            var get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM] where ID_REQUEST = '" + get_id + "' and INT_STEP >= 3 and INT_STEP <= 5 ");
+            var checklist = sql.GET_DATA_FROM_SQL("select * from REQUEST where Code_Request = '" + code_request + "'");
+            var get_id = checklist.Rows[0]["Id_Request"].ToString();
+            var nguoixuat = checklist.Rows[0]["User_Update"].ToString() + " \n " + checklist.Rows[0]["Last_Update"].ToString()!.Split(' ')[0];
+            var get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM] where ID_REQUEST = '" + get_id + "' and ( INT_STEP >= 3 and INT_STEP <= 5 OR INT_STEP = 11)");
            
             string nguoilamdon = "";
             string nguoitao = "";
@@ -451,7 +438,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string dongy = "";
             if (get_adid.Rows.Count > 0)
             {
-                 nguoitao = get_adid.Rows[0]["CHR_ADID_NGUOITAO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
+                 nguoitao = get_adid.Rows[0]["CHR_ADID_NGUOITAO"].ToString()! + " \n "  + checklist.Rows[0]["Create_Date"].ToString()!.Split(' ')[0];
                  nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
                  qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
                  qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
@@ -461,10 +448,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             else
             {
-                 get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM_GA] where ID_REQUEST = '" + get_id + "' and INT_STEP >= 3 and INT_STEP <= 5  ");
+                 get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM_GA] where ID_REQUEST = '" + get_id + "' and ( INT_STEP >= 3 and INT_STEP <= 5  OR INT_STEP = 11) ");
                  if(get_adid.Rows.Count > 0)
                  {
-                    nguoitao = get_adid.Rows[0]["CHR_ADID_NGUOITAO"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
+                    nguoitao = get_adid.Rows[0]["CHR_ADID_NGUOITAO"].ToString()! + " \n " + checklist.Rows[0]["Create_Date"].ToString()!.Split(' ')[0];
                     nguoilamdon = get_adid.Rows[0]["CHR_ADID_NGUOIYEUCAU"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOIYEUCAU"].ToString()!.Split(' ')[0];
                     qltc = get_adid.Rows[0]["CHR_ADID_NGUOITHAMTRA"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
                     qlcc = get_adid.Rows[0]["CHR_ADID_NGUOIPHEDUYET"].ToString()! + " \n " + get_adid.Rows[0]["DTM_NGUOITHAMTRA"].ToString()!.Split(' ')[0];
@@ -500,11 +487,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     int startRow = 9; // Dòng bắt đầu điền dữ liệu (ứng với idx=1 là 8+1)
                     int totalItems = list.Count;
-
+                    int kiten = 24;
                     // 1. Nếu danh sách > 12, chèn thêm dòng
                     if (totalItems > 12)
                     {
                         ws.InsertRow(startRow + 12, totalItems - 12, startRow + 11);
+                        kiten = kiten + totalItems;
                     }
 
                     // 2. Lặp qua toàn bộ danh sách (không giới hạn 12 nữa)
@@ -533,10 +521,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cells["K5"].Value = qltc;
                     ws.Cells["H5"].Value = qlcc;
 
-                    ws.Cells["D24"].Value = xuatkho;
-                    ws.Cells["A24"].Value = xuatkho;
-                    ws.Cells["C24"].Value = quanlytiepnhan;
-                    ws.Cells["E24"].Value = nguoitao.Split(' ')[0];
+                    ws.Cells["D" + kiten].Value = nguoixuat;
+                    ws.Cells["A" + kiten].Value = xuatkho;
+                    ws.Cells["C" + kiten].Value = quanlytiepnhan;
+                    ws.Cells["E" + kiten].Value = nguoitao.Split(' ')[0] +" \n " + checklist.Rows[0]["Last_Update"].ToString()!.Split(' ')[0]; ;
                     string checkgia = string.IsNullOrEmpty(firstLoad.Total_Real) ? "0" : firstLoad.Total_Real;
                     if (float.Parse(checkgia) >= 10000)
                     {
@@ -637,7 +625,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json("Đơn yêu cầu lỗi");
             }
         }
-
         public List<REQUEST_DETAIL> GetListRequestDetail(string iD_REQUEST)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
@@ -708,8 +695,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var model = GetListRequestDetail(iD_REQUEST); // Danh sách chi tiết (IEnumerable)
             ViewBag.MasterData = iD_REQUEST;      // Thông tin tổng quát đơn hàng
             return View(model);
-        }
-
-      
+        }    
     }
 }

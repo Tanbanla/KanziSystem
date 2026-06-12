@@ -284,7 +284,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public JsonResult _get_phongchiuphi()
         {
             List<string> pcp = REQUEST_PROCESS.costphongban();
-            return Json(pcp);
+            return Json(pcp.Distinct());
         }
         public JsonResult _get_phongchiuphi_xuatkho()
         {
@@ -896,7 +896,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return Json(resultList);
         }
-
         public JsonResult view_rqall_GA_PROD(string StartDate, string EndDate, string us, string Group_Code, string loaicp, string Code_Request, string Urgent, string Cost_Center, string Tinhtrang, double Total)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
@@ -957,7 +956,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json(null);
             }
         }
-
         public JsonResult resetdon(string mayeucau, string khoi)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
@@ -991,7 +989,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return Json("Reset OK");
         }
-
         public JsonResult _load_modal_tongdon(string cost_request)
         {
             var td = REQUEST_PROCESS._load_modal_tongdon(cost_request);

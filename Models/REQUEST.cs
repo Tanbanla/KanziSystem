@@ -379,7 +379,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Code_Request = list.Rows[i]["Code_Request"].ToString()!,
                     Cost_Center = list.Rows[i]["Cost_Center"].ToString()!,
                     Dealine = list.Rows[i]["Dealine"].ToString()!,
-                    Total = double.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Total =  Math.Round(double.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),2),
                     User_Create = list.Rows[i]["User_Create"].ToString()!,
                     Create_Date = list.Rows[i]["Create_Date"].ToString()!,
                     CHR_TEN_NGUOIYEUCAU = list.Rows[i]["CHR_TEN_NGUOIYEUCAU"].ToString()!,
@@ -655,7 +655,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
            
                     string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
                         ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi],[Sotaikhoan])
-                        VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', '{thoigian.ToString("yyyy-MM-dd")}', N'{nguoixuatkho}', '{kho}', '{khoi}', '{phongchiuphi}', N'{vitrii}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}','{sotaikhoan}');
+                        VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', '{thoigian.ToString("yyyy-MM-dd  HH:mm:ss")}', N'{nguoixuatkho}', '{kho}', '{khoi}', '{phongchiuphi}', N'{vitrii}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}','{sotaikhoan}');
                         SELECT SCOPE_IDENTITY();";
 
                     // hứng ID vừa tạo
@@ -669,10 +669,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
                             [Amount_Real] = '{slXuat}', 
                             [Price_Real] = '{giathucte}',
-                            [Total_exchange_real] = '{tongchiphi}',
+                            [Total_exchange_real] = {slXuat} * {giathucte},
                             [Status] = 'DONE',
                             [Last_Update] = GETDATE(),
-                            [Total_Real] = ROUND(({tongchiphi}/{laytigia}),2),
+                            [Total_Real] = ({slXuat} * {giathucte}) / {laytigia},
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}',
                             [Kho] = '{kho}',
@@ -685,8 +685,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
 
                     string UpdateRequest = "";
-                    UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongtien + "'";
-                    UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
+                    UpdateRequest = UpdateRequest + $"UPDATE [REQUEST] SET [Total_exchange_real] = {slXuat} * {giathucte}";
+                    UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + laytigia + "'";
                     UpdateRequest = UpdateRequest + ",[Currency_Real] = 'VND'";
                     UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
                     UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
@@ -726,9 +726,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
 
                     _db.GET_DATA_FROM_SQL(UpdateRequest);
-                }
-                  
-              
+                }              
                 var idrq = _db.ReturnString("SELECT Id_Request FROM REQUEST WHERE Code_Request = '" + code_request + "'");
                 CheckDone(code_request, idrq);
                

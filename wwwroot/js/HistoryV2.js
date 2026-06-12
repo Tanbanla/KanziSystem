@@ -6,8 +6,6 @@
     const paginationEl = document.getElementById('historyPagination');
     const paginationInfoEl = document.getElementById('historyPaginationInfo');
     const pageSizeSelect = document.getElementById('historyPageSize');
-    const pageIndexInput = document.getElementById('historyPageIndex');
-    const btnGoPage = document.getElementById('historyGoPage');
     const btnExportHistory = document.getElementById('btnExportHistory');
     const btnImportHistory = document.getElementById('btnImportHistory');
     const supplierSelect = document.getElementById('editNhaCungCap');
@@ -465,11 +463,6 @@
                 .replace('{2}', total);
         }
 
-        if (pageIndexInput) {
-            pageIndexInput.min = '1';
-            pageIndexInput.max = String(totalPages);
-            pageIndexInput.value = String(currentPage);
-        }
     }
 
     function navigateToPage(targetPage) {
@@ -477,22 +470,14 @@
         const safeTarget = Math.min(Math.max(1, Number(targetPage) || 1), totalPages);
         if (safeTarget === currentPage) return;
 
-        if (serverPaged) {
-            applyFilters(safeTarget);
-        } else {
-            currentPage = safeTarget;
-            renderTable(getRowsForPage(currentGroups, currentPage));
-            renderPagination(currentPage, totalCountServer);
-        }
+        applyFilters(safeTarget);
     }
 
     function getRowsForPage(rows, pageIndex) {
         if (!Array.isArray(rows)) return [];
         if (serverPaged) return rows;
 
-        const safePage = Math.max(1, Number(pageIndex) || 1);
-        const start = (safePage - 1) * pageSize;
-        return rows.slice(start, start + pageSize);
+        return rows;
     }
 
     function approvalCell(name, time) {
@@ -624,30 +609,26 @@
     });
 
     paginationEl?.addEventListener('click', function (e) {
-        const btn = e.target.closest('button[data-page]');
-        if (!btn || btn.parentElement.classList.contains('disabled')) return;
+        const btn = e.target.closest && e.target.closest('button[data-page]');
+        if (!btn) return;
+        e.preventDefault();
 
+        const pageAttr = btn.getAttribute('data-page');
+ 
         const totalPages = Math.max(1, Math.ceil((totalCountServer || 0) / pageSize));
+        let targetPage = 1;
 
-        const page = btn.dataset.page;
-        if (page === 'prev') {
-            if (currentPage > 1) {
-                navigateToPage(currentPage - 1);
-            }
-            return;
+        if (pageAttr === 'prev') {
+            targetPage = Math.max(1, currentPage - 1);
+        } else if (pageAttr === 'next') {
+            targetPage = Math.min(totalPages, currentPage + 1);
+        } else {
+            const n = Number(pageAttr);
+            targetPage = Number.isInteger(n) && n > 0 ? Math.min(Math.max(1, n), totalPages) : currentPage;
         }
 
-        if (page === 'next') {
-            if (currentPage < totalPages) {
-                navigateToPage(currentPage + 1);
-            }
-            return;
-        }
+        navigateToPage(targetPage);
 
-        const targetPage = Number(page);
-        if (Number.isInteger(targetPage) && targetPage > 0 && targetPage !== currentPage) {
-            navigateToPage(targetPage);
-        }
     });
 
     pageSizeSelect?.addEventListener('change', function () {
@@ -655,20 +636,6 @@
         if (!Number.isInteger(nextSize) || nextSize <= 0) return;
         pageSize = nextSize;
         applyFilters(1);
-    });
-
-    btnGoPage?.addEventListener('click', function () {
-        const target = Number(pageIndexInput?.value);
-        if (!Number.isInteger(target) || target <= 0) return;
-        navigateToPage(target);
-    });
-
-    pageIndexInput?.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        const target = Number(pageIndexInput?.value);
-        if (!Number.isInteger(target) || target <= 0) return;
-        navigateToPage(target);
     });
 
     // Initial load

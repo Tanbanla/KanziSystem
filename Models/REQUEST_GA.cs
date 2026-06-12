@@ -47,7 +47,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public float? Total_exchange { get; set; }
         public float? Exchange_rate { get; set; }
         public string? Currency { get; set; }
-        public float? Total { get; set; }
+        public double? Total { get; set; }
         public float? Total_exchange_real { get; set; }
         public float? Exchange_rate_Real { get; set; }
         public string? Currency_Real { get; set; }
@@ -250,9 +250,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Urgent = list.Rows[i]["Urgent"].ToString()!
                 });
             }
-            //pe_ = pe_.GroupBy(x => x.Code_Request)
-            // .Select(g => g.First())
-            // .ToList();
+            pe_ = pe_.GroupBy(x => x.Code_Request)
+             .Select(g => g.First())
+             .ToList();
             return pe_;
         }
         public static List<PE_REQUEST_CONFIRM_GA> get_requestcondition(string loaicp, string ngayyc, string us,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, double Total, string Urgent, string costt_ct)
@@ -300,7 +300,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Code_Request = list.Rows[i]["Code_Request"].ToString()!,
                     Cost_Center = list.Rows[i]["Cost_Center"].ToString()!,
                     Dealine = list.Rows[i]["Dealine"].ToString()!.Split(" ")[0],
-                    Total = float.Parse(list.Rows[i]["Total"].ToString()!),
+                    Total = Math.Round(double.Parse(list.Rows[i]["Total"].ToString()!),2),
                     User_Create = list.Rows[i]["User_Create"].ToString()!,
                     Create_Date = list.Rows[i]["Create_Date"].ToString()!,
                     CHR_TEN_NGUOIYEUCAU = list.Rows[i]["CHR_TEN_NGUOIYEUCAU"].ToString()!,

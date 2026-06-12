@@ -211,7 +211,7 @@
                         if(item.Declaration == "COMMON") {loaichiphi = "Chi phí chung"}
                         if(item.Declaration == "OTHER") {loaichiphi = "OTHER"}
                         html += `<tr class="${domau}">`;
-                        html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info(this.id, '${item.INT_STEP}')">Xem</button></td>`;
+                        html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info_tongdon(this.id, '${item.INT_STEP}')">Xem</button></td>`;
                         html += `<td>${item.Type == 1 ? '<span class="badge badge-danger">Gấp</span>' : 'Thông thường'}</td>`;
                         html += `<td>${getStatusName(item.INT_STEP)}</td>`;
                         html += `<td>${item.Code_Request}</td>`;
@@ -259,7 +259,7 @@
                         if(item.Declaration == "COMMON") {loaichiphi = "Chi phí chung"}
                         if(item.Declaration == "OTHER") {loaichiphi = "OTHER"}
                         html += `<tr class="${domau}">`;
-                        html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info(this.id, '${item.INT_STEP}')">Xem</button></td>`;
+                        html += `<td><button class="btn btn-sm btn-info" id="${item.Code_Request}" onclick="_modal_info_tongdon(this.id, '${item.INT_STEP}')">Xem</button></td>`;
                         html += `<td>${item.Type == 1 ? '<span class="badge badge-danger">Gấp</span>' : 'Thông thường'}</td>`;
                         html += `<td>${getStatusName_GA(item.INT_STEP)}</td>`;
                         html += `<td>${item.Code_Request}</td>`;

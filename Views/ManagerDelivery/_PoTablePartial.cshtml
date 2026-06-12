@@ -1,0 +1,64 @@
+@using PRJ_WAREHOUSE_BIVN.Controllers
+@model IEnumerable<PoViewModel>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover mb-0 align-middle">
+        <thead>
+            <tr class="text-center text-uppercase fs-7">
+                <th class="text-dark">No.</th>
+                <th class="bg-pur text-dark">Ngày YC</th>
+                <th class="bg-pur text-dark">Ngày YC giao</th>
+                <th class="bg-pur text-dark">Số PO</th>
+                <th class="bg-pur text-dark">Tên hàng</th>
+                <th class="bg-pur text-dark">Mã hàng</th>
+                <th class="text-dark" colspan="3">HÀNH ĐỘNG</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    // Đổi màu nền nếu có ảnh hưởng sản xuất
+                    string rowClass = item.ImpactToProduction == "Yes" ? "row-alert-yes" : "";
+                    string infoId = $"info-{item.Id}";
+
+                    <tr class="@rowClass">
+                        <td class="text-center fw-bold">@item.Id</td>
+                        <td class="text-center">@item.ReqDate.ToString("dd/MM/yyyy")</td>
+                        <td class="text-center">@item.DeliveryReqDate.ToString("dd/MM/yyyy")</td>
+                        <td class="text-center fw-bold text-primary">@item.PoNumber</td>
+                        <td>@item.ItemName</td>
+                        <td class="text-center fw-bold">@item.ItemCode</td>
+                        <td class="text-center cursor-pointer toggle-detail" data-target="#@infoId">
+                            <span class="badge @(item.Status == "Received" ? "badge-ok" : "badge-ng") p-2 w-100">
+                                @(item.Status == "Received" ? "OK" : "NG") <i class="fa-solid fa fa-caret-down ms-1"></i>
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                    data-po="@item.PoNumber" data-item-name="@item.ItemName" data-item-code="@item.ItemCode">
+                                <i class="fa-solid ion-compose"></i> Dự kiến
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr id="@infoId" class="collapse detail-row">
+                        <td colspan="20">
+                            <div class="detail-container">
+                                <h6 class="text-success fw-bold mb-3">THÔNG TIN CHI TIẾT CỦA PO: @item.PoNumber</h6>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu đơn hàng.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
