@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using PRJ_WAREHOUSE_BIVN.Models;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
@@ -23,6 +24,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public DateTime NgayNhapKho { get; set; }
         public double SoLuongHienTaiTaiKhoChuyen { get; set; }
     }
+  
     public class ImportController : Controller
     {
         public IActionResult Import_material()
@@ -118,7 +120,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         public JsonResult _get_log(string madon, string ngay_tu, string ngay_den, string kho, string manguyenlieu, string loai, string us)
         {
-            List<KHO_NHAPXUAT> lst = KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai, us);
+            List<Models.KHO_NHAPXUAT> lst = Models.KHO_NHAPXUAT._logg(madon, ngay_tu, ngay_den, kho, manguyenlieu, loai, us);
             return Json(lst);
         }
         private readonly IWebHostEnvironment _env;
@@ -260,8 +262,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpGet("export")]
         public IActionResult Export()
         {
-            var data = new List<KHO_NHAPXUAT> {
-            new KHO_NHAPXUAT {  }
+            var data = new List<Models.KHO_NHAPXUAT> {
+            new Models.KHO_NHAPXUAT {  }
         };
             var fileContents = ExportToExcel_FileEx(data, "Students");
 
@@ -625,7 +627,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json("Đơn yêu cầu lỗi");
             }
         }
-        public List<REQUEST_DETAIL> GetListRequestDetail(string iD_REQUEST)
+        public List<Models.REQUEST_DETAIL> GetListRequestDetail(string iD_REQUEST)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             //var request = db.GET_DATA_FROM_SQL("select * from DETAIL where Id_Request = '" + iD_REQUEST + "'");
@@ -636,11 +638,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var get_phongban = db.ReturnString("select [Name] from DEPARTMENT as a left join REQUEST as b on a.Cost_Center = b.Cost_Center where b.Code_Request = '" + request_detail.Rows[0]["Code_Request"].ToString() + "'");
        
-            List<REQUEST_DETAIL> rq_dt = new List<REQUEST_DETAIL>();
+            List<Models.REQUEST_DETAIL> rq_dt = new List<Models.REQUEST_DETAIL>();
 
             for (int i = 0; i < request_detail.Rows.Count; i++)
             {
-                rq_dt.Add(new REQUEST_DETAIL
+                rq_dt.Add(new Models.REQUEST_DETAIL
                 {
                     Material_Name = request_detail.Rows[i]["Material_Code"].ToString() + ":" + request_detail.Rows[i]["Material_Name"].ToString(),
                     Account_Code = request_detail.Rows[i]["Account_Code"].ToString() + ":" + request_detail.Rows[i]["Account_Name"].ToString(),
@@ -665,11 +667,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //List<REQUEST> rq = new List<REQUEST>();
 
             var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST] where Id_Request = '" + iD_REQUEST + "'");
-            List<REQUEST> rq_dt = new List<REQUEST>();
+            List<Models.REQUEST> rq_dt = new List<Models.REQUEST>();
             var get_namesec = request_detail.Rows[0]["Cost_Center"].ToString();
             for (int i = 0; i < request_detail.Rows.Count; i++)
             {
-                rq_dt.Add(new REQUEST
+                rq_dt.Add(new Models.REQUEST
                 {
                     Code_Request = request_detail.Rows[i]["Code_Request"].ToString(),
                     Cost_Center = request_detail.Rows[i]["Cost_Center"].ToString(),
@@ -695,6 +697,38 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var model = GetListRequestDetail(iD_REQUEST); // Danh sách chi tiết (IEnumerable)
             ViewBag.MasterData = iD_REQUEST;      // Thông tin tổng quát đơn hàng
             return View(model);
-        }    
+        }
+        [HttpPost]
+        public JsonResult NhapKhoDacBiet([FromBody] NhapKhoRequest request)
+        {
+            SQL_Connect_DB20 sql = new SQL_Connect_DB20();
+            string Manhanvien = sql.ReturnString("SELECT CHR_CRT_USERID FROM [TM_USER] WHERE [CHR_USERID] = '" + request.us + "' ");
+            string Soluonghientai = sql.ReturnString("SELECT [Hientai] FROM KHO WHERE [MaNguyenLieu] =  N'" + request.MaNguyenLieu + "' AND [Kho] = '" + request.Kho + "' AND [Group_Code] = '" + request.Khoi + "' ");
+            double SoluongTruocthaydoi = 0;
+            if (Soluonghientai.Trim() == "")
+            {
+                sql.GET_DATA_FROM_SQL("INSERT INTO KHO(MaNguyenLieu,Hientai,Group_Code,Kho) VALUES (N'" + request.MaNguyenLieu!.Trim().ToUpper() + "','" + request.Soluong + "','" + request.Khoi + "','" + request.Kho + "')");
+            }
+            else
+            {
+                sql.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] + " + request.Soluong + " WHERE [MaNguyenLieu] =  N'" + request.MaNguyenLieu!.Trim() + "' AND [Kho] = '" + request.Kho + "' AND [Group_Code] = '" + request.Khoi + "'");
+                SoluongTruocthaydoi = Convert.ToDouble(Soluonghientai);
+            }
+           
+            DataTable Nguyenlieu = sql.Getdatatable("SELECT * FROM [MATERIAL] WHERE [Material_Code] = '" + request.MaNguyenLieu.Trim() + "' ", "Nl");
+            sql.GET_DATA_FROM_SQL("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[Donvi],[MaNguoinhap],[Gia],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + request.MaNguyenLieu.Trim().ToUpper() + "',N'Nhập hàng đặc biệt vào kho " + request.Kho + ", Ghi chú: " + request.GhiChu + "','" + Convert.ToDouble(request.Soluong.ToString()!.Trim()) + "','NHAP','" + request.NgayNhapKho + "','" + request.us + "','" + request.Kho + "','" + request.Khoi + "','" + Nguyenlieu.Rows[0]["Material_Name_JP"].ToString()!.Trim() + "','" + Nguyenlieu.Rows[0]["Unit"].ToString()!.Trim() + "','" + Manhanvien + "','" + Nguyenlieu.Rows[0]["Price"].ToString()!.Trim() + "','" + request.NgayNhapKho.ToString("MM/dd/yyyy") + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(request.Soluong.ToString()!.Trim()) + SoluongTruocthaydoi) + "')");
+
+            return Json("OK");
+        }
+    }
+    public class NhapKhoRequest
+    {
+        public string? MaNguyenLieu { get; set; }
+        public decimal? Soluong { get; set; }
+        public string? Kho { get; set; }
+        public DateTime NgayNhapKho { get; set; }
+        public string? GhiChu { get; set; }
+        public string? Khoi { get; set; }
+        public string? us { get; set; }
     }
 }

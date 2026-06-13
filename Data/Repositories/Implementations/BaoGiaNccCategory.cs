@@ -168,7 +168,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<CheckSupplierByCategoryModel>> CheckSupperlierByCategory(List<CheckSupplierByCategoryModel> request)
         {
             var missing = new List<CheckSupplierByCategoryModel>();
-            if (request == null || !request.Any())
+            if (request == null || request.Count == 0)
                 return missing;
 
             var normalizedRequest = request
@@ -181,20 +181,24 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .DistinctBy(r => (r.MaDon, r.ChungLoai))
                 .ToList();
 
-            if (!normalizedRequest.Any())
+            if (normalizedRequest.Count == 0)
                 return missing;
 
-            var maDonList = normalizedRequest.Select(r => r.MaDon).Distinct().ToList();
+            var maDonList = normalizedRequest
+                .Select(r => r.MaDon)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var existing = await _context.BaoGia_NCC_Categories
+                .AsNoTracking()
                 .Where(c => maDonList.Contains(c.CHR_MaNCC))
                 .Select(c => new { Ma = (c.CHR_MaNCC ?? string.Empty).Trim(), ChungLoai = (c.NVCHR_ChungLoai ?? string.Empty).Trim() })
                 .ToListAsync();
 
-            var existingSet = new HashSet<string>(existing.Select(e => (e.Ma + "|" + e.ChungLoai).ToLowerInvariant()));
+            var existingSet = new HashSet<string>(existing.Select(e => e.Ma + "|" + e.ChungLoai), StringComparer.OrdinalIgnoreCase);
 
             missing = normalizedRequest
-                .Where(r => !existingSet.Contains((r.MaDon + "|" + r.ChungLoai).ToLowerInvariant()))
+                .Where(r => !existingSet.Contains(r.MaDon + "|" + r.ChungLoai))
                 .ToList();
 
             return missing;

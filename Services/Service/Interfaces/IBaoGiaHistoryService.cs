@@ -37,5 +37,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Tính tổng theo trạng thái đơn
         Task<GenericResponse<List<dynamic>>> GetCountStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? user);
+        // Tính tình trạng xử lý đơn hàng
+        Task<GenericResponse<List<dynamic>>> GetProcessingStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user);
+        // Tính các đơn hàng đang chờ chọn nhà cung cấp
+        Task<GenericResponse<List<dynamic>>> GetWaitingForSupplier(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user);
     }
 }

@@ -671,8 +671,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Price_Real] = '{giathucte}',
                             [Total_exchange_real] = {slXuat} * {giathucte},
                             [Status] = 'DONE',
+                            [Currency_Real] = [Currency],
                             [Last_Update] = GETDATE(),
-                            [Total_Real] = ({slXuat} * {giathucte}) / {laytigia},
+                            [Total_Real] = ROUND(({slXuat} * {giathucte}) / {laytigia},2),
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}',
                             [Kho] = '{kho}',
@@ -705,10 +706,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Total_exchange_real] = {slXuat} * {giathucte},
                             [Status] = 'DONE',
                             [Last_Update] = GETDATE(),
+                            [Currency_Real] = [Currency],
                             [Total_Real] = {slXuat} * {giathucte},
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}',
-                            [Kho] = '{kho}',
+                            [Kho] = '{kho}',                            
                             [Id_LichsuXuat] = '{idKhoNhapXuat}' 
                             WHERE [Id_RequestDetail] = '{id_rq}'";
 

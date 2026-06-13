@@ -1181,6 +1181,31 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Lấy dữ liệu bảng Tab1
         [HttpPost]
+        public async Task<IActionResult> GetHistoryTab1([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            try
+            {
+                var result = await _baoGiaHistoryService.GetWaitingForSupplier(
+                    searchModel.MaDon,
+                    searchModel.MaNcc,
+                    searchModel.Section,
+                    searchModel.NguoiYeuCau,
+                    searchModel.MaHang,
+                    GetCurrentUserId()
+                );
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
+            }
+        }
+        // Lấy dữ liệu bảng Tab2
+        [HttpPost]
         public async Task<IActionResult> GetCountQuotation([FromBody] SearchBaoGiaViewModel searchModel)
         {
             try
@@ -1204,7 +1229,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
             }
         }
-        // Lấy dữ liệu bảng Tab2
+        // Lấy dữ liệu bảng Tab3
         [HttpPost]
         public async Task<IActionResult> GetCountStatus([FromBody] SearchBaoGiaViewModel searchModel)
         {
@@ -1229,5 +1254,31 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
             }
         }
+        // Lấy dữ liệu bảng Tab4
+        [HttpPost]
+        public async Task<IActionResult> GetProcessingStatus([FromBody] SearchBaoGiaViewModel searchModel)
+        {
+            try
+            {
+                var result = await _baoGiaHistoryService.GetProcessingStatus(
+                    searchModel.MaDon,
+                    searchModel.MaNcc,
+                    searchModel.Section,
+                    searchModel.NguoiYeuCau,
+                    searchModel.MaHang,
+                    GetCurrentUserId()
+                );
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
+            }
+        }
+
     }
 }

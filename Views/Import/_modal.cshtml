@@ -568,6 +568,65 @@
     </form>
 </div>
 
+<div class="modal-part" id="modal-nhaphangdacbiet">
+    <style>
+        .modal-header, .modal-body, .modal-footer {
+            padding: 0px;
+        }
+    </style>
+    <form class="needs-validation" novalidate>
+        <div class="card">
+            <div class="card-header bg-light">
+                <strong>Nhập hàng đặc biệt</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label class="form-label"> Khối :</label>
+                        <select id="Khoidacbiet" class="form-control">
+                            <option>PROD</option>
+                            <option>GA</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label"> Mã linh kiện :</label>
+                        <input type="text" class="form-control" id="malkdacbiet" />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label"> Số lượng :</label>
+                        <input type="number" class="form-control" id="soluongdacbiet" min="0" />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label"> Kho :</label>
+                        <select id="khodacbiet" class="form-control">
+                            <option>F1</option>
+                            <option>F2</option>
+                            <option>F3</option>
+                            <option>F4</option>
+                            <option>F5</option>
+                            <option>F6</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label"> Ngày nhập kho :</label>
+                        <input type="date" id="ngaydacbiet" class="form-control" required />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label"> Ghi chú :</label>
+                        <textarea class="form-control" id="ghichudacbiet"></textarea>
+                    </div>
+                </div>            
+            </div>
+
+            <div class="card-footer">
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-outline-danger" onclick="_nhapdacbiet()">
+                    <i class="fas fa-exchange-alt"></i> Nhập hàng đặc biệt
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
 <script>
     // Minimal client-side helpers: clamp quantity to available stock and show validation.
    function chekk(){
@@ -628,5 +687,60 @@
                     });
          
     }
-   
+
+    function _nhapdacbiet(){
+        let maLinhKien = document.getElementById("malkdacbiet").value.trim();
+        let soLuong = document.getElementById("soluongdacbiet").value.trim();
+        let kho = document.getElementById("khodacbiet").value;
+        let ngayNhapKho = document.getElementById("ngaydacbiet").value;
+        let ghiChu = document.getElementById("ghichudacbiet").value.trim();
+         let khoi = document.getElementById("Khoidacbiet").value;
+        let us = document.getElementById("us").innerHTML;
+
+         // 2. Validate dữ liệu phía Client
+         if (maLinhKien === "" || soLuong === "" || kho === "" || ngayNhapKho === "") {
+             alert("Vui lòng điền đầy đủ các thông tin bắt buộc (*)");
+             return;
+         }
+
+         if (parseFloat(soLuong) <= 0 || isNaN(soLuong)) {
+             alert("Số lượng nhập phải lớn hơn 0");
+             return;
+         }
+         let postData = {
+             MaNguyenLieu: maLinhKien,
+             Soluong: soLuong,
+             Kho: kho,
+             NgayNhapKho: ngayNhapKho,
+             GhiChu: ghiChu,
+             Khoi : khoi,
+             us : us
+         };
+
+         // 4. Gọi API xử lý nghiệp vụ
+         if (confirm("Bạn có chắc chắn muốn nhập số hàng đặc biệt này vào hệ thống?")) {
+               fetch('/Import/NhapKhoDacBiet', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify(postData)
+             })
+             .then(response => response.json())
+             .then(data => {
+                 if (data.success) {
+                     alert("Nhập hàng đặc biệt thành công!");
+                     if (typeof _load_xuatkho === "function") {
+                         _load_xuatkho();
+                     }
+                 } else {
+                     alert("Lỗi: " + data.message);
+                 }
+             })
+             .catch(error => {
+                 console.error('Error:', error);
+                 alert("Không thể kết nối đến máy chủ.");
+             });
+         }
+    }
 </script>

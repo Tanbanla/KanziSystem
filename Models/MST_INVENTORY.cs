@@ -127,7 +127,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
             string trt =vitri;
             string[] Vt = trt.Split(':');
-            con.ReturnString("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Ngaynhaokho],[Phong],[Vitri],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + malinhkien + "',N'Chuyển từ kho " + khochuyen + " sang kho " + khonhan + "','" + soluongchuyen + "','XUAT',GETDATE(),'" + us + "','" + khochuyen + "','" + khoi + "','" + ngaychuyen + "','" + Vt[0] + "','" + Vt[1] + "','" + soluonghientai + "','" + (Convert.ToDouble(soluonghientai) - Convert.ToDouble(soluongchuyen)) + "')");
+            con.ReturnString("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Ngaynhaokho],[Phong],[Vitri],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + malinhkien + "',N'Chuyển từ kho " + khochuyen + " sang kho " + khonhan + "','" + soluongchuyen + "','XUAT','" + ngaychuyen + "','" + us + "','" + khochuyen + "','" + khoi + "','" + ngaychuyen + "','" + Vt[0] + "','" + Vt[1] + "','" + soluonghientai + "','" + (Convert.ToDouble(soluonghientai) - Convert.ToDouble(soluongchuyen)) + "')");
 
             // Nhập kho
             string Soluonghientai = con.ReturnString("SELECT Hientai FROM KHO WHERE [MaNguyenLieu] =  N'" + malinhkien + "' AND [Kho] = '" + khonhan + "' AND [Group_Code] = '" + khoi + "' ");
@@ -142,7 +142,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 SoluongTruocthaydoi = Convert.ToDouble(Soluonghientai);
             }
             //**************
-            con.ReturnString("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES (N'" + malinhkien + "',N'Nhận từ kho " + khochuyen + " sang kho " + khonhan + "','" + Convert.ToDouble(soluongchuyen) + "','NHAP',GETDATE(),'" + us + "','" + khonhan + "','" + khoi + "','" + ngaychuyen + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(soluongchuyen) + SoluongTruocthaydoi) + "')");
+            con.ReturnString("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES (N'" + malinhkien + "',N'Nhận từ kho " + khochuyen + " sang kho " + khonhan + "','" + Convert.ToDouble(soluongchuyen) + "','NHAP','" + ngaychuyen + "','" + us + "','" + khonhan + "','" + khoi + "','" + ngaychuyen + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(soluongchuyen) + SoluongTruocthaydoi) + "')");
             return "OK";
         }
     }

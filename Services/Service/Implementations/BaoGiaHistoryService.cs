@@ -253,5 +253,38 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             return result;
         }
+        // Tính tình trạng xử lý đơn hàng
+        public async Task<GenericResponse<List<dynamic>>> GetProcessingStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetProcessingStatus(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return result;
+        }
+        // Tính các đơn hàng đang chờ chọn nhà cung cấp
+        public async Task<GenericResponse<List<dynamic>>> GetWaitingForSupplier(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetWaitingForSupplier(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

@@ -76,6 +76,11 @@
                                 <td><button type="button" class="btn btn-success ml-3" onclick="_load_xuatkho()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button></td>
                                 <td><button type="button" class="btn btn-info ml-3" onclick="resett()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button></td>                   
                                 <td><a href="~/Request/RequestAll_GA_PROD" target="_blank" class="btn btn-success">Kiểm tra Đơn</a></td>
+                                <td>
+                                    <button type="button" class="btn btn-danger" id="modal-24">
+                                        <i class="ion ion-ios-plus-outline"></i> Nhập hàng đặc biệt
+                                    </button>
+                                </td>
                             </tr>
                             <tr class="bg-primary">                          
                                 <th width="100px"></th>
@@ -105,50 +110,32 @@
 </div>
 <button id="modal-10" hidden>Click</button>
 <button id="modal-19" hidden>Click</button>
+@* <button id="modal-24" hidden>Click</button> *@
 @await Html.PartialAsync("_modal", "Import")
 <script src="~/scripts/xuatkho.js"></script>
 <script>
-    window.onload = function(){
+       window.onload = function() {
         _load_xuatkho();
-    }
-    function resett(){
+    };
+
+    function resett() {
         document.getElementById("mayeucau").value = "";
         document.getElementById("nguoitao").value = "";
         _load_xuatkho();
     }
-    //  let checkAll = document.getElementById('checkAll');
-    // document.addEventListener('change', function(e) {
 
-    //     if (e.target && e.target.id === 'checkAll') {
-    //             let checkboxes = document.querySelectorAll('.item');
-    //         checkboxes.forEach(cb => {
-    //             cb.checked = e.target.checked;
-    //         });
-    //     }
-
-    //     if (e.target && e.target.classList.contains('item')) {
-    //             let allItems = document.querySelectorAll('.item');
-    //         let checkedItems = document.querySelectorAll('.item:checked');
-
-    //         // Nếu số lượng checkbox đang chọn bằng tổng số checkbox -> Check nút đầu bảng
-    //         checkAll.checked = (allItems.length === checkedItems.length);
-
-    //         // Trạng thái lửng lơ (Gạch ngang) nếu chỉ chọn một vài ô
-    //         checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
-    //     }
-
-    // });
-     let smallcheck = document.getElementById('smallcheck');
-     document.addEventListener('change', function(e) {
-
+    // Xử lý sự kiện check box 'smallcheck'
+    let smallcheck = document.getElementById('smallcheck');
+    document.addEventListener('change', function(e) {
         if (e.target && e.target.id === 'smallcheck') {
-                let checkboxes = document.querySelectorAll('.itemsmall');
+            let checkboxes = document.querySelectorAll('.itemsmall');
             checkboxes.forEach(cb => {
                 cb.checked = e.target.checked;
             });
         }
+
         if (e.target && e.target.classList.contains('itemsmall')) {
-                let allItems = document.querySelectorAll('.itemsmall');
+            let allItems = document.querySelectorAll('.itemsmall');
             let checkedItems = document.querySelectorAll('.itemsmall:checked');
 
             // Nếu số lượng checkbox đang chọn bằng tổng số checkbox -> Check nút đầu bảng
@@ -157,8 +144,7 @@
             // Trạng thái lửng lơ (Gạch ngang) nếu chỉ chọn một vài ô
             smallcheck.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
         }
-
-     });
+    });
 
     function resett_don() {
         let maYeuCau = document.getElementById("mayeucau").value.trim();
@@ -169,7 +155,6 @@
         }
 
         if (confirm(`Bạn có chắc chắn muốn reset đơn ${maYeuCau} không?`)) {
-            // Gọi API bằng fetch (hoặc $.ajax nếu dự án dùng jQuery)
             fetch('/Warehouse/ResetDon', {
                 method: 'POST',
                 headers: {
@@ -192,4 +177,5 @@
             });
         }
     }
+   
 </script>

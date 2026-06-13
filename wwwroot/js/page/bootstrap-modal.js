@@ -550,6 +550,33 @@ $("#modal-23").fireModal({
         console.log(form)
     },
 });
+$("#modal-24").fireModal({
+    title: '',
+    body: $("#modal-nhaphangdacbiet"),
+    footerClass: 'bg-whitesmoke',
+    autoFocus: false,
+    created: function (modal) {
+        modal.find('.modal-dialog').css('max-width', '300px');
+        modal.find('.modal-dialog').css('padding-top', '100px');
+        modal.find('.modal-content').css({
+            'border': '1',
+        });
+    },
+    onFormSubmit: function (modal, e, form) {
+
+        // DO AJAX HERE
+        let fake_ajax = setTimeout(function () {
+            form.stopProgress();
+
+            clearInterval(fake_ajax);
+        }, 1500);
+
+        e.preventDefault();
+    },
+    shown: function (modal, form) {
+        console.log(form)
+    },
+});
 $('.oh-my-modal').fireModal({
   title: 'My Modal',
   body: 'This is cool plugin!'

@@ -841,9 +841,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     MAX(CASE WHEN r.ID_StepBaoGia = 2 THEN 1 ELSE 0 END) AS QLSCSection,
                     MAX(CASE WHEN r.ID_StepBaoGia = 3 THEN 1 ELSE 0 END) AS QLTCSection,
                     MAX(CASE WHEN r.ID_StepBaoGia = 4 THEN 1 ELSE 0 END) AS PICPur,
-                    MAX(CASE WHEN r.ID_StepBaoGia = 5 THEN 1 ELSE 0 END) AS QLSCPur,
-                    MAX(CASE WHEN r.ID_StepBaoGia = 13 THEN 1 ELSE 0 END) AS IsCompleted,
-                    MAX(CASE WHEN r.ID_StepBaoGia > 11 AND r.ID_StepBaoGia < 13 THEN 1 ELSE 0 END) AS IsProcessing
+                    MAX(CASE WHEN r.ID_StepBaoGia = 5 THEN 1 ELSE 0 END) AS QLSCPur
                 FROM BaoGia_Request_of_Quotation r
                 LEFT JOIN BaoGia_Master_Approver_Send_Mail s ON r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE r.BIT_LayBaoGia = 1
@@ -851,46 +849,46 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     AND r.ID_Status NOT LIKE 'RETURN%'
             ";
 
-                        var whereClauses = new List<string>();
-                        var parameters = new Dapper.DynamicParameters();
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
 
-                        if (!string.IsNullOrEmpty(MaDon))
-                        {
-                            whereClauses.Add("r.CHR_MaDon = @MaDon");
-                            parameters.Add("MaDon", MaDon);
-                        }
-                        if (!string.IsNullOrEmpty(MaNcc))
-                        {
-                            whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
-                            parameters.Add("MaNcc", "%" + MaNcc + "%");
-                        }
-                        if (!string.IsNullOrEmpty(Section))
-                        {
-                            whereClauses.Add("r.CHR_SectionCode LIKE @Section");
-                            parameters.Add("Section", "%" + Section + "%");
-                        }
-                        if (!string.IsNullOrEmpty(nguoiYeuCau))
-                        {
-                            whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
-                            parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
-                        }
-                        if (!string.IsNullOrEmpty(MaHang))
-                        {
-                            whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
-                            parameters.Add("MaHang", "%" + MaHang + "%");
-                        }
-                        if (!string.IsNullOrEmpty(user))
-                        {
-                            whereClauses.Add("s.CHR_UserAdid = @Adid");
-                            parameters.Add("Adid", user);
-                        }
+            if (!string.IsNullOrEmpty(MaDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereClauses.Add("r.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
 
-                        if (whereClauses.Any())
-                        {
-                            sql += " AND " + string.Join(" AND ", whereClauses);
-                        }
+            if (whereClauses.Any())
+            {
+                sql += " AND " + string.Join(" AND ", whereClauses);
+            }
 
-                        sql += @"
+            sql += @"
                 GROUP BY r.CHR_MaDon, r.BIT_LayBaoGia
             )
 
@@ -899,15 +897,118 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 SUM(QLSCSection) AS QLSCSection,
                 SUM(QLTCSection) AS QLTCSection,
                 SUM(PICPur) AS PICPur,
-                SUM(QLSCPur) AS QLSCPur,
-                SUM(IsCompleted) AS SoDonHoanThanh,
-                SUM(IsProcessing) AS SoDonDangXuLy,
-                SUM(CASE WHEN IsProcessing = 0 THEN 1 ELSE 0 END) AS SoDonChuaXuLy
+                SUM(QLSCPur) AS QLSCPur
             FROM DonHang;";
 
             var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return result;
         }
+        // Tính tình trạng xử lý đơn hàng
+        public async Task<List<dynamic>> GetProcessingStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user)
+        {
+            var sql = @"
+            WITH DonHang AS (
+                    SELECT 
+                            r.CHR_MaDon,
+                            CASE WHEN COUNT(CASE WHEN r.ID_StepBaoGia = 13 THEN 1 END) = COUNT(*) THEN 1 ELSE 0 END AS IsCompleted,
+                            CASE WHEN COUNT(CASE WHEN r.ID_StepBaoGia > 11  and r.ID_StepBaoGia <13  THEN 1 END) = COUNT(*) THEN 1 ELSE 0 END AS IsProcessing,
+                            CASE WHEN COUNT(CASE WHEN r.ID_StepBaoGia < 11 THEN 1 END) = COUNT(*) THEN 1 ELSE 0 END AS IsChuaXuLy
+                        FROM BaoGia_Request_of_Quotation r
+	                    LEFT JOIN (
+		                    SELECT DISTINCT CHR_CodeSection 
+		                    FROM BaoGia_Master_Approver_Send_Mail
+	                    ) s
+	                    ON r.CHR_SectionCode = s.CHR_CodeSection
+                    WHERE r.BIT_LayBaoGia = 1
+                        AND r.ID_Status NOT LIKE 'DELETE'
+                        AND (r.ID_Status NOT LIKE 'RETURN%' or r.ID_StepBaoGia = 8)
+            ";
 
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
+
+            if (!string.IsNullOrEmpty(MaDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereClauses.Add("r.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " AND " + string.Join(" AND ", whereClauses);
+            }
+
+            sql += @"
+                GROUP BY r.CHR_MaDon, r.BIT_LayBaoGia
+            )
+
+            SELECT 
+                SUM(IsCompleted) AS SoDonHoanThanh,
+                SUM(IsProcessing) AS SoDonDangXuLy,
+                SUM(IsChuaXuLy) AS SoDonChuaXuLy
+            FROM DonHang;";
+
+            var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            return result;
+        }
+        // Tính các đơn hàng đang chờ chọn nhà cung cấp
+        public async Task<List<dynamic>> GetWaitingForSupplier(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user)
+        {
+            var sql = @"WITH ChiTietHang AS (
+                SELECT 
+                    CHR_MaDon,
+                    CHR_MaHangNoiBo,
+		            CHR_MaThietBi,
+                    CASE WHEN MAX(CASE WHEN ID_StepBaoGia > 8 AND ID_StepBaoGia < 12 THEN 1 ELSE 0 END) = 0
+                         AND MAX(CASE WHEN ID_StepBaoGia > 6 AND ID_StepBaoGia < 9 THEN 1 ELSE 0 END) = 1
+                    THEN 1 ELSE 0 END AS IsOnlyWaiting,
+        
+                    CASE WHEN MAX(CASE WHEN ID_StepBaoGia > 6 AND ID_StepBaoGia < 9 THEN 1 ELSE 0 END) = 0
+                         AND MAX(CASE WHEN ID_StepBaoGia > 8 AND ID_StepBaoGia < 12 THEN 1 ELSE 0 END) = 1
+                    THEN 1 ELSE 0 END AS IsOnlySelected,
+        
+                    CASE WHEN MAX(CASE WHEN ID_StepBaoGia > 6 AND ID_StepBaoGia < 9 THEN 1 ELSE 0 END) = 1
+                         AND MAX(CASE WHEN ID_StepBaoGia > 8 AND ID_StepBaoGia < 12 THEN 1 ELSE 0 END) = 1
+                    THEN 1 ELSE 0 END AS IsBoth
+                FROM BaoGia_Request_of_Quotation
+                WHERE BIT_LayBaoGia = 1
+                    AND ID_Status NOT LIKE 'DELETE'
+                    AND (ID_Status NOT LIKE 'RETURN%' or ID_StepBaoGia = 8)
+                GROUP BY CHR_MaDon, CHR_MaHangNoiBo,CHR_MaThietBi
+            )
+
+            SELECT 
+                SUM(IsOnlyWaiting) AS TongSoHang_DangCho,
+                SUM(IsOnlySelected) AS TongSoHang_DaChon,
+                SUM(IsBoth) AS TongSoHang_HaiTrangThai,
+                COUNT(*) AS TongSoHang_TatCa
+            FROM ChiTietHang;";
+            return null;
+        }
     }
 }
