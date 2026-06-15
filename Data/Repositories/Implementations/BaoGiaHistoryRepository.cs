@@ -979,7 +979,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Tính các đơn hàng đang chờ chọn nhà cung cấp
         public async Task<List<dynamic>> GetWaitingForSupplier(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user)
         {
-            var sql = @"WITH ChiTietHang AS (
+            var sql = @"
+            WITH ChiTietHang AS (
                 SELECT 
                     CHR_MaDon,
                     CHR_MaHangNoiBo,
@@ -999,16 +1000,59 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 WHERE BIT_LayBaoGia = 1
                     AND ID_Status NOT LIKE 'DELETE'
                     AND (ID_Status NOT LIKE 'RETURN%' or ID_StepBaoGia = 8)
+            ";
+
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
+
+            if (!string.IsNullOrEmpty(MaDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereClauses.Add("r.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " AND " + string.Join(" AND ", whereClauses);
+            }
+
+            sql += @"
                 GROUP BY CHR_MaDon, CHR_MaHangNoiBo,CHR_MaThietBi
             )
-
             SELECT 
                 SUM(IsOnlyWaiting) AS TongSoHang_DangCho,
                 SUM(IsOnlySelected) AS TongSoHang_DaChon,
                 SUM(IsBoth) AS TongSoHang_HaiTrangThai,
                 COUNT(*) AS TongSoHang_TatCa
             FROM ChiTietHang;";
-            return null;
+
+            var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            return result;
         }
     }
 }

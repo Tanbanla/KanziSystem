@@ -783,8 +783,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                         Request_Date = list.Rows[i]["Request_Date"].ToString()!,
                         Declaration = list.Rows[i]["Declaration"].ToString()!,
                         Dealine = list.Rows[i]["Dealine"].ToString()!,
-                        Total_exchange = double.Parse(list.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                        Total = double.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                        Total_exchange = Math.Round(double.Parse(list.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),2),
+                        Total = Math.Round(double.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),2),
                         Kind = list.Rows[i]["Kind"].ToString()!,
                         Type = list.Rows[i]["Type"].ToString()!,
                         Status = list.Rows[i]["Status"].ToString()!,
@@ -805,8 +805,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             else
             {
                 return new List<PE_REQUEST_CONFIRM>();
-            }
-          
+            }          
         }
         public static List<REQUEST_DETAIL> _load_body_detail(string code_request)
         {

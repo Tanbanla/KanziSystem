@@ -1798,25 +1798,25 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Category_JP).HasMaxLength(500);
             entity.Property(e => e.Category_VN).HasMaxLength(500);
             entity.Property(e => e.Code_Suppiler).HasMaxLength(200);
-            entity.Property(e => e.Composition).HasMaxLength(250);
+            entity.Property(e => e.Composition).HasMaxLength(2200);
             entity.Property(e => e.Currency)
                 .HasMaxLength(10)
                 .IsFixedLength();
-            entity.Property(e => e.Dimension).HasMaxLength(250);
+            entity.Property(e => e.Dimension).HasMaxLength(2200);
             entity.Property(e => e.GoodKind).HasMaxLength(50);
             entity.Property(e => e.Group_Code).HasMaxLength(50);
             entity.Property(e => e.Id_Material).ValueGeneratedOnAdd();
             entity.Property(e => e.Material1)
-                .HasMaxLength(250)
+                .HasMaxLength(2200)
                 .HasColumnName("Material");
             entity.Property(e => e.Material_Name_EN).HasMaxLength(500);
             entity.Property(e => e.Material_Name_JP).HasMaxLength(500);
             entity.Property(e => e.Material_Name_VN);
-            entity.Property(e => e.Purpose).HasMaxLength(250);
-            entity.Property(e => e.Shape).HasMaxLength(250);
+            entity.Property(e => e.Purpose).HasMaxLength(2200);
+            entity.Property(e => e.Shape).HasMaxLength(2200);
             entity.Property(e => e.Unit).HasMaxLength(50);
             entity.Property(e => e.Unit_Note).HasMaxLength(500);
-            entity.Property(e => e.UsedFor).HasMaxLength(250);
+            entity.Property(e => e.UsedFor).HasMaxLength(2200);
             entity.Property(e => e.CHR_MaterialOutSide).HasMaxLength(50);
         });
 

@@ -594,7 +594,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     Declaration = list.Rows[i]["Declaration"].ToString()!,
                     Dealine = list.Rows[i]["Dealine"].ToString()!,
                     Total_exchange = float.Parse(list.Rows[i]["Total_exchange"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
-                    Total = float.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),
+                    Total = Math.Round(float.Parse(list.Rows[i]["Total"].ToString()!, System.Globalization.CultureInfo.InvariantCulture),2),
                     Kind = list.Rows[i]["Kind"].ToString()!,
                     Type = list.Rows[i]["Type"].ToString()!,
                     Status = list.Rows[i]["Status"].ToString()!,
