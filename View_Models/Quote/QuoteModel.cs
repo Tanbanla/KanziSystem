@@ -170,6 +170,8 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public List<int>? listUpdate { get; set; }
 
         public bool isReturn { get; set; }
+
+        public List<BaoGia_Request_of_QuotationDTO> listRequest { get; set; } = new List<BaoGia_Request_of_QuotationDTO>();
     }
     // delete quotation by id
     public class DeleteQuotationByIdModel

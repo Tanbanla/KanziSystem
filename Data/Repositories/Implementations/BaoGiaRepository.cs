@@ -1590,11 +1590,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 throw new ArgumentNullException(nameof(maDons), "No data to check");
             }
 
-            var count = await _context.BaoGia_Request_of_Quotations
-                .Where(c => maDons.Equals(c.CHR_MaDon) && c.ID_Status.Contains("RETURN"))
-                .CountAsync();
+            var result = await _context.BaoGia_Request_of_Quotations
+                .Where(c => maDons.Contains(c.CHR_MaDon))
+                .GroupBy(c => c.CHR_MaDon)
+                .Select(g => g.Max(x => x.ID_StepBaoGia))
+                .AllAsync(maxStep => maxStep < 5);
 
-            return count > 0;
+            return result;
         }
         // Export history báo giá
         public async Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)

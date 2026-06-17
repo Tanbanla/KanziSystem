@@ -2081,7 +2081,12 @@
         let opt = Array.from(select.options).find(o => o.value === val);
         if (!opt) {
             // try match by text prefix before ' - '
-            opt = Array.from(select.options).find(o => (o.text || '').toLowerCase() === (val || '').toLowerCase() || (o.text || '').toLowerCase().startsWith((val || '').toLowerCase()));
+            /*            opt = Array.from(select.options).find(o => (o.text || '').toLowerCase() === (val || '').toLowerCase() || (o.text || '').toLowerCase().startsWith((val || '').toLowerCase()));*/
+            opt = Array.from(select.options).find(o => {
+                const text = (o.text || '').toLowerCase();
+                const value = (val || '').toLowerCase();
+                return text === value || text.includes(value);
+            });
         }
         if (opt) {
             select.value = opt.value;

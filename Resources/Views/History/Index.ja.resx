@@ -468,4 +468,166 @@
   <data name="PageSize" xml:space="preserve">
     <value>ページサイズ</value>
   </data>
+  <data name="CHR_StepName" xml:space="preserve">
+    <value>CHR_StepNameJP</value>
+  </data>
+  <data name="DashboardSummary" xml:space="preserve">
+    <value>ダッシュボード概要</value>
+  </data>
+  <data name="SummaryTable1Title" xml:space="preserve">
+    <value>表1: 期限ステータス</value>
+  </data>
+  <data name="DueSoon" xml:space="preserve">
+    <value>期限当日</value>
+  </data>
+  <data name="OneDayLeft" xml:space="preserve">
+    <value>残り1日</value>
+  </data>
+  <data name="Remaining" xml:space="preserve">
+    <value>残り</value>
+  </data>
+  <data name="Overdue" xml:space="preserve">
+    <value>期限超過</value>
+  </data>
+  <data name="SummaryTable2Title" xml:space="preserve">
+    <value>表2: 依頼ステータス</value>
+  </data>
+  <data name="WaitDeptPic" xml:space="preserve">
+    <value>部門PIC待ち</value>
+  </data>
+  <data name="WaitDeptQlsc" xml:space="preserve">
+    <value>部門QLSC待ち</value>
+  </data>
+  <data name="WaitDeptQltc" xml:space="preserve">
+    <value>部門QLTC待ち</value>
+  </data>
+  <data name="WaitOrderPic" xml:space="preserve">
+    <value>購買PIC待ち</value>
+  </data>
+  <data name="WaitOrderQlsc" xml:space="preserve">
+    <value>購買QLSC待ち</value>
+  </data>
+  <data name="SummaryTable3Title" xml:space="preserve">
+    <value>表3: 処理ステータス</value>
+  </data>
+  <data name="CompletedOrders" xml:space="preserve">
+    <value>完了件数</value>
+  </data>
+  <data name="ProcessingOrders" xml:space="preserve">
+    <value>処理中件数</value>
+  </data>
+  <data name="UnprocessedOrders" xml:space="preserve">
+    <value>未処理件数</value>
+  </data>
+  <data name="SummaryTable4Title" xml:space="preserve">
+    <value>表4: 仕入先選定待ち</value>
+  </data>
+  <data name="TotalWaitingItems" xml:space="preserve">
+    <value>選定待ち合計</value>
+  </data>
+  <data name="TotalSelectedItems" xml:space="preserve">
+    <value>選定済み合計</value>
+  </data>
+  <data name="TotalBothStatusItems" xml:space="preserve">
+    <value>両状態合計</value>
+  </data>
+  <data name="TotalAllItems" xml:space="preserve">
+    <value>全件合計</value>
+  </data>
+  <data name="HistoryTableTitle" xml:space="preserve">
+    <value>履歴テーブル</value>
+  </data>
+  <data name="LegendTitle" xml:space="preserve">
+    <value>色の凡例</value>
+  </data>
+  <data name="LegendRejectedQuote" xml:space="preserve">
+    <value>黄色: 見積依頼却下</value>
+  </data>
+  <data name="LegendSupplierSubmitted" xml:space="preserve">
+    <value>緑（仕入先セル）: 見積提出済み</value>
+  </data>
+  <data name="LegendSupplierNotSubmitted" xml:space="preserve">
+    <value>白（仕入先セル）: 見積未提出</value>
+  </data>
+  <data name="LegendOverdue" xml:space="preserve">
+    <value>赤: 見積依頼期限超過</value>
+  </data>
+  <data name="LegendGroup1" xml:space="preserve">
+    <value>Group 1 - 依頼承認</value>
+  </data>
+  <data name="LegendGroup2" xml:space="preserve">
+    <value>Group 2 - 仕入先選定承認</value>
+  </data>
+  <data name="LegendGroup3" xml:space="preserve">
+    <value>Group 3 - 仕入先選定結果</value>
+  </data>
+  <data name="LegendGroup4" xml:space="preserve">
+    <value>Group 4 - ステータス/操作</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="OrderNo" xml:space="preserve">
+    <value>依頼番号</value>
+  </data>
+  <data name="InternalCode" xml:space="preserve">
+    <value>社内コード</value>
+  </data>
+  <data name="VendorGoodCode" xml:space="preserve">
+    <value>仕入先品目コード</value>
+  </data>
+  <data name="PartNameEnglish" xml:space="preserve">
+    <value>品名（英語）(*)</value>
+  </data>
+  <data name="Supplier1" xml:space="preserve">
+    <value>仕入先 1</value>
+  </data>
+  <data name="Supplier2" xml:space="preserve">
+    <value>仕入先 2</value>
+  </data>
+  <data name="Supplier3" xml:space="preserve">
+    <value>仕入先 3</value>
+  </data>
+  <data name="Supplier4" xml:space="preserve">
+    <value>仕入先 4</value>
+  </data>
+  <data name="Supplier5" xml:space="preserve">
+    <value>仕入先 5</value>
+  </data>
+  <data name="SelectionDeadline" xml:space="preserve">
+    <value>選定期限</value>
+  </data>
+  <data name="RequesterUser" xml:space="preserve">
+    <value>依頼者</value>
+  </data>
+  <data name="ApprovalOrderGroup" xml:space="preserve">
+    <value>依頼承認</value>
+  </data>
+  <data name="ApprovalSupplierGroup" xml:space="preserve">
+    <value>仕入先選定承認</value>
+  </data>
+  <data name="ResultSupplierGroup" xml:space="preserve">
+    <value>仕入先選定結果</value>
+  </data>
+  <data name="SelectedSupplier" xml:space="preserve">
+    <value>選定仕入先</value>
+  </data>
+  <data name="SelectedSupplierReason" xml:space="preserve">
+    <value>仕入先選定理由</value>
+  </data>
+  <data name="QuotationLink" xml:space="preserve">
+    <value>見積リンク</value>
+  </data>
+  <data name="ViewHistoryTooltip" xml:space="preserve">
+    <value>履歴を見る</value>
+  </data>
+  <data name="ReturnTooltip" xml:space="preserve">
+    <value>差戻し</value>
+  </data>
+  <data name="DeleteTooltip" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="ExportTable" xml:space="preserve">
+    <value>テーブルデータファイルのエクスポート</value>
+  </data>
 </root>

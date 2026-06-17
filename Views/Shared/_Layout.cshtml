@@ -162,7 +162,7 @@
                                     </a>
                                 </li>
                                 <li>
-@*                                     @if (User.FindFirst("Roles")?.Value == "UserPUR")
+                                    @if (User.FindFirst("Roles")?.Value == "UserPUR")
                                     {
                                         <a class="dropdown-item py-2" href="~/History/Index">
                                             <i class="fas fa-history me-2"></i>
@@ -170,12 +170,12 @@
                                         </a>
                                     }
                                     else
-                                    { *@
+                                    {
                                         <a class="dropdown-item py-2" href="~/History/HistoryQuote">
                                             <i class="fas fa-history me-2"></i>
                                             <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                         </a>
-@*                                     } *@
+                                    }
                                     
                                 </li>
                             </ul>

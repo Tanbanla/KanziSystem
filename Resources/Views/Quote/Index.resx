@@ -163,7 +163,7 @@
     <value>Mã hàng của NCC</value>
   </data>
   <data name="ItemNameVN" xml:space="preserve">
-    <value>Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)</value>
+    <value>Tên hàng VN(dự thảo)</value>
   </data>
   <data name="ItemNameEN" xml:space="preserve">
     <value>Tên hàng EN</value>
@@ -247,7 +247,7 @@
     <value>-- Chọn mã hàng nội bộ --</value>
   </data>
   <data name="ItemNameVNPlaceholder" xml:space="preserve">
-    <value>Tên hàng VN dùng để mở thủ tục hải quan</value>
+    <value>Tên hàng VN</value>
   </data>
   <data name="Composition" xml:space="preserve">
     <value>Thành phần, hàm lượng</value>

@@ -163,7 +163,7 @@
     <value>仕入先品目コード</value>
   </data>
   <data name="ItemNameVN" xml:space="preserve">
-    <value>税関手続き用ベトナム語品名（案）</value>
+    <value>ベトナム語での商品名（​​下書き）</value>
   </data>
   <data name="ItemNameEN" xml:space="preserve">
     <value>英語品名</value>
@@ -247,7 +247,7 @@
     <value>-- 社内品目コードを選択 --</value>
   </data>
   <data name="ItemNameVNPlaceholder" xml:space="preserve">
-    <value>税関手続き用ベトナム語品名</value>
+    <value>VNアイテム名</value>
   </data>
   <data name="Composition" xml:space="preserve">
     <value>成分・含有量</value>

@@ -468,4 +468,166 @@
   <data name="PageSize" xml:space="preserve">
     <value>Số dòng</value>
   </data>
+  <data name="CHR_StepName" xml:space="preserve">
+    <value>CHR_StepName</value>
+  </data>
+  <data name="DashboardSummary" xml:space="preserve">
+    <value>Bảng tổng hợp</value>
+  </data>
+  <data name="SummaryTable1Title" xml:space="preserve">
+    <value>Bảng 1: Tình trạng thời hạn</value>
+  </data>
+  <data name="DueSoon" xml:space="preserve">
+    <value>Đến hạn</value>
+  </data>
+  <data name="OneDayLeft" xml:space="preserve">
+    <value>Còn 1 ngày</value>
+  </data>
+  <data name="Remaining" xml:space="preserve">
+    <value>Còn lại</value>
+  </data>
+  <data name="Overdue" xml:space="preserve">
+    <value>Quá hạn</value>
+  </data>
+  <data name="SummaryTable2Title" xml:space="preserve">
+    <value>Bảng 2: Tình trạng đơn</value>
+  </data>
+  <data name="WaitDeptPic" xml:space="preserve">
+    <value>Chờ PIC phòng ban</value>
+  </data>
+  <data name="WaitDeptQlsc" xml:space="preserve">
+    <value>Chờ QLSC phòng ban</value>
+  </data>
+  <data name="WaitDeptQltc" xml:space="preserve">
+    <value>Chờ QLTC phòng ban</value>
+  </data>
+  <data name="WaitOrderPic" xml:space="preserve">
+    <value>Chờ PIC phòng đặt hàng</value>
+  </data>
+  <data name="WaitOrderQlsc" xml:space="preserve">
+    <value>Chờ QLSC phòng đặt hàng</value>
+  </data>
+  <data name="SummaryTable3Title" xml:space="preserve">
+    <value>Bảng 3: Tình trạng xử lý</value>
+  </data>
+  <data name="CompletedOrders" xml:space="preserve">
+    <value>Số đơn hoàn thành</value>
+  </data>
+  <data name="ProcessingOrders" xml:space="preserve">
+    <value>Số đơn đang xử lý</value>
+  </data>
+  <data name="UnprocessedOrders" xml:space="preserve">
+    <value>Số đơn chưa xử lý</value>
+  </data>
+  <data name="SummaryTable4Title" xml:space="preserve">
+    <value>Bảng 4: Chờ chọn NCC</value>
+  </data>
+  <data name="TotalWaitingItems" xml:space="preserve">
+    <value>Tổng số hàng đang chờ</value>
+  </data>
+  <data name="TotalSelectedItems" xml:space="preserve">
+    <value>Tổng số hàng đã chọn</value>
+  </data>
+  <data name="TotalBothStatusItems" xml:space="preserve">
+    <value>Tổng số hàng hai trạng thái</value>
+  </data>
+  <data name="TotalAllItems" xml:space="preserve">
+    <value>Tổng số hàng tất cả</value>
+  </data>
+  <data name="HistoryTableTitle" xml:space="preserve">
+    <value>Bảng lịch sử</value>
+  </data>
+  <data name="LegendTitle" xml:space="preserve">
+    <value>Chú thích màu</value>
+  </data>
+  <data name="LegendRejectedQuote" xml:space="preserve">
+    <value>Màu vàng: Từ chối báo giá</value>
+  </data>
+  <data name="LegendSupplierSubmitted" xml:space="preserve">
+    <value>Màu xanh lá (ô NCC): Đã gửi báo giá</value>
+  </data>
+  <data name="LegendSupplierNotSubmitted" xml:space="preserve">
+    <value>Màu trắng (ô NCC): Nhà cung cấp chưa gửi báo giá</value>
+  </data>
+  <data name="LegendOverdue" xml:space="preserve">
+    <value>Màu đỏ: Quá hạn xin báo giá</value>
+  </data>
+  <data name="LegendGroup1" xml:space="preserve">
+    <value>Group 1 - Phê duyệt đơn</value>
+  </data>
+  <data name="LegendGroup2" xml:space="preserve">
+    <value>Group 2 - Phê duyệt chọn NCC</value>
+  </data>
+  <data name="LegendGroup3" xml:space="preserve">
+    <value>Group 3 - Kết quả lựa chọn NCC</value>
+  </data>
+  <data name="LegendGroup4" xml:space="preserve">
+    <value>Group 4 - Trạng thái/Action</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>STT</value>
+  </data>
+  <data name="OrderNo" xml:space="preserve">
+    <value>Số đơn</value>
+  </data>
+  <data name="InternalCode" xml:space="preserve">
+    <value>Mã nội bộ</value>
+  </data>
+  <data name="VendorGoodCode" xml:space="preserve">
+    <value>Mã hàng của NCC</value>
+  </data>
+  <data name="PartNameEnglish" xml:space="preserve">
+    <value>Tên hàng tiếng anh (*)</value>
+  </data>
+  <data name="Supplier1" xml:space="preserve">
+    <value>Nhà cung cấp 1</value>
+  </data>
+  <data name="Supplier2" xml:space="preserve">
+    <value>Nhà cung cấp 2</value>
+  </data>
+  <data name="Supplier3" xml:space="preserve">
+    <value>Nhà cung cấp 3</value>
+  </data>
+  <data name="Supplier4" xml:space="preserve">
+    <value>Nhà cung cấp 4</value>
+  </data>
+  <data name="Supplier5" xml:space="preserve">
+    <value>Nhà cung cấp 5</value>
+  </data>
+  <data name="SelectionDeadline" xml:space="preserve">
+    <value>Kì hạn lựa chọn</value>
+  </data>
+  <data name="RequesterUser" xml:space="preserve">
+    <value>Người làm đơn</value>
+  </data>
+  <data name="ApprovalOrderGroup" xml:space="preserve">
+    <value>Phê duyệt đơn</value>
+  </data>
+  <data name="ApprovalSupplierGroup" xml:space="preserve">
+    <value>Phê duyệt chọn NCC</value>
+  </data>
+  <data name="ResultSupplierGroup" xml:space="preserve">
+    <value>Kết quả lựa chọn NCC</value>
+  </data>
+  <data name="SelectedSupplier" xml:space="preserve">
+    <value>Nhà cung cấp chọn</value>
+  </data>
+  <data name="SelectedSupplierReason" xml:space="preserve">
+    <value>Lý do chọn nhà cung cấp</value>
+  </data>
+  <data name="QuotationLink" xml:space="preserve">
+    <value>Link báo giá</value>
+  </data>
+  <data name="ViewHistoryTooltip" xml:space="preserve">
+    <value>Xem lịch sử</value>
+  </data>
+  <data name="ReturnTooltip" xml:space="preserve">
+    <value>Trả lại</value>
+  </data>
+  <data name="DeleteTooltip" xml:space="preserve">
+    <value>Xóa</value>
+  </data>
+  <data name="ExportTable" xml:space="preserve">
+    <value>Xuất file dữ liệu bảng</value>
+  </data>
 </root>

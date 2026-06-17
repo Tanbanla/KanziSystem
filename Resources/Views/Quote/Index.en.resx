@@ -163,7 +163,7 @@
     <value>Supplier Item Code</value>
   </data>
   <data name="ItemNameVN" xml:space="preserve">
-    <value>Item name in Vietnamese for customs (draft)</value>
+    <value>Item name in Vietnamese (draft)</value>
   </data>
   <data name="ItemNameEN" xml:space="preserve">
     <value>Item name (EN)</value>
@@ -247,7 +247,7 @@
     <value>-- Select internal material code --</value>
   </data>
   <data name="ItemNameVNPlaceholder" xml:space="preserve">
-    <value>VN item name for customs</value>
+    <value>VN item name</value>
   </data>
   <data name="Composition" xml:space="preserve">
     <value>Composition, content</value>

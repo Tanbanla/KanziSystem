@@ -519,30 +519,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<ListRequest<dynamic>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? status, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
         {
-            var sql = @"
-                WITH CTE AS (
-                    SELECT 
-                        r.CHR_MaDon,
-                        r.CHR_MaHangNoiBo,
-                        r.CHR_MaHangNCC,
-                        r.CHR_NameEN,
-                        r.DTM_KyHan,
-                        r.CHR_CreateBy,
-                        CONVERT(DATE, r.DTM_CreateDate) AS DTM_Create,
-                        r.CHR_MaNCC,
-                        v.ShortName,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo
-                            ORDER BY r.CHR_MaNCC
-                        ) AS RN
-                    FROM BaoGia_Request_of_Quotation r
-                    LEFT JOIN IM_NCC_NEW v ON r.CHR_MaNCC = v.Ma
-            ";
+            var sql = string.Empty;
 
             var whereClauses = new List<string>();
             var parameters = new Dapper.DynamicParameters();
 
-            whereClauses.Add("r.CHR_MaNCC IS NOT NULL");
+            whereClauses.Add("r.BIT_LayBaoGia = 1");
 
             if (!string.IsNullOrEmpty(MaDon))
             {
@@ -584,7 +566,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             switch (status)
             {
                 case "RETURN":
-                    statusSql = "r.ID_Status LIKE '%RETURN%' AND r.ID_Status NOT LIKE 'DELETE'";
+                    statusSql = "r.ID_Status LIKE 'RETURN%'";
                     break;
                 case "DONE":
                     statusSql = "r.ID_Status = 'DONE' AND r.ID_Status NOT LIKE 'DELETE'";
@@ -599,7 +581,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     statusSql = "r.ID_Status LIKE 'DELETE'";
                     break;
                 default:
-                    statusSql = "r.ID_Status NOT LIKE 'DELETE'";
+                    statusSql = "r.ID_Status NOT LIKE 'RETURN%' AND r.ID_Status NOT LIKE 'DELETE'";
                     break;
             }
             whereClauses.Add("(" + statusSql + ")");
@@ -607,205 +589,194 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // date range filters (use DTM_CreateDate)
             if (dateFrom.HasValue)
             {
-                whereClauses.Add("CAST(r.DTM_CreateDate AS DATE) >= CAST(@DateFrom AS DATE)");
+                whereClauses.Add("r.DTM_CreateDate >= @DateFrom");
                 parameters.Add("DateFrom", dateFrom.Value.Date);
             }
             if (dateTo.HasValue)
             {
-                whereClauses.Add("CAST(r.DTM_CreateDate AS DATE) <= CAST(@DateTo AS DATE)");
-                parameters.Add("DateTo", dateTo.Value.Date);
+                whereClauses.Add("r.DTM_CreateDate < @DateTo");
+                parameters.Add("DateTo", dateTo.Value.Date.AddDays(1));
             }
 
-            if (whereClauses.Any())
-            {
-                sql += " WHERE " + string.Join(" AND ", whereClauses);
-            }
+            var whereSql = whereClauses.Any()
+                ? " WHERE " + string.Join(" AND ", whereClauses)
+                : string.Empty;
 
-            sql += @"
-                ),
-                HIS AS (
-                    SELECT 
-                        h.CHR_MaDon,
-                        h.CHR_ActionType,
-                        h.NVCHR_UpdateName,
-                        TRY_CONVERT(DATETIME, h.CHR_Updatedate) AS ApproveTime,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY h.CHR_MaDon, h.CHR_ActionType
-                            ORDER BY TRY_CONVERT(DATETIME, h.CHR_Updatedate) DESC
-                        ) AS RN
-                    FROM BaoGia_History_Request_of_Quotation h
-                    WHERE h.CHR_ActionType IN (
-                        'QLSC','QLTC','PIC',
-                        'QLSC_1',
-                        'PIC_PICK_NCC',
-                        'QLSC_PICK_NCC',
-                        'QLTC_PICK_NCC',
-                        'DEFT_PICK_NCC'
-                    )
-                ),
-                HIS_PIVOT AS (
-                    SELECT 
-                        CHR_MaDon,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
-                    FROM HIS
-                    WHERE RN = 1
-                    GROUP BY CHR_MaDon
-                )
-                SELECT 
-                    c.CHR_MaDon,
-                    c.CHR_MaHangNoiBo,
-                    c.CHR_MaHangNCC,
-                    c.CHR_NameEN,
-                    c.DTM_KyHan,
-                    c.CHR_CreateBy,
-                    c.DTM_Create,
-                    MAX(CASE WHEN c.RN = 1 THEN c.ShortName END) AS Vender1,
-                    MAX(CASE WHEN c.RN = 2 THEN c.ShortName END) AS Vender2,
-                    MAX(CASE WHEN c.RN = 3 THEN c.ShortName END) AS Vender3,
-                    MAX(CASE WHEN c.RN = 4 THEN c.ShortName END) AS Vender4,
-                    MAX(CASE WHEN c.RN = 5 THEN c.ShortName END) AS Vender5,
-                    h.PIC_Approve, h.PIC_Time,
-                    h.QLSC_Approve, h.QLSC_Time,
-                    h.QLTC_Approve, h.QLTC_Time,
-                    h.QLSC1_Approve, h.QLSC1_Time,
-                    h.PIC_PickNCC, h.PIC_PickNCC_Time,
-                    h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
-                    h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
-                    h.DEFT_PickNCC, h.DEFT_PickNCC_Time
-                FROM CTE c
-                LEFT JOIN HIS_PIVOT h 
-                    ON c.CHR_MaDon = h.CHR_MaDon
-                GROUP BY 
-                    c.CHR_MaDon,
-                    c.CHR_MaHangNoiBo,
-                    c.CHR_MaHangNCC,
-                    c.CHR_NameEN,
-                    c.DTM_KyHan,
-                    c.DTM_Create,
-                    c.CHR_CreateBy,
-                    h.PIC_Approve, h.PIC_Time,
-                    h.QLSC_Approve, h.QLSC_Time,
-                    h.QLTC_Approve, h.QLTC_Time,
-                    h.QLSC1_Approve, h.QLSC1_Time,
-                    h.PIC_PickNCC, h.PIC_PickNCC_Time,
-                    h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
-                    h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
-                    h.DEFT_PickNCC, h.DEFT_PickNCC_Time
-            ";
-
-            var countSql = @"
-                WITH CTE AS (
-                    SELECT 
+            var cteSql = @"
+                ;WITH FILTERED AS (
+                    SELECT
+                        r.ID,
                         r.CHR_MaDon,
-                        r.CHR_MaHangNoiBo,
                         r.CHR_MaHangNCC,
+                        r.CHR_MaHangNoiBo,
                         r.CHR_NameEN,
                         r.DTM_KyHan,
                         r.CHR_CreateBy,
-                        CONVERT(DATE, r.DTM_CreateDate) AS DTM_Create,
-                        r.CHR_MaNCC,
-                        v.ShortName,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY r.CHR_MaDon, r.CHR_MaHangNoiBo
-                            ORDER BY r.CHR_MaNCC
-                        ) AS RN
+                        r.ID_StepBaoGia,
+                        r.CHR_MaNCC
                     FROM BaoGia_Request_of_Quotation r
-                    LEFT JOIN IM_NCC_NEW v ON r.CHR_MaNCC = v.Ma
-            ";
-
-            if (whereClauses.Any())
-            {
-                countSql += " WHERE " + string.Join(" AND ", whereClauses);
-            }
-
-            countSql += @"
+            " + whereSql + @"
                 ),
-                HIS AS (
-                    SELECT 
-                        h.CHR_MaDon,
+                MAIN AS (
+                    SELECT
+                        f.CHR_MaDon,
+                        f.CHR_MaHangNCC,
+                        f.CHR_MaHangNoiBo,
+                        f.CHR_NameEN,
+                        MAX(f.DTM_KyHan) AS DTM_KyHan,
+                        MAX(f.CHR_CreateBy) AS CHR_CreateBy,
+                        MAX(f.ID_StepBaoGia) AS Step
+                    FROM FILTERED f
+                    GROUP BY
+                        f.CHR_MaDon,
+                        f.CHR_MaHangNCC,
+                        f.CHR_MaHangNoiBo,
+                        f.CHR_NameEN
+                ),
+                NCC_ROW AS (
+                    SELECT
+                        f.CHR_MaDon,
+                        f.CHR_MaHangNoiBo,
+                        f.ID_StepBaoGia,
+                        ISNULL(n.ShortName, f.CHR_MaNCC) AS ShortName,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY
+                                f.CHR_MaDon,
+                                ISNULL(NULLIF(f.CHR_MaHangNoiBo, ''), CAST(f.ID AS NVARCHAR(20)))
+                            ORDER BY n.ShortName
+                        ) AS rn
+                    FROM FILTERED f
+                    LEFT JOIN IM_NCC_NEW n ON f.CHR_MaNCC = n.Ma
+                ),
+                NCC_PIVOT AS (
+                    SELECT
+                        CHR_MaDon,
+                        CHR_MaHangNoiBo,
+                        MAX(CASE WHEN rn = 1 THEN ShortName END) AS NCC_1,
+                        MAX(CASE WHEN rn = 2 THEN ShortName END) AS NCC_2,
+                        MAX(CASE WHEN rn = 3 THEN ShortName END) AS NCC_3,
+                        MAX(CASE WHEN rn = 4 THEN ShortName END) AS NCC_4,
+                        MAX(CASE WHEN rn = 5 THEN ShortName END) AS NCC_5,
+						MAX(CASE WHEN rn = 1 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_1,
+                        MAX(CASE WHEN rn = 2 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_2,
+                        MAX(CASE WHEN rn = 3 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_3,
+                        MAX(CASE WHEN rn = 4 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_4,
+                        MAX(CASE WHEN rn = 5 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_5
+                    FROM NCC_ROW
+                    GROUP BY CHR_MaDon, CHR_MaHangNoiBo
+                ),
+                HIS_RAW AS (
+                    SELECT
+                        f.CHR_MaDon,
+                        f.CHR_MaHangNoiBo,
                         h.CHR_ActionType,
                         h.NVCHR_UpdateName,
-                        TRY_CONVERT(DATETIME, h.CHR_Updatedate) AS ApproveTime,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY h.CHR_MaDon, h.CHR_ActionType
-                            ORDER BY TRY_CONVERT(DATETIME, h.CHR_Updatedate) DESC
-                        ) AS RN
+                        TRY_CONVERT(DATETIME, h.CHR_Updatedate) AS ApproveTime
                     FROM BaoGia_History_Request_of_Quotation h
+                    INNER JOIN FILTERED f
+                        ON f.ID = h.ID_RequestQuote
                     WHERE h.CHR_ActionType IN (
                         'QLSC','QLTC','PIC',
-                        'QLSC_1',
-                        'PIC_PICK_NCC',
-                        'QLSC_PICK_NCC',
-                        'QLTC_PICK_NCC',
+                        'QLSC_1','PIC_PICK_NCC',
+                        'QLSC_PICK_NCC','QLTC_PICK_NCC',
                         'DEFT_PICK_NCC'
                     )
                 ),
-                HIS_PIVOT AS (
-                    SELECT 
+                HIS AS (
+                    SELECT
                         CHR_MaDon,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
-                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
-                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
-                    FROM HIS
-                    WHERE RN = 1
-                    GROUP BY CHR_MaDon
+                        CHR_MaHangNoiBo,
+		                MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
+		                MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
+		                MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
+		                MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
+		                MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
+		                MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
+		                MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
+		                MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
+		                MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
+		                MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
+		                MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
+		                MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
+		                MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
+		                MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
+		                MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
+		                MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
+                    FROM HIS_RAW
+                    GROUP BY CHR_MaDon, CHR_MaHangNoiBo
+                ),
+                PICK AS (
+                    SELECT
+                        f.CHR_MaDon,
+                        f.CHR_MaHangNoiBo,
+                        n.ShortName AS NCC_DuocChon,
+                        d.NVCHR_ReasonPick,
+                        d.NVCHR_File
+                    FROM FILTERED f
+                    INNER JOIN BaoGia_Detail_of_Quotation d
+                        ON d.ID_RequestQuote = f.ID
+                        AND d.BIT_Select = 1
+                    LEFT JOIN IM_NCC_NEW n
+                        ON f.CHR_MaNCC = n.Ma
                 )
-                SELECT COUNT(*)
-                FROM (
-                    SELECT c.CHR_MaDon
-                    FROM CTE c
-                    LEFT JOIN HIS_PIVOT h ON c.CHR_MaDon = h.CHR_MaDon
-                    GROUP BY 
-                        c.CHR_MaDon,
-                        c.CHR_MaHangNoiBo,
-                        c.CHR_MaHangNCC,
-                        c.CHR_NameEN,
-                        c.DTM_KyHan,
-                        c.DTM_Create,
-                        c.CHR_CreateBy,
-                        h.PIC_Approve, h.PIC_Time,
-                        h.QLSC_Approve, h.QLSC_Time,
-                        h.QLTC_Approve, h.QLTC_Time,
-                        h.QLSC1_Approve, h.QLSC1_Time,
-                        h.PIC_PickNCC, h.PIC_PickNCC_Time,
-                        h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
-                        h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
-                        h.DEFT_PickNCC, h.DEFT_PickNCC_Time
-                ) T
+            ";
+
+            sql = cteSql + @"
+                SELECT
+                    m.CHR_MaDon,
+                    m.CHR_MaHangNoiBo,
+                    m.CHR_MaHangNCC,
+                    m.CHR_NameEN,
+                    m.DTM_KyHan,
+                    m.CHR_CreateBy,
+                    m.Step,
+                    s.CHR_StepName,
+	                s.CHR_StepNameEN,
+	                s.CHR_StepNameJP,
+                    ncc.NCC_1,
+                    ncc.NCC_2,
+                    ncc.NCC_3,
+                    ncc.NCC_4,
+                    ncc.NCC_5,
+					ncc.BitNCC_1,
+                    ncc.BitNCC_2,
+                    ncc.BitNCC_3,
+                    ncc.BitNCC_4,
+                    ncc.BitNCC_5,
+                    h.PIC_Approve, h.PIC_Time,
+                    h.QLSC_Approve, h.QLSC_Time,
+                    h.QLTC_Approve, h.QLTC_Time,
+                    h.QLSC1_Approve, h.QLSC1_Time,
+                    h.PIC_PickNCC, h.PIC_PickNCC_Time,
+                    h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
+                    h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
+                    h.DEFT_PickNCC, h.DEFT_PickNCC_Time,
+                    p.NCC_DuocChon,
+                    p.NVCHR_ReasonPick,
+                    p.NVCHR_File
+                FROM MAIN m
+                LEFT JOIN NCC_PIVOT ncc
+                    ON m.CHR_MaDon = ncc.CHR_MaDon
+                    AND m.CHR_MaHangNoiBo = ncc.CHR_MaHangNoiBo
+                LEFT JOIN HIS h
+                    ON m.CHR_MaDon = h.CHR_MaDon
+                    AND m.CHR_MaHangNoiBo = h.CHR_MaHangNoiBo
+                LEFT JOIN PICK p
+                    ON m.CHR_MaDon = p.CHR_MaDon
+                    AND m.CHR_MaHangNoiBo = p.CHR_MaHangNoiBo
+                LEFT JOIN BaoGia_Step s
+                    ON m.Step = s.INT_StepNumber
+            ";
+
+            var countSql = cteSql + @"
+                SELECT COUNT(1)
+                FROM MAIN
             ";
 
             if (pageSize > 0 && pageIndex > 0)
             {
                 sql += @"
-                    ORDER BY c.DTM_KyHan, c.CHR_MaDon, c.CHR_MaHangNoiBo
+                    ORDER BY m.CHR_MaHangNoiBo
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY
                 ";
@@ -815,7 +786,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             else
             {
                 sql += @"
-                    ORDER BY c.DTM_KyHan, c.CHR_MaDon, c.CHR_MaHangNoiBo
+                    ORDER BY m.CHR_MaHangNoiBo
                 ";
             }
 
@@ -915,7 +886,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                             CASE WHEN COUNT(CASE WHEN r.ID_StepBaoGia < 11 THEN 1 END) = COUNT(*) THEN 1 ELSE 0 END AS IsChuaXuLy
                         FROM BaoGia_Request_of_Quotation r
 	                    LEFT JOIN (
-		                    SELECT DISTINCT CHR_CodeSection 
+		                    SELECT DISTINCT CHR_CodeSection, CHR_UserAdid
 		                    FROM BaoGia_Master_Approver_Send_Mail
 	                    ) s
 	                    ON r.CHR_SectionCode = s.CHR_CodeSection
@@ -996,7 +967,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     CASE WHEN MAX(CASE WHEN ID_StepBaoGia > 6 AND ID_StepBaoGia < 9 THEN 1 ELSE 0 END) = 1
                          AND MAX(CASE WHEN ID_StepBaoGia > 8 AND ID_StepBaoGia < 12 THEN 1 ELSE 0 END) = 1
                     THEN 1 ELSE 0 END AS IsBoth
-                FROM BaoGia_Request_of_Quotation
+                FROM BaoGia_Request_of_Quotation as r
+	            LEFT JOIN (
+		            SELECT DISTINCT CHR_CodeSection, CHR_UserAdid
+		            FROM BaoGia_Master_Approver_Send_Mail
+	            ) s
+	            ON CHR_SectionCode = s.CHR_CodeSection
                 WHERE BIT_LayBaoGia = 1
                     AND ID_Status NOT LIKE 'DELETE'
                     AND (ID_Status NOT LIKE 'RETURN%' or ID_StepBaoGia = 8)

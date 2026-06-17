@@ -468,4 +468,166 @@
   <data name="PageSize" xml:space="preserve">
     <value>Page Size</value>
   </data>
+  <data name="CHR_StepName" xml:space="preserve">
+    <value>CHR_StepNameEN</value>
+  </data>
+  <data name="DashboardSummary" xml:space="preserve">
+    <value>Dashboard summary</value>
+  </data>
+  <data name="SummaryTable1Title" xml:space="preserve">
+    <value>Table 1: Deadline status</value>
+  </data>
+  <data name="DueSoon" xml:space="preserve">
+    <value>Due today</value>
+  </data>
+  <data name="OneDayLeft" xml:space="preserve">
+    <value>1 day left</value>
+  </data>
+  <data name="Remaining" xml:space="preserve">
+    <value>Remaining</value>
+  </data>
+  <data name="Overdue" xml:space="preserve">
+    <value>Overdue</value>
+  </data>
+  <data name="SummaryTable2Title" xml:space="preserve">
+    <value>Table 2: Order status</value>
+  </data>
+  <data name="WaitDeptPic" xml:space="preserve">
+    <value>Waiting dept PIC</value>
+  </data>
+  <data name="WaitDeptQlsc" xml:space="preserve">
+    <value>Waiting dept QLSC</value>
+  </data>
+  <data name="WaitDeptQltc" xml:space="preserve">
+    <value>Waiting dept QLTC</value>
+  </data>
+  <data name="WaitOrderPic" xml:space="preserve">
+    <value>Waiting order PIC</value>
+  </data>
+  <data name="WaitOrderQlsc" xml:space="preserve">
+    <value>Waiting order QLSC</value>
+  </data>
+  <data name="SummaryTable3Title" xml:space="preserve">
+    <value>Table 3: Processing status</value>
+  </data>
+  <data name="CompletedOrders" xml:space="preserve">
+    <value>Completed orders</value>
+  </data>
+  <data name="ProcessingOrders" xml:space="preserve">
+    <value>Processing orders</value>
+  </data>
+  <data name="UnprocessedOrders" xml:space="preserve">
+    <value>Unprocessed orders</value>
+  </data>
+  <data name="SummaryTable4Title" xml:space="preserve">
+    <value>Table 4: Waiting supplier selection</value>
+  </data>
+  <data name="TotalWaitingItems" xml:space="preserve">
+    <value>Total waiting items</value>
+  </data>
+  <data name="TotalSelectedItems" xml:space="preserve">
+    <value>Total selected items</value>
+  </data>
+  <data name="TotalBothStatusItems" xml:space="preserve">
+    <value>Total items in both statuses</value>
+  </data>
+  <data name="TotalAllItems" xml:space="preserve">
+    <value>Total all items</value>
+  </data>
+  <data name="HistoryTableTitle" xml:space="preserve">
+    <value>History table</value>
+  </data>
+  <data name="LegendTitle" xml:space="preserve">
+    <value>Color legend</value>
+  </data>
+  <data name="LegendRejectedQuote" xml:space="preserve">
+    <value>Yellow: Quotation rejected</value>
+  </data>
+  <data name="LegendSupplierSubmitted" xml:space="preserve">
+    <value>Green (supplier cell): Supplier submitted quotation</value>
+  </data>
+  <data name="LegendSupplierNotSubmitted" xml:space="preserve">
+    <value>White (supplier cell): Supplier has not submitted quotation</value>
+  </data>
+  <data name="LegendOverdue" xml:space="preserve">
+    <value>Red: Quotation request overdue</value>
+  </data>
+  <data name="LegendGroup1" xml:space="preserve">
+    <value>Group 1 - Order approval</value>
+  </data>
+  <data name="LegendGroup2" xml:space="preserve">
+    <value>Group 2 - Supplier selection approval</value>
+  </data>
+  <data name="LegendGroup3" xml:space="preserve">
+    <value>Group 3 - Supplier selection result</value>
+  </data>
+  <data name="LegendGroup4" xml:space="preserve">
+    <value>Group 4 - Status/Action</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="OrderNo" xml:space="preserve">
+    <value>Order no.</value>
+  </data>
+  <data name="InternalCode" xml:space="preserve">
+    <value>Internal code</value>
+  </data>
+  <data name="VendorGoodCode" xml:space="preserve">
+    <value>Vendor good code</value>
+  </data>
+  <data name="PartNameEnglish" xml:space="preserve">
+    <value>Part name (English) (*)</value>
+  </data>
+  <data name="Supplier1" xml:space="preserve">
+    <value>Supplier 1</value>
+  </data>
+  <data name="Supplier2" xml:space="preserve">
+    <value>Supplier 2</value>
+  </data>
+  <data name="Supplier3" xml:space="preserve">
+    <value>Supplier 3</value>
+  </data>
+  <data name="Supplier4" xml:space="preserve">
+    <value>Supplier 4</value>
+  </data>
+  <data name="Supplier5" xml:space="preserve">
+    <value>Supplier 5</value>
+  </data>
+  <data name="SelectionDeadline" xml:space="preserve">
+    <value>Selection deadline</value>
+  </data>
+  <data name="RequesterUser" xml:space="preserve">
+    <value>Requester</value>
+  </data>
+  <data name="ApprovalOrderGroup" xml:space="preserve">
+    <value>Order approval</value>
+  </data>
+  <data name="ApprovalSupplierGroup" xml:space="preserve">
+    <value>Supplier selection approval</value>
+  </data>
+  <data name="ResultSupplierGroup" xml:space="preserve">
+    <value>Supplier selection result</value>
+  </data>
+  <data name="SelectedSupplier" xml:space="preserve">
+    <value>Selected supplier</value>
+  </data>
+  <data name="SelectedSupplierReason" xml:space="preserve">
+    <value>Reason for supplier selection</value>
+  </data>
+  <data name="QuotationLink" xml:space="preserve">
+    <value>Quotation link</value>
+  </data>
+  <data name="ViewHistoryTooltip" xml:space="preserve">
+    <value>View history</value>
+  </data>
+  <data name="ReturnTooltip" xml:space="preserve">
+    <value>Return</value>
+  </data>
+  <data name="DeleteTooltip" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ExportTable" xml:space="preserve">
+    <value>Export table data file</value>
+  </data>
 </root>

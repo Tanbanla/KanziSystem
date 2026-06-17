@@ -1,7 +1,70 @@
+#quote-history {
+    font-size: 11px;
+}
+
+#quote-history .card {
+    border-radius: 10px;
+}
+
+#quote-history .card-header,
+#quote-history .card-body,
+#quote-history .card-footer {
+    padding: 10px 12px;
+}
+
+#quote-history .form-label,
+#quote-history .form-control,
+#quote-history .form-select,
+#quote-history .btn,
+#quote-history .small,
+#quote-history .pagination,
+#quote-history .page-link {
+    font-size: 11px;
+}
+
+#quote-history .btn {
+    border-radius: 6px;
+    padding: 6px 8px;
+}
+
+#quote-history .history-section-header {
+    margin-bottom: 6px;
+}
+
+#quote-history .history-summary-card .card-header {
+    border-bottom: 1px solid #edf1f5;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+#quote-history .history-summary-card {
+    overflow: hidden;
+}
+
+#quote-history .history-summary-grid .summary-table td {
+    padding: 7px 9px;
+    border-bottom: 1px solid #edf1f5;
+    vertical-align: middle;
+    font-size: 11px;
+}
+
+#quote-history .history-summary-grid .summary-table tr:last-child td {
+    border-bottom: none;
+}
+
+#quote-history .history-summary-grid .summary-table td:last-child {
+    width: 56px;
+    text-align: right;
+    font-weight: 700;
+    color: #1f2937;
+}
+
 #historyGroupTableContainer {
     max-height: 680px;
     overflow: auto;
     position: relative;
+    border-radius: 10px;
 }
 
 #historyGroupTable thead th {
@@ -28,89 +91,45 @@
     z-index: 1;
 }
 
-.history-top-layout {
-    display: flex;
-    gap: 16px;
-    align-items: stretch;
-    margin-bottom: 16px;
-}
-
-.history-filter-column {
-    flex: 1 1 68%;
-    min-width: 0;
-}
-
-.history-summary-column {
-    flex: 0 0 32%;
-    min-width: 300px;
-}
-
-.history-summary-card .card-header {
-    border-bottom: 1px solid #edf1f5;
-}
-
 .summary-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-    .summary-table td {
-        padding: 10px 12px;
-        border-bottom: 1px solid #edf1f5;
-        vertical-align: middle;
-        font-size: 13px;
-    }
-
-    .summary-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .summary-table td:last-child {
-        width: 72px;
-        text-align: right;
-        font-weight: 600;
-        color: #1f2937;
-    }
-
-.status-dot {
+#quote-history .status-dot {
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    margin-right: 8px;
+    margin-right: 6px;
     vertical-align: middle;
-}
-
-@media (max-width: 1200px) {
-    .history-top-layout {
-        flex-direction: column;
-    }
-
-    .history-summary-column {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
 }
 
 .approval-table {
     border-collapse: separate;
     border-spacing: 0;
-    width: max-content;
+    width: 100%;
     min-width: 100%;
-    table-layout: auto;
-    font-size: 13px;
+    table-layout: fixed;
+    font-size: 11px;
 }
 
     .approval-table th, .approval-table td {
         border: 1px solid #333;
-        padding: 6px;
+        padding: 6px 5px;
         text-align: center;
-        white-space: nowrap;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        vertical-align: middle;
     }
 
     .approval-table thead th {
         background-color: #ddd;
         background-clip: padding-box;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
 
     .approval-table thead tr:first-child {
@@ -121,7 +140,7 @@
 
     .approval-table thead tr:nth-child(2) {
         position: sticky;
-        top: 38px;
+        top: 30px;
         z-index: 5;
     }
 
@@ -138,6 +157,28 @@
     .approval-table .group4 {
         background-color: #FFF200;
     }
+
+    .approval-table tbody tr {
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    .approval-table tbody tr:hover {
+        background-color: #f6fbff;
+    }
+
+    .approval-table td:nth-child(2),
+    .approval-table td:nth-child(3),
+    .approval-table td:nth-child(4),
+    .approval-table td:nth-child(5),
+    .approval-table td:nth-child(11),
+    .approval-table td:nth-child(12),
+    .approval-table td:nth-child(21),
+    .approval-table td:nth-child(22),
+    .approval-table td:nth-child(23),
+    .approval-table td:nth-child(24) {
+        max-width: 120px;
+    }
+
     .approval-table .status {
         width: 90px;
     }
@@ -152,21 +193,23 @@
     gap: 12px;
     align-items: center;
     padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
     .legend .item {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 13px;
+        font-size: 11px;
         color: #333;
     }
 
     .legend .swatch {
-        width: 18px;
-        height: 18px;
+        width: 12px;
+        height: 12px;
         border: 1px solid #999;
         display: inline-block;
+        border-radius: 3px;
     }
 
         .legend .swatch.yellow {
@@ -175,6 +218,22 @@
 
         .legend .swatch.green {
             background: #cfe3c6;
+        }
+
+        .legend .swatch.group1 {
+            background: #e7b38c;
+        }
+
+        .legend .swatch.group2 {
+            background: #9fb6c8;
+        }
+
+        .legend .swatch.group3 {
+            background: #cfe3c6;
+        }
+
+        .legend .swatch.group4 {
+            background: #fff200;
         }
 
         .legend .swatch.white {
@@ -193,3 +252,32 @@
         margin: 0 8px;
     }
 
+@media (max-width: 1400px) {
+    .approval-table {
+        min-width: 1280px;
+    }
+}
+
+@media (max-width: 768px) {
+    #quote-history .card-header,
+    #quote-history .card-body,
+    #quote-history .card-footer {
+        padding: 8px;
+    }
+
+    #historyGroupTableContainer {
+        max-height: 560px;
+    }
+}
+.action-buttons .btn-outline-info,
+.action-buttons .btn-outline-warning,
+.action-buttons .btn-outline-danger {
+    border: none;
+}
+
+    .action-buttons .btn-outline-info:hover,
+    .action-buttons .btn-outline-warning:hover,
+    .action-buttons .btn-outline-danger:hover {
+        border: none;
+        box-shadow: none;
+    }

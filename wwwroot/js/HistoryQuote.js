@@ -9,7 +9,6 @@
     const btnImportHistory = document.getElementById('btnImportHistory');
     const supplierSelect = document.getElementById('editNhaCungCap');
     const hiddenTenNCC = document.getElementById('editTenNCC');
-    const btnExportManaHistory = document.getElementById('btnExportManaHistory');
     let currentPage = 1;
     const pageSize = 50;
     let currentGroups = [];
@@ -309,63 +308,6 @@
         try {
             showLoading(T.Exporting || 'Đang xuất...');
             const res = await fetch((window.apiBaseUrl || '') + '/History/ExportManagerHistory', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!res.ok) {
-                const msg = await res.text().catch(() => T.ExportError || 'Xuất file thất bại');
-                throw new Error(msg);
-            }
-            const blob = await res.blob();
-            let fileName = 'HistoryQuote.xlsx';
-            const cd = res.headers.get('content-disposition');
-            if (cd) {
-                const m = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(cd);
-                if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
-            }
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error('Error exporting history', err);
-            showDialog(T.Notification || 'Thông báo', `<div class="text-danger">${err.message}</div>`);
-        } finally {
-            hideLoading();
-        }
-    });
-    btnExportManaHistory?.addEventListener('click', async () => {
-        const maDon = (document.getElementById('searchMaDon').value || '').trim();
-        const phongBan = (document.getElementById('searchPhongBan').value || '').trim();
-        const nguoiTao = (document.getElementById('searchNguoiTao').value || '').trim();
-        const maVatTu = (document.getElementById('searchMaVatTu').value || '').trim();
-        const nhaCungCap = (document.getElementById('searchNhaCungCap').value || '').trim();
-        const status = statusFilter.value;
-        const from = document.getElementById('dateFrom').value;
-        const to = document.getElementById('dateTo').value;
-        // build payload for ExportHistory
-        const payload = {
-            MaDon: maDon,
-            MaNcc: nhaCungCap,
-            Section: phongBan,
-            NguoiYeuCau: nguoiTao,
-            MaHang: maVatTu,
-            TrangThai: status,
-            Step: null,
-            PageIndex: 1,
-            PageSize: 10000,
-            Date: (from && to) ? { From: from, To: to } : null
-        };
-
-        const T = window.i18nHistoryQuote || {};
-        try {
-            showLoading(T.Exporting || 'Đang xuất...');
-            const res = await fetch((window.apiBaseUrl || '') + '/History/ExportManagerHistoryMiniExcel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

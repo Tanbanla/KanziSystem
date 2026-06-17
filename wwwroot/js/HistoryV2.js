@@ -217,6 +217,294 @@
     if (window.jQuery) buildSearchableDropdown($(document)); else buildSearchableDropdown(document);
     document.addEventListener('DOMContentLoaded', function () { buildSearchableDropdown(document); });
 
+    btnExportManaHistory?.addEventListener('click', handleHistoryExportClick);
+    async function handleHistoryExportClick(ev) {
+        ev && ev.preventDefault();
+
+        if ((btnExportManaHistory && btnExportManaHistory.disabled) || (btnExportHistory && btnExportHistory.disabled)) return;
+
+        if (btnExportManaHistory) btnExportManaHistory.disabled = true;
+        if (btnExportHistory) btnExportHistory.disabled = true;
+
+        showLoading(window.i18nHistoryQuote?.Exporting || 'Đang xuất...');
+        try {
+            const payload = buildSearchPayload(1);
+            const res = await fetch(apiUrl('/History/ExportHistoryExcel'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const txt = await res.text().catch(() => null);
+                throw new Error(txt || (window.i18nHistoryQuote?.MsgCannotExport || 'Không thể xuất file'));
+            }
+
+            const blob = await res.blob();
+            let fileName = `HistoryQuote_${new Date().toISOString().replace(/[:.]/g, '')}.xlsx`;
+            try {
+                const cd = res.headers.get('content-disposition') || res.headers.get('Content-Disposition');
+                if (cd) {
+                    const m = /filename[^;=\\n]*=((['"]).*?\\2|[^;\\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                }
+            } catch (e) { }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            showDialog({ title: window.i18nHistoryQuote?.Notification || 'Thông báo', message: err?.message || String(err), type: 'error' });
+        } finally {
+            hideLoading();
+            if (btnExportManaHistory) btnExportManaHistory.disabled = false;
+            if (btnExportHistory) btnExportHistory.disabled = false;
+        }
+    }
+
+    btnExportHistory?.addEventListener('click', handleHistoryExportManaClick);
+    async function handleHistoryExportManaClick(ev) {
+        ev && ev.preventDefault();
+
+        if ((btnExportManaHistory && btnExportManaHistory.disabled) || (btnExportHistory && btnExportHistory.disabled)) return;
+
+        if (btnExportManaHistory) btnExportManaHistory.disabled = true;
+        if (btnExportHistory) btnExportHistory.disabled = true;
+
+        showLoading(window.i18nHistoryQuote?.Exporting || 'Đang xuất...');
+        try {
+            const payload = buildSearchPayload(1);
+            const res = await fetch(apiUrl('/History/ExportManagerHistoryIndex'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const txt = await res.text().catch(() => null);
+                throw new Error(txt || (window.i18nHistoryQuote?.MsgCannotExport || 'Không thể xuất file'));
+            }
+
+            const blob = await res.blob();
+            let fileName = `HistoryQuote_${new Date().toISOString().replace(/[:.]/g, '')}.xlsx`;
+            try {
+                const cd = res.headers.get('content-disposition') || res.headers.get('Content-Disposition');
+                if (cd) {
+                    const m = /filename[^;=\\n]*=((['"]).*?\\2|[^;\\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                }
+            } catch (e) { }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            showDialog({ title: window.i18nHistoryQuote?.Notification || 'Thông báo', message: err?.message || String(err), type: 'error' });
+        } finally {
+            hideLoading();
+            if (btnExportManaHistory) btnExportManaHistory.disabled = false;
+            if (btnExportHistory) btnExportHistory.disabled = false;
+        }
+    }
+    // Import history file
+    btnImportHistory?.addEventListener('click', async () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.xlsx, .xls';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        fileInput.addEventListener('change', async function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const T = window.i18nHistoryQuote || {};
+
+            const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+            if (!allowedTypes.includes(file.type)) {
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidFileType || 'Loại file không hợp lệ'), type: 'error' });
+                document.body.removeChild(fileInput);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try { showLoading((window.i18nHistoryQuote && window.i18nHistoryQuote.LoadingData) || 'Đang xử lý...'); } catch (e) { }
+
+            try {
+                const response = await fetch(apiUrl('/History/ImportFileExcelEditHistory'), {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => null);
+                    throw new Error(errorText || (T.ErrorPrefix || 'Lỗi server'));
+                }
+
+                const importResult = await response.json().catch(() => null);
+
+                // If import does not require selecting approver, show success
+                if (!importResult?.isReturn) {
+                    showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'), type: 'success' });
+                    applyFilters(1);
+                    return;
+                }
+
+                // If import indicates a return flow, prompt user to select approver/section
+                const step = 2;
+                const section = importResult?.sectionCode || '';
+
+                // Require user to select an approver when isReturn === true
+                let selected = await openApproverSelector(step, section);
+                while (!selected) {
+                    showDialog({ title: T.Notification || 'Thông báo', message: (T.MustSelectApprover || 'Bạn phải chọn người phê duyệt trước khi thoát'), type: 'warning' });
+                    selected = await openApproverSelector(step, section);
+                }
+
+                const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? '';
+                const finalId = approverId || (selected.value || selected.Value || '');
+
+                if (!finalId) {
+                    showDialog({ title: T.Notification || 'Thông báo', message: (T.InvalidApprover || 'Người phê duyệt không hợp lệ'), type: 'error' });
+                    return;
+                }
+
+                const payload = {
+                    listUpdate: importResult?.listUpdate,
+                    sectionCode: finalId
+                };
+
+                const updateResponse = await fetch(apiUrl('/History/UpdateUserApprovalHistory'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!updateResponse.ok) {
+                    const text = await updateResponse.text().catch(() => null);
+                    throw new Error(text || (T.ErrorPrefix || 'Lỗi server khi cập nhật người phê duyệt'));
+                }
+
+                const updateResult = await updateResponse.json().catch(() => null);
+
+                showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'), type: 'success' });
+                applyFilters(1);
+
+            } catch (error) {
+                const T = window.i18nHistoryQuote || {};
+                showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể import file'), type: 'error' });
+            } finally {
+                try { hideLoading(); } catch (e) { }
+                try { document.body.removeChild(fileInput); } catch (e) { }
+            }
+        });
+
+        fileInput.click();
+    });
+
+    // Open approver selection modal (copied/adapted from HistoryQuote.js)
+    function openApproverSelector(stepNumber, sectionCode) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const modal = document.getElementById('selectApproverModal');
+                const sel = document.getElementById('selectNextApprover');
+                const notice = document.getElementById('selectApproverNotice');
+                if (!modal || !sel) return resolve(null);
+                sel.innerHTML = '';
+                const placeholderOpt = document.createElement('option');
+                placeholderOpt.value = '';
+                placeholderOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.SelectPlaceholder) || '-- Chọn --';
+                sel.appendChild(placeholderOpt);
+
+                const body = { Step: stepNumber, SectionCost: sectionCode };
+                let list = [];
+                try {
+                    const resp = await fetch(apiUrl('/History/GetListApprovel'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        list = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+                    }
+                } catch (e) { console.warn('Failed to load approvers', e); }
+
+                if (!list || !list.length) {
+                    const emptyOpt = document.createElement('option');
+                    emptyOpt.value = '';
+                    emptyOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.NoResults) || 'Không có kết quả';
+                    sel.appendChild(emptyOpt);
+                } else {
+                    list.forEach(item => {
+                        const o = document.createElement('option');
+                        const adid = item.chR_UserAdid || item.CHR_UserAdid || item.ADID || item.Id || item.id || '';
+                        const name = item.nvchR_UserName || item.NVCHR_UserName || item.Name || item.FullName || item.nvchR_FullName || '';
+                        o.value = adid || '';
+                        o.textContent = (name ? (name + (adid ? (' (' + adid + ')') : '')) : (adid || ''));
+                        try { o.dataset.raw = JSON.stringify(item); } catch { }
+                        sel.appendChild(o);
+                    });
+                }
+
+                try { if (modal.parentElement !== document.body) document.body.appendChild(modal); } catch (e) { }
+                try {
+                    if (window.bootstrap && bootstrap.Modal) {
+                        const bsModal = new bootstrap.Modal(modal, { backdrop: 'static' });
+                        modal._bsModal = bsModal;
+                        bsModal.show();
+                        setTimeout(() => { try { const createdBackdrop = document.querySelector('.modal-backdrop'); if (createdBackdrop) createdBackdrop.style.zIndex = '10550'; modal.style.zIndex = '10600'; } catch (e) { } }, 10);
+                    } else {
+                        const backdrop = document.createElement('div');
+                        backdrop.className = 'modal-backdrop show custom-modal-backdrop';
+                        backdrop.style.zIndex = '10550';
+                        document.body.appendChild(backdrop);
+                        modal._backdrop = backdrop;
+                        modal.style.zIndex = '10600';
+                        modal.style.display = 'block';
+                        modal.classList.add('show');
+                    }
+                } catch (e) { modal.style.display = 'block'; modal.classList.add('show'); }
+
+                const confirmBtn = document.getElementById('confirmSelectApprover');
+                function cleanup() {
+                    try { if (modal._bsModal) modal._bsModal.hide(); else { modal.style.display = 'none'; modal.classList.remove('show'); } } catch (e) { try { modal.style.display = 'none'; modal.classList.remove('show'); } catch { } }
+                    try { if (modal._backdrop) { document.body.removeChild(modal._backdrop); delete modal._backdrop; } } catch (e) { }
+                    try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) { }
+                    try { modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) { }
+                    if (notice) notice.style.display = 'none';
+                    try { modal.style.zIndex = ''; } catch (e) { }
+                }
+                function onConfirm(e) {
+                    e && e.preventDefault();
+                    const value = sel.value;
+                    if (!value) {
+                        if (notice) notice.style.display = '';
+                        return;
+                    }
+                    const raw = sel.selectedOptions && sel.selectedOptions[0] && sel.selectedOptions[0].dataset.raw;
+                    let obj = null;
+                    try { obj = raw ? JSON.parse(raw) : { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; } catch { obj = { CHR_UserAdid: value, NVCHR_UserName: sel.selectedOptions[0].textContent }; }
+                    cleanup();
+                    resolve(obj);
+                }
+                function onCancel() { cleanup(); resolve(null); }
+                if (confirmBtn) confirmBtn.addEventListener('click', onConfirm);
+                try { modal.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) { }
+            } catch (err) { reject(err); }
+        });
+    }
     // Loading overlay helpers
     function showLoading(message) {
         try {
@@ -235,7 +523,7 @@
             el.style.display = 'none';
             el.setAttribute('aria-hidden', 'true');
             const msgEl = el.querySelector('.loader-msg');
-            if (msgEl) msgEl.textContent = 'Đang xử lý...';
+            if (msgEl) msgEl.textContent = window.i18nHistoryQuote?.LoadingData || 'Processing...';
         } catch (e) { }
     }
 
@@ -314,10 +602,6 @@
         };
         overlay.addEventListener('click', overlay._closeHandler);
     }
-    const statusMap = new Map((window.HistoryData?.status || []).map(s => [
-        s?.VCHR_CodeStatus,
-        s?.DisplayName || s?.NVCHR_TenStatus || s?.CHR_TenStatusEN || s?.CHR_TenStatusJP || ''
-    ]));
 
     const state = {
         requestController: null
@@ -501,41 +785,40 @@
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i] || {};
-            const statusCode = getValue(row, ['ID_Status', 'id_Status', 'status'], '');
-            const statusText = statusMap.get(statusCode) || statusCode || '';
-            const deadline = getValue(row, ['DTM_KyHan', 'dtm_KyHan']);
+            var stepName = window.i18nHistoryQuote?.CHR_StepName;
+            const deadline = getValue(row, ['DTM_KyHan']);
 
             html[i] = `
                 <tr>
                     <td>${startNo + i}</td>
-                    <td>${escapeHtml(getValue(row, ['CHR_MaDon', 'chr_MaDon']))}</td>
-                    <td>${escapeHtml(getValue(row, ['CHR_MaHangNoiBo', 'chr_MaHangNoiBo']))}</td>
-                    <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC', 'chr_MaHangNCC']))}</td>
-                    <td>${escapeHtml(getValue(row, ['CHR_NameEN', 'chr_NameEN']))}</td>
-                    <td>${escapeHtml(getValue(row, ['Vender1', 'vender1']))}</td>
-                    <td>${escapeHtml(getValue(row, ['Vender2', 'vender2']))}</td>
-                    <td>${escapeHtml(getValue(row, ['Vender3', 'vender3']))}</td>
-                    <td>${escapeHtml(getValue(row, ['Vender4', 'vender4']))}</td>
-                    <td>${escapeHtml(getValue(row, ['Vender5', 'vender5']))}</td>
+                    <td>${escapeHtml(getValue(row, ['CHR_MaDon']))}</td>
+                    <td>${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}</td>
+                    <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}</td>
+                    <td>${escapeHtml(getValue(row, ['CHR_NameEN']))}</td>
+                    <td>${escapeHtml(getValue(row, ['NCC_1']))}</td>
+                    <td>${escapeHtml(getValue(row, ['NCC_2']))}</td>
+                    <td>${escapeHtml(getValue(row, ['NCC_3']))}</td>
+                    <td>${escapeHtml(getValue(row, ['NCC_4']))}</td>
+                    <td>${escapeHtml(getValue(row, ['NCC_5']))}</td>
                     <td style="${isOverdue(deadline) ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
-                    <td>${escapeHtml(getValue(row, ['CHR_CreateBy', 'chr_CreateBy']))}</td>
-                    ${approvalCell(getValue(row, ['QLSC_Approve', 'qlsC_Approve']), getValue(row, ['QLSC_Time', 'qlsC_Time']))}
-                    ${approvalCell(getValue(row, ['QLTC_Approve', 'qltC_Approve']), getValue(row, ['QLTC_Time', 'qltC_Time']))}
-                    ${approvalCell(getValue(row, ['PIC_Approve', 'piC_Approve']), getValue(row, ['PIC_Time', 'piC_Time']))}
-                    ${approvalCell(getValue(row, ['QLSC1_Approve', 'qlsC1_Approve']), getValue(row, ['QLSC1_Time', 'qlsC1_Time']))}
-                    ${approvalCell(getValue(row, ['PIC_PickNCC', 'piC_PickNCC']), getValue(row, ['PIC_PickNCC_Time', 'piC_PickNCC_Time']))}
-                    ${approvalCell(getValue(row, ['QLSC_PickNCC', 'qlsC_PickNCC']), getValue(row, ['QLSC_PickNCC_Time', 'qlsC_PickNCC_Time']))}
-                    ${approvalCell(getValue(row, ['QLTC_PickNCC', 'qltC_PickNCC']), getValue(row, ['QLTC_PickNCC_Time', 'qltC_PickNCC_Time']))}
-                    ${approvalCell(getValue(row, ['DEFT_PickNCC', 'defT_PickNCC']), getValue(row, ['DEFT_PickNCC_Time', 'defT_PickNCC_Time']))}
-                    <td>${escapeHtml(getValue(row, ['PickVendor', 'pickVendor']))}</td>
-                    <td>${escapeHtml(getValue(row, ['PickReason', 'pickReason']))}</td>
-                    <td>${escapeHtml(getValue(row, ['PickLink', 'pickLink']))}</td>
-                    <td>${escapeHtml(statusText)}</td>
+                    <td>${escapeHtml(getValue(row, ['CHR_CreateBy']))}</td>
+                    ${approvalCell(getValue(row, ['QLSC_Approve']), getValue(row, ['QLSC_Time']))}
+                    ${approvalCell(getValue(row, ['QLTC_Approve']), getValue(row, ['QLTC_Time']))}
+                    ${approvalCell(getValue(row, ['PIC_Approve']), getValue(row, ['PIC_Time']))}
+                    ${approvalCell(getValue(row, ['QLSC1_Approve']), getValue(row, ['QLSC1_Time']))}
+                    ${approvalCell(getValue(row, ['PIC_PickNCC']), getValue(row, ['PIC_PickNCC_Time']))}
+                    ${approvalCell(getValue(row, ['QLSC_PickNCC']), getValue(row, ['QLSC_PickNCC_Time']))}
+                    ${approvalCell(getValue(row, ['QLTC_PickNCC']), getValue(row, ['QLTC_PickNCC_Time']))}
+                    ${approvalCell(getValue(row, ['DEFT_PickNCC']), getValue(row, ['DEFT_PickNCC_Time']))}
+                    <td>${escapeHtml(getValue(row, ['NCC_DuocChon']))}</td>
+                    <td>${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
+                    <td>${escapeHtml(getValue(row, ['NVCHR_File']))}</td>
+                    <td>${escapeHtml(getValue(row, [stepName]))}</td>
                     <td>
-                        <div class="action-buttons" role="group" aria-label="Actions">
-                            <button type="button" class="btn btn-outline-info btn-view-history" title="Xem lịch sử" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon', 'chr_MaDon']))}"><i class="fas fa-history"></i></button>
-                            <button type="button" class="btn btn-outline-warning btn-return-history" title="Trả lại" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon', 'chr_MaDon']))}"><i class="fas fa-undo"></i></button>
-                            <button type="button" class="btn btn-outline-danger btn-delete-history" title="Xóa" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon', 'chr_MaDon']))}"><i class="fas fa-trash"></i></button>
+                        <div class="action-buttons" role="group" aria-label="${escapeHtml(window.i18nHistoryQuote?.Actions || 'Actions')}">
+                            <button type="button" class="btn btn-outline-info btn-view-history" title="${escapeHtml(window.i18nHistoryQuote?.ViewHistoryTooltip || 'View history')}" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon']))}"><i class="fas fa-history"></i></button>
+                            <button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon']))}"><i class="fas fa-undo"></i></button>
+                            <button type="button" class="btn btn-outline-danger btn-delete-history" title="${escapeHtml(window.i18nHistoryQuote?.DeleteTooltip || 'Delete')}" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon']))}"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>`;
@@ -559,9 +842,21 @@
         document.getElementById('statWaitDeptQltc').textContent = getValue(row, ['QLTCSection', 'qltCSection'], 0);
         document.getElementById('statWaitOrderPic').textContent = getValue(row, ['PICPur', 'picPur'], 0);
         document.getElementById('statWaitOrderQlsc').textContent = getValue(row, ['QLSCPur', 'qlsCPur'], 0);
+    }
+
+    function renderSummaryProcessingStatus(result) {
+        const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
         document.getElementById('statCompletedOrders').textContent = getValue(row, ['SoDonHoanThanh', 'soDonHoanThanh'], 0);
         document.getElementById('statProcessingOrders').textContent = getValue(row, ['SoDonDangXuLy', 'soDonDangXuLy'], 0);
         document.getElementById('statUnprocessedOrders').textContent = getValue(row, ['SoDonChuaXuLy', 'soDonChuaXuLy'], 0);
+    }
+
+    function renderSummaryWaitingSupplier(result) {
+        const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
+        document.getElementById('statWaitingSupplier').textContent = getValue(row, ['TongSoHang_DangCho', 'tongSoHang_DangCho'], 0);
+        document.getElementById('statSelectedSupplier').textContent = getValue(row, ['TongSoHang_DaChon', 'tongSoHang_DaChon'], 0);
+        document.getElementById('statBothStatusSupplier').textContent = getValue(row, ['TongSoHang_HaiTrangThai', 'tongSoHang_HaiTrangThai'], 0);
+        document.getElementById('statTotalSupplier').textContent = getValue(row, ['TongSoHang_TatCa', 'tongSoHang_TatCa'], 0);
     }
 
     async function applyFilters(pageIndex = 1) {
@@ -572,12 +867,14 @@
         currentPage = pageIndex;
 
         try {
-            showLoading(window.i18nHistoryQuote?.Filter || 'Đang lọc dữ liệu...');
+            showLoading(window.i18nHistoryQuote?.LoadingData || 'Processing...');
 
-            const [historyResult, countQuotationResult, countStatusResult] = await Promise.all([
+            const [historyResult, countQuotationResult, countStatusResult, processingStatusResult, waitingSupplierResult] = await Promise.all([
                 postJson('/History/SearchHistory', payload, state.requestController.signal),
                 postJson('/History/GetCountQuotation', payload, state.requestController.signal),
-                postJson('/History/GetCountStatus', payload, state.requestController.signal)
+                postJson('/History/GetCountStatus', payload, state.requestController.signal),
+                postJson('/History/GetProcessingStatus', payload, state.requestController.signal),
+                postJson('/History/GetHistoryTab1', payload, state.requestController.signal)
             ]);
 
             const parsed = normalizeListResponse(historyResult);
@@ -589,6 +886,8 @@
             renderPagination(currentPage, totalCountServer);
             renderSummaryCountQuotation(countQuotationResult);
             renderSummaryCountStatus(countStatusResult);
+            renderSummaryProcessingStatus(processingStatusResult);
+            renderSummaryWaitingSupplier(waitingSupplierResult);
         } catch (error) {
             if (error?.name === 'AbortError') return;
             showDialog({
