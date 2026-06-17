@@ -43,5 +43,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<dynamic>> GetProcessingStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user);
         // Tính các đơn hàng đang chờ chọn nhà cung cấp
         Task<List<dynamic>> GetWaitingForSupplier(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user);
+        // Lấy lịch sử của đơn hành
+        Task<List<BaoGia_History_Request_of_Quotation>> GetOrderHistoryAsync(string? maDon, string? maHang, string? maHangNCC);
     }
 }

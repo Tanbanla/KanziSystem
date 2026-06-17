@@ -1030,5 +1030,45 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return result;
         }
+
+        // Lấy lịch sử của đơn hành
+        public async Task<List<BaoGia_History_Request_of_Quotation>> GetOrderHistoryAsync(string? maDon, string? maHang, string? maHangNCC)
+        {
+
+            var sql = @"
+                SELECT 
+                    h.*
+                FROM BaoGia_History_Request_of_Quotation as h
+                LEFT JOIN BaoGia_Request_of_Quotation as r ON h.ID_RequestQuote = r.ID
+                WHERE 1=1 ";
+
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
+            // Dieu kien loc theo maDon, maHang, maHangNCC
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", maDon);
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo = @Mahang");
+                parameters.Add("Mahang", maHang);
+            }
+            if (!string.IsNullOrEmpty(maHangNCC))
+            {
+                whereClauses.Add("r.CHR_MaHangNCC = @MaHangNCC");
+                parameters.Add("MaHangNCC", maHangNCC);
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " AND " + string.Join(" AND ", whereClauses);
+            }
+
+            var result = (await _conn.QueryAsync<BaoGia_History_Request_of_Quotation>(sql, parameters)).ToList();
+            return result;
+        }
+
     }
 }

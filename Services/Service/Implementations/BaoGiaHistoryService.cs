@@ -286,5 +286,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Lấy lịch sử của đơn hành
+        public async Task<GenericResponse<List<BaoGia_History_Request_of_Quotation>>> GetOrderHistoryAsync(string? maDon, string? maHang, string? maHangNCC)
+        {
+            var result = new GenericResponse<List<BaoGia_History_Request_of_Quotation>>();
+            try
+            {
+                var histories = await _repo.GetOrderHistoryAsync(maDon, maHang, maHangNCC);
+                result.Data = histories;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

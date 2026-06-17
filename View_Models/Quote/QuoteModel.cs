@@ -213,4 +213,11 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string MaDon { get; set; } = string.Empty;
         public string ChungLoai { get; set; } = string.Empty;
     }
+    // Search history info by maDon
+    public class SearchHistoryInfoByMaDonModel
+    {
+        public string MaDon { get; set; } = string.Empty;
+        public string MaHang { get; set; } = string.Empty;
+        public string MaHangNCC { get; set; } = string.Empty;
+    }
 }

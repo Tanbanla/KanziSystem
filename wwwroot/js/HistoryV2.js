@@ -8,14 +8,11 @@
     const pageSizeSelect = document.getElementById('historyPageSize');
     const btnExportHistory = document.getElementById('btnExportHistory');
     const btnImportHistory = document.getElementById('btnImportHistory');
-    const supplierSelect = document.getElementById('editNhaCungCap');
-    const hiddenTenNCC = document.getElementById('editTenNCC');
     const btnExportManaHistory = document.getElementById('btnExportManaHistory');
     let currentPage = 1;
     let pageSize = Number(pageSizeSelect?.value) || 50;
     let currentGroups = [];
     let totalCountServer = 0;
-    let serverPaged = false;
     const role = window.HistoryData.role || 'User';
 
     btnReset?.addEventListener('click', () => {
@@ -72,13 +69,6 @@
                     const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (T.NoResults || 'Không có kết quả');
                     list.appendChild(empty);
                 }
-            }
-
-            function getRowsForPage(rows, pageIndex) {
-                if (!Array.isArray(rows)) return [];
-                if (serverPaged) return rows;
-                const start = Math.max(0, (pageIndex - 1) * pageSize);
-                return rows.slice(start, start + pageSize);
             }
 
             function updateButtonText() {
@@ -703,15 +693,14 @@
         const root = result || {};
         const data = getValue(root, ['data', 'Data'], []);
         if (Array.isArray(data)) {
-            return { rows: data, totalCount: data.length, serverPaged: false };
+            return { rows: data, totalCount: data.length };
         }
 
         const rows = getValue(data, ['data', 'Data'], []);
         const totalCount = Number(getValue(data, ['totalCount', 'TotalCount'], Array.isArray(rows) ? rows.length : 0)) || 0;
         return {
             rows: Array.isArray(rows) ? rows : [],
-            totalCount,
-            serverPaged: true
+            totalCount
         };
     }
 
@@ -757,11 +746,249 @@
         applyFilters(safeTarget);
     }
 
-    function getRowsForPage(rows, pageIndex) {
+    function getRowsForPage(rows) {
         if (!Array.isArray(rows)) return [];
-        if (serverPaged) return rows;
-
         return rows;
+    }
+
+    function mapActionText(actionType) {
+        const code = String(actionType || '').trim();
+        if (!code) return '';
+        const statuses = window.HistoryData?.status;
+        if (!Array.isArray(statuses)) return code;
+        const found = statuses.find(s => String(s?.VCHR_CodeStatus || '').trim() === code);
+        return found?.DisplayName || code;
+    }
+
+    function buildHistoryHtml(result) {
+        const data = Array.isArray(result) ? result : (result?.data || result?.Data || []);
+        const T = window.i18nHistoryQuote || {};
+        if (!Array.isArray(data) || data.length === 0) {
+            return `<div>${escapeHtml(T.MsgNoHistory || 'Không có lịch sử.')}</div>`;
+        }
+
+        const rows = data.map((h, index) => {
+            const dateText = formatDateTime(getValue(h, ['CHR_Updatedate', 'chR_Updatedate']));
+            const requestId = getValue(h, ['ID_RequestQuote', 'iD_RequestQuote']);
+            const action = mapActionText(getValue(h, ['CHR_ActionType', 'chR_ActionType']));
+            const updateBy = getValue(h, ['CHR_UpdateBy', 'chR_UpdateBy']);
+            const updateName = getValue(h, ['NVCHR_UpdateName', 'nvchR_UpdateName']);
+            const reason = getValue(h, ['NVCHR_LyDo', 'nvchR_LyDo']);
+
+            return `<tr>
+                <td class="text-center">${index + 1}</td>
+                <td>${escapeHtml(dateText)}</td>
+                <td>${escapeHtml(requestId)}</td>
+                <td>${escapeHtml(action)}</td>
+                <td>${escapeHtml(updateBy)}${updateName ? ` - ${escapeHtml(updateName)}` : ''}</td>
+                <td>${escapeHtml(reason)}</td>
+            </tr>`;
+        }).join('');
+
+        return `
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light"><tr>
+                        <th style="width:60px">#</th>
+                        <th>${escapeHtml(T.HistoryTime || 'Thời gian')}</th>
+                        <th>${escapeHtml(T.RequestNo || 'Số Request')}</th>
+                        <th>${escapeHtml(T.Action || 'Hành động')}</th>
+                        <th>${escapeHtml(T.UpdatedBy || 'Người cập nhật')}</th>
+                        <th>${escapeHtml(T.Reason || 'Lý do')}</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }
+
+    function showReasonModal({ modalId, textareaId, noticeId, confirmButtonId }) {
+        return new Promise((resolve) => {
+            const modalEl = document.getElementById(modalId);
+            const textarea = document.getElementById(textareaId);
+            const notice = document.getElementById(noticeId);
+            const confirmBtn = document.getElementById(confirmButtonId);
+            if (!modalEl || !textarea || !confirmBtn) {
+                resolve(null);
+                return;
+            }
+
+            textarea.value = '';
+            if (notice) notice.style.display = 'none';
+
+            try {
+                if (modalEl.parentElement !== document.body) {
+                    document.body.appendChild(modalEl);
+                }
+            } catch (e) { }
+
+            let bsModal = null;
+            try {
+                if (window.bootstrap && bootstrap.Modal) {
+                    bsModal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
+                    bsModal.show();
+                } else {
+                    modalEl.style.display = 'block';
+                    modalEl.classList.add('show');
+                    document.body.classList.add('modal-open');
+                }
+            } catch (e) {
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
+
+            const cleanUp = () => {
+                try {
+                    if (bsModal) bsModal.hide();
+                    else {
+                        modalEl.style.display = 'none';
+                        modalEl.classList.remove('show');
+                        document.body.classList.remove('modal-open');
+                    }
+                } catch (e) {
+                    modalEl.style.display = 'none';
+                    modalEl.classList.remove('show');
+                    document.body.classList.remove('modal-open');
+                }
+                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) { }
+                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) { }
+                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) { }
+            };
+
+            const onHidden = () => {
+                cleanUp();
+                resolve(null);
+            };
+
+            const onCancel = (e) => {
+                e?.preventDefault();
+                cleanUp();
+                resolve(null);
+            };
+
+            const onConfirm = (e) => {
+                e?.preventDefault();
+                const reason = (textarea.value || '').trim();
+                if (!reason) {
+                    if (notice) notice.style.display = '';
+                    return;
+                }
+                cleanUp();
+                resolve(reason);
+            };
+
+            try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.addEventListener('click', onCancel)); } catch (e) { }
+            try { if (bsModal) modalEl.addEventListener('hidden.bs.modal', onHidden); } catch (e) { }
+            confirmBtn.addEventListener('click', onConfirm);
+            try { textarea.focus(); } catch (e) { }
+        });
+    }
+
+    async function handleViewHistory(button) {
+        const T = window.i18nHistoryQuote || {};
+        const maDon = button.getAttribute('data-madon') || '';
+        const maHang = button.getAttribute('data-mahang') || '';
+        const maHangNcc = button.getAttribute('data-mahangncc') || '';
+        if (!maDon) {
+            showDialog({ title: T.Notification || 'Thông báo', message: T.MsgSelectGroupFailed || 'Vui lòng chọn mã đơn!', type: 'warning' });
+            return;
+        }
+
+        try {
+            showLoading(T.LoadingData || 'Đang tải...');
+            const histories = await postJson('/History/GetHistoryApprover', {
+                maDon,
+                maHang,
+                maHangNCC: maHangNcc
+            });
+            showDialog(T.PageTitleHistory || 'Lịch sử đơn', buildHistoryHtml(histories));
+        } catch (error) {
+            showDialog({
+                title: T.Notification || 'Thông báo',
+                message: error?.message || T.MsgLoadHistoryFailed || 'Không tải được lịch sử.',
+                type: 'error'
+            });
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function handleDeleteHistory(button) {
+        const T = window.i18nHistoryQuote || {};
+        const maDon = button.getAttribute('data-madon') || '';
+        if (!maDon) return;
+
+        const reason = await showReasonModal({
+            modalId: 'deleteReasonModal',
+            textareaId: 'deleteReasonText',
+            noticeId: 'deleteReasonNotice',
+            confirmButtonId: 'confirmDeleteWithReason'
+        });
+        if (!reason) return;
+
+        try {
+            showLoading(T.Deleting || 'Đang xóa...');
+            const response = await fetch(apiUrl('/History/DeleteDanhSachBaoGiaByMaDon'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maDon, reason })
+            });
+
+            const text = await response.text().catch(() => null);
+            if (!response.ok) {
+                throw new Error(text || (T.DeleteFailed || 'Xóa thất bại'));
+            }
+
+            showDialog({ title: T.Notification || 'Thông báo', message: T.DeleteSuccess || 'Đã xóa thành công.', type: 'success' });
+            applyFilters(currentPage);
+        } catch (error) {
+            showDialog({
+                title: T.Notification || 'Thông báo',
+                message: error?.message || T.DeleteFailed || 'Xóa thất bại',
+                type: 'error'
+            });
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function handleReturnHistory(button) {
+        const T = window.i18nHistoryQuote || {};
+        const maDon = button.getAttribute('data-madon') || '';
+        if (!maDon) return;
+
+        const reason = await showReasonModal({
+            modalId: 'returnReasonModal',
+            textareaId: 'returnReasonText',
+            noticeId: 'returnReasonNotice',
+            confirmButtonId: 'confirmReturnWithReason'
+        });
+        if (!reason) return;
+
+        try {
+            showLoading(T.Exporting || 'Đang xử lý...');
+            const response = await fetch(apiUrl('/History/ReturnQuotation'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maDon, reason })
+            });
+
+            const text = await response.text().catch(() => null);
+            if (!response.ok) {
+                throw new Error(text || (T.ReturnFailed || 'Trả lại thất bại!'));
+            }
+
+            showDialog({ title: T.Notification || 'Thông báo', message: T.ReturnSuccess || 'Trả về thành công!', type: 'success' });
+            applyFilters(currentPage);
+        } catch (error) {
+            showDialog({
+                title: T.Notification || 'Thông báo',
+                message: error?.message || T.ReturnFailed || 'Trả lại thất bại!',
+                type: 'error'
+            });
+        } finally {
+            hideLoading();
+        }
     }
 
     function approvalCell(name, time) {
@@ -785,8 +1012,14 @@
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i] || {};
-            var stepName = window.i18nHistoryQuote?.CHR_StepName;
+            const stepName = window.i18nHistoryQuote?.CHR_StepName || 'CHR_StepName';
             const deadline = getValue(row, ['DTM_KyHan']);
+            const maDon = getValue(row, ['CHR_MaDon']);
+            const maHang = getValue(row, ['CHR_MaHangNoiBo']);
+            const maHangNcc = getValue(row, ['CHR_MaHangNCC']);
+            const returnAction = role === 'UserPUR'
+                ? `<button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-undo"></i></button>`
+                : '';
 
             html[i] = `
                 <tr>
@@ -816,9 +1049,9 @@
                     <td>${escapeHtml(getValue(row, [stepName]))}</td>
                     <td>
                         <div class="action-buttons" role="group" aria-label="${escapeHtml(window.i18nHistoryQuote?.Actions || 'Actions')}">
-                            <button type="button" class="btn btn-outline-info btn-view-history" title="${escapeHtml(window.i18nHistoryQuote?.ViewHistoryTooltip || 'View history')}" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon']))}"><i class="fas fa-history"></i></button>
-                            <button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon']))}"><i class="fas fa-undo"></i></button>
-                            <button type="button" class="btn btn-outline-danger btn-delete-history" title="${escapeHtml(window.i18nHistoryQuote?.DeleteTooltip || 'Delete')}" data-madon="${escapeHtml(getValue(row, ['CHR_MaDon']))}"><i class="fas fa-trash"></i></button>
+                            <button type="button" class="btn btn-outline-info btn-view-history" title="${escapeHtml(window.i18nHistoryQuote?.ViewHistoryTooltip || 'View history')}" data-madon="${escapeHtml(maDon)}" data-mahang="${escapeHtml(maHang)}" data-mahangncc="${escapeHtml(maHangNcc)}"><i class="fas fa-history"></i></button>
+                            ${returnAction}
+                            <button type="button" class="btn btn-outline-danger btn-delete-history" title="${escapeHtml(window.i18nHistoryQuote?.DeleteTooltip || 'Delete')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>`;
@@ -879,10 +1112,9 @@
 
             const parsed = normalizeListResponse(historyResult);
             currentGroups = parsed.rows;
-            totalCountServer = historyResult.totalCount;
-            serverPaged = parsed.serverPaged;
+            totalCountServer = parsed.totalCount;
 
-            renderTable(getRowsForPage(currentGroups, currentPage));
+            renderTable(getRowsForPage(currentGroups));
             renderPagination(currentPage, totalCountServer);
             renderSummaryCountQuotation(countQuotationResult);
             renderSummaryCountStatus(countStatusResult);
@@ -935,6 +1167,25 @@
         if (!Number.isInteger(nextSize) || nextSize <= 0) return;
         pageSize = nextSize;
         applyFilters(1);
+    });
+
+    tblBody?.addEventListener('click', async function (event) {
+        const button = event.target.closest('button');
+        if (!button) return;
+
+        if (button.classList.contains('btn-view-history')) {
+            await handleViewHistory(button);
+            return;
+        }
+
+        if (button.classList.contains('btn-return-history')) {
+            await handleReturnHistory(button);
+            return;
+        }
+
+        if (button.classList.contains('btn-delete-history')) {
+            await handleDeleteHistory(button);
+        }
     });
 
     // Initial load

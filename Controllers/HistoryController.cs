@@ -984,7 +984,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     searchModel.TrangThai,
                     GetCurrentUserId(),
                     -1,
-                    -1, 
+                    -1,
                     searchModel.Date,
                     searchModel.From,
                     searchModel.ChungLoai
@@ -1488,5 +1488,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
         }
 
+        // Lấy thông tin lịch sử của đơn hàng
+        [HttpPost]
+        public async Task<IActionResult> GetHistoryApprover([FromBody] SearchHistoryInfoByMaDonModel searchModel)
+        {
+            if(searchModel == null)
+            {
+                return BadRequest("Dữ liệu tìm kiếm không hợp lệ");
+            }
+
+            try
+            {
+                var result = await _baoGiaHistoryService.GetOrderHistoryAsync(
+                    searchModel.MaDon,
+                    searchModel.MaHang,
+                    searchModel.MaHangNCC
+                );
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
+            }
+
+        }
     }
 }
