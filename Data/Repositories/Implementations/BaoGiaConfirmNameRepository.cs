@@ -241,45 +241,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             if (confirmNames == null || !confirmNames.Any()) return false;
 
-            //var requestIds = confirmNames
-            //    .Select(x => x.ID_RequestQuote)
-            //    .Distinct()
-            //    .ToList();
-
-            //var details = await _context.BaoGia_Detail_of_Quotations
-            //    .Where(d => requestIds.Contains(d.ID_RequestQuote) && !string.IsNullOrWhiteSpace(d.NVCHR_TenHangHQ))
-            //    .ToListAsync();
-
-            //var request = await _context.BaoGia_Request_of_Quotations
-            //    .Where(r => requestIds.Contains(r.ID) && !string.IsNullOrWhiteSpace(r.NVCHR_NameVN))
-            //    .ToListAsync();
-
-            //var nameByRequest = details
-            //    .GroupBy(d => d.ID_RequestQuote)
-            //    .ToDictionary(g => g.Key, g => g.First().NVCHR_TenHangHQ);
-
-            //foreach (var item in confirmNames)
-            //{
-            //    if (item == null) continue;
-            //    //if (item.VCHR_TenHaiQuan != null && !string.IsNullOrWhiteSpace(item.VCHR_TenHaiQuan)) continue;
-
-            //    if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan))
-            //    {
-            //        if (!string.IsNullOrWhiteSpace(tenHaiQuan))
-            //            item.VCHR_TenRecomment = tenHaiQuan;
-            //    }
-            //    // Cập nhật trạng thái
-            //    var rq = request.FirstOrDefault(r => r.ID == item.ID_RequestQuote);
-            //    if (rq != null)
-            //    {
-            //        rq.ID_StepBaoGia = 12; // Đang xác nhận tên hàng
-            //        rq.ID_Status = "WAIT_CONFIRM_NAME";
-            //    }
-            //}
-
-            //await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(confirmNames);
-            //await _context.SaveChangesAsync();
-            //return true;
             var requestIds = confirmNames
             .Select(x => x.ID_RequestQuote)
             .Distinct()

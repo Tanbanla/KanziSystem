@@ -514,7 +514,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var baoGiaDetailService = scope.ServiceProvider.GetRequiredService<IBaoGiaDetailService>();
                                 var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
                                 var checkSendMail = true;
+                                
+                                var nccNotConfirmName = await baoGiaService.GetListNccNotConfirmNameAsync();
+                                var listNccNotConfirmName = nccNotConfirmName.Data ?? new List<string>();
 
+                                listCofirm.ForEach(c =>
+                                {
+                                    var item = listOk.FirstOrDefault(x => x.ID == c.Id);
+                                    if (item != null && listNccNotConfirmName.Contains(item.CHR_MaNCC ?? ""))
+                                    {
+                                        checkSendMail = false;
+                                    }
+                                });
 
                                 var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
                                 foreach (var material in listOk)

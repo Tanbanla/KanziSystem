@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.DTO;
 using System.Net.Mail;
 
 namespace PRJ_WAREHOUSE_BIVN.Common
@@ -45,6 +45,8 @@ namespace PRJ_WAREHOUSE_BIVN.Common
 
             try
             {
+                //mail_to = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                //mail_cc = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
                 MailMessage msg = new MailMessage();
                 msg.From = new MailAddress(mail_from);
 

@@ -45,7 +45,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarOK(string maDon, string userNext, string userUpdate);
         public Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarNG(string maDon, string Reason, string userUpdate);
         public Task<ListRequest<dynamic>> SearchRequestDone(string? maDon, string? section, string? maHang, string? maNCC, string user, int pageIndex, int pageSize);
-
         // update người phê duyệt cho đơn
         public Task<List<BaoGia_Request_of_Quotation>> UpdateUserApprovalHistory(UpdateHistoryResult update);
         // update ma hang noi bo
@@ -68,6 +67,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
         // update thời hạn lựa chọn nhà cung cấp
         Task<List<BaoGia_Request_of_Quotation>> UpdateDeadlineAsync(List<BaoGia_Request_of_Quotation> baoGias);
+        // Lấy danh sách NCC k cần xác nhận tên hàng
+        Task<List<string>> GetListNccNotConfirmNameAsync();
 
     }
 }

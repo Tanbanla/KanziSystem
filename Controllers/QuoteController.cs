@@ -170,6 +170,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest("Not data empty");
             }
+            // kiểm tra số lượng nhà cung cấp cho mỗi sản phẩm (MaHangNoiBo, MaHangNCC) không vượt quá 5
+            var violatingGroups = danhSachBaoGia
+                .Where(d => d != null)
+                .GroupBy(d => (MaHangNoiBo: (d.CHR_MaHangNoiBo ?? string.Empty).Trim(), MaHangNcc: (d.CHR_MaHangNCC ?? string.Empty).Trim()))
+                .Select(g => new
+                {
+                    Key = g.Key,
+                    DistinctSupplierCount = g.Select(x => (x.CHR_MaNCC ?? string.Empty).Trim())
+                                            .Where(s => !string.IsNullOrEmpty(s))
+                                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                                            .Count()
+                })
+                .Where(x => x.DistinctSupplierCount > 5)
+                .ToList();
+
+            if (violatingGroups.Any())
+            {
+                var messages = violatingGroups.Select(v =>
+                {
+                    var mhnb = string.IsNullOrEmpty(v.Key.MaHangNoiBo) ? "(no internal code)" : v.Key.MaHangNoiBo;
+                    var mhncc = string.IsNullOrEmpty(v.Key.MaHangNcc) ? "(no supplier product code)" : v.Key.MaHangNcc;
+                    return $"Sản phẩm '{mhnb}' / '{mhncc}' có {v.DistinctSupplierCount} nhà cung cấp (vượt quá 5).";
+                });
+
+                return BadRequest("Lỗi ràng buộc nhà cung cấp: " + string.Join("; ", messages));
+            }
+
             var distinctLinks = danhSachBaoGia.Select(b => b.CHR_LinkFile)
                                                .Where(s => !string.IsNullOrWhiteSpace(s))
                                                .Distinct(StringComparer.OrdinalIgnoreCase)

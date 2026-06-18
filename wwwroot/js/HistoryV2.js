@@ -1112,7 +1112,7 @@
 
             const parsed = normalizeListResponse(historyResult);
             currentGroups = parsed.rows;
-            totalCountServer = parsed.totalCount;
+            totalCountServer = historyResult.totalCount;
 
             renderTable(getRowsForPage(currentGroups));
             renderPagination(currentPage, totalCountServer);
@@ -1145,7 +1145,7 @@
         e.preventDefault();
 
         const pageAttr = btn.getAttribute('data-page');
- 
+
         const totalPages = Math.max(1, Math.ceil((totalCountServer || 0) / pageSize));
         let targetPage = 1;
 

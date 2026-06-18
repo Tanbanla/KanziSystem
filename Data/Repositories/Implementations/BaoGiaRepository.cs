@@ -1602,10 +1602,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
         {
             var sql = @"
-                SELECT DISTINCT q.*, d.BIT_Select, d.NVCHR_ReasonPick, d.NVCHR_File
-                FROM BaoGia_Request_of_Quotation as q
-                INNER JOIN [BaoGia_Master_Approver_Send_Mail] as s ON q.CHR_SectionCode = s.CHR_CodeSection
-                LEFT JOIN BaoGia_Detail_of_Quotation as d ON q.ID = d.ID_RequestQuote
+                WITH FilteredRequest AS (
+                    SELECT q.*
+                    FROM BaoGia_Request_of_Quotation q
             ";
 
             var whereClauses = new List<string>();
@@ -1648,7 +1647,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(user))
             {
-                whereClauses.Add("s.CHR_UserAdid = @Adid");
+                whereClauses.Add("EXISTS ( SELECT 1  FROM BaoGia_Master_Approver_Send_Mail s " +
+                    "WHERE s.CHR_CodeSection = q.CHR_SectionCode and s.CHR_UserAdid = @Adid )");
                 parameters.Add("Adid", user);
             }
 
@@ -1676,7 +1676,26 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sql += " WHERE " + string.Join(" AND ", whereClauses);
             }
 
-            sql += " ORDER BY DTM_CreateDate DESC";
+            sql += @"
+                ),
+                LatestDetail AS (
+                    SELECT
+                        d.ID_RequestQuote,
+                        d.BIT_Select,
+                        d.NVCHR_ReasonPick,
+                        d.NVCHR_File,
+                        ROW_NUMBER() OVER (PARTITION BY d.ID_RequestQuote ORDER BY d.ID DESC) AS rn
+                    FROM BaoGia_Detail_of_Quotation d
+                    INNER JOIN FilteredRequest q ON q.ID = d.ID_RequestQuote
+                )
+                SELECT
+                    q.*, 
+                    d.BIT_Select, 
+                    d.NVCHR_ReasonPick, 
+                    d.NVCHR_File
+                FROM FilteredRequest q
+                LEFT JOIN LatestDetail d ON d.ID_RequestQuote = q.ID AND d.rn = 1
+                ORDER BY q.CHR_MaDon DESC";
 
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return data;
@@ -1733,6 +1752,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 }
             }
             return baoGias;
+        }
+
+        // Lấy danh sách NCC k cần xác nhận tên hàng
+         public async Task<List<string>> GetListNccNotConfirmNameAsync()
+        {
+            var sql = "SELECT CHR_MaNcc FROM BaoGia_Vender_NotConfirm WHERE CHR_Status = 'ON'";
+            var result = await _conn.QueryAsync<string>(sql);
+            return result.ToList();
         }
     }
 }

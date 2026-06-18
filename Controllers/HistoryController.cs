@@ -984,7 +984,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     searchModel.TrangThai,
                     GetCurrentUserId(),
                     -1,
-                    -1,
+                    -1, 
                     searchModel.Date,
                     searchModel.From,
                     searchModel.ChungLoai
@@ -1273,7 +1273,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Lỗi lấy danh sách step");
                 }
 
-                // Chuẩn bị dictionary để tra cứu nhanh O(1) thay vì FirstOrDefault trong mỗi dòng.
                 var statusMap = statusResult.Data?
                     .Where(s => !string.IsNullOrWhiteSpace(s.VCHR_CodeStatus))
                     .GroupBy(s => s.VCHR_CodeStatus)
@@ -1406,18 +1405,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest("Không tìm thấy worksheet trong template");
                 }
 
-                var wsApprover = workbook.Worksheets.Count >= 2 ? workbook.Worksheet(2) : null;
-                if (wsApprover == null)
-                {
-                    return BadRequest("Không tìm thấy sheet 2 trong template");
-                }
-
-                var wsMaterial = workbook.Worksheets.Count >= 3 ? workbook.Worksheet(3) : null;
-                if (wsMaterial == null)
-                {
-                    return BadRequest("Không tìm thấy sheet 3 trong template");
-                }
-
                 var mainRows = new List<object[]>(historyData.Count);
                 int stt = 1;
 
@@ -1468,8 +1455,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         GetStepName(rq.ID_StepBaoGia),
                         GetReason(rq.ID, rq.ID_Status),
                         selectMark,
-                        isSelected ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
-                        isSelected ? rq.NVCHR_File ?? string.Empty : string.Empty
+                        rq.NVCHR_ReasonPick ?? string.Empty,
+                        rq.NVCHR_File ?? string.Empty 
                     });
                 }
 
@@ -1492,7 +1479,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> GetHistoryApprover([FromBody] SearchHistoryInfoByMaDonModel searchModel)
         {
-            if(searchModel == null)
+            if (searchModel == null)
             {
                 return BadRequest("Dữ liệu tìm kiếm không hợp lệ");
             }

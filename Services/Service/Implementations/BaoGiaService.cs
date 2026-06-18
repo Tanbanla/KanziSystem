@@ -525,5 +525,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Lấy danh sách NCC k cần xác nhận tên hàng
+        public async Task<GenericResponse<List<string>>> GetListNccNotConfirmNameAsync()
+        {
+            var result = new GenericResponse<List<string>>();
+            try
+            {
+                result.Data = await _repo.GetListNccNotConfirmNameAsync();
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

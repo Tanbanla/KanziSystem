@@ -34,7 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
           var res =  await _context.BaoGia_Request_of_Quotations
                 .Where(m => (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false)
-                && m.BIT_LayBaoGia == true && m.CHR_MaNCC != "" && m.ID_StepBaoGia == 6 )
+                && m.BIT_LayBaoGia == true && m.CHR_MaNCC != "" && m.ID_StepBaoGia == 6)//&& m.CHR_MaNCC != "L4AMIVN"
                 .Select(m => m.CHR_MaNCC)
                 .Distinct()
                 .ToListAsync();
