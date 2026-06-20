@@ -1041,6 +1041,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return null;
                 }
 
+                static bool GetBool(IDictionary<string, object?> item, params string[] keys)
+                {
+                    foreach (var key in keys)
+                    {
+                        if (!item.TryGetValue(key, out var value) || value == null) continue;
+
+                        try
+                        {
+                            if (value is bool b) return b;
+                            if (value is byte bt) return bt == 1;
+                            if (value is short s) return s == 1;
+                            if (value is int i) return i == 1;
+
+                            var text = Convert.ToString(value)?.Trim();
+                            if (string.IsNullOrEmpty(text)) continue;
+                            if (text == "1") return true;
+                            if (text == "0") return false;
+                            if (bool.TryParse(text, out var parsed)) return parsed;
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    return false;
+                }
+
                 static string BuildApprovalText(string approver, DateTime? approvedAt)
                     => string.IsNullOrWhiteSpace(approver)
                         ? string.Empty
@@ -1123,24 +1150,53 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     var excelRow = dataStartRow + i;
                     var item = ToDictionary(rows[i]);
+                    var supplier1 = GetString(item, "NCC_1");
+                    var supplier2 = GetString(item, "NCC_2");
+                    var supplier3 = GetString(item, "NCC_3");
+                    var supplier4 = GetString(item, "NCC_4");
+                    var supplier5 = GetString(item, "NCC_5");
+
+                    var bitNcc1 = GetBool(item, "BitNCC_1", "bitNCC_1");
+                    var bitNcc2 = GetBool(item, "BitNCC_2", "bitNCC_2");
+                    var bitNcc3 = GetBool(item, "BitNCC_3", "bitNCC_3");
+                    var bitNcc4 = GetBool(item, "BitNCC_4", "bitNCC_4");
+                    var bitNcc5 = GetBool(item, "BitNCC_5", "bitNCC_5");
 
                     ws.Cell(excelRow, 1).Value = i + 1;
                     ws.Cell(excelRow, 2).Value = GetString(item, "CHR_MaDon");
                     ws.Cell(excelRow, 3).Value = GetString(item, "CHR_MaHangNoiBo");
                     ws.Cell(excelRow, 4).Value = GetString(item, "CHR_MaHangNCC");
                     ws.Cell(excelRow, 5).Value = GetString(item, "CHR_NameEN");
-                    ws.Cell(excelRow, 6).Value = GetString(item, "NCC_1");
-                    ws.Cell(excelRow, 7).Value = GetString(item, "NCC_2");
-                    ws.Cell(excelRow, 8).Value = GetString(item, "NCC_3");
-                    ws.Cell(excelRow, 9).Value = GetString(item, "NCC_4");
-                    ws.Cell(excelRow, 10).Value = GetString(item, "NCC_5");
 
                     var deadline = GetDateTime(item, "DTM_KyHan");
+                    var isOverdue = deadline.HasValue && deadline.Value.Date < DateTime.Today;
+
+                    void ApplySupplierStyle(int col, string supplierText, bool isSelected)
+                    {
+                        var cell = ws.Cell(excelRow, col);
+                        cell.Value = supplierText;
+                        if (isSelected)
+                        {
+                            cell.Style.Fill.BackgroundColor = group3Color;
+                        }
+                        else if (isOverdue && !string.IsNullOrWhiteSpace(supplierText))
+                        {
+                            cell.Style.Fill.BackgroundColor = overdueColor;
+                            cell.Style.Font.FontColor = XLColor.White;
+                        }
+                    }
+
+                    ApplySupplierStyle(6, supplier1, bitNcc1);
+                    ApplySupplierStyle(7, supplier2, bitNcc2);
+                    ApplySupplierStyle(8, supplier3, bitNcc3);
+                    ApplySupplierStyle(9, supplier4, bitNcc4);
+                    ApplySupplierStyle(10, supplier5, bitNcc5);
+
                     if (deadline.HasValue)
                     {
                         ws.Cell(excelRow, 11).Value = deadline.Value;
                         ws.Cell(excelRow, 11).Style.DateFormat.Format = "dd/MM/yyyy";
-                        if (deadline.Value.Date < DateTime.Today)
+                        if (isOverdue)
                         {
                             ws.Cell(excelRow, 11).Style.Fill.BackgroundColor = overdueColor;
                             ws.Cell(excelRow, 11).Style.Font.FontColor = XLColor.White;

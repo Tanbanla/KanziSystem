@@ -239,14 +239,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Luu thong tin
         public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
         {
-            if (confirmNames == null || !confirmNames.Any()) return false;
+            if (confirmNames == null || !confirmNames.Any())
+                return false;
+
+            var notNeedConfirmName = (await _context.BaoGia_Vender_NotConfirms
+                .Where(x => x.CHR_MaNcc != null && x.CHR_Status == "ON")
+                .Select(x => x.CHR_MaNcc)
+                .Distinct()
+                .ToListAsync())
+                .ToHashSet();
 
             var requestIds = confirmNames
-            .Select(x => x.ID_RequestQuote)
-            .Distinct()
-            .ToList();
+                .Select(x => x.ID_RequestQuote)
+                .Distinct()
+                .ToList();
 
-            // 1. Kiểm tra trùng lặp
             var existingIds = await _context.BaoGia_Confirm_Name_Quotations
                 .Where(c => requestIds.Contains(c.ID_RequestQuote))
                 .Select(c => c.ID_RequestQuote)
@@ -257,50 +264,57 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .ToList();
 
             if (!newConfirmNames.Any())
-            {
-                return false; 
-            }
+                return false;
+
+            var newIds = newConfirmNames.Select(x => x.ID_RequestQuote).ToList();
 
             var details = await _context.BaoGia_Detail_of_Quotations
-                .Where(d => requestIds.Contains(d.ID_RequestQuote) && !string.IsNullOrWhiteSpace(d.NVCHR_TenHangHQ))
+                .Where(d => newIds.Contains(d.ID_RequestQuote) && !string.IsNullOrWhiteSpace(d.NVCHR_TenHangHQ))
                 .ToListAsync();
 
             var requests = await _context.BaoGia_Request_of_Quotations
-                .Where(r => requestIds.Contains(r.ID) && !string.IsNullOrWhiteSpace(r.NVCHR_NameVN))
+                .Where(r => newIds.Contains(r.ID))
                 .ToListAsync();
 
- 
             var nameByRequest = details
                 .GroupBy(d => d.ID_RequestQuote)
                 .ToDictionary(g => g.Key, g => g.First().NVCHR_TenHangHQ);
 
-            var requestDict = requests.ToDictionary(r => r.ID, r => r);
+            var requestDict = requests.ToDictionary(r => r.ID);
+
+            var finalConfirmNames = new List<BaoGia_Confirm_Name_Quotation>();
 
             foreach (var item in newConfirmNames)
             {
                 if (item == null) continue;
 
-                // Gán tên gợi ý từ detail
                 if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan)
                     && !string.IsNullOrWhiteSpace(tenHaiQuan))
                 {
                     item.VCHR_TenRecomment = tenHaiQuan;
                 }
 
-                // Cập nhật trạng thái request
                 if (requestDict.TryGetValue(item.ID_RequestQuote, out var rq))
                 {
-                    rq.ID_StepBaoGia = 12; // Đang xác nhận tên hàng
-                    rq.ID_Status = "WAIT_CONFIRM_NAME";
+                    if (!string.IsNullOrEmpty(rq.CHR_MaNCC) &&
+                        notNeedConfirmName.Contains(rq.CHR_MaNCC))
+                    {
+                        rq.ID_StepBaoGia = 13;
+                        rq.ID_Status = "DONE";
+                    }
+                    else
+                    {
+                        rq.ID_StepBaoGia = 12;
+                        rq.ID_Status = "WAIT_CONFIRM_NAME";
+
+                        finalConfirmNames.Add(item);
+                    }
                 }
             }
 
-            await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(newConfirmNames);
-
-
-            foreach (var rq in requests.Where(r => newConfirmNames.Select(c => c.ID_RequestQuote).Contains(r.ID)))
+            if (finalConfirmNames.Any())
             {
-                _context.Entry(rq).State = EntityState.Modified;
+                await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(finalConfirmNames);
             }
 
             await _context.SaveChangesAsync();
@@ -703,6 +717,66 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (data == null) return new List<dynamic>();
 
             return data.ToList();
+        }
+        // Update Name HQ role PIC PUR
+        public async Task<bool> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user)
+        {
+            if (baoGia == null || baoGia.Count == 0) return false;
+
+            var ids = baoGia.Select(x => x.ID).ToList();
+
+            // Load confirmName
+            var confirmNames = await _context.BaoGia_Confirm_Name_Quotations
+                .Where(x => ids.Contains(x.ID))
+                .ToListAsync();
+
+            if (!confirmNames.Any()) return false;
+
+            // Map 
+            var confirmDict = confirmNames.ToDictionary(x => x.ID);
+
+            var requestQuoteIds = confirmNames
+                .Select(x => x.ID_RequestQuote)
+                .Distinct()
+                .ToList();
+
+            // Load detail
+            var details = await _context.BaoGia_Detail_of_Quotations
+                .Where(x => requestQuoteIds.Contains(x.ID_RequestQuote))
+                .ToListAsync();
+
+            var detailDict = details
+                .GroupBy(x => x.ID_RequestQuote)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            bool hasChanges = false;
+            var now = DateTime.Now;
+
+            foreach (var item in baoGia)
+            {
+                if (!confirmDict.TryGetValue(item.ID, out var confirmName))
+                    continue;
+
+                // update detail
+                if (detailDict.TryGetValue(confirmName.ID_RequestQuote, out var detail))
+                {
+                    detail.NVCHR_TenHangHQ = item.VCHR_TenRecomment;
+                    detail.CHR_NameEN = item.CHR_NameEN;
+                }
+
+                // update confirm name
+                confirmName.VCHR_TenRecomment = item.VCHR_TenRecomment;
+                confirmName.CHR_Status = "Confirmed";
+                confirmName.CHR_StatusShip = "Confirming";
+                confirmName.VCHR_UserPUR = user;
+                confirmName.DTM_UserPUR = now;
+                confirmName.DTM_UpdateDate = now;
+                confirmName.VCHR_UpdateBy = user;
+
+                hasChanges = true;
+            }
+
+            return hasChanges && await _context.SaveChangesAsync() > 0;
         }
     }
 }

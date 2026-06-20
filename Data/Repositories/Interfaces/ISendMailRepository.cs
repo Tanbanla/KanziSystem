@@ -31,5 +31,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath);
         // lấy mail người tạo đơn
         Task<string> GetRequesterEmailByAdidAsync(string adid);
+        // The list vender not need to send mail
+        Task<List<string>> SupplierNeedToSendMailAsync();
     }
 }

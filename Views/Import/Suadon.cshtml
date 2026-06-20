@@ -212,8 +212,8 @@
                                             </select>
                                         </td>
                                         <td><input type="text" class="form-control vt" id="vt_1" value="@item.Vitri"></td>
-                                        <td><input type="text" class="form-control" id="gc_1" value="@item.Poisition"></td>
-                                       @*  <td>
+                                        <td><input type="text" class="form-control gc" id="gc_1" value="@item.Poisition"></td>
+                                       @* <td>
                                             <button type="button" id="xoa_1" onclick="_xoadong('@item.Id_RequestDetail')" class="btn btn-outline-danger btn-remove">&times;</button>
                                         </td>  *@                                     
                                     </tr>
@@ -244,9 +244,7 @@
         _load_rate();
         _load_phongchiuphi_1();
         _load_account_1();
-      
-        
-        //_load_name_inv1(document.getElementById("group_code").value);
+
     }
     function check_mucdichkhac() {
         // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)

@@ -1,4 +1,3 @@
-// InputQuote.js - JavaScript cho màn hình nhập thông tin báo giá
 (function() {
     'use strict';
 

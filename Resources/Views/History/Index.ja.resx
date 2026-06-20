@@ -475,7 +475,7 @@
     <value>ダッシュボード概要</value>
   </data>
   <data name="SummaryTable1Title" xml:space="preserve">
-    <value>表1: 期限ステータス</value>
+    <value>表1 : 仕入先選定待ち</value>
   </data>
   <data name="DueSoon" xml:space="preserve">
     <value>期限当日</value>
@@ -490,7 +490,7 @@
     <value>期限超過</value>
   </data>
   <data name="SummaryTable2Title" xml:space="preserve">
-    <value>表2: 依頼ステータス</value>
+    <value>表2 : 期限ステータス</value>
   </data>
   <data name="WaitDeptPic" xml:space="preserve">
     <value>部門PIC待ち</value>
@@ -508,7 +508,7 @@
     <value>購買QLSC待ち</value>
   </data>
   <data name="SummaryTable3Title" xml:space="preserve">
-    <value>表3: 処理ステータス</value>
+    <value>表3：申請承認状況</value>
   </data>
   <data name="CompletedOrders" xml:space="preserve">
     <value>完了件数</value>
@@ -520,19 +520,19 @@
     <value>未処理件数</value>
   </data>
   <data name="SummaryTable4Title" xml:space="preserve">
-    <value>表4: 仕入先選定待ち</value>
+    <value>表4：申請処理状況</value>
   </data>
   <data name="TotalWaitingItems" xml:space="preserve">
-    <value>選定待ち合計</value>
+    <value> 取得対象コード数</value>
   </data>
   <data name="TotalSelectedItems" xml:space="preserve">
-    <value>選定済み合計</value>
+    <value>仕入先選択対象コード数</value>
   </data>
   <data name="TotalBothStatusItems" xml:space="preserve">
-    <value>両状態合計</value>
+    <value>仕入先選択済みコード数</value>
   </data>
   <data name="TotalAllItems" xml:space="preserve">
-    <value>全件合計</value>
+    <value>選択待ち</value>
   </data>
   <data name="HistoryTableTitle" xml:space="preserve">
     <value>履歴テーブル</value>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -46,4 +46,6 @@ public partial class BaoGia_Confirm_Name_Quotation
     public string? CHR_StatusShip { get; set; }
 
     public string? CHR_StatusACC { get; set; }
+
+    public string? CHR_NameEN { get; set; }
 }

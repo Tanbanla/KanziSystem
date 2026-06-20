@@ -475,7 +475,7 @@
     <value>Dashboard summary</value>
   </data>
   <data name="SummaryTable1Title" xml:space="preserve">
-    <value>Table 1: Deadline status</value>
+    <value>Table 1: Waiting supplier selection</value>
   </data>
   <data name="DueSoon" xml:space="preserve">
     <value>Due today</value>
@@ -490,7 +490,7 @@
     <value>Overdue</value>
   </data>
   <data name="SummaryTable2Title" xml:space="preserve">
-    <value>Table 2: Order status</value>
+    <value>Table 2: Deadline status</value>
   </data>
   <data name="WaitDeptPic" xml:space="preserve">
     <value>Waiting dept PIC</value>
@@ -508,7 +508,7 @@
     <value>Waiting order QLSC</value>
   </data>
   <data name="SummaryTable3Title" xml:space="preserve">
-    <value>Table 3: Processing status</value>
+    <value>Table 3: Application Approval Status</value>
   </data>
   <data name="CompletedOrders" xml:space="preserve">
     <value>Completed orders</value>
@@ -520,19 +520,19 @@
     <value>Unprocessed orders</value>
   </data>
   <data name="SummaryTable4Title" xml:space="preserve">
-    <value>Table 4: Waiting supplier selection</value>
+    <value>Table 4: Application Processing Status</value>
   </data>
   <data name="TotalWaitingItems" xml:space="preserve">
-    <value>Total waiting items</value>
+    <value>Total codes to retrieve</value>
   </data>
   <data name="TotalSelectedItems" xml:space="preserve">
-    <value>Total selected items</value>
+    <value>Codes pending supplier selection</value>
   </data>
   <data name="TotalBothStatusItems" xml:space="preserve">
-    <value>Total items in both statuses</value>
+    <value>Supplier-selected codes</value>
   </data>
   <data name="TotalAllItems" xml:space="preserve">
-    <value>Total all items</value>
+    <value>Pending selection</value>
   </data>
   <data name="HistoryTableTitle" xml:space="preserve">
     <value>History table</value>

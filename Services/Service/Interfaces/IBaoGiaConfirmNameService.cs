@@ -38,5 +38,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user);
         //Export file ten hanh xac nhan
         Task<GenericResponse<List<dynamic>>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user);
+        // Update Name HQ role PIC PUR
+        Task<GenericResponse<bool>> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_QuotationDTO> baoGia, string user);
     }
 }

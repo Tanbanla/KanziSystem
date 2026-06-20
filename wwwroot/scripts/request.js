@@ -91,7 +91,7 @@ function _insert_request() {
                 Currency: Currency,
                 Total: Total,
                 Kind: Kind,
-                Type: Type,
+                Typee: Type,
                 Status: Status,
                 Place: Place,
                 Loaihinhtokhai: Loaihinhtokhai,

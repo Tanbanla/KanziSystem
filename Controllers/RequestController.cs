@@ -158,7 +158,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 model.mailnguoitao = model.adidnguoitao + "@brothergroup.net";
             }
 
-            var rq_detail = REQUEST_PROCESS.Insert_request(model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_dy, model.adid_dy, model.mail_dy, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao,model.Note);
+            var rq_detail = REQUEST_PROCESS.Insert_request( model.Cost_Center, model.Declaration, model.Dealine, model.Total_exchange, model.Exchange_rate, model.Currency, model.Total, model.Kind, model.Typee, model.Status, model.Place, model.Loaihinhtokhai, model.Group_Code, model.Chophepin, model.Urgent, model.User_Create, model.rq, model.adid_dt, model.adid_tt, model.adid_pd, model.mail_dt, model.mail_tt, model.mail_pd, model.ten_dt, model.ten_tt, model.ten_pd, model.ten_dy, model.adid_dy, model.mail_dy, model.ten_xk, model.adid_xk, model.mail_xk, model.adidnguoitao, model.mailnguoitao,model.Note);
 
             string body = $@"Xin chào <br />こんにちは、 <br />
                  Đơn yêu cầu xuất kho :  {rq_detail}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />

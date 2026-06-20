@@ -998,6 +998,15 @@
         return `<td style="background:#cfe3c6;">${escapeHtml(text)}${dt ? `<div class="small text-muted">${escapeHtml(dt)}</div>` : ''}</td>`;
     }
 
+    function supplierCell(value, bitValue, overdue) {
+        const raw = String(bitValue ?? '').trim().toLowerCase();
+        const isValue = value === '';
+        const isSelected = bitValue === 1 || bitValue === true || raw === '1' || raw === 'true';
+        const bgColor = isSelected ? '#cfe3c6' : ((overdue && !isValue) ? 'red' : '#ffffff');
+        const textColor = (!isSelected && overdue) ? '#ffffff' : '';
+        return `<td style="background:${bgColor};${textColor ? `color:${textColor};` : ''}">${escapeHtml(value)}</td>`;
+    }
+
     function renderTable(rows) {
         if (!tblBody) return;
 
@@ -1014,6 +1023,7 @@
             const row = rows[i] || {};
             const stepName = window.i18nHistoryQuote?.CHR_StepName || 'CHR_StepName';
             const deadline = getValue(row, ['DTM_KyHan']);
+            const overdue = isOverdue(deadline);
             const maDon = getValue(row, ['CHR_MaDon']);
             const maHang = getValue(row, ['CHR_MaHangNoiBo']);
             const maHangNcc = getValue(row, ['CHR_MaHangNCC']);
@@ -1028,12 +1038,12 @@
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_NameEN']))}</td>
-                    <td>${escapeHtml(getValue(row, ['NCC_1']))}</td>
-                    <td>${escapeHtml(getValue(row, ['NCC_2']))}</td>
-                    <td>${escapeHtml(getValue(row, ['NCC_3']))}</td>
-                    <td>${escapeHtml(getValue(row, ['NCC_4']))}</td>
-                    <td>${escapeHtml(getValue(row, ['NCC_5']))}</td>
-                    <td style="${isOverdue(deadline) ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
+                    ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), overdue)}
+                    ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), overdue)}
+                    ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), overdue)}
+                    ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), overdue)}
+                    ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), overdue)}
+                    <td style="${overdue ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_CreateBy']))}</td>
                     ${approvalCell(getValue(row, ['QLSC_Approve']), getValue(row, ['QLSC_Time']))}
                     ${approvalCell(getValue(row, ['QLTC_Approve']), getValue(row, ['QLTC_Time']))}
@@ -1086,10 +1096,10 @@
 
     function renderSummaryWaitingSupplier(result) {
         const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
-        document.getElementById('statWaitingSupplier').textContent = getValue(row, ['TongSoHang_DangCho', 'tongSoHang_DangCho'], 0);
-        document.getElementById('statSelectedSupplier').textContent = getValue(row, ['TongSoHang_DaChon', 'tongSoHang_DaChon'], 0);
-        document.getElementById('statBothStatusSupplier').textContent = getValue(row, ['TongSoHang_HaiTrangThai', 'tongSoHang_HaiTrangThai'], 0);
-        document.getElementById('statTotalSupplier').textContent = getValue(row, ['TongSoHang_TatCa', 'tongSoHang_TatCa'], 0);
+        document.getElementById('statWaitingSupplier').textContent = getValue(row, ['IsNeed'], 0);
+        document.getElementById('statSelectedSupplier').textContent = getValue(row, ['IsNeedPick'], 0);
+        document.getElementById('statBothStatusSupplier').textContent = getValue(row, ['IsPicked'], 0);
+        document.getElementById('statTotalSupplier').textContent = getValue(row, ['IsPicking'], 0);
     }
 
     async function applyFilters(pageIndex = 1) {

@@ -467,7 +467,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) > 1 THEN 1 ELSE 0 END) AS ConLai,
                     SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) < 0 THEN 1 ELSE 0 END) AS QuaHan
                 FROM [BaoGia_Request_of_Quotation] as r
-                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE r.BIT_LayBaoGia = 1
                   AND r.ID_StepBaoGia > 2 AND r.ID_StepBaoGia < 12
                   AND r.DTM_KyHan IS NOT NULL
@@ -503,8 +502,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(user))
             {
-                whereClauses.Add("s.CHR_UserAdid = @Adid");
                 parameters.Add("Adid", user);
+                whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
             }
 
             if (whereClauses.Any())
@@ -620,33 +619,40 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 MAIN AS (
                     SELECT
                         f.CHR_MaDon,
-                        f.CHR_MaHangNCC,
                         f.CHR_MaHangNoiBo,
-                        f.CHR_NameEN,
+                        MAX(f.CHR_MaHangNCC) AS CHR_MaHangNCC,
+                        MAX(f.CHR_NameEN) AS CHR_NameEN,
                         MAX(f.DTM_KyHan) AS DTM_KyHan,
                         MAX(f.CHR_CreateBy) AS CHR_CreateBy,
                         MAX(f.ID_StepBaoGia) AS Step
                     FROM FILTERED f
                     GROUP BY
                         f.CHR_MaDon,
-                        f.CHR_MaHangNCC,
-                        f.CHR_MaHangNoiBo,
-                        f.CHR_NameEN
+                        f.CHR_MaHangNoiBo
                 ),
                 NCC_ROW AS (
-                    SELECT
-                        f.CHR_MaDon,
-                        f.CHR_MaHangNoiBo,
-                        f.ID_StepBaoGia,
-                        ISNULL(n.ShortName, f.CHR_MaNCC) AS ShortName,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY
-                                f.CHR_MaDon,
-                                ISNULL(NULLIF(f.CHR_MaHangNoiBo, ''), CAST(f.ID AS NVARCHAR(20)))
-                            ORDER BY n.ShortName
-                        ) AS rn
-                    FROM FILTERED f
-                    LEFT JOIN IM_NCC_NEW n ON f.CHR_MaNCC = n.Ma
+	                SELECT
+		                CHR_MaDon,
+		                CHR_MaHangNoiBo,
+		                ShortName,
+		                MAX(ID_StepBaoGia) AS ID_StepBaoGia,
+		                ROW_NUMBER() OVER (
+			                PARTITION BY CHR_MaDon, CHR_MaHangNoiBo
+			                ORDER BY ShortName
+		                ) AS rn
+	                FROM (
+		                SELECT DISTINCT
+			                f.CHR_MaDon,
+			                f.CHR_MaHangNoiBo,
+			                ISNULL(n.ShortName, f.CHR_MaNCC) AS ShortName,
+			                f.ID_StepBaoGia
+		                FROM FILTERED f
+		                LEFT JOIN IM_NCC_NEW n ON f.CHR_MaNCC = n.Ma
+	                ) t
+	                GROUP BY 
+		                CHR_MaDon,
+		                CHR_MaHangNoiBo,
+		                ShortName
                 ),
                 NCC_PIVOT AS (
                     SELECT
@@ -657,7 +663,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         MAX(CASE WHEN rn = 3 THEN ShortName END) AS NCC_3,
                         MAX(CASE WHEN rn = 4 THEN ShortName END) AS NCC_4,
                         MAX(CASE WHEN rn = 5 THEN ShortName END) AS NCC_5,
-						MAX(CASE WHEN rn = 1 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_1,
+		                MAX(CASE WHEN rn = 1 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_1,
                         MAX(CASE WHEN rn = 2 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_2,
                         MAX(CASE WHEN rn = 3 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_3,
                         MAX(CASE WHEN rn = 4 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_4,
@@ -706,19 +712,27 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     GROUP BY CHR_MaDon, CHR_MaHangNoiBo
                 ),
                 PICK AS (
-                    SELECT
-                        f.CHR_MaDon,
-                        f.CHR_MaHangNoiBo,
-                        n.ShortName AS NCC_DuocChon,
-                        d.NVCHR_ReasonPick,
-                        d.NVCHR_File
-                    FROM FILTERED f
-                    INNER JOIN BaoGia_Detail_of_Quotation d
-                        ON d.ID_RequestQuote = f.ID
-                        AND d.BIT_Select = 1
-                    LEFT JOIN IM_NCC_NEW n
-                        ON f.CHR_MaNCC = n.Ma
-                )
+                    SELECT *
+                    FROM (
+                        SELECT
+                            f.CHR_MaDon,
+                            f.CHR_MaHangNoiBo,
+                            n.ShortName AS NCC_DuocChon,
+                            d.NVCHR_ReasonPick,
+                            d.NVCHR_File,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
+                                ORDER BY d.ID DESC
+                            ) AS rn
+                        FROM FILTERED f
+                        INNER JOIN BaoGia_Detail_of_Quotation d
+                            ON d.ID_RequestQuote = f.ID
+                            AND d.BIT_Select = 1
+                        LEFT JOIN IM_NCC_NEW n
+                            ON f.CHR_MaNCC = n.Ma
+                    ) t
+                    WHERE rn = 1
+                )   
             ";
 
             sql = cteSql + @"
@@ -806,18 +820,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var sql = @"
             WITH DonHang AS (
-                SELECT 
-                    r.CHR_MaDon,
-                    MAX(CASE WHEN r.ID_StepBaoGia = 1 THEN 1 ELSE 0 END) AS PICSection,
-                    MAX(CASE WHEN r.ID_StepBaoGia = 2 THEN 1 ELSE 0 END) AS QLSCSection,
-                    MAX(CASE WHEN r.ID_StepBaoGia = 3 THEN 1 ELSE 0 END) AS QLTCSection,
-                    MAX(CASE WHEN r.ID_StepBaoGia = 4 THEN 1 ELSE 0 END) AS PICPur,
-                    MAX(CASE WHEN r.ID_StepBaoGia = 5 THEN 1 ELSE 0 END) AS QLSCPur
-                FROM BaoGia_Request_of_Quotation r
-                LEFT JOIN BaoGia_Master_Approver_Send_Mail s ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE r.BIT_LayBaoGia = 1
-                    AND r.ID_Status NOT LIKE 'DELETE'
-                    AND r.ID_Status NOT LIKE 'RETURN%'
+                 SELECT 
+                     r.CHR_MaDon,
+                     MAX(CASE WHEN r.ID_StepBaoGia = 1 THEN 1 ELSE 0 END) AS PICSection,
+                     MAX(CASE WHEN r.ID_StepBaoGia = 2 THEN 1 ELSE 0 END) AS QLSCSection,
+                     MAX(CASE WHEN r.ID_StepBaoGia = 3 THEN 1 ELSE 0 END) AS QLTCSection,
+                     MAX(CASE WHEN r.ID_StepBaoGia = 4 THEN 1 ELSE 0 END) AS PICPur,
+                     MAX(CASE WHEN r.ID_StepBaoGia = 5 THEN 1 ELSE 0 END) AS QLSCPur
+                 FROM BaoGia_Request_of_Quotation r
+                 WHERE r.BIT_LayBaoGia = 1 and r.ID_StepBaoGia < 6
+                     AND r.ID_Status NOT LIKE 'DELETE'
+                     AND r.ID_Status NOT LIKE 'RETURN%'
             ";
 
             var whereClauses = new List<string>();
@@ -850,8 +863,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(user))
             {
-                whereClauses.Add("s.CHR_UserAdid = @Adid");
                 parameters.Add("Adid", user);
+                whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
             }
 
             if (whereClauses.Any())
@@ -885,11 +898,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                             CASE WHEN COUNT(CASE WHEN r.ID_StepBaoGia > 11  and r.ID_StepBaoGia <13  THEN 1 END) = COUNT(*) THEN 1 ELSE 0 END AS IsProcessing,
                             CASE WHEN COUNT(CASE WHEN r.ID_StepBaoGia < 11 THEN 1 END) = COUNT(*) THEN 1 ELSE 0 END AS IsChuaXuLy
                         FROM BaoGia_Request_of_Quotation r
-	                    LEFT JOIN (
-		                    SELECT DISTINCT CHR_CodeSection, CHR_UserAdid
-		                    FROM BaoGia_Master_Approver_Send_Mail
-	                    ) s
-	                    ON r.CHR_SectionCode = s.CHR_CodeSection
                     WHERE r.BIT_LayBaoGia = 1
                         AND r.ID_Status NOT LIKE 'DELETE'
                         AND (r.ID_Status NOT LIKE 'RETURN%' or r.ID_StepBaoGia = 8)
@@ -925,8 +933,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(user))
             {
-                whereClauses.Add("s.CHR_UserAdid = @Adid");
                 parameters.Add("Adid", user);
+                whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
             }
 
             if (whereClauses.Any())
@@ -951,31 +959,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<dynamic>> GetWaitingForSupplier(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user)
         {
             var sql = @"
-            WITH ChiTietHang AS (
-                SELECT 
+            WITH Base AS (
+                SELECT DISTINCT
                     CHR_MaDon,
                     CHR_MaHangNoiBo,
-		            CHR_MaThietBi,
-                    CASE WHEN MAX(CASE WHEN ID_StepBaoGia > 8 AND ID_StepBaoGia < 12 THEN 1 ELSE 0 END) = 0
-                         AND MAX(CASE WHEN ID_StepBaoGia > 6 AND ID_StepBaoGia < 9 THEN 1 ELSE 0 END) = 1
-                    THEN 1 ELSE 0 END AS IsOnlyWaiting,
-        
-                    CASE WHEN MAX(CASE WHEN ID_StepBaoGia > 6 AND ID_StepBaoGia < 9 THEN 1 ELSE 0 END) = 0
-                         AND MAX(CASE WHEN ID_StepBaoGia > 8 AND ID_StepBaoGia < 12 THEN 1 ELSE 0 END) = 1
-                    THEN 1 ELSE 0 END AS IsOnlySelected,
-        
-                    CASE WHEN MAX(CASE WHEN ID_StepBaoGia > 6 AND ID_StepBaoGia < 9 THEN 1 ELSE 0 END) = 1
-                         AND MAX(CASE WHEN ID_StepBaoGia > 8 AND ID_StepBaoGia < 12 THEN 1 ELSE 0 END) = 1
-                    THEN 1 ELSE 0 END AS IsBoth
-                FROM BaoGia_Request_of_Quotation as r
-	            LEFT JOIN (
-		            SELECT DISTINCT CHR_CodeSection, CHR_UserAdid
-		            FROM BaoGia_Master_Approver_Send_Mail
-	            ) s
-	            ON CHR_SectionCode = s.CHR_CodeSection
+                    REPLACE(LTRIM(RTRIM(CHR_MaHangNCC)), ' ', '') AS CHR_MaHangNCC_Clean,
+                    ID_StepBaoGia
+                FROM BaoGia_Request_of_Quotation r
                 WHERE BIT_LayBaoGia = 1
-                    AND ID_Status NOT LIKE 'DELETE'
-                    AND (ID_Status NOT LIKE 'RETURN%' or ID_StepBaoGia = 8)
+		            AND ID_StepBaoGia > 2
             ";
 
             var whereClauses = new List<string>();
@@ -1008,8 +1000,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrEmpty(user))
             {
-                whereClauses.Add("s.CHR_UserAdid = @Adid");
                 parameters.Add("Adid", user);
+                whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
             }
 
             if (whereClauses.Any())
@@ -1018,14 +1010,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             sql += @"
-                GROUP BY CHR_MaDon, CHR_MaHangNoiBo,CHR_MaThietBi
             )
-            SELECT 
-                SUM(IsOnlyWaiting) AS TongSoHang_DangCho,
-                SUM(IsOnlySelected) AS TongSoHang_DaChon,
-                SUM(IsBoth) AS TongSoHang_HaiTrangThai,
-                COUNT(*) AS TongSoHang_TatCa
-            FROM ChiTietHang;";
+            SELECT
+                -- Cần lấy quotation
+                (SELECT COUNT(DISTINCT CHR_MaDon + '|' + CHR_MaHangNoiBo + '|' + CHR_MaHangNCC_Clean) FROM Base) AS IsNeed,
+
+                -- Yêu cầu lựa chọn
+                (SELECT COUNT(DISTINCT CHR_MaDon + '|' + CHR_MaHangNoiBo) FROM Base ) AS IsNeedPick,--WHERE ID_StepBaoGia > 5
+
+                -- Đã chọn NCC
+                (SELECT COUNT(DISTINCT CHR_MaDon + '|' + CHR_MaHangNoiBo) FROM Base WHERE ID_StepBaoGia > 9) AS IsPicked,
+
+                -- Chờ lựa chọn
+                (SELECT COUNT(DISTINCT CHR_MaDon + '|' + CHR_MaHangNoiBo) FROM Base WHERE ID_StepBaoGia > 6 AND ID_StepBaoGia < 9) AS IsPicking;";
 
             var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return result;

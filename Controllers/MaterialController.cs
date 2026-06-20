@@ -373,6 +373,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var itemNG = new List<ConfirmNameDTO>();
             var listDifferent = new List<BaoGia_Confirm_Name_Quotation>();
             var listUpdateRequest = new List<BaoGia_Request_of_QuotationDTO>();
+            var listUpdateUserPur = new List<BaoGia_Confirm_Name_QuotationDTO>();
             var hasErrors = false;
             try
             {
@@ -428,7 +429,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     hasErrors = true;
                                     continue;
                                 }
-                                if (tenHaiQuan != tenRecomment)
+                                if (tenHaiQuan.Trim().ToUpper() != tenRecomment.Trim().ToUpper())
                                 {
                                     listDifferent.Add(new BaoGia_Confirm_Name_Quotation
                                     {
@@ -452,6 +453,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             break;
                         case "UserPUR":
+                            var itemRequestPur = new BaoGia_Confirm_Name_QuotationDTO
+                            {
+                                ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                CHR_NameEN = ws.Cell(r, 13).GetString(),
+                                VCHR_TenRecomment = ws.Cell(r, 12).GetString(),
+                            };
+                            listUpdateUserPur.Add(itemRequestPur);
+                            break;
                         default:
                             var itemRequest = new BaoGia_Request_of_QuotationDTO
                             {
@@ -619,9 +628,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 // Lưu thông tin cập nhật vào request với role UserPUR và User
-                if (listUpdateRequest.Any())
+                if(role == "UserPUR" )
                 {
-                    await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
+                    if (listUpdateUserPur.Any())
+                    {
+                        await _confirmNameService.UpdateNameHQRolePICPURAsync(listUpdateUserPur, user);
+                    }
+                }
+                else
+                {
+                    if (listUpdateRequest.Any())
+                    {
+                        await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
+                    }
                 }
 
             }

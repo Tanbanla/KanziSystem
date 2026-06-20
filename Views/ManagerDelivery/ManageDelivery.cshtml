@@ -1,22 +1,1296 @@
-@using PRJ_WAREHOUSE_BIVN.Controllers
-@model IEnumerable<PoViewModel>
+@using PRJ_WAREHOUSE_BIVN.Language
+@{
+    ViewData["Title"] = "Quản lý nhận hàng";
+}
 
-<div class="card">
-    <div class="card-header bg-white pb-0 d-flex justify-content-between align-items-end border-bottom">
-        <ul class="nav nav-tabs border-bottom-0" id="poTabs" role="tablist">
-        </ul>
-    </div>
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-size: 14px;
+    }
 
-    <div class="card-body p-0">
-        <div class="tab-content" id="poTabsContent">
+    .input-group-text, select.form-control:not([size]):not([multiple]), .form-control:not(.form-control-sm):not(.form-control-lg) {
+        font-size: 13px;
+        padding: 15px 12px;
+        height: 38px;
+    }
 
-            <div class="tab-pane fade show active" id="pending" role="tabpanel">
-                @await Html.PartialAsync("_PoTablePartial", Model.Where(x => x.Status == "Pending"))
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 15px;
+    }
+
+    .table-responsive {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .table th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        vertical-align: middle;
+    }
+
+    .bg-pur {
+        background-color: #e2f0d9 !important;
+    }
+
+    .badge-ng {
+        background-color: #ff0000;
+        color: white;
+    }
+
+    .badge-ok {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .row-alert-yes {
+        background-color: #fce8e6;
+    }
+
+    /* Đảm bảo khoảng cách nhỏ giữa 2 nút trong ô hành động */
+    .btn-action-gap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* Vùng kéo thả file Excel chuyên dụng */
+    .excel-dropzone {
+        border: 2px dashed #28a745;
+        background-color: #f8fff9;
+        border-radius: 6px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .excel-dropzone:hover {
+            background-color: #f0fdf2;
+            border-color: #218838;
+        }
+
+    /* Style cho hàng hiển thị thông tin mở rộng */
+    .detail-row {
+        background-color: #ffffff !important;
+    }
+
+    .detail-container {
+        padding: 15px;
+        background: #fdfdfd;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-pane" type="button" role="tab">Hàng ngoài danh mục</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-pane" type="button" role="tab">Hàng trong danh mục</button>
+    </li>
+    <li style="margin-left:200px">
+        <h4 class="text-primary mb-0"><i class="fa-solid ion-clipboard me-2"></i>&nbsp; THEO DÕI TIẾN ĐỘ ĐƠN HÀNG & THANH TOÁN (PO) </h4>
+    </li>
+</ul>
+
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="home-pane" role="tabpanel" aria-labelledby="home-tab">
+        <div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">        
+            <div class="card">
+                <div class="card-body">
+                    <form class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
+                            <input type="text" class="form-control" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
+                            <input type="month" class="form-control" value="2026-05">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
+                            <select class="form-control" style="padding: 5px 12px;">
+                                <option value="">-- Tất cả trạng thái --</option>
+                                <option value="Yes">Có (Yes) - Đang cảnh báo</option>
+                                <option value="No">Không (No)</option>
+                                <option value="Wait">Chờ phòng ban xác nhận</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end gap-2">
+                            <button type="button" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
+                            <button type="reset" class="btn btn-outline-secondary"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</button>
+                        </div>
+                    </form>
+                </div>
             </div>
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <select class="form-control" style="padding:2px 5px">
+                            <option>Danh sách PO chưa giao hàng &nbsp;</option>
+                            <option>Danh sách PO đã nhập hàng &nbsp;</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-center text-uppercase fs-7">
+                                    <th class="text-dark">No.</th>
+                                    <th class="bg-pur text-dark">Ngày YC</th>
+                                    <th class="bg-pur text-dark">Ngày YC giao</th>
+                                    <th class="bg-pur text-dark">Số PO</th>
+                                    <th class="bg-pur text-dark">Tên hàng</th>
+                                    <th class="bg-pur text-dark">Mã hàng</th>
+                                    <th class="bg-pur text-dark">Số lượng</th>
+                                    <th class="bg-pur text-dark">Đơn vị</th>
+                                    <th class="bg-pur text-dark">Tên NCC</th>
+                                    <th class="bg-pur text-dark">Time GH</th>
+                                    <th class="bg-pur text-dark" width="100">ĐN phát hành PO</th>
+                                    <th class="text-dark">Ngày gửi PO</th>
+                                    <th class="bg-pur text-dark">ĐN Follow NCC</th>
+                                    <th class="text-dark">Ngày NCC XN Giao</th>
+                                    <th class="text-dark">Lịch giao (OK/NG)</th>
+                                    <th class="text-dark">Ảnh hưởng SX</th>
+                                    <!-- THÊM MỚI TIÊU ĐỀ CỘT TRẠNG THÁI -->
+                                    <th class="text-dark">Trạng thái</th>
+                                    <th class="text-dark" colspan="3">NHẬP DỮ LIỆU</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- DÒNG 1: ĐƠN HÀNG ĐÃ NHẬP HÀNG -->
+                                <tr class="row-alert-yes">
+                                    <td class="text-center fw-bold">153</td>
+                                    <td class="text-center">04/05/2026</td>
+                                    <td class="text-center">05/05/2026</td>
+                                    <td class="text-center fw-bold text-primary">2603-0008</td>
+                                    <td>Dây đai PP (0.7mm*15mm*1500m)</td>
+                                    <td class="text-center fw-bold">E000188</td>
+                                    <td class="text-end">100</td>
+                                    <td class="text-center">Roll</td>
+                                    <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
+                                    <td>60</td>
+                                    <td>thuongti</td>
+                                    <td class="text-center">09/06/2026</td>
+                                    <td>Hương</td>
+                                    <td class="text-center fw-bold text-danger">13/06/2026</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
+                                        <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                    </td>
+                                    <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
 
-            <div class="tab-pane fade" id="received" role="tabpanel">
-                @await Html.PartialAsync("_PoTablePartial", Model.Where(x => x.Status == "Received"))
+                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 1 -->
+                                    <th class="text-center text-success">
+                                        Đã nhập hàng
+                                    </th>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188"
+                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="13/06/2026" data-impact="Yes">
+                                            <i class="fa-solid ion-compose"></i> Dự kiến
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-pen"></i> Chính thức
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188" data-order-qty="100" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- TĂNG COLSPAN LÊN 20 ĐỂ TRÁNH LỆCH KHUNG KHI CÓ CHI TIẾT -->
+                                <tr id="info-153" class="collapse detail-row">
+                                    <td colspan="20">
+                                        <div class="detail-container">
+                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
+                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-danger">13/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-danger">Có (Yes)</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
+                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">12/06/2026</b></span>
+                                                        <span class="d-block fs-7">Cửa giao / Kho nhận: <b class="text-dark">Cửa F1 / Kho F1</b></span>
+                                                        <span class="d-block fs-7">Trạng thái: <b class="text-success">Đã hoàn thành nhận hàng</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
+                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-dark">100 Roll</b></span>
+                                                        <span class="d-block fs-7">Số ĐNTT: <b class="text-dark">DNTT-2605-0012</b></span>
+                                                        <span class="d-block fs-7">Số Hóa đơn: <b class="text-dark">INV-0089271</b></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- DÒNG 2: ĐƠN HÀNG CHƯA GIAO HÀNG -->
+                                <tr>
+                                    <td class="text-center fw-bold">154</td>
+                                    <td class="text-center">04/05/2026</td>
+                                    <td class="text-center">05/05/2026</td>
+                                    <td class="text-center fw-bold text-primary">2603-0009</td>
+                                    <td>Giấy A4 in 2 mặt Bãi Bằng 58gsm</td>
+                                    <td class="text-center fw-bold">E000189</td>
+                                    <td class="text-end">200</td>
+                                    <td class="text-center">Ream</td>
+                                    <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
+                                    <td>30</td>
+                                    <td>thuongti</td>
+                                    <td class="text-center">09/06/2026</td>
+                                    <td>Hương</td>
+                                    <td class="text-center fw-bold text-danger">06/05/2026</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-154">
+                                        <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                    </td>
+                                    <td class="text-center text-secondary">Không (No)</td>
+
+                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 2 -->
+                                    <th class="text-center text-warning">
+                                        Chưa giao hàng
+                                    </th>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189"
+                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="06/05/2026" data-impact="No">
+                                            <i class="fa-solid ion-compose"></i> Dự kiến
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-pen"></i> Chính thức
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189" data-order-qty="200" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- TĂNG COLSPAN LÊN 20 -->
+                                <tr id="info-154" class="collapse detail-row">
+                                    <td colspan="20">
+                                        <div class="detail-container">
+                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
+                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-danger">06/05/2026</b></span>
+                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-secondary">Không (No)</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
+                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-muted">-- Chưa nhập dữ liệu --</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
+                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-muted">-- Chưa thanh toán --</b></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- DÒNG 3: ĐƠN HÀNG ĐÃ NHẬP HÀNG -->
+                                <tr>
+                                    <td class="text-center fw-bold">155</td>
+                                    <td class="text-center">04/05/2026</td>
+                                    <td class="text-center">05/05/2026</td>
+                                    <td class="text-center fw-bold text-primary">2603-0010</td>
+                                    <td>Băng dính xốp PE (45mm * 45mm)</td>
+                                    <td class="text-center text-muted">Ngoài E/A</td>
+                                    <td class="text-end">42,000</td>
+                                    <td class="text-center">Pcs</td>
+                                    <td>CÔNG TY TNHH THƯƠNG MẠI Y</td>
+                                    <td>10</td>
+                                    <td>thuongti</td>
+                                    <td class="text-center">09/06/2026</td>
+                                    <td>Hương</td>
+                                    <td class="text-center text-success">02/05/2026</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-155">
+                                        <span class="badge badge-ok p-2 w-100">OK <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                    </td>
+                                    <td class="text-center text-secondary">Không (No)</td>
+
+                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 3 -->
+                                    <th class="text-center text-success">
+                                        Đã nhập hàng
+                                    </th>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A"
+                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="02/05/2026" data-impact="No">
+                                            <i class="fa-solid ion-compose"></i> Dự kiến
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-pen"></i> Chính thức
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A" data-order-qty="42,000" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- TĂNG COLSPAN LÊN 20 -->
+                                <tr id="info-155" class="collapse detail-row">
+                                    <td colspan="20">
+                                        <div class="detail-container">
+                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
+                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-success">02/05/2026</b></span>
+                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-secondary">Không (No)</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
+                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">02/05/2026</b></span>
+                                                        <span class="d-block fs-7">Cửa giao / Kho nhận: <b class="text-dark">Cửa F2 / Kho F2</b></span>
+                                                        <span class="d-block fs-7">Trạng thái: <b class="text-success">Đã nhận hàng OK</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
+                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-muted">-- Chưa thanh toán --</b></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+                    <span class="text-muted">Hiển thị 1-3 trong tổng số 158 dòng dữ liệu chưa giao</span>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="profile-pane" role="tabpanel" aria-labelledby="profile-tab">
+        <div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">
+            <div class="card">
+                <div class="card-body">
+                    <form class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
+                            <input type="text" class="form-control" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
+                            <input type="month" class="form-control" value="2026-05">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
+                            <select class="form-control" style="padding: 5px 12px;">
+                                <option value="">-- Tất cả trạng thái --</option>
+                                <option value="Yes">Có (Yes) - Đang cảnh báo</option>
+                                <option value="No">Không (No)</option>
+                                <option value="Wait">Chờ phòng ban xác nhận</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end gap-2">
+                            <button type="button" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
+                            <button type="reset" class="btn btn-outline-secondary"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <select class="form-control" style="padding:2px 5px">
+                            <option>Danh sách mã A/E chưa giao hàng &nbsp;</option>
+                            <option>Danh sách mã A/E đã giao hàng &nbsp;</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-center text-uppercase fs-7">
+                                    <th class="text-dark">No.</th>
+                                    <th class="bg-pur text-dark">Ngày YC</th>
+                                    <th class="bg-pur text-dark">Ngày YC giao</th>
+                                    <th class="bg-pur text-dark">Số PO</th>
+                                    <th class="bg-pur text-dark">Tên hàng</th>
+                                    <th class="bg-pur text-dark">Mã hàng</th>
+                                    <th class="bg-pur text-dark">Số lượng</th>
+                                    <th class="bg-pur text-dark">Đơn vị</th>
+                                    <th class="bg-pur text-dark">Tên NCC</th>
+                                    <th class="bg-pur text-dark">Time GH</th>
+                                    <th class="bg-pur text-dark" width="100">ĐN phát hành PO</th>
+                                    <th class="text-dark">Ngày gửi PO</th>
+                                    <th class="bg-pur text-dark">ĐN Follow NCC</th>
+                                    <th class="text-dark">Ngày NCC XN Giao</th>
+                                    <th class="text-dark">Lịch giao (OK/NG)</th>
+                                    <th class="text-dark">Ảnh hưởng SX</th>
+                                    <th class="text-dark">Cảnh báo</th>
+                                    <!-- THÊM MỚI TIÊU ĐỀ CỘT TRẠNG THÁI -->
+                                    <th class="text-dark">Trạng thái</th>
+                                    <th class="text-dark" colspan="3">NHẬP DỮ LIỆU</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- DÒNG 1: ĐƠN HÀNG ĐÃ NHẬP HÀNG -->
+                                <tr class="row-alert-yes">
+                                    <td class="text-center fw-bold">153</td>
+                                    <td class="text-center">04/05/2026</td>
+                                    <td class="text-center">05/05/2026</td>
+                                    <td class="text-center fw-bold text-primary">2603-0008</td>
+                                    <td>Dây đai PP (0.7mm*15mm*1500m)</td>
+                                    <td class="text-center fw-bold">E000188</td>
+                                    <td class="text-end">100</td>
+                                    <td class="text-center">Roll</td>
+                                    <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
+                                    <td>60</td>
+                                    <td>thuongti</td>
+                                    <td class="text-center">09/06/2026</td>
+                                    <td>Hương</td>
+                                    <td class="text-center fw-bold text-danger">13/06/2026</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
+                                        <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                    </td>
+                                    <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
+                                        <span class="badge badge-ng p-2 w-100">Put out</span>
+                                    </td>
+                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 1 -->
+                                    <th class="text-center text-success">
+                                        Đã nhập hàng
+                                    </th>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188"
+                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="13/06/2026" data-impact="Yes">
+                                            <i class="fa-solid ion-compose"></i> Dự kiến
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-pen"></i> Chính thức
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188" data-order-qty="100" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- TĂNG COLSPAN LÊN 20 ĐỂ TRÁNH LỆCH KHUNG KHI CÓ CHI TIẾT -->
+                                <tr id="info-153" class="collapse detail-row">
+                                    <td colspan="20">
+                                        <div class="detail-container">
+                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
+                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-danger">13/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-danger">Có (Yes)</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
+                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">12/06/2026</b></span>
+                                                        <span class="d-block fs-7">Cửa giao / Kho nhận: <b class="text-dark">Cửa F1 / Kho F1</b></span>
+                                                        <span class="d-block fs-7">Trạng thái: <b class="text-success">Đã hoàn thành nhận hàng</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
+                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-dark">100 Roll</b></span>
+                                                        <span class="d-block fs-7">Số ĐNTT: <b class="text-dark">DNTT-2605-0012</b></span>
+                                                        <span class="d-block fs-7">Số Hóa đơn: <b class="text-dark">INV-0089271</b></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- DÒNG 2: ĐƠN HÀNG CHƯA GIAO HÀNG -->
+                                <tr>
+                                    <td class="text-center fw-bold">154</td>
+                                    <td class="text-center">04/05/2026</td>
+                                    <td class="text-center">05/05/2026</td>
+                                    <td class="text-center fw-bold text-primary">2603-0009</td>
+                                    <td>Giấy A4 in 2 mặt Bãi Bằng 58gsm</td>
+                                    <td class="text-center fw-bold">E000189</td>
+                                    <td class="text-end">200</td>
+                                    <td class="text-center">Ream</td>
+                                    <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
+                                    <td>30</td>
+                                    <td>thuongti</td>
+                                    <td class="text-center">09/06/2026</td>
+                                    <td>Hương</td>
+                                    <td class="text-center fw-bold text-danger">06/05/2026</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-154">
+                                        <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                    </td>
+                                    <td class="text-center text-secondary">Không (No)</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
+                                        <span class="badge badge-ng p-2 w-100">Put in</span>
+                                    </td>
+                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 2 -->
+                                    <th class="text-center text-warning">
+                                        Chưa giao hàng
+                                    </th>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189"
+                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="06/05/2026" data-impact="No">
+                                            <i class="fa-solid ion-compose"></i> Dự kiến
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-pen"></i> Chính thức
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189" data-order-qty="200" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- TĂNG COLSPAN LÊN 20 -->
+                                <tr id="info-154" class="collapse detail-row">
+                                    <td colspan="20">
+                                        <div class="detail-container">
+                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
+                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-danger">06/05/2026</b></span>
+                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-secondary">Không (No)</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
+                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-muted">-- Chưa nhập dữ liệu --</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
+                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-muted">-- Chưa thanh toán --</b></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- DÒNG 3: ĐƠN HÀNG ĐÃ NHẬP HÀNG -->
+                                <tr>
+                                    <td class="text-center fw-bold">155</td>
+                                    <td class="text-center">04/05/2026</td>
+                                    <td class="text-center">05/05/2026</td>
+                                    <td class="text-center fw-bold text-primary">2603-0010</td>
+                                    <td>Băng dính xốp PE (45mm * 45mm)</td>
+                                    <td class="text-center text-muted">Ngoài E/A</td>
+                                    <td class="text-end">42,000</td>
+                                    <td class="text-center">Pcs</td>
+                                    <td>CÔNG TY TNHH THƯƠNG MẠI Y</td>
+                                    <td>10</td>
+                                    <td>thuongti</td>
+                                    <td class="text-center">09/06/2026</td>
+                                    <td>Hương</td>
+                                    <td class="text-center text-success">02/05/2026</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-155">
+                                        <span class="badge badge-ok p-2 w-100">OK <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                    </td>
+                                    <td class="text-center text-secondary">Không (No)</td>
+                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
+                                        <span class="badge badge-ok p-2 w-100">An toàn <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                    </td>
+                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 3 -->
+                                    <th class="text-center text-success">
+                                        Đã nhập hàng
+                                    </th>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A"
+                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="02/05/2026" data-impact="No">
+                                            <i class="fa-solid ion-compose"></i> Dự kiến
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-pen"></i> Chính thức
+                                        </button>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A" data-order-qty="42,000" data-req-date="05/05/2026">
+                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- TĂNG COLSPAN LÊN 20 -->
+                                <tr id="info-155" class="collapse detail-row">
+                                    <td colspan="20">
+                                        <div class="detail-container">
+                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
+                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
+                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-success">02/05/2026</b></span>
+                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-secondary">Không (No)</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
+                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">02/05/2026</b></span>
+                                                        <span class="d-block fs-7">Cửa giao / Kho nhận: <b class="text-dark">Cửa F2 / Kho F2</b></span>
+                                                        <span class="d-block fs-7">Trạng thái: <b class="text-success">Đã nhận hàng OK</b></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-2 border rounded bg-light">
+                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
+                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-muted">-- Chưa thanh toán --</b></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+                    <span class="text-muted">Hiển thị 1-3 trong tổng số 158 dòng dữ liệu chưa giao</span>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>   
+</div>
+
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-primary" id="updateModalLabel">
+                    <i class="fa-solid fa fa-pen-to-square me-1"></i> Cập nhật Tiến độ PO: <span id="modalPoNumber"></span>
+                </h5>
+                <button type="button" class="btn-close btn" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-2 mb-3 fs-7">
+                    <strong>Mặt hàng:</strong> <span id="modalItemName"></span> (<span id="modalItemCode"></span>) <br>
+                    <strong>Ngày YC giao trên PO:</strong> <span class="text-dark fw-bold" id="modalReqDate"></span>
+                </div>
+
+                <form id="updateForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">1. Ngày gửi PO cho NCC</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-regular fa fa-calendar"></i></span>
+                            <input type="date" id="modalSendPoDate" class="form-control" placeholder="Chọn ngày gửi PO">
+                        </div>
+                        <div class="form-text text-muted">Hệ thống sẽ mail nhắc nhở PIC PUR sau 2 ngày phát hành nếu bỏ trống.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">2. Ngày NCC xác nhận giao (Dự kiến)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-regular fa fa-calendar-check"></i></span>
+                            <input type="date" id="modalConfirmDate" class="form-control" placeholder="Chọn ngày NCC cam kết giao">
+                        </div>
+                        <div class="form-text text-muted">Sau 5 ngày gửi PO nếu chưa nhập, hệ thống sẽ gửi mail cảnh báo.</div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3 p-3 bg-light rounded border border-warning">
+                        <label class="form-label fw-bold text-warning-emphasis d-block mb-2">
+                            <i class="fa-solid fa fa-users-gear me-1"></i> Dành cho Phòng ban yêu cầu (PR1-MC / User RQ)
+                        </label>
+                        <label class="form-label fw-semibold">Xác nhận ảnh hưởng tới sản xuất:</label>
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioImpact" id="radioNo" value="No">
+                                <label class="form-check-label text-success fw-bold" for="radioNo">Không ảnh hưởng (No)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioImpact" id="radioYes" value="Yes">
+                                <label class="form-check-label text-danger fw-bold" for="radioYes">Có ảnh hưởng (Yes)</label>
+                            </div>
+                        </div>
+                        <div class="form-text text-danger mt-1">Lưu ý: If chọn "Yes", cảnh báo sẽ duy trì liên tục trên hệ thống cho tới khi hàng về kho.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSaveInfo" class="btn btn-primary">
+                    <i class="fa-solid fa fa-floppy-disk me-1"></i> Lưu thông tin
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="officialModal" tabindex="-1" aria-labelledby="officialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-success">
+            <div class="modal-header text-success">
+                <h5 class="modal-title fw-bold" id="officialModalLabel">
+                    <i class="fa-solid fa fa-circle-check me-1"></i> Nhập nhận hàng thực tế PO: <span id="offPoNumber"></span>
+                </h5>
+                <button type="button" class="btn-close btn" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success py-2 mb-3 fs-7">
+
+                    <strong>Mặt hàng:</strong> <span id="offItemName"></span> (<span id="offItemCode"></span>) <br>
+                    <strong>Ngày YC giao trên PO:</strong> <span class="fw-bold text-dark" id="offReqDate"></span>
+                </div>
+
+                <form id="officialForm">
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Ngày giao hàng chính thức</label>
+                            <input type="date" id="modalActualDate" class="form-control border-success" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Giờ giao hàng</label>
+                            <input type="time" id="modalActualTime" class="form-control border-success">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Cửa giao hàng</label>
+                            <select id="modalGate" class="form-control" style="padding: 5px 12px">
+                                <option value="F1">F1</option>
+                                <option value="F2">F2</option>
+                                <option value="F3">F3</option>
+                                <option value="F4">F4</option>
+                                <option value="F5">F5</option>
+                                <option value="F6">F6</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Kho nhận hàng</label>
+                            <select id="modalWarehouse" class="form-control" style="padding: 5px 12px">
+                                <option value="Kho F1">Kho F1</option>
+                                <option value="Kho F2">Kho F2</option>
+                                <option value="Kho F3">Kho F3</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" id="btnSaveOfficial" class="btn btn-success fw-bold">
+                    <i class="fa-solid fa fa-circle-check me-1"></i> Hoàn thành nhận hàng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-info">
+            <div class="modal-header text-info">
+                <h5 class="modal-title fw-bold" id="paymentModalLabel">
+                    <i class="fa-solid fa fa-credit-card me-1"></i> Nhập thông tin thanh toán PO: <span id="payPoNumber"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white btn" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-2 mb-3 fs-7">
+                    <strong>Mặt hàng:</strong> <span id="payItemName"></span> (<span id="payItemCode"></span>) <br>
+                    <strong>Số lượng đặt hàng:</strong> <span class="fw-bold text-primary" id="payOrderQty"></span>
+                </div>
+
+                <form id="paymentForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">Số lượng thanh toán thực tế</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-info text-info"><i class="fa-solid fa fa-calculator"></i></span>
+                            <input type="number" id="modalPayQty" class="form-control border-info" placeholder="Nhập số lượng thực tế cần thanh toán" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">Số ĐNTT (Đề nghị thanh toán)</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-info text-info"><i class="fa-solid fa fa-file-invoice text-info"></i></span>
+                            <input type="text" id="modalDnttNumber" class="form-control border-info" placeholder="Nhập số ĐNTT" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-dark">Số Hóa đơn (Invoice Number)</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-info text-info"><i class="fa-solid fa fa text-info">📑</i></span>
+                            <input type="text" id="modalInvoiceNumber" class="form-control border-info" placeholder="Nhập mã số hóa đơn">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" id="btnSavePayment" class="btn btn-info text-white fw-bold">
+                    <i class="fa-solid fa fa-floppy-disk me-1"></i> Lưu hồ sơ thanh toán
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-success">
+            <div class="modal-header text-success">
+                <h5 class="modal-title fw-bold" id="importExcelModalLabel">
+                    <i class="fa-solid fa fa-file-excel me-1"></i> Import Tiến Độ / Đơn Hàng Từ Excel
+                </h5>
+                <button type="button" class="btn-close btn-close-white btn" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 d-flex justify-content-between align-items-center p-2 bg-light rounded border">
+                    <span class="fs-7 text-muted"><i class="fa-solid fa fa-circle-info me-1"></i> Sử dụng file mẫu chuẩn để tránh lỗi dữ liệu.</span>
+                    <a href="#" class="btn btn-xs btn-link text-success p-0 fw-bold text-decoration-none"><i class="fa-solid fa fa-download me-1"></i> Tải Template</a>
+                </div>
+
+                <form id="importExcelForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">Chọn tệp tin Excel (.xlsx, .xls)</label>
+                        <div class="excel-dropzone" onclick="document.getElementById('excelFileInput').click()">
+                            <i class="fa-solid fa fa-cloud-arrow-up text-success mb-2" style="font-size: 2rem;"></i>
+                            <p class="mb-1 fw-semibold text-secondary" id="dropzoneText">Kéo thả file vào đây hoặc click để chọn file</p>
+                            <span class="fs-7 text-muted">Dung lượng tối đa: 10MB</span>
+                            <input type="file" id="excelFileInput" class="d-none" accept=".xlsx, .xls">
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-dark">Tên Sheet dữ liệu (Mặc định Sheet đầu tiên)</label>
+                        <input type="text" id="modalExcelSheetName" class="form-control" placeholder="Ví dụ: Sheet1, Data_PO...">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnExecuteImport" class="btn btn-success fw-bold">
+                    <i class="fa-solid fa fa-upload me-1"></i> Thực hiện Import
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- LOGIC MỚI: ĐÓNG MỞ HÀNG THÔNG TIN PHỤ BÊN DƯỚI DÒNG ---
+        const toggleButtons = document.querySelectorAll('.toggle-detail');
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetSelector = this.getAttribute('data-target');
+                const targetRow = document.querySelector(targetSelector);
+                if(targetRow) {
+                    targetRow.classList.toggle('show');
+                    // Đổi icon caret lên/xuống trực quan
+                    const icon = this.querySelector('i');
+                    if(targetRow.classList.contains('show')) {
+                        icon.className = "fa-solid fa fa-caret-up ms-1";
+                    } else {
+                        icon.className = "fa-solid fa fa-caret-down ms-1";
+                    }
+                }
+            });
+        });
+
+        // --- KHỞI TẠO MODAL 1: DỰ KIẾN ---
+        const estModalEl = document.getElementById('updateModal');
+        let bsEstModal = null;
+        if (estModalEl) {
+            document.body.appendChild(estModalEl);
+            bsEstModal = new bootstrap.Modal(estModalEl, { backdrop: true, focus: true });
+
+            estModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (bsEstModal) bsEstModal.hide();
+                });
+            });
+        }
+
+        // --- KHỞI TẠO MODAL 2: CHÍNH THỨC ---
+        const offModalEl = document.getElementById('officialModal');
+        let bsOffModal = null;
+        if (offModalEl) {
+            document.body.appendChild(offModalEl);
+            bsOffModal = new bootstrap.Modal(offModalEl, { backdrop: true, focus: true });
+
+            offModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (bsOffModal) bsOffModal.hide();
+                });
+            });
+        }
+
+        // --- KHỞI TẠO MODAL 3: THANH TOÁN ---
+        const payModalEl = document.getElementById('paymentModal');
+        let bsPayModal = null;
+        if (payModalEl) {
+            document.body.appendChild(payModalEl);
+            bsPayModal = new bootstrap.Modal(payModalEl, { backdrop: true, focus: true });
+
+            payModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (bsPayModal) bsPayModal.hide();
+                });
+            });
+        }
+
+        // --- KHỞI TẠO MODAL 4: IMPORT EXCEL ---
+        const importModalEl = document.getElementById('importExcelModal');
+        let bsImportModal = null;
+        if (importModalEl) {
+            document.body.appendChild(importModalEl);
+            bsImportModal = new bootstrap.Modal(importModalEl, { backdrop: true, focus: true });
+
+            importModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (bsImportModal) bsImportModal.hide();
+                });
+            });
+        }
+
+        // Hàm phụ trợ xử lý định dạng chuỗi ngày tháng
+        function convertToDateInputValue(dateStr) {
+            if (!dateStr || dateStr.trim() === "") return "";
+            const months = {
+                'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06',
+                'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12'
+            };
+
+            let parts = [];
+            if(dateStr.includes('-')) { parts = dateStr.split('-'); }
+            else if(dateStr.includes('/')) { parts = dateStr.split('/'); }
+
+            if (parts.length !== 3) return "";
+
+            const day = parts[0].padStart(2, '0');
+            const monthStr = parts[1].toLowerCase();
+            let month = '01';
+
+            if (isNaN(monthStr)) {
+                month = months[monthStr] || '01';
+            } else {
+                month = monthStr.padStart(2, '0');
+            }
+            const year = parts[2];
+            return `${year}-${month}-${day}`;
+        }
+
+        // --- LOGIC EVENT: MỞ MODAL IMPORT EXCEL ---
+        const btnOpenImportExcel = document.getElementById('btnOpenImportExcel');
+        if (btnOpenImportExcel) {
+            btnOpenImportExcel.addEventListener('click', function () {
+                document.getElementById('importExcelForm').reset();
+                document.getElementById('dropzoneText').textContent = "Kéo thả file vào đây hoặc click để chọn file";
+                if (bsImportModal) bsImportModal.show();
+            });
+        }
+
+        // --- HIỂN THỊ TÊN FILE KHI CHỌN FILE EXCEL ---
+        const excelFileInput = document.getElementById('excelFileInput');
+        if (excelFileInput) {
+            excelFileInput.addEventListener('change', function () {
+                if (this.files && this.files.length > 0) {
+                    document.getElementById('dropzoneText').textContent = "📌 Đã chọn file: " + this.files[0].name;
+                }
+            });
+        }
+
+        // --- LOGIC EVENT: THỰC HIỆN IMPORT EXCEL ---
+        const btnExecuteImport = document.getElementById('btnExecuteImport');
+        if (btnExecuteImport) {
+            btnExecuteImport.addEventListener('click', function () {
+                const fileInput = document.getElementById('excelFileInput');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert("Vui lòng chọn tệp tin Excel trước khi thực hiện Import!");
+                    return;
+                }
+                alert("Đọc tệp tin thành công!\nHệ thống đang phân tích dữ liệu và cập nhật danh sách PO.");
+                if (bsImportModal) bsImportModal.hide();
+            });
+        }
+
+        // --- LOGIC EVENT: NÚT NHẬP DỰ KIẾN ---
+        const estButtons = document.querySelectorAll('.btn-update-po');
+        estButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const poNumber = this.getAttribute('data-po') || '';
+                const itemName = this.getAttribute('data-item-name') || '';
+                const itemCode = this.getAttribute('data-item-code') || '';
+                const reqDate = this.getAttribute('data-req-date') || '';
+                const sendDate = this.getAttribute('data-send-date') || '';
+                const confirmDate = this.getAttribute('data-confirm-date') || '';
+                const impact = this.getAttribute('data-impact') || '';
+
+                document.getElementById('modalPoNumber').textContent = poNumber;
+                document.getElementById('modalItemName').textContent = itemName;
+                document.getElementById('modalItemCode').textContent = itemCode;
+                document.getElementById('modalReqDate').textContent = reqDate;
+
+                const inputSendDate = document.getElementById('modalSendPoDate');
+                if (sendDate && sendDate.trim() !== "") {
+                    inputSendDate.value = convertToDateInputValue(sendDate);
+                    inputSendDate.classList.add('bg-light');
+                } else {
+                    inputSendDate.value = "";
+                    inputSendDate.classList.remove('bg-light');
+                }
+
+                const inputConfirmDate = document.getElementById('modalConfirmDate');
+                if (confirmDate && confirmDate.trim() !== "") {
+                    inputConfirmDate.value = convertToDateInputValue(confirmDate);
+                    inputConfirmDate.classList.add('bg-light');
+                } else {
+                    inputConfirmDate.value = "";
+                    inputConfirmDate.classList.remove('bg-light');
+                }
+
+                const radioYes = document.getElementById('radioYes');
+                const radioNo = document.getElementById('radioNo');
+                const radioInputs = document.querySelectorAll('input[name="flexRadioImpact"]');
+
+                if (impact === "Yes") {
+                    radioYes.checked = true;
+                    radioInputs.forEach(radio => radio.disabled = true);
+                } else if (impact === "No") {
+                    radioNo.checked = true;
+                    radioInputs.forEach(radio => radio.disabled = true);
+                } else {
+                    radioNo.checked = true;
+                    radioInputs.forEach(radio => radio.disabled = false);
+                }
+
+                const btnSave = document.getElementById('btnSaveInfo');
+                if (sendDate && sendDate.trim() !== "" && confirmDate && confirmDate.trim() !== "" && (impact === "Yes" || impact === "No")) {
+                    btnSave.style.display = 'none';
+                } else {
+                    btnSave.style.display = 'block';
+                }
+
+                if (bsEstModal) bsEstModal.show();
+            });
+        });
+
+        // --- LOGIC EVENT: NÚT NHẬP CHÍNH THỨC ---
+        const offButtons = document.querySelectorAll('.btn-official-po');
+        offButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const poNumber = this.getAttribute('data-po') || '';
+                const itemName = this.getAttribute('data-item-name') || '';
+                const itemCode = this.getAttribute('data-item-code') || '';
+                const reqDate = this.getAttribute('data-req-date') || '';
+
+                document.getElementById('offPoNumber').textContent = poNumber;
+                document.getElementById('offItemName').textContent = itemName;
+                document.getElementById('offItemCode').textContent = itemCode;
+                document.getElementById('offReqDate').textContent = reqDate;
+
+                document.getElementById('officialForm').reset();
+
+                if (bsOffModal) bsOffModal.show();
+            });
+        });
+
+        // --- LOGIC EVENT: NÚT THANH TOÁN ---
+        const payButtons = document.querySelectorAll('.btn-payment-po');
+        payButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const poNumber = this.getAttribute('data-po') || '';
+                const itemName = this.getAttribute('data-item-name') || '';
+                const itemCode = this.getAttribute('data-item-code') || '';
+                const orderQty = this.getAttribute('data-order-qty') || '';
+
+                document.getElementById('payPoNumber').textContent = poNumber;
+                document.getElementById('payItemName').textContent = itemName;
+                document.getElementById('payItemCode').textContent = itemCode;
+                document.getElementById('payOrderQty').textContent = orderQty;
+
+                document.getElementById('paymentForm').reset();
+                document.getElementById('modalPayQty').value = orderQty.replace(/,/g, '');
+
+                if (bsPayModal) bsPayModal.show();
+            });
+        });
+
+        // --- LOGIC EVENT: LƯU MODAL DỰ KIẾN ---
+        const btnSaveInfo = document.getElementById('btnSaveInfo');
+        if (btnSaveInfo) {
+            btnSaveInfo.addEventListener('click', function() {
+                alert('Lưu dữ liệu thành công! Hệ thống sẽ tự động tính toán OK/NG và kích hoạt luồng Mail.');
+                if (bsEstModal) bsEstModal.hide();
+            });
+        }
+
+        // --- LOGIC EVENT: LƯU MODAL CHÍNH THỨC ---
+        const btnSaveOfficial = document.getElementById('btnSaveOfficial');
+        if (btnSaveOfficial) {
+            btnSaveOfficial.addEventListener('click', function() {
+                const actualDate = document.getElementById('modalActualDate').value;
+                if (!actualDate) {
+                    alert("Vui lòng nhập Ngày nhận hàng thực tế!");
+                    return;
+                }
+                alert("Xác nhận nhập kho hàng thành công! Trạng thái đơn hàng sẽ được lưu chính thức.");
+                if (bsOffModal) bsOffModal.hide();
+            });
+        }
+
+        // --- LOGIC EVENT: LƯU MODAL THANH TOÁN ---
+        const btnSavePayment = document.getElementById('btnSavePayment');
+        if (btnSavePayment) {
+            btnSavePayment.addEventListener('click', function() {
+                const payQty = document.getElementById('modalPayQty').value;
+                const dntt = document.getElementById('modalDnttNumber').value;
+
+                if (!payQty || !dntt) {
+                    alert("Vui lòng điền đầy đủ Số lượng thanh toán thực tế và Số ĐNTT!");
+                    return;
+                }
+
+                alert("Cập nhật thông tin hồ sơ thanh toán thành công!");
+                if (bsPayModal) bsPayModal.hide();
+            });
+        }
+
+        // --- RESET FORM KHI ĐÓNG MODAL DỰ KIẾN ---
+        if (estModalEl) {
+            estModalEl.addEventListener('hidden.bs.modal', function () {
+                document.getElementById('updateForm').reset();
+                document.getElementById('modalSendPoDate').classList.remove('bg-light');
+                document.getElementById('modalConfirmDate').classList.remove('bg-light');
+                document.querySelectorAll('input[name="flexRadioImpact"]').forEach(radio => {
+                    radio.disabled = false;
+                });
+                document.getElementById('btnSaveInfo').style.display = 'block';
+            });
+        }
+    });
+    document.querySelectorAll('.nav-link').forEach(button => {
+        button.addEventListener('click', function () {
+            // Xóa active khỏi các nút và nội dung cũ
+            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+
+            // Gán active cho nút mới
+            this.classList.add('active');
+
+            // Gán active cho nội dung mới
+            const target = document.querySelector(this.getAttribute('data-bs-target'));
+            if(target) {
+                target.classList.add('show', 'active');
+            }
+        });
+    });
+</script>

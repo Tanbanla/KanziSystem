@@ -65,6 +65,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<BaoGia_Step> BaoGia_Steps { get; set; }
 
+    public virtual DbSet<BaoGia_Vender_NotConfirm> BaoGia_Vender_NotConfirms { get; set; }
+
     public virtual DbSet<Baocao_ACC_KIEMKE> Baocao_ACC_KIEMKEs { get; set; }
 
     public virtual DbSet<Baocao_ACC_NHAP_THONGTIN> Baocao_ACC_NHAP_THONGTINs { get; set; }
@@ -594,6 +596,9 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.VCHR_UserShip)
                 .HasMaxLength(20)
                 .IsUnicode(false);
+            entity.Property(e => e.CHR_NameEN)
+                .HasMaxLength(650)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<BaoGia_Detail_of_Quotation>(entity =>
@@ -612,7 +617,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.CHR_MaHangNCC)
                 .HasMaxLength(250);
-            entity.Property(e => e.CHR_NameEN).HasMaxLength(200);
+            entity.Property(e => e.CHR_NameEN).HasMaxLength(650);
             entity.Property(e => e.CHR_Status).HasMaxLength(150);
             entity.Property(e => e.CHR_UpdateBy)
                 .HasMaxLength(50)

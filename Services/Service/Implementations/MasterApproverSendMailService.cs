@@ -116,5 +116,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return response;
         }
+        // Check quyền phê duyệt của user theo step và section
+        public async Task<GenericResponse<bool>> CheckUserApprovalPermissionAsync(string adid, List<int> ids)
+        {
+            var response = new GenericResponse<bool>();
+            try
+            {
+                var result = await _repo.CheckUserApprovalPermissionAsync(adid, ids);
+                response.Data = result;
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in CheckUserApprovalPermissionAsync: {ex.Message}";
+            }
+            return response;
+        }
     }
 }

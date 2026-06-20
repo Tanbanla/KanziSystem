@@ -278,5 +278,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Update Name HQ role PIC PUR
+        public async Task<GenericResponse<bool>> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_QuotationDTO> baoGia, string user)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var dt = _mapper.Map<List<BaoGia_Confirm_Name_Quotation>>(baoGia);
+                result.Data = await _repo.UpdateNameHQRolePICPURAsync(dt, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

@@ -475,7 +475,7 @@
     <value>Bảng tổng hợp</value>
   </data>
   <data name="SummaryTable1Title" xml:space="preserve">
-    <value>Bảng 1: Tình trạng thời hạn</value>
+    <value>Bảng 1: Tình trạng chờ chọn nhà cung cấp</value>
   </data>
   <data name="DueSoon" xml:space="preserve">
     <value>Đến hạn</value>
@@ -490,7 +490,7 @@
     <value>Quá hạn</value>
   </data>
   <data name="SummaryTable2Title" xml:space="preserve">
-    <value>Bảng 2: Tình trạng đơn</value>
+    <value>Bảng 2: Tình trạng thời hạn</value>
   </data>
   <data name="WaitDeptPic" xml:space="preserve">
     <value>Chờ PIC phòng ban</value>
@@ -508,7 +508,7 @@
     <value>Chờ QLSC phòng đặt hàng</value>
   </data>
   <data name="SummaryTable3Title" xml:space="preserve">
-    <value>Bảng 3: Tình trạng xử lý</value>
+    <value>Bảng 3: Tình trạng phê duyệt đơn</value>
   </data>
   <data name="CompletedOrders" xml:space="preserve">
     <value>Số đơn hoàn thành</value>
@@ -520,19 +520,19 @@
     <value>Số đơn chưa xử lý</value>
   </data>
   <data name="SummaryTable4Title" xml:space="preserve">
-    <value>Bảng 4: Chờ chọn NCC</value>
+    <value>Bảng 4: Tình trạng xử lý đơn</value>
   </data>
   <data name="TotalWaitingItems" xml:space="preserve">
-    <value>Tổng số hàng đang chờ</value>
+    <value>Tổng số mã cần lấy</value>
   </data>
   <data name="TotalSelectedItems" xml:space="preserve">
-    <value>Tổng số hàng đã chọn</value>
+    <value>Số mã yêu cầu lựa chọn NCC</value>
   </data>
   <data name="TotalBothStatusItems" xml:space="preserve">
-    <value>Tổng số hàng hai trạng thái</value>
+    <value>Số mã đã  chọn NCC</value>
   </data>
   <data name="TotalAllItems" xml:space="preserve">
-    <value>Tổng số hàng tất cả</value>
+    <value>Số mã chờ chọn NCC</value>
   </data>
   <data name="HistoryTableTitle" xml:space="preserve">
     <value>Bảng lịch sử</value>

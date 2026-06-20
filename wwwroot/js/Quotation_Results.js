@@ -848,13 +848,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                             showDialog({ title: T.Notification || 'Thông báo', message: txt || (T.MsgSaveError || 'Lỗi khi xử lý phê duyệt'), type: 'error' });
                                             return;
                                         }
-                                        showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                                showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                                try { quotationApp.reloadTables(); } catch (e) { }
                                         return;
                                     }
                                 } catch (err) {
                                     console.error('Post-import approver flow failed', err);
                                 }
                                 showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                                try { quotationApp.reloadTables(); } catch (e) { }
                             });
                         }
                     })
@@ -867,7 +869,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         document.body.removeChild(fileInput);
                     });
             });
-            this.loadSupplierData(); 
             try {
                 fileInput.click();
             } catch (e) {
@@ -935,6 +936,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             // Thành công
                             return response.json().then(data => {
                                 showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                                try { quotationApp.reloadTables(); } catch (e) { }
                             });
                         }
                     })
@@ -2029,6 +2031,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             return result;
         },
+        reloadTables: function () {
+            try { this.loadSupplierData(); } catch (e) { /* ignore */ }
+            try { this.searchItems(); } catch (e) { /* ignore */ }
+        },
         confirmSelection: async function () {
             const selections = this.getSelections();
             if (!selections.length) {
@@ -2058,6 +2064,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const T = window.i18nQuotationResults || {};
                 if (!data) return showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveError || 'lỗi {0}').replace('{0}', ''), type: 'error' });
                 showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgSaveSuccess || 'Gửi thành công'), type: 'success' });
+                try { this.loadSupplierData(); } catch (e) { }
 
             } catch (err) {
                 const T = window.i18nQuotationResults || {};

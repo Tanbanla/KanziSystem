@@ -108,7 +108,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 2, sr.SectionCost ?? "");
             if (!result.Success)
             {
-                return BadRequest("Error list Approver: " + result.Message);
+                return BadRequest(_localizer["ApproverListError", result.Message]);
             }
             return Ok(result.Data);
         }
@@ -144,7 +144,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 if (result.Data == null)
                 {
-                    return BadRequest("No data to export");
+                    return BadRequest(_localizer["NoDataToExport"]);
                 }
                 var dataList = result.Data.Data;
                 // Calculate totals for system columns
@@ -166,7 +166,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
                 if (!System.IO.File.Exists(templatePath))
                 {
-                    return BadRequest("Không tìm thấy file template: TemplateQuotationResults.xlsx");
+                    return BadRequest(_localizer["TemplateNotFound", "TemplateQuotationResults.xlsx"]);
                 }
 
                 using var fs = System.IO.File.OpenRead(templatePath);
@@ -174,7 +174,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var ws = workbook.Worksheets.FirstOrDefault();
                 if (ws == null)
                 {
-                    return BadRequest("Không tìm thấy worksheet trong template");
+                    return BadRequest(_localizer["WorksheetNotFound"]);
                 }
                 int rowStart = 4;
                 foreach (var item in dataList)
@@ -329,7 +329,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> ImportApprovalQuotianExcel([FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
-                return BadRequest("File không hợp lệ");
+                return BadRequest(_localizer["InvalidFile"]);
 
             var items = new List<dynamic>();
             var errorRows = new List<dynamic>();
@@ -338,7 +338,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var stream = file.OpenReadStream();
                 using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
                 var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                if (ws == null) return BadRequest(_localizer["WorksheetNotFound"]);
                 var isErrors = false;
                 // Dữ liệu bắt đầu từ dòng 4
                 int startRow = 4;
@@ -372,7 +372,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             resonApproval = ws.Cell(r, 62).GetString();
                             break;
                     }
+                    // case chưa chọn kết quả phê duyệt
+                    if (resultApproval != "OK" && resultApproval != "NG")
+                    {
+                        isErrors = true;
+                        errorRows.Add(new
+                        {
+                            Row = r,
+                            MaDon = maDon,
+                            ID = idRequest,
+                            BIT_Select = false,
+                            NVCHR_LyDo = resonApproval,
+                            ID_Step = status,
+                            Errors = _localizer["ValidApprovalResultRequired"].Value
+                        });
+                        continue;
+                    }
 
+                    // case chưa nhập lý do từ chối 
                     if (resultApproval == "NG" && resonApproval == "")
                     {
                         isErrors = true;
@@ -384,10 +401,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             BIT_Select = false,
                             NVCHR_LyDo = resonApproval,
                             ID_Step = status,
-                            Errors = "Lý do phê duyệt không được để trống khi kết quả là NG"
+                            Errors = _localizer["ApprovalReasonRequiredWhenNG"].Value
                         });
                         continue;
                     }
+
                     items.Add(new
                     {
                         Row = r,
@@ -417,7 +435,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         errorWs.Cell(i + 2, 2).Value = row.MaDon;
                         errorWs.Cell(i + 2, 3).Value = row.ID;
                         errorWs.Cell(i + 2, 4).Value = row.BIT_Select;
-                        errorWs.Cell(i + 2, 5).Value = row.NVCHR_ReasonPick;
+                        errorWs.Cell(i + 2, 5).Value = row.NVCHR_LyDo;
                         errorWs.Cell(i + 2, 6).Value = row.Errors;
                     }
                     using var errorStream = new MemoryStream();
@@ -429,7 +447,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 if (items.Count == 0)
                 {
-                    return BadRequest("Không nhận được dữ liệu hợp lệ ");
+                    return BadRequest(_localizer["NoValidDataReceived"]);
                 }
 
                 // If any item is in Chief/Expert Approval step (mapped to 10) ask client to select next approver
@@ -456,7 +474,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var approverResult = await _approverService.GetApproverByStepAndSectionAsync(10, "");
                     if (!approverResult.Success)
                     {
-                        return BadRequest("Error list Approver: " + approverResult.Message);
+                        return BadRequest(_localizer["ApproverListError", approverResult.Message]);
                     }
                     return Ok(new
                     {
@@ -471,14 +489,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var result = await _approverService.GetApproverByStepAndSectionAsync(step, "");
                 if (!result.Success)
                 {
-                    return BadRequest("Error list Approver: " + result.Message);
+                    return BadRequest(_localizer["ApproverListError", result.Message]);
                 }
                 var approvers = result.Data.FirstOrDefault();
                 return await PheDuyetBaoGia(listApproval, approvers?.CHR_UserAdid ?? "khanhmf");
             }
             catch (Exception ex)
             {
-                return BadRequest($"Lỗi đọc file: {ex.Message}");
+                return BadRequest(_localizer["ReadFileError", ex.Message]);
             }
         }
         // Xử lý aproval
@@ -486,18 +504,26 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (listCofirm == null || !listCofirm.Any())
             {
-                return BadRequest("Not data approver");
+                return BadRequest(_localizer["NoApprovalData"]);
             }
             try
             {
-                var baoGia = await _baoGiaService.UpdateApprover(listCofirm, UserApproverNext, GetCurrentUserId());
+                var currentUserId = GetCurrentUserId();
+                // Check user phê duyệt có hợp lệ không
+                var checkPermission = await _approverService.CheckUserApprovalPermissionAsync(currentUserId, listCofirm.Select(c => c.Id).ToList());
+                if (!checkPermission.Success || !checkPermission.Data)
+                {
+                    return BadRequest(_localizer["NoApprovalPermission"]);
+                }
+
+                // Lưu lịch sử phê duyệt
+                var baoGia = await _baoGiaService.UpdateApprover(listCofirm, UserApproverNext, currentUserId);
                 if (!baoGia.Success)
                 {
-                    return BadRequest("Error Approval :" + baoGia.Message);
+                    return BadRequest(_localizer["ApprovalError", baoGia.Message]);
                 }
                 var req = baoGia.Data;
                 var userSend = UserApproverNext;
-                var currentUserId = GetCurrentUserId();
                 var listOk = req.Where(c => c.ID_Status != null && !c.ID_Status.Contains("RETURN")).ToList();
                 var listNG = req.Where(c => c.ID_Status != null && c.ID_Status.Contains("RETURN")).ToList();
                 // Send mail Approval ok
@@ -515,17 +541,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
                                 var checkSendMail = true;
                                 
-                                var nccNotConfirmName = await baoGiaService.GetListNccNotConfirmNameAsync();
-                                var listNccNotConfirmName = nccNotConfirmName.Data ?? new List<string>();
-
-                                listCofirm.ForEach(c =>
-                                {
-                                    var item = listOk.FirstOrDefault(x => x.ID == c.Id);
-                                    if (item != null && listNccNotConfirmName.Contains(item.CHR_MaNCC ?? ""))
-                                    {
-                                        checkSendMail = false;
-                                    }
-                                });
 
                                 var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
                                 foreach (var material in listOk)
@@ -600,7 +615,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var result = await _approverService.GetApproverByStepAndSectionAsync(4, "3110");
                 if (!result.Success)
                 {
-                    return BadRequest("Không lấy được thông tin PIC phụ trách: " + result.Message);
+                    return BadRequest(_localizer["CannotGetPICInfo", result.Message]);
                 }
                 var dataPic = result.Data;
                 if (listNG.Any())
@@ -629,14 +644,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(" Error Approval: " + ex.Message);
+                return BadRequest(_localizer["ApprovalError", ex.Message]);
             }
         }
         [HttpPost]
         public async Task<IActionResult> ConfirmImportedApprovals([FromBody] ConfirmImportedApprovalsRequest req)
         {
             if (req == null || req.Items == null || !req.Items.Any())
-                return BadRequest("No items provided");
+                return BadRequest(_localizer["NoItemsProvided"]);
 
             try
             {
@@ -655,7 +670,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Error processing approvals: " + ex.Message);
+                return BadRequest(_localizer["ProcessApprovalsError", ex.Message]);
             }
         }
         // Nhập lựa chọn báo giá file excel
@@ -663,7 +678,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> ImportQuotianExcel([FromForm] ImportPickSupplier vm)
         {
             if (vm.fileSend == null || vm.fileSend.Length == 0)
-                return BadRequest("File không hợp lệ");
+                return BadRequest(_localizer["InvalidFile"]);
 
             var items = new List<dynamic>();
             var errorRows = new List<dynamic>();
@@ -672,7 +687,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var stream = vm.fileSend.OpenReadStream();
                 using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
                 var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                if (ws == null) return BadRequest(_localizer["WorksheetNotFound"]);
                 var isErrors = false;
 
                 int startRow = 4;
@@ -831,6 +846,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         errors.Add(_localizer["DuplicatePriceForVendor", maHangNB, maHangNCC]);
                     }
 
+                    // check lựa chọn nhà cung cấp bắt buộc phải lựa chọn O và X
+                    if (!bitSelect.Contains("O") && !bitSelect.Contains("X"))
+                    {
+                        errors.Add(_localizer["InvalidSelection", 52]);
+                    }
+
                     if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
                     {
                         errors.Add(_localizer["SelectedVendorNoReasonColumn", 52]);
@@ -963,14 +984,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Lỗi đọc file: {ex.Message}");
+                return BadRequest(_localizer["ReadFileError", ex.Message]);
             }
         }
         [HttpPost]
         public async Task<IActionResult> ImportQuotianExcelOld([FromForm] ImportPickSupplier vm)
         {
             if (vm.fileSend == null || vm.fileSend.Length == 0)
-                return BadRequest("File không hợp lệ");
+                return BadRequest(_localizer["InvalidFile"]);
 
             var items = new List<dynamic>();
             var errorRows = new List<dynamic>();
@@ -979,7 +1000,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var stream = vm.fileSend.OpenReadStream();
                 using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
                 var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+                if (ws == null) return BadRequest(_localizer["WorksheetNotFound"]);
                 var isErrors = false;
                 // Dữ liệu bắt đầu từ dòng 4
                 int startRow = 4;
@@ -1002,7 +1023,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
                     {
                         isErrors = true;
-                        errors.Add("Hàng chưa được chọn nhà cung cấp nhưng đã có lý do từ chối");
+                        errors.Add(_localizer["SelectedVendorNoReason"].Value);
                     }
 
                     if (errors.Any())
@@ -1030,7 +1051,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 ID = id,
                                 BIT_Select = bitSelect,
                                 NVCHR_ReasonPick = reason,
-                                Errors = string.Join("; ", " Trong 1 mã đơn , 1 hàng nội bộ chỉ dc chọn 1 nhà báo giá")
+                                Errors = string.Join("; ", _localizer["OneVendorPerItemInOrder"].Value)
                             });
                         }
                         else
@@ -1095,13 +1116,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Lỗi đọc file: {ex.Message}");
+                return BadRequest(_localizer["ReadFileError", ex.Message]);
             }
         }
         [HttpPost]
         public async Task<IActionResult> SearchInputQuote([FromBody] SearchInputQuote searchModel)
         {
-            if (searchModel == null) return BadRequest("Không nhận Search Input");
+            if (searchModel == null) return BadRequest(_localizer["SearchInputMissing"]);
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
                 searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM, searchModel.pageSize, searchModel.pageIndex);
             if (!result.Success)
@@ -1506,7 +1527,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (string.IsNullOrWhiteSpace(maDon))
             {
-                return BadRequest("Mã đơn không được để trống");
+                return BadRequest(_localizer["OrderCodeRequired"]);
             }
             var result = await _baoGiaService.GetSupplierApprovalInfoAsync(maDon);
             if (!result.Success)
@@ -1520,7 +1541,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (model == null || !model.listCofirm.Any())
             {
-                return BadRequest("Not data approver");
+                return BadRequest(_localizer["NoApprovalData"]);
             }
             return await PheDuyetBaoGia(model.listCofirm, model.UserApproverNext);
         }
@@ -1543,12 +1564,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 if (selections == null || !selections.Any())
                 {
-                    return BadRequest("Không có dữ liệu để xuất");
+                    return BadRequest(_localizer["NoDataToExport"]);
                 }
                 var Status = await _baoGiaStatusService.GetListStatusAsync();
                 if (Status == null || !Status.Success)
                 {
-                    return BadRequest("Lỗi lấy danh sách trạng thái");
+                    return BadRequest(_localizer["StatusListFetchError"]);
                 }
                 List<BaoGia_StatusDTO> listStatus = Status.Data ?? new List<BaoGia_StatusDTO>();
                 List<int> listIdExport = new List<int>();
@@ -1583,7 +1604,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var templatePath = Path.Combine(root, "template", "FileSelectionQuote.xlsx");
                 if (!System.IO.File.Exists(templatePath))
                 {
-                    return BadRequest("Không tìm thấy file template: FileSelectionQuote.xlsx");
+                    return BadRequest(_localizer["TemplateNotFound", "FileSelectionQuote.xlsx"]);
                 }
 
                 using var fs = System.IO.File.OpenRead(templatePath);
@@ -1591,7 +1612,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var ws = workbook.Worksheets.FirstOrDefault();
                 if (ws == null)
                 {
-                    return BadRequest("Không tìm thấy worksheet trong template");
+                    return BadRequest(_localizer["WorksheetNotFound"]);
                 }
 
                 int row = 4;
@@ -1676,7 +1697,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Lỗi xuất file: {ex.Message}");
+                return BadRequest(_localizer["ExportError", ex.Message]);
             }
         }
         private string GetApprovalStatus(int currentStep, int requiredStep, string? reason)

@@ -20,5 +20,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>> GetApproverByStepAndSectionAsync(int idStep, string sectionCode);
         // Inser thông tin và đăng ký user đăng nhập
         public Task<GenericResponse<bool>> InsertMasterApproverSendMailAsync(List<BaoGia_Master_Approver_Send_Mail> dtos);
+        // Check quyền phê duyệt của user theo step và section
+        Task<GenericResponse<bool>> CheckUserApprovalPermissionAsync(string adid, List<int> ids);
     }
 }

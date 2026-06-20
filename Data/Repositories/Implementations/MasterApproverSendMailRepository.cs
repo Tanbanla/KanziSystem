@@ -117,5 +117,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+        // Check quyền phê duyệt của user theo step và section
+        public async Task<bool> CheckUserApprovalPermissionAsync(string adid, List<int> ids)
+        {
+            var requiredSteps = await _context.BaoGia_Request_of_Quotations
+                .Where(x => ids.Contains(x.ID))
+                .Select(x => new { x.ID_StepBaoGia, x.CHR_SectionCode })
+                .Distinct()
+                .ToListAsync();
+
+            var userPermissions = await _context.BaoGia_Master_Approver_Send_Mails
+                 .Where(x => x.CHR_UserAdid == adid)
+                 .Select(x => new { x.ID_BaoGiaStep, x.CHR_CodeSection })
+                 .Distinct()
+                 .ToListAsync();
+
+            return requiredSteps.All(step =>
+                userPermissions.Any(p =>
+                    p.ID_BaoGiaStep == step.ID_StepBaoGia &&
+                    p.CHR_CodeSection == step.CHR_SectionCode));
+        }
     }
 }

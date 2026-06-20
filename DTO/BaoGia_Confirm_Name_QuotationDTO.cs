@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.DTO;
@@ -44,4 +44,6 @@ public partial class BaoGia_Confirm_Name_QuotationDTO
     public string? VCHR_TenRecomment { get; set; }
     public string? CHR_StatusACC { get; set; }
     public string? CHR_StatusShip { get; set; }
+
+    public string? CHR_NameEN { get; set; }
 }

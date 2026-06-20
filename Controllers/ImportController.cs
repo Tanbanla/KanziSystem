@@ -515,9 +515,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cells["M" + currentRow].Value = item.Aim;
                     }
 
-                    int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng
-                    ws.Cells["L" + totalRow + 12].Formula = $"SUM(L{startRow}:L{totalRow - 1})";
-
+                    int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng                                       
+                    ws.Cells["L" + (totalRow + 12)].Formula = $"=SUM(L{startRow}:L{totalRow - 1})";
+                    ws.Calculate();
 
                     ws.Cells["O5"].Value = nguoitao;
                     ws.Cells["K5"].Value = qltc;
@@ -532,6 +532,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         ws.Cells["M5"].Value = nguoilamdon;                           
                     }
+
                     // Tính toán lại toàn bộ công thức trong sheet trước khi lưu
                     ws.Calculate();
                     package.Save();
