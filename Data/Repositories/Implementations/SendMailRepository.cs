@@ -244,17 +244,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // The list vender not need to send mail
         public async Task<List<string>> SupplierNeedToSendMailAsync()
         {
-
-            var res = await _context.BaoGia_Vender_NotConfirms
-                .Where(m => m.CHR_Status == "ON")
-                .Select(m => m.CHR_MaNcc)
-                .Distinct()
-                .ToListAsync();
-            if (res == null || res.Count == 0)
+            const string sql = @"SELECT DISTINCT CHR_MaNcc
+                                  FROM BaoGia_Vender_NotConfirm
+                                  WHERE CHR_Status = @Status";
+            try
+            {
+                var res = (await _conn.QueryAsync<string>(sql, new { Status = "ON" }))?.ToList();
+                if (res == null || res.Count == 0)
+                {
+                    return new List<string>();
+                }
+                return res;
+            }
+            catch (Exception)
             {
                 return new List<string>();
             }
-            return res;
         }
     }
 }

@@ -61,9 +61,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             if (!string.IsNullOrWhiteSpace(SoDon))
             {
-                var md = int.Parse(SoDon.Trim());
-                whereBuilder.Append(" AND c.ID = @SoDon");
-                parameters.Add("@SoDon", md);
+                whereBuilder.Append(" AND r.CHR_MaDon = @SoDon");
+                parameters.Add("@SoDon", SoDon.Trim());
             }
             if (!string.IsNullOrWhiteSpace(section))
             {
@@ -708,7 +707,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             var selectSql = new StringBuilder();
-            selectSql.Append("SELECT DISTINCT c.* ,r.CHR_CreateBy,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo,r.CHR_NameEN,d.CHR_MaHangNCC as maHangNcc,d.INT_SoLuong,");
+            selectSql.Append("SELECT DISTINCT c.* ,r.CHR_CreateBy,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo,r.CHR_NameEN as NameEN,d.CHR_MaHangNCC as maHangNcc,d.INT_SoLuong,");
             selectSql.Append(" d.NVCHR_DonVi,d.NVCHR_TenHangHQ, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang,n.ShortName, d.CHR_CodeNCC, d.NVCHR_File ");
             selectSql.Append(baseFrom);
             selectSql.Append(whereBuilder.ToString());
@@ -749,6 +748,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .GroupBy(x => x.ID_RequestQuote)
                 .ToDictionary(g => g.Key, g => g.First());
 
+            // Load request quote
+            var requestQuotes = await _context.BaoGia_Request_of_Quotations
+                .Where(x => requestQuoteIds.Contains(x.ID))
+                .ToListAsync();
+            var requestDict = requestQuotes.GroupBy(x => x.ID)
+                .ToDictionary(g => g.Key, g => g.First());
+
             bool hasChanges = false;
             var now = DateTime.Now;
 
@@ -763,15 +769,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.NVCHR_TenHangHQ = item.VCHR_TenRecomment;
                     detail.CHR_NameEN = item.CHR_NameEN;
                 }
+                // update request quote
+                if (requestDict.TryGetValue(confirmName.ID_RequestQuote, out var requestQuote))
+                {
+                    requestQuote.NVCHR_NameVN = item.VCHR_TenRecomment;
+                    requestQuote.ID_StepBaoGia = 13;
+                    requestQuote.ID_Status = "DONE";
+                    requestQuote.CHR_NameEN = item.CHR_NameEN;
+
+                }
 
                 // update confirm name
                 confirmName.VCHR_TenRecomment = item.VCHR_TenRecomment;
                 confirmName.CHR_Status = "Confirmed";
-                confirmName.CHR_StatusShip = "Confirming";
+                confirmName.CHR_StatusShip = "Confirmed";
                 confirmName.VCHR_UserPUR = user;
                 confirmName.DTM_UserPUR = now;
                 confirmName.DTM_UpdateDate = now;
                 confirmName.VCHR_UpdateBy = user;
+                confirmName.CHR_NameEN = item.CHR_NameEN;
 
                 hasChanges = true;
             }

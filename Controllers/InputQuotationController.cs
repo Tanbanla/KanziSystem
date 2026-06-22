@@ -18,51 +18,33 @@ using System.Linq;
 using Path = System.IO.Path;
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
-    public class InputQuotationController : BaseAuthController
-    {
-        private readonly ILogger<InputQuotationController> _logger;
-        private readonly IBaoGiaHistoryService _baoGiaHistoryService;
-        private readonly IWebHostEnvironment _env;
-        private readonly IBaoGiaService _baoGiaService;
-        private readonly IBaoGiaStatusService _baoGiaStatusService;
-        private readonly IBaoGiaStepService _baoGiaStepService;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IMasterApproverSendMailService _approverService;
-        private readonly IMaterialService _materialService;
-        private readonly IConfiguration _configuration;
-        private readonly IExchangeRateService _exchangeRateService;
-        private readonly IBaoGiaDetailService _baoGiaDetailService;
-        private readonly ISendMailService _sendMailService;
-
-        private readonly ITmCategoryService _tmCategoryService;
-        private readonly IDepartmentService _deparmentService;
-        private readonly ITmNccNewService _tmNccNewService;
-        private readonly IStringLocalizer<InputQuotationController> _localizer;
-        public InputQuotationController(IExchangeRateService exchangeRateService, IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
-        IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<InputQuotationController> logger, IServiceScopeFactory serviceScopeFactory,
-        IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration, IBaoGiaDetailService baoGiaDetailService
+    public class InputQuotationController(IExchangeRateService exchangeRateService, IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
+    IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<InputQuotationController> logger, IServiceScopeFactory serviceScopeFactory,
+    IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration, IBaoGiaDetailService baoGiaDetailService
         , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService, IStringLocalizer<InputQuotationController> localizer
-        , ISendMailService sendMailService
-        )
-        {
-            _env = env;
-            _baoGiaHistoryService = baoGiaHistoryService;
-            _baoGiaService = baoGiaService;
-            _baoGiaStatusService = baoGiaStatusService;
-            _baoGiaStepService = baoGiaStepService;
-            _logger = logger;
-            _serviceScopeFactory = serviceScopeFactory;
-            _approverService = approverService;
-            _materialService = materialService;
-            _configuration = configuration;
-            _tmCategoryService = tmCategoryService;
-            _deparmentService = deparmentService;
-            _tmNccNewService = tmNccNewService;
-            _localizer = localizer;
-            _exchangeRateService = exchangeRateService;
-            _baoGiaDetailService = baoGiaDetailService;
-            _sendMailService = sendMailService;
-        }
+        , ISendMailService sendMailService, IFileImportService fileImportService
+        ) : BaseAuthController
+    {
+        private readonly ILogger<InputQuotationController> _logger = logger;
+        private readonly IBaoGiaHistoryService _baoGiaHistoryService = baoGiaHistoryService;
+        private readonly IWebHostEnvironment _env = env;
+        private readonly IBaoGiaService _baoGiaService = baoGiaService;
+        private readonly IBaoGiaStatusService _baoGiaStatusService = baoGiaStatusService;
+        private readonly IBaoGiaStepService _baoGiaStepService = baoGiaStepService;
+        private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+        private readonly IMasterApproverSendMailService _approverService = approverService;
+        private readonly IMaterialService _materialService = materialService;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly IExchangeRateService _exchangeRateService = exchangeRateService;
+        private readonly IBaoGiaDetailService _baoGiaDetailService = baoGiaDetailService;
+        private readonly ISendMailService _sendMailService = sendMailService;
+        private readonly IFileImportService _fileImportService = fileImportService;
+
+        private readonly ITmCategoryService _tmCategoryService = tmCategoryService;
+        private readonly IDepartmentService _deparmentService = deparmentService;
+        private readonly ITmNccNewService _tmNccNewService = tmNccNewService;
+        private readonly IStringLocalizer<InputQuotationController> _localizer = localizer;
+
         // Nhập file excel
         [HttpPost]
         public async Task<IActionResult> ImportExcelInputQuote([FromForm] IFormFile file)
@@ -308,6 +290,49 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 // Cập nhật dữ liệu nếu không có lỗi
+                if (!items.Any())
+                {
+                    return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
+                }
+                // lấy thông tin để lưu file nhập báo giá
+                var listInforFile = items.Select(c => c.NVCHR_File).Distinct().ToList();
+
+                var savedMap = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+                foreach (var src in listInforFile)
+                {
+                    if (savedMap.ContainsKey(src)) continue;
+                    try
+                    {
+                        var saveRes = await _fileImportService.SaveFileFromPathAsync(src);
+                        if (saveRes != null && saveRes.Success && !string.IsNullOrWhiteSpace(saveRes.Data))
+                        {
+                            savedMap[src] = saveRes.Data;
+                        }
+                        else
+                        {
+                            _logger.LogWarning(saveRes?.Message, "Failed saving link {Link}", src);
+                            savedMap[src] = null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed saving link {Link}", src);
+                        savedMap[src] = null;
+                        return BadRequest($"Lỗi khi lưu file từ đường dẫn: {src}. Chi tiết: {ex.Message}");
+                    }
+                }
+                foreach (var dto in items)
+                {
+                    if (string.IsNullOrWhiteSpace(dto.NVCHR_File)) continue;
+                    var checkKey = dto.NVCHR_File?.Trim().Trim('"', '\'') ?? dto.NVCHR_File;
+                    if (savedMap.TryGetValue(checkKey, out var saved) && !string.IsNullOrWhiteSpace(saved))
+                    {
+                        dto.NVCHR_File = saved;
+                    }
+
+                }
+
+                // Luu vào csdl
                 var result = await _baoGiaDetailService.UpdateListThongTinNhapBaoGiaAsync(items);
                 if (!result.Success)
                 {
@@ -416,23 +441,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
-                // Convert List<dynamic> to List<BaoGia_Detail_of_QuotationDTO>
-                //var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                //var dtoList = new List<BaoGia_Detail_of_QuotationDTO>();
-                //foreach (var item in model.baoGiaDetail)
-                //{
-                //    // Serialize dynamic to JSON then deserialize to DTO
-                //    var json = System.Text.Json.JsonSerializer.Serialize(item);
-                //    var dto = System.Text.Json.JsonSerializer.Deserialize<BaoGia_Detail_of_QuotationDTO>(json, options);
-                //    if (dto != null)
-                //        dtoList.Add(dto);
-                //}
-
-                //var result = await _baoGiaDetailService.InsertListBaoGiaDetailAsync(dtoList);
-                //if (!result.Success)
-                //{
-                //    return BadRequest(result.Message);
-                //}
                 // gửi mail thông báo có báo giá mới cho người yêu cầu báo giá
                 var sendMail = await _sendMailService.SendMailToSupplierByRequestCodeAsync(model.MaDon);
                 return Ok(sendMail.Data);

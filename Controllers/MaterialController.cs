@@ -633,6 +633,45 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (listUpdateUserPur.Any())
                     {
                         await _confirmNameService.UpdateNameHQRolePICPURAsync(listUpdateUserPur, user);
+
+                        var listCheck = listUpdateUserPur.Select(d => d.ID).ToList();
+                        // Send Mail PIC khi đơn hoàn thành xác nhận tên hải quan
+                        _ = Task.Run(async () =>
+                        {
+                            using (var scope = _serviceScopeFactory.CreateScope())
+                            {
+                                try
+                                {
+                                    var listDone = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                    if (!listDone.Success)
+                                    {
+                                        _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
+                                        return;
+                                    }
+
+                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                                    foreach (var item in listDone.Data)
+                                    {
+                                        // gửi mail thông báo đơn đã hoàn thành xác nhận tên hải quan
+                                        var emailResult = await sendMailService.SendMailAsync(
+                                            item.UserCreate + "@brothergroup.net",
+                                            string.Empty,
+                                            18,
+                                            "SelectQuote/SelectQuoteSection",
+                                            true,
+                                            item.Section,
+                                            item.MaDon,
+                                            item.UserCreate);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Lỗi khi gửi mail xác nhận tên mới");
+                                }
+                            }
+                        });
+
                     }
                 }
                 else
@@ -704,7 +743,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 10).SetValue(rq.maHangNcc ?? "");
                     ws.Cell(row, 11).SetValue(rq.CHR_CodeNCC + " - " + rq.ShortName ?? "");
                     ws.Cell(row, 12).SetValue(rq.NVCHR_TenHangHQ ?? "");
-                    ws.Cell(row, 13).SetValue(rq.CHR_NameEN ?? "");
+                    ws.Cell(row, 13).SetValue(rq.NameEN ?? "");
                     ws.Cell(row, 14).SetValue(rq.INT_SoLuong ?? "");
                     ws.Cell(row, 15).SetValue(rq.NVCHR_DonVi ?? "");
                     ws.Cell(row, 16).SetValue(rq.NVCHR_ChungLoai ?? "");

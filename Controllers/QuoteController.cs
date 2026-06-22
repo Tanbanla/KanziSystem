@@ -215,7 +215,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                     else
                     {
-
+                        _logger.LogWarning(saveRes?.Message, "Failed saving link {Link}", src);
                         savedMap[src] = null;
                     }
                 }

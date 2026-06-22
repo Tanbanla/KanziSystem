@@ -68,8 +68,12 @@
                         // after bootstrap created backdrop, increase z-index to ensure on top
                         setTimeout(() => {
                             try {
-                                const createdBackdrop = document.querySelector('.modal-backdrop');
-                                if (createdBackdrop) createdBackdrop.style.zIndex = '10550';
+                                const backdrops = document.querySelectorAll('.modal-backdrop');
+                                const createdBackdrop = backdrops.length ? backdrops[backdrops.length - 1] : null;
+                                if (createdBackdrop) {
+                                    createdBackdrop.style.zIndex = '10550';
+                                    modal._bsBackdrop = createdBackdrop;
+                                }
                                 modal.style.zIndex = '10600';
                             } catch (e) { }
                         }, 10);
@@ -100,6 +104,13 @@
                     // remove any custom backdrop we created
                     try {
                         if (modal._backdrop) { document.body.removeChild(modal._backdrop); delete modal._backdrop; }
+                    } catch (e) { }
+                    // ensure bootstrap backdrop for approver modal is removed
+                    try {
+                        if (modal._bsBackdrop && modal._bsBackdrop.parentElement) {
+                            modal._bsBackdrop.parentElement.removeChild(modal._bsBackdrop);
+                        }
+                        delete modal._bsBackdrop;
                     } catch (e) { }
                     // cleanup listeners
                     confirmBtn.removeEventListener('click', onConfirm);
@@ -1347,6 +1358,9 @@
         document.addEventListener('click', function (e) {
             const modalEl = document.getElementById('detailModal');
             if (!modalEl || modalEl.style.display !== 'block') return;
+            const approverModalEl = document.getElementById('selectApproverModal');
+            const isApproverModalOpen = approverModalEl && (approverModalEl.classList.contains('show') || approverModalEl.style.display === 'block');
+            if (isApproverModalOpen) return;
             const dialog = modalEl.querySelector('.modal-dialog');
             if (dialog && !dialog.contains(e.target)) {
                 hideDetailModal();
@@ -1355,6 +1369,9 @@
         // ESC to close
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
+                const approverModalEl = document.getElementById('selectApproverModal');
+                const isApproverModalOpen = approverModalEl && (approverModalEl.classList.contains('show') || approverModalEl.style.display === 'block');
+                if (isApproverModalOpen) return;
                 const modalEl = document.getElementById('detailModal');
                 if (modalEl && modalEl.style.display === 'block') hideDetailModal();
             }

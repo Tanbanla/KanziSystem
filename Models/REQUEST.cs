@@ -673,7 +673,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Status] = 'DONE',
                             [Currency_Real] = [Currency],
                             [Last_Update] = GETDATE(),
-                            [Total_Real] = ROUND(({slXuat} * {giathucte}) / {laytigia},2),
+                            [Total_Real] = ({slXuat} * {giathucte}) / {laytigia},
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}',
                             [Kho] = '{kho}',
@@ -684,9 +684,10 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
                     // đẩy vào đơn gốc
                     var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
+                    var tongtien_1 = _db.ReturnString("select SUM(Total_exchange_real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
 
                     string UpdateRequest = "";
-                    UpdateRequest = UpdateRequest + $"UPDATE [REQUEST] SET [Total_exchange_real] = {slXuat} * {giathucte}";
+                    UpdateRequest = UpdateRequest + $"UPDATE [REQUEST] SET [Total_exchange_real] = {tongtien_1}";
                     UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + laytigia + "'";
                     UpdateRequest = UpdateRequest + ",[Currency_Real] = 'VND'";
                     UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
