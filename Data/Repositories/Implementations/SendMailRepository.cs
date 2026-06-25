@@ -4,15 +4,20 @@ using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.Models_Agent;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Data.SqlClient;
 using System.Net.Mail;
 using System.Net.NetworkInformation;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
     public class SendMailRepository: BaseRepository<TM_MASTER_MAIL, int>, ISendMailRepository
     {
         private readonly COST_MANAGEMENTContext _context;
+        private readonly string _agentContext;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
 
@@ -20,6 +25,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             : base(context, options, configuration)
         {
             _context = context;
+            _agentContext = options.Value.AgentConnection;
             _configuration = configuration;
             _env = env;
         }

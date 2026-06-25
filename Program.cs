@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Extensions;
 using PRJ_WAREHOUSE_BIVN.Models_Agent;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -50,9 +51,9 @@ builder.Services.AddSession(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login"; // Đường dẫn đến trang login
-        options.LogoutPath = "/Account/Logout"; // Đường dẫn logout
-        options.AccessDeniedPath = "/Account/AccessDenied"; // Đường dẫn khi bị từ chối truy cập
+        options.LoginPath = "/"+baseUrl+"Account/Login"; // Đường dẫn đến trang login
+        options.LogoutPath = "/"+baseUrl+"Account/Logout"; // Đường dẫn logout
+        options.AccessDeniedPath = "/"+baseUrl+"Account/AccessDenied"; // Đường dẫn khi bị từ chối truy cập
         options.ExpireTimeSpan = TimeSpan.FromHours(10); // Thời gian hết hạn cookie 3 tiếng
         options.SlidingExpiration = true; // Gia hạn cookie khi user hoạt động
         options.Cookie.Name = ".PRJ_WAREHOUSE_BIVN.Auth";
@@ -72,7 +73,9 @@ builder.Services.AddDbContext<AgentContext>(options => options.UseSqlServer(agen
 
 builder.Services.Configure<ConnectionStringOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+// Initialize static EmailSender with settings and agent connection string
+var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
+EmailSender.Initialize(emailSettings, agentConnection);
 
 builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(costManagerConnection));
 builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(workingControlConnection));
