@@ -24,7 +24,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (req is null) return BadRequest(new { success = false, message = "request body required" });
             if (string.IsNullOrWhiteSpace(req.MailFrom)) return BadRequest(new { success = false, message = "mailFrom required" });
 
-            bool ok = EmailSender.sendEmailNotify(
+            bool ok = EmailSender.sendEmailNotifyAsync(
                 req.Title ?? string.Empty,
                 req.MailFrom,
                 req.MailTo ?? string.Empty,

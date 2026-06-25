@@ -24,6 +24,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IMasterApproverSendMailService _approverService;
         private readonly IMaterialService _materialService;
         private readonly IConfiguration _configuration;
+        private readonly IFileImportService _fileImportService;
 
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IDepartmentService _deparmentService;
@@ -33,7 +34,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public HistoryController(IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<HistoryController> logger, IServiceScopeFactory serviceScopeFactory,
             IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration
-            , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService, IStringLocalizer<HistoryController> localizer
+            , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService,
+            IStringLocalizer<HistoryController> localizer, IFileImportService fileImportService
             )
         {
             _env = env;
@@ -50,6 +52,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _deparmentService = deparmentService;
             _tmNccNewService = tmNccNewService;
             _localizer = localizer;
+            _fileImportService = fileImportService;
         }
         // tìm kiếm đơn báo giá
         [HttpPost]
@@ -790,7 +793,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccNews = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var statusData = await _baoGiaStatusService.GetListStatusAsync();
-            var madons = await LoadMadonAsync(13);
+            var madons = await LoadMadonAsync(14);
             var role = GetRolesUser();
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             var vm = new QuoteModel
@@ -1028,6 +1031,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return string.Empty;
                 }
 
+                static int GetInt(IDictionary<string, object?> item, params string[] keys)
+                {
+                    foreach (var key in keys)
+                    {
+                        if (item.TryGetValue(key, out var value) && value != null)
+                        {
+                            if (value is int i) return i;
+                            if (int.TryParse(Convert.ToString(value), out var parsed)) return parsed;
+                        }
+                    }
+                    return 0;
+                }
+
                 static DateTime? GetDateTime(IDictionary<string, object?> item, params string[] keys)
                 {
                     foreach (var key in keys)
@@ -1068,12 +1084,28 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return false;
                 }
 
-                static string BuildApprovalText(string approver, DateTime? approvedAt)
-                    => string.IsNullOrWhiteSpace(approver)
-                        ? string.Empty
-                        : approvedAt.HasValue
+                static string BuildApprovalText(
+                    string approver,
+                    DateTime? approvedAt,
+                    string? userNext,
+                    int cellStep,
+                    int currentStep)
+                    {
+
+                    if (!string.IsNullOrWhiteSpace(approver))
+                    {
+                        return approvedAt.HasValue
                             ? $"{approver}\n{approvedAt.Value:dd/MM/yyyy HH:mm}"
                             : approver;
+                    }
+
+                    if (cellStep == currentStep + 1)
+                    {
+                        return string.IsNullOrWhiteSpace(userNext) ? string.Empty : userNext;
+                    }
+
+                    return string.Empty;
+                }
 
                 var currentLang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? "vi";
 
@@ -1092,7 +1124,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var group4Color = XLColor.FromHtml("#FFF200");
                 var overdueColor = XLColor.FromHtml("#E74C3C");
 
-                string L(string key, string fallback) => _localizer[key].Value ?? fallback;
+                string L(string key, string fallback)
+                {
+                    var val = _localizer[key].Value;
+                    return string.IsNullOrWhiteSpace(val) || val == key ? fallback : val;
+                }
+
+                bool IsRefuse(string s) => (s ?? "").Trim().ToLower() == "refuse";
 
                 ws.Cell(headerRow1, 1).Value = L("No", "No");
                 ws.Cell(headerRow1, 2).Value = L("OrderNo", "Order No");
@@ -1162,6 +1200,34 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var bitNcc4 = GetBool(item, "BitNCC_4", "bitNCC_4");
                     var bitNcc5 = GetBool(item, "BitNCC_5", "bitNCC_5");
 
+                    var status1 = GetString(item, "Status_1");
+                    var status2 = GetString(item, "Status_2");
+                    var status3 = GetString(item, "Status_3");
+                    var status4 = GetString(item, "Status_4");
+                    var status5 = GetString(item, "Status_5");
+
+                    // count sl nha tu choi
+                    var allRefuse = new[]
+                    {
+                        IsRefuse(status1) ,
+                        IsRefuse(status2),
+                        IsRefuse(status3) ,
+                        IsRefuse(status4),
+                        IsRefuse(status5)
+                    }.Count(a => a == true);
+
+                    // count sl nhà cung cấp
+
+                    int countSL = new[]
+                    {
+                        supplier1,
+                        supplier2,
+                        supplier3,
+                        supplier4,
+                        supplier5
+                    }.Count(s => !string.IsNullOrWhiteSpace(s));
+
+
                     ws.Cell(excelRow, 1).Value = i + 1;
                     ws.Cell(excelRow, 2).Value = GetString(item, "CHR_MaDon");
                     ws.Cell(excelRow, 3).Value = GetString(item, "CHR_MaHangNoiBo");
@@ -1171,26 +1237,55 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var deadline = GetDateTime(item, "DTM_KyHan");
                     var isOverdue = deadline.HasValue && deadline.Value.Date < DateTime.Today;
 
-                    void ApplySupplierStyle(int col, string supplierText, bool isSelected)
+                    var step = GetInt(item, "Step", "INT_Step");
+                    void ApplySupplierStyle(int col, string supplierText, object bitValue, string statusText)
                     {
                         var cell = ws.Cell(excelRow, col);
-                        cell.Value = supplierText;
-                        if (isSelected)
+                        cell.Value = supplierText ?? "";
+
+                        if (step < 7)
                         {
-                            cell.Style.Fill.BackgroundColor = group3Color;
+                            cell.Style.Fill.BackgroundColor = XLColor.White;
+                            return;
                         }
-                        else if (isOverdue && !string.IsNullOrWhiteSpace(supplierText))
+
+                        // RULE 1: ALL REFUSE -> đỏ
+                        if (allRefuse == countSL)
                         {
                             cell.Style.Fill.BackgroundColor = overdueColor;
                             cell.Style.Font.FontColor = XLColor.White;
+                            return;
+                        }
+
+                        // RULE 2: logic cũ JS
+                        var raw = Convert.ToString(bitValue)?.Trim().ToLower();
+                        var isRefuse = (statusText ?? "").Trim().ToLower() == "refuse";
+                        var isValue = string.IsNullOrEmpty(supplierText);
+
+                        var isSelected =
+                            (bitValue is bool b && b) ||
+                            (bitValue is int i && i == 1) ||
+                            raw == "1" ||
+                            raw == "true";
+
+                        if (isSelected && !isRefuse)
+                        {
+                            cell.Style.Fill.BackgroundColor = group3Color; // xanh
+                        }
+                        else if (!isValue)
+                        {
+                            cell.Style.Fill.BackgroundColor = XLColor.Yellow;
+                        }
+                        else
+                        {
+                            cell.Style.Fill.BackgroundColor = XLColor.White;
                         }
                     }
-
-                    ApplySupplierStyle(6, supplier1, bitNcc1);
-                    ApplySupplierStyle(7, supplier2, bitNcc2);
-                    ApplySupplierStyle(8, supplier3, bitNcc3);
-                    ApplySupplierStyle(9, supplier4, bitNcc4);
-                    ApplySupplierStyle(10, supplier5, bitNcc5);
+                    ApplySupplierStyle(6, supplier1, bitNcc1, status1);
+                    ApplySupplierStyle(7, supplier2, bitNcc2, status2);
+                    ApplySupplierStyle(8, supplier3, bitNcc3, status3);
+                    ApplySupplierStyle(9, supplier4, bitNcc4, status4);
+                    ApplySupplierStyle(10, supplier5, bitNcc5, status5);
 
                     if (deadline.HasValue)
                     {
@@ -1207,21 +1302,37 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     var approvalValues = new[]
                     {
-                        BuildApprovalText(GetString(item, "QLSC_Approve"), GetDateTime(item, "QLSC_Time")),
-                        BuildApprovalText(GetString(item, "QLTC_Approve"), GetDateTime(item, "QLTC_Time")),
-                        BuildApprovalText(GetString(item, "PIC_Approve"), GetDateTime(item, "PIC_Time")),
-                        BuildApprovalText(GetString(item, "QLSC1_Approve"), GetDateTime(item, "QLSC1_Time")),
-                        BuildApprovalText(GetString(item, "PIC_PickNCC"), GetDateTime(item, "PIC_PickNCC_Time")),
-                        BuildApprovalText(GetString(item, "QLSC_PickNCC"), GetDateTime(item, "QLSC_PickNCC_Time")),
-                        BuildApprovalText(GetString(item, "QLTC_PickNCC"), GetDateTime(item, "QLTC_PickNCC_Time")),
-                        BuildApprovalText(GetString(item, "DEFT_PickNCC"), GetDateTime(item, "DEFT_PickNCC_Time"))
+                        BuildApprovalText(GetString(item, "QLSC_Approve"), GetDateTime(item, "QLSC_Time"), GetString(item, "UserNext"),3,step),
+                        BuildApprovalText(GetString(item, "QLTC_Approve"), GetDateTime(item, "QLTC_Time"), GetString(item, "UserNext"),4,step),
+                        BuildApprovalText(GetString(item, "PIC_Approve"), GetDateTime(item, "PIC_Time"), GetString(item, "UserNext"),5,step),
+                        BuildApprovalText(GetString(item, "QLSC1_Approve"), GetDateTime(item, "QLSC1_Time"), GetString(item, "UserNext"),6,step),
+                        BuildApprovalText(GetString(item, "PIC_PickNCC"), GetDateTime(item, "PIC_PickNCC_Time"), GetString(item, "UserNext"),7,step),
+                        BuildApprovalText(GetString(item, "QLSC_PickNCC"), GetDateTime(item, "QLSC_PickNCC_Time"), GetString(item, "UserNext"),10,step),
+                        BuildApprovalText(GetString(item, "QLTC_PickNCC"), GetDateTime(item, "QLTC_PickNCC_Time"), GetString(item, "UserNext"),11,step),
+                        BuildApprovalText(GetString(item, "DEFT_PickNCC"), GetDateTime(item, "DEFT_PickNCC_Time"), GetString(item, "UserNext"),12,step)
                     };
 
                     for (var offset = 0; offset < approvalValues.Length; offset++)
                     {
                         var col = 13 + offset;
-                        ws.Cell(excelRow, col).Value = approvalValues[offset];
-                        if (!string.IsNullOrWhiteSpace(approvalValues[offset]))
+                        var cellValue = approvalValues[offset];
+
+                        ws.Cell(excelRow, col).Value = cellValue;
+
+                        // Lấy lại approver tương ứng để biết đã duyệt hay chưa
+                        var isApproved = !string.IsNullOrWhiteSpace(new[]
+                        {
+                            GetString(item, "QLSC_Approve"),
+                            GetString(item, "QLTC_Approve"),
+                            GetString(item, "PIC_Approve"),
+                            GetString(item, "QLSC1_Approve"),
+                            GetString(item, "PIC_PickNCC"),
+                            GetString(item, "QLSC_PickNCC"),
+                            GetString(item, "QLTC_PickNCC"),
+                            GetString(item, "DEFT_PickNCC")
+                        }[offset]);
+
+                        if (isApproved)
                         {
                             ws.Cell(excelRow, col).Style.Fill.BackgroundColor = group3Color;
                         }
@@ -1558,6 +1669,34 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi tìm kiếm: {ex.Message}");
             }
 
+        }
+
+        // Download thông tin file kết quả báo giá
+        [HttpPost]
+        public async Task<IActionResult> DownloadQuoteFile([FromBody] string urlFile)
+        {
+            if (string.IsNullOrEmpty(urlFile))
+                return BadRequest("Không có đường dẫn file");
+
+            try
+            {
+                var rqFile = await _fileImportService.GetFileToLinkAsync(urlFile);
+
+                if (!rqFile.Success || rqFile.Data == null)
+                    return BadRequest(rqFile.Message);
+
+                var file = rqFile.Data;
+
+                return File(
+                    file.OpenReadStream(),
+                    file.ContentType ?? "application/octet-stream",
+                    file.FileName
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Lỗi khi download: " + ex.Message);
+            }
         }
     }
 }

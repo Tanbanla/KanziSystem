@@ -98,7 +98,7 @@
         _load_phongchiuphi();
     }
     function loadListWarehouse() {
-            fetch('/Delivery/GetWareHouse', {
+            fetch('/ipcs/Delivery/GetWareHouse', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -127,7 +127,7 @@
         const params = new URLSearchParams();
         params.append('us', us);
 
-            fetch('/Master/load_ma', {
+                fetch('/ipcs/Master/load_ma', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -169,7 +169,7 @@
         const params = new URLSearchParams();
         params.append('manguyenlieu', maDuocChon);
 
-        fetch('/Master/load_kho_theo_ma', {
+        fetch('/ipcs/Master/load_kho_theo_ma', {
             method: 'POST',
             headers: {
                 // Quan trọng: Sử dụng x-www-form-urlencoded nếu dùng URLSearchParams
@@ -211,7 +211,7 @@
         inputTenKho.value = khoFound ? khoFound.ten : "";
     }
     function _load_phongchiuphi() {
-        fetch('/Request/_get_phongchiuphi_xuatkho', {
+        fetch('/ipcs/Request/_get_phongchiuphi_xuatkho', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

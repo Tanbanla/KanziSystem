@@ -1,4 +1,4 @@
-﻿namespace PRJ_WAREHOUSE_BIVN.Common
+namespace PRJ_WAREHOUSE_BIVN.Common
 {
     public class GenericResponse<T>
     {
@@ -11,6 +11,8 @@
         public string Error { get; set; }
 
         public T Data { get; set; }
+        public string FileName { get; internal set; }
+
         public GenericResponse()
         {
         }

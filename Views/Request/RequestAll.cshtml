@@ -162,7 +162,7 @@
         var loaicp = document.getElementById("loaicp").value;
         
         $.ajax({
-            url: '/Request/view_rqall', // Thay YourControllerName bằng tên Controller của bạn
+            url: '/ipcs/Request/view_rqall', // Thay YourControllerName bằng tên Controller của bạn
             type: 'GET',
             data: {
                 StartDate: Request_Date,
@@ -335,7 +335,7 @@
             const params = new URLSearchParams();
             params.append('iD_REQUEST', iD_REQUEST);
 
-            fetch('/Import/_XOADONPROD', {
+            fetch('/ipcs/Import/_XOADONPROD', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -364,7 +364,7 @@
             const params = new URLSearchParams();
             params.append('iD_REQUEST', iD_REQUEST);
 
-            fetch('/Import/_XOADONGA', {
+            fetch('/ipcs/Import/_XOADONGA', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -393,7 +393,7 @@
         const params = new URLSearchParams();
         params.append('iD_REQUEST', iD_REQUEST);
 
-        fetch('/Import/_Suadonhang', {
+        fetch('/ipcs/Import/_Suadonhang', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

@@ -580,7 +580,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     statusSql = "r.ID_Status LIKE 'DELETE'";
                     break;
                 default:
-                    statusSql = "r.ID_Status NOT LIKE 'RETURN%' AND r.ID_Status NOT LIKE 'DELETE'";
+                    statusSql = "r.ID_Status NOT LIKE 'DELETE' AND (r.ID_Status NOT LIKE 'RETURN%' or r.ID_StepBaoGia = 8)";
                     break;
             }
             whereClauses.Add("(" + statusSql + ")");
@@ -612,7 +612,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         r.DTM_KyHan,
                         r.CHR_CreateBy,
                         r.ID_StepBaoGia,
-                        r.CHR_MaNCC
+                        r.CHR_MaNCC,
+                        r.CHR_UserApproval
                     FROM BaoGia_Request_of_Quotation r
             " + whereSql + @"
                 ),
@@ -624,7 +625,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         MAX(f.CHR_NameEN) AS CHR_NameEN,
                         MAX(f.DTM_KyHan) AS DTM_KyHan,
                         MAX(f.CHR_CreateBy) AS CHR_CreateBy,
-                        MAX(f.ID_StepBaoGia) AS Step
+                        MAX(f.ID_StepBaoGia) AS Step,
+                        MAX(f.CHR_UserApproval) as UserNext
                     FROM FILTERED f
                     GROUP BY
                         f.CHR_MaDon,
@@ -635,6 +637,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 		                CHR_MaDon,
 		                CHR_MaHangNoiBo,
 		                ShortName,
+						CHR_Status,
 		                MAX(ID_StepBaoGia) AS ID_StepBaoGia,
 		                ROW_NUMBER() OVER (
 			                PARTITION BY CHR_MaDon, CHR_MaHangNoiBo
@@ -645,14 +648,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 			                f.CHR_MaDon,
 			                f.CHR_MaHangNoiBo,
 			                ISNULL(n.ShortName, f.CHR_MaNCC) AS ShortName,
-			                f.ID_StepBaoGia
+			                f.ID_StepBaoGia,
+							d.CHR_Status
 		                FROM FILTERED f
 		                LEFT JOIN IM_NCC_NEW n ON f.CHR_MaNCC = n.Ma
+					 LEFT JOIN BaoGia_Detail_of_Quotation d
+                            ON d.ID_RequestQuote = f.ID
 	                ) t
 	                GROUP BY 
 		                CHR_MaDon,
 		                CHR_MaHangNoiBo,
-		                ShortName
+		                ShortName,
+						CHR_Status
                 ),
                 NCC_PIVOT AS (
                     SELECT
@@ -667,7 +674,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         MAX(CASE WHEN rn = 2 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_2,
                         MAX(CASE WHEN rn = 3 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_3,
                         MAX(CASE WHEN rn = 4 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_4,
-                        MAX(CASE WHEN rn = 5 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_5
+                        MAX(CASE WHEN rn = 5 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_5,
+						MAX(CASE WHEN rn = 1 THEN CHR_Status END) AS Status_1,
+                        MAX(CASE WHEN rn = 2 THEN CHR_Status END) AS Status_2,
+                        MAX(CASE WHEN rn = 3 THEN CHR_Status END) AS Status_3,
+                        MAX(CASE WHEN rn = 4 THEN CHR_Status END) AS Status_4,
+                        MAX(CASE WHEN rn = 5 THEN CHR_Status END) AS Status_5
                     FROM NCC_ROW
                     GROUP BY CHR_MaDon, CHR_MaHangNoiBo
                 ),
@@ -717,9 +729,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         SELECT
                             f.CHR_MaDon,
                             f.CHR_MaHangNoiBo,
-                            n.ShortName AS NCC_DuocChon,
+                            ISNULL(n.ShortName, n.Ma) AS NCC_DuocChon,
                             d.NVCHR_ReasonPick,
                             d.NVCHR_File,
+                            f.ID_StepBaoGia AS PickStep,
                             ROW_NUMBER() OVER (
                                 PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
                                 ORDER BY d.ID DESC
@@ -743,10 +756,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     m.CHR_NameEN,
                     m.DTM_KyHan,
                     m.CHR_CreateBy,
-                    m.Step,
-                    s.CHR_StepName,
-	                s.CHR_StepNameEN,
-	                s.CHR_StepNameJP,
+					m.UserNext,
+					ISNULL(p.PickStep, m.Step) AS Step,
+					s.CHR_StepName,
+					s.CHR_StepNameEN,
+					s.CHR_StepNameJP,
                     ncc.NCC_1,
                     ncc.NCC_2,
                     ncc.NCC_3,
@@ -757,6 +771,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     ncc.BitNCC_3,
                     ncc.BitNCC_4,
                     ncc.BitNCC_5,
+					ncc.Status_1,
+					ncc.Status_2,
+					ncc.Status_3,
+					ncc.Status_4,
+					ncc.Status_5,
                     h.PIC_Approve, h.PIC_Time,
                     h.QLSC_Approve, h.QLSC_Time,
                     h.QLTC_Approve, h.QLTC_Time,
@@ -779,7 +798,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     ON m.CHR_MaDon = p.CHR_MaDon
                     AND m.CHR_MaHangNoiBo = p.CHR_MaHangNoiBo
                 LEFT JOIN BaoGia_Step s
-                    ON m.Step = s.INT_StepNumber
+                    ON ISNULL(p.PickStep, m.Step) = s.INT_StepNumber
             ";
 
             var countSql = cteSql + @"

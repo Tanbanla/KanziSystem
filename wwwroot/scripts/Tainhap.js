@@ -26,7 +26,7 @@ async function _Tainhap() {
         alert("Không được để dữ liệu trống !");
     }
     else {
-        fetch('/Master/Tainhap', {
+        fetch('/ipcs/Master/Tainhap', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -56,7 +56,7 @@ async function _load_name_inv() {
     document.getElementById("ghichu").value = "";
     var group_code = document.getElementById("khoi").value;
     const params = new URLSearchParams({ group_code: group_code });
-    fetch('/Import/_load_material', {
+    fetch('/ipcs/Import/_load_material', {
         method: 'POST',
         body: params
     })
@@ -75,7 +75,7 @@ async function _load_material(id) {
     params.append('Material_Code', idd);
     params.append('Group_Code', groupcode);
 
-    fetch('/Import/_info_material', {
+    fetch('/ipcs/Import/_info_material', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -100,7 +100,7 @@ async function _load_material(id) {
         });
 }
 async function _load_wh() {
-    fetch('/Master/load_warehouse', {
+    fetch('/ipcs/Master/load_warehouse', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -121,7 +121,7 @@ async function _load_wh() {
 }
 async function _load_warehouse() {
 
-    fetch('/Master/load_warehouse', {
+    fetch('/ipcs/Master/load_warehouse', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -148,7 +148,7 @@ async function _load_warehouse() {
 }
 async function _get_location() {
 
-    fetch('/Master/Get_location', {
+    fetch('/ipcs/Master/Get_location', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -185,7 +185,7 @@ async function _load_tainhap() {
     params.append('UserName', UserName);
   
 
-    fetch('/Master/Load_tainhap', {
+    fetch('/ipcs/Master/Load_tainhap', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -225,7 +225,7 @@ async function del_tainhap(id) {
         const params = new URLSearchParams();
         params.append('id', id);
 
-        fetch('/Master/del_tainhap', {
+        fetch('/ipcs/Master/del_tainhap', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -271,7 +271,7 @@ async function editt() {
     params.append('giatien', giatien);
     params.append('kho', kho);
 
-    fetch('/Master/edit_tainhap', {
+    fetch('/ipcs/Master/edit_tainhap', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

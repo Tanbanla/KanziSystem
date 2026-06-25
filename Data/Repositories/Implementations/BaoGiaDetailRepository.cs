@@ -283,7 +283,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     rq.ID_Status = "WAIT_PICK_NCC";
                 }
             }
-           // await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+            await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
             await _context.SaveChangesAsync();
             return true;
         }

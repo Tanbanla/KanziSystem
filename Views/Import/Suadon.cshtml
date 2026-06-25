@@ -189,7 +189,7 @@
                                 @foreach (var item in Model)
                                 {
                                     <tr class="input-row">
-                                        <td class="row-number text-center fw-bold">@item.Id_RequestDetail</td>
+                                        <td class="row-number text-center fw-bold idrq_dt">@item.Id_RequestDetail</td>
                                         <td>
                                             <select class="form-control tenhang" id="tenhang_1" style="background-color:#e9ecef">
                                                 <option>@item.Material_Name</option>
@@ -220,7 +220,6 @@
                                 }
                             </tbody>
                         </table>
-
                     </div>
                  @*    <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button> *@
                 </div>
@@ -249,9 +248,7 @@
     function check_mucdichkhac() {
         // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
         const lstMaterial = document.getElementById("lstMaterial");
-        if (lstMaterial) lstMaterial.innerHTML = "";
-
-       
+        if (lstMaterial) lstMaterial.innerHTML = ""; 
         _load_phongchiuphi_1();
         _load_account_1();
         // 5. Tính toán lại tổng tiền (về 0)
@@ -390,7 +387,8 @@
         }
     }
     function _load_phongchiuphi_1() {
-        fetch('/Request/_get_phongchiuphi', {
+            fetch('/ipcs/Request/_get_phongchiuphi', {
+            //fetch('/Request/_get_phongchiuphi', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -416,7 +414,8 @@
         .catch(error => console.error('Lỗi fetch:', error));
     }
     function _load_account_1() {
-        fetch('/Import/_load_account', {
+            fetch('/ipcs/Import/_load_account', {
+            //fetch('/Import/_load_account', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -454,8 +453,9 @@
         var gr = "";
         const params = new URLSearchParams();
             params.append('iD_REQUEST', iD_REQUEST);
-  
-            fetch('/Import/request', {
+
+                fetch('/ipcs/Import/request', {
+                //fetch('/Import/request', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -548,7 +548,8 @@
     formData.append("file", file);
     formData.append("us", us);
     try {
-        const response = await fetch('/Import/ImportFileExcel', {
+            const response = await fetch('/ipcs/Import/ImportFileExcel', {
+            //const response = await fetch('/Import/ImportFileExcel', {
             method: 'POST',
             body: formData
         });
@@ -648,6 +649,7 @@
         const rows = document.querySelectorAll('.input-row');
         rows.forEach((row) => {
             // Safely query elements inside row
+            const idrq_dt = row.querySelector('.idrq_dt');
             const tenhangEl = row.querySelector('.tenhang');
             const stkEl = row.querySelector('.stk');
             const slEl = row.querySelector('.sl');
@@ -671,6 +673,7 @@
 
             // Lấy dữ liệu từ các phần tử bên trong dòng hiện tại
             let rowData = {
+                    Id_RequestDetail: idrq_dt.innerHTML,
                     Material_Code: materialCode,
                     Material_Name: materialName,
                     Account_Code: accountCode,
@@ -704,16 +707,17 @@
         var urgentValue = (document.querySelector('input[name="value"]:checked') && document.querySelector('input[name="value"]:checked').value) || 0;
         var Urgent = urgentValue;
         var User_Create = document.getElementById("us").innerHTML;
-            var Place = document.getElementById("place").value;
+        var Place = document.getElementById("place").value;
         var Declaration = document.getElementById("loaichiphi").value;
         var cost_center = document.getElementById("cost_center").value;
-      
+
         if (Dealine == "") {
             alert("Vui lòng điền đủ thông tin vào đơn !")
         }
         else {
             $.ajax({
-                url: '/Request/_sua_request',
+                url: '/ipcs/Request/_sua_request',
+                //url: '/Request/_sua_request',
                 type: 'POST',
                 dataType: 'JSON',
                 //contentType: 'application/json',
@@ -730,11 +734,11 @@
                     Code_Request : Code_Request,
                     Declaration : Declaration,
                     Cost_Center : cost_center,
-                    Note : mucdichkhac,
+                    Note : mucdichkhac
                 },
                 success: function (response) {
                     alert(response);
-                        location.href = "/Approval/Condition"
+                    location.href = "/ipcs/Approval/Condition"
                 }
             })
 
@@ -762,7 +766,8 @@
 
     async function _load_name_inv1(group_code) {
     const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
-    fetch('/Import/_load_material', {
+        fetch('/ipcs/Import/_load_material', {
+        //fetch('/Import/_load_material', {
         method: 'POST',
         body: params
     })

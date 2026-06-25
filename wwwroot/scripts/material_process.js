@@ -1,4 +1,4 @@
-﻿// --- 1. Quản lý Trạng thái Phân trang ---
+// --- 1. Quản lý Trạng thái Phân trang ---
 const userPagingState = {
     fullData: [],
     currentPage: 1,
@@ -20,7 +20,7 @@ async function _load_material() {
     params.append('Group_Code', Group_Code);
 
 
-    fetch('/Material/load_material', {
+    fetch('/ipcs/Material/load_material', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

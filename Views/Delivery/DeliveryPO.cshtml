@@ -275,7 +275,7 @@
         loadListWarehouse();       
     }
     function loadListWarehouse() {
-            fetch('/Delivery/GetWareHouse', {
+            fetch('/ipcs/Delivery/GetWareHouse', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -307,7 +307,7 @@
         let closeBottom = modal ? modal.querySelector(".close-modal") : null;
 
     async function openModal() {
-    const url = '/Delivery/GetExchangeUnit';
+    const url = '/ipcs/Delivery/GetExchangeUnit';
     const options =
     {
         method: 'POST',

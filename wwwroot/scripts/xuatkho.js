@@ -5,7 +5,7 @@ function _load_xuatkho() {
     var khoi = document.getElementById("khoi").value;
     var us = document.getElementById("us").innerHTML;
     const params = new URLSearchParams({us : us, mayeucau: mayeucau, nguoitao: nguoitao, khoi: khoi });
-    fetch('/Import/_load_xuatkhohang', {
+    fetch('/ipcs/Import/_load_xuatkhohang', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -136,7 +136,7 @@ function _load_body_detail(code_request) {
     const params = new URLSearchParams();
     params.append('code_request', code_request);
 
-    fetch('/Import/_load_body_detail', {
+    fetch('/ipcs/Import/_load_body_detail', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -183,7 +183,7 @@ function _load_tonkhotheonhamay(mahang, sl, id_rq, unit) {
     const params = new URLSearchParams();
     params.append('mahang', mahang);
 
-    fetch('/Import/_tonkhotheonhamay', {
+    fetch('/ipcs/Import/_tonkhotheonhamay', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -218,7 +218,7 @@ function _soluongtontainhamay(kho) {
     params.append('mahang', mahang);
     params.append('kho', kho);
 
-    fetch('/Import/_chonnhamay', {
+    fetch('/ipcs/Import/_chonnhamay', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -310,7 +310,7 @@ function _xuatkho() {
             // ĐỔI TÊN THÀNH 'id_rq' ĐỂ KHỚP VỚI THAM SỐ CỦA HÀM C#
             params.append('id_rq', idChiTietDong);
 
-            let p = fetch('/Import/_xuatkhothucte', {
+            let p = fetch('/ipcs/Import/_xuatkhothucte', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -341,7 +341,7 @@ function _dlxuatkho() {
     var code_request = document.getElementById("madonn").innerHTML;
     const params = new URLSearchParams();
     params.append('code_request', code_request);
-    fetch('/Import/ExportModalDetail', {
+    fetch('/ipcs/Import/ExportModalDetail', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -375,7 +375,7 @@ function _modal_chitietxuatkho(code_request) {
     const params = new URLSearchParams();
     params.append('code_request', code_request);
 
-    fetch('/Import/_load_modal_detail', {
+    fetch('/ipcs/Import/_load_modal_detail', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

@@ -725,7 +725,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
                     UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
                     UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
-                    UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
+                    UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]= N'" + nguoinhan + "'";
                     UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
 
                     _db.GET_DATA_FROM_SQL(UpdateRequest);
@@ -768,12 +768,11 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             if(checkus.Rows.Count > 0)
             {
                 List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
-
                 var list = _db.GET_DATA_FROM_SQL($@"select b.*,a.ID_REQUEST from [PE_REQUEST_CONFIRM] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
                         WHERE (a.INT_STEP = '4' OR a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
-                        and b.Group_Code like '%{khoi}%' order by ID desc");
+                        and MONTH(Dealine) = '{DateTime.Now.Month}' and YEAR(Dealine) = '{DateTime.Now.Year}' and b.Group_Code like '%{khoi}%' order by ID desc");
 
                 for (int i = 0; i < list.Rows.Count; i++)
                 {

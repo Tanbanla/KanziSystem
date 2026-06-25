@@ -1,4 +1,4 @@
-﻿
+
 // --- 1. Quản lý Trạng thái Phân trang ---
 const userPagingState = {
     fullData: [],
@@ -19,7 +19,7 @@ function _load_user() {
     params.append('us_adid', us_adid);
   
  
-    fetch('/User/Load_User', {
+    fetch('/ipcs/User/Load_User', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -165,7 +165,7 @@ function _insert_user() {
     params.append('role', employee_role);
     params.append('mail', employee_mail);
     if (employee_code != "" && employee_name != "" && employee_adid != "" && employee_mail != "" && employee_dept != "" && employee_role != "") {
-        fetch('/User/Insert_Edit_User', {
+        fetch('/ipcs/User/Insert_Edit_User', {
 
             method: 'POST',
             headers: {
@@ -218,7 +218,7 @@ function _update_user() {
     params.append('role', employee_role);
     params.append('mail', employee_mail);
     if (employee_name != "" && employee_adid != "" && employee_code != "" && employee_dept != "" && employee_role != "" && employee_mail != "") {
-        fetch('/User/Insert_Edit_User', {
+        fetch('/ipcs/User/Insert_Edit_User', {
 
             method: 'POST',
             headers: {

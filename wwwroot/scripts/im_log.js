@@ -21,7 +21,7 @@ function _load_log() {
    // params.append('khoii', khoii);
     params.append('us', us);
 
-    fetch('/Import/_get_log', {
+    fetch('/ipcs/Import/_get_log', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -75,7 +75,7 @@ async function downloadExcel() {
     parra.append('date_to', dateToElement.value);
     parra.append('date_from', dateFromElement.value);
 
-    fetch('/Import/download_log', {
+    fetch('/ipcs/Import/download_log', {
 
         method: 'POST',
         headers: {

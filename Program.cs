@@ -1,17 +1,17 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PRJ_WAREHOUSE_BIVN.Common;
+using PRJ_WAREHOUSE_BIVN.Extensions;
+using PRJ_WAREHOUSE_BIVN.Models_Agent;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Models_Working;
 using PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper;
 using System.Data;
 using System.Data.SqlClient;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using PRJ_WAREHOUSE_BIVN.Extensions;
-using Microsoft.AspNetCore.Authentication;
-using PRJ_WAREHOUSE_BIVN.Models_Agent;
 using System.Globalization; 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,6 +71,8 @@ builder.Services.AddDbContext<AgentContext>(options => options.UseSqlServer(agen
 
 
 builder.Services.Configure<ConnectionStringOptions>(builder.Configuration.GetSection("ConnectionStrings"));
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(costManagerConnection));
 builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(workingControlConnection));

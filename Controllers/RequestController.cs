@@ -164,7 +164,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                  Đơn yêu cầu xuất kho :  {rq_detail}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
                  Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
                  ご承認賜りますようお願い申し上げます。<br />
-                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                 <a href='http://apbivnap18/ipcs/Approval/ListData'> Link </a> <br />
                  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                  ※このメールは自動的に送付されたので、返事をしないでください。 ";
          
@@ -255,7 +255,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                  Đơn yêu cầu xuất kho :  {rq_detail}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
                  Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
                  ご承認賜りますようお願い申し上げます。<br />
-                 <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                 <a href='http://apbivnap18/ipcs/Approval/ListData_GA'> Link </a> <br />
                  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                  ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
@@ -327,7 +327,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                  Đơn yêu cầu xuất kho :  {get_ma}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
                  Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
                  ご承認賜りますようお願い申し上げます。<br />
-                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                 <a href='http://apbivnap18/ipcs/Approval/ListData'> Link </a> <br />
                  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                  ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
@@ -362,11 +362,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //     Đơn yêu cầu xuất kho :  {get_ma}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
             //     Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
             //     ご承認賜りますようお願い申し上げます。<br />
-            //     <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+            //     <a href='http://apbivnap18/ipcs/Approval/ListData'> Link </a> <br />
             //     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
             //     ※このメールは自動的に送付されたので、返事をしないでください。 ";
             //}
-            //REQUEST_PROCESS._sendmail(body, mailTo, subject);
+         
             var up = REQUEST_PROCESS._update_request(id_request, regency, buoc.ToString());
             // gửi đến người tạo đơn
             if (step == "4")
@@ -380,7 +380,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
                 REQUEST_PROCESS._sendmail(body, guiden, subject);
             }
-            // Gửi mail 
+
+            // Gửi mail
+            REQUEST_PROCESS._sendmail(body, mailTo, subject);
             REQUEST_PROCESS._sendmail(body, "maithi.tuyen@brother-bivn.com.vn", subject);
             return Json(up);
         }
@@ -401,7 +403,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                  Đơn yêu cầu xuất kho :  {get_ma}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
                  Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
                  ご承認賜りますようお願い申し上げます。<br />
-                 <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                 <a href='http://apbivnap18/ipcs/Approval/ListData_GA'> Link </a> <br />
                  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                  ※このメールは自動的に送付されたので、返事をしないでください。 ";
             string subject = "Xin phê duyệt đơn yêu cầu xuất kho /出庫依頼承認のお願い";
@@ -437,14 +439,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             //    body = $@"Xin chào <br />
             //         Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
             //         Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-            //         <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+            //         <a href='http://apbivnap18/ipcs/Approval/ListData_GA'> Link </a> <br />
             //         ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
             //         ※このメールは自動的に送付されたので, 返事をしないでください。";
             //}
           
             var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());                        
             // Gửi mail 
-            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+          
             if (step == "5")
             {
                 string guiden = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
@@ -456,6 +458,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
                 REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
             }
+            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
             return Json("OK");
         }
         public JsonResult _update_dongytatca(string us, string madon)
@@ -467,7 +470,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                  Đơn yêu cầu xuất kho :  {madon}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
                  Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
                  ご承認賜りますようお願い申し上げます。<br />
-                 <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                 <a href='http://apbivnap18/ipcs/Approval/ListData'> Link </a> <br />
                  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                  ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
@@ -507,13 +510,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8075/Approval/ListData'> Link </a> <br />
+                     <a href='http://apbivnap18/ipcs/Approval/ListData'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
             }
 
             var up = REQUEST_PROCESS._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
-            REQUEST_PROCESS._sendmail(body, mailTo!, subject);            
+            REQUEST_PROCESS._sendmail(body, mailTo, subject);            
              
             return Json(up);
         }
@@ -526,7 +529,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                  Đơn yêu cầu xuất kho :  {madon}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
                  Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
                  ご承認賜りますようお願い申し上げます。<br />
-                 <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                 <a href='http://apbivnap18/ipcs/Approval/ListData_GA'> Link </a> <br />
                  ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                  ※このメールは自動的に送付されたので、返事をしないでください。 ";
 
@@ -574,17 +577,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-                     <a href='http://172.26.248.62:8075/Approval/ListData_GA'> Link </a> <br />
+                     <a href='http://apbivnap18/ipcs/Approval/ListData_GA'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
                  up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], get_if.Rows[0][0].ToString()!);
                  REQUEST_PROCESS_GA._sendmail(body, mailTohoanthanh, subject);
             }
-            else
-            {
-                up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
-                REQUEST_PROCESS_GA._sendmail(body, mailTo!, subject);
-            }
+           
+            up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
+            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+            
             // update đơn
           
             return Json(up);
@@ -791,11 +793,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     for (int i = 0; i < rq.Count; i++)
                     {
-                        var update = db.GET_DATA_FROM_SQL($@"IF EXISTS (SELECT 1 FROM REQUEST_DETAIL
-                        WHERE Code_Request = '{Code_Request}' AND Material_Code = '{rq[i].Material_Code}')
-                        BEGIN
-                            -- Thực hiện Update
-                            UPDATE REQUEST_DETAIL
+                        var update = db.GET_DATA_FROM_SQL($@"UPDATE REQUEST_DETAIL
                             SET 
                                 Material_Name = N'{rq[i].Material_Name}',                             
                                 Vitri = N'{rq[i].Vitri}',
@@ -806,14 +804,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 Account_Code = '{rq[i].Account_Code}',
                                 Account_Name = N'{rq[i].Account_Name}',
                                 [Status] = ''
-                            WHERE Code_Request = '{Code_Request}' AND Material_Code = '{rq[i].Material_Code}'
-                        END
-                        ELSE
-                        BEGIN
-                            -- Thực hiện Insert
-                            INSERT INTO REQUEST_DETAIL (Code_Request,Material_Name, Material_Code, Account_Name,Account_Code,Unit, Amount, Price, Total, Vitri, Poisition,Currency, Aim, Id_Request,Total_exchange,Rate,Material_Name_EN,Material_Name_ENJP, Phongchiuchiphi)
-                            VALUES ('{Code_Request}',N'{rq[i].Material_Name}','{rq[i].Material_Code}','{rq[i].Account_Name}','{rq[i].Account_Code}',N'{rq[i].Unit}','{rq[i].Amount}','{rq[i].Price}','{rq[i].Total_exchange}','{rq[i].Vitri}',N'{rq[i].Poisition}',N'{rq[i].Currency!.Trim()}',N'{rq[i].Aim}','{iD_REQUEST}','{rq[i].Total_exchange}','1','','','{rq[i].Phongchiuchiphi!.Split(':')[0]}')
-                        END");
+                            WHERE Id_RequestDetail = '{rq[i].Id_RequestDetail}'");
                     }
                     if(Note == "OTHER AIM")
                     {

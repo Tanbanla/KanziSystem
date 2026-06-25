@@ -565,7 +565,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var emailResult = await sendMailService.SendMailAsync(mail, mail, 12,
                                 "History/HistoryQuote", isGap,
                                 sectionName, maDon, currentUserId);
-                            //var emailResult = await sendMailService.SendMailToConfirmItemAsync(12, 12, "Quote/HistoryQuote", true, "", "", currentUserId);
                         }
                         catch (Exception ex)
                         {

@@ -4,7 +4,8 @@ let centercode = "";
 let cost = "";
 
 // lấy thông tin người dùng
- async function getEmployeeData() {
+async function getEmployeeData() {
+
      // lấy thông tin phòng ban
      var ph = document.getElementById("name_dept").value;
    
@@ -13,7 +14,7 @@ let cost = "";
      }
     const formData = new URLSearchParams();
     formData.append('ph', ph);
-    fetch('/Request/_layphongban', {
+     fetch('/ipcs/Request/_layphongban', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -86,7 +87,7 @@ async function get_block() {
     const params = new URLSearchParams();
     params.append('group_code', group_code);
 
-    fetch('/Import/_load_userinventory', {
+    fetch('/ipcs/Import/_load_userinventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
@@ -132,7 +133,7 @@ async function get_useriv(id) {
     const params = new URLSearchParams();
     params.append('id', id.split('_')[0]);
 
-    fetch('/Import/_getid_user', {
+    fetch('/ipcs/Import/_getid_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
@@ -188,7 +189,7 @@ async function loadToCombo(position, comboId) {
             const params = new URLSearchParams();
             params.append('adid', usUQ);
 
-            const rsUQ = await fetch('/User/Load_UQ', {
+            const rsUQ = await fetch('/ipcs/User/Load_UQ', {
                 method: 'POST',
                 body: params
             });
@@ -234,7 +235,7 @@ async function loadToCombo_GD(position, comboId) {
         const params = new URLSearchParams();
         params.append('adid', usUQ);
 
-        const rsUQ = await fetch('/User/Load_UQ', {
+        const rsUQ = await fetch('/ipcs/User/Load_UQ', {
             method: 'POST',
             body: params
         });
@@ -275,7 +276,7 @@ async function loadToCombo_TBP(position, comboId) {
         const params = new URLSearchParams();
         params.append('adid', usUQ);
 
-        const rsUQ = await fetch('/User/Load_UQ', {
+        const rsUQ = await fetch('/ipcs/User/Load_UQ', {
             method: 'POST',
             body: params
         });
@@ -331,7 +332,7 @@ async function loadToCombo_TBP(position, comboId) {
     const params = new URLSearchParams();
     params.append('id', id.split('_')[0]);
 
-    fetch('/Import/_getid_user', {
+     fetch('/ipcs/Import/_getid_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params

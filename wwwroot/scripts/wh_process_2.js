@@ -1,4 +1,4 @@
-﻿// --- 1. Quản lý Trạng thái Phân trang ---
+// --- 1. Quản lý Trạng thái Phân trang ---
 const userPagingState = {
     fullData: [],
     currentPage: 1,
@@ -8,7 +8,7 @@ const userPagingState = {
 // --- 2. Hàm Tải Dữ liệu Chính (Fetch) ---
 function _load_warehouse() {
 
-    fetch('/Master/load_warehouse', {
+    fetch('/ipcs/Master/load_warehouse', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -144,7 +144,7 @@ function add_wh() {
     params.append('CHR_NOTE', CHR_NOTE);
     params.append('CHR_USER', CHR_USER);
 
-    fetch('/Master/insert_wh', {
+    fetch('/ipcs/Master/insert_wh', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -176,7 +176,7 @@ function del_wh(id, tenkho) {
         params.append('id', id);
         params.append('tenkho', tenkho);
 
-        fetch('/Master/del_warehouse', {
+        fetch('/ipcs/Master/del_warehouse', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -203,7 +203,7 @@ function del_wh(id, tenkho) {
 
 function load_section() {
 
-    fetch('/Master/load_section', {
+    fetch('/ipcs/Master/load_section', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

@@ -3,16 +3,15 @@ let phongban_GA = "";
 let centercode_GA = "";
 let cost_GA = "";
 // thông tin người dùng GA
- async function getEmployeeData_GA() {
-
-     var ph = document.getElementById("name_dept").value;
+async function getEmployeeData_GA() {
+    var ph = document.getElementById("name_dept").value;
      if (ph == "") {
          alert("Chưa chọn phòng");
      }
     const formData = new URLSearchParams();
     formData.append('ph', ph);
 
-    fetch('/Request/_layphongban', {
+     fetch('/ipcs/Request/_layphongban', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -24,7 +23,6 @@ let cost_GA = "";
 
         })
         .catch(err => console.error('Fetch error:', err));
-
 
     let us = document.getElementById("us").innerHTML;
     const employeeId = us.trim();
@@ -80,14 +78,13 @@ async function get_block_GA() {
     const params = new URLSearchParams();
     params.append('group_code', group_code);
 
-    fetch('/Import/_load_userinventory', {
+    fetch('/ipcs/Import/_load_userinventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             document.getElementById("GA_ten_xuatkho").innerHTML = "";
             document.getElementById("GA_ten_dongy_QLSC").innerHTML = "";
             document.getElementById("GA_ten_dongy_QLTC").innerHTML = "";
@@ -133,11 +130,10 @@ async function get_block_GA() {
 }
 // Tạo sự kiện khi thay đổi user
 async function get_useriv_GA(id) {
-
     const params = new URLSearchParams();
     params.append('id', id.split('_')[0]);
 
-    fetch('/Import/_getid_user', {
+    fetch('/ipcs/Import/_getid_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
@@ -191,7 +187,7 @@ async function loadToCombo_GA(position, comboId) {
             const params = new URLSearchParams();
             params.append('adid', usUQ);
 
-            const rsUQ = await fetch('/User/Load_UQ', {
+            const rsUQ = await fetch('/ipcs/User/Load_UQ', {
                 method: 'POST',
                 body: params
             });
@@ -239,7 +235,7 @@ async function loadToCombo_GD_GA(position, comboId) {
         const params = new URLSearchParams();
         params.append('adid', usUQ);
 
-        const rsUQ = await fetch('/User/Load_UQ', {
+        const rsUQ = await fetch('/ipcs/User/Load_UQ', {
             method: 'POST',
             body: params
         });
@@ -281,7 +277,7 @@ async function loadToCombo_TBP_GA(position, comboId) {
         const params = new URLSearchParams();
         params.append('adid', usUQ);
 
-        const rsUQ = await fetch('/User/Load_UQ', {
+        const rsUQ = await fetch('/ipcs/User/Load_UQ', {
             method: 'POST',
             body: params
         });

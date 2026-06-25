@@ -1,5 +1,5 @@
-﻿function _load_wh() {
-    const url = '/WAREHOUSE/Load_Warehouse';
+function _load_wh() {
+    const url = '/ipcs/WAREHOUSE/Load_Warehouse';
     const options = {
         method: 'POST',
     };

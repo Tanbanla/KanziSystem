@@ -20,6 +20,8 @@
   <ItemGroup>
     <None Remove="Data\File_import_ex.xlsx" />
     <None Remove="Data\Form_Export_WH.xlsx" />
+    <None Remove="Data\Log_WH.xlsx" />
+    <None Remove="Data\Template_HangTrongDanhMuc.xlsm" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +29,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Form_Export_WH.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Log_WH.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Template_HangTrongDanhMuc.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -167,15 +175,6 @@
     <EmbeddedResource Update="Resources\Views\SelectQuote\SelectQuoteSection.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Data\Log_WH.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Template_HangTrongDanhMuc.xlsm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,6 @@
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Data.SqlClient;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
@@ -7,36 +9,54 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public int Id { get; set; } // Số thứ tự hoặc ID
         public DateTime ReqDate { get; set; }
         public DateTime DeliveryReqDate { get; set; }
-        public string PoNumber { get; set; }
-        public string ItemName { get; set; }
-        public string ItemCode { get; set; }
+        public string? PoNumber { get; set; }
+        public string? ItemName { get; set; }
+        public string? ItemCode { get; set; }
         public int Quantity { get; set; }
-        public string Unit { get; set; }
-        public string SupplierName { get; set; }
+        public string? Unit { get; set; }
+        public string? SupplierName { get; set; }
         public int LeadTime { get; set; }
-        public string Issuer { get; set; }
+        public string? Issuer { get; set; }
         public DateTime? SendPoDate { get; set; }
-        public string Follower { get; set; }
+        public string? Follower { get; set; }
         public DateTime? ConfirmedDeliveryDate { get; set; }
-        public string ImpactToProduction { get; set; } // "Yes" hoặc "No"
-        public string Status { get; set; } // "Pending" hoặc "Received"
+        public string? ImpactToProduction { get; set; } // "Yes" hoặc "No"
+        public string? Status { get; set; } // "Pending" hoặc "Received"
+    }
+    public class PoDetailViewModel
+    {
+        public int PO_Detail_Id { get; set; }
+        public DateTime? Ngayyc { get; set; }
+        public DateTime? Ngayycgiao { get; set; }
+        public string? SoPO { get; set; }
+        public string? Tentiengviet { get; set; }
+        public string? Mahang { get; set; }
+        public decimal Soluong { get; set; }
+        public string? Dovi { get; set; }
+        public string? Nhacungcap { get; set; }
+        public DateTime? TimeGH { get; set; }
+        public string? DNphathanhpo { get; set; }
+        public DateTime? ngayguiPO { get; set; } 
+        public string? DNncc { get; set; }
+        public string? ngaynccxngiao { get; set; }
+        public string? lichgiao { get; set; }
+      
+        public string? anhuongsx { get; set; }
+        public string? trangthai { get; set; }
     }
     public class ManagerDeliveryController : Controller
     {
+        private readonly string _connectionString = "data source=apbivndb14;initial catalog=COST_MANAGEMENT;user id=Kanzaisystem;password=Kanzaisystem;";
         public async Task<IActionResult> ManageDelivery()
         {
-            // Lấy dữ liệu từ DB (Ví dụ sử dụng Entity Framework)
-            // var data = await _context.PurchaseOrders.Select(po => new PoViewModel { ... }).ToListAsync();
+            string sql = $@"SELECT TOP (500) b.[PO_Detail_Id], a.Ngayphathanh, a.
+            from IM_PO as a left join IM_PO_DETAIL as b on a.SoPO = b.SoPO where Ngayphathanh >= '{DateTime.Now.ToString("yyyy-MM-01")}' order by Ngayphathanh desc";
 
-            // Giả lập dữ liệu
-            var data = new List<PoViewModel>
+            using (var connection = new SqlConnection(_connectionString))
             {
-                new PoViewModel { Id = 153, PoNumber = "2603-0008", Status = "Received", ImpactToProduction = "Yes" },
-                new PoViewModel { Id = 154, PoNumber = "2603-0009", Status = "Pending", ImpactToProduction = "No" },
-                new PoViewModel { Id = 155, PoNumber = "2603-0010", Status = "Received", ImpactToProduction = "No" }
-            };
-
-            return View(data);
+                var poList = connection.Query<PoDetailViewModel>(sql).ToList();
+                return View(poList); // Đẩy dữ liệu sang View
+            }
         }
     }
 }

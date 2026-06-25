@@ -750,7 +750,7 @@
             tr.appendChild(td(getVal(it, 'nvchR_Rohs', 'nvchR_Rohs'))); // ROHS
             tr.appendChild(td(getVal(it, 'nvchR_COCQ', 'nvchR_COCQ'))); // COCQ
             tr.appendChild(td(getVal(it, 'nvchR_MSDS', 'nvchR_MSDS'))); // MSDS
-            tr.appendChild(td(getVal(it, 'vchR_AnToan', 'vchR_AnToan'))); // vchR_AnToan
+            tr.appendChild(td(getVal(it, 'nvchR_AnToan', 'nvchR_AnToan'))); // vchR_AnToan
 
             // Supplier deadline, urgent, get quotation, reason
             const tdDeadline = td(formatDate(getVal(it, 'dtM_KyHan', 'dtM_KyHan'))); tdDeadline.className = 'text-center'; tr.appendChild(tdDeadline); // Kỳ hạn chọn NCC

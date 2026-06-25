@@ -4,7 +4,7 @@ function resett() {
     _Load_PO()
 }
 function ImportWarehouse() {
-    const url = '/Delivery/NhapKhoAction';
+    const url = '/ipcs/Delivery/NhapKhoAction';
 
     let table = document.getElementById('show_kho_iv');
     //Scan table with row selected will import to warehouse
@@ -54,7 +54,7 @@ function ImportWarehouse() {
     SearchPoDel();
 }
 function Usingg() {
-    const url = '/Delivery/Sudungngay';
+    const url = '/ipcs/Delivery/Sudungngay';
 
     let table = document.getElementById('show_kho_iv');
     //Scan table with row selected will import to warehouse
@@ -109,7 +109,7 @@ async function SearchPoDel() {
     let mayeucau = document.getElementById('mayeucau').value;
     let mahang = document.getElementById('mahang').value;
     let Phongbanyeucau = document.getElementById('phongyeucau').value;
-    const url = '/Delivery/SearchDataPo';
+    const url = '/ipcs/Delivery/SearchDataPo';
     let payload =
     {
         PoNumber: GetPO,
@@ -190,7 +190,7 @@ async function _Load_PO() {
 
     try {
         // Sử dụng await đồng bộ hóa request để try...catch có thể hoạt động đúng
-        const response = await fetch('/Delivery/LoadDataPo', {
+        const response = await fetch('/ipcs/Delivery/LoadDataPo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -279,7 +279,7 @@ async function _Load_PO() {
     }
 }
 function ResetWarehouse() {
-    const url = '/Delivery/ResetImportRow';
+    const url = '/ipcs/Delivery/ResetImportRow';
 
     let table = document.getElementById('show_kho_iv');
     let group_code = document.getElementById("IdDept").value;

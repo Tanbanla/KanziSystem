@@ -237,7 +237,7 @@ function _load_request_condition() {
         params.append('ngayyc', ngayyc);
         params.append('loaicp', loaicp);
 
-    fetch('/Request/get_requestcondition', {
+        fetch('/ipcs/Request/get_requestcondition', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -301,7 +301,7 @@ function _load_request_condition() {
                     var huydon = ``;
 
                     if(parseFloat(item.inT_STEP) <= 4){
-                            suadon = `<a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a>`;
+                            suadon = `<a href="/ipcs/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a>`;
                             huydon = `<i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon('${item.iD_REQUEST}')" ></i>`;
                     }
                     if(item.user_Create == us)
@@ -339,17 +339,17 @@ function _load_request_condition() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-    function moModalHuyDon(id) {
-        document.getElementById("id_huy").value = id;
-        document.getElementById("txtLyDo").value = "";
+function moModalHuyDon(id) {
+    document.getElementById("id_huy").value = id;
+    document.getElementById("txtLyDo").value = "";
 
-        // Mở modal
-        $('#modalLyDoHuyn').modal('show');
+    // Mở modal
+    $('#modalLyDoHuyn').modal('show');
 
-        // Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
-        // Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
-        $('#modalLyDoHuyn').appendTo("body");
-    }
+    // Cách "chữa cháy" nếu lớp phủ vẫn đè lên:
+    // Chuyển Modal ra ngoài cùng của body bằng JS ngay khi mở
+    $('#modalLyDoHuyn').appendTo("body");
+}
 
 // GA
 async function _load_request_condition_ga() {
@@ -371,7 +371,7 @@ async function _load_request_condition_ga() {
         'loaicp' : getValue("loaicp"),
     });
 
-    fetch('/Request/get_requestcondition_ga', {
+        fetch('/ipcs/Request/get_requestcondition_ga', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString()
@@ -429,7 +429,7 @@ async function _load_request_condition_ga() {
                 var huydon = ``;
                 if (parseFloat(item.inT_STEP) <= 5 )
                 {
-                    suadon = `<a href="/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a>`;
+                    suadon = `<a href="/ipcs/Import/Suadon?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a>`;
                     huydon = `<i class="fa fa-ban text-danger" style="cursor:pointer" onclick="moModalHuyDon_GA('${item.iD_REQUEST}')" ></i>`;
                 }
                 if(item.user_Create == us)
@@ -473,7 +473,7 @@ if(x){
         const params = new URLSearchParams();
         params.append('iD_REQUEST', iD_REQUEST);
 
-        fetch('/Import/_XOADONPROD', {
+            fetch('/ipcs/Import/_XOADONPROD', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -502,7 +502,7 @@ if(x){
         const params = new URLSearchParams();
         params.append('iD_REQUEST', iD_REQUEST);
 
-        fetch('/Import/_XOADONGA', {
+            fetch('/ipcs/Import/_XOADONGA', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -531,7 +531,7 @@ function _modal_sua(iD_REQUEST) {
     const params = new URLSearchParams();
     params.append('iD_REQUEST', iD_REQUEST);
 
-    fetch('/Import/_Suadonhang', {
+        fetch('/ipcs/Import/_Suadonhang', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

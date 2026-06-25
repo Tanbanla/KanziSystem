@@ -530,7 +530,9 @@
                     <div class="col-md-4">
                         <label class="form-label"> Kho nhận  <span class="text-danger">*</span></label>
                         <select id="khonhan" class="form-control">
+                            <option>F1</option>
                             <option>F2</option>
+                            <option>F3</option>
                             <option>F4</option>
                             <option>F5</option>
                             <option>F6</option>
@@ -663,7 +665,7 @@
             params.append('khoi', khoi);
             params.append('nguoichuyen', nguoichuyen);
 
-                fetch('/Master/chuyenkho', {
+                 fetch('/ipcs/Master/chuyenkho', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -719,7 +721,7 @@
 
          // 4. Gọi API xử lý nghiệp vụ
          if (confirm("Bạn có chắc chắn muốn nhập số hàng đặc biệt này vào hệ thống?")) {
-               fetch('/Import/NhapKhoDacBiet', {
+                fetch('/ipcs/Import/NhapKhoDacBiet', {
                  method: 'POST',
                  headers: {
                      'Content-Type': 'application/json'

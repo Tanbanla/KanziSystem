@@ -1,4 +1,5 @@
 using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.Models;
 using System.Net.Mail;
 
 namespace PRJ_WAREHOUSE_BIVN.Common
@@ -39,14 +40,21 @@ namespace PRJ_WAREHOUSE_BIVN.Common
     }
     public static class EmailSender
     {
-        public static bool sendEmailNotify(string title, string mail_from, string mail_to, string mail_cc, string mail_bcc, string body, int priority)
+        private static EmailSettings _emailSettings;
+
+        public static void Initialize(EmailSettings emailSettings)
+        {
+            _emailSettings = emailSettings;
+        }
+
+        public static async Task<bool> sendEmailNotifyAsync(string title, string mail_from, string mail_to, string mail_cc, string mail_bcc, string body, int priority)
         {
             bool blresult = true;
 
             try
             {
-                //mail_to = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
-                //mail_cc = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                mail_to = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                mail_cc = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
                 MailMessage msg = new MailMessage();
                 msg.From = new MailAddress(mail_from);
 
@@ -92,10 +100,30 @@ namespace PRJ_WAREHOUSE_BIVN.Common
                 msg.Body = body;
                 msg.IsBodyHtml = true;
 
-                using (SmtpClient emailClient = new SmtpClient("smtp.brother.co.jp", 25))
+                //using (SmtpClient emailClient = new SmtpClient("smtp.brother.co.jp", 25))
+                //{
+                //    emailClient.UseDefaultCredentials = true;
+                //    emailClient.Send(msg);
+                //}
+                var smtpUser = !string.IsNullOrWhiteSpace(_emailSettings.SenderEmail)
+                ? _emailSettings.SenderEmail
+                : _emailSettings.SenderName;
+
+                using (System.Net.Mail.SmtpClient emailClient = new System.Net.Mail.SmtpClient(_emailSettings.SmtpServer, _emailSettings.SmtpPort))
                 {
-                    emailClient.UseDefaultCredentials = true;
-                    emailClient.Send(msg);
+                   // emailClient.UseDefaultCredentials = false;
+                    emailClient.Credentials = new System.Net.NetworkCredential(smtpUser, _emailSettings.Password);
+                    emailClient.EnableSsl = true;
+
+                    try
+                    {
+                        await emailClient.SendMailAsync(msg);
+                    }
+                    catch (SmtpException ex) when (ex.Message != null && ex.Message.Contains("does not support secure connections", StringComparison.OrdinalIgnoreCase))
+                    {
+                        emailClient.EnableSsl = false;
+                        await emailClient.SendMailAsync(msg);
+                    }
                 }
             }
             catch (Exception)

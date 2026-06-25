@@ -21,6 +21,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         private readonly ISendMailRepository _repo;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private const string mailPICTo = "bivn-gagpur@brother-bivn.com.vn";//"bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-gagpur@brother-bivn.com.vn";//
         public SendMailService(ISendMailRepository repository, IMapper mapper, IConfiguration configuration) : base(repository, mapper)
         {
             _repo = repository;
@@ -45,7 +46,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
            string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
            string body = string.Format(mail.CHR_BODY, urlMail+url, gapText, section, idRequest,user);
 
-           bool sendResult = EmailSender.sendEmailNotify(
+           bool sendResult = await EmailSender.sendEmailNotifyAsync(
                mail.CHR_SUBJECT,
                mail.CHR_FROM,
                toEmail,
@@ -240,7 +241,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var bodyTable = mail.CHR_BODY + tableHtml.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
                     var email = string.IsNullOrEmpty(mail.CHR_CC) ?
-                    "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
+                    mailPICTo : mail.CHR_CC;
 
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
@@ -465,7 +466,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                 var body = string.Format(bodyTable, dearMail, mailTk);
                 var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ?
-                    "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
+                    mailPICTo : mail.CHR_CC;
 
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {
@@ -691,7 +692,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                 var body = string.Format(bodyTable, dearMail, mailTk);
                 var emailCC = string.IsNullOrEmpty(mail.CHR_CC)
-                    ? "bivn-pur-indirectpart@brother-bivn.com.vn"
+                    ? mailPICTo
                     : mail.CHR_CC;
 
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
@@ -904,7 +905,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
                     var email = string.IsNullOrEmpty(mail.CHR_CC) ?
-                        "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
+                        mailPICTo : mail.CHR_CC;
 
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
@@ -983,7 +984,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
             string body = string.Format(mailTemplate.CHR_BODY ?? "", urlMail+"ApprovalQuote/Index", gapText, sectionName, requestCode);
             // Gửi mail
-            bool sendResult = EmailSender.sendEmailNotify(
+            bool sendResult = await EmailSender.sendEmailNotifyAsync(
                 mailTemplate.CHR_SUBJECT ?? "",
                 mailTemplate.CHR_FROM ?? "",
                 requesterEmail,
@@ -1029,7 +1030,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 // Chuẩn bị nội dung mail với các tham số
                 string body = string.Format(mailTemplate.CHR_BODY ?? "", link, gapText, sectionName, sectionCode, user);
                 // Gửi mail
-                bool sendResult = EmailSender.sendEmailNotify(
+                bool sendResult = await EmailSender.sendEmailNotifyAsync(
                     mailTemplate.CHR_SUBJECT ?? "",
                     mailTemplate.CHR_FROM ?? "",
                     requesterEmail,
@@ -1266,7 +1267,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var dearMail = "nhà cung cấp " + (rqList.FirstOrDefault()?.Ten ?? "") + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Trân trọng cảm ơn!";
                     var bodyTable = mail.CHR_BODY + tableHtml.ToString();
                     var body = string.Format(bodyTable, dearMail);
-                    var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ? "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
+                    var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ? mailPICTo : mail.CHR_CC;
 
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
@@ -1507,7 +1508,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
                     var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ?
-                        "bivn-pur-indirectpart@brother-bivn.com.vn" : mail.CHR_CC;
+                        mailPICTo : mail.CHR_CC;
 
                     attachmentPaths.Insert(0, tempFilePath);
 

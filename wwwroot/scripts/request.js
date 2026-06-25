@@ -75,7 +75,7 @@ function _insert_request() {
     }
     else {
         $.ajax({
-            url: '/Request/_Insert_request',
+            url: '/ipcs/Request/_Insert_request',
             type: 'POST',
             dataType: 'JSON',
             // 1. Thêm contentType để Server biết đây là dữ liệu JSON
@@ -213,7 +213,7 @@ function _insert_request_GA() {
     }
     else {
         $.ajax({
-            url: '/Request/_Insert_request_GA',
+            url: '/ipcs/Request/_Insert_request_GA',
             type: 'POST',
             dataType: 'JSON',
             // 1. Thêm contentType để Server biết đây là dữ liệu JSON
@@ -273,7 +273,7 @@ function _insert_request_GA() {
     }
 }
 async function _load_rate() {
-    fetch('/Request/_get_rate', {
+    fetch('/ipcs/Request/_get_rate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -293,7 +293,7 @@ async function _load_rate() {
         });
 }
 async function _load_phongchiuphi() {
-    fetch('/Request/_get_phongchiuphi', {
+    fetch('/ipcs/Request/_get_phongchiuphi', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -326,7 +326,7 @@ function _load_vitri(cost,idd) {
     params.append('cost', cost);
     var id = idd.split('_')[1];
   
-    fetch('/Request/_get_vitri', {
+    fetch('/ipcs/Request/_get_vitri', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -377,7 +377,7 @@ async function get_mail(us) {
 // gửi mail
 async function send_mail(mail_to, Urgent) {
     $.ajax({
-        url: '/Request/_send_mail',
+        url: '/ipcs/Request/_send_mail',
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -407,7 +407,7 @@ async function _load_confirm() {
     formData.append('Code_Request', Code_Request);
     formData.append('INT_STEP', INT_STEP);
 
-    fetch('/Request/_get_confirm', {
+    fetch('/ipcs/Request/_get_confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -487,7 +487,7 @@ async function _load_confirm_GA() {
     formData.append('Code_Request', Code_Request);
     formData.append('INT_STEP', INT_STEP);
 
-    fetch('/Request/_get_confirm_GA', {
+    fetch('/ipcs/Request/_get_confirm_GA', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -560,7 +560,7 @@ async function _load_confirm_GA() {
 function _modal_info(cost_request, step) {
 
     $.ajax({
-        url: '/Request/_get_request',
+        url: '/ipcs/Request/_get_request',
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -649,7 +649,7 @@ async function _dlxuatkho_trangthai(id) {
     var code_request = document.getElementById("madonhang" + id).innerHTML;
     const params = new URLSearchParams();
     params.append('code_request', code_request);
-    fetch('/Import/ExportModalDetail', {
+    fetch('/ipcs/Import/ExportModalDetail', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -685,7 +685,7 @@ function _update_request(id) {
     var urgent = document.getElementById("urgent" + id).innerHTML;
    
     $.ajax({
-        url: '/Request/_update_request',
+        url: '/ipcs/Request/_update_request',
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -708,7 +708,7 @@ function _update_request_PROD_Slide(id) {
     var urgent = document.getElementById("urgent" + id).innerHTML;
 
     $.ajax({
-        url: '/Request/_update_request',
+        url: '/ipcs/Request/_update_request',
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -736,7 +736,7 @@ function _update_request_GA(id) {
     params.append('step', step);
     params.append('urgent', urgent);
 
-    fetch('/Request/_update_request_GA', {
+    fetch('/ipcs/Request/_update_request_GA', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -773,7 +773,7 @@ function _update_request_GA_Slide(id) {
     params.append('step', step);
     params.append('urgent', urgent);
 
-    fetch('/Request/_update_request_GA', {
+    fetch('/ipcs/Request/_update_request_GA', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -804,7 +804,7 @@ function _update_request_all(request) {
     params.append('us', us);
     params.append('madon', request);
  
-    fetch('/Request/_update_dongytatca', {
+    fetch('/ipcs/Request/_update_dongytatca', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -832,7 +832,7 @@ function _update_request_all_GA(request) {
     params.append('us', us);
     params.append('madon', request);
 
-    fetch('/Request/_update_dongytatca_GA', {
+    fetch('/ipcs/Request/_update_dongytatca_GA', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -877,7 +877,7 @@ function _reject(id) {
     params.append('urgent', urgent);
     params.append('reason', reason);
   
-    fetch('/Request/_reject', {
+    fetch('/ipcs/Request/_reject', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -917,7 +917,7 @@ function _reject2(id) {
     params.append('urgent', urgent);
     params.append('reason', reason);
 
-    fetch('/Request/_reject_GA', {
+    fetch('/ipcs/Request/_reject_GA', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -951,7 +951,7 @@ function _reset() {
 }
 function _load_account() {
    
-    fetch('/Import/_load_account', {
+    fetch('/ipcs/Import/_load_account', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -973,7 +973,6 @@ function _load_account() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-
 function Huy_don() {
     var x = confirm("Bạn có chắc muốn hủy đơn yêu cầu này không ?");
     if(x) {
@@ -983,7 +982,7 @@ function Huy_don() {
         params.append('id_request', id);
         params.append('reason', reason);
 
-        fetch('/Request/_huydon_prod', {
+        fetch('/ipcs/Request/_huydon_prod', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -1008,7 +1007,6 @@ function Huy_don() {
     }
    
 }
-
 function Huy_don_GA() {
     var x = confirm("Bạn có chắc muốn hủy đơn yêu cầu này không ?");
     if (x) {
@@ -1018,7 +1016,7 @@ function Huy_don_GA() {
         params.append('id_request', id);
         params.append('reason', reason);
 
-        fetch('/Request/_huydon_GA', {
+        fetch('/ipcs/Request/_huydon_GA', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -1042,11 +1040,10 @@ function Huy_don_GA() {
     }
 
 }
-
 function _modal_info_tongdon(cost_request, step) {
 
     $.ajax({
-        url: '/Request/_load_modal_tongdon',
+        url: '/ipcs/Request/_load_modal_tongdon',
         type: 'POST',
         dataType: 'JSON',
         data: {

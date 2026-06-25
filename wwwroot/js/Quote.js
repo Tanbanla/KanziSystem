@@ -10,8 +10,8 @@
         , exportRenderOutSide: (window.apiBaseUrl || '') + '/Quote/ExportRenderOutSide'
         , exportTable: (window.apiBaseUrl || '') + '/Quote/ExportTable'
         , searchApprover: (window.apiBaseUrl || '') + '/Quote/GetListApprovel'
-        ,downloadMasterMaterial: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterMaterial`
-        ,downloadMasterVendor: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterVendor`
+        , downloadMasterMaterial: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterMaterial`
+        , downloadMasterVendor: `${window.apiBaseUrl || ''}/Master/ExportExcelMasterVendor`
         , checkNCC: (window.apiBaseUrl || '') + '/Quote/CheckNCC'
         , checkNCCByCategory: (window.apiBaseUrl || '') + '/Quote/CheckNCCByCategory'
     };

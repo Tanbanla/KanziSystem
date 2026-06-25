@@ -991,22 +991,49 @@
         }
     }
 
-    function approvalCell(name, time) {
+    function approvalCell(name, time, userNext, cellStep, currentStep) {
         const text = String(name || '').trim();
-        if (!text) return '<td></td>';
-        const dt = formatDateTime(time);
-        return `<td style="background:#cfe3c6;">${escapeHtml(text)}${dt ? `<div class="small text-muted">${escapeHtml(dt)}</div>` : ''}</td>`;
-    }
 
-    function supplierCell(value, bitValue, overdue) {
+        if (text) {
+            const dt = formatDateTime(time);
+            return `<td style="background:#cfe3c6;">
+            ${escapeHtml(text)}
+            ${dt ? `<div class="small text-muted">${escapeHtml(dt)}</div>` : ''}
+        </td>`;
+        }
+
+        if (cellStep === currentStep + 1) {
+            return `<td>${escapeHtml(userNext)}</td>`;
+        }
+        return `<td></td>`;
+    }
+    function supplierCell(value, bitValue, status, step, countStatus, countNCC) {
         const raw = String(bitValue ?? '').trim().toLowerCase();
-        const isValue = value === '';
+        const isRefuse = String(status ?? '').trim().toLowerCase() === 'refuse';
+        const isValueEmpty = value === '';
         const isSelected = bitValue === 1 || bitValue === true || raw === '1' || raw === 'true';
-        const bgColor = isSelected ? '#cfe3c6' : ((overdue && !isValue) ? 'red' : '#ffffff');
-        const textColor = (!isSelected && overdue) ? '#ffffff' : '';
+
+        let bgColor = '#ffffff';
+        let textColor = '';
+        // RULE 0: step < 7
+        if (step < 7) {
+            bgColor = '#ffffff';
+        }
+        // RULE 1: all refuse
+        else if (countStatus === countNCC) {
+            bgColor = '#e74c3c';
+            textColor = '#ffffff';
+        }
+        // RULE 2: logic cũ
+        else if (isSelected && !isRefuse) {
+            bgColor = '#cfe3c6';
+        }
+        else if (!isValueEmpty) {
+            bgColor = 'yellow';
+        }
+
         return `<td style="background:${bgColor};${textColor ? `color:${textColor};` : ''}">${escapeHtml(value)}</td>`;
     }
-
     function renderTable(rows) {
         if (!tblBody) return;
 
@@ -1027,6 +1054,22 @@
             const maDon = getValue(row, ['CHR_MaDon']);
             const maHang = getValue(row, ['CHR_MaHangNoiBo']);
             const maHangNcc = getValue(row, ['CHR_MaHangNCC']);
+            const countStatus = [
+                row.Status_1,
+                row.Status_2,
+                row.Status_3,
+                row.Status_4,
+                row.Status_5
+            ].filter(s => String(s ?? '').trim().toLowerCase() === 'refuse').length;
+            const countNCC = [
+                row.NCC_1,
+                row.NCC_2,
+                row.NCC_3,
+                row.NCC_4,
+                row.NCC_5
+            ].filter(s => String(s ?? '').trim() !== '').length;
+
+            const step = Number(getValue(row, ['Step', 'step'], 0)) || 0;
             const returnAction = role === 'UserPUR'
                 ? `<button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-undo"></i></button>`
                 : '';
@@ -1038,24 +1081,33 @@
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_NameEN']))}</td>
-                    ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), overdue)}
-                    ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), overdue)}
-                    ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), overdue)}
-                    ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), overdue)}
-                    ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), overdue)}
+                    ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), getValue(row, ['Status_1', 'status_1']), step, countStatus, countNCC)}
+                    ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), getValue(row, ['Status_2', 'status_2']), step, countStatus, countNCC)}
+                    ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), getValue(row, ['Status_3', 'status_3']), step, countStatus, countNCC)}
+                    ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), getValue(row, ['Status_4', 'status_4']), step, countStatus, countNCC)}
+                    ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), getValue(row, ['Status_5', 'status_5']), step, countStatus, countNCC)}
                     <td style="${overdue ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_CreateBy']))}</td>
-                    ${approvalCell(getValue(row, ['QLSC_Approve']), getValue(row, ['QLSC_Time']))}
-                    ${approvalCell(getValue(row, ['QLTC_Approve']), getValue(row, ['QLTC_Time']))}
-                    ${approvalCell(getValue(row, ['PIC_Approve']), getValue(row, ['PIC_Time']))}
-                    ${approvalCell(getValue(row, ['QLSC1_Approve']), getValue(row, ['QLSC1_Time']))}
-                    ${approvalCell(getValue(row, ['PIC_PickNCC']), getValue(row, ['PIC_PickNCC_Time']))}
-                    ${approvalCell(getValue(row, ['QLSC_PickNCC']), getValue(row, ['QLSC_PickNCC_Time']))}
-                    ${approvalCell(getValue(row, ['QLTC_PickNCC']), getValue(row, ['QLTC_PickNCC_Time']))}
-                    ${approvalCell(getValue(row, ['DEFT_PickNCC']), getValue(row, ['DEFT_PickNCC_Time']))}
+                    ${approvalCell(getValue(row, ['QLSC_Approve']), getValue(row, ['QLSC_Time']), getValue(row, ['UserNext']), 3, step)}
+                    ${approvalCell(getValue(row, ['QLTC_Approve']), getValue(row, ['QLTC_Time']), getValue(row, ['UserNext']), 4, step)}
+                    ${approvalCell(getValue(row, ['PIC_Approve']), getValue(row, ['PIC_Time']), getValue(row, ['UserNext']), 5, step)}
+                    ${approvalCell(getValue(row, ['QLSC1_Approve']), getValue(row, ['QLSC1_Time']), getValue(row, ['UserNext']), 6, step)}
+                    ${approvalCell(getValue(row, ['PIC_PickNCC']), getValue(row, ['PIC_PickNCC_Time']), getValue(row, ['UserNext']), 7, step)}
+                    ${approvalCell(getValue(row, ['QLSC_PickNCC']), getValue(row, ['QLSC_PickNCC_Time']), getValue(row, ['UserNext']), 10, step)}
+                    ${approvalCell(getValue(row, ['QLTC_PickNCC']), getValue(row, ['QLTC_PickNCC_Time']), getValue(row, ['UserNext']), 11, step)}
+                    ${approvalCell(getValue(row, ['DEFT_PickNCC']), getValue(row, ['DEFT_PickNCC_Time']), getValue(row, ['UserNext']), 12, step)}
                     <td>${escapeHtml(getValue(row, ['NCC_DuocChon']))}</td>
                     <td>${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
-                    <td>${escapeHtml(getValue(row, ['NVCHR_File']))}</td>
+                    <td class="text-center">
+                        ${
+                        getValue(row, ['NVCHR_File'])
+                                ? `<button class="btn btn-outline-primary btn-sm btn-download"
+                                data-file="${escapeHtml(getValue(row, ['NVCHR_File']))}">
+                            <i class="fas fa-download"></i>
+                        </button>`
+                                : ''
+                        }
+                    </td>
                     <td>${escapeHtml(getValue(row, [stepName]))}</td>
                     <td>
                         <div class="action-buttons" role="group" aria-label="${escapeHtml(window.i18nHistoryQuote?.Actions || 'Actions')}">
@@ -1069,7 +1121,51 @@
 
         tblBody.innerHTML = html.join('');
     }
+    // tải file xuống
+    document.addEventListener('click', async function (e) {
+        const btn = e.target.closest('.btn-download');
+        if (!btn) return;
 
+        const file = btn.dataset.file;
+        if (!file) {
+            alert("Không có file");
+            return;
+        }
+
+        try {
+            const response = await fetch(apiUrl('/History/DownloadQuoteFile'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(file)
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(errText || "Download thất bại");
+            }
+
+            const blob = await response.blob();
+
+            // tạo link download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            // lấy tên file từ path
+            a.download = file.split('/').pop() || 'download';
+            document.body.appendChild(a);
+            a.click();
+
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+        } catch (err) {
+            console.error(err);
+            alert("Lỗi khi tải file: " + err.message);
+        }
+    });
     function renderSummaryCountQuotation(result) {
         const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
         document.getElementById('statDueSoon').textContent = getValue(row, ['DenHanLuaChon', 'denHanLuaChon'], 0);
