@@ -181,9 +181,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
                 REQUEST_PROCESS._sendmail(body, model.mail_dt, subject);
-            } 
-           
-
+            }          
             return Json("OK");
         }
         public double USD(double NT, double dongia)
@@ -958,7 +956,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             if (khoi == "GA")
             {
-                _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '5', CONFIRM_QLTC = 0 where ID_REQUEST = '" + id_rq + "'");
+                _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '5' where ID_REQUEST = '" + id_rq + "'");
             }
             if (khoi == "PROD")
             {

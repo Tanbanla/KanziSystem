@@ -345,8 +345,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         GetStepName(rq.ID_StepBaoGia),
                         GetReason(rq.ID, rq.ID_Status),
                         selectMark,
-                        isSelected ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
-                        isSelected ? rq.NVCHR_File ?? string.Empty : string.Empty
+                        rq.NVCHR_ReasonPick ?? string.Empty,
+                        rq.NVCHR_File ?? string.Empty
                     });
                 }
 

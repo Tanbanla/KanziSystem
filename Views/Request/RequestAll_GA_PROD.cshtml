@@ -234,10 +234,10 @@
                 if (data && data.length > 0) {
                     console.log(data);
                     $.each(data, function (index, item) {
-                         var reset_don = "";
-                        if(item.Status == "DONE" ){
-
-                             reset_don = `<button class="btn btn-danger" ><i class=" fa fa-reply text-white" style="cursor:pointer" onclick="_resetdon('${item.Code_Request}')" ></i> Reset đơn</button>`;
+                         var resetdon = "";
+                        if(item.Status == "DONE" )
+                        {
+                             resetdon = `<button class="btn btn-info" onclick="_resetdon('${item.Code_Request}')" ><i class=" fa fa-reply text-white" style="cursor:pointer"  ></i> Reset đơn</button>`;
                         }
                         var domau = "";
                         if(parseFloat(item.INT_STEP) <= 6)

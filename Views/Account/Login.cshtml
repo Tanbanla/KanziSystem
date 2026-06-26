@@ -20,7 +20,7 @@
     <div class="language-selector position-absolute top-0 end-0 p-3">
         <form method="post" asp-action="SetCulture" asp-controller="Account" id="cultureForm" class="d-flex align-items-center">
             <i class="fas fa-globe text-muted me-2"></i>
-            <input type="hidden" name="returnUrl" value="/Account/Login" />
+            <input type="hidden" name="returnUrl" value="@Context.Request.PathBase/Account/Login"/>
             <select name="culture" class="form-select form-select-sm border-0 bg-transparent" onchange="this.form.submit()" style="width: auto; min-width: 120px;">
                 <option value="vi" selected="@(System.Globalization.CultureInfo.CurrentCulture.Name.StartsWith("vi"))">Tiếng Việt</option>
                 <option value="en" selected="@(System.Globalization.CultureInfo.CurrentCulture.Name.StartsWith("en"))">English</option>

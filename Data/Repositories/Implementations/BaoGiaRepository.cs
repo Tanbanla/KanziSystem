@@ -577,14 +577,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 	             st.NVCHR_TenStatus  as status
              FROM BaoGia_Request_of_Quotation r
              LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-             LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
              LEFT JOIN BaoGia_Status st on r.ID_Status = st.VCHR_CodeStatus
              WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1 ");
 
             var parameters = new DynamicParameters();
             if (!string.IsNullOrEmpty(user))
             {
-                sql.Append(" AND s.CHR_UserAdid= @User");
+                sql.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @User)");
                 parameters.Add("User", user);
             }
             if (!string.IsNullOrEmpty(maDon))
@@ -642,11 +641,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var countSql = new StringBuilder(@"
             SELECT COUNT(r.id)
                 FROM BaoGia_Request_of_Quotation r
-                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
                 WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1");
             if (!string.IsNullOrEmpty(user))
             {
-                countSql.Append(" AND s.CHR_UserAdid= @User");
+                countSql.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @User)");
             }
             if (!string.IsNullOrEmpty(maDon))
             {

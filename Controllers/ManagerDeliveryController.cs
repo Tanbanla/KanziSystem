@@ -40,17 +40,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? DNncc { get; set; }
         public string? ngaynccxngiao { get; set; }
         public string? lichgiao { get; set; }
-      
         public string? anhuongsx { get; set; }
         public string? trangthai { get; set; }
+        public string? Danhmuc { get; set; }
     }
     public class ManagerDeliveryController : Controller
     {
         private readonly string _connectionString = "data source=apbivndb14;initial catalog=COST_MANAGEMENT;user id=Kanzaisystem;password=Kanzaisystem;";
         public async Task<IActionResult> ManageDelivery()
         {
-            string sql = $@"SELECT TOP (500) b.[PO_Detail_Id], a.Ngayphathanh, a.
-            from IM_PO as a left join IM_PO_DETAIL as b on a.SoPO = b.SoPO where Ngayphathanh >= '{DateTime.Now.ToString("yyyy-MM-01")}' order by Ngayphathanh desc";
+            string sql = $@"SELECT a FROM [COST_MANAGEMENT].[dbo].[PO] as a left join REQUEST as b on a.Code_Request = b.Code_Request where Ngayphathanh >= '{DateTime.Now.ToString("yyyy-MM-01")}' order by Ngayphathanh desc";
 
             using (var connection = new SqlConnection(_connectionString))
             {

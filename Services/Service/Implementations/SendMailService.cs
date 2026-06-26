@@ -21,7 +21,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         private readonly ISendMailRepository _repo;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
-        private const string mailPICTo = "bivn-gagpur@brother-bivn.com.vn";//"bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-gagpur@brother-bivn.com.vn";//
+        private const string mailPICTo = "bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-gagpur@brother-bivn.com.vn";//
         public SendMailService(ISendMailRepository repository, IMapper mapper, IConfiguration configuration) : base(repository, mapper)
         {
             _repo = repository;
@@ -46,7 +46,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
            string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
            string body = string.Format(mail.CHR_BODY, urlMail+url, gapText, section, idRequest,user);
 
-           bool sendResult = await EmailSender.sendEmailNotifyAsync(
+           bool sendResult = EmailSender.sendEmailNotify(
                mail.CHR_SUBJECT,
                mail.CHR_FROM,
                toEmail,
@@ -984,7 +984,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
             string body = string.Format(mailTemplate.CHR_BODY ?? "", urlMail+"ApprovalQuote/Index", gapText, sectionName, requestCode);
             // Gửi mail
-            bool sendResult = await EmailSender.sendEmailNotifyAsync(
+            bool sendResult = EmailSender.sendEmailNotify(
                 mailTemplate.CHR_SUBJECT ?? "",
                 mailTemplate.CHR_FROM ?? "",
                 requesterEmail,
@@ -1030,7 +1030,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 // Chuẩn bị nội dung mail với các tham số
                 string body = string.Format(mailTemplate.CHR_BODY ?? "", link, gapText, sectionName, sectionCode, user);
                 // Gửi mail
-                bool sendResult = await EmailSender.sendEmailNotifyAsync(
+                bool sendResult = EmailSender.sendEmailNotify(
                     mailTemplate.CHR_SUBJECT ?? "",
                     mailTemplate.CHR_FROM ?? "",
                     requesterEmail,

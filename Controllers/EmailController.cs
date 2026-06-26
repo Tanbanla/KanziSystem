@@ -17,15 +17,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             _sendMailService = sendMailService;
         }
-
         [HttpPost("send")]
         [AllowAnonymous]
-        public async Task<IActionResult> Send([FromBody] EmailRequest req)
+        public IActionResult Send([FromBody] EmailRequest req)
         {
             if (req is null) return BadRequest(new { success = false, message = "request body required" });
             if (string.IsNullOrWhiteSpace(req.MailFrom)) return BadRequest(new { success = false, message = "mailFrom required" });
 
-            bool ok = await EmailSender.sendEmailNotifyAsync(
+            bool ok = EmailSender.sendEmailNotify(
                 req.Title ?? string.Empty,
                 req.MailFrom,
                 req.MailTo ?? string.Empty,
@@ -37,13 +36,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (ok) return Ok(new { success = true });
             return StatusCode(500, new { success = false, message = "failed to send email" });
         }
-
         [HttpGet]
         [HttpGet("SendMailSupplier")]
         [AllowAnonymous]
         public async Task<IActionResult> SendMailSupplier()
         {
-            var res = await _sendMailService.SendMailToSupplierAsync();
+            var res = await _sendMailService.SendMailToSupplierAsync();//_sendMailService.SendMailToSupplierOrDerByCategoryAsync();//
             if (!res.Success)
             {
                 return StatusCode(500, new { success = false, message = res.Message });

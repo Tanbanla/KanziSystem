@@ -162,20 +162,20 @@
                                     </a>
                                 </li>
                                 <li>
-@*                                     @if (User.FindFirst("Roles")?.Value == "UserPUR")
-                                    { *@
+                                    @if (User.FindFirst("Roles")?.Value == "UserPUR")
+                                    {
                                         <a class="dropdown-item py-2" href="~/History/Index">
                                             <i class="fas fa-history me-2"></i>
                                             <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                         </a>
-@*                                     }
+                                    }
                                     else
                                     {
                                         <a class="dropdown-item py-2" href="~/History/HistoryQuote">
                                             <i class="fas fa-history me-2"></i>
                                             <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                         </a>
-                                    } *@
+                                    }
                                     
                                 </li>
                             </ul>
@@ -183,9 +183,14 @@
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Material" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-social-dropbox"></i> <span>@Localizer["MenuMaterial"]</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
-                                <li><a class="nav-link" href="~/Material/Creat_Material"><i class="fas fa-plus-square"></i> @Localizer["MenuMaterialCreate"]</a></li>
-                                <li><a class="nav-link" href="~/Material/ConfirmName"><i class="fas fa-check-square"></i> @Localizer["MenuMaterialConfirmName"]</a></li>
+@*                                 <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
+                                <li><a class="nav-link" href="~/Material/Creat_Material"><i class="fas fa-plus-square"></i> @Localizer["MenuMaterialCreate"]</a></li> *@
+                               <li>
+                                    <a class="dropdown-item py-2" href="~/Material/ConfirmName">
+                                        <i class="fas fa-check-square"></i>
+                                        <span class="small">@Localizer["MenuMaterialConfirmName"]</span>
+                                    </a>
+                               </li>
                             </ul>
                         </li>
 
@@ -220,8 +225,9 @@
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cog"></i> <span>@Localizer["MenuMaster"]</span></a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item py-2" href="~/Master/Masters"><i class="ion ion-ios-home"></i> @Localizer["MenuMasterWarehouse"]</a></li>
-                                <li><a class="dropdown-item py-2" href="~/Master/master_vender"><i class="ion ion-social-snapchat"></i> @Localizer["MenuMasterVendor"]</a></li>
-                                <li><a class="dropdown-item py-2" href="~/Master/master_material"><i class="ion ion-android-options"></i> @Localizer["MenuMasterMaterial"]</a></li>
+@*                                 <li><a class="dropdown-item py-2" href="~/Master/master_vender"><i class="ion ion-social-snapchat"></i> @Localizer["MenuMasterVendor"]</a></li> *@
+@*                                 <li><a class="dropdown-item py-2" href="~/Master/master_material"><i class="ion ion-android-options"></i> @Localizer["MenuMasterMaterial"]</a></li> *@
+                                <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/User/QuanlyUyquyen"><i class="fas fa-handshake"></i> @Languages.uyquyen</a></li>
                                 @if (User.FindFirst("Roles")?.Value == "UserPUR")
                                 {

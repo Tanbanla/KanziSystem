@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Agent
 {
@@ -13,7 +13,6 @@ namespace PRJ_WAREHOUSE_BIVN.Models_Agent
         {
         }
         public DbSet<TM_EMPLOYEE> TM_EMPLOYEE { get; set; } = null!;
-        public DbSet<TM_MASTER_MAIL_KEY> TM_MASTER_MAIL_KEYs { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

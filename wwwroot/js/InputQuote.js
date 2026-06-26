@@ -740,14 +740,14 @@
             // 21 - Attachment
             row.appendChild(td(item.NVCHR_File || ''));
 
-            // 22 - DTM_EffectiveDate
-            row.appendChild(td(formatDate(item.DTM_EffectiveDate) || ''));
-
-            // 23 - DTM_ExpiryDate
-            row.appendChild(td(formatDate(item.DTM_ExpiryDate) || ''));
-
-            // 24 - Input time
+            // 22 - Input time
             row.appendChild(td(formatDate(item.DTM_UpdateDate) || ''));
+
+            // 23 - DTM_EffectiveDate
+            row.appendChild(td(formatDateNotTime(item.DTM_EffectiveDate) || ''));
+
+            // 24 - DTM_ExpiryDate
+            row.appendChild(td(formatDateNotTime(item.DTM_ExpiryDate) || ''));
 
             tbody.appendChild(row);
         });
@@ -817,6 +817,14 @@
         if (isNaN(dt.getTime())) return '';
         const pad = n => n.toString().padStart(2, '0');
         return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()} - ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    }
+    function formatDateNotTime(d) {
+        if (window.cmMomentFormat) { return window.cmMomentFormat(d); }
+        if (!d) return '';
+        const dt = new Date(d);
+        if (isNaN(dt.getTime())) return '';
+        const pad = n => n.toString().padStart(2, '0');
+        return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()}`;
     }
     // Initialize
     function init() {
