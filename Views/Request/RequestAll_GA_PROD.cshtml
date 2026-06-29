@@ -162,7 +162,8 @@
         var loaicp = document.getElementById("loaicp").value;
 
         $.ajax({
-            url: '/ipcs/Request/view_rqall_GA_PROD', // Thay YourControllerName bằng tên Controller của bạn
+            url: '/ipcs/Request/view_rqall_GA_PROD', 
+           // url: '/Request/view_rqall_GA_PROD', 
             type: 'GET',
             data: {
                 StartDate: Request_Date,
@@ -186,8 +187,7 @@
                         if(item.Status == "DONE" ){
                              resetdon = `<button class="btn btn-info" onclick="_resetdon('${item.Code_Request}')" ><i class=" fa fa-reply text-white" style="cursor:pointer"  ></i> Reset đơn</button>`;
                         }
-
-                        domau = "text-secondary";
+                        var domau = "text-secondary";
                         if(parseFloat(item.INT_STEP) <= 4 && item.Group_Code == "PROD" )
                         {
                             domau = "text-danger";
@@ -291,7 +291,6 @@
         return date.toLocaleDateString('vi-VN');
     }
 
-    // Hàm bổ trợ lấy tên trạng thái
     function getStatusName(status) {
         var statuses = {
                 "0": "Đợi người dự thảo",
@@ -437,6 +436,7 @@
                 params.append('mayeucau', code_request);
 
                 fetch('/ipcs/Request/resetdon', {
+                //fetch('/Request/resetdon', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

@@ -129,7 +129,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var dto1 = new BaoGia_Detail_of_QuotationDTO
                             {
                                 ID = idRequestQuote1,
-                                CHR_MaHangNCC = ws.Cell(r, 10).GetString(),
+                                CHR_MaHangNCC = ws.Cell(r, 11).GetString(),
                                 NVCHR_TenHangHQ = ws.Cell(r, 12).GetString(),
                                 CHR_NameEN = ws.Cell(r, 13).GetString(),
                                 INT_SoLuong = (int?)ConvertHelper.ParseDouble(ws.Cell(r, 14).GetString()),

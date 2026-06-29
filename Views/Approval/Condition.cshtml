@@ -238,6 +238,7 @@ function _load_request_condition() {
         params.append('loaicp', loaicp);
 
         fetch('/ipcs/Request/get_requestcondition', {
+        //fetch('/Request/get_requestcondition', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -309,6 +310,7 @@ function _load_request_condition() {
                         quyen = `<td  title="Xóa đơn" ><i class="fa fa-trash text-danger" onclick="xoa_don_prod('${item.iD_REQUEST}')"/></i> </td>
                                 <td title="Sửa đơn" >${suadon}</td>
                                 <td title="Hủy đơn" >${huydon}</td>`;
+                                //<td><a href="/Request/SuDungLai?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
                     }
             return `
                     <tr>
@@ -372,6 +374,7 @@ async function _load_request_condition_ga() {
     });
 
         fetch('/ipcs/Request/get_requestcondition_ga', {
+        //fetch('/Request/get_requestcondition_ga', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString()

@@ -558,7 +558,6 @@ async function chuyenkhoo() {
                 _load_xuatkho();
             })
             .catch(error => console.error('Error:', error));
-
     }
 }
    

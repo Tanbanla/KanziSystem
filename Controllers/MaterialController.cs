@@ -41,10 +41,61 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _deparmentService = deparmentService;
             _configuration = configuration;
         }
-        // MARK: Confirm Name actions use EF context directly
+        // MARK: Quản lý linh kiện
         public IActionResult Material()
         {
             return View();
+        }
+        // Search thông tin màn hình quản lý
+        [HttpPost]
+        public async Task<IActionResult> SearchMaterialView([FromBody] SearchMaterialVM search)
+        {
+            if(search == null)
+            {
+                return BadRequest("Invalid search parameters.");
+            }
+            try
+            {
+                var result = await _materialService.SearchDateByMaterialViewAsync(search);
+                if(!result.Success)
+                {
+                    return BadRequest("Bug: "+result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error searching material view.");
+                return StatusCode(500, "Internal server error. Bug: "+ex.Message);
+            }
+        }
+        // Xuất file excel Material View
+        [HttpPost]
+        public async Task<IActionResult> ExportMaterialViewToExcel([FromBody] SearchMaterialVM search)
+        {
+            if (search == null)
+            {
+                return BadRequest("Invalid search parameters.");
+            }
+            try
+            {
+                var result = await _materialService.ExportMaterialViewToExcelAsync(search);
+                if (!result.Success)
+                {
+                    return BadRequest("Bug: " + result.Message);
+                }
+                var fileContent = result.Data;
+                return File(
+                    fileContent.OpenReadStream(),
+                    fileContent.ContentType ?? "application/octet-stream",
+                    fileContent.FileName
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting material view to Excel.");
+                return StatusCode(500, "Internal server error. Bug: " + ex.Message);
+            }
         }
         public IActionResult Creat_Material()
         {

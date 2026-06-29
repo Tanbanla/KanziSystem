@@ -157,7 +157,7 @@
                         <input id="mstFile" accept=".xlsx" type="file" class="form-control" />
                     </div>
                     <div class="form-group col-md-1">
-                        <label for="inputCity"><a href="/Import/ExportToExcel"> File mẫu excel </a></label> <code style="float:right"><b></b></code>
+                        <label for="inputCity"><a href="/ipcs/Import/ExportToExcel"> File mẫu excel </a></label> <code style="float:right"><b></b></code>
                         <button id="btnUpload" onclick="UploadFileFormat()" type="button" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Import file</button>
                     </div>                  
                 </div>
@@ -249,7 +249,7 @@
 
         //initSelect2($('.select2'));
     }
-        function check_mucdichkhac() { 
+       function check_mucdichkhac() { 
         // mặc định là chi phí cố định
         if(document.getElementById("group_code").value == "GA"){
           
@@ -336,7 +336,7 @@
             uncheck_mucdichkhac();
         }
     }   
-        function updateRowNumbers() {
+       function updateRowNumbers() {
         const rows = document.querySelectorAll('#dynamic-table tbody tr');
         rows.forEach((row, index) => {
             const i = index + 1; // Số thứ tự mới

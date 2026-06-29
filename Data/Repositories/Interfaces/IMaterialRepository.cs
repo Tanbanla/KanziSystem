@@ -1,6 +1,7 @@
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using static PRJ_WAREHOUSE_BIVN.View_Models.Material.MaterialVM;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -27,5 +28,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<string> MaterialCodeLater(string type);
         // check ma hang
         public Task<string> CheckMaterialCode(string keyword, string category);
+        // Search date by Material View
+        Task<ListRequest<MATERIAL>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
     }
 }

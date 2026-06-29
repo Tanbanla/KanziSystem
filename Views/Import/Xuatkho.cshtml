@@ -155,7 +155,7 @@
         }
 
         if (confirm(`Bạn có chắc chắn muốn reset đơn ${maYeuCau} không?`)) {
-            fetch('/ipcs/Warehouse/ResetDon', {
+            fetch('/Warehouse/ResetDon', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

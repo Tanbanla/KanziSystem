@@ -1,18 +1,23 @@
 using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using System.Collections.Generic;
+using static PRJ_WAREHOUSE_BIVN.View_Models.Material.MaterialVM;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
     public class MaterialService: BaseService<MATERIAL, int, MATERIALDTO>, IMaterialService
     {
         private readonly IMaterialRepository _repo;
-        public MaterialService(IMaterialRepository repository, IMapper mapper): base(repository, mapper)
+        private readonly IWebHostEnvironment _env;
+        public MaterialService(IMaterialRepository repository, IMapper mapper, IWebHostEnvironment env): base(repository, mapper)
         {
             _repo = repository;
+            _env = env;
         }
         // Lấy theo mã hàng
         public async Task<GenericResponse<MATERIALDTO>> GetByMaHangAsync(string maHang)
@@ -202,6 +207,120 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = false;
             }
             return result;
+        }
+        // Search date by Material View
+        public async Task<GenericResponse<ListRequest<MATERIAL>>> SearchDateByMaterialViewAsync(SearchMaterialVM search)
+        {
+            var result = new GenericResponse<ListRequest<MATERIAL>>();
+            try
+            {
+                var materials = await _repo.SearchDateByMaterialViewAsync(search);
+                result.Data = materials;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Export danh sách linh kiện
+        public async Task<GenericResponse<IFormFile>> ExportMaterialViewToExcelAsync(SearchMaterialVM search)
+        {
+            var result = new GenericResponse<IFormFile>();
+            try
+            {
+                var dataAsync = await _repo.SearchDateByMaterialViewAsync(search);
+                var materials = dataAsync.Data;
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "MaterialMaster.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    result.Success = false;
+                    result.Message = "Không tìm thấy file template";
+                    return result;
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    result.Success = false;
+                    result.Message = "Không tìm thấy worksheet trong template";
+                    return result;
+                }
+                int startRow = 3;
+                foreach(var m in materials)
+                {
+
+                    ws.Cell(startRow, 1).Value = GetLoaiHang(m.Material_Code);
+                    ws.Cell(startRow, 2).Value = m.Material_Code;
+                    ws.Cell(startRow, 3).Value = m.Code_Suppiler;
+                    ws.Cell(startRow, 4).Value = m.Material_Name_VN;
+                    ws.Cell(startRow, 5).Value = m.Material_Name_EN;
+                    ws.Cell(startRow, 7).Value = m.Category_VN;
+                    ws.Cell(startRow, 8).Value = m.Group_Code;
+                    ws.Cell(startRow, 9).Value = m.Shape;
+                    ws.Cell(startRow, 10).Value = m.Material1;
+                    ws.Cell(startRow, 11).Value = m.Composition;
+                    ws.Cell(startRow, 12).Value = m.Dimension;
+                    ws.Cell(startRow, 13).Value = m.UsedFor;
+                    ws.Cell(startRow, 14).Value = m.Purpose;
+
+                    startRow++;
+                }
+
+                ws.Columns().AdjustToContents();
+
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                stream.Position = 0;
+
+
+                var fileName = $"Material_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+
+                IFormFile file = new FormFile(stream, 0, stream.Length, "file", fileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                };
+
+                result.Success = true;
+                result.Data = file;
+                result.Message = "Xuất Excel thành công";
+
+
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return  result;
+        }
+        private string? GetLoaiHang(string materialCode)
+        {
+            if (string.IsNullOrEmpty(materialCode))
+                return null;
+            switch (materialCode.Substring(0, 1))
+            {
+                case "A":
+                    return "A";
+                case "B":
+                    return "B";
+                case "C":
+                    return "C";
+                case "E":
+                    return "E";
+                case "I":
+                    return "I";
+                default:
+                    return "NO LIST";
+            }
         }
     }
 }

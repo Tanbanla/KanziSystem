@@ -1964,11 +1964,12 @@ a.dropdown-item {
   --dark: color(dark); }
 
 body {
-  background-color: #fafdfb;
-  font-size: 14px;
-  font-weight: 400;
-  font-family: 'Times New Roman';
-  color: #313131; }
+    background-color: #fafdfb;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: 'Times New Roman'; /* 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;*/
+    color: #313131;
+}
 
 a.bb {
   text-decoration: none;

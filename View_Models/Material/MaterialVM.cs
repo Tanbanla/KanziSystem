@@ -73,5 +73,15 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Material
             public string? GroupCode { get; set; }
             public string? GoodKind { get; set; }
         }
+        // search material view
+        public class SearchMaterialVM
+        {
+            public string? MaterialCode { get; set; }
+            public string? MaterialName { get; set; }
+            public string? MaterialCatergory { get; set; }
+            public string? MaterialGroup { get; set; }
+            public int? pageIndex { get; set; } = 1;
+            public int? pageSize { get; set; } = 50;
+        }
     }
 }

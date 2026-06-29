@@ -721,7 +721,8 @@
 
          // 4. Gọi API xử lý nghiệp vụ
          if (confirm("Bạn có chắc chắn muốn nhập số hàng đặc biệt này vào hệ thống?")) {
-                fetch('/ipcs/Import/NhapKhoDacBiet', {
+                 fetch('/ipcs/Import/NhapKhoDacBiet', {
+                 //fetch('/Import/NhapKhoDacBiet', {
                  method: 'POST',
                  headers: {
                      'Content-Type': 'application/json'

@@ -1,11 +1,15 @@
 using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Text;
+using static PRJ_WAREHOUSE_BIVN.View_Models.Material.MaterialVM;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -25,48 +29,66 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result;
         }
         // Tim kiem thong tin hang hoa va phan trang
-        public async Task<List<MATERIAL>> SearchAsync(string? MaHang, string? Name, string? NhomHang, int? pageIndex, int? pageSize)
+        public async Task<List<MATERIAL>> SearchAsync(
+            string? MaHang,
+            string? Name,
+            string? NhomHang,
+            int? pageIndex,
+            int? pageSize)
         {
-            var sql = "SELECT * FROM MATERIAL WHERE 1=1";
-            var parameters = new Dapper.DynamicParameters();
+            var sql = new StringBuilder("SELECT * FROM MATERIAL");
+            var where = new List<string>();
+            var parameters = new DynamicParameters();
 
-            // Filter by code
+            // ===== FILTER =====
             if (!string.IsNullOrWhiteSpace(MaHang))
             {
-                sql += " AND Material_Code LIKE '%' + @MaterialCode + '%'";
+                where.Add("Material_Code LIKE '%' + @MaterialCode + '%'");
                 parameters.Add("MaterialCode", MaHang);
             }
 
-            // Filter by name (search across multiple name columns)
             if (!string.IsNullOrWhiteSpace(Name))
             {
-                sql += " OR (Material_Name_VN LIKE '%' + @MaterialName + '%' OR Material_Name_EN LIKE '%' + @MaterialName + '%' OR Material_Name_JP LIKE '%' + @MaterialName + '%')";
+                where.Add(@"(
+                    Material_Name_VN LIKE '%' + @MaterialName + '%' 
+                    OR Material_Name_EN LIKE '%' + @MaterialName + '%' 
+                    OR Material_Name_JP LIKE '%' + @MaterialName + '%'
+                )");
                 parameters.Add("MaterialName", Name);
             }
 
-            // Filter by category/type
             if (!string.IsNullOrWhiteSpace(NhomHang))
             {
-                sql += " AND (Category_VN LIKE @MaterialType + '%' OR Category_EN LIKE '%' + @MaterialType + '%' OR Category_JP LIKE '%' + @MaterialType + '%')";
+                where.Add(@"(
+                    Category_VN LIKE '%' + @MaterialType + '%' 
+                    OR Category_EN LIKE '%' + @MaterialType + '%' 
+                    OR Category_JP LIKE '%' + @MaterialType + '%'
+                )");
                 parameters.Add("MaterialType", NhomHang);
             }
 
-            // Pagination
+            if (where.Any())
+            {
+                sql.Append(" WHERE " + string.Join(" AND ", where));
+            }
+
             if (pageSize.HasValue && pageSize.Value > 0)
             {
                 var page = pageIndex.GetValueOrDefault(1);
                 var offset = (page - 1) * pageSize.Value;
-                sql += " ORDER BY Material_Code OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+                sql.Append(" ORDER BY Material_Code OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+
                 parameters.Add("Offset", offset);
                 parameters.Add("PageSize", pageSize.Value);
             }
             else
             {
-                sql += " ORDER BY Material_Code";
+                sql.Append(" ORDER BY Material_Code");
             }
-
-            return (await _conn.QueryAsync<MATERIAL>(sql, parameters)).ToList();
+            return (await _conn.QueryAsync<MATERIAL>(sql.ToString(), parameters)).ToList();
         }
+
         // Lay danh sach hang hoa theo ten hoac ma
         public async Task<List<MATERIAL>> GetMaterialsByNameOrCodeAsync(string keyword)
         {
@@ -210,6 +232,80 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
              .FirstOrDefaultAsync();
 
             return result ?? string.Empty;
+        }
+        // Search date by Material View
+        public async Task<ListRequest<MATERIAL>> SearchDateByMaterialViewAsync(SearchMaterialVM search)
+        {
+            var sql = new StringBuilder();
+            var where = new List<string>();
+            var parameters = new DynamicParameters();
+
+            sql.Append("SELECT * FROM MATERIAL");
+
+            // ===== FILTER =====
+            if (!string.IsNullOrWhiteSpace(search.MaterialCode))
+            {
+                where.Add("Material_Code LIKE '%' + @MaterialCode + '%'");
+                parameters.Add("MaterialCode", search.MaterialCode);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search.MaterialName))
+            {
+                where.Add(@"(
+                    Material_Name_VN LIKE '%' + @MaterialName + '%' 
+                    OR Material_Name_EN LIKE '%' + @MaterialName + '%' 
+                    OR Material_Name_JP LIKE '%' + @MaterialName + '%'
+                )");
+                parameters.Add("MaterialName", search.MaterialName);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search.MaterialCatergory))
+            {
+                where.Add(@"(
+                    Category_VN LIKE '%' + @MaterialType + '%'
+                    OR Category_EN LIKE '%' + @MaterialType + '%'
+                    OR Category_JP LIKE '%' + @MaterialType + '%'
+                )");
+                parameters.Add("MaterialType", search.MaterialCatergory);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search.MaterialGroup))
+            {
+                where.Add("Group_Code = @MaterialGroup");
+                parameters.Add("MaterialGroup", search.MaterialGroup);
+            }
+
+            if (where.Any())
+            {
+                sql.Append(" WHERE " + string.Join(" AND ", where));
+            }
+
+            var countSql = $"SELECT COUNT(1) FROM MATERIAL {(where.Any() ? "WHERE " + string.Join(" AND ", where) : "")}";
+            var totalCount = await _conn.ExecuteScalarAsync<int>(countSql, parameters);
+
+
+            if (search.pageSize.HasValue && search.pageSize.Value > 0)
+            {
+                var page = search.pageIndex.GetValueOrDefault(1);
+                var offset = (page - 1) * search.pageSize.Value;
+
+                sql.Append(" ORDER BY Material_Code OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+
+                parameters.Add("Offset", offset);
+                parameters.Add("PageSize", search.pageSize.Value);
+            }
+            else
+            {
+                sql.Append(" ORDER BY Material_Code");
+            }
+
+            var data = (await _conn.QueryAsync<MATERIAL>(sql.ToString(), parameters)).ToList();
+
+            return new ListRequest<MATERIAL>
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
         }
     }
 }

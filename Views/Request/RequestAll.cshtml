@@ -33,10 +33,13 @@
                                 <td>
                                     <select class="form-control" id="tinhtrangdon">
                                         <option value=""> ---  Chọn ---</option>
-                                        <option value="WAITCONFIRM">Đang chờ xác nhận</option>
-                                        <option value="REFUSE">Hủy bỏ</option>
-                                        <option value="DONE">	Hoàn thành</option>
-                                    
+                                        <option value="0">Đợi người dự thảo</option>
+                                        <option value="1">Đợi người thẩm tra</option>
+                                        <option value="2">Đợi người phê duyệt</option>
+                                        <option value="3">Đợi quản lý phòng tiếp nhận</option>
+                                        <option value="4">Đợi người xuất kho</option>
+                                        <option value="5">Hoàn thành</option>
+                                        <option value="6">Bị từ chối</option>
                                     </select>
                                 </td>
                                 <td width="125">
@@ -162,7 +165,7 @@
         var loaicp = document.getElementById("loaicp").value;
         
         $.ajax({
-            url: '/ipcs/Request/view_rqall', // Thay YourControllerName bằng tên Controller của bạn
+            url: '/ipcs/Request/view_rqall',           
             type: 'GET',
             data: {
                 StartDate: Request_Date,

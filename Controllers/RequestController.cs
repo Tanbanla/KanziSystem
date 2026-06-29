@@ -855,6 +855,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 bang = "PE_REQUEST_CONFIRM_GA";
             }
+            var trangthai = $"";
+            if (!string.IsNullOrEmpty(Tinhtrang))
+            {
+                trangthai = $" AND [INT_STEP] = '{Tinhtrang}'";
+            }
             string sql = $@"SELECT TOP (300) {Truongdulieu} FROM REQUEST  left join {bang} on REQUEST.Id_Request = {bang}.ID_REQUEST
                     WHERE Request_Date like '%{StartDate}%' 
                     AND Dealine like '%{EndDate}%'
@@ -862,7 +867,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     AND Urgent like N'%%'
 	                AND Group_Code like N'%{Group_Code}%'
 					AND Declaration like N'%{loaicp}%'
-                    AND [Status] like N'%{Tinhtrang}%'
+                    {trangthai}
 					AND Code_Request like N'%{Code_Request}%'
 					AND Cost_Center like N'%{Cost_Center}%'
                     {gia}
@@ -891,9 +896,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // 1. Lấy dữ liệu chính
             var Truongdulieu = "REQUEST.[Id_Request],[Code_Request],[Group_Code],[Cost_Center],[Request_Date],[Declaration],[Dealine],[Dealine_Real],[Total],[Total_Real],[Kind],[Type],[Status],[Create_Date],[User_Create],[Last_Update],[User_Update],[Reason],[Action],[Note] AS Chitiet,[Chophepin],[INT_STEP] ";
             string gia = "";
-            var chkk = _db.ReturnString("select Count(*) from [PE_USERNAME] where [Adid] = '" + us + "'");
-            if(chkk != "0")
+            var chkk = _db.GET_DATA_FROM_SQL("select * from [PE_USERNAME] where [Adid] = '" + us + "'");
+            if(chkk.Rows.Count > 0)
             {
+                string gc = chkk.Rows[0]["Group_Code"].ToString()!;
                 if (Total > 0 && Total < 3000)
                 {
                     gia = "and b.Total < '3000'";
@@ -907,22 +913,27 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     gia = "and b.Total >= '10000'";
                 }
                 string bang = "PE_REQUEST_CONFIRM";
-                if (Group_Code == "GA")
+
+                if (gc == "GA")
                 {
                     bang = "PE_REQUEST_CONFIRM_GA";
+                }
+                var trangthai = $"";
+                if (!string.IsNullOrEmpty(Tinhtrang))
+                {
+                    trangthai = $" AND [INT_STEP] = '{Tinhtrang}'";
                 }
                 string sql = $@"SELECT TOP (300) {Truongdulieu} FROM REQUEST  left join {bang} on REQUEST.Id_Request = {bang}.ID_REQUEST
                     WHERE Request_Date like '%{StartDate}%' 
                     AND Dealine like '%{EndDate}%'
                     AND KIND = 'IN'
                     AND Urgent like N'%%'
-	                AND Group_Code like N'%{Group_Code}%'
+	                AND Group_Code like N'%{gc}%'
 					AND Declaration like N'%{loaicp}%'
-                    AND [Status] like N'%{Tinhtrang}%'
+                    {trangthai}
 					AND Code_Request like N'%{Code_Request}%'
 					AND Cost_Center like N'%{Cost_Center}%'
                     {gia}
-                    AND Group_Code like N'%{Group_Code}%'
                     ORDER BY [Id_Request] DESC";
 
                 DataTable dataTable = _db.GET_DATA_FROM_SQL(sql);
@@ -952,13 +963,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var id_rq = _db.ReturnString("select Id_Request from REQUEST where Code_Request = '" + mayeucau + "'");
             //update trạng thái đơn request
             _db.GET_DATA_FROM_SQL("update [REQUEST_DETAIL] set Status = '' where Code_Request = '" + mayeucau + "'");
+
             _db.GET_DATA_FROM_SQL("update REQUEST set Status = 'WAITCONFIRM' where Code_Request = '" + mayeucau + "'");
 
-            if (khoi == "GA")
+            var get_khoi = _db.ReturnString("select Group_Code from REQUEST where Code_Request = '" + mayeucau + "'");
+
+            if (get_khoi == "GA")
             {
                 _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM_GA set INT_STEP = '5' where ID_REQUEST = '" + id_rq + "'");
             }
-            if (khoi == "PROD")
+            if (get_khoi == "PROD")
             {
                 _db.GET_DATA_FROM_SQL("update PE_REQUEST_CONFIRM set INT_STEP = '4' where ID_REQUEST = '" + id_rq + "'");
             }
@@ -982,6 +996,45 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var td = REQUEST_PROCESS._load_modal_tongdon(cost_request);
             return Json(td);
+        }
+        public ActionResult SuDungLai(string iD_REQUEST)
+        {
+            var model = GetListRequestDetail(iD_REQUEST); // Danh sách chi tiết (IEnumerable)
+            ViewBag.MasterData = iD_REQUEST;      // Thông tin tổng quát đơn hàng
+            return View(model);
+        }
+        public List<Models.REQUEST_DETAIL> GetListRequestDetail(string iD_REQUEST)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            //var request = db.GET_DATA_FROM_SQL("select * from DETAIL where Id_Request = '" + iD_REQUEST + "'");
+            //List<REQUEST> rq = new List<REQUEST>();
+
+            var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST_DETAIL] where Id_Request = '" + iD_REQUEST + "'");
+            var get_vitri = db.ReturnString("select Place from [REQUEST] where [Id_Request] = '" + iD_REQUEST + "'");
+
+            var get_phongban = db.ReturnString("select [Name] from DEPARTMENT as a left join REQUEST as b on a.Cost_Center = b.Cost_Center where b.Code_Request = '" + request_detail.Rows[0]["Code_Request"].ToString() + "'");
+
+            List<Models.REQUEST_DETAIL> rq_dt = new List<Models.REQUEST_DETAIL>();
+
+            for (int i = 0; i < request_detail.Rows.Count; i++)
+            {
+                rq_dt.Add(new Models.REQUEST_DETAIL
+                {
+                    Material_Name = request_detail.Rows[i]["Material_Code"].ToString() + ":" + request_detail.Rows[i]["Material_Name"].ToString(),
+                    Account_Code = request_detail.Rows[i]["Account_Code"].ToString() + ":" + request_detail.Rows[i]["Account_Name"].ToString(),
+                    Amount = float.Parse(request_detail.Rows[i]["Amount"].ToString()!),
+                    Unit = request_detail.Rows[i]["Unit"].ToString(),
+                    Price = float.Parse(request_detail.Rows[i]["Price"].ToString()!),
+                    Currency = request_detail.Rows[i]["Currency"].ToString(),
+                    Total_exchange = float.Parse(request_detail.Rows[i]["Total_exchange"].ToString()!),
+                    Aim = request_detail.Rows[i]["Aim"].ToString(),
+                    Phongchiuchiphi = request_detail.Rows[i]["Phongchiuchiphi"].ToString() + ":" + get_phongban.ToString(),
+                    Vitri = request_detail.Rows[i]["Vitri"].ToString(),
+                    Poisition = request_detail.Rows[i]["Poisition"].ToString(),
+                    Id_RequestDetail = int.Parse(request_detail.Rows[i]["Id_RequestDetail"].ToString()!)
+                });
+            }
+            return rq_dt;
         }
     }
 }

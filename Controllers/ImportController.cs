@@ -23,8 +23,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? ViTriRaw { get; set; } // Tương ứng cmbVitri.SelectedItem
         public DateTime NgayNhapKho { get; set; }
         public double SoLuongHienTaiTaiKhoChuyen { get; set; }
-    }
-  
+    }  
     public class ImportController : Controller
     {
         public IActionResult Import_material()
@@ -60,7 +59,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // lấy tên mã hàng hiển thị trong combobox
         public JsonResult _load_material(string group_code, string loaichiphi)
         {
-
             string mahang = "";
             if (loaichiphi == "AUXILIARY")
             {
@@ -714,10 +712,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 sql.GET_DATA_FROM_SQL("UPDATE KHO SET [Hientai] = [Hientai] + " + request.Soluong + " WHERE [MaNguyenLieu] =  N'" + request.MaNguyenLieu!.Trim() + "' AND [Kho] = '" + request.Kho + "' AND [Group_Code] = '" + request.Khoi + "'");
                 SoluongTruocthaydoi = Convert.ToDouble(Soluonghientai);
-            }
-           
-            DataTable Nguyenlieu = sql.Getdatatable("SELECT * FROM [MATERIAL] WHERE [Material_Code] = '" + request.MaNguyenLieu.Trim() + "' ", "Nl");
-            sql.GET_DATA_FROM_SQL("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[Donvi],[MaNguoinhap],[Gia],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + request.MaNguyenLieu.Trim().ToUpper() + "',N'Nhập hàng đặc biệt vào kho " + request.Kho + ", Ghi chú: " + request.GhiChu + "','" + Convert.ToDouble(request.Soluong.ToString()!.Trim()) + "','NHAP','" + request.NgayNhapKho + "','" + request.us + "','" + request.Kho + "','" + request.Khoi + "','" + Nguyenlieu.Rows[0]["Material_Name_JP"].ToString()!.Trim() + "','" + Nguyenlieu.Rows[0]["Unit"].ToString()!.Trim() + "','" + Manhanvien + "','0','" + request.NgayNhapKho.ToString("MM/dd/yyyy") + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(request.Soluong.ToString()!.Trim()) + SoluongTruocthaydoi) + "')");
+            }          
+            var Nguyenlieu = sql.GET_DATA_FROM_SQL("SELECT * FROM [MATERIAL] WHERE [Material_Code] = '" + request.MaNguyenLieu.Trim() + "' ");
+            sql.GET_DATA_FROM_SQL("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[Donvi],[MaNguoinhap],[Gia],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + request.MaNguyenLieu.Trim().ToUpper() + "',N'Nhập hàng đặc biệt vào kho " + request.Kho + ", Ghi chú: " + request.GhiChu + "','" + Convert.ToDouble(request.Soluong.ToString()!.Trim()) + "','NHAP','" + request.NgayNhapKho + "','" + request.us + "','" + request.Kho + "','" + request.Khoi + "',N'" + Nguyenlieu.Rows[0]["Material_Name_JP"].ToString()!.Trim() + "',N'" + Nguyenlieu.Rows[0]["Unit"].ToString()!.Trim() + "','" + Manhanvien + "','0','" + request.NgayNhapKho.ToString("MM/dd/yyyy") + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(request.Soluong.ToString()!.Trim()) + SoluongTruocthaydoi) + "')");
 
             return Json("OK");
         }
