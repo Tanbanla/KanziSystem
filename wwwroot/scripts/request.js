@@ -488,6 +488,8 @@ async function _load_confirm_GA() {
     formData.append('INT_STEP', INT_STEP);
 
     fetch('/ipcs/Request/_get_confirm_GA', {
+    //fetch('/Request/_get_confirm_GA', {
+   
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -561,6 +563,7 @@ function _modal_info(cost_request, step) {
 
     $.ajax({
         url: '/ipcs/Request/_get_request',
+        //url: '/Request/_get_request',
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -737,6 +740,8 @@ function _update_request_GA(id) {
     params.append('urgent', urgent);
 
     fetch('/ipcs/Request/_update_request_GA', {
+    //fetch('/Request/_update_request_GA', {
+   
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -774,6 +779,7 @@ function _update_request_GA_Slide(id) {
     params.append('urgent', urgent);
 
     fetch('/ipcs/Request/_update_request_GA', {
+ 
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

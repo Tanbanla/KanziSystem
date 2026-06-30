@@ -201,21 +201,32 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var check = REQUEST_PROCESS._xuatkho(code_request, adid_nx, nguoinhan, nguoixuatkho, thoigian, manguyenlieu, soluong, giathucte, donvi, kho, tongchiphi, vitri, phong, khoi, id_rq);
             return Json(check);
         }
-        public JsonResult _load_xuatkhohang(string us, string mayeucau, string nguoitao, string khoi)
+        public JsonResult _load_xuatkhohang(string us, string mayeucau, string nguoitao, string khoi, string thangnam)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             var chk = db.ReturnString($"select [Group_Code] from PE_USERNAME where Adid = '{us}'");
 
-
+            if (string.IsNullOrEmpty(thangnam))
+            {
+                thangnam = DateTime.Now.ToString("yyyy-M");
+            }
+            string thang = thangnam.Split('-')[1];
+            string nam = thangnam.Split('-')[0];
+          
+            if (thang.Length == 2)
+            {
+                thang = thang.Substring(1);
+            }
             if (chk == "GA")
             {
-                var list = Models.REQUEST_PROCESS_GA._load_tonkhoxuathang(mayeucau, nguoitao, khoi);
+                var list = Models.REQUEST_PROCESS_GA._load_tonkhoxuathang(mayeucau, nguoitao, khoi, thang, nam);
                 return Json(list);
             }
 
             if (chk == "PROD")
             {
-                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us, mayeucau, nguoitao, khoi);
+                
+                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us, mayeucau, nguoitao, khoi, thang, nam);
                 return Json(list);
             }
 
@@ -714,7 +725,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 SoluongTruocthaydoi = Convert.ToDouble(Soluonghientai);
             }          
             var Nguyenlieu = sql.GET_DATA_FROM_SQL("SELECT * FROM [MATERIAL] WHERE [Material_Code] = '" + request.MaNguyenLieu.Trim() + "' ");
-            sql.GET_DATA_FROM_SQL("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[Donvi],[MaNguoinhap],[Gia],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + request.MaNguyenLieu.Trim().ToUpper() + "',N'Nhập hàng đặc biệt vào kho " + request.Kho + ", Ghi chú: " + request.GhiChu + "','" + Convert.ToDouble(request.Soluong.ToString()!.Trim()) + "','NHAP','" + request.NgayNhapKho + "','" + request.us + "','" + request.Kho + "','" + request.Khoi + "',N'" + Nguyenlieu.Rows[0]["Material_Name_JP"].ToString()!.Trim() + "',N'" + Nguyenlieu.Rows[0]["Unit"].ToString()!.Trim() + "','" + Manhanvien + "','0','" + request.NgayNhapKho.ToString("MM/dd/yyyy") + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(request.Soluong.ToString()!.Trim()) + SoluongTruocthaydoi) + "')");
+            sql.GET_DATA_FROM_SQL("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[Donvi],[MaNguoinhap],[Gia],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + request.MaNguyenLieu.Trim().ToUpper() + "',N'Nhập hàng đặc biệt vào kho " + request.Kho + ", Ghi chú: " + request.GhiChu + "','" + Convert.ToDouble(request.Soluong.ToString()!.Trim()) + "','NHAP','" + request.NgayNhapKho.ToString("MM/dd/yyyy HH:mm:ss") + "','" + request.us + "','" + request.Kho + "','" + request.Khoi + "',N'" + Nguyenlieu.Rows[0]["Material_Name_JP"].ToString()!.Trim() + "',N'" + Nguyenlieu.Rows[0]["Unit"].ToString()!.Trim() + "','" + Manhanvien + "','0','" + request.NgayNhapKho.ToString("MM/dd/yyyy HH:mm:ss") + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(request.Soluong.ToString()!.Trim()) + SoluongTruocthaydoi) + "')");
 
             return Json("OK");
         }

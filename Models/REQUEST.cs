@@ -760,8 +760,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 _db.GET_DATA_FROM_SQL("Update [PE_REQUEST_CONFIRM_GA] set INT_STEP = '11' where ID_REQUEST = '" + id_rq + "'");
             }
         }
-        public static List<PE_REQUEST_CONFIRM> _load_tonkhoxuathang(string us,string madonhang, string nguoitao, string khoi)
-        {            
+        public static List<PE_REQUEST_CONFIRM> _load_tonkhoxuathang(string us,string madonhang, string nguoitao, string khoi, string thang, string nam)
+        {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
 
             var checkus = _db.GET_DATA_FROM_SQL($"select * from PE_USERNAME where Adid = '{us}'");
@@ -772,7 +772,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
                         WHERE (a.INT_STEP = '4' OR a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
-                        and MONTH(Dealine) = '{DateTime.Now.Month}' and YEAR(Dealine) = '{DateTime.Now.Year}' and b.Group_Code like '%{khoi}%' order by ID desc");
+                        and MONTH(Dealine) = '{thang}' and YEAR(Dealine) = '{nam}' and b.Group_Code like '%{khoi}%' order by ID desc");
 
                 for (int i = 0; i < list.Rows.Count; i++)
                 {

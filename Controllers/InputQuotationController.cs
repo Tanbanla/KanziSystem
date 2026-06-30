@@ -542,5 +542,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             };
             return View(vm);
         }
+        // Hàm chuyển đổi file từ đường dẫn sang file lưu trong hệ thống
+        [HttpGet]
+        public async Task<IActionResult> SaveFileFromPath(string filePath)
+        {
+            try
+            {
+                //var result = await _fileImportService.ConvertFileFromPathAsync();
+                //if (!result.Success)
+                //{
+                //    return BadRequest(result.Message);
+                //}
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi khi lưu file từ đường dẫn: {ex.Message}");
+            }
+        }
     }
 }

@@ -79,17 +79,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             try
             {
+                search.pageIndex = 0;
+                search.pageSize = 0;
                 var result = await _materialService.ExportMaterialViewToExcelAsync(search);
                 if (!result.Success)
                 {
                     return BadRequest("Bug: " + result.Message);
                 }
-                var fileContent = result.Data;
-                return File(
-                    fileContent.OpenReadStream(),
-                    fileContent.ContentType ?? "application/octet-stream",
-                    fileContent.FileName
-                );
+
+                var (fileBytes, fileName, contentType) = result.Data;
+
+                return File(fileBytes, contentType, fileName);
             }
             catch (Exception ex)
             {

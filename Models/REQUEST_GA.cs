@@ -567,22 +567,22 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 _db.GET_DATA_FROM_SQL("UPDATE [REQUEST] SET [Status] = 'DONE' WHERE [Code_Request] = '" + Code_Request + "' ");
             }
         }
-        public static List<PE_REQUEST_CONFIRM_GA> _load_tonkhoxuathang(string madonhang, string nguoitao, string khoi)
+        public static List<PE_REQUEST_CONFIRM_GA> _load_tonkhoxuathang(string madonhang, string nguoitao, string khoi, string thang, string nam)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM_GA> pe_ = new List<PE_REQUEST_CONFIRM_GA>();
-
-            var check_khoi = "b.Group_Code like '%" + khoi + "%'";
-            if (khoi == "PROD")
+            var khoidon = _db.ReturnString("select Group_Code from REQUEST where Code_Request = '" + madonhang + "'");
+            var check_khoi = "b.Group_Code like '%" + khoidon + "%'";
+            if (khoidon == "PROD")
             {
-                check_khoi = "(b.Group_Code like '%" + khoi + "%' or b.Group_Code like 'PUR' )";
+                check_khoi = "(b.Group_Code like '%" + khoidon + "%' or b.Group_Code like 'PUR' )";
             }
 
             var list = _db.GET_DATA_FROM_SQL($@"select b.*,a.ID_REQUEST from [PE_REQUEST_CONFIRM_GA] as a 
                         left join REQUEST as b on a.ID_REQUEST = b.Id_Request 
                         left join DEPARTMENT as c on b.Cost_Center = c.Cost_Center 
                         WHERE (a.INT_STEP = '5')  and Code_Request like '%{madonhang}%' and b.Status <> 'DONE' and CHR_ADID_NGUOITAO like '%{nguoitao}%'
-                        and {check_khoi} order by ID desc");
+                         and MONTH(Dealine) = '{thang}' and YEAR(Dealine) = '{nam}' and {check_khoi} order by ID desc");
 
             for (int i = 0; i < list.Rows.Count; i++)
             {

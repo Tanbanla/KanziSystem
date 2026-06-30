@@ -31,6 +31,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Search date by Material View
         Task<GenericResponse<ListRequest<MATERIAL>>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
         // Export danh sách linh kiện
-        Task<GenericResponse<IFormFile>> ExportMaterialViewToExcelAsync(SearchMaterialVM search);
+        Task<GenericResponse<(byte[] FileBytes, string FileName, string ContentType)>> ExportMaterialViewToExcelAsync(SearchMaterialVM search);
     }
 }

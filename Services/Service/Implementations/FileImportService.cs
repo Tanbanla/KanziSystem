@@ -8,18 +8,21 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
     public class FileImportService : IFileImportService
     {
+        private readonly IBaoGiaDetailRepository _repoDetail;
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
 
-        public FileImportService(IWebHostEnvironment env, IConfiguration configuration)
+        public FileImportService(IWebHostEnvironment env, IConfiguration configuration, IBaoGiaDetailRepository repoDetail)
         {
             _env = env;
             _configuration = configuration;
+            _repoDetail = repoDetail;
         }
 
         public async Task<GenericResponse<string?>> SaveFileFromPathAsync(string sourcePath)

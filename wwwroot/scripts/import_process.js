@@ -175,8 +175,8 @@ function initSelect2($element) {
 // Cập nhật lại hàm load trong import_process.js hoặc tại đây
 async function _load_name_inv(group_code) {
     const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
-    fetch('/ipcs/Import/_load_material', {
-    //fetch('/Import/_load_material', {
+   fetch('/ipcs/Import/_load_material', {
+   // fetch('/Import/_load_material', {
         method: 'POST',
         body: params
     })

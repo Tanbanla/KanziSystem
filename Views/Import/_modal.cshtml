@@ -731,14 +731,12 @@
              })
              .then(response => response.json())
              .then(data => {
-                 if (data.success) {
-                     alert("Nhập hàng đặc biệt thành công!");
-                     if (typeof _load_xuatkho === "function") {
-                         _load_xuatkho();
-                     }
-                 } else {
-                     alert("Lỗi: " + data.message);
-                 }
+               
+                alert(data);
+                if (typeof _load_xuatkho === "function") {
+                    _load_xuatkho();
+                }
+                
              })
              .catch(error => {
                  console.error('Error:', error);

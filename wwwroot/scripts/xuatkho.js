@@ -4,8 +4,10 @@ function _load_xuatkho() {
     var nguoitao = document.getElementById("nguoitao").value;
     var khoi = document.getElementById("khoi").value;
     var us = document.getElementById("us").innerHTML;
-    const params = new URLSearchParams({us : us, mayeucau: mayeucau, nguoitao: nguoitao, khoi: khoi });
+    var thangnam = document.getElementById("thangnam").value;
+    const params = new URLSearchParams({ us: us, mayeucau: mayeucau, nguoitao: nguoitao, khoi: khoi, thangnam: thangnam });
     fetch('/ipcs/Import/_load_xuatkhohang', {
+    //fetch('/Import/_load_xuatkhohang', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

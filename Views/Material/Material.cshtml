@@ -34,7 +34,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="ion ion-key"></i></span>
                             </div>
-                            <input type="text" class="form-control" id="Account_Name_VN" placeholder="Tên tài khoản (VN)">
+                            <input type="text" class="form-control" id="Category_VN" placeholder="Chủng loại">
                         </div>
                     </div>
 
@@ -60,6 +60,9 @@
                         <a href="@Context.Request.PathBase/Material/Creat_Material" class="btn-create">
                             <i class="ion ion-plus"></i> Tạo mã
                         </a>
+                        <button type="button" class="btn btn-outline-success" style="border-radius: 10px;" onclick="_download_material()">
+                            <i class="fas fa-file-download"> Tải dữ liệu</i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -68,7 +71,7 @@
             <div class="table-wrapper">
                 <div class="table-responsive">
                     <table class="table table-bordered">
-                        <thead>
+                        <thead style="background: #007aff">
                             <tr>
                                 <th>Mã vật tư</th>
                                 <th>Tên VN</th>
@@ -78,7 +81,7 @@
                                 <th>Chủng loại hàng</th>
                                 <th>Mã nhà hàng nhà cung cấp</th>
                                 <th>Nhóm</th>
-                                <th>Loại</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="show_material"></tbody>
@@ -88,13 +91,29 @@
                     <ul class="pagination" id="pagination-controls"></ul>
                 </div>
             </div>
+            <!-- Pagination -->
+            <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="small text-muted" style="margin-right: 8px;" id="historyPaginationInfo">@Localizer["PaginationInfo", "0", "0", "0"].Value</div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <label for="historyPageSize" class="small text-muted mb-0">Số dòng</label>
+                    <select id="historyPageSize" class="form-select form-select-sm" style="width:90px;margin-left: 4px;">
+                        <option value="20">20</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="historyPagination">
+                            <li class="page-item disabled"><button class="page-link" data-page="prev">«</button></li>
+                            <li class="page-item active"><button class="page-link" data-page="1">1</button></li>
+                            <li class="page-item disabled"><button class="page-link" data-page="next">»</button></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
-@* <script src="~/scripts/material_process.js"></script> *@
-<script>
-    // window.onload = function () {
-    //     _load_material();
-    // }
-</script>
+<script src="~/js/Material.js" asp-append-version="true"></script>

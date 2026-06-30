@@ -456,7 +456,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
                 REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
             }
-            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+           // REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
             return Json("OK");
         }
         public JsonResult _update_dongytatca(string us, string madon)

@@ -150,8 +150,7 @@
                         <button type="button" class="btn btn-sm btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                   
+                <div class="card-body p-0">                  
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover mb-0 align-middle">
                             <thead>
@@ -177,99 +176,99 @@
                                     <th class="bg-white text-dark" colspan="3">NHẬP DỮ LIỆU</th>
                                 </tr>
                             </thead>
-        <tbody>
-       @*      @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model.Where(x=> x.Danhmuc == "OUT"))
-                {
-                    <tr class="@(item.LuongvethucteNgaynhap != null ? "row-alert-yes" : "")">
-                        <td class="text-center fw-bold">@(stt++)</td>
-                        <td class="text-center">@(item.Ngaydangkytk?.ToString("dd/MM/yyyy") ?? "-")</td>
-                        <td class="text-center">@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy") ?? "-")</td>
-                        <td class="text-center fw-bold text-primary">@item.SoPO</td>
-                        <td>@item.Tentiengviet</td>
-                        <td class="text-center fw-bold">@item.Mahang</td>
-                        <td class="text-end">@item.Soluong.ToString("N0")</td>
-                        <td class="text-center">@item.Dovi</td>
-                        <td>@item.Nhacungcap</td> <td>Time GH</td> <td>@item.Tenphongyeucau</td>
-                        <td class="text-center">@(item.InvoicePONgaynhap?.ToString("dd/MM/yyyy") ?? "-")</td>
-                        <td>Người Follow</td> <td class="text-center fw-bold text-danger">Ngày XN Giao</td> <td class="text-center cursor-pointer toggle-detail" data-target="#info-@item.PO_Detail_Id">
-                            <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                        </td>
-                        <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
+                            <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                               @*  foreach (var item in Model.Where(x=> x.Danhmuc == "OUT"))
+                                {
+                                    <tr class="@(item.Ngayyc != null ? "row-alert-yes" : "")">
+                                        <td class="text-center fw-bold">@(stt++)</td>
+                                        <td class="text-center">@(item.Ngayycgiao?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                        <td class="text-center">@(item.ngaynccxngiao?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                        <td class="text-center fw-bold text-primary">@item.SoPO</td>
+                                        <td>@item.Tentiengviet</td>
+                                        <td class="text-center fw-bold">@item.Mahang</td>
+                                        <td class="text-end">@item.Soluong.ToString("N0")</td>
+                                        <td class="text-center">@item.Dovi</td>
+                                        <td>@item.Nhacungcap</td> <td>Time GH</td> <td></td>
+                                        <td class="text-center">@(item.InvoicePONgaynhap?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                        <td>Người Follow</td> <td class="text-center fw-bold text-danger">Ngày XN Giao</td> <td class="text-center cursor-pointer toggle-detail" data-target="#info-@item.PO_Detail_Id">
+                                            <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                        </td>
+                                        <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
                         
-                        <th class="text-center @(item.LuongvethucteNgaynhap != null ? "text-success" : "text-warning")">
-                            @(item.LuongvethucteNgaynhap != null ? "Đã nhập hàng" : "Chưa giao hàng")
-                        </th>
+                                        <th class="text-center @(item.LuongvethucteNgaynhap != null ? "text-success" : "text-warning")">
+                                            @(item.LuongvethucteNgaynhap != null ? "Đã nhập hàng" : "Chưa giao hàng")
+                                        </th>
 
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
-                                    data-po="@item.SoPO" 
-                                    data-item-name="@item.Tentiengviet" 
-                                    data-item-code="@item.Mahang"
-                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
-                                <i class="fa-solid ion-compose"></i> Dự kiến
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
-                                    data-po="@item.SoPO" 
-                                    data-item-name="@item.Tentiengviet" 
-                                    data-item-code="@item.Mahang" 
-                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
-                                <i class="fa-solid fa fa-pen"></i> Chính thức
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
-                                    data-po="@item.SoPO" 
-                                    data-item-name="@item.Tentiengviet" 
-                                    data-item-code="@item.Mahang" 
-                                    data-order-qty="@item.Soluong" 
-                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
-                                <i class="fa-solid fa fa-credit-card"></i> Thanh toán
-                            </button>
-                        </td>
-                    </tr>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                    data-po="@item.SoPO" 
+                                                    data-item-name="@item.Tentiengviet" 
+                                                    data-item-code="@item.Mahang"
+                                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
+                                                <i class="fa-solid ion-compose"></i> Dự kiến
+                                            </button>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                    data-po="@item.SoPO" 
+                                                    data-item-name="@item.Tentiengviet" 
+                                                    data-item-code="@item.Mahang" 
+                                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
+                                                <i class="fa-solid fa fa-pen"></i> Chính thức
+                                            </button>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                    data-po="@item.SoPO" 
+                                                    data-item-name="@item.Tentiengviet" 
+                                                    data-item-code="@item.Mahang" 
+                                                    data-order-qty="@item.Soluong" 
+                                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
+                                                <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                            </button>
+                                        </td>
+                                    </tr>
 
-                    <tr id="info-@item.PO_Detail_Id" class="collapse detail-row">
-                        <td colspan="20">
-                            <div class="detail-container">
-                                <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT CỦA SỐ PO: @item.SoPO</h6>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <div class="p-2 border rounded bg-light">
-                                            <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
-                                            <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">@(item.InvoicePONgaynhap?.ToString("dd/MM/yyyy") ?? "Chưa gửi")</b></span>
+                                    <tr id="info-@item.PO_Detail_Id" class="collapse detail-row">
+                                        <td colspan="20">
+                                            <div class="detail-container">
+                                                <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT CỦA SỐ PO: @item.SoPO</h6>
+                                                <div class="row g-3">
+                                                    <div class="col-md-4">
+                                                        <div class="p-2 border rounded bg-light">
+                                                            <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
+                                                            <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">@(item.InvoicePONgaynhap?.ToString("dd/MM/yyyy") ?? "Chưa gửi")</b></span>
+                                                            </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="p-2 border rounded bg-light">
+                                                            <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
+                                                            <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">@(item.LuongvethucteNgaynhap?.ToString("dd/MM/yyyy") ?? "--")</b></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="p-2 border rounded bg-light">
+                                                            <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
+                                                            <span class="d-block fs-7">Tổng tiền: <b class="text-dark">@(item.Sotien?.ToString("N0") ?? "0")</b></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="p-2 border rounded bg-light">
-                                            <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
-                                            <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">@(item.LuongvethucteNgaynhap?.ToString("dd/MM/yyyy") ?? "--")</b></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="p-2 border rounded bg-light">
-                                            <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
-                                            <span class="d-block fs-7">Tổng tiền: <b class="text-dark">@(item.Sotien?.ToString("N0") ?? "0")</b></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu PO nào.</td>
-                </tr>
-            } *@
-        </tbody>
-    </table>
-</div>
+                                        </td>
+                                    </tr>
+                                } *@
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu PO nào.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
                 </div>
                 <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
                     <span class="text-muted">Hiển thị 1-3 trong tổng số 158 dòng dữ liệu chưa giao</span>

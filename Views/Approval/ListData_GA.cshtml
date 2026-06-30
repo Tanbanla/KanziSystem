@@ -305,7 +305,8 @@
 
             // 2. Đưa các lệnh gọi AJAX vào danh sách theo dõi
             let ajaxRequest = $.ajax({
-                url: '/ipcs/Request/_get_request_GA',
+                url: '/ipcs/Request/_get_request_GA',             
+                //url: '/Request/_get_request_GA',             
                 type: 'POST',
                 dataType: 'JSON',
                 data: { cost_request: mayeucau },
@@ -373,7 +374,6 @@
         const checkboxes = document.querySelectorAll('input.item:checked');
         checkboxes.forEach((item) => {
             if (item.checked) {
-
                 _update_request_all_GA(item.value);
             }
         });

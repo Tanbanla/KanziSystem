@@ -226,15 +226,18 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Export danh sách linh kiện
-        public async Task<GenericResponse<IFormFile>> ExportMaterialViewToExcelAsync(SearchMaterialVM search)
+        public async Task<GenericResponse<(byte[] FileBytes, string FileName, string ContentType)>> ExportMaterialViewToExcelAsync(SearchMaterialVM search)
         {
-            var result = new GenericResponse<IFormFile>();
+            var result = new GenericResponse<(byte[], string, string)>();
+
             try
             {
                 var dataAsync = await _repo.SearchDateByMaterialViewAsync(search);
                 var materials = dataAsync.Data;
+
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
                 var templatePath = Path.Combine(root, "template", "MaterialMaster.xlsx");
+
                 if (!System.IO.File.Exists(templatePath))
                 {
                     result.Success = false;
@@ -244,17 +247,18 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 using var fs = System.IO.File.OpenRead(templatePath);
                 using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+
                 var ws = workbook.Worksheets.FirstOrDefault();
                 if (ws == null)
                 {
                     result.Success = false;
-                    result.Message = "Không tìm thấy worksheet trong template";
+                    result.Message = "Không tìm thấy worksheet";
                     return result;
                 }
-                int startRow = 3;
-                foreach(var m in materials)
-                {
 
+                int startRow = 3;
+                foreach (var m in materials)
+                {
                     ws.Cell(startRow, 1).Value = GetLoaiHang(m.Material_Code);
                     ws.Cell(startRow, 2).Value = m.Material_Code;
                     ws.Cell(startRow, 3).Value = m.Code_Suppiler;
@@ -272,35 +276,29 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     startRow++;
                 }
 
-                ws.Columns().AdjustToContents();
-
+               // ws.Columns().AdjustToContents();
 
                 using var stream = new MemoryStream();
                 workbook.SaveAs(stream);
-                stream.Position = 0;
 
+                var fileBytes = stream.ToArray(); 
 
                 var fileName = $"Material_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
 
-                IFormFile file = new FormFile(stream, 0, stream.Length, "file", fileName)
-                {
-                    Headers = new HeaderDictionary(),
-                    ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                };
-
                 result.Success = true;
-                result.Data = file;
-                result.Message = "Xuất Excel thành công";
-
-
+                result.Data = (
+                    fileBytes,
+                    fileName,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                );
             }
             catch (Exception ex)
             {
-                result.Message = ex.Message;
                 result.Success = false;
+                result.Message = ex.Message;
             }
 
-            return  result;
+            return result;
         }
         private string? GetLoaiHang(string materialCode)
         {

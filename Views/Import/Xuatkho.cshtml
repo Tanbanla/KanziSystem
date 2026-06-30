@@ -71,6 +71,7 @@
                                         <option value="PUR">PUR</option>
                                     </select>
                                 </td>
+                                <td><input type="month" class="form-control" id="thangnam" placeholder="@Languages.Thoigian "></td>
                                 <td><input type="text" class="form-control" id="mayeucau" placeholder="@Languages.mayeucau "></td>
                                 <td><input type="text" class="form-control" id="nguoitao" placeholder="@Languages.nguoitao"></td>
                                 <td><button type="button" class="btn btn-success ml-3" onclick="_load_xuatkho()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button></td>
@@ -155,7 +156,7 @@
         }
 
         if (confirm(`Bạn có chắc chắn muốn reset đơn ${maYeuCau} không?`)) {
-            fetch('/Warehouse/ResetDon', {
+            fetch('/ipcs/Warehouse/ResetDon', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

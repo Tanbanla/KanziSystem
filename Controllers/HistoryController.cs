@@ -821,7 +821,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccNews = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
             var statusData = await _baoGiaStatusService.GetListStatusAsync();
-            var madons = await LoadMadonAsync(13);
+            var madons = await LoadMadonAsync(14);
             var role = GetRolesUser();
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             var vm = new QuoteModel

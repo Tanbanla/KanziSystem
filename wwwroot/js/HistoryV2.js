@@ -1028,7 +1028,7 @@
         else if (isSelected && !isRefuse) {
             bgColor = '#cfe3c6';
         }
-        else if (!isValueEmpty) {
+        else if (isRefuse) {
             bgColor = 'yellow';
         }
 
