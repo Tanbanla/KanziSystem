@@ -201,4 +201,10 @@
   <data name="InvalidSelection" xml:space="preserve">
     <value>サプライヤー選定結果はまだ出ていません。</value>
   </data>
+  <data name="RejectedVendorNoRemarkColumn" xml:space="preserve">
+    <value>サプライヤー選定を却下する理由は何も選ばれていません。</value>
+  </data>
+  <data name="ReasonRequiredForItems" xml:space="preserve">
+    <value>選考結果の理由は入力されていませんでした。</value>
+  </data>
 </root>

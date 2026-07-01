@@ -24,5 +24,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<int> GetIdDetailAsync(int? idRequest);
         // Cập nhật thông tin status của đơn báo giá
         Task<bool> UpdateStatusAsync(List<int> ids);
+        // Lấy thông tin các file cần chuyển
+        Task<List<UpdateFile>> GetFilesToTransferAsync();
+        // update thông tin link báo giá trên hệ thống
+        Task<bool> UpdateLinkBaoGiaAsync(List<UpdateFile> listDto);
     }
 }

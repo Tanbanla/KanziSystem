@@ -1,4 +1,5 @@
 using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -11,10 +12,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
     {
         private readonly IBaoGiaDetailRepository _repo;
         private readonly IMapper _mapper;
-        public BaoGiaDetailService(IBaoGiaDetailRepository repo, IMapper mapper) : base(repo, mapper)
+        private readonly IConfiguration _configuration;
+        public BaoGiaDetailService(IBaoGiaDetailRepository repo, IMapper mapper, IConfiguration configuration) : base(repo, mapper)
         {
             _repo = repo;
             _mapper = mapper;
+            _configuration = configuration;
         }
         // Tìm kiếm thông tin liên quan đến báo giá
         public async Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, int? PageSize, int? PageIndex)
@@ -167,6 +170,150 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = false;
             }
             return result;
+        }
+
+
+        // Cập nhật thông tin link báo giá trên hệ thống
+        public async Task<GenericResponse<bool>> UpdateLinkBaoGiaAsync()
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var dataNeedUpdate = await _repo.GetFilesToTransferAsync();
+                if(dataNeedUpdate != null && dataNeedUpdate.Any())
+                {
+                    // lấy thông tin để lưu file nhập báo giá
+                    var listInforFile = dataNeedUpdate.Select(c => c.Link).Distinct().ToList();
+
+                    var savedMap = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var src in listInforFile)
+                    {
+                        if (savedMap.ContainsKey(src)) continue;
+                        try
+                        {
+                            var saveRes = await SaveFileFromPathAsync(src);
+                            if (saveRes != null && saveRes.Success && !string.IsNullOrWhiteSpace(saveRes.Data))
+                            {
+                                savedMap[src] = saveRes.Data;
+                            }
+                            else
+                            {
+                                savedMap[src] = null;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                            savedMap[src] = null;
+                            continue;
+                        }
+                    }
+                    foreach (var dto in dataNeedUpdate)
+                    {
+                        if (string.IsNullOrWhiteSpace(dto.Link)) continue;
+                        var checkKey = dto.Link?.Trim().Trim('"', '\'') ?? dto.Link;
+                        if (savedMap.TryGetValue(checkKey, out var saved) && !string.IsNullOrWhiteSpace(saved))
+                        {
+                            dto.Link = saved;
+                        }
+
+                    }
+
+                    var isSuccess = await _repo.UpdateLinkBaoGiaAsync(dataNeedUpdate);
+
+                    result.Data = isSuccess;
+                    result.Success = isSuccess;
+                    if (!isSuccess)
+                    {
+                        result.Message = "Update database failed";
+                    }
+
+                }
+                else
+                {
+                    result.Message = "No files to update.";
+                    result.Success = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Function file
+        private async Task<GenericResponse<string?>> SaveFileFromPathAsync(string sourcePath)
+        {
+            var result = new GenericResponse<string?>();
+
+
+            if (string.IsNullOrWhiteSpace(sourcePath))
+            {
+                result.Success = false;
+                result.Message = "Source path is empty.";
+                return result;
+            }
+           ;
+
+            // Normalize and split by comma if multiple paths provided
+            var raw = sourcePath.Trim();
+            raw = raw.Trim('"', '\'');
+            var parts = raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(p => p.Trim().Trim('"', '\''))
+                            .ToList();
+
+            string? found = null;
+            foreach (var p0 in parts)
+            {
+                var p = p0.Replace("/", "\\").Trim();
+                if (p.StartsWith("\\") && !p.StartsWith("\\\\"))
+                {
+                    p = "\\" + p;
+                }
+
+                if (File.Exists(p))
+                {
+                    found = p;
+                    break;
+                }
+            }
+
+            if (found == null) return null;
+
+            var extension = Path.GetExtension(found).ToLowerInvariant();
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc" };
+            if (!allowedExtensions.Contains(extension)) return null;
+
+            try
+            {
+                var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/'); ;
+                if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
+
+                var fileName = Path.GetFileName(found) ?? (Guid.NewGuid().ToString() + ".dat");
+                var uniqueName = $"{DateTime.Now:yyyyMMdd}_{Guid.NewGuid():N}_{fileName}";
+                var dest = Path.Combine(uploadFolder, uniqueName);
+
+                // Use asynchronous copy if possible, but for local files, synchronous is fine wrapped in Task
+                using (var sourceStream = File.OpenRead(found))
+                using (var destStream = new FileStream(dest, FileMode.Create))
+                {
+                    await sourceStream.CopyToAsync(destStream);
+                }
+
+                var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
+                var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
+
+                result.Data = fileUrl;
+                result.Success = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+                return result;
+            }
         }
     }
 }

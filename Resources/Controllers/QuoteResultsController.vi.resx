@@ -201,4 +201,10 @@
   <data name="InvalidSelection" xml:space="preserve">
     <value>Chưa lựa chọn kết quả chọn nhà cung cấp </value>
   </data>
+  <data name="RejectedVendorNoRemarkColumn" xml:space="preserve">
+    <value>Chưa chọn lý do từ chối lấy chọn nhà cung cấp</value>
+  </data>
+  <data name="ReasonRequiredForItems" xml:space="preserve">
+    <value>Nhập thiếu lý do cho kết quả lựa chọn</value>
+  </data>
 </root>

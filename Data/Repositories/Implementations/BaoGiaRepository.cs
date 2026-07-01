@@ -489,7 +489,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(" ORDER BY TrangThai,t1.DTM_CreateDate DESC");
             }
-
+            var a = sql.ToString();
             var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
 
             // Build count sql using same CTE and filters so total respects search
@@ -1369,6 +1369,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             foreach (var item in dataApprovers)
             {
                 if (!existingData.TryGetValue(item.Id, out var data)) continue;
+
+                if (data.ID_StepBaoGia < 7)
+                {
+                    continue;
+                }
 
                 if (item.IsApproved != false)
                 {

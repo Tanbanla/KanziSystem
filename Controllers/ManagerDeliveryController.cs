@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using PRJ_WAREHOUSE_BIVN.Models;
 using System.Data.SqlClient;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -46,17 +47,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     }
     public class ManagerDeliveryController : Controller
     {
-        private readonly string _connectionString = "data source=apbivndb14;initial catalog=COST_MANAGEMENT;user id=Kanzaisystem;password=Kanzaisystem;";
-        public async Task<IActionResult> ManageDelivery()
-        {
-            string sql = $@"SELECT a FROM [COST_MANAGEMENT].[dbo].[PO] as a left join REQUEST as b on a.Code_Request = b.Code_Request where Ngayphathanh >= '{DateTime.Now.ToString("yyyy-MM-01")}' order by Ngayphathanh desc";
+        //public async Task<IActionResult> ManageDelivery()
+        //{
+      
+        //    SQL_Connect_DB20 sql = new SQL_Connect_DB20();
+        //    string query = $@"SELECT a.*, Dealine FROM [COST_MANAGEMENT].[dbo].[PO] as a left join REQUEST as b on a.Code_Request = b.Code_Request where Ngayphathanh >= '{DateTime.Now.ToString("yyyy-MM-01")}' order by Ngayphathanh desc";
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                var poList = connection.Query<PoDetailViewModel>(sql).ToList();
-                return View(poList); // Đẩy dữ liệu sang View
-            }
-        }
+        //    var lst = sql.GET_DATA_FROM_SQL(query);
+        //    for(int i = 0; i < lst.Rows.Count; i++)
+        //    {
+        //        PoDetailViewModel po = new PoDetailViewModel();
+        //        po.PO_Detail_Id = int.Parse(lst.Rows[i][""].ToString()!);
+        //    }
+        //}
     }
 }
 

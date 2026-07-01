@@ -1,4 +1,4 @@
-
+@* 
 @using PRJ_WAREHOUSE_BIVN.Language
 @using PRJ_WAREHOUSE_BIVN.Controllers
 @model IEnumerable<PoDetailViewModel>
@@ -179,7 +179,7 @@
                             <tbody>
                             @if (Model != null && Model.Any())
                             {
-                               @*  foreach (var item in Model.Where(x=> x.Danhmuc == "OUT"))
+                                foreach (var item in Model.Where(x=> x.Danhmuc == "OUT"))
                                 {
                                     <tr class="@(item.Ngayyc != null ? "row-alert-yes" : "")">
                                         <td class="text-center fw-bold">@(stt++)</td>
@@ -258,7 +258,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                } *@
+                                }
                             }
                             else
                             {
@@ -1151,3 +1151,4 @@
         });
     });
 </script>
+ *@

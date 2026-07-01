@@ -201,4 +201,10 @@
   <data name="InvalidSelection" xml:space="preserve">
     <value>No supplier selection results have been chosen yet.</value>
   </data>
+  <data name="RejectedVendorNoRemarkColumn" xml:space="preserve">
+    <value>No reason has been selected to reject the supplier selection.</value>
+  </data>
+  <data name="ReasonRequiredForItems" xml:space="preserve">
+    <value>The reason for the selection result was not entered.</value>
+  </data>
 </root>

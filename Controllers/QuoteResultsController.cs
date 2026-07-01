@@ -76,6 +76,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SavePickSupplier([FromBody] SaveQuotationResultsModel vm)
         {
+            var check = vm.listPick.Where(c => (c.BIT_Select == true || c.BIT_Select == false) && c.NVCHR_ReasonPick == "").ToList();
+            if (!check.Any())
+            {
+                return BadRequest(_localizer["ReasonRequiredForItems"]);
+            }
+
             var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(vm.listPick, vm.UserApproverNext);
             if (!result.Success)
             {
@@ -851,10 +857,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         errors.Add(_localizer["InvalidSelection", 52]);
                     }
-
+                    // check reason pick
                     if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
                     {
                         errors.Add(_localizer["SelectedVendorNoReasonColumn", 52]);
+                    }
+                    // check reason remark
+                    if(bitSelect.Contains("X") && string.IsNullOrEmpty(reason))
+                    {
+                        errors.Add(_localizer["RejectedVendorNoRemarkColumn", 53]);
                     }
 
                     if (errors.Any())

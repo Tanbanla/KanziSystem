@@ -391,7 +391,6 @@ async function send_mail(mail_to, Urgent) {
         }
     })
 }
-
 async function _load_confirm() {
 
     var Urgent = document.getElementById("trangthaidon").value;
@@ -647,7 +646,6 @@ function _modal_info(cost_request, step) {
         }
     })
 }
-
 async function _dlxuatkho_trangthai(id) {
     var code_request = document.getElementById("madonhang" + id).innerHTML;
     const params = new URLSearchParams();
@@ -832,7 +830,6 @@ function _update_request_all(request) {
 
 }
 function _update_request_all_GA(request) {
-
     var us = document.getElementById("us").innerHTML;
     const params = new URLSearchParams();
     params.append('us', us);
@@ -857,7 +854,6 @@ function _update_request_all_GA(request) {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-
 }
 function _dongy_all() {
 
@@ -955,8 +951,7 @@ function _reset() {
     document.getElementById("tinhtrangdon").value = "";
     _load_confirm();
 }
-function _load_account() {
-   
+function _load_account() { 
     fetch('/ipcs/Import/_load_account', {
         method: 'POST',
         headers: {

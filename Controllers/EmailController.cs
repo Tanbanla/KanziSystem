@@ -12,10 +12,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     public class EmailController : ControllerBase
     {
         private readonly ISendMailService _sendMailService;
+        private readonly IBaoGiaDetailService _baoGiaDetailService;
 
-        public EmailController(ISendMailService sendMailService)
+        public EmailController(ISendMailService sendMailService, IBaoGiaDetailService baoGiaDetailService)
         {
             _sendMailService = sendMailService;
+            _baoGiaDetailService = baoGiaDetailService;
         }
         [HttpPost("send")]
         [AllowAnonymous]
@@ -48,7 +50,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(new { success = true, message = "Email API is running" });
         }
-
+        [HttpGet]
+        [HttpGet("UpdateFileDetail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateFileDetail()
+        {
+            var res = await _baoGiaDetailService.UpdateLinkBaoGiaAsync();
+            if (!res.Success)
+            {
+                return StatusCode(500, new { success = false, message = res.Message });
+            }
+            return Ok(new { success = true, message = "API is running" });
+        }
         public class EmailRequest
         {
             public string? Title { get; set; }

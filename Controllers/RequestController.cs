@@ -961,9 +961,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             //check id_rq
             var id_rq = _db.ReturnString("select Id_Request from REQUEST where Code_Request = '" + mayeucau + "'");
-            //update trạng thái đơn request
-            _db.GET_DATA_FROM_SQL("update [REQUEST_DETAIL] set Status = '' where Code_Request = '" + mayeucau + "'");
-
+         
             _db.GET_DATA_FROM_SQL("update REQUEST set Status = 'WAITCONFIRM' where Code_Request = '" + mayeucau + "'");
 
             var get_khoi = _db.ReturnString("select Group_Code from REQUEST where Code_Request = '" + mayeucau + "'");
@@ -988,6 +986,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 _db.GET_DATA_FROM_SQL("update KHO set Hientai = Hientai + " + soluong + " where MaNguyenLieu = '" + malinhkien + "' and Kho = '" + kho + "'");
             }
 
+            _db.GET_DATA_FROM_SQL(" UPDATE [REQUEST_DETAIL] SET [Status] = '',[Amount_Real] = NULL,[Total_exchange_real] = NULL,[Rate_Real] = NULL,[Total_Real] = NULL,Price_Real = NULL,[Id_LichsuXuat] = NULL,[Kho] = NULL WHERE[Code_Request] = '" + mayeucau + "'");
             _db.GET_DATA_FROM_SQL("delete from KHO_NHAPXUAT where Hanhdong like '%" + mayeucau + "%'");
 
             return Json("Reset OK");

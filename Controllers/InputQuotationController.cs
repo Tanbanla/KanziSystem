@@ -159,6 +159,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         }
                         else
                         {
+                            // kiểm tra có điền giá không
+                            if (
+                                (string.IsNullOrEmpty(ws.Cell(r, 16).GetString()) && string.IsNullOrEmpty(ws.Cell(r, 17).GetString()))
+                                || (ws.Cell(r, 16).GetString() == "0" && ws.Cell(r, 16).GetString() == "0")
+                            )
+                            {
+                                break;
+                            }
+
                             // Kiểm tra các cột bắt buộc (22,23,24)
                             if (string.IsNullOrWhiteSpace(ws.Cell(r, 22).GetString())) errors.Add("Cột 22 (VCHR_CamKet) bắt buộc");
                             if (string.IsNullOrWhiteSpace(ws.Cell(r, 23).GetString())) errors.Add("Cột 23 (Delivery Term) bắt buộc");
@@ -474,6 +483,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return madons.Data ?? new List<string>();
         }
 
+        // Tim kiem thong tin Material
+        [HttpPost]
+        public async Task<IActionResult> GetSearchMaterial([FromBody] MaterialSearch maHang)
+        {
+            var result = await _materialService.SearchAsync(maHang.MaHang, maHang.Name, maHang.NhomHang, maHang.PageIndex, maHang.PageSize);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
+
         // MARK: - Input Quote
         public async Task<IActionResult> InputQuote()
         {
@@ -541,24 +562,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CurrentRequest = request.Data
             };
             return View(vm);
-        }
-        // Hàm chuyển đổi file từ đường dẫn sang file lưu trong hệ thống
-        [HttpGet]
-        public async Task<IActionResult> SaveFileFromPath(string filePath)
-        {
-            try
-            {
-                //var result = await _fileImportService.ConvertFileFromPathAsync();
-                //if (!result.Success)
-                //{
-                //    return BadRequest(result.Message);
-                //}
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Lỗi khi lưu file từ đường dẫn: {ex.Message}");
-            }
         }
     }
 }

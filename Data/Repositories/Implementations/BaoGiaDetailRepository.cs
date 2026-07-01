@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -344,19 +345,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var detail = await _context.BaoGia_Detail_of_Quotations.Where(c => c.ID_RequestQuote == item.ID).FirstOrDefaultAsync();
                 if (detail != null)
                 {
+                    // save rq
+                    var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
+                    if (rq == null)
+                    {
+                        continue;
+                    }
+                    if(rq.ID_StepBaoGia < 7 || rq.ID_StepBaoGia > 8)
+                    {
+                        continue;
+                    }
+                    rq.ID_StepBaoGia = 9;
+                    rq.ID_Status = "WAIT_APPROVE";
+                    rq.CHR_UserApproval = userApproverNext;
+                    resultList.Add(rq);
+                    // Update deltail
                     detail.BIT_Select = item.BIT_Select;
                     detail.NVCHR_ReasonPick = item.NVCHR_ReasonPick;
                     detail.CHR_UpdateBy = item.CHR_UpdateBy;
                     detail.NVCHR_Note = item.NVCHR_Note;
-                    // save rq
-                    var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);
-                    if (rq != null)
-                    {
-                        rq.ID_StepBaoGia = 9;
-                        rq.ID_Status = "WAIT_APPROVE";
-                        rq.CHR_UserApproval = userApproverNext;
-                    }
-                    resultList.Add(rq);
                     // luu lịch sử thay đổi
                     var historyD = new BaoGia_History_Detail_Request
                     {
@@ -457,6 +464,44 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             foreach (var request in requestsToUpdate)
             {
                 request.ID_Status = "SUPPLIER_REFUSED";
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // Lấy thông tin các file cần chuyển
+        public async Task<List<UpdateFile>> GetFilesToTransferAsync()
+        {
+            var query = await _context.BaoGia_Detail_of_Quotations
+                .Where(r => r.NVCHR_File != null && r.NVCHR_File.Contains("\\apbivnsh15"))
+                .Select(r => new UpdateFile { ID = r.ID, Link = r.NVCHR_File })
+                .ToListAsync();
+
+            return query;
+        }
+        // update thông tin link báo giá trên hệ thống
+        public async Task<bool> UpdateLinkBaoGiaAsync(List<UpdateFile> listDto)
+        {
+            if (!listDto.Any() || listDto == null)
+            {
+                throw new Exception("UpdateLinkBaoGiaAsync method is not implemented yet.");
+            }
+            var dataUpdate = await _context.BaoGia_Detail_of_Quotations
+                .Where(d => listDto.Select(u => u.ID).Contains(d.ID))
+                .ToListAsync();
+            if(!dataUpdate.Any()|| dataUpdate == null)
+            {
+                throw new Exception("Không tìm thấy dữ liệu");
+            }
+
+            var dict = listDto.ToDictionary(x => x.ID, x => x.Link);
+
+            foreach (var i in dataUpdate)
+            {
+                if (dict.TryGetValue(i.ID, out var link))
+                {
+                    i.NVCHR_File = link;
+                }
             }
 
             await _context.SaveChangesAsync();

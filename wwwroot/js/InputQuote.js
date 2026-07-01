@@ -46,7 +46,7 @@
             quoteState.pageIndex = 1;
             loadQuoteList();
         });
-        
+     
         // Load initial data
         loadQuoteList();
     }
