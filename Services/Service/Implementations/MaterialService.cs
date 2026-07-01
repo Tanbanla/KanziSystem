@@ -320,5 +320,40 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     return "NO LIST";
             }
         }
+        // Delete Material
+        public async Task<GenericResponse<bool>> DeleteMaterialAsync(string codeMaterial)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var deleteResult = await _repo.DeleteMaterialAsync(codeMaterial);
+                result.Data = deleteResult;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Update Material
+        public async Task<GenericResponse<bool>> UpdateMaterialAsync(MATERIALDTO mt)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var data = _mapper.Map<MATERIAL>(mt);
+                var updateResult = await _repo.UpdateMaterialAsync(data);
+                result.Data = updateResult;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

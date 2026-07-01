@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
 		Microsoft ResX Schema
@@ -98,4 +98,142 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+	<data name="PageTitle" xml:space="preserve">
+		<value>Vật tư</value>
+	</data>
+	<data name="PlaceholderMaterialCode" xml:space="preserve">
+		<value>Mã vật tư</value>
+	</data>
+	<data name="PlaceholderMaterialNameVN" xml:space="preserve">
+		<value>Tên vật tư (VN)</value>
+	</data>
+	<data name="PlaceholderCategory" xml:space="preserve">
+		<value>Chủng loại</value>
+	</data>
+	<data name="SelectGroup" xml:space="preserve">
+		<value>Chọn khối</value>
+	</data>
+	<data name="CreateCode" xml:space="preserve">
+		<value>Tạo mã</value>
+	</data>
+	<data name="DownloadData" xml:space="preserve">
+		<value>Tải dữ liệu</value>
+	</data>
+	<data name="HeaderMaterialCode" xml:space="preserve">
+		<value>Mã vật tư</value>
+	</data>
+	<data name="HeaderNameVN" xml:space="preserve">
+		<value>Tên VN</value>
+	</data>
+	<data name="HeaderNameEN" xml:space="preserve">
+		<value>Tên EN</value>
+	</data>
+	<data name="HeaderNameJP" xml:space="preserve">
+		<value>Tên JP</value>
+	</data>
+	<data name="HeaderUnit" xml:space="preserve">
+		<value>Đơn vị</value>
+	</data>
+	<data name="HeaderCategory" xml:space="preserve">
+		<value>Chủng loại hàng</value>
+	</data>
+	<data name="HeaderSupplierCode" xml:space="preserve">
+		<value>Mã hàng nhà cung cấp</value>
+	</data>
+	<data name="HeaderGroup" xml:space="preserve">
+		<value>Nhóm</value>
+	</data>
+	<data name="HeaderAction" xml:space="preserve">
+		<value>Thao tác</value>
+	</data>
+	<data name="RowsPerPage" xml:space="preserve">
+		<value>Số dòng</value>
+	</data>
+	<data name="PaginationInfo" xml:space="preserve">
+		<value>Hiển thị {0} - {1} / {2}</value>
+	</data>
+	<data name="ConfirmDeleteTitle" xml:space="preserve">
+		<value>Xác nhận xóa</value>
+	</data>
+	<data name="Close" xml:space="preserve">
+		<value>Đóng</value>
+	</data>
+	<data name="Cancel" xml:space="preserve">
+		<value>Hủy</value>
+	</data>
+	<data name="Delete" xml:space="preserve">
+		<value>Xóa</value>
+	</data>
+	<data name="EditMaterialTitle" xml:space="preserve">
+		<value>Sửa thông tin mã linh kiện</value>
+	</data>
+	<data name="LabelMaterialCode" xml:space="preserve">
+		<value>Mã vật tư</value>
+	</data>
+	<data name="LabelGroup" xml:space="preserve">
+		<value>Nhóm</value>
+	</data>
+	<data name="LabelNameVN" xml:space="preserve">
+		<value>Tên VN</value>
+	</data>
+	<data name="LabelNameEN" xml:space="preserve">
+		<value>Tên EN</value>
+	</data>
+	<data name="LabelNameJP" xml:space="preserve">
+		<value>Tên JP</value>
+	</data>
+	<data name="LabelUnit" xml:space="preserve">
+		<value>Đơn vị</value>
+	</data>
+	<data name="LabelCategory" xml:space="preserve">
+		<value>Chủng loại hàng</value>
+	</data>
+	<data name="LabelSupplierCode" xml:space="preserve">
+		<value>Mã hàng nhà cung cấp</value>
+	</data>
+	<data name="SaveChanges" xml:space="preserve">
+		<value>Lưu thay đổi</value>
+	</data>
+	<data name="NoData" xml:space="preserve">
+		<value>Không có dữ liệu</value>
+	</data>
+	<data name="Edit" xml:space="preserve">
+		<value>Sửa</value>
+	</data>
+	<data name="ConfirmDeleteMessage" xml:space="preserve">
+		<value>Bạn có chắc chắn muốn xóa mã vật tư này không?</value>
+	</data>
+	<data name="ConfirmDeleteMessageFormat" xml:space="preserve">
+		<value>Bạn có chắc chắn muốn xóa mã vật tư "{0}"?</value>
+	</data>
+	<data name="LoadDataError" xml:space="preserve">
+		<value>Lỗi khi load dữ liệu</value>
+	</data>
+	<data name="SystemError" xml:space="preserve">
+		<value>Lỗi hệ thống</value>
+	</data>
+	<data name="DeleteFailed" xml:space="preserve">
+		<value>Xóa mã vật tư thất bại</value>
+	</data>
+	<data name="DeleteSystemError" xml:space="preserve">
+		<value>Lỗi hệ thống khi xóa mã vật tư</value>
+	</data>
+	<data name="EditNotFound" xml:space="preserve">
+		<value>Không tìm thấy thông tin vật tư để sửa</value>
+	</data>
+	<data name="InvalidMaterialCode" xml:space="preserve">
+		<value>Mã vật tư không hợp lệ</value>
+	</data>
+	<data name="UpdateFailed" xml:space="preserve">
+		<value>Cập nhật mã vật tư thất bại</value>
+	</data>
+	<data name="UpdateSystemError" xml:space="preserve">
+		<value>Lỗi hệ thống khi cập nhật vật tư</value>
+	</data>
+	<data name="DownloadError" xml:space="preserve">
+		<value>Lỗi download file</value>
+	</data>
+	<data name="DownloadSystemError" xml:space="preserve">
+		<value>Lỗi hệ thống khi tải file</value>
+	</data>
 </root>

@@ -97,6 +97,38 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return StatusCode(500, "Internal server error. Bug: " + ex.Message);
             }
         }
+        // Delete Material
+        [HttpGet]
+        public async Task<IActionResult> DeleteMaterial(string codeMaterial)
+        {
+            if (string.IsNullOrEmpty(codeMaterial))
+            {
+                return BadRequest("Invalid material code.");
+            }
+
+            var result = await _materialService.DeleteMaterialAsync(codeMaterial);
+            if (!result.Success)
+            {
+                return BadRequest("Bug: " + result.Message);
+            }
+
+            return Ok(result.Data);
+        }
+        // Update Material
+        [HttpPost]
+        public async Task<IActionResult> UpdateMaterial([FromBody] MATERIALDTO model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid model state.");
+            }
+            var result = await _materialService.UpdateMaterialAsync(model);
+            if (!result.Success)
+            {
+                return BadRequest("Bug: " + result.Message);
+            }
+            return Ok(result.Data);
+        }
         public IActionResult Creat_Material()
         {
             return View();

@@ -1,6 +1,10 @@
 let currentPage = 1;
 let pageSize = 50;
 let totalRecords = 0;
+let materialsOnPage = [];
+let selectedMaterialCodeToDelete = "";
+let selectedMaterialForEdit = null;
+const i18nMaterial = window.i18nMaterial || {};
 
 document.addEventListener("DOMContentLoaded", function () {
     _load_material();
@@ -16,6 +20,20 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
+    document.getElementById("btnSearch")?.addEventListener("click", function () {
+        currentPage = 1;
+        _load_material();
+    });
+
+    document.getElementById("lst_gc")?.addEventListener("change", function () {
+        currentPage = 1;
+        _load_material();
+    });
+
+    document.getElementById("btnDownload")?.addEventListener("click", function () {
+        _download_material();
+    });
+
     // Change page size
     document.getElementById("historyPageSize").addEventListener("change", function () {
         pageSize = parseInt(this.value);
@@ -29,12 +47,31 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!btn) return;
 
         let page = btn.getAttribute("data-page");
+        const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
 
         if (page === "prev") currentPage--;
         else if (page === "next") currentPage++;
         else currentPage = parseInt(page);
 
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
         _load_material();
+    });
+
+    document.getElementById("show_material")?.addEventListener("click", handleTableActionClick);
+
+    document.getElementById("btnConfirmDeleteMaterial")?.addEventListener("click", confirmDeleteMaterial);
+
+    document.getElementById("btnSaveMaterialChanges")?.addEventListener("click", saveMaterialChanges);
+
+    document.querySelectorAll("[data-dismiss='modal']").forEach(button => {
+        button.addEventListener("click", function () {
+            const modal = button.closest(".modal");
+            if (modal?.id) {
+                hideModal(modal.id);
+            }
+        });
     });
 });
 
@@ -60,21 +97,32 @@ async function _load_material() {
         });
 
         if (!res.ok) {
-            alert("Lỗi khi load dữ liệu");
+            alert(t("LoadDataError", "Lỗi khi load dữ liệu"));
             return;
         }
 
-        const data = await res.json();
+        const payload = await res.json();
+        const data = Array.isArray(payload?.data)
+            ? payload.data
+            : (Array.isArray(payload) ? payload : []);
 
-        renderTable(data.data || data);
-        totalRecords = data.totalCount || data.length || 0;
+        materialsOnPage = data;
+        renderTable(data);
+        totalRecords = payload?.totalCount ?? data.length ?? 0;
+
+        const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+            await _load_material();
+            return;
+        }
 
         renderPagination();
         renderInfo();
 
     } catch (err) {
         console.error(err);
-        alert("Lỗi hệ thống");
+        alert(t("SystemError", "Lỗi hệ thống"));
     }
 }
 
@@ -83,22 +131,30 @@ function renderTable(data) {
     tbody.innerHTML = "";
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center">Không có dữ liệu</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center">${escapeHtml(t("NoData", "Không có dữ liệu"))}</td></tr>`;
         return;
     }
 
     data.forEach(item => {
+        const materialCode = item.material_Code || "";
         const row = `
             <tr>
-                <td>${item.material_Code || ""}</td>
-                <td>${item.material_Name_VN || ""}</td>
-                <td>${item.material_Name_EN || ""}</td>
-                <td>${item.material_Name_JP || ""}</td>
-                <td>${item.unit || ""}</td>
-                <td>${item.category_VN || ""}</td>
-                <td>${item.code_Suppiler || ""}</td>
-                <td>${item.group_Code || ""}</td>
-                <td>${item.type || ""}</td>
+                <td>${escapeHtml(materialCode)}</td>
+                <td>${escapeHtml(item.material_Name_VN)}</td>
+                <td>${escapeHtml(item.material_Name_EN)}</td>
+                <td>${escapeHtml(item.material_Name_JP)}</td>
+                <td>${escapeHtml(item.unit)}</td>
+                <td>${escapeHtml(item.category_VN)}</td>
+                <td>${escapeHtml(item.code_Suppiler)}</td>
+                <td>${escapeHtml(item.group_Code)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-primary mr-1" data-action="edit" data-code="${escapeHtml(materialCode)}">
+                        ${escapeHtml(t("Edit", "Sửa"))}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-code="${escapeHtml(materialCode)}">
+                        ${escapeHtml(t("Delete", "Xóa"))}
+                    </button>
+                </td>
             </tr>
         `;
         tbody.insertAdjacentHTML("beforeend", row);
@@ -144,8 +200,241 @@ function renderInfo() {
     const start = (currentPage - 1) * pageSize + 1;
     const end = Math.min(start + pageSize - 1, totalRecords);
 
-    document.getElementById("historyPaginationInfo").innerText =
-        `Hiển thị ${start} - ${end} / ${totalRecords}`;
+    const paginationInfo =
+        totalRecords === 0
+            ? formatString(t("PaginationInfo", "Hiển thị {0} - {1} / {2}"), 0, 0, 0)
+            : formatString(t("PaginationInfo", "Hiển thị {0} - {1} / {2}"), start, end, totalRecords);
+
+    document.getElementById("historyPaginationInfo").innerText = paginationInfo;
+}
+
+function handleTableActionClick(event) {
+    const btn = event.target.closest("button[data-action]");
+    if (!btn) {
+        return;
+    }
+
+    const action = btn.getAttribute("data-action");
+    const materialCode = btn.getAttribute("data-code");
+    if (!materialCode) {
+        return;
+    }
+
+    if (action === "delete") {
+        openDeleteModal(materialCode);
+        return;
+    }
+
+    if (action === "edit") {
+        openEditModal(materialCode);
+    }
+}
+
+function openDeleteModal(materialCode) {
+    selectedMaterialCodeToDelete = materialCode;
+    const messageEl = document.getElementById("deleteMaterialMessage");
+    if (messageEl) {
+        messageEl.textContent = formatString(
+            t("ConfirmDeleteMessageFormat", "Bạn có chắc chắn muốn xóa mã vật tư \"{0}\"?"),
+            materialCode
+        );
+    }
+
+    showModal("deleteMaterialModal");
+}
+
+async function confirmDeleteMaterial() {
+    if (!selectedMaterialCodeToDelete) {
+        return;
+    }
+
+    try {
+        const res = await fetch(apiUrl(`/Material/DeleteMaterial?codeMaterial=${encodeURIComponent(selectedMaterialCodeToDelete)}`), {
+            method: "GET"
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            alert(errorText || t("DeleteFailed", "Xóa mã vật tư thất bại"));
+            return;
+        }
+
+        hideModal("deleteMaterialModal");
+
+        if (materialsOnPage.length === 1 && currentPage > 1) {
+            currentPage--;
+        }
+
+        selectedMaterialCodeToDelete = "";
+        await _load_material();
+    } catch (err) {
+        console.error(err);
+        alert(t("DeleteSystemError", "Lỗi hệ thống khi xóa mã vật tư"));
+    }
+}
+
+function openEditModal(materialCode) {
+    selectedMaterialForEdit = materialsOnPage.find(item => item.material_Code === materialCode) || null;
+
+    if (!selectedMaterialForEdit) {
+        alert(t("EditNotFound", "Không tìm thấy thông tin vật tư để sửa"));
+        return;
+    }
+
+    setInputValue("editMaterialCode", selectedMaterialForEdit.material_Code);
+    setInputValue("editMaterialNameVN", selectedMaterialForEdit.material_Name_VN);
+    setInputValue("editMaterialNameEN", selectedMaterialForEdit.material_Name_EN);
+    setInputValue("editMaterialNameJP", selectedMaterialForEdit.material_Name_JP);
+    setInputValue("editUnit", selectedMaterialForEdit.unit);
+    setInputValue("editCategoryVN", selectedMaterialForEdit.category_VN);
+    setInputValue("editCodeSupplier", selectedMaterialForEdit.code_Suppiler);
+    setInputValue("editGroupCode", selectedMaterialForEdit.group_Code);
+
+    showModal("editMaterialModal");
+}
+
+async function saveMaterialChanges() {
+    if (!selectedMaterialForEdit) {
+        return;
+    }
+
+    const materialCode = getInputValue("editMaterialCode");
+    if (!materialCode) {
+        alert(t("InvalidMaterialCode", "Mã vật tư không hợp lệ"));
+        return;
+    }
+
+    const payload = {
+        Id_Material: getProp(selectedMaterialForEdit, ["id_Material", "idMaterial"], 0),
+        Material_Code: materialCode,
+        Material_Name_VN: getInputValue("editMaterialNameVN"),
+        Material_Name_EN: getInputValue("editMaterialNameEN"),
+        Material_Name_JP: getInputValue("editMaterialNameJP"),
+        Unit: getInputValue("editUnit"),
+        Category_VN: getInputValue("editCategoryVN"),
+        Category_EN: getProp(selectedMaterialForEdit, ["category_EN", "categoryEn"], ""),
+        Category_JP: getProp(selectedMaterialForEdit, ["category_JP", "categoryJp"], ""),
+        Group_Code: getInputValue("editGroupCode"),
+        Shape: getProp(selectedMaterialForEdit, ["shape"], ""),
+        Material: getProp(selectedMaterialForEdit, ["material", "material1"], ""),
+        Composition: getProp(selectedMaterialForEdit, ["composition"], ""),
+        Dimension: getProp(selectedMaterialForEdit, ["dimension"], ""),
+        UsedFor: getProp(selectedMaterialForEdit, ["usedFor"], ""),
+        Purpose: getProp(selectedMaterialForEdit, ["purpose"], ""),
+        Code_Suppiler: getInputValue("editCodeSupplier")
+    };
+
+    try {
+        const res = await fetch(apiUrl("/Material/UpdateMaterial"), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            alert(errorText || t("UpdateFailed", "Cập nhật mã vật tư thất bại"));
+            return;
+        }
+
+        hideModal("editMaterialModal");
+        selectedMaterialForEdit = null;
+        await _load_material();
+    } catch (err) {
+        console.error(err);
+        alert(t("UpdateSystemError", "Lỗi hệ thống khi cập nhật vật tư"));
+    }
+}
+
+function t(key, fallback) {
+    const value = i18nMaterial[key];
+    return value === undefined || value === null || value === "" ? fallback : value;
+}
+
+function formatString(template, ...args) {
+    return String(template).replace(/\{(\d+)\}/g, (match, index) => {
+        const value = args[Number(index)];
+        return value === undefined || value === null ? "" : String(value);
+    });
+}
+
+function setInputValue(id, value) {
+    const element = document.getElementById(id);
+    if (!element) {
+        return;
+    }
+
+    element.value = value ?? "";
+}
+
+function getInputValue(id) {
+    const element = document.getElementById(id);
+    return element ? element.value.trim() : "";
+}
+
+function getProp(source, keys, defaultValue) {
+    for (const key of keys) {
+        if (source[key] !== undefined && source[key] !== null) {
+            return source[key];
+        }
+    }
+
+    return defaultValue;
+}
+
+function showModal(modalId) {
+    const modalElement = document.getElementById(modalId);
+    if (!modalElement) {
+        return;
+    }
+
+    if (window.bootstrap?.Modal) {
+        window.bootstrap.Modal.getOrCreateInstance(modalElement).show();
+        return;
+    }
+
+    if (window.jQuery && typeof window.jQuery.fn.modal === "function") {
+        window.jQuery(modalElement).modal("show");
+        return;
+    }
+
+    modalElement.style.display = "block";
+    modalElement.classList.add("show");
+}
+
+function hideModal(modalId) {
+    const modalElement = document.getElementById(modalId);
+    if (!modalElement) {
+        return;
+    }
+
+    if (window.bootstrap?.Modal) {
+        window.bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+        return;
+    }
+
+    if (window.jQuery && typeof window.jQuery.fn.modal === "function") {
+        window.jQuery(modalElement).modal("hide");
+        return;
+    }
+
+    modalElement.classList.remove("show");
+    modalElement.style.display = "none";
+}
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 async function _download_material() {
@@ -159,7 +448,7 @@ async function _download_material() {
         });
 
         if (!res.ok) {
-            alert("Lỗi download file");
+            alert(t("DownloadError", "Lỗi download file"));
             return;
         }
 
@@ -185,7 +474,7 @@ async function _download_material() {
 
     } catch (err) {
         console.error(err);
-        alert("Lỗi hệ thống khi tải file");
+        alert(t("DownloadSystemError", "Lỗi hệ thống khi tải file"));
     }
 }
 function apiUrl(path) {

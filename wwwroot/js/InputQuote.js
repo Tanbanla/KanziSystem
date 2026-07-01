@@ -14,7 +14,11 @@
     let elements = {};
     function initEnhancements(root) {
         try {
-            buildSearchableDropdown(root || document);
+            if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
+                window.KanziSearchableDropdown.init(root || document);
+            } else {
+                buildSearchableDropdown(root || document);
+            }
         } catch (e) {
     
         }
@@ -248,9 +252,21 @@
         selects.forEach(function (select) {
             if (select.dataset.searchDropdown === 'true') return;
 
-            const options = Array.from(select.options).map(function (opt) {
+            let options = Array.from(select.options).map(function (opt) {
                 return { value: opt.value, text: opt.textContent || opt.innerText || '', selected: opt.selected };
             });
+            const remoteEnabled = String(select.dataset.remote || '').toLowerCase() === 'true';
+            const remoteState = {
+                enabled: remoteEnabled,
+                api: select.dataset.api || '/InputQuotation/GetSearchMaterial',
+                pageSize: Math.max(1, parseInt(select.dataset.pageSize || '50', 10) || 50),
+                nextPage: 1,
+                query: '',
+                loading: false,
+                lastPage: false,
+                requestToken: 0,
+                debounceTimer: null
+            };
 
             // Build UI elements
             const wrapper = document.createElement('div'); wrapper.className = 'ms-container';
@@ -262,7 +278,98 @@
             search.innerHTML = '<input type="text" placeholder="' + (T.SearchEllipsis || 'Tìm...') + '" />';
             const list = document.createElement('div'); list.className = 'ms-list';
 
-            function renderList(query) {
+            function rebuildOptionsFromSelect() {
+                options = Array.from(select.options).map(function (opt) {
+                    return { value: opt.value, text: opt.textContent || opt.innerText || '', selected: opt.selected };
+                });
+            }
+
+            function clearRemoteOptionsKeepPlaceholder() {
+                const placeholder = select.options.length > 0 ? select.options[0] : null;
+                select.innerHTML = '';
+                if (placeholder) {
+                    select.appendChild(placeholder);
+                    placeholder.selected = !select.value;
+                }
+                rebuildOptionsFromSelect();
+            }
+
+            function appendRemoteItems(items) {
+                const existingValues = new Set(Array.from(select.options).map(function (o) { return o.value; }));
+                (items || []).forEach(function (it) {
+                    const code = String(it.Material_Code || it.material_Code || it.materialCode || '').trim();
+                    if (!code || existingValues.has(code)) return;
+                    const name = String(it.Material_Name_VN || it.material_Name_VN || it.materialNameVN || '').trim();
+                    const text = name ? (code + ' - ' + name) : code;
+                    const opt = document.createElement('option');
+                    opt.value = code;
+                    opt.text = text;
+                    select.appendChild(opt);
+                    existingValues.add(code);
+                });
+                rebuildOptionsFromSelect();
+            }
+
+            function initRemotePaginationFromCurrentOptions() {
+                const nonEmptyCount = options.filter(function (o) { return !!o.value; }).length;
+                remoteState.nextPage = Math.floor(nonEmptyCount / remoteState.pageSize) + 1;
+                remoteState.lastPage = nonEmptyCount > 0 && nonEmptyCount < remoteState.pageSize;
+            }
+
+            async function fetchRemoteMaterials(reset) {
+                if (!remoteState.enabled) return;
+                if (remoteState.loading) return;
+                if (!reset && remoteState.lastPage) return;
+
+                const pageToLoad = reset ? 1 : remoteState.nextPage;
+                const token = ++remoteState.requestToken;
+                const preserveScroll = !reset;
+                const currentScrollTop = preserveScroll ? list.scrollTop : 0;
+
+                if (reset) {
+                    remoteState.lastPage = false;
+                    clearRemoteOptionsKeepPlaceholder();
+                }
+
+                remoteState.loading = true;
+                renderList(remoteState.query, preserveScroll ? currentScrollTop : null);
+
+                try {
+                    const body = {
+                        MaHang: '',
+                        Name: remoteState.query || '',
+                        NhomHang: '',
+                        PageIndex: pageToLoad,
+                        PageSize: remoteState.pageSize
+                    };
+                    const url = (window.apiBaseUrl || '') + remoteState.api;
+                    const res = await callApi(url, body);
+
+                    if (token !== remoteState.requestToken) return;
+
+                    const rows = Array.isArray(res)
+                        ? res
+                        : (Array.isArray(res?.data) ? res.data : []);
+
+                    appendRemoteItems(rows);
+
+                    if (rows.length < remoteState.pageSize) {
+                        remoteState.lastPage = true;
+                    } else {
+                        remoteState.nextPage = pageToLoad + 1;
+                    }
+                } catch (err) {
+                    console.error(err);
+                } finally {
+                    if (token === remoteState.requestToken) {
+                        remoteState.loading = false;
+                        renderList(remoteState.query, preserveScroll ? currentScrollTop : null);
+                        updateButtonText();
+                    }
+                }
+            }
+
+            function renderList(query, scrollTop) {
                 const q = (query || '').toLowerCase();
                 list.innerHTML = '';
                 let hasItems = false;
@@ -280,6 +387,16 @@
                 if (!hasItems) {
                     const empty = document.createElement('div'); empty.className = 'ms-empty'; empty.textContent = (window.i18nInputQuote && window.i18nInputQuote.NoResults) || 'Không có kết quả';
                     list.appendChild(empty);
+                }
+                if (remoteState.enabled && remoteState.loading) {
+                    const loading = document.createElement('div');
+                    loading.className = 'ms-empty';
+                    loading.textContent = (window.i18nInputQuote && window.i18nInputQuote.Loading) || 'Đang tải...';
+                    list.appendChild(loading);
+                }
+
+                if (typeof scrollTop === 'number') {
+                    list.scrollTop = scrollTop;
                 }
             }
 
@@ -304,6 +421,9 @@
             });
 
             updateButtonText();
+            if (remoteState.enabled) {
+                initRemotePaginationFromCurrentOptions();
+            }
             renderList('');
 
             dropdown.appendChild(search);
@@ -363,7 +483,17 @@
                     dropdown._detached = true;
                     const inp = search.querySelector('input');
                     if (inp) { inp.value = ''; inp.focus(); }
-                    renderList('');
+                    remoteState.query = '';
+                    if (remoteState.enabled) {
+                        const currentCount = options.filter(function (o) { return !!o.value; }).length;
+                        if (currentCount === 0) {
+                            fetchRemoteMaterials(true);
+                        } else {
+                            renderList('');
+                        }
+                    } else {
+                        renderList('');
+                    }
                 }
             });
 
@@ -409,7 +539,32 @@
 
             const inp = search.querySelector('input');
             if (inp) {
-                inp.addEventListener('input', function () { renderList(this.value); });
+                inp.addEventListener('input', function () {
+                    if (!remoteState.enabled) {
+                        renderList(this.value);
+                        return;
+                    }
+
+                    remoteState.query = (this.value || '').trim();
+                    if (remoteState.debounceTimer) {
+                        clearTimeout(remoteState.debounceTimer);
+                    }
+
+                    remoteState.debounceTimer = setTimeout(function () {
+                        remoteState.nextPage = 1;
+                        fetchRemoteMaterials(true);
+                    }, 300);
+                });
+            }
+
+            if (remoteState.enabled) {
+                list.addEventListener('scroll', function () {
+                    if (!dropdown.classList.contains('open')) return;
+                    if (remoteState.loading || remoteState.lastPage) return;
+                    const nearBottom = (list.scrollTop + list.clientHeight) >= (list.scrollHeight - 24);
+                    if (!nearBottom) return;
+                    fetchRemoteMaterials(false);
+                });
             }
 
             // Mark enhanced

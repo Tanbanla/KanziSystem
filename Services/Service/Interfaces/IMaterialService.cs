@@ -1,6 +1,7 @@
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Runtime.CompilerServices;
 using static PRJ_WAREHOUSE_BIVN.View_Models.Material.MaterialVM;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
@@ -32,5 +33,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<ListRequest<MATERIAL>>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
         // Export danh sách linh kiện
         Task<GenericResponse<(byte[] FileBytes, string FileName, string ContentType)>> ExportMaterialViewToExcelAsync(SearchMaterialVM search);
+        // Delete Material
+        Task<GenericResponse<bool>> DeleteMaterialAsync(string codeMaterial);
+        // Update Material
+        Task<GenericResponse<bool>> UpdateMaterialAsync(MATERIALDTO mt);
     }
 }

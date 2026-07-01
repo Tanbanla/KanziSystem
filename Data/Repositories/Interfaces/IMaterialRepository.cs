@@ -30,5 +30,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<string> CheckMaterialCode(string keyword, string category);
         // Search date by Material View
         Task<ListRequest<MATERIAL>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
+        // Delete Material
+        Task<bool> DeleteMaterialAsync(string codeMaterial);
+        // Update Material
+        Task<bool> UpdateMaterialAsync(MATERIAL mt);
     }
 }

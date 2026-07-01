@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Material";
+    ViewData["Title"] = Localizer["PageTitle"].Value;
 }
 <head>
     <link rel="stylesheet" href="~/css/Material.css" />
@@ -16,7 +16,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="ion ion-ios-barcode"></i></span>
                             </div>
-                            <input type="text" class="form-control" id="Material_Code" placeholder="Mã vật tư">
+                            <input type="text" class="form-control" id="Material_Code" placeholder="@Localizer["PlaceholderMaterialCode"]">
                         </div>
                     </div>
 
@@ -25,7 +25,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="ion ion-ios-paper"></i></span>
                             </div>
-                            <input type="text" class="form-control" id="Material_Name_VN" placeholder="Tên vật tư (VN)">
+                            <input type="text" class="form-control" id="Material_Name_VN" placeholder="@Localizer["PlaceholderMaterialNameVN"]">
                         </div>
                     </div>
 
@@ -34,7 +34,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="ion ion-key"></i></span>
                             </div>
-                            <input type="text" class="form-control" id="Category_VN" placeholder="Chủng loại">
+                            <input type="text" class="form-control" id="Category_VN" placeholder="@Localizer["PlaceholderCategory"]">
                         </div>
                     </div>
 
@@ -43,8 +43,8 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="ion ion-ios-grid-view"></i></span>
                             </div>
-                            <select class="form-control" id="lst_gc" onchange="_load_material()">
-                                <option value="">Chọn khối</option>
+                            <select class="form-control" id="lst_gc">
+                                <option value="">@Localizer["SelectGroup"]</option>
                                 <option value="PROD">PROD</option>
                                 <option value="GA">GA</option>
                                 <option value="IT">IT</option>
@@ -54,14 +54,14 @@
                     </div>
 
                     <div class="search-actions">
-                        <button type="button" class="btn-search" onclick="_load_material()">
+                        <button type="button" class="btn-search" id="btnSearch">
                             <i class="ion ion-ios-search-strong"></i>
                         </button>
                         <a href="@Context.Request.PathBase/Material/Creat_Material" class="btn-create">
-                            <i class="ion ion-plus"></i> Tạo mã
+                            <i class="ion ion-plus"></i> @Localizer["CreateCode"]
                         </a>
-                        <button type="button" class="btn btn-outline-success" style="border-radius: 10px;" onclick="_download_material()">
-                            <i class="fas fa-file-download"> Tải dữ liệu</i>
+                        <button type="button" class="btn btn-outline-success" style="border-radius: 10px;" id="btnDownload">
+                            <i class="fas fa-file-download"> @Localizer["DownloadData"]</i>
                         </button>
                     </div>
                 </div>
@@ -73,15 +73,15 @@
                     <table class="table table-bordered">
                         <thead style="background: #007aff">
                             <tr>
-                                <th>Mã vật tư</th>
-                                <th>Tên VN</th>
-                                <th>Tên EN</th>
-                                <th>Tên JP</th>
-                                <th>Đơn vị</th>
-                                <th>Chủng loại hàng</th>
-                                <th>Mã nhà hàng nhà cung cấp</th>
-                                <th>Nhóm</th>
-                                <th>Thao tác</th>
+                                <th>@Localizer["HeaderMaterialCode"]</th>
+                                <th>@Localizer["HeaderNameVN"]</th>
+                                <th>@Localizer["HeaderNameEN"]</th>
+                                <th>@Localizer["HeaderNameJP"]</th>
+                                <th>@Localizer["HeaderUnit"]</th>
+                                <th>@Localizer["HeaderCategory"]</th>
+                                <th>@Localizer["HeaderSupplierCode"]</th>
+                                <th>@Localizer["HeaderGroup"]</th>
+                                <th>@Localizer["HeaderAction"]</th>
                             </tr>
                         </thead>
                         <tbody id="show_material"></tbody>
@@ -95,7 +95,7 @@
             <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="small text-muted" style="margin-right: 8px;" id="historyPaginationInfo">@Localizer["PaginationInfo", "0", "0", "0"].Value</div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <label for="historyPageSize" class="small text-muted mb-0">Số dòng</label>
+                    <label for="historyPageSize" class="small text-muted mb-0">@Localizer["RowsPerPage"]</label>
                     <select id="historyPageSize" class="form-select form-select-sm" style="width:90px;margin-left: 4px;">
                         <option value="20">20</option>
                         <option value="50" selected>50</option>
@@ -115,5 +115,112 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteMaterialModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Localizer["ConfirmDeleteTitle"]</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="@Localizer["Close"]">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteMaterialMessage" class="mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">@Localizer["Cancel"]</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDeleteMaterial">@Localizer["Delete"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editMaterialModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Localizer["EditMaterialTitle"]</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="@Localizer["Close"]">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="editMaterialCode">@Localizer["LabelMaterialCode"]</label>
+                        <input type="text" class="form-control" id="editMaterialCode" readonly>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="editGroupCode">@Localizer["LabelGroup"]</label>
+                        <select class="form-control" id="editGroupCode">
+                            <option value="">@Localizer["SelectGroup"]</option>
+                            <option value="PROD">PROD</option>
+                            <option value="GA">GA</option>
+                            <option value="IT">IT</option>
+                            <option value="PUR">PUR</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="editMaterialNameVN">@Localizer["LabelNameVN"]</label>
+                        <input type="text" class="form-control" id="editMaterialNameVN">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="editMaterialNameEN">@Localizer["LabelNameEN"]</label>
+                        <input type="text" class="form-control" id="editMaterialNameEN">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="editMaterialNameJP">@Localizer["LabelNameJP"]</label>
+                        <input type="text" class="form-control" id="editMaterialNameJP">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="editUnit">@Localizer["LabelUnit"]</label>
+                        <input type="text" class="form-control" id="editUnit">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="editCategoryVN">@Localizer["LabelCategory"]</label>
+                        <input type="text" class="form-control" id="editCategoryVN">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="editCodeSupplier">@Localizer["LabelSupplierCode"]</label>
+                        <input type="text" class="form-control" id="editCodeSupplier">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">@Localizer["Cancel"]</button>
+                <button type="button" class="btn btn-primary" id="btnSaveMaterialChanges">@Localizer["SaveChanges"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.i18nMaterial = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new
+    {
+        NoData = Localizer["NoData"].Value,
+        Edit = Localizer["Edit"].Value,
+        Delete = Localizer["Delete"].Value,
+        PaginationInfo = Localizer["PaginationInfo"].Value,
+        ConfirmDeleteMessage = Localizer["ConfirmDeleteMessage"].Value,
+        LoadDataError = Localizer["LoadDataError"].Value,
+        SystemError = Localizer["SystemError"].Value,
+        DeleteFailed = Localizer["DeleteFailed"].Value,
+        DeleteSystemError = Localizer["DeleteSystemError"].Value,
+        EditNotFound = Localizer["EditNotFound"].Value,
+        InvalidMaterialCode = Localizer["InvalidMaterialCode"].Value,
+        UpdateFailed = Localizer["UpdateFailed"].Value,
+        UpdateSystemError = Localizer["UpdateSystemError"].Value,
+        DownloadError = Localizer["DownloadError"].Value,
+        DownloadSystemError = Localizer["DownloadSystemError"].Value,
+        ConfirmDeleteMessageFormat = Localizer["ConfirmDeleteMessageFormat"].Value
+    }));
+</script>
 
 <script src="~/js/Material.js" asp-append-version="true"></script>

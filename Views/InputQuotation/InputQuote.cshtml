@@ -64,12 +64,12 @@
                         </div>
                         <div class="col-12 col-md-3">
                             <label for="searchMaterial" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
-                            <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select">
+                            <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select" data-remote="true" data-api="/InputQuotation/GetSearchMaterial" data-page-size="500">
                                 <option value="" selected>@Localizer["SelectMaterial"]</option>
-@*                                 @foreach (var s in mATERIAs)
+                                @foreach (var s in mATERIAs)
                                 {
                                     <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
-                                } *@
+                                }
                             </select>
                         </div>
                          <div class="col-12 col-md-3">
@@ -393,5 +393,6 @@
     }));
 </script>
 @section Scripts {
+    <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
     <script src="~/js/InputQuote.js"  asp-append-version="true"></script>
 }

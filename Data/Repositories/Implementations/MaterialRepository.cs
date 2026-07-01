@@ -307,5 +307,44 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 TotalCount = totalCount
             };
         }
+        // Delete Material
+        public async Task<bool> DeleteMaterialAsync(string codeMaterial)
+        {
+            var material = await _context.MATERIALs.FirstOrDefaultAsync(m => m.Material_Code == codeMaterial);
+            if (material == null)
+                return false;
+            _context.MATERIALs.Remove(material);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        // Update Material
+        public async Task<bool> UpdateMaterialAsync(MATERIAL mt)
+        {
+            var material = await _context.MATERIALs.FirstOrDefaultAsync(m => m.Material_Code == mt.Material_Code);
+            if (material == null)
+                return false;
+
+            // Update properties
+            material.Material_Code = mt.Material_Code;
+            material.Material_Name_VN = mt.Material_Name_VN;
+            material.Material_Name_EN = mt.Material_Name_EN;
+            material.Material_Name_JP = mt.Material_Name_JP;
+            material.Category_VN = mt.Category_VN;
+            material.Category_EN = mt.Category_EN;
+            material.Category_JP = mt.Category_JP;
+            material.Group_Code = mt.Group_Code;
+            material.Shape = mt.Shape;
+            material.Unit = mt.Unit;
+            material.Material1 = mt.Material1;
+            material.Composition = mt.Composition;
+            material.Dimension = mt.Dimension;
+            material.UsedFor = mt.UsedFor;
+            material.Purpose = mt.Purpose;
+            material.Code_Suppiler = mt.Code_Suppiler;
+
+            _context.MATERIALs.Update(material);
+            await _context.SaveChangesAsync();
+            return true;
+        }   
     }
 }
