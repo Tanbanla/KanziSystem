@@ -64,7 +64,7 @@
                         </div>
                         <div class="col-12 col-md-3">
                             <label for="searchMaterial" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
-                            <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select" data-remote="true" data-api="/InputQuotation/GetSearchMaterial" data-page-size="500">
+                            <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
                                 <option value="" selected>@Localizer["SelectMaterial"]</option>
                                 @foreach (var s in mATERIAs)
                                 {
@@ -167,7 +167,7 @@
                         </div>
                         <div class="col-12 col-md-2">
                             <label for="supplierSearchMaVatTu" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
-                            <select id="supplierSearchMaVatTu" name="supplierSearchMaVatTu" class="form-select supplierSearchMaVatTu searchable-select">
+                            <select id="supplierSearchMaVatTu" name="supplierSearchMaVatTu" class="form-select supplierSearchMaVatTu searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
                                 <option value="" selected>@Localizer["SelectMaterial"]</option>
                                 @foreach (var s in mATERIAs)
                                 {

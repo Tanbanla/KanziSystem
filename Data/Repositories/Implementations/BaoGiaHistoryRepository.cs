@@ -336,15 +336,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         d.BIT_Select,
                         d.NVCHR_ReasonPick,
                         d.NVCHR_File,
+                        v.ShortName,
                         ROW_NUMBER() OVER (
                             PARTITION BY q.CHR_MaDon, q.CHR_MaHangNoiBo
                             ORDER BY q.ID_StepBaoGia DESC
                         ) AS rn
-                    FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] q
-                    INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] s
+                    FROM BaoGia_Request_of_Quotation q
+                    INNER JOIN BaoGia_Master_Approver_Send_Mail s
                         ON q.CHR_SectionCode = s.CHR_CodeSection
-                    LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Detail_of_Quotation] d
+                    LEFT JOIN BaoGia_Detail_of_Quotation d
                         ON q.ID = d.ID_RequestQuote
+                    LEFT JOIN IM_NCC_NEW v ON q.CHR_MaNCC = v.Ma
             ";
 
 
@@ -447,7 +449,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     CHR_LinkFile,
                     BIT_Select,
                     NVCHR_ReasonPick,
-                    NVCHR_File
+                    NVCHR_File,
+					ShortName
                 FROM CTE_MaxStep
                 WHERE rn = 1
                 ORDER BY CTE_MaxStep.CHR_MaDon, CTE_MaxStep.CHR_MaHangNoiBo

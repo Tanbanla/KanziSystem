@@ -731,11 +731,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     var reasonRemark = ws.Cell(r, 53).GetString();
 
-                    allRowsData.Add(new
+                    allRowsData.Add(new BaoGiaImportModel
                     {
                         Row = r,
                         MaDon = maDon,
-                        ID = id,
+                        ID = int.Parse(id),
                         MaThietBi = maThietBi,
                         MaHangNoiBo = maHangNB,
                         CodeVender = codeVender,
@@ -998,138 +998,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(_localizer["ReadFileError", ex.Message]);
             }
         }
-        [HttpPost]
-        public async Task<IActionResult> ImportQuotianExcelOld([FromForm] ImportPickSupplier vm)
-        {
-            if (vm.fileSend == null || vm.fileSend.Length == 0)
-                return BadRequest(_localizer["InvalidFile"]);
 
-            var items = new List<dynamic>();
-            var errorRows = new List<dynamic>();
-            try
-            {
-                using var stream = vm.fileSend.OpenReadStream();
-                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
-                var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null) return BadRequest(_localizer["WorksheetNotFound"]);
-                var isErrors = false;
-                // Dữ liệu bắt đầu từ dòng 4
-                int startRow = 4;
-                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
-
-                for (int r = startRow; r <= lastRow; r++)
-                {
-                    var errors = new List<string>();
-                    var maDon = ws.Cell(r, 1).GetString();
-                    if (string.IsNullOrEmpty(maDon))
-                    {
-                        break;
-                    }
-                    var id = ws.Cell(r, 3).GetString();
-                    var bitSelect = ws.Cell(r, 51).GetString();
-                    var reason = ws.Cell(r, 52).GetString();
-                    var maHangNB = ws.Cell(r, 5).GetString();
-
-                    // Validate
-                    if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
-                    {
-                        isErrors = true;
-                        errors.Add(_localizer["SelectedVendorNoReason"].Value);
-                    }
-
-                    if (errors.Any())
-                    {
-                        errorRows.Add(new
-                        {
-                            Row = r,
-                            MaDon = maDon,
-                            ID = id,
-                            BIT_Select = bitSelect,
-                            NVCHR_ReasonPick = reason,
-                            Errors = string.Join("; ", errors)
-                        });
-                    }
-                    else
-                    {
-                        var check = items.Where(c => c.CHR_MaDon == maDon && c.CHR_MaHangNoiBo == maHangNB && c.BIT_Select).ToList();
-                        if (check.Any() && bitSelect.Contains("O"))
-                        {
-                            isErrors = true;
-                            errorRows.Add(new
-                            {
-                                Row = r,
-                                MaDon = maDon,
-                                ID = id,
-                                BIT_Select = bitSelect,
-                                NVCHR_ReasonPick = reason,
-                                Errors = string.Join("; ", _localizer["OneVendorPerItemInOrder"].Value)
-                            });
-                        }
-                        else
-                        {
-                            items.Add(new
-                            {
-                                ID = id,
-                                BIT_Select = bitSelect.Contains("O"),
-                                NVCHR_ReasonPick = reason,
-                                CHR_MaDon = maDon,
-                                CHR_MaHangNoiBo = maHangNB
-                            });
-                        }
-                    }
-                }
-
-                if (isErrors)
-                {
-                    // Create error file
-                    using var errorWorkbook = new ClosedXML.Excel.XLWorkbook();
-                    var errorWs = errorWorkbook.Worksheets.Add("Errors");
-                    errorWs.Cell(1, 1).Value = "Row";
-                    errorWs.Cell(1, 2).Value = "MaDon";
-                    errorWs.Cell(1, 3).Value = "ID";
-                    errorWs.Cell(1, 4).Value = "BIT_Select";
-                    errorWs.Cell(1, 5).Value = "NVCHR_ReasonPick";
-                    errorWs.Cell(1, 6).Value = "Errors";
-                    for (int i = 0; i < errorRows.Count; i++)
-                    {
-                        var row = errorRows[i];
-                        errorWs.Cell(i + 2, 1).Value = row.Row;
-                        errorWs.Cell(i + 2, 2).Value = row.MaDon;
-                        errorWs.Cell(i + 2, 3).Value = row.ID;
-                        errorWs.Cell(i + 2, 4).Value = row.BIT_Select;
-                        errorWs.Cell(i + 2, 5).Value = row.NVCHR_ReasonPick;
-                        errorWs.Cell(i + 2, 6).Value = row.Errors;
-                    }
-                    using var errorStream = new MemoryStream();
-                    errorWorkbook.SaveAs(errorStream);
-                    var errorBytes = errorStream.ToArray();
-                    var errorFileName = $"ImportErrors_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-                    const string errorContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                    return File(errorBytes, errorContentType, errorFileName);
-                }
-                else
-                {
-                    // Update database
-                    var dtoList = items.Select(i => new BaoGia_Detail_of_QuotationDTO
-                    {
-                        ID = int.Parse(i.ID.ToString()),
-                        BIT_Select = (bool)i.BIT_Select,
-                        NVCHR_ReasonPick = i.NVCHR_ReasonPick.ToString(),
-                        CHR_UpdateBy = GetCurrentUserId()
-                    }).ToList();
-                    var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(dtoList, vm.userNextApproval);
-                    if (!result.Success)
-                    {
-                        return BadRequest(result.Message);
-                    }
-                    return Ok(new { message = "Import successful" });
-                }
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(_localizer["ReadFileError", ex.Message]);
-            }
-        }
         [HttpPost]
         public async Task<IActionResult> SearchInputQuote([FromBody] SearchInputQuote searchModel)
         {

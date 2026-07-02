@@ -303,7 +303,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-uppercase fw-semibold">@Localizer["InternalMaterialCode"]</label>
-                    <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select">
+                    <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
                         <option value="" selected>@Localizer["SelectInternalMaterialCode"]</option>
                         @foreach (var m in materials)
                         {
@@ -395,6 +395,7 @@
     <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
 </div>
 @section Scripts {
+    <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
     <script src="~/js/SelectQuote.js" asp-append-version="true"></script>
     <script>
         (function() {

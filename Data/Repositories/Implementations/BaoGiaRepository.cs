@@ -1695,9 +1695,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     q.*, 
                     d.BIT_Select, 
                     d.NVCHR_ReasonPick, 
-                    d.NVCHR_File
+                    d.NVCHR_File,
+                    v.ShortName
                 FROM FilteredRequest q
                 LEFT JOIN LatestDetail d ON d.ID_RequestQuote = q.ID AND d.rn = 1
+                LEFT JOIN IM_NCC_NEW v ON q.CHR_MaNCC = v.Ma
                 ORDER BY q.CHR_MaDon DESC";
 
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
@@ -1763,6 +1765,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = "SELECT CHR_MaNcc FROM BaoGia_Vender_NotConfirm WHERE CHR_Status = 'ON'";
             var result = await _conn.QueryAsync<string>(sql);
             return result.ToList();
+        }
+        // kiểm tra đơn + mã hàng đã được quyền lựa chọn nhà cung cấp hay chưa
+        public async Task<List<BaoGiaImportModel>> CheckPermissionSelectSupplierAsync(BaoGiaImportModel baoGiaImportModel)
+        {
+            // Implement the logic to check permission here
+            throw new NotImplementedException();
         }
     }
 }

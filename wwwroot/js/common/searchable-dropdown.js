@@ -28,7 +28,7 @@
             var remoteEnabled = String(select.dataset.remote || '').toLowerCase() === 'true';
             var remoteState = {
                 enabled: remoteEnabled,
-                api: select.dataset.api || '/InputQuotation/GetSearchMaterial',
+                api: select.dataset.api || '/Material/SearchMaterialView',
                 pageSize: Math.max(1, parseInt(select.dataset.pageSize || '50', 10) || 50),
                 nextPage: 1,
                 query: '',
@@ -154,11 +154,12 @@
 
                 try {
                     var body = {
-                        MaHang: '',
-                        Name: remoteState.query || '',
-                        NhomHang: '',
-                        PageIndex: pageToLoad,
-                        PageSize: remoteState.pageSize
+                        MaterialCode: '',
+                        MaterialName: remoteState.query || '',
+                        MaterialCatergory: '',
+                        MaterialGroup: '',
+                        pageIndex: pageToLoad,
+                        pageSize: remoteState.pageSize
                     };
                     var url = (window.apiBaseUrl || '') + remoteState.api;
                     var res = await callRemoteApi(url, body);

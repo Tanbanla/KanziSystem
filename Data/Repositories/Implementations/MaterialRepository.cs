@@ -254,7 +254,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 where.Add(@"(
                     Material_Name_VN LIKE '%' + @MaterialName + '%' 
                     OR Material_Name_EN LIKE '%' + @MaterialName + '%' 
-                    OR Material_Name_JP LIKE '%' + @MaterialName + '%'
+                    OR Material_Name_JP LIKE '%' + @MaterialName + '%' or Material_Code LIKE '%' + @MaterialName + '%'
                 )");
                 parameters.Add("MaterialName", search.MaterialName);
             }

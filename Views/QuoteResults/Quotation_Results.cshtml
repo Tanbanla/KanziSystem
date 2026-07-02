@@ -287,7 +287,7 @@
                         </div>
                         <div class="col-12 col-md-3">
                             <label for="searchMaterial" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
-                            <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select">
+                            <select id="searchMaterial" name="searchMaterial" class="form-select searchMaterial searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
                                 <option value="" selected>@Localizer["SelectMaterial"]</option>
                                 @foreach (var s in listMaterials)
                                 {
@@ -397,7 +397,7 @@
                         </div>
                         <div class="col-12 col-md-2">
                             <label for="supplierSearchMaVatTu" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
-                            <select id="supplierSearchMaVatTu" name="supplierSearchMaVatTu" class="form-select supplierSearchMaVatTu searchable-select">
+                            <select id="supplierSearchMaVatTu" name="supplierSearchMaVatTu" class="form-select supplierSearchMaVatTu searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
                                 <option value="" selected>@Localizer["SelectMaterial"]</option>
                                 @foreach (var s in listMaterials)
                                 {
@@ -590,6 +590,7 @@
 }
 
 @section Scripts {
+    <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
     <script src="~/js/Quotation_Results.js" asp-append-version="true"></script>
     <script>
         (function() {

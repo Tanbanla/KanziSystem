@@ -65,14 +65,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("btnSaveMaterialChanges")?.addEventListener("click", saveMaterialChanges);
 
-    document.querySelectorAll("[data-dismiss='modal']").forEach(button => {
-        button.addEventListener("click", function () {
-            const modal = button.closest(".modal");
-            if (modal?.id) {
-                hideModal(modal.id);
-            }
-        });
-    });
+    bindModalCloseButtons("deleteMaterialModal");
+    bindModalCloseButtons("editMaterialModal");
 });
 
 function _getSearchData() {
@@ -390,9 +384,32 @@ function showModal(modalId) {
         return;
     }
 
+    removeModalBackdrops();
+
     if (window.bootstrap?.Modal) {
-        window.bootstrap.Modal.getOrCreateInstance(modalElement).show();
-        return;
+        const bsModal = window.bootstrap.Modal;
+        if (typeof bsModal.getOrCreateInstance === "function") {
+            bsModal.getOrCreateInstance(modalElement).show();
+            return;
+        }
+
+        if (typeof bsModal.getInstance === "function") {
+            const instance = bsModal.getInstance(modalElement);
+            if (instance && typeof instance.show === "function") {
+                instance.show();
+                return;
+            }
+        }
+
+        try {
+            const instance = new bsModal(modalElement);
+            if (instance && typeof instance.show === "function") {
+                instance.show();
+                return;
+            }
+        } catch (e) {
+            // ignore 
+        }
     }
 
     if (window.jQuery && typeof window.jQuery.fn.modal === "function") {
@@ -410,19 +427,79 @@ function hideModal(modalId) {
         return;
     }
 
+    const forceHide = () => {
+        modalElement.classList.remove("show");
+        modalElement.style.display = "none";
+        modalElement.setAttribute("aria-hidden", "true");
+        modalElement.removeAttribute("aria-modal");
+        removeModalBackdrops();
+    };
+
     if (window.bootstrap?.Modal) {
-        window.bootstrap.Modal.getOrCreateInstance(modalElement).hide();
-        return;
+        const bsModal = window.bootstrap.Modal;
+        if (typeof bsModal.getOrCreateInstance === "function") {
+            bsModal.getOrCreateInstance(modalElement).hide();
+            setTimeout(forceHide, 200);
+            return;
+        }
+
+        if (typeof bsModal.getInstance === "function") {
+            const instance = bsModal.getInstance(modalElement);
+            if (instance && typeof instance.hide === "function") {
+                instance.hide();
+                setTimeout(forceHide, 200);
+                return;
+            }
+        }
+
+        try {
+            const instance = new bsModal(modalElement);
+            if (instance && typeof instance.hide === "function") {
+                instance.hide();
+                setTimeout(forceHide, 200);
+                return;
+            }
+        } catch (e) {
+            // ignore 
+        }
     }
 
     if (window.jQuery && typeof window.jQuery.fn.modal === "function") {
         window.jQuery(modalElement).modal("hide");
+        setTimeout(forceHide, 200);
         return;
     }
 
-    modalElement.classList.remove("show");
-    modalElement.style.display = "none";
+    forceHide();
 }
+
+function bindModalCloseButtons(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+        return;
+    }
+
+    modal.querySelectorAll("[data-dismiss='modal'], .close").forEach(button => {
+        if (button.dataset.modalCloseBound === "true") {
+            return;
+        }
+
+        button.dataset.modalCloseBound = "true";
+        button.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            hideModal(modalId);
+        });
+    });
+}
+
+function removeModalBackdrops() {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
+}
+
 
 function escapeHtml(value) {
     if (value === null || value === undefined) {
