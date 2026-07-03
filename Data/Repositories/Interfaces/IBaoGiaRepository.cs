@@ -64,7 +64,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Check đơn return
         Task<bool> CheckDonReturnAsync(List<string> maDons);
         // Export history báo giá
-        Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
+        Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang,
+            string? status, int? step, string? user, string? chungLoai, DateTime? to, DateTime? from);
         // update thời hạn lựa chọn nhà cung cấp
         Task<List<BaoGia_Request_of_Quotation>> UpdateDeadlineAsync(List<BaoGia_Request_of_Quotation> baoGias);
         // Lấy danh sách NCC k cần xác nhận tên hàng

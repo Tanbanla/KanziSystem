@@ -27,39 +27,91 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     public class PoDetailViewModel
     {
         public int PO_Detail_Id { get; set; }
-        public DateTime? Ngayyc { get; set; }
-        public DateTime? Ngayycgiao { get; set; }
+        public string? Ngayyc { get; set; }
+        public string? Ngayycgiao { get; set; }
         public string? SoPO { get; set; }
         public string? Tentiengviet { get; set; }
         public string? Mahang { get; set; }
-        public decimal Soluong { get; set; }
-        public string? Dovi { get; set; }
+        public double Soluong { get; set; }
+        public string? Donvi { get; set; }
         public string? Nhacungcap { get; set; }
-        public DateTime? TimeGH { get; set; }
         public string? DNphathanhpo { get; set; }
-        public DateTime? ngayguiPO { get; set; } 
-        public string? DNncc { get; set; }
+        public string? ngayguiPO { get; set; } 
+        public string? DNphongban { get; set; }
         public string? ngaynccxngiao { get; set; }
         public string? lichgiao { get; set; }
         public string? anhuongsx { get; set; }
         public string? trangthai { get; set; }
         public string? Danhmuc { get; set; }
+        public string? LuongvekhoKhonhap { get; set; }
     }
     public class ManagerDeliveryController : Controller
     {
-        //public async Task<IActionResult> ManageDelivery()
-        //{
-      
-        //    SQL_Connect_DB20 sql = new SQL_Connect_DB20();
-        //    string query = $@"SELECT a.*, Dealine FROM [COST_MANAGEMENT].[dbo].[PO] as a left join REQUEST as b on a.Code_Request = b.Code_Request where Ngayphathanh >= '{DateTime.Now.ToString("yyyy-MM-01")}' order by Ngayphathanh desc";
 
-        //    var lst = sql.GET_DATA_FROM_SQL(query);
-        //    for(int i = 0; i < lst.Rows.Count; i++)
-        //    {
-        //        PoDetailViewModel po = new PoDetailViewModel();
-        //        po.PO_Detail_Id = int.Parse(lst.Rows[i][""].ToString()!);
-        //    }
-        //}
+        public IActionResult ManageDelivery(int page = 1, string deliveryStatus = "da-nhap")
+        {
+            var luongvekho = "";
+            if(deliveryStatus == "da-nhap") { luongvekho = "LuongvekhoKhonhap is null"; }
+            else { luongvekho = "LuongvekhoKhonhap is not null"; }
+            SQL_Connect_DB20 sql = new SQL_Connect_DB20();
+            string query = $@"SELECT a.*, Dealine FROM [COST_MANAGEMENT].[dbo].[PO] as a 
+                      LEFT JOIN REQUEST as b ON a.Code_Request = b.Code_Request 
+                      WHERE Ngayphathanh >= '2026-06-01' and {luongvekho}
+                      ORDER BY Ngayphathanh DESC";
+
+            var lst = sql.GET_DATA_FROM_SQL_TEST(query);
+            List<PoDetailViewModel> listPo = new List<PoDetailViewModel>();
+
+            for (int i = 0; i < lst.Rows.Count; i++)
+            {
+                PoDetailViewModel po = new PoDetailViewModel();
+
+                po.PO_Detail_Id = int.Parse(lst.Rows[i]["PO_Detail_Id"].ToString()!);
+                po.Ngayyc = lst.Rows[i]["Ngaytao"].ToString()!.Split(' ')[0];
+                po.Ngayycgiao = lst.Rows[i]["Ngaygiaohangdukien"].ToString()!.Split(' ')[0];
+                po.SoPO = lst.Rows[i]["SoPO"].ToString();
+                po.Tentiengviet = lst.Rows[i]["Tentiengviet"].ToString();
+                po.Mahang = lst.Rows[i]["Mahang"].ToString();
+                po.Soluong = double.Parse(lst.Rows[i]["Soluong"].ToString()!);
+                po.Donvi = lst.Rows[i]["Dovi"].ToString();
+                po.Nhacungcap = lst.Rows[i]["TenNCC"].ToString();
+                po.DNphathanhpo = lst.Rows[i]["Nguoilamdon"].ToString()?.ToLower();
+                po.ngayguiPO = lst.Rows[i]["Ngayphathanh"].ToString()!.Split(' ')[0];
+                po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
+                po.ngaynccxngiao = "";
+                po.lichgiao = "";
+                po.anhuongsx = "";
+                po.trangthai = "";
+                po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
+                po.Danhmuc = lst.Rows[i]["Danhmuc"].ToString();
+
+                listPo.Add(po);
+            }
+            // ================= LOGIC PHÂN TRANG CHUẨN 500 BẢN GHI TỪ ĐẦU =================
+            int pageSize = 500;
+            int totalRecords = listPo.Count; // Đếm lại tổng số bản ghi sau khi đã lọc trạng thái
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            // Lấy chính xác 500 bản ghi của trang hiện tại
+            var pagedList = listPo.OrderByDescending(x => x.PO_Detail_Id)
+                                  .Skip((page - 1) * pageSize)
+                                  .Take(pageSize)
+                                  .ToList();
+
+            // Truyền trạng thái bộ lọc và phân trang sang View
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalRecords = totalRecords;
+            ViewBag.PageSize = pageSize;
+            ViewBag.DeliveryStatus = deliveryStatus; // Giữ trạng thái thẻ select dropdown
+
+            TempData["Tongsoluong"] = totalRecords;
+
+            return View(pagedList);
+        }
     }
 }
 

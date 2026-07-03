@@ -986,7 +986,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 _db.GET_DATA_FROM_SQL("update KHO set Hientai = Hientai + " + soluong + " where MaNguyenLieu = '" + malinhkien + "' and Kho = '" + kho + "'");
             }
 
-            _db.GET_DATA_FROM_SQL(" UPDATE [REQUEST_DETAIL] SET [Status] = '',[Amount_Real] = NULL,[Total_exchange_real] = NULL,[Rate_Real] = NULL,[Total_Real] = NULL,Price_Real = NULL,[Id_LichsuXuat] = NULL,[Kho] = NULL WHERE[Code_Request] = '" + mayeucau + "'");
+            _db.GET_DATA_FROM_SQL(" UPDATE [REQUEST_DETAIL] SET [Status] = '',[Amount_Real] = NULL,[Total_exchange_real] = NULL,[Rate_Real] = NULL,[Total_Real] = NULL,Price_Real = NULL,[Id_LichsuXuat] = NULL,[Kho] = NULL WHERE [Code_Request] = '" + mayeucau + "'");
             _db.GET_DATA_FROM_SQL("delete from KHO_NHAPXUAT where Hanhdong like '%" + mayeucau + "%'");
 
             return Json("Reset OK");

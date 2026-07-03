@@ -500,7 +500,7 @@
             trangThai: document.getElementById('statusFilter')?.value?.trim() || null,
             pageIndex,
             pageSize,
-            date: document.getElementById('dateTo')?.value || null,
+            to: document.getElementById('dateTo')?.value || null,
             from: document.getElementById('dateFrom')?.value || null,
             chungLoai: null
         };

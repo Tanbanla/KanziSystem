@@ -1,4 +1,3 @@
-@* 
 @using PRJ_WAREHOUSE_BIVN.Language
 @using PRJ_WAREHOUSE_BIVN.Controllers
 @model IEnumerable<PoDetailViewModel>
@@ -8,6 +7,9 @@
 }
 
 <style>
+    .table.table-bordered th {
+        border-color: #d6d1d1;
+    }
     body {
         background-color: #f8f9fa;
         font-size: 14px;
@@ -28,6 +30,7 @@
     .table-responsive {
         max-height: 600px;
         overflow-y: auto;
+
     }
 
     .table th {
@@ -35,10 +38,11 @@
         top: 0;
         z-index: 1;
         vertical-align: middle;
+        border-color: #d6d1d1;
     }
 
     .bg-pur {
-        background-color: #e2f0d9 !important;
+        background-color: #2335b7 !important;
     }
 
     .badge-ng {
@@ -109,7 +113,7 @@
 
 <div class="tab-content" id="myTabContent">
     <div class="tab-pane fade show active" id="home-pane" role="tabpanel" aria-labelledby="home-tab">
-        <div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">        
+        <div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">
             <div class="card">
                 <div class="card-body">
                     <form class="row g-3">
@@ -119,7 +123,7 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
-                            <input type="month" class="form-control" value="2026-05">
+                            <input type="month" class="form-control" value="@DateTime.Now.ToString("yyyy-06")">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
@@ -140,9 +144,9 @@
             <div class="card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <div>
-                        <select class="form-control" style="padding:2px 5px">
-                            <option>Danh sách PO chưa giao hàng &nbsp;</option>
-                            <option>Danh sách PO đã nhập hàng &nbsp;</option>
+                        <select class="form-control filter-delivery-status" style="padding:2px 5px">
+                            <option value="da-nhap">Danh sách PO chưa giao hàng &nbsp;</option>
+                            <option value="chua-giao">Danh sách PO đã nhập hàng &nbsp;</option>
                         </select>
                     </div>
                     <div>
@@ -150,141 +154,130 @@
                         <button type="button" class="btn btn-sm btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
                     </div>
                 </div>
-                <div class="card-body p-0">                  
+                <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover mb-0 align-middle">
-                            <thead>
+                            <thead style="font-size:12px">
                                 <tr class="text-center text-uppercase fs-7">
-                                    <th class="text-dark text-dark">No.</th>
-                                    <th class="bg-pur text-dark">Ngày YC</th>
-                                    <th class="bg-pur text-dark">Ngày YC giao</th>
-                                    <th class="bg-pur text-dark" width="80px">Số PO</th>
-                                    <th class="bg-pur text-dark" width="200px">Tên hàng</th>
-                                    <th class="bg-pur text-dark">Mã hàng</th>
-                                    <th class="bg-pur text-dark">Số lượng</th>
-                                    <th class="bg-pur text-dark">Đơn vị</th>
-                                    <th class="bg-pur text-dark">Tên NCC</th>
-                                    <th class="bg-pur text-dark">Time GH</th>
-                                    <th class="bg-pur text-dark" width="100">ĐN phát hành PO</th>
-                                    <th class="bg-white text-dark">Ngày gửi PO</th>
-                                    <th class="bg-pur text-dark">ĐN Follow NCC</th>
-                                    <th class="bg-white text-dark">Ngày NCC XN Giao</th>
-                                    <th class="bg-white text-dark">Lịch giao (OK/NG)</th>
-                                    <th class="bg-white text-dark">Ảnh hưởng SX</th>
-                               
-                                    <th class="bg-white text-dark">Trạng thái</th>
-                                    <th class="bg-white text-dark" colspan="3">NHẬP DỮ LIỆU</th>
+                                    <th class="bg-white text-dark">No.</th>
+                                    <th class="bg-pur text-white">Ngày YC</th>
+                                    <th class="bg-pur text-white">Ngày YC giao</th>
+                                    <th class="bg-pur text-white" width="80px">Số PO</th>
+                                    <th class="bg-pur text-white" width="230px">Tên hàng</th>
+                                    <th class="bg-pur text-white">Mã hàng</th>
+                                    <th class="bg-pur text-white">Số lượng</th>
+                                    <th class="bg-pur text-white">Đơn vị</th>
+                                    <th class="bg-pur text-white" width="200px">Tên NCC</th>
+                                    <th class="bg-pur text-white" width="100" title="Người phát hành">ĐN PH PO</th>
+                                    <th class="bg-white text-primary">Ngày gửi PO</th>
+                                    <th class="bg-pur text-white">ĐN Follow NCC</th>
+                                    <th class="bg-white text-primary">Ngày GH</th>
+                                    <th class="bg-white text-primary">Lịch giao (OK/NG)</th>
+                                    <th class="bg-white text-primary">Ảnh hưởng SX</th>
+                                    <th class="bg-white text-primary" colspan="3">NHẬP DỮ LIỆU</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            @if (Model != null && Model.Any())
-                            {
-                                foreach (var item in Model.Where(x=> x.Danhmuc == "OUT"))
+                                @if (Model != null && Model.Any())
                                 {
-                                    <tr class="@(item.Ngayyc != null ? "row-alert-yes" : "")">
-                                        <td class="text-center fw-bold">@(stt++)</td>
-                                        <td class="text-center">@(item.Ngayycgiao?.ToString("dd/MM/yyyy") ?? "-")</td>
-                                        <td class="text-center">@(item.ngaynccxngiao?.ToString("dd/MM/yyyy") ?? "-")</td>
-                                        <td class="text-center fw-bold text-primary">@item.SoPO</td>
-                                        <td>@item.Tentiengviet</td>
-                                        <td class="text-center fw-bold">@item.Mahang</td>
-                                        <td class="text-end">@item.Soluong.ToString("N0")</td>
-                                        <td class="text-center">@item.Dovi</td>
-                                        <td>@item.Nhacungcap</td> <td>Time GH</td> <td></td>
-                                        <td class="text-center">@(item.InvoicePONgaynhap?.ToString("dd/MM/yyyy") ?? "-")</td>
-                                        <td>Người Follow</td> <td class="text-center fw-bold text-danger">Ngày XN Giao</td> <td class="text-center cursor-pointer toggle-detail" data-target="#info-@item.PO_Detail_Id">
-                                            <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                                        </td>
-                                        <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
-                        
-                                        <th class="text-center @(item.LuongvethucteNgaynhap != null ? "text-success" : "text-warning")">
-                                            @(item.LuongvethucteNgaynhap != null ? "Đã nhập hàng" : "Chưa giao hàng")
-                                        </th>
-
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
-                                                    data-po="@item.SoPO" 
-                                                    data-item-name="@item.Tentiengviet" 
-                                                    data-item-code="@item.Mahang"
-                                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
-                                                <i class="fa-solid ion-compose"></i> Dự kiến
-                                            </button>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
-                                                    data-po="@item.SoPO" 
-                                                    data-item-name="@item.Tentiengviet" 
-                                                    data-item-code="@item.Mahang" 
-                                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
-                                                <i class="fa-solid fa fa-pen"></i> Chính thức
-                                            </button>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
-                                                    data-po="@item.SoPO" 
-                                                    data-item-name="@item.Tentiengviet" 
-                                                    data-item-code="@item.Mahang" 
-                                                    data-order-qty="@item.Soluong" 
-                                                    data-req-date="@(item.Ngaygiaohangdukien?.ToString("dd/MM/yyyy"))">
-                                                <i class="fa-solid fa fa-credit-card"></i> Thanh toán
-                                            </button>
-                                        </td>
-                                    </tr>
-
-                                    <tr id="info-@item.PO_Detail_Id" class="collapse detail-row">
-                                        <td colspan="20">
-                                            <div class="detail-container">
-                                                <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT CỦA SỐ PO: @item.SoPO</h6>
-                                                <div class="row g-3">
-                                                    <div class="col-md-4">
-                                                        <div class="p-2 border rounded bg-light">
-                                                            <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
-                                                            <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">@(item.InvoicePONgaynhap?.ToString("dd/MM/yyyy") ?? "Chưa gửi")</b></span>
-                                                            </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="p-2 border rounded bg-light">
-                                                            <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
-                                                            <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">@(item.LuongvethucteNgaynhap?.ToString("dd/MM/yyyy") ?? "--")</b></span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="p-2 border rounded bg-light">
-                                                            <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
-                                                            <span class="d-block fs-7">Tổng tiền: <b class="text-dark">@(item.Sotien?.ToString("N0") ?? "0")</b></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
+                                    foreach (var item in Model.Where(x => x.Danhmuc == "OUT"))
+                                    {
+                                        <tr class="main-row @(item.Ngayyc != null ? "row-alert-yes" : "")" data-luongvekho="@(item.LuongvekhoKhonhap)">
+                                            <td class="text-center fw-bold">@(stt++)</td>
+                                            <td class="text-center">@item.Ngayyc</td>
+                                            <td class="text-center">@item.Ngayycgiao </td>
+                                            <td class="text-center fw-bold text-primary">@item.SoPO</td>
+                                            <td>@item.Tentiengviet</td>
+                                            <td class="text-center fw-bold">@item.Mahang</td>
+                                            <td class="text-end">@item.Soluong.ToString("N0")</td>
+                                            <td class="text-center">@item.Donvi</td>
+                                            <td>@item.Nhacungcap</td>
+                                            <td class="text-center">@(item.DNphathanhpo)</td>
+                                            <td>@item.ngayguiPO</td>
+                                            <td class="text-center fw-bold text-danger">@(item.DNphathanhpo)</td>
+                                            <td></td>
+                                            <td class="text-center cursor-pointer toggle-detail" data-target="#info-@item.PO_Detail_Id">
+                                                <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                            </td>
+                                            <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-req-date="@(item.ngaynccxngiao)">
+                                                    <i class="fa-solid ion-compose"></i> Dự kiến
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-req-date="@(item.ngaynccxngiao)">
+                                                    <i class="fa-solid fa fa-pen"></i> Chính thức
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-order-qty="@item.Soluong"
+                                                        data-req-date="@(item.ngaynccxngiao)">
+                                                    <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu PO nào.</td>
                                     </tr>
                                 }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu PO nào.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
-                    <span class="text-muted">Hiển thị 1-3 trong tổng số 158 dòng dữ liệu chưa giao</span>
+                    <span class="text-muted">
+                        Hiển thị @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1)
+                        - @(Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalRecords))
+                        trong tổng số @ViewBag.TotalRecords dữ liệu
+                    </span>
                     <nav>
                         <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage - 1 })">Trước</a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+
+                                if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i })">@i</a>
+                                    </li>
+                                }
+                                else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
+                                {
+                                    <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                                }
+                            }
+
+                            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage + 1 })">Sau</a>
+                            </li>
                         </ul>
                     </nav>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="tab-pane fade" id="profile-pane" role="tabpanel" aria-labelledby="profile-tab">
         <div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">
             <div class="card">
@@ -317,9 +310,10 @@
             <div class="card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <div>
-                        <select class="form-control" style="padding:2px 5px">
-                            <option>Danh sách mã A/E chưa giao hàng &nbsp;</option>
-                            <option>Danh sách mã A/E đã giao hàng &nbsp;</option>
+                        <select class="form-control filter-delivery-status" style="padding:2px 5px">
+                            <option value="all">-- Tất cả danh sách mã A/E --</option>
+                            <option value="chua-giao">Danh sách mã A/E chưa giao hàng &nbsp;</option>
+                            <option value="da-nhap">Danh sách mã A/E đã giao hàng &nbsp;</option>
                         </select>
                     </div>
                     <div>
@@ -333,30 +327,28 @@
                             <thead>
                                 <tr class="text-center text-uppercase fs-7">
                                     <th class="text-dark">No.</th>
-                                    <th class="bg-pur text-dark">Ngày YC</th>
-                                    <th class="bg-pur text-dark">Ngày YC giao</th>
-                                    <th class="bg-pur text-dark">Số PO</th>
-                                    <th class="bg-pur text-dark">Tên hàng</th>
-                                    <th class="bg-pur text-dark">Mã hàng</th>
-                                    <th class="bg-pur text-dark">Số lượng</th>
-                                    <th class="bg-pur text-dark">Đơn vị</th>
-                                    <th class="bg-pur text-dark">Tên NCC</th>
-                                    <th class="bg-pur text-dark">Time GH</th>
-                                    <th class="bg-pur text-dark" width="100">ĐN phát hành PO</th>
+                                    <th class="bg-pur text-white">Ngày YC</th>
+                                    <th class="bg-pur text-white">Ngày YC giao</th>
+                                    <th class="bg-pur text-white">Số PO</th>
+                                    <th class="bg-pur text-white">Tên hàng</th>
+                                    <th class="bg-pur text-white">Mã hàng</th>
+                                    <th class="bg-pur text-white">Số lượng</th>
+                                    <th class="bg-pur text-white">Đơn vị</th>
+                                    <th class="bg-pur text-white">Tên NCC</th>
+                                    <th class="bg-pur text-white">Time GH</th>
+                                    <th class="bg-pur text-white" width="100">ĐN phát hành PO</th>
                                     <th class="text-dark">Ngày gửi PO</th>
-                                    <th class="bg-pur text-dark">ĐN Follow NCC</th>
+                                    <th class="bg-pur text-white">ĐN Follow NCC</th>
                                     <th class="text-dark">Ngày NCC XN Giao</th>
                                     <th class="text-dark">Lịch giao (OK/NG)</th>
                                     <th class="text-dark">Ảnh hưởng SX</th>
                                     <th class="text-dark">Cảnh báo</th>
-                                    <!-- THÊM MỚI TIÊU ĐỀ CỘT TRẠNG THÁI -->
                                     <th class="text-dark">Trạng thái</th>
                                     <th class="text-dark" colspan="3">NHẬP DỮ LIỆU</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- DÒNG 1: ĐƠN HÀNG ĐÃ NHẬP HÀNG -->
-                                <tr class="row-alert-yes">
+                                <tr class="main-row row-alert-yes" data-luongvekho="">
                                     <td class="text-center fw-bold">153</td>
                                     <td class="text-center">04/05/2026</td>
                                     <td class="text-center">05/05/2026</td>
@@ -378,10 +370,7 @@
                                     <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
                                         <span class="badge badge-ng p-2 w-100">Put out</span>
                                     </td>
-                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 1 -->
-                                    <th class="text-center text-success">
-                                        Đã nhập hàng
-                                    </th>
+                                    <th class="text-center text-success">Đã nhập hàng</th>
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
                                                 data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188"
@@ -402,11 +391,10 @@
                                         </button>
                                     </td>
                                 </tr>
-                                <!-- TĂNG COLSPAN LÊN 20 ĐỂ TRÁNH LỆCH KHUNG KHI CÓ CHI TIẾT -->
                                 <tr id="info-153" class="collapse detail-row">
                                     <td colspan="20">
                                         <div class="detail-container">
-                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
+                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
                                             <div class="row g-3">
                                                 <div class="col-md-4">
                                                     <div class="p-2 border rounded bg-light">
@@ -437,8 +425,7 @@
                                     </td>
                                 </tr>
 
-                                <!-- DÒNG 2: ĐƠN HÀNG CHƯA GIAO HÀNG -->
-                                <tr>
+                                <tr class="main-row" data-luongvekho="CoDuLieu">
                                     <td class="text-center fw-bold">154</td>
                                     <td class="text-center">04/05/2026</td>
                                     <td class="text-center">05/05/2026</td>
@@ -460,11 +447,7 @@
                                     <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
                                         <span class="badge badge-ng p-2 w-100">Put in</span>
                                     </td>
-                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 2 -->
-                                    <th class="text-center text-warning">
-                                        Chưa giao hàng
-                                    </th>
-
+                                    <th class="text-center text-warning">Chưa giao hàng</th>
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
                                                 data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189"
@@ -485,7 +468,6 @@
                                         </button>
                                     </td>
                                 </tr>
-                                <!-- TĂNG COLSPAN LÊN 20 -->
                                 <tr id="info-154" class="collapse detail-row">
                                     <td colspan="20">
                                         <div class="detail-container">
@@ -516,12 +498,11 @@
                                     </td>
                                 </tr>
 
-                                <!-- DÒNG 3: ĐƠN HÀNG ĐÃ NHẬP HÀNG -->
-                                <tr>
+                                <tr class="main-row" data-luongvekho="">
                                     <td class="text-center fw-bold">155</td>
                                     <td class="text-center">04/05/2026</td>
                                     <td class="text-center">05/05/2026</td>
-                                    <td class="text-center fw-bold text-primary">2603-0010</td>
+                                    <td class="text-center fw-bold text-primary">2603-0110</td>
                                     <td>Băng dính xốp PE (45mm * 45mm)</td>
                                     <td class="text-center text-muted">Ngoài E/A</td>
                                     <td class="text-end">42,000</td>
@@ -539,11 +520,7 @@
                                     <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
                                         <span class="badge badge-ok p-2 w-100">An toàn <i class="fa-solid fa fa-caret-down ms-1"></i></span>
                                     </td>
-                                    <!-- THÊM MỚI Ô TRẠNG THÁI DÒNG 3 -->
-                                    <th class="text-center text-success">
-                                        Đã nhập hàng
-                                    </th>
-
+                                    <th class="text-center text-success">Đã nhập hàng</th>
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
                                                 data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A"
@@ -564,7 +541,6 @@
                                         </button>
                                     </td>
                                 </tr>
-                                <!-- TĂNG COLSPAN LÊN 20 -->
                                 <tr id="info-155" class="collapse detail-row">
                                     <td colspan="20">
                                         <div class="detail-container">
@@ -601,20 +577,41 @@
                     </div>
                 </div>
                 <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
-                    <span class="text-muted">Hiển thị 1-3 trong tổng số 158 dòng dữ liệu chưa giao</span>
+                    <span class="text-muted">
+                        Hiển thị @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1)
+                        - @(Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalRecords))
+                        trong tổng số @ViewBag.TotalRecords dữ liệu
+                    </span>
                     <nav>
                         <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage - 1 })">Trước</a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                               
+                                if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i })">@i</a>
+                                    </li>
+                                }
+                                else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
+                                {
+                                    <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                                }
+                            }
+
+                            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage + 1 })">Sau</a>
+                            </li>
                         </ul>
                     </nav>
                 </div>
             </div>
         </div>
-    </div>   
+    </div>
 </div>
 
 <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
@@ -693,7 +690,6 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-success py-2 mb-3 fs-7">
-
                     <strong>Mặt hàng:</strong> <span id="offItemName"></span> (<span id="offItemCode"></span>) <br>
                     <strong>Ngày YC giao trên PO:</strong> <span class="fw-bold text-dark" id="offReqDate"></span>
                 </div>
@@ -1133,17 +1129,59 @@
                 document.getElementById('btnSaveInfo').style.display = 'block';
             });
         }
+
+        // --- THÊM MỚI: LOGIC LỌC TRẠNG THÁI GIAO HÀNG (CHƯA GIAO HÀNG / ĐÃ NHẬP HÀNG) ---
+        const filterSelects = document.querySelectorAll('.filter-delivery-status');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function () {
+                const filterValue = this.value; // Có giá trị: 'all', 'chua-giao', 'da-nhap'
+                const tbody = this.closest('.card').querySelector('tbody');
+                const mainRows = tbody.querySelectorAll('tr.main-row');
+
+                mainRows.forEach(row => {
+                    // Lấy dữ liệu thuộc tính LuongvekhoKhonhap của dòng hiện tại
+                    const luongVeKho = row.getAttribute('data-luongvekho') || "";
+
+                    // Tìm dòng thông tin chi tiết mở rộng ngay dưới (nếu có) để ẩn/hiện đồng bộ
+                    const detailRowId = row.querySelector('.toggle-detail')?.getAttribute('data-target');
+                    const detailRow = detailRowId ? document.querySelector(detailRowId) : null;
+
+                    let isShow = true;
+
+                    // Áp dụng bộ lọc dựa trên logic người dùng đặt ra
+                    if (filterValue === 'chua-giao') {
+                        // Logic: LuongvekhoKhonhap != null và != ''
+                        isShow = (luongVeKho !== null && luongVeKho.trim() !== "");
+                    } else if (filterValue === 'da-nhap') {
+                        // Logic ngược lại: LuongvekhoKhonhap == null hoặc == ''
+                        isShow = (luongVeKho === null || luongVeKho.trim() === "");
+                    }
+
+                    // Thực thi Ẩn / Hiện dòng trên giao diện DOM
+                    if (isShow) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+
+                        // Nếu dòng chi tiết con đang mở, đóng nó lại để tránh lỗi lệch khung table
+                        if (detailRow && detailRow.classList.contains('show')) {
+                            detailRow.classList.remove('show');
+                            const icon = row.querySelector('.toggle-detail i');
+                            if (icon) icon.className = "fa-solid fa fa-caret-down ms-1";
+                        }
+                    }
+                });
+            });
+        });
     });
+
+    // Xử lý sự kiện click chuyển Tabs Bootstrap mượt mà
     document.querySelectorAll('.nav-link').forEach(button => {
         button.addEventListener('click', function () {
-            // Xóa active khỏi các nút và nội dung cũ
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
 
-            // Gán active cho nút mới
             this.classList.add('active');
-
-            // Gán active cho nội dung mới
             const target = document.querySelector(this.getAttribute('data-bs-target'));
             if(target) {
                 target.classList.add('show', 'active');
@@ -1151,4 +1189,3 @@
         });
     });
 </script>
- *@

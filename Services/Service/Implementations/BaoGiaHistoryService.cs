@@ -154,12 +154,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         }
         // Sreach lịch sử bảo giá
         public async Task<GenericResponse<ListRequest<dynamic>>> SearchHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
-        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
+        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? to, DateTime? from, string? chungLoai)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.SearchHistoryAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, pageIndex, pageSize, date, chungLoai);
+                result.Data = await _repo.SearchHistoryAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, pageIndex, pageSize, to, from, chungLoai);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -170,12 +170,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Lấy thông tin phê duyệt báo giá của các đơn hàng
-        public async Task<GenericResponse<List<dynamic>>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        public async Task<GenericResponse<List<dynamic>>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang,
+            string? status, int? step, string? user, string? chungLoai, DateTime? to, DateTime? from)
         {
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                result.Data = await _repo.GetHistoryApprover(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, chungLoai);
+                result.Data = await _repo.GetHistoryApprover(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, chungLoai,to, from);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -186,12 +187,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Lấy thông tin lịch sử báo giá theo mã hàng nội bộ và số đơn
-        public async Task<GenericResponse<List<dynamic>>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        public async Task<GenericResponse<List<dynamic>>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang,
+            string? status, int? step, string? user, string? chungLoai,DateTime? to, DateTime? from)
         {
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                result.Data = await _repo.GetHistoryByMaterialCode(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, chungLoai);
+                result.Data = await _repo.GetHistoryByMaterialCode(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, chungLoai, to, from);
                 result.Success = true;
             }
             catch (Exception ex)

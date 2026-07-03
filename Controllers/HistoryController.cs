@@ -69,7 +69,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 GetCurrentUserId() ?? "",
                 searchModel.PageIndex,
                 searchModel.PageSize,
-                searchModel.Date,
+                searchModel.to,
+                searchModel.from,
                 searchModel.ChungLoai
                 );
             if (!result.Success)
@@ -87,7 +88,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var result = await _baoGiaService.ExportHistoryBaoGiaAsync(searchModel.MaDon,
                 searchModel.MaNcc, searchModel.Section,
                 searchModel.NguoiYeuCau, searchModel.MaHang,
-                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai);
+                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai, searchModel.to, searchModel.from);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -96,7 +97,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var historyApprover = await _baoGiaHistoryService.GetHistoryApprover(searchModel.MaDon,
                 searchModel.MaNcc, searchModel.Section,
                 searchModel.NguoiYeuCau, searchModel.MaHang,
-                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai);
+                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai, searchModel.to, searchModel.from);
             if (!historyApprover.Success)
             {
                 return BadRequest(historyApprover.Message);
@@ -105,7 +106,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var historyByMaterial = await _baoGiaHistoryService.GetHistoryByMaterialCode(searchModel.MaDon,
                 searchModel.MaNcc, searchModel.Section,
                 searchModel.NguoiYeuCau, searchModel.MaHang,
-                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai);
+                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai, searchModel.to, searchModel.from);
             if (!historyByMaterial.Success)
             {
                 return BadRequest(historyByMaterial.Message);
@@ -855,8 +856,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     GetCurrentUserId(),
                     searchModel.PageIndex,
                     searchModel.PageSize,
-                    searchModel.Date,
-                    searchModel.From,
+                    searchModel.to,
+                    searchModel.from,
                     searchModel.ChungLoai
                 );
                 if (!result.Success)
@@ -988,8 +989,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     GetCurrentUserId(),
                     -1,
                     -1, 
-                    searchModel.Date,
-                    searchModel.From,
+                    searchModel.to,
+                    searchModel.from,
                     searchModel.ChungLoai
                 );
                 if (!result.Success)
@@ -1410,7 +1411,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var result = await _baoGiaService.ExportHistoryBaoGiaAsync(searchModel.MaDon,
                 searchModel.MaNcc, searchModel.Section,
                 searchModel.NguoiYeuCau, searchModel.MaHang,
-                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai);
+                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai,searchModel.to, searchModel.from);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

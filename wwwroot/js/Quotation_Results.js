@@ -1,6 +1,35 @@
 document.addEventListener('DOMContentLoaded', function () {
     window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
 
+    const supplierPickReasonOptions = [
+        'Cheaper price_Giá rẻ hơn',
+        'Higher price_Giá cao hơn',
+        'Get quotation from only 1 vendor (Buy directly from maker)_Chỉ xin báo giá từ 1 NCC (Mua trực tiếp từ maker)',
+        'Only this vendor sent quotation_Chỉ NCC này gửi báo giá',
+        'Requesting section selected only 1 vendor to get quotation_Phòng ban chỉ chọn 1 NCC lấy báo giá',
+        'Stop selling/ producing this product_Không bán/ sản xuất mã hàng này',
+        'Vendors refused to quote_NCC từ chối báo giá',
+        'Vendor did not send quotation on time_NCC không gửi báo giá đúng hạn',
+        "Requesting section input Incorrect vendor's good code_Phòng ban điền sai mã hàng của NCC",
+        'Vendors quoted for similar alternative product_NCC báo giá cho mã thay thế',
+        'High MOQ, unsuitable for requirements_MOQ cao, không phù hợp với yêu cầu',
+        'The unit price is high but it meets the requirements_Đơn giá cao nhưng phù hợp với yêu cầu',
+        'Vendor has been closed_NCC đã giải thể'
+    ];
+    const supplierReasonDatalistId = 'supplierPickReasonOptionsList';
+
+    function ensureReasonDatalist() {
+        try {
+            let listEl = document.getElementById(supplierReasonDatalistId);
+            if (!listEl) {
+                listEl = document.createElement('datalist');
+                listEl.id = supplierReasonDatalistId;
+                document.body.appendChild(listEl);
+            }
+            listEl.innerHTML = supplierPickReasonOptions.map(x => `<option value="${String(x).replace(/"/g, '&quot;')}"></option>`).join('');
+        } catch { }
+    }
+
     // Pagination state for Request List tab
     const requestListState = {
         pageIndex: 1,
@@ -24,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
         init: function () {
             this.bindEvents();
             this.closeEdit();
+            ensureReasonDatalist();
             // Khởi tạo dropdown có tìm kiếm cho các select có class 'searchable-select'
             initEnhancements();
             console.log('Quotation Results initialized');
@@ -144,8 +174,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 table.style.fontSize = '10px';
                 table.style.lineHeight = '1.2';
             }
+            const ensureRefuseRowStyle = () => {
+                const styleId = 'supplierRefuseRowStyle';
+                if (document.getElementById(styleId)) return;
+                const styleEl = document.createElement('style');
+                styleEl.id = styleId;
+                styleEl.textContent = '#supplierQuoteTable tbody tr.refuse-row > td { background-color: #f8d7da !important; color: #721c24 !important; }';
+                document.head.appendChild(styleEl);
+            };
 
-            const getMismatchStyle = (isMatch) => isMatch === false ? 'color: red; background-color: #ffcccc;' : '';
+
+            const getMismatchStyle = (isMatch, step) => {
+                try {
+                    const s = Number(step || 0);
+                    if (s > 6 && isMatch === false) return 'color: red; background-color: #ffcccc;';
+                } catch { }
+                return '';
+            };
 
             const rowsHtml = data.map((d, index) => {
 
@@ -160,9 +205,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     try { totalCell = Number(usd * sl).toLocaleString(); } catch { totalCell = usd * sl; }
                     totalCell = totalCell + ' USD';
                 }
-
+                const checkRefuse = (d.CHR_Status === 'Refuse') ? true : false;
                 return `
-                <tr class="text-center" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
+                <tr class="text-center ${checkRefuse ? 'refuse-row' : ''}" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
                     <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.status || ''}</td>
@@ -198,8 +243,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_SoLuong)}">${d.soluong || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_DonVi)}">${d.donvi || ''}</td>
-                    <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : ''}</td>
-                    <td class="text-end" style="padding: 2px 4px; text-align: right;">${d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : ''}</td>
+                    <td class="text-end" style="padding: 2px 4px; text-align: right;">${checkRefuse ? 'Refuse' : (d.FL_USD != null ? Number(d.FL_USD).toLocaleString() : '')}</td>
+                    <td class="text-end" style="padding: 2px 4px; text-align: right;">${checkRefuse ? 'Refuse' : (d.FL_VND != null ? Number(d.FL_VND).toLocaleString() : '')}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.NVCHR_MOQ || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_LeadTime || ''}</td>
                     <td style="padding: 2px 4px; text-align: center; ${getMismatchStyle(d.IsMatch_Ngay)}">${d.DTM_ShipTime ? new Date(d.DTM_ShipTime).toLocaleDateString() : ''}</td>
@@ -221,27 +266,16 @@ document.addEventListener('DOMContentLoaded', function () {
                             <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
                         </select>
                     </td>
-                    <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_ReasonPick || ''}"></td>
+                    <td><input type="text" class="form-control form-control-sm reason-input" list="${supplierReasonDatalistId}" value="${d.NVCHR_ReasonPick || ''}"></td>
                     <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_Note || ''}"></td>
                 </tr>
             `;
             }).join('');
 
             tbody.innerHTML = rowsHtml;
+            ensureRefuseRowStyle();
             this.applyAdditionalColumnsVisibility();
         },
-        // mapping status supplier tab
-        //MappingStatusSupplier: function (codeStatus) {
-        //    const T = window.i18nQuotationResults || {};
-        //    switch (codeStatus) {
-        //        case 'WAIT_PICK_NCC': return T.WaitPickSupplier || 'Chờ chọn nhà cung cấp';
-        //        case 'PICKED': return T.SupplierSelected || 'Đã chọn nhà cung cấp';
-        //        case 'WAIT_CONFIRM_NAME': return T.WaitConfirmName || 'Chờ xác nhận tên';
-        //        case 'CONFIRMED': return T.WaitApproval || 'Chờ phê duyệt';
-        //        case 'WAIT_NCC': return T.WaitSupplierQuote || 'Chờ báo giá nhà cung cấp';
-        //        default: return '';
-        //    }
-        //},
         // đóng modal 
         closeEdit: function () {
             document.getElementById('btnCloseEdit_1')?.addEventListener('click', function () {
@@ -369,7 +403,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             const reasonEl = row.querySelector('.reason-input');
                             const reason = reasonEl?.value?.trim() || '';
                             if (!reason) {
-                                showPrompt({ title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do', message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp', placeholder: '' })
+                                showPrompt({
+                                title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do',
+                                message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp',
+                                placeholder: '',
+                                    allowCustom: true,
+                                options: supplierPickReasonOptions
+                            })
                                     .then(r => {
                                         if (!r) {
                                             cb.checked = false;
@@ -398,7 +438,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (val === 'true') {
                         const reason = reasonEl?.value?.trim() || '';
                         if (!reason) {
-                            showPrompt({ title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do', message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp', placeholder: '' })
+                            showPrompt({
+                                title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do',
+                                message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp',
+                                placeholder: '',
+                                allowCustom: true,
+                                options: supplierPickReasonOptions
+                            })
                                 .then(r => {
                                     if (!r) {
                                         try { sel.value = ''; } catch { }
@@ -1042,7 +1088,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <td>${dieuKien}</td>
                                     <td>${file}</td>
                                     <td><input class="form-check-input supplier-select" type="checkbox" value="${id}" data-id="${id}" /></td>
-                                    <td><input type="text" class="form-control reason-input" /></td>    
+                                    <td><input type="text" class="form-control reason-input" list="${supplierReasonDatalistId}" /></td>    
                                 </tr>`;
                     }).join('');
                     bodyEl.innerHTML = rowsHtml;
@@ -2179,10 +2225,16 @@ function showDialog({ title = (window.i18nQuotationResults && window.i18nQuotati
     overlay.style.display = 'flex';
     attachDialogCloseHandlers();
 }
-function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', placeholder = '', defaultValue = '' } = {}) {
+function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', placeholder = '', defaultValue = '', options = null, allowCustom = false } = {}) {
     return new Promise((resolve) => {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
         if (!overlay) {
+            if (Array.isArray(options) && options.length) {
+                const listText = options.map((x, i) => `${i + 1}. ${x}`).join('\n');
+                const val = window.prompt(`${message || title}\n\n${listText}`, defaultValue || '');
+                resolve(val === null ? null : (val || '').toString());
+                return;
+            }
             const val = window.prompt(message || title, defaultValue || '');
             resolve(val === null ? null : (val || '').toString());
             return;
@@ -2200,11 +2252,47 @@ function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotati
             msg.innerHTML = message;
             container.appendChild(msg);
         }
-        const inp = document.createElement('input');
-        inp.type = 'text';
-        inp.className = 'form-control';
-        inp.placeholder = placeholder || '';
-        inp.value = defaultValue || '';
+        const useOptions = Array.isArray(options) && options.length > 0;
+        let inp;
+        if (useOptions) {
+            if (allowCustom) {
+                inp = document.createElement('input');
+                inp.type = 'text';
+                inp.className = 'form-control';
+                inp.placeholder = placeholder || '';
+                inp.value = defaultValue || '';
+                const listId = 'cmPromptReasonOptions';
+                inp.setAttribute('list', listId);
+                const dl = document.createElement('datalist');
+                dl.id = listId;
+                options.forEach(opt => {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = opt;
+                    dl.appendChild(optionEl);
+                });
+                container.appendChild(dl);
+            } else {
+                inp = document.createElement('select');
+                inp.className = 'form-select';
+                const placeholderOpt = document.createElement('option');
+                placeholderOpt.value = '';
+                placeholderOpt.textContent = placeholder || ('');
+                inp.appendChild(placeholderOpt);
+                options.forEach(opt => {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = opt;
+                    optionEl.textContent = opt;
+                    inp.appendChild(optionEl);
+                });
+                if (defaultValue) inp.value = defaultValue;
+            }
+        } else {
+            inp = document.createElement('input');
+            inp.type = 'text';
+            inp.className = 'form-control';
+            inp.placeholder = placeholder || '';
+            inp.value = defaultValue || '';
+        }
         container.appendChild(inp);
         bodyEl.appendChild(container);
 
@@ -2234,7 +2322,12 @@ function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotati
         overlay.style.display = 'flex';
         attachDialogCloseHandlers();
         // focus
-        setTimeout(() => { try { inp.focus(); inp.select(); } catch { } }, 50);
+        setTimeout(() => {
+            try {
+                inp.focus();
+                if (!useOptions && typeof inp.select === 'function') inp.select();
+            } catch { }
+        }, 50);
     });
 }
 function hideDialog() {

@@ -116,14 +116,108 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return results;
         }
         public async Task<ListRequest<dynamic>> SearchHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
-            string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai)
+     string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? to, DateTime? from, string? chungLoai)
         {
-            var sql = @"
+            // Xây dựng điều kiện WHERE chung
+            var whereConditions = new List<string>();
+            var parameters = new DynamicParameters();
+
+            // Thêm các điều kiện tìm kiếm
+            if (!string.IsNullOrEmpty(MaDon))
+            {
+                whereConditions.Add("q.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", MaDon);
+            }
+
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                whereConditions.Add("q.CHR_MaNCC LIKE '%' + @MaNcc + '%'");
+                parameters.Add("MaNcc", MaNcc);
+            }
+
+            if (!string.IsNullOrEmpty(chungLoai))
+            {
+                whereConditions.Add("q.NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%'");
+                parameters.Add("ChungLoai", chungLoai);
+            }
+
+            if (!string.IsNullOrEmpty(Section))
+            {
+                whereConditions.Add("q.CHR_SectionCode LIKE '%' + @Section + '%'");
+                parameters.Add("Section", Section);
+            }
+
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                whereConditions.Add("q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%'");
+                parameters.Add("NguoiYeuCau", nguoiYeuCau);
+            }
+
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                whereConditions.Add("q.CHR_MaHangNoiBo LIKE '%' + @MaHang + '%'");
+                parameters.Add("MaHang", MaHang);
+            }
+
+            if (step.HasValue)
+            {
+                whereConditions.Add("q.ID_StepBaoGia = @Step");
+                parameters.Add("Step", step.Value);
+            }
+
+            if (from.HasValue)
+            {
+                whereConditions.Add("q.DTM_CreateDate >= @From");
+                parameters.Add("From", from.Value);
+            }
+
+            if (to.HasValue)
+            {
+                whereConditions.Add("q.DTM_CreateDate <= @To");
+                parameters.Add("To", to.Value);
+            }
+
+            // Điều kiện user
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereConditions.Add("s.CHR_UserAdid = @Adid");
+                parameters.Add("Adid", user);
+            }
+
+            // Xây dựng điều kiện status
+            string statusSql = "1=1";
+            switch (status)
+            {
+                case "RETURN":
+                    statusSql = "q.ID_Status LIKE '%RETURN%' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "DONE":
+                    statusSql = "q.ID_Status = 'DONE' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "APPROVAL":
+                    statusSql = "q.ID_Status LIKE 'APPROVAL%' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "WAIT":
+                    statusSql = "q.ID_Status LIKE '%WAIT%' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "DELETE":
+                    statusSql = "q.ID_Status LIKE '%DELETE%'";
+                    break;
+                default:
+                    statusSql = "q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+            }
+            whereConditions.Add($"({statusSql})");
+
+            var whereClause = whereConditions.Count > 0 ? "WHERE " + string.Join(" AND ", whereConditions) : "";
+
+            // Main query
+            var sql = $@"
                 SELECT 
                     q.CHR_MaDon,
                     q.CHR_CreateBy,
                     MAX(q.DTM_CreateDate) AS DTM_CreateDate,
-                        CASE 
+                    CASE 
                         WHEN COUNT(CASE WHEN q.BIT_LayBaoGia = 1 THEN 1 END) > 0 
                         THEN MAX(CASE WHEN q.BIT_LayBaoGia = 1 THEN q.ID_Status END)
                         ELSE MIN(q.ID_Status)
@@ -145,69 +239,23 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         WHERE q2.CHR_MaDon = q.CHR_MaDon
                         FOR XML PATH('')
                     ), 1, 2, '') AS Suppliers
-                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] AS q
-                INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] AS s 
+                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] q
+                INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] s 
                     ON q.CHR_SectionCode = s.CHR_CodeSection
-                WHERE (@MaDon IS NULL OR CHR_MaDon = @MaDon)
-                  AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
-                  AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
-                  AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
-                  AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
-                  AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
-                  AND (@Step IS NULL OR ID_StepBaoGia = @Step)
-                  AND (@Date IS NULL OR CAST(DTM_CreateDate AS DATE) = CAST(@Date AS DATE))
-                  AND ( s.CHR_UserAdid = @Adid)
-            ";
-
-            var statusSql = "1=1";
-            switch (status)
-            {
-                case "RETURN":
-                    statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DONE":
-                    statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "APPROVAL":
-                    statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "WAIT":
-                    statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DELETE":
-                    statusSql = "ID_Status LIKE 'DELETE'";
-                    break;
-                default:
-                    statusSql = "ID_Status NOT LIKE 'DELETE'";
-                    break;
-            }
-
-            // append status filter into WHERE before GROUP BY
-            sql += " AND (" + statusSql + ")";
-
-            // add grouping
-            sql += @"
+                {whereClause}
                 GROUP BY q.CHR_MaDon, q.CHR_CreateBy
             ";
 
-            // Build count query first
-            var countSql = @"
-                SELECT COUNT(distinct q.CHR_MaDon)
-                FROM BaoGia_Request_of_Quotation as q
-				  inner join [BaoGia_Master_Approver_Send_Mail] as s 
-				on q.CHR_SectionCode = s.CHR_CodeSection
-                WHERE (@MaDon IS NULL OR CHR_MaDon = @MaDon)
-                  AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
-                  AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
-                  AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
-                  AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
-                  AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
-                  AND (@Step IS NULL OR ID_StepBaoGia = @Step)
-                  AND (@Date IS NULL OR CAST(DTM_CreateDate AS DATE) = CAST(@Date AS DATE))
-                  AND ( s.CHR_UserAdid = @Adid)
-                  AND (" + statusSql + ")";
+            // Count query
+            var countSql = $@"
+                SELECT COUNT(DISTINCT q.CHR_MaDon)
+                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] q
+                INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] s 
+                    ON q.CHR_SectionCode = s.CHR_CodeSection
+                {whereClause}
+            ";
 
-            // Add ordering and paging to main query 
+            // Thêm ORDER BY và phân trang
             if (pageSize > 0 && pageIndex > 0)
             {
                 sql += @"
@@ -215,6 +263,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY
                 ";
+                parameters.Add("Offset", (pageIndex - 1) * pageSize);
+                parameters.Add("PageSize", pageSize);
             }
             else
             {
@@ -223,21 +273,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 ";
             }
 
-            var parameters = new
-            {
-                MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
-                MaNcc = string.IsNullOrEmpty(MaNcc) ? null : MaNcc,
-                Section = string.IsNullOrEmpty(Section) ? null : Section,
-                NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
-                MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
-                Step = step,
-                Offset = (pageIndex - 1) * pageSize,
-                PageSize = pageSize,
-                Date = date,
-                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
-                Adid = user
-            };
-
+            // Thực thi query
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             var totalCount = await _conn.ExecuteScalarAsync<long>(countSql, parameters);
 
@@ -248,7 +284,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             };
         }
         // Lấy thông tin phê duyệt báo giá của các đơn hàng
-        public async Task<List<dynamic>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        public async Task<List<dynamic>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+            string? MaHang, string? status, int? step, string? user, string? chungLoai, DateTime? to, DateTime? from)
         {
             var sql = @"
                 WITH Ranked AS (
@@ -257,14 +294,91 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     FROM [COST_MANAGEMENT].[dbo].[BaoGia_History_Request_of_Quotation] h
                     INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] q ON q.ID = h.ID_RequestQuote
                     INNER JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Master_Approver_Send_Mail] s ON q.CHR_SectionCode = s.CHR_CodeSection
-                    WHERE (@MaDon IS NULL OR q.CHR_MaDon = @MaDon)
-                      AND (@MaNcc IS NULL OR q.CHR_MaNCC LIKE '%' + @MaNcc + '%')
-                      AND (@ChungLoai IS NULL OR q.NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
-                      AND (@Section IS NULL OR q.CHR_SectionCode LIKE '%' + @Section + '%')
-                      AND (@NguoiYeuCau IS NULL OR q.CHR_CreateBy LIKE '%' + @NguoiYeuCau + '%')
-                      AND (@MaHang IS NULL OR q.CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
-                      AND (@Step IS NULL OR q.ID_StepBaoGia = @Step)
-                      AND (s.CHR_UserAdid = @Adid)
+                    WHERE 1=1
+            ";
+
+            var parameters = new DynamicParameters();
+
+            // Thêm các điều kiện tìm kiếm
+            if (!string.IsNullOrEmpty(MaDon))
+            {
+                sql += " AND q.CHR_MaDon = @MaDon";
+                parameters.Add("MaDon", MaDon);
+            }
+            if (!string.IsNullOrEmpty(MaNcc))
+            {
+                sql += " AND q.CHR_MaNCC LIKE @MaNcc";
+                parameters.Add("MaNcc", "%" + MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(chungLoai))
+            {
+                sql += " AND q.NVCHR_ChungLoai LIKE @ChungLoai";
+                parameters.Add("ChungLoai", "%" + chungLoai + "%");
+            }
+            if (!string.IsNullOrEmpty(Section))
+            {
+                sql += " AND q.CHR_SectionCode LIKE @Section";
+                parameters.Add("Section", "%" + Section + "%");
+            }
+            if (!string.IsNullOrEmpty(nguoiYeuCau))
+            {
+                sql += " AND q.CHR_CreateBy LIKE @NguoiYeuCau";
+                parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+            }
+            if (!string.IsNullOrEmpty(MaHang))
+            {
+                sql += " AND q.CHR_MaHangNoiBo LIKE @MaHang";
+                parameters.Add("MaHang", "%" + MaHang + "%");
+            }
+            if (step.HasValue)
+            {
+                sql += " AND q.ID_StepBaoGia = @Step";
+                parameters.Add("Step", step);
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                sql += " AND s.CHR_UserAdid = @Adid";
+                parameters.Add("Adid", user);
+            }
+
+            // Thêm điều kiện thời gian
+            if (from.HasValue)
+            {
+                sql += " AND q.DTM_CreateDate >= @From";
+                parameters.Add("From", from.Value);
+            }
+            if (to.HasValue)
+            {
+                sql += " AND q.DTM_CreateDate <= @To";
+                parameters.Add("To", to.Value);
+            }
+
+            // Status handling
+            string statusSql = "1=1";
+            switch (status)
+            {
+                case "RETURN":
+                    statusSql = "q.ID_Status LIKE '%RETURN%' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "DONE":
+                    statusSql = "q.ID_Status = 'DONE' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "APPROVAL":
+                    statusSql = "q.ID_Status LIKE 'APPROVAL%' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "WAIT":
+                    statusSql = "q.ID_Status LIKE '%WAIT%' AND q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+                case "DELETE":
+                    statusSql = "q.ID_Status LIKE '%DELETE%'";
+                    break;
+                default:
+                    statusSql = "q.ID_Status NOT LIKE '%DELETE%'";
+                    break;
+            }
+            sql += " AND (" + statusSql + ")";
+
+            sql += @"
                 )
                 SELECT 
                     CHR_MaDon AS maDon,
@@ -280,54 +394,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS userPur,
                     MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN CHR_Updatedate END) AS timePur
                 FROM Ranked
-            ";
-
-            var statusSql = "1=1";
-            switch (status)
-            {
-                case "RETURN":
-                    statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DONE":
-                    statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "APPROVAL":
-                    statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "WAIT":
-                    statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DELETE":
-                    statusSql = "ID_Status LIKE 'DELETE'";
-                    break;
-                default:
-                    statusSql = "ID_Status NOT LIKE 'DELETE'";
-                    break;
-            }
-
-            sql += " WHERE (" + statusSql + ")";
-            sql += @"
+                WHERE rn = 1
                 GROUP BY CHR_MaDon, ID_RequestQuote
                 ORDER BY maDon DESC
             ";
-
-            var parameters = new
-            {
-                MaDon = string.IsNullOrEmpty(MaDon) ? null : MaDon,
-                MaNcc = string.IsNullOrEmpty(MaNcc) ? null : MaNcc,
-                Section = string.IsNullOrEmpty(Section) ? null : Section,
-                NguoiYeuCau = string.IsNullOrEmpty(nguoiYeuCau) ? null : nguoiYeuCau,
-                MaHang = string.IsNullOrEmpty(MaHang) ? null : MaHang,
-                Step = step,
-                ChungLoai = string.IsNullOrEmpty(chungLoai) ? null : chungLoai,
-                Adid = user
-            };
 
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
             return data;
         }
         // Lấy thông tin lịch sử báo giá theo mã hàng nội bộ và số đơn
-        public async Task<List<dynamic>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        public async Task<List<dynamic>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+            string? MaHang, string? status, int? step, string? user, string? chungLoai, DateTime? to, DateTime? from)
         {
             var sql = @"
                 WITH CTE_MaxStep AS (
@@ -393,7 +470,16 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 whereClauses.Add("s.CHR_UserAdid = @Adid");
                 parameters.Add("Adid", user);
             }
-
+            if (from.HasValue)
+            {
+                whereClauses.Add("q.DTM_CreateDate >= @From");
+                parameters.Add("From", from.Value);
+            }
+            if (to.HasValue)
+            {
+                whereClauses.Add("q.DTM_CreateDate <= @To");
+                parameters.Add("To", to.Value);
+            }
             if (!string.IsNullOrEmpty(status))
             {
                 string statusSql = status switch

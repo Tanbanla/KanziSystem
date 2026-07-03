@@ -69,7 +69,6 @@
         <div class="card">
             <div class="card-body p-0">
                 <div class="form-row">
-                    <p hidden id="idrq">@ViewBag.MasterData</p>
                     <div class="form-group col-md-1">
                         <label for="inputEmail4"> @Languages.Khoi :</label>
                         <select class="form-control" id="group_code" onchange="_load_name_inv(this.value)" style="background-color:#ffff0029">
@@ -80,28 +79,24 @@
                         </select>
                     </div>
                     <div class="form-group col-md-2">
-                        <label>@Languages.mayeucau (Sẽ tạo mới)</label>
-                        <input type="text" class="form-control" value="" id="madon" readonly>
+                        <label>@Languages.loaiphieu</label>
+                        <input type="text" class="form-control" value="Hàng trong danh mục" readonly>
                     </div>
-                    <div class="form-group col-md-2" hidden>
+                    <div class="form-group col-md-2">
                         <label>@Languages.Phongban</label>
-                        <input type="text" class="form-control" id="name_dept" readonly>
+                        <select class="form-control" id="name_dept" onchange="_load_dept(this.value)" style="background-color:#ffff0029"></select>
                     </div>
-                    <div class="form-group col-md-2" hidden>
+                    <div class="form-group col-md-2">
                         <label>@Languages.tenphongyeucau</label>
-                        <input type="text" class="form-control" id="dept" required>
+                        <input type="text" class="form-control" id="dept" readonly required>
                     </div>
-                    <div class="form-group col-md-2" hidden>
+                    <div class="form-group col-md-2">
                         <label>@Languages.Bophan</label>
                         <input type="text" class="form-control" id="secs" readonly required>
                     </div>
                     <div class="form-group col-md-1">
-                        <label>@Languages.phongchiuphi</label>
-                        <input type="text" class="form-control" id="cost_center" style="background-color:#ffff0029">
-                    </div>
-                    <div class="form-group col-md-1">
                         <label>@Languages.vitri</label>
-                        <input type="text" class="form-control" id="place" style="background-color:#ffff0029">
+                        <input type="text" class="form-control" id="placee" style="background-color:#ffff0029">
                     </div>
                     <div class="form-group">
                         <label class="d-block"><b class="text-danger">@Languages.dathang :</b></label>
@@ -113,7 +108,7 @@
                                         <span class="selectgroup-button">@Languages.Thongthuong</span>
                                     </label>
                                     <label class="selectgroup-item">
-                                        <input type="radio" name="value" value="1" class="selectgroup-input" id="gap">
+                                        <input type="radio" name="value" value="1" class="selectgroup-input">
                                         <span class="selectgroup-button-gap"><b>@Languages.Gap</b></span>
                                     </label>
                                 </div>

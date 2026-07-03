@@ -236,11 +236,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Luu thong tin
-        public async Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
+        public async Task<List<BaoGia_Confirm_Name_Quotation>> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
         {
             if (confirmNames == null || !confirmNames.Any())
-                return false;
-
+            {
+                throw new ArgumentException("The list of confirm names cannot be null or empty.", nameof(confirmNames));
+            }
             var notNeedConfirmName = (await _context.BaoGia_Vender_NotConfirms
                 .Where(x => x.CHR_MaNcc != null && x.CHR_Status == "ON")
                 .Select(x => x.CHR_MaNcc)
@@ -263,7 +264,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .ToList();
 
             if (!newConfirmNames.Any())
-                return false;
+            {
+                throw new InvalidOperationException("All provided confirm names already exist in the database.");
+            }
 
             var newIds = newConfirmNames.Select(x => x.ID_RequestQuote).ToList();
 
@@ -282,6 +285,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var requestDict = requests.ToDictionary(r => r.ID);
 
             var finalConfirmNames = new List<BaoGia_Confirm_Name_Quotation>();
+            var listNotNeedConfirmName = new List<BaoGia_Confirm_Name_Quotation>();
 
             foreach (var item in newConfirmNames)
             {
@@ -300,6 +304,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     {
                         rq.ID_StepBaoGia = 13;
                         rq.ID_Status = "DONE";
+
+                        listNotNeedConfirmName.Add(item);
                     }
                     else
                     {
@@ -317,7 +323,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             await _context.SaveChangesAsync();
-            return true;
+            return listNotNeedConfirmName;
         }
         // luu thong tin nhap file
         public async Task<bool> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role)

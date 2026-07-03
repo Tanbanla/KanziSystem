@@ -237,8 +237,8 @@ function _load_request_condition() {
         params.append('ngayyc', ngayyc);
         params.append('loaicp', loaicp);
 
-        fetch('/ipcs/Request/get_requestcondition', {
         //fetch('/Request/get_requestcondition', {
+        fetch('/ipcs/Request/get_requestcondition', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

@@ -176,7 +176,7 @@ function initSelect2($element) {
 async function _load_name_inv(group_code) {
     const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
    fetch('/ipcs/Import/_load_material', {
-   // fetch('/Import/_load_material', {
+    //fetch('/Import/_load_material', {
         method: 'POST',
         body: params
     })
@@ -242,6 +242,7 @@ async function _load_dept(dept) {
     params.append('us', us);
 
     fetch('/ipcs/Import/_load_dept', {
+    //fetch('/Import/_load_dept', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params

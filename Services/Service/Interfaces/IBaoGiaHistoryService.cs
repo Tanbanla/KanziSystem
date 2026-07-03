@@ -23,11 +23,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<ReasonQuotition>>> GetReasonsAsync(List<dynamic> ids);
         // Sreach lịch sử bảo giá
         Task<GenericResponse<ListRequest<dynamic>>> SearchHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
-        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? date, string? chungLoai);
+        string? MaHang, string? status, int? step, string? user, int pageIndex, int pageSize, DateTime? to, DateTime? from, string? chungLoai);
         // Lấy thông tin phê duyệt báo giá của các đơn hàng
-        Task<GenericResponse<List<dynamic>>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
+        Task<GenericResponse<List<dynamic>>> GetHistoryApprover(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai, DateTime? to, DateTime? from);
         // Lấy thông tin lịch sử báo giá theo mã hàng nội bộ và số đơn
-        Task<GenericResponse<List<dynamic>>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai);
+        Task<GenericResponse<List<dynamic>>> GetHistoryByMaterialCode(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang,
+            string? status, int? step, string? user, string? chungLoai,DateTime? to, DateTime? from);
         // tính tổng số đơn đến hạn
         Task<GenericResponse<List<dynamic>>> GetCountQuotation(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? user);

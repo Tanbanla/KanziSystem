@@ -290,10 +290,6 @@
 
     // Initialize supplier event listeners
     function initializeSupplierEventListeners() {
-        // Tab change event
-        // document.getElementById('supplier-input-tab')?.addEventListener('shown.bs.tab', function (e) {
-        //     loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
-        // });
 
         // Search button
         document.getElementById('supplierSearchBtn')?.addEventListener('click', function() {
@@ -428,9 +424,19 @@
             return;
         }
 
-        function isFalseFlag(v) {
-            return v === false || v === 0;
+        function isFalseFlag(v, step) {
+            const stepInt = parseInt(step) || 0;
+            return (v === false || v === 0) && stepInt > 6;
         }
+
+        // color scheme
+        const mismatchBg = '#fff3cd'; // light yellow (warning)
+        const mismatchColor = '#856404';
+        const mismatchBorder = '1px solid #ffeeba';
+
+        const refusedBg = '#f8d7da'; // light red (danger)
+        const refusedColor = '#721c24';
+        const refusedBorder = '1px solid #f5c6cb';
 
         data.forEach((item, index) => {
             const row = document.createElement('tr');
@@ -442,7 +448,15 @@
                 c.textContent = text != null ? text : '';
                 return c;
             }
-
+            var checkRefuse = item.CHR_Status === 'Refuse'
+            if (checkRefuse) {
+                // highlight whole row for refused items
+                row.style.backgroundColor = refusedBg;
+                row.style.color = refusedColor;
+                row.style.border = refusedBorder;
+            }
+            
+            
             // 1 - STT
             row.appendChild(td(((supplierState.currentPage - 1) * supplierState.pageSize) + index + 1, 'text-center'));
 
@@ -457,45 +471,62 @@
 
             // 5 - Supplier item code -> IsMatch_MaHangNCC
             const maHangCell = td(item.CHR_MaHangNCC || '');
-            if (isFalseFlag(item.IsMatch_MaHangNCC)) {
+            if (isFalseFlag(item.IsMatch_MaHangNCC, item.ID_StepBaoGia)) {
                 maHangCell.classList.add('mismatch');
-                maHangCell.style.color = 'red';
-                maHangCell.style.border = '1px solid red';
+                maHangCell.style.backgroundColor = mismatchBg;
+                maHangCell.style.color = mismatchColor;
+                maHangCell.style.border = mismatchBorder;
             }
             row.appendChild(maHangCell);
 
             // 6 - Item name HQ -> IsMatch_NameVN
             const nameVNCell = td(item.NVCHR_TenHangHQ || '');
-            if (isFalseFlag(item.IsMatch_NameVN)) {
+            if (isFalseFlag(item.IsMatch_NameVN, item.ID_StepBaoGia)) {
                 nameVNCell.classList.add('mismatch');
-                nameVNCell.style.color = 'red';
-                nameVNCell.style.border = '1px solid red';
+                nameVNCell.style.backgroundColor = mismatchBg;
+                nameVNCell.style.color = mismatchColor;
+                nameVNCell.style.border = mismatchBorder;
             }
             row.appendChild(nameVNCell);
 
             // 7 - Quantity -> IsMatch_SoLuong
             const qtyCell = td(item.INT_SoLuong || '', 'text-center');
-            if (isFalseFlag(item.IsMatch_SoLuong)) {
+            if (isFalseFlag(item.IsMatch_SoLuong, item.ID_StepBaoGia)) {
                 qtyCell.classList.add('mismatch');
-                qtyCell.style.color = 'red';
-                qtyCell.style.border = '1px solid red';
+                qtyCell.style.backgroundColor = mismatchBg;
+                qtyCell.style.color = mismatchColor;
+                qtyCell.style.border = mismatchBorder;
             }
             row.appendChild(qtyCell);
 
             // 8 - Unit -> IsMatch_DonVi
             const unitCell = td(item.NVCHR_DonVi || '', 'text-center');
-            if (isFalseFlag(item.IsMatch_DonVi)) {
+            if (isFalseFlag(item.IsMatch_DonVi, item.ID_StepBaoGia)) {
                 unitCell.classList.add('mismatch');
-                unitCell.style.color = 'red';
-                unitCell.style.border = '1px solid red';
+                unitCell.style.backgroundColor = mismatchBg;
+                unitCell.style.color = mismatchColor;
+                unitCell.style.border = mismatchBorder;
             }
             row.appendChild(unitCell);
 
             // 9 - Price USD
-            row.appendChild(td(item.FL_USD ? item.FL_USD.toFixed(2) : '', 'text-end'));
+            if (checkRefuse) {
+                // keep explicit text for refused price but row already highlighted
+                const cell = td('Refuse', 'text-center');
+                cell.style.fontWeight = '600';
+                row.appendChild(cell);
+            } else {
+                row.appendChild(td(item.FL_USD ? item.FL_USD.toFixed(2) : '', 'text-end'));
+            }
 
             // 10 - Price VND
-            row.appendChild(td(item.FL_VND ? item.FL_VND.toFixed(2) : '', 'text-end'));
+            if (checkRefuse) {
+                const cell = td('Refuse', 'text-center');
+                cell.style.fontWeight = '600';
+                row.appendChild(cell);
+            } else {
+                row.appendChild(td(item.FL_VND ? item.FL_VND.toFixed(2) : '', 'text-end'));
+            }
 
             // 11 - MOQ
             row.appendChild(td(item.NVCHR_MOQ || ''));
@@ -505,55 +536,61 @@
 
             // 13 - Delivery date -> IsMatch_Ngay
             const deliveryCell = td(item.DTM_ShipTime ? new Date(item.DTM_ShipTime).toLocaleDateString('vi-VN') : '');
-            if (isFalseFlag(item.IsMatch_Ngay)) {
+            if (isFalseFlag(item.IsMatch_Ngay, item.ID_StepBaoGia)) {
                 deliveryCell.classList.add('mismatch');
-                deliveryCell.style.color = 'red';
-                deliveryCell.style.border = '1px solid red';
+                deliveryCell.style.backgroundColor = mismatchBg;
+                deliveryCell.style.color = mismatchColor;
+                deliveryCell.style.border = mismatchBorder;
             }
             row.appendChild(deliveryCell);
 
             // 14 - Rohs -> IsMatch_Rohs
             const rohsCell = td(item.VCHR_Rohs || '');
-            if (isFalseFlag(item.IsMatch_Rohs)) {
+            if (isFalseFlag(item.IsMatch_Rohs, item.ID_StepBaoGia)) {
                 rohsCell.classList.add('mismatch');
-                rohsCell.style.color = 'red';
-                rohsCell.style.border = '1px solid red';
+                rohsCell.style.backgroundColor = mismatchBg;
+                rohsCell.style.color = mismatchColor;
+                rohsCell.style.border = mismatchBorder;
             }
             row.appendChild(rohsCell);
 
             // 15 - COCQ -> IsMatch_COCQ
             const cocqCell = td(item.VCHR_COCQ || '');
-            if (isFalseFlag(item.IsMatch_COCQ)) {
+            if (isFalseFlag(item.IsMatch_COCQ, item.ID_StepBaoGia)) {
                 cocqCell.classList.add('mismatch');
-                cocqCell.style.color = 'red';
-                cocqCell.style.border = '1px solid red';
+                cocqCell.style.backgroundColor = mismatchBg;
+                cocqCell.style.color = mismatchColor;
+                cocqCell.style.border = mismatchBorder;
             }
             row.appendChild(cocqCell);
 
             // 16 - MSDS -> IsMatch_MSDS
             const msdsCell = td(item.VCHR_MSDS || '');
-            if (isFalseFlag(item.IsMatch_MSDS)) {
+            if (isFalseFlag(item.IsMatch_MSDS, item.ID_StepBaoGia)) {
                 msdsCell.classList.add('mismatch');
-                msdsCell.style.color = 'red';
-                msdsCell.style.border = '1px solid red';
+                msdsCell.style.backgroundColor = mismatchBg;
+                msdsCell.style.color = mismatchColor;
+                msdsCell.style.border = mismatchBorder;
             }
             row.appendChild(msdsCell);
 
             // 17 - Safety -> IsMatch_AnToan
             const safetyCell = td(item.VCHR_AnToan || '');
-            if (isFalseFlag(item.IsMatch_AnToan)) {
+            if (isFalseFlag(item.IsMatch_AnToan, item.ID_StepBaoGia)) {
                 safetyCell.classList.add('mismatch');
-                safetyCell.style.color = 'red';
-                safetyCell.style.border = '1px solid red';
+                safetyCell.style.backgroundColor = mismatchBg;
+                safetyCell.style.color = mismatchColor;
+                safetyCell.style.border = mismatchBorder;
             }
             row.appendChild(safetyCell);
 
             // 18 - Commitment
             const commitCell = td(item.VCHR_CamKet || '');
-            if (isFalseFlag(item.IsMatchCamKet)) {
+            if (isFalseFlag(item.IsMatchCamKet, item.ID_StepBaoGia)) {
                 commitCell.classList.add('mismatch');
-                commitCell.style.color = 'red';
-                commitCell.style.border = '1px solid red';
+                commitCell.style.backgroundColor = mismatchBg;
+                commitCell.style.color = mismatchColor;
+                commitCell.style.border = mismatchBorder;
             }
             row.appendChild(commitCell);
 

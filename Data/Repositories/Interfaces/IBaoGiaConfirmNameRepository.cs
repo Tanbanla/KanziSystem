@@ -18,7 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> RejectConfirmNameAsync(int id, string reason, string rejectedBy);
 
         // Insert thong tin danh sach
-        public Task<bool> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames);
+        Task<List<BaoGia_Confirm_Name_Quotation>> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames);
         // luu thong tin nhap file
         public Task<bool> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role);
         // Saves

@@ -541,6 +541,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                  d.FL_USD,
                  d.FL_VND,
                  d.FL_Sum,
+				 d.CHR_Status,
                  CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
                  CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
                  CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
@@ -634,7 +635,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("Offset", (pageIndex - 1) * pageSize);
                 parameters.Add("PageSize", pageSize);
             }
-
+            var a = sql.ToString();
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
 
             // For total count, build a similar CTE so status filter and partition logic match the main query
@@ -1602,7 +1603,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result;
         }
         // Export history báo giá
-        public async Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        public async Task<List<dynamic>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang,
+            string? status, int? step, string? user, string? chungLoai, DateTime? to, DateTime? from)
         {
             var sql = @"
                 WITH FilteredRequest AS (
@@ -1654,7 +1656,16 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     "WHERE s.CHR_CodeSection = q.CHR_SectionCode and s.CHR_UserAdid = @Adid )");
                 parameters.Add("Adid", user);
             }
-
+            if (from.HasValue)
+            {
+                whereClauses.Add("q.DTM_CreateDate >= @From");
+                parameters.Add("From", from.Value);
+            }
+            if (to.HasValue)
+            {
+                whereClauses.Add("q.DTM_CreateDate <= @To");
+                parameters.Add("To", to.Value);
+            }
             // status handling
             if (!string.IsNullOrEmpty(status))
             {
@@ -1769,6 +1780,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // kiểm tra đơn + mã hàng đã được quyền lựa chọn nhà cung cấp hay chưa
         public async Task<List<BaoGiaImportModel>> CheckPermissionSelectSupplierAsync(BaoGiaImportModel baoGiaImportModel)
         {
+
+
             // Implement the logic to check permission here
             throw new NotImplementedException();
         }

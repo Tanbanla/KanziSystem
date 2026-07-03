@@ -100,13 +100,14 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Insert thong tin danh sach
-        public async Task<GenericResponse<bool>> AddListAsync(List<BaoGia_Confirm_Name_QuotationDTO> confirmNames)
+        public async Task<GenericResponse<List<BaoGia_Confirm_Name_QuotationDTO>>> AddListAsync(List<BaoGia_Confirm_Name_QuotationDTO> confirmNames)
         {
-            var result = new GenericResponse<bool>();
+            var result = new GenericResponse<List<BaoGia_Confirm_Name_QuotationDTO>>();
             try
             {
                 var data = _mapper.Map<List<BaoGia_Confirm_Name_Quotation>>(confirmNames);
-                result.Data = await _repo.AddListAsync(data);
+                var rq = await _repo.AddListAsync(data);
+                result.Data = _mapper.Map<List<BaoGia_Confirm_Name_QuotationDTO>>(rq);
                 result.Success = true;
             }
             catch (Exception ex)

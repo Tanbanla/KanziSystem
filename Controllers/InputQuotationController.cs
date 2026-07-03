@@ -89,7 +89,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             break;
                         }
                         var errors = new List<string>();
-                        if (ws.Cell(r, 16).GetString().ToLower().Contains("refuse") || ws.Cell(r, 17).GetString().ToLower().Contains("refuse"))
+
+                        if (ws.Cell(r, 16).GetString().Contains("refuse", StringComparison.OrdinalIgnoreCase) ||
+                            ws.Cell(r, 17).GetString().Contains("refuse", StringComparison.OrdinalIgnoreCase))
                         {
                             // lấy Id của đơn lưu trong csdl
                             var idRequestQuote1 = 0;
@@ -418,7 +420,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 GetCurrentUserId() ?? "",
                 searchModel.PageIndex,
                 searchModel.PageSize,
-                searchModel.Date,
+                searchModel.to,
                 searchModel.ChungLoai
                 );
             if (!result.Success)

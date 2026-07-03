@@ -38,6 +38,47 @@
     overflow-x: auto;
 }
 
+/* Supplier filter form: prevent action buttons from overlapping search fields on laptop */
+#supplierFilterForm > [class*="col-"] {
+    min-width: 0;
+}
+
+#supplierFilterForm .form-select,
+#supplierFilterForm .searchable-select {
+    width: 100%;
+    min-width: 0;
+}
+
+#supplierFilterForm .text-md-end .d-flex {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: .5rem;
+    column-gap: .5rem;
+}
+
+#supplierFilterForm .text-md-end .d-flex > div[style*="margin-left"] {
+    display: none;
+}
+
+#supplierFilterForm #supplierSearchBtn,
+#supplierFilterForm #supplierImportExcelBtn,
+#supplierFilterForm #btnClearnTAB2 {
+    flex-shrink: 0;
+    padding: .375rem .75rem;
+}
+
+@media (min-width: 992px) and (max-width: 1600px) {
+    #supplierFilterForm > .text-md-end {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-top: .25rem !important;
+    }
+
+    #supplierFilterForm > .text-md-end .d-flex {
+        justify-content: flex-start !important;
+    }
+}
+
     /* Sticky header styling */
     #detailModal thead th {
         position: sticky;

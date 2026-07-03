@@ -54,8 +54,8 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public int? Step { get; set; }
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
-        public DateTime? Date { get; set; }
-        public DateTime? From { get; set; }
+        public DateTime? to { get; set; }
+        public DateTime? from { get; set; }
         public string? ChungLoai { get; set; }
 
     }

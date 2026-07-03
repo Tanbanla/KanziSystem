@@ -222,16 +222,21 @@
             Step: null,
             PageIndex: page,
             PageSize: pageSize,
-            Date: (from && to) ? { From: from, To: to } : null
+            from: from || null,
+            to: to || null,
+            Chungloai: ''
         };
         fetch((window.apiBaseUrl || '') + '/History/SearchHistoryBaoGia', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
-            .then(r => {
+            .then(async r => {
                 const T = window.i18nHistoryQuote || {};
-                if (!r.ok) throw new Error(T.MsgSearchFailed || 'Search failed');
+                if (!r.ok) {
+                    const errorText = await r.text().catch(() => '');
+                    throw new Error(errorText || (T.MsgSearchFailed || 'Search failed'));
+                }
                 return r.json();
             })
             .then(data => {
@@ -301,7 +306,9 @@
             Step: null,
             PageIndex: 1,
             PageSize: 100,
-            Date: (from && to) ? { From: from, To: to } : null
+            from: from || null,
+            to: to || null,
+            Chungloai: ''
         };
         // ExportHistory
         const T = window.i18nHistoryQuote || {};

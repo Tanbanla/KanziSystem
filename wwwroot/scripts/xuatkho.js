@@ -258,7 +258,14 @@ function caculator() {
     }
 
 }
-function _xuatkho() {
+// Thêm một biến toàn cục để kiểm soát trạng thái click
+let isProcessingXuatKho = false;
+function _xuatkho(btn = null) {
+    // 1. Nếu đang xử lý thì chặn không cho chạy tiếp
+    if (isProcessingXuatKho) {
+        return;
+    }
+
     var code_request = document.getElementById("madonn").innerHTML;
     var adid_nx = document.getElementById("us").innerHTML;
     var nguoinhan = document.getElementById("nguoinhan_thucte").value;
@@ -269,6 +276,7 @@ function _xuatkho() {
     var phong = document.getElementById("phong_yc").innerHTML;
     var kho = document.getElementById("khoSelect").value;
 
+    // Validate thông tin
     if (nguoixuatkho == "" || nguoinhan == "") {
         alert("Điền thông tin người xuất kho và người nhận !");
         return;
@@ -276,15 +284,29 @@ function _xuatkho() {
 
     const checkboxes = document.querySelectorAll('input.itemsmall');
     let countChecked = 0;
+
+    // Đếm trước số lượng checkbox để validate, tránh khóa nút nếu người dùng chưa chọn gì
+    checkboxes.forEach(item => {
+        if (item.checked) countChecked++;
+    });
+
+    if (countChecked === 0) {
+        alert("Vui lòng tích chọn ít nhất một mặt hàng để xuất kho!");
+        return;
+    }
+
+    // 2. Vượt qua hết validate -> Bắt đầu khóa nút / đánh dấu đang xử lý
+    isProcessingXuatKho = true;
+    if (btn) {
+        btn.disabled = true; // Làm mờ nút nếu có truyền element vào
+        btn.innerHTML = "Đang xử lý..."; // Tùy chọn: Thay đổi text của nút
+    }
+
     let promises = [];
 
     checkboxes.forEach((item, i) => {
         if (item.checked) {
-            countChecked++;
-
-            // LẤY ĐÚNG ID CHI TIẾT TỪ CHECKBOX ĐANG ĐƯỢC TÍCH
             var idChiTietDong = item.id;
-
             var manguyenlieu = document.getElementById("mahang_" + i).innerHTML;
             var soluong = document.getElementById("slthucte_" + i).value;
             var giathucte = document.getElementById("dgthucte_" + i).value;
@@ -308,8 +330,6 @@ function _xuatkho() {
             params.append('phong', phong);
             params.append('khoi', khoi);
             params.append('tongchiphiold', tongchiphiold);
-
-            // ĐỔI TÊN THÀNH 'id_rq' ĐỂ KHỚP VỚI THAM SỐ CỦA HÀM C#
             params.append('id_rq', idChiTietDong);
 
             let p = fetch('/ipcs/Import/_xuatkhothucte', {
@@ -326,16 +346,19 @@ function _xuatkho() {
         }
     });
 
-    if (countChecked === 0) {
-        alert("Vui lòng tích chọn ít nhất một mặt hàng để xuất kho!");
-        return;
-    }
-
+    // 3. Xử lý sau khi toàn bộ API calls hoàn thành
     Promise.all(promises).then(() => {
         alert("Đã xử lý xuất kho cho " + countChecked + " mặt hàng thành công!");
         document.querySelectorAll('.close').forEach(button => button.click());
         if (typeof _load_xuatkho === "function") {
             _load_xuatkho();
+        }
+    }).finally(() => {
+        // Mở khóa lại nút sau khi đã xong (kể cả thành công hay lỗi mạng)
+        isProcessingXuatKho = false;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = "Xuất kho"; // Trả lại text ban đầu (Sửa lại text theo thực tế HTML của bạn)
         }
     });
 }

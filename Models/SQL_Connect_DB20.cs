@@ -57,7 +57,31 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             catch { return ""; }
         }
         // Thêm vào trong lớp SQL_Connect_DB20 của bạn
- 
+        public readonly string connectString_Test = @"data source=apbivndb20;initial catalog=COST_MANAGEMENT;user id=tuyenmt;password=123456a@;";
+        public DataTable GET_DATA_FROM_SQL_TEST(string DATASELECT)
+        {
+            try
+            {
+                using (SqlConnection cn = new SqlConnection(connectString_Test))
+                {
+                    if (cn.State != ConnectionState.Open) { cn.Open(); }
+                    string CommandText = DATASELECT;
+                    using (SqlCommand cmd = new SqlCommand(CommandText, cn))
+                    {
+                        using (SqlDataAdapter adp = new SqlDataAdapter(cmd))
+                        {
+                            using (DataTable dt = new DataTable())
+                            {
+                                adp.Fill(dt);
+                                return dt;
+                            }
+                            ;
+                        }
+                    }
+                }
+            }
+            catch { return new DataTable(); }
+        }
         public int ExecuteSP(string spName, object? param = null)
         {
             using var conn = new SqlConnection(connectString);

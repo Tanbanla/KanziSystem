@@ -492,12 +492,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Export history báo giá
-        public async Task<GenericResponse<List<dynamic>>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? status, int? step, string? user, string? chungLoai)
+        public async Task<GenericResponse<List<dynamic>>> ExportHistoryBaoGiaAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+            string? MaHang, string? status, int? step, string? user, string? chungLoai, DateTime? to, DateTime? from)
         {
             var result = new GenericResponse<List<dynamic>>();
             try
             {
-                result.Data = await _repo.ExportHistoryBaoGiaAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, chungLoai);
+                result.Data = await _repo.ExportHistoryBaoGiaAsync(MaDon, MaNcc, Section, nguoiYeuCau, MaHang, status, step, user, chungLoai, to, from);
                 result.Success = true;
             }
             catch (Exception ex)

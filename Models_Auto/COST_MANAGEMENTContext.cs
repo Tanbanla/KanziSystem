@@ -922,6 +922,20 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasColumnType("datetime");
         });
 
+        modelBuilder.Entity<BaoGia_Vender_NotConfirm>(entity =>
+        {
+            entity.HasKey(e => e.ID).HasName("PK__BaoGia_V__3214EC27C4B1174F");
+
+            entity.ToTable("BaoGia_Vender_NotConfirm");
+
+            entity.Property(e => e.CHR_MaNcc).HasMaxLength(50);
+            entity.Property(e => e.CHR_Status).HasMaxLength(50);
+            entity.Property(e => e.created_at)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+        });
+
         modelBuilder.Entity<Baocao_ACC_KIEMKE>(entity =>
         {
             entity
