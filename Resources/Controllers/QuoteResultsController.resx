@@ -207,4 +207,10 @@
   <data name="ReasonRequiredForItems" xml:space="preserve">
     <value>The reason for the selection result was not entered.</value>
   </data>
+  <data name="NotAllSuppliersQuoted" xml:space="preserve">
+    <value>Order code {0} + Internal product code {1} does not have sufficient quotation information for apartment supplier.</value>
+  </data>
+  <data name="CannotSelectSupplierForItems" xml:space="preserve">
+    <value>The order does not have sufficient quotations from suppliers and cannot be selected. List: {0}</value>
+  </data>
 </root>

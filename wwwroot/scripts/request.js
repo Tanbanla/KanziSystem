@@ -863,7 +863,16 @@ function _dongy_all() {
             _update_request_all(item.value);
         }
     });
-    alert("Hoàn thành !");
+    // --- Hiển thị thông báo góc phải ---
+    const thongBao = document.getElementById('thong-bao-goc-phai');
+
+    // Hiển thị thông báo
+    thongBao.style.display = 'block';
+
+    // Tự động ẩn sau 3 giây (3000ms)
+    setTimeout(() => {
+        thongBao.style.display = 'none';
+    }, 3000);
 }
 function _reject(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;

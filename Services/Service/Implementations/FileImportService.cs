@@ -34,27 +34,49 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = "Source path is empty.";
                 return result;
             }
-            ;
 
-            // Normalize and split by comma if multiple paths provided
-            var raw = sourcePath.Trim();
-            raw = raw.Trim('"', '\'');
+            var candidates = new List<(string Value, bool IsQuoted)>();
+            var quoteMatches = System.Text.RegularExpressions.Regex.Matches(sourcePath, "\"([^\"]+)\"|'([^']+)'");
+            foreach (System.Text.RegularExpressions.Match match in quoteMatches)
+            {
+                var value = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    candidates.Add((value.Trim(), true));
+                }
+            }
+
+            var raw = sourcePath.Trim().Trim('"', '\'');
+            if (!string.IsNullOrWhiteSpace(raw))
+            {
+                candidates.Add((raw, false));
+            }
+
             var parts = raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(p => p.Trim().Trim('"', '\''))
-                            .ToList();
+                           .Select(p => p.Trim().Trim('"', '\''));
+            foreach (var part in parts)
+            {
+                if (!string.IsNullOrWhiteSpace(part))
+                {
+                    candidates.Add((part, false));
+                }
+            }
 
             string? found = null;
-            foreach (var p0 in parts)
+            string? matchedInputPath = null;
+            var matchedFromQuoted = false;
+            foreach (var candidate in candidates)
             {
-                var p = p0.Replace("/", "\\").Trim();
+                var p = candidate.Value.Replace("/", "\\").Trim();
                 if (p.StartsWith("\\") && !p.StartsWith("\\\\"))
                 {
                     p = "\\" + p;
                 }
-
                 if (File.Exists(p))
                 {
                     found = p;
+                    matchedInputPath = candidate.Value;
+                    matchedFromQuoted = candidate.IsQuoted;
                     break;
                 }
             }
@@ -62,12 +84,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             if (found == null) return null;
 
             var extension = Path.GetExtension(found).ToLowerInvariant();
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg" };
             if (!allowedExtensions.Contains(extension)) return null;
 
             try
             {
-                var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/'); ;
+                var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
                 if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
 
                 var fileName = Path.GetFileName(found) ?? (Guid.NewGuid().ToString() + ".dat");
@@ -84,7 +106,16 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
                 var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
 
-                result.Data = fileUrl;
+                var onlyQuotedPath = System.Text.RegularExpressions.Regex.IsMatch(sourcePath, "^\\s*([\"']).*\\1\\s*$");
+                if (matchedFromQuoted && !string.IsNullOrWhiteSpace(matchedInputPath) && !onlyQuotedPath)
+                {
+                    result.Data = ReplaceFirstIgnoreCase(sourcePath, matchedInputPath, fileUrl);
+                }
+                else
+                {
+                    result.Data = fileUrl;
+                }
+
                 result.Success = true;
                 return result;
             }
@@ -94,6 +125,15 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = ex.Message;
                 return result;
             }
+        }
+        private static string ReplaceFirstIgnoreCase(string input, string oldValue, string newValue)
+        {
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(oldValue)) return input;
+
+            var index = input.IndexOf(oldValue, StringComparison.OrdinalIgnoreCase);
+            if (index < 0) return input;
+
+            return string.Concat(input.AsSpan(0, index), newValue, input.AsSpan(index + oldValue.Length));
         }
         // Lấy file từ link 
         public async Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath)

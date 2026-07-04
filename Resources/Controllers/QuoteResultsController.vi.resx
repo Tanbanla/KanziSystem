@@ -207,4 +207,10 @@
   <data name="ReasonRequiredForItems" xml:space="preserve">
     <value>Nhập thiếu lý do cho kết quả lựa chọn</value>
   </data>
+  <data name="NotAllSuppliersQuoted" xml:space="preserve">
+    <value>Mã đơn {0} + Mã hàng nội bộ {1} chưa  đủ thông tin báo giá của các nhà chung cấp.</value>
+  </data>
+  <data name="CannotSelectSupplierForItems" xml:space="preserve">
+    <value>Đơn chưa đủ bao giá các nhà cung cấp, không thể chọn. Danh sách: {0}</value>
+  </data>
 </root>

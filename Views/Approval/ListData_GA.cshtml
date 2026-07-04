@@ -95,10 +95,14 @@
     <div class="col-12">
         <div class="card card-primary">
             <div class="card-header" style="padding-left: 0px;">
+                <div id="thong-bao-goc-phai" class="alert alert-success" style="display: none; position: fixed; top: 80px; right: 20px; width: 300px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 6px;" role="alert">
+                    <strong>Hoàn thành!</strong> Đã xử lý tất cả yêu cầu.
+                </div>
                 <div class="form-group" style="margin : 10px 0 0 5px">
                     <div class="input-group mb-2">
-                        <button class="btn btn-outline-success" style="border-radius : 0px;" onclick="_dongy_all_GA()"><i class="fa fa-check"></i> @Languages.Dongy</button>
-                        <button class="btn btn-outline-info ml-1" style="border-radius : 0px;" id="modal-15" onclick="_list_view()"><i class="fa fa-eye-dropper"></i> @Languages.Xem</button>
+                        <button class="btn btn-success" style="border-radius : 0px;" onclick="_dongy_all_GA()"><i class="fa fa-check-double"></i> @Languages.Pheduyetdon</button>
+                      
+                        <button class="btn btn-info ml-1" style="border-radius : 0px;" id="modal-15" onclick="_list_view()"><i class="fa fa-eye"></i> @Languages.Xem</button>
                     </div>
                 </div>
                 <div class="form-group" style="margin : 10px 0 0 50px">
@@ -139,8 +143,8 @@
                         </select>
                     </div>
                 </div>
-                <button type="button" class="btn btn-success ml-3" onclick="_load_confirm_GA()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-                <button type="button" class="btn btn-info ml-3" onclick="_reset()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button>
+                <button type="button" class="btn btn-primary ml-3" onclick="_load_confirm_GA()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
+                <button type="button" class="btn btn-secondary ml-3" onclick="_reset()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button>
 
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
             </div>
@@ -167,7 +171,6 @@
                                 <th>@Languages.nguoiduthao</th>
                                 <th>@Languages.nguoithamtra</th>
                                 <th>@Languages.nguoipheduyet</th>
-
                                 <th>@Languages.Damnhiem</th>
                                 <th>@Languages.dongyboi QLSC</th>
                                 <th>@Languages.dongyboi QLTC</th>
@@ -377,6 +380,15 @@
                 _update_request_all_GA(item.value);
             }
         });
-        alert("Hoàn thành !");
+         // --- Hiển thị thông báo góc phải ---
+        const thongBao = document.getElementById('thong-bao-goc-phai');
+
+        // Hiển thị thông báo
+        thongBao.style.display = 'block';
+
+        // Tự động ẩn sau 3 giây (3000ms)
+        setTimeout(() => {
+            thongBao.style.display = 'none';
+        }, 3000);
     }
 </script>

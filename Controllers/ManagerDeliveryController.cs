@@ -48,16 +48,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     public class ManagerDeliveryController : Controller
     {
 
-        public IActionResult ManageDelivery(int page = 1, string deliveryStatus = "da-nhap")
+        public IActionResult ManageDelivery(int page = 1)
         {
-            var luongvekho = "";
-            if(deliveryStatus == "da-nhap") { luongvekho = "LuongvekhoKhonhap is null"; }
-            else { luongvekho = "LuongvekhoKhonhap is not null"; }
+       
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             string query = $@"SELECT a.*, Dealine FROM [COST_MANAGEMENT].[dbo].[PO] as a 
                       LEFT JOIN REQUEST as b ON a.Code_Request = b.Code_Request 
-                      WHERE Ngayphathanh >= '2026-06-01' and {luongvekho}
-                      ORDER BY Ngayphathanh DESC";
+                      WHERE Ngayphathanh >= '2026-06-01' ORDER BY Ngayphathanh DESC";
 
             var lst = sql.GET_DATA_FROM_SQL_TEST(query);
             List<PoDetailViewModel> listPo = new List<PoDetailViewModel>();
@@ -75,9 +72,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.Soluong = double.Parse(lst.Rows[i]["Soluong"].ToString()!);
                 po.Donvi = lst.Rows[i]["Dovi"].ToString();
                 po.Nhacungcap = lst.Rows[i]["TenNCC"].ToString();
-                po.DNphathanhpo = lst.Rows[i]["Nguoilamdon"].ToString()?.ToLower();
-                po.ngayguiPO = lst.Rows[i]["Ngayphathanh"].ToString()!.Split(' ')[0];
+                po.DNphathanhpo = lst.Rows[i]["Nguoilamdon"].ToString()?.ToLower();          
                 po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
+
+                po.ngayguiPO = lst.Rows[i]["Ngay_gui_PO"] != null ? lst.Rows[i]["Ngay_gui_PO"].ToString()!.Split(' ')[0] : "";
                 po.ngaynccxngiao = "";
                 po.lichgiao = "";
                 po.anhuongsx = "";
@@ -105,9 +103,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalRecords = totalRecords;
-            ViewBag.PageSize = pageSize;
-            ViewBag.DeliveryStatus = deliveryStatus; // Giữ trạng thái thẻ select dropdown
-
+            ViewBag.PageSize = pageSize;       
             TempData["Tongsoluong"] = totalRecords;
 
             return View(pagedList);

@@ -542,5 +542,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // kiểm tra đơn + mã hàng đã được quyền lựa chọn nhà cung cấp hay chưa
+        public async Task<GenericResponse<List<BaoGiaImportModel>>> CheckPermissionSelectSupplierAsync(List<BaoGiaImportModel> baoGiaImportModels)
+        {
+            var result = new GenericResponse<List<BaoGiaImportModel>>();
+            try
+            {
+                result.Data = await _repo.CheckPermissionSelectSupplierAsync(baoGiaImportModels);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+               result.Success = false;
+               result.Message = ex.Message;
+            }
+            return result;
+        }
     }
 }

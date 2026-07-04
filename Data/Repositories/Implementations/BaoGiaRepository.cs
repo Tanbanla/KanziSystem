@@ -1778,12 +1778,30 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result.ToList();
         }
         // kiểm tra đơn + mã hàng đã được quyền lựa chọn nhà cung cấp hay chưa
-        public async Task<List<BaoGiaImportModel>> CheckPermissionSelectSupplierAsync(BaoGiaImportModel baoGiaImportModel)
+        public async Task<List<BaoGiaImportModel>> CheckPermissionSelectSupplierAsync(
+            List<BaoGiaImportModel> baoGiaImportModels)
         {
+            var dataCheck = baoGiaImportModels
+                .Select(x => $"{x.MaDon}|{x.MaHangNoiBo}")
+                .ToHashSet();
 
+            var invalidKeys = await _context.BaoGia_Request_of_Quotations
+                .Where(x => x.ID_StepBaoGia < 7 && x.BIT_LayBaoGia == true)
+                .Select(x => new
+                {
+                    x.CHR_MaDon,
+                    x.CHR_MaHangNoiBo
+                })
+                .ToListAsync();
 
-            // Implement the logic to check permission here
-            throw new NotImplementedException();
+            var invalidSet = invalidKeys
+                .Where(x => dataCheck.Contains($"{x.CHR_MaDon}|{x.CHR_MaHangNoiBo}"))
+                .Select(x => $"{x.CHR_MaDon}|{x.CHR_MaHangNoiBo}")
+                .ToHashSet();
+
+            return baoGiaImportModels
+                .Where(x => invalidSet.Contains($"{x.MaDon}|{x.MaHangNoiBo}"))
+                .ToList();
         }
     }
 }

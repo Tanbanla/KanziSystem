@@ -646,12 +646,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var request_detail = db.GET_DATA_FROM_SQL("select * from [REQUEST_DETAIL] where Id_Request = '" + iD_REQUEST + "'");
             var get_vitri = db.ReturnString("select Place from [REQUEST] where [Id_Request] = '" + iD_REQUEST + "'");
 
-            var get_phongban = db.ReturnString("select [Name] from DEPARTMENT as a left join REQUEST as b on a.Cost_Center = b.Cost_Center where b.Code_Request = '" + request_detail.Rows[0]["Code_Request"].ToString() + "'");
-       
+           
             List<Models.REQUEST_DETAIL> rq_dt = new List<Models.REQUEST_DETAIL>();
 
             for (int i = 0; i < request_detail.Rows.Count; i++)
             {
+                var get_phongban = db.ReturnString("select [Name] from DEPARTMENT as a left join REQUEST_DETAIL as b on a.Cost_Center = b.Phongchiuchiphi where Id_RequestDetail = '" + request_detail.Rows[i]["Id_RequestDetail"].ToString() + "'");
+
                 rq_dt.Add(new Models.REQUEST_DETAIL
                 {
                     Material_Name = request_detail.Rows[i]["Material_Code"].ToString() + ":" + request_detail.Rows[i]["Material_Name"].ToString(),

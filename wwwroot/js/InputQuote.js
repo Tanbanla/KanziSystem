@@ -471,7 +471,7 @@
 
             // 5 - Supplier item code -> IsMatch_MaHangNCC
             const maHangCell = td(item.CHR_MaHangNCC || '');
-            if (isFalseFlag(item.IsMatch_MaHangNCC, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_MaHangNCC, item.ID_StepBaoGia) && !checkRefuse) {
                 maHangCell.classList.add('mismatch');
                 maHangCell.style.backgroundColor = mismatchBg;
                 maHangCell.style.color = mismatchColor;
@@ -481,7 +481,7 @@
 
             // 6 - Item name HQ -> IsMatch_NameVN
             const nameVNCell = td(item.NVCHR_TenHangHQ || '');
-            if (isFalseFlag(item.IsMatch_NameVN, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_NameVN, item.ID_StepBaoGia) && !checkRefuse) {
                 nameVNCell.classList.add('mismatch');
                 nameVNCell.style.backgroundColor = mismatchBg;
                 nameVNCell.style.color = mismatchColor;
@@ -491,7 +491,7 @@
 
             // 7 - Quantity -> IsMatch_SoLuong
             const qtyCell = td(item.INT_SoLuong || '', 'text-center');
-            if (isFalseFlag(item.IsMatch_SoLuong, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_SoLuong, item.ID_StepBaoGia) && !checkRefuse) {
                 qtyCell.classList.add('mismatch');
                 qtyCell.style.backgroundColor = mismatchBg;
                 qtyCell.style.color = mismatchColor;
@@ -501,7 +501,7 @@
 
             // 8 - Unit -> IsMatch_DonVi
             const unitCell = td(item.NVCHR_DonVi || '', 'text-center');
-            if (isFalseFlag(item.IsMatch_DonVi, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_DonVi, item.ID_StepBaoGia) && !checkRefuse) {
                 unitCell.classList.add('mismatch');
                 unitCell.style.backgroundColor = mismatchBg;
                 unitCell.style.color = mismatchColor;
@@ -536,7 +536,7 @@
 
             // 13 - Delivery date -> IsMatch_Ngay
             const deliveryCell = td(item.DTM_ShipTime ? new Date(item.DTM_ShipTime).toLocaleDateString('vi-VN') : '');
-            if (isFalseFlag(item.IsMatch_Ngay, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_Ngay, item.ID_StepBaoGia) && !checkRefuse) {
                 deliveryCell.classList.add('mismatch');
                 deliveryCell.style.backgroundColor = mismatchBg;
                 deliveryCell.style.color = mismatchColor;
@@ -546,7 +546,7 @@
 
             // 14 - Rohs -> IsMatch_Rohs
             const rohsCell = td(item.VCHR_Rohs || '');
-            if (isFalseFlag(item.IsMatch_Rohs, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_Rohs, item.ID_StepBaoGia) && !checkRefuse) {
                 rohsCell.classList.add('mismatch');
                 rohsCell.style.backgroundColor = mismatchBg;
                 rohsCell.style.color = mismatchColor;
@@ -556,7 +556,7 @@
 
             // 15 - COCQ -> IsMatch_COCQ
             const cocqCell = td(item.VCHR_COCQ || '');
-            if (isFalseFlag(item.IsMatch_COCQ, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_COCQ, item.ID_StepBaoGia) && !checkRefuse) {
                 cocqCell.classList.add('mismatch');
                 cocqCell.style.backgroundColor = mismatchBg;
                 cocqCell.style.color = mismatchColor;
@@ -566,7 +566,7 @@
 
             // 16 - MSDS -> IsMatch_MSDS
             const msdsCell = td(item.VCHR_MSDS || '');
-            if (isFalseFlag(item.IsMatch_MSDS, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_MSDS, item.ID_StepBaoGia) && !checkRefuse) {
                 msdsCell.classList.add('mismatch');
                 msdsCell.style.backgroundColor = mismatchBg;
                 msdsCell.style.color = mismatchColor;
@@ -576,7 +576,7 @@
 
             // 17 - Safety -> IsMatch_AnToan
             const safetyCell = td(item.VCHR_AnToan || '');
-            if (isFalseFlag(item.IsMatch_AnToan, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatch_AnToan, item.ID_StepBaoGia) && !checkRefuse) {
                 safetyCell.classList.add('mismatch');
                 safetyCell.style.backgroundColor = mismatchBg;
                 safetyCell.style.color = mismatchColor;
@@ -586,7 +586,7 @@
 
             // 18 - Commitment
             const commitCell = td(item.VCHR_CamKet || '');
-            if (isFalseFlag(item.IsMatchCamKet, item.ID_StepBaoGia)) {
+            if (isFalseFlag(item.IsMatchCamKet, item.ID_StepBaoGia) && !checkRefuse) {
                 commitCell.classList.add('mismatch');
                 commitCell.style.backgroundColor = mismatchBg;
                 commitCell.style.color = mismatchColor;

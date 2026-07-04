@@ -207,4 +207,10 @@
   <data name="ReasonRequiredForItems" xml:space="preserve">
     <value>選考結果の理由は入力されていませんでした。</value>
   </data>
+  <data name="NotAllSuppliersQuoted" xml:space="preserve">
+    <value>受注コード {0} および社内品番コード {1} ：マンションサプライヤー向け見積情報不足。</value>
+  </data>
+  <data name="CannotSelectSupplierForItems" xml:space="preserve">
+    <value>仕入先見積不足のため、受注を選択できません。対象：{0}</value>
+  </data>
 </root>

@@ -480,9 +480,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const idAttr = row.getAttribute('data-id') || sel.getAttribute('data-id') || '';
                     const id = idAttr !== '' && !isNaN(Number(idAttr)) ? Number(idAttr) : idAttr;
                     const reason = (row.querySelector('.reason-input')?.value || '').toString();
-                    const maDon = row.getAttribute('data-madon') || '';
-                    const maHang = row.getAttribute('data-mahang') || '';
-                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, CHR_MaDon: maDon, CHR_MaHangNoiBo: maHang });
+                    const maDon = row.getAttribute('data-madon') || sel.getAttribute('data-madon') || '';
+                    const maHang = row.getAttribute('data-mahang') || sel.getAttribute('data-mahang') || '';
+                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, NVCHR_NameNCC: maDon, CHR_MaHangNCC: maHang });
                 });
                 const approverNext = window.__selectedNextApprover || '';
                 if (!payload.length) {

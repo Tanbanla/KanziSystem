@@ -77,10 +77,10 @@
         transition: all 0.2s ease;
     }
 
-        .excel-dropzone:hover {
-            background-color: #f0fdf2;
-            border-color: #218838;
-        }
+    .excel-dropzone:hover {
+        background-color: #f0fdf2;
+        border-color: #218838;
+    }
 
     /* Style cho hàng hiển thị thông tin mở rộng */
     .detail-row {
@@ -96,6 +96,20 @@
 
     .cursor-pointer {
         cursor: pointer;
+    }
+
+    .nav-link {
+        padding: .1rem 1rem;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: white;
+        background-color: #2335b7;
+      
+    }
+
+    .nav-tabs .nav-item .nav-link.active {
+        color: #e4e4e4;
     }
 </style>
 
@@ -117,15 +131,15 @@
             <div class="card">
                 <div class="card-body">
                     <form class="row g-3">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
                             <input type="text" class="form-control" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
                             <input type="month" class="form-control" value="@DateTime.Now.ToString("yyyy-06")">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
                             <select class="form-control" style="padding: 5px 12px;">
                                 <option value="">-- Tất cả trạng thái --</option>
@@ -134,26 +148,19 @@
                                 <option value="Wait">Chờ phòng ban xác nhận</option>
                             </select>
                         </div>
-                        <div class="col-md-3 d-flex align-items-end gap-2">
+                        <div class="col-md-2 d-flex align-items-end gap-2">
                             <button type="button" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
                             <button type="reset" class="btn btn-outline-secondary"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</button>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end gap-2">
+                            <button class="btn btn-outline-danger"><i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel</button>
+                            <button type="button" class="btn btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="card">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <div>
-                        <select class="form-control filter-delivery-status" style="padding:2px 5px">
-                            <option value="da-nhap">Danh sách PO chưa giao hàng &nbsp;</option>
-                            <option value="chua-giao">Danh sách PO đã nhập hàng &nbsp;</option>
-                        </select>
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel</button>
-                        <button type="button" class="btn btn-sm btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
-                    </div>
-                </div>
+               
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover mb-0 align-middle">
@@ -308,19 +315,6 @@
                 </div>
             </div>
             <div class="card">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <div>
-                        <select class="form-control filter-delivery-status" style="padding:2px 5px">
-                            <option value="all">-- Tất cả danh sách mã A/E --</option>
-                            <option value="chua-giao">Danh sách mã A/E chưa giao hàng &nbsp;</option>
-                            <option value="da-nhap">Danh sách mã A/E đã giao hàng &nbsp;</option>
-                        </select>
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel</button>
-                        <button type="button" class="btn btn-sm btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
-                    </div>
-                </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover mb-0 align-middle">
@@ -348,230 +342,65 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="main-row row-alert-yes" data-luongvekho="">
-                                    <td class="text-center fw-bold">153</td>
-                                    <td class="text-center">04/05/2026</td>
-                                    <td class="text-center">05/05/2026</td>
-                                    <td class="text-center fw-bold text-primary">2603-0008</td>
-                                    <td>Dây đai PP (0.7mm*15mm*1500m)</td>
-                                    <td class="text-center fw-bold">E000188</td>
-                                    <td class="text-end">100</td>
-                                    <td class="text-center">Roll</td>
-                                    <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
-                                    <td>60</td>
-                                    <td>thuongti</td>
-                                    <td class="text-center">09/06/2026</td>
-                                    <td>Hương</td>
-                                    <td class="text-center fw-bold text-danger">13/06/2026</td>
-                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
-                                        <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                                    </td>
-                                    <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
-                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
-                                        <span class="badge badge-ng p-2 w-100">Put out</span>
-                                    </td>
-                                    <th class="text-center text-success">Đã nhập hàng</th>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
-                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188"
-                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="13/06/2026" data-impact="Yes">
-                                            <i class="fa-solid ion-compose"></i> Dự kiến
-                                        </button>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
-                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188" data-req-date="05/05/2026">
-                                            <i class="fa-solid fa fa-pen"></i> Chính thức
-                                        </button>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
-                                                data-po="2603-0008" data-item-name="Dây đai PP (0.7mm*15mm*1500m)" data-item-code="E000188" data-order-qty="100" data-req-date="05/05/2026">
-                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr id="info-153" class="collapse detail-row">
-                                    <td colspan="20">
-                                        <div class="detail-container">
-                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
-                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
-                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-danger">13/06/2026</b></span>
-                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-danger">Có (Yes)</b></span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
-                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">12/06/2026</b></span>
-                                                        <span class="d-block fs-7">Cửa giao / Kho nhận: <b class="text-dark">Cửa F1 / Kho F1</b></span>
-                                                        <span class="d-block fs-7">Trạng thái: <b class="text-success">Đã hoàn thành nhận hàng</b></span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
-                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-dark">100 Roll</b></span>
-                                                        <span class="d-block fs-7">Số ĐNTT: <b class="text-dark">DNTT-2605-0012</b></span>
-                                                        <span class="d-block fs-7">Số Hóa đơn: <b class="text-dark">INV-0089271</b></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr class="main-row" data-luongvekho="CoDuLieu">
-                                    <td class="text-center fw-bold">154</td>
-                                    <td class="text-center">04/05/2026</td>
-                                    <td class="text-center">05/05/2026</td>
-                                    <td class="text-center fw-bold text-primary">2603-0009</td>
-                                    <td>Giấy A4 in 2 mặt Bãi Bằng 58gsm</td>
-                                    <td class="text-center fw-bold">E000189</td>
-                                    <td class="text-end">200</td>
-                                    <td class="text-center">Ream</td>
-                                    <td>CÔNG TY TNHH THƯƠNG MẠI X</td>
-                                    <td>30</td>
-                                    <td>thuongti</td>
-                                    <td class="text-center">09/06/2026</td>
-                                    <td>Hương</td>
-                                    <td class="text-center fw-bold text-danger">06/05/2026</td>
-                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-154">
-                                        <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                                    </td>
-                                    <td class="text-center text-secondary">Không (No)</td>
-                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
-                                        <span class="badge badge-ng p-2 w-100">Put in</span>
-                                    </td>
-                                    <th class="text-center text-warning">Chưa giao hàng</th>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
-                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189"
-                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="06/05/2026" data-impact="No">
-                                            <i class="fa-solid ion-compose"></i> Dự kiến
-                                        </button>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
-                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189" data-req-date="05/05/2026">
-                                            <i class="fa-solid fa fa-pen"></i> Chính thức
-                                        </button>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
-                                                data-po="2603-0008" data-item-name="Giấy A4 in 2 mặt Bãi Bằng 58gsm" data-item-code="E000189" data-order-qty="200" data-req-date="05/05/2026">
-                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr id="info-154" class="collapse detail-row">
-                                    <td colspan="20">
-                                        <div class="detail-container">
-                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
-                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
-                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-danger">06/05/2026</b></span>
-                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-secondary">Không (No)</b></span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
-                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-muted">-- Chưa nhập dữ liệu --</b></span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
-                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-muted">-- Chưa thanh toán --</b></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr class="main-row" data-luongvekho="">
-                                    <td class="text-center fw-bold">155</td>
-                                    <td class="text-center">04/05/2026</td>
-                                    <td class="text-center">05/05/2026</td>
-                                    <td class="text-center fw-bold text-primary">2603-0110</td>
-                                    <td>Băng dính xốp PE (45mm * 45mm)</td>
-                                    <td class="text-center text-muted">Ngoài E/A</td>
-                                    <td class="text-end">42,000</td>
-                                    <td class="text-center">Pcs</td>
-                                    <td>CÔNG TY TNHH THƯƠNG MẠI Y</td>
-                                    <td>10</td>
-                                    <td>thuongti</td>
-                                    <td class="text-center">09/06/2026</td>
-                                    <td>Hương</td>
-                                    <td class="text-center text-success">02/05/2026</td>
-                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-155">
-                                        <span class="badge badge-ok p-2 w-100">OK <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                                    </td>
-                                    <td class="text-center text-secondary">Không (No)</td>
-                                    <td class="text-center cursor-pointer toggle-detail" data-target="#info-153">
-                                        <span class="badge badge-ok p-2 w-100">An toàn <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                                    </td>
-                                    <th class="text-center text-success">Đã nhập hàng</th>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
-                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A"
-                                                data-req-date="05/05/2026" data-send-date="09/06/2026" data-confirm-date="02/05/2026" data-impact="No">
-                                            <i class="fa-solid ion-compose"></i> Dự kiến
-                                        </button>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
-                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A" data-req-date="05/05/2026">
-                                            <i class="fa-solid fa fa-pen"></i> Chính thức
-                                        </button>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
-                                                data-po="2603-0008" data-item-name="Băng dính xốp PE (45mm * 45mm)" data-item-code="Ngoài E/A" data-order-qty="42,000" data-req-date="05/05/2026">
-                                            <i class="fa-solid fa fa-credit-card"></i> Thanh toán
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr id="info-155" class="collapse detail-row">
-                                    <td colspan="20">
-                                        <div class="detail-container">
-                                            <h6 class="text-success fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-primary d-block mb-1"><i class="fa-solid fa fa-clock-rotate-left me-1"></i> 1. Dữ liệu Dự Kiến (PUR)</strong>
-                                                        <span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">09/06/2026</b></span>
-                                                        <span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-success">02/05/2026</b></span>
-                                                        <span class="d-block fs-7">Ảnh hưởng SX: <b class="text-secondary">Không (No)</b></span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-success d-block mb-1"><i class="fa-solid fa fa-boxes-stacked me-1"></i> 2. Thực Tế Nhận Hàng (Warehouse)</strong>
-                                                        <span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">02/05/2026</b></span>
-                                                        <span class="d-block fs-7">Cửa giao / Kho nhận: <b class="text-dark">Cửa F2 / Kho F2</b></span>
-                                                        <span class="d-block fs-7">Trạng thái: <b class="text-success">Đã nhận hàng OK</b></span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded bg-light">
-                                                        <strong class="text-info d-block mb-1"><i class="fa-solid fa fa-calculator me-1"></i> 3. Chứng Từ Thanh Toán (Accounting)</strong>
-                                                        <span class="d-block fs-7">Số lượng thanh toán: <b class="text-muted">-- Chưa thanh toán --</b></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var item in Model.Where(x => x.Danhmuc == "IN"))
+                                    {
+                                        <tr class="main-row @(item.Ngayyc != null ? "row-alert-yes" : "")" data-luongvekho="@(item.LuongvekhoKhonhap)">
+                                            <td class="text-center fw-bold">@(stt++)</td>
+                                            <td class="text-center">@item.Ngayyc</td>
+                                            <td class="text-center">@item.Ngayycgiao </td>
+                                            <td class="text-center fw-bold text-primary">@item.SoPO</td>
+                                            <td>@item.Tentiengviet</td>
+                                            <td class="text-center fw-bold">@item.Mahang</td>
+                                            <td class="text-end">@item.Soluong.ToString("N0")</td>
+                                            <td class="text-center">@item.Donvi</td>
+                                            <td>@item.Nhacungcap</td>
+                                            <td class="text-center">@item.DNphathanhpo</td>
+                                            <td>@item.ngayguiPO</td>
+                                            <td class="text-center fw-bold text-danger">@item.DNphathanhpo</td>
+                                            <td></td>
+                                            <td class="text-center cursor-pointer toggle-detail" data-target="#info-@item.PO_Detail_Id">
+                                                <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
+                                            </td>
+                                            <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-req-date="@item.ngaynccxngiao">
+                                                    <i class="fa-solid ion-compose"></i> Dự kiến
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-req-date="@item.ngaynccxngiao">
+                                                    <i class="fa-solid fa fa-pen"></i> Chính thức
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-order-qty="@item.Soluong"
+                                                        data-req-date="@(item.ngaynccxngiao)">
+                                                    <i class="fa-solid fa fa-credit-card"></i> Thanh toán
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu PO nào.</td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -587,10 +416,8 @@
                             <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
                                 <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage - 1 })">Trước</a>
                             </li>
-
                             @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                            {
-                               
+                            {                              
                                 if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
                                 {
                                     <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
@@ -602,7 +429,6 @@
                                     <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
                                 }
                             }
-
                             <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
                                 <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage + 1 })">Sau</a>
                             </li>
@@ -1128,51 +954,7 @@
                 });
                 document.getElementById('btnSaveInfo').style.display = 'block';
             });
-        }
-
-        // --- THÊM MỚI: LOGIC LỌC TRẠNG THÁI GIAO HÀNG (CHƯA GIAO HÀNG / ĐÃ NHẬP HÀNG) ---
-        const filterSelects = document.querySelectorAll('.filter-delivery-status');
-        filterSelects.forEach(select => {
-            select.addEventListener('change', function () {
-                const filterValue = this.value; // Có giá trị: 'all', 'chua-giao', 'da-nhap'
-                const tbody = this.closest('.card').querySelector('tbody');
-                const mainRows = tbody.querySelectorAll('tr.main-row');
-
-                mainRows.forEach(row => {
-                    // Lấy dữ liệu thuộc tính LuongvekhoKhonhap của dòng hiện tại
-                    const luongVeKho = row.getAttribute('data-luongvekho') || "";
-
-                    // Tìm dòng thông tin chi tiết mở rộng ngay dưới (nếu có) để ẩn/hiện đồng bộ
-                    const detailRowId = row.querySelector('.toggle-detail')?.getAttribute('data-target');
-                    const detailRow = detailRowId ? document.querySelector(detailRowId) : null;
-
-                    let isShow = true;
-
-                    // Áp dụng bộ lọc dựa trên logic người dùng đặt ra
-                    if (filterValue === 'chua-giao') {
-                        // Logic: LuongvekhoKhonhap != null và != ''
-                        isShow = (luongVeKho !== null && luongVeKho.trim() !== "");
-                    } else if (filterValue === 'da-nhap') {
-                        // Logic ngược lại: LuongvekhoKhonhap == null hoặc == ''
-                        isShow = (luongVeKho === null || luongVeKho.trim() === "");
-                    }
-
-                    // Thực thi Ẩn / Hiện dòng trên giao diện DOM
-                    if (isShow) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-
-                        // Nếu dòng chi tiết con đang mở, đóng nó lại để tránh lỗi lệch khung table
-                        if (detailRow && detailRow.classList.contains('show')) {
-                            detailRow.classList.remove('show');
-                            const icon = row.querySelector('.toggle-detail i');
-                            if (icon) icon.className = "fa-solid fa fa-caret-down ms-1";
-                        }
-                    }
-                });
-            });
-        });
+        } 
     });
 
     // Xử lý sự kiện click chuyển Tabs Bootstrap mượt mà

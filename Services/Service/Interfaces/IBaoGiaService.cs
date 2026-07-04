@@ -87,5 +87,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdateDeadlineAsync(List<BaoGia_Request_of_QuotationDTO> baoGias);
         // Lấy danh sách NCC k cần xác nhận tên hàng
         Task<GenericResponse<List<string>>> GetListNccNotConfirmNameAsync();
+        // kiểm tra đơn + mã hàng đã được quyền lựa chọn nhà cung cấp hay chưa
+        Task<GenericResponse<List<BaoGiaImportModel>>> CheckPermissionSelectSupplierAsync(List<BaoGiaImportModel> baoGiaImportModels);
     }
 }
