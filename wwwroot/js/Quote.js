@@ -976,8 +976,8 @@
             const categorySelect = tr.querySelector('.chungLoaiTb');
             if (categorySelect && material.category_VN) {
                 try {
-                    // nếu select đang rỗng, thử set bằng value hoặc bằng text (setSelectValueByText sẽ tìm theo value trước)
-                    setSelectValueByText(categorySelect, material.category_VN);
+
+                    setCategorySelectValueExact(categorySelect, material.category_VN);
                     // nếu select được enhance thành searchable, cập nhật hiển thị
                     updateSearchableSelectDisplay(categorySelect);
                     autoAddRowByCategory(categorySelect);
@@ -2076,18 +2076,66 @@
 
     function setSelectValueByText(select, textOrValue) {
         if (!select) return;
-        const val = textOrValue ?? '';
-        // try match by value first
-        let opt = Array.from(select.options).find(o => o.value === val);
+        const val = (textOrValue ?? '').toString().trim();
+        const normalize = (s) => (s || '').toString().trim().toLowerCase();
+        const valNorm = normalize(val);
+
+        const options = Array.from(select.options || []);
+
+        // 1) Match exact by value
+        let opt = options.find(o => normalize(o.value) === valNorm);
+
+        // 2) Match exact by full text
         if (!opt) {
-            // try match by text prefix before ' - '
-            /*            opt = Array.from(select.options).find(o => (o.text || '').toLowerCase() === (val || '').toLowerCase() || (o.text || '').toLowerCase().startsWith((val || '').toLowerCase()));*/
-            opt = Array.from(select.options).find(o => {
-                const text = (o.text || '').toLowerCase();
-                const value = (val || '').toLowerCase();
-                return text === value || text.includes(value);
-            });
+            opt = options.find(o => normalize(o.text) === valNorm);
         }
+
+        // 3) Match exact by VN part before " - " (e.g. "Kìm - ..." => "Kìm")
+        if (!opt) {
+            opt = options.find(o => normalize((o.text || '').split(' - ')[0]) === valNorm);
+        }
+
+        // 4) Fallback: startsWith on VN part only (avoid broad includes causing wrong matches)
+        if (!opt) {
+            opt = options.find(o => normalize((o.text || '').split(' - ')[0]).startsWith(valNorm));
+        }
+
+        if (opt) {
+            select.value = opt.value;
+            updateSearchableSelectDisplay(select);
+        }
+    }
+
+    // Strict matcher for category only: prefer exact match to avoid "Kìm" -> "Kìm bấm"
+    function setCategorySelectValueExact(select, textOrValue) {
+        if (!select) return;
+        const val = (textOrValue ?? '').toString().trim();
+        const normalize = (s) => (s || '')
+            .toString()
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ');
+        const getVnLabel = (text) => (text || '').toString().split(/\s*-\s*/)[0];
+        const valNorm = normalize(val);
+        const options = Array.from(select.options || []);
+
+        let opt = options.find(o => normalize(o.value) === valNorm);
+        if (!opt) opt = options.find(o => normalize(o.text) === valNorm);
+        if (!opt) opt = options.find(o => normalize(getVnLabel(o.text)) === valNorm);
+
+        // fallback an toàn: chỉ nhận khi có đúng 1 candidate chứa từ khóa theo word-boundary
+        if (!opt) {
+            const candidates = options.filter(o => {
+                const vn = normalize(getVnLabel(o.text));
+                return vn && (` ${vn} `).includes(` ${valNorm} `);
+            });
+            if (candidates.length === 1) {
+                opt = candidates[0];
+            }
+        }
+
         if (opt) {
             select.value = opt.value;
             updateSearchableSelectDisplay(select);
@@ -2109,7 +2157,11 @@
         const setSelectById = (idPattern, value) => {
             const element = tr.querySelector(`#${idPattern}_${rowNumber}`);
             if (element) {
-                setSelectValueByText(element, value);
+                if (idPattern === 'chungLoai') {
+                    setCategorySelectValueExact(element, value);
+                } else {
+                    setSelectValueByText(element, value);
+                }
             }
         };
 

@@ -1612,7 +1612,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         rq.NVCHR_FileThietKe ?? string.Empty,
                         rq.NVCHR_NhaSanXuat ?? string.Empty,
                         rq.CHR_MaNCC ?? string.Empty,
-                        rq.NVCHR_TenNCC ?? string.Empty,
+                        rq.ShortName?? rq.NVCHR_TenNCC ?? string.Empty,
                         rq.BIT_LayBaoGia == false ? "X" : "O",
                         rq.NVCHR_LyDo ?? string.Empty,
                         ToDateString(rq.DTM_NgayMuonNhan),

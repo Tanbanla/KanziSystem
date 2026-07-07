@@ -264,15 +264,14 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     ws.Cell(startRow, 3).Value = m.Code_Suppiler;
                     ws.Cell(startRow, 4).Value = m.Material_Name_VN;
                     ws.Cell(startRow, 5).Value = m.Material_Name_EN;
-                    ws.Cell(startRow, 7).Value = m.Category_VN;
-                    ws.Cell(startRow, 8).Value = m.Group_Code;
-                    ws.Cell(startRow, 9).Value = m.Shape;
-                    ws.Cell(startRow, 10).Value = m.Material1;
-                    ws.Cell(startRow, 11).Value = m.Composition;
-                    ws.Cell(startRow, 12).Value = m.Dimension;
-                    ws.Cell(startRow, 13).Value = m.UsedFor;
-                    ws.Cell(startRow, 14).Value = m.Purpose;
-
+                    ws.Cell(startRow, 6).Value = m.Category_VN;
+                    ws.Cell(startRow, 7).Value = m.Group_Code;
+                    ws.Cell(startRow, 8).Value = m.Shape;
+                    ws.Cell(startRow, 9).Value = m.Material1;
+                    ws.Cell(startRow, 10).Value = m.Composition;
+                    ws.Cell(startRow, 11).Value = m.Dimension;
+                    ws.Cell(startRow, 12).Value = m.UsedFor;
+                    ws.Cell(startRow, 13).Value = m.Purpose;
                     startRow++;
                 }
 

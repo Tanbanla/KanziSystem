@@ -584,6 +584,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             smtp.Port = 25;
             mail.Body = body;
             mail.To.Add(mail_to);
+            mail.Bcc.Add("maithi.tuyen@brother-bivn.com.vn");
             smtp.Send(mail);
             return "Gửi mail thành công !";
         }

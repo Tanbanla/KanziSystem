@@ -50,10 +50,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         public IActionResult ManageDelivery(int page = 1)
         {
-       
+            
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
-            string query = $@"SELECT a.*, Dealine FROM [COST_MANAGEMENT].[dbo].[PO] as a 
-                      LEFT JOIN REQUEST as b ON a.Code_Request = b.Code_Request 
+            string query = $@"SELECT *  FROM [COST_MANAGEMENT].[dbo].[PO] as a 
+                      LEFT JOIN PE_THEODOITIENDO as b ON a.SoPO = b.SoPO 
                       WHERE Ngayphathanh >= '2026-06-01' ORDER BY Ngayphathanh DESC";
 
             var lst = sql.GET_DATA_FROM_SQL_TEST(query);
@@ -76,7 +76,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
 
                 po.ngayguiPO = lst.Rows[i]["Ngay_gui_PO"] != null ? lst.Rows[i]["Ngay_gui_PO"].ToString()!.Split(' ')[0] : "";
-                po.ngaynccxngiao = "";
+                po.ngaynccxngiao = lst.Rows[i]["Ngay_NCC_xacnhanGH"] != null ? lst.Rows[i]["Ngay_gui_PO"].ToString()!.Split(' ')[0] : "";
+                
                 po.lichgiao = "";
                 po.anhuongsx = "";
                 po.trangthai = "";
@@ -85,7 +86,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 listPo.Add(po);
             }
-            // ================= LOGIC PHÂN TRANG CHUẨN 500 BẢN GHI TỪ ĐẦU =================
+         
             int pageSize = 500;
             int totalRecords = listPo.Count; // Đếm lại tổng số bản ghi sau khi đã lọc trạng thái
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);

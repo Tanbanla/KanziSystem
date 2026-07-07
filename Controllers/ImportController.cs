@@ -525,7 +525,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
 
                     int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng                                       
-                    ws.Cells["L" + (totalRow + 12)].Formula = $"=SUM(L{startRow}:L{totalRow - 1})";
+                    ws.Cells["L" + (totalRow)].Formula = $"=SUM(L{startRow}:L{totalRow - 1})";
                     ws.Calculate();
 
                     ws.Cells["O5"].Value = nguoitao;

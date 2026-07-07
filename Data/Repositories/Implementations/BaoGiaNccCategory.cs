@@ -4,6 +4,7 @@ using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using System.Text;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -167,6 +168,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
         public async Task<List<CheckSupplierByCategoryModel>> CheckSupperlierByCategory(List<CheckSupplierByCategoryModel> request)
         {
+            static string NormalizeText(string? input)
+            {
+                return (input ?? string.Empty).Trim().Normalize(NormalizationForm.FormC);
+            }
+
             var missing = new List<CheckSupplierByCategoryModel>();
             if (request == null || request.Count == 0)
                 return missing;
@@ -174,8 +180,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var normalizedRequest = request
                 .Select(r => new CheckSupplierByCategoryModel
                 {
-                    MaDon = (r.MaDon ?? string.Empty).Trim(),
-                    ChungLoai = (r.ChungLoai ?? string.Empty).Trim()
+                    MaDon = NormalizeText(r.MaDon),
+                    ChungLoai = NormalizeText(r.ChungLoai)
                 })
                 .Where(r => !string.IsNullOrEmpty(r.MaDon))
                 .DistinctBy(r => (r.MaDon, r.ChungLoai))
@@ -195,7 +201,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .Select(c => new { Ma = (c.CHR_MaNCC ?? string.Empty).Trim(), ChungLoai = (c.NVCHR_ChungLoai ?? string.Empty).Trim() })
                 .ToListAsync();
 
-            var existingSet = new HashSet<string>(existing.Select(e => e.Ma + "|" + e.ChungLoai), StringComparer.OrdinalIgnoreCase);
+            var existingSet = new HashSet<string>(
+                existing.Select(e => NormalizeText(e.Ma) + "|" + NormalizeText(e.ChungLoai)),
+                StringComparer.OrdinalIgnoreCase
+            );
 
             missing = normalizedRequest
                 .Where(r => !existingSet.Contains(r.MaDon + "|" + r.ChungLoai))

@@ -352,18 +352,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             // Lấy địa chỉ email từ DataTable
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
-          
-            //// Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
-            //if (buoc == 5)
-            //{
-            //     body = $@"Xin chào <br />こんにちは、 <br />
-            //     Đơn yêu cầu xuất kho :  {get_ma}  đã được gửi đến bạn xin phê duyệt<br />出庫依頼が申請されておりますので、<br />
-            //     Bạn vui lòng click vào đường link dưới đây để xác nhận <br />恐れ入りますが、下記リンクより内容をご確認のうえ、<br />
-            //     ご承認賜りますようお願い申し上げます。<br />
-            //     <a href='http://apbivnap18/ipcs/Approval/ListData'> Link </a> <br />
-            //     ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-            //     ※このメールは自動的に送付されたので、返事をしないでください。 ";
-            //}
+         
          
             var up = REQUEST_PROCESS._update_request(id_request, regency, buoc.ToString());
             // gửi đến người tạo đơn
@@ -381,7 +370,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             // Gửi mail
             REQUEST_PROCESS._sendmail(body, mailTo, subject);
-            REQUEST_PROCESS._sendmail(body, "maithi.tuyen@brother-bivn.com.vn", subject);
             return Json(up);
         }
         public JsonResult _update_request_GA(string id_request, string regency, string step, string urgent)
@@ -430,17 +418,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             // Lấy địa chỉ email từ DataTable
             string mailTo = mail_send.Rows[0][columnName].ToString()!;
-
-            // Cập nhật lại nội dung Body (Sử dụng chuỗi nguyên bản @ để dễ đọc)
-            //if (buoc == 5)
-            //{
-            //    body = $@"Xin chào <br />
-            //         Đơn yêu cầu mã : {get_ma} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
-            //         Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
-            //         <a href='http://apbivnap18/ipcs/Approval/ListData_GA'> Link </a> <br />
-            //         ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
-            //         ※このメールは自動的に送付されたので, 返事をしないでください。";
-            //}
           
             var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());                        
             // Gửi mail 
@@ -451,12 +428,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {get_ma} của bạn đã HOÀN THÀNH <br /><br />
                      Bạn vui lòng đến kho để nhận hàng <br /><br />
-                     Kiểm tra thông tin đơn tại : <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
+                     Kiểm tra thông tin đơn tại : <a href='http://apbivnap18/ipcs/Approval/Condition'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
                 REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
             }
-           // REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
             return Json("OK");
         }
         public JsonResult _update_dongytatca(string us, string madon)
@@ -603,7 +580,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
               理由 : " + reason + @"<br /><br />
 
               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /> 下記リンクより内容をご確認ください。
-              <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
+              <a href='http://apbivnap18/ipcs/Approval/Condition'> Link </a> <br />
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
 
@@ -689,7 +666,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
               理由 : " + reason + @"<br /><br />
 
               Bạn vui lòng click vào đường link dưới đây để xác nhận <br /> 下記リンクより内容をご確認ください。
-              <a href='http://172.26.248.62:8075/Approval/Condition'> Link </a> <br />
+              <a href='http://apbivnap18/ipcs/Approval/Condition'> Link </a> <br />
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
 

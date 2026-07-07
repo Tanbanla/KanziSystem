@@ -342,7 +342,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             material.Purpose = mt.Purpose;
             material.Code_Suppiler = mt.Code_Suppiler;
 
-            _context.MATERIALs.Update(material);
             await _context.SaveChangesAsync();
             return true;
         }   
