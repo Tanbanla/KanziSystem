@@ -367,6 +367,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Giao hàng PO.
+        /// </summary>
+        public static string Giaohang {
+            get {
+                return ResourceManager.GetString("Giaohang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Giá tiền.
         /// </summary>
         public static string Giatien {

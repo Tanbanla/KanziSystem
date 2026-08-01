@@ -203,7 +203,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // Tạo mã material với prefix A hoặc I
         private string GenerateMaterialCode(string type, int number)
         {
-            return $"{type}{number:D8}";
+            var format = new[] { "A", "B", "E" }.Contains(type.ToUpper())
+                ? "D6"
+                : "D8";
+
+            return $"{type}{number.ToString(format)}";
         }
 
         // Extract số từ mã material

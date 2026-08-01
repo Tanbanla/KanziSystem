@@ -827,48 +827,101 @@
         }
     }
 
+    //function approvalCell(name, time, userNext, cellStep, currentStep) {
+    //    const text = String(name || '').trim();
+
+    //    if (text) {
+    //        const dt = formatDateTime(time);
+    //        return `<td style="background:#cfe3c6;">
+    //        ${escapeHtml(text)}
+    //        ${dt ? `<div class="small text-muted">${escapeHtml(dt)}</div>` : ''}
+    //    </td>`;
+    //    }
+
+    //    if (cellStep === currentStep + 1) {
+    //        return `<td>${escapeHtml(userNext)}</td>`;
+    //    }
+    //    return `<td></td>`;
+    //}
     function approvalCell(name, time, userNext, cellStep, currentStep) {
         const text = String(name || '').trim();
 
-        if (text) {
-            const dt = formatDateTime(time);
-            return `<td style="background:#cfe3c6;">
-            ${escapeHtml(text)}
-            ${dt ? `<div class="small text-muted">${escapeHtml(dt)}</div>` : ''}
-        </td>`;
-        }
-
-        if (cellStep === currentStep + 1) {
+        if (cellStep < currentStep) {
+            if (text) {
+                const dt = formatDateTime(time);
+                return `<td style="background:#cfe3c6;">
+                ${escapeHtml(text)}
+                ${dt ? `<div class="small text-muted">${escapeHtml(dt)}</div>` : ''}
+                    </td>`;
+            }
+        } else if (cellStep === currentStep) {
             return `<td>${escapeHtml(userNext)}</td>`;
         }
         return `<td></td>`;
     }
-    function supplierCell(value, bitValue, status, step, countStatus, countNCC) {
+    function supplierCell(value, bitValue, status, step, isAllRefuse, selectedSupplier, quoteLink) {
         const raw = String(bitValue ?? '').trim().toLowerCase();
         const isRefuse = String(status ?? '').trim().toLowerCase() === 'refuse';
-        const isValueEmpty = value === '';
         const isSelected = bitValue === 1 || bitValue === true || raw === '1' || raw === 'true';
+
+        const supplierName = String(value ?? '').trim();
+        const selectedName = String(selectedSupplier ?? '').trim();
+
+        const stepByRole = role === 'UserPUR' ? 8 : 12;
+
+        // Vẫn tô nền xanh khi step > stepByRole
+        const isPickedSupplier =
+            step > stepByRole &&
+            supplierName &&
+            selectedName &&
+            supplierName.toLowerCase() === selectedName.toLowerCase();
+
+        // Chỉ cho download khi step > stepByRole
+        const canDownloadQuote =
+            step > stepByRole &&
+            supplierName &&
+            String(quoteLink ?? '').trim();
 
         let bgColor = '#ffffff';
         let textColor = '';
-        // RULE 0: step < 7
-        if (step < 7) {
+
+        if (step < 5) {
             bgColor = '#ffffff';
         }
-        // RULE 1: all refuse
-        else if (countStatus === countNCC) {
+        else if (isAllRefuse) {
             bgColor = '#e74c3c';
             textColor = '#ffffff';
         }
-        // RULE 2: logic cũ
         else if (isSelected && !isRefuse) {
             bgColor = '#cfe3c6';
         }
         else if (isRefuse) {
-            bgColor = 'yellow';
+            bgColor = '#f1c232';
         }
 
-        return `<td style="background:${bgColor};${textColor ? `color:${textColor};` : ''}">${escapeHtml(value)}</td>`;
+        // Tô nền supplier được chọn khi step > 10
+        if (isPickedSupplier) {
+            bgColor = '#cfe2ff';
+
+            // Chỉ đổi màu chữ thành link khi step > stepByRole
+            if (step > stepByRole) {
+                textColor = '#0d6efd';
+            }
+        }
+
+        const cellContent = canDownloadQuote
+            ? `<button type="button"
+                   class="btn btn-link p-0 btn-download"
+                   data-file="${escapeHtml(quoteLink)}"
+                   title="Download quote"
+                   style="color:#0d6efd;text-decoration:underline;white-space:normal;word-break:break-all;overflow-wrap:anywhere;display:block;width:100%;text-align:inherit;line-height:1.2;">
+                ${escapeHtml(value)}
+           </button>`
+            : escapeHtml(value);
+
+        return `<td style="background:${bgColor};${textColor ? `color:${textColor};font-weight:600;` : ''}">
+                ${cellContent}
+            </td>`;
     }
     function renderTable(rows) {
         if (!tblBody) return;
@@ -905,11 +958,19 @@
                 row.NCC_5
             ].filter(s => String(s ?? '').trim() !== '').length;
 
+            const isAllRefuse = countStatus === countNCC;
             const step = Number(getValue(row, ['Step', 'step'], 0)) || 0;
+            const selectedSupplier = getValue(row, ['NCC_DuocChon', 'ncc_DuocChon', 'NCCDuocChon']);
+            const link1 = getValue(row, ['nLink_1', 'Link_1', 'link_1']);
+            const link2 = getValue(row, ['Link_2', 'link_2']);
+            const link3 = getValue(row, ['Link_3', 'link_3']);
+            const link4 = getValue(row, ['Link_4', 'link_4']);
+            const link5 = getValue(row, ['Link_5', 'link_5']);
             const returnAction = role === 'UserPUR'
                 ? `<button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-undo"></i></button>`
                 : '';
-
+            const StatusRow = isAllRefuse ? ` <td>${escapeHtml(window.i18nHistoryQuote?.AllRefuse || 'Toàn bộ các NCC đã từ chối báo giá')}</td>`
+                : `<td>${escapeHtml(getValue(row, [stepName]))}</td>`
             html[i] = `
                 <tr>
                     <td>${startNo + i}</td>
@@ -917,34 +978,23 @@
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_NameEN']))}</td>
-                    ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), getValue(row, ['Status_1', 'status_1']), step, countStatus, countNCC)}
-                    ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), getValue(row, ['Status_2', 'status_2']), step, countStatus, countNCC)}
-                    ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), getValue(row, ['Status_3', 'status_3']), step, countStatus, countNCC)}
-                    ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), getValue(row, ['Status_4', 'status_4']), step, countStatus, countNCC)}
-                    ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), getValue(row, ['Status_5', 'status_5']), step, countStatus, countNCC)}
+                    ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), getValue(row, ['Status_1', 'status_1']), step, isAllRefuse, selectedSupplier, link1)}
+                    ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), getValue(row, ['Status_2', 'status_2']), step, isAllRefuse, selectedSupplier, link2)}
+                    ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), getValue(row, ['Status_3', 'status_3']), step, isAllRefuse, selectedSupplier, link3)}
+                    ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), getValue(row, ['Status_4', 'status_4']), step, isAllRefuse, selectedSupplier, link4)}
+                    ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), getValue(row, ['Status_5', 'status_5']), step, isAllRefuse, selectedSupplier, link5)}
+                    <td>${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
                     <td style="${overdue ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_CreateBy']))}</td>
-                    ${approvalCell(getValue(row, ['QLSC_Approve']), getValue(row, ['QLSC_Time']), getValue(row, ['UserNext']), 3, step)}
-                    ${approvalCell(getValue(row, ['QLTC_Approve']), getValue(row, ['QLTC_Time']), getValue(row, ['UserNext']), 4, step)}
-                    ${approvalCell(getValue(row, ['PIC_Approve']), getValue(row, ['PIC_Time']), getValue(row, ['UserNext']), 5, step)}
-                    ${approvalCell(getValue(row, ['QLSC1_Approve']), getValue(row, ['QLSC1_Time']), getValue(row, ['UserNext']), 6, step)}
+                    ${approvalCell(getValue(row, ['QLSC_Approve']), getValue(row, ['QLSC_Time']), getValue(row, ['UserNext']), 2, step)}
+                    ${approvalCell(getValue(row, ['QLTC_Approve']), getValue(row, ['QLTC_Time']), getValue(row, ['UserNext']), 3, step)}
+                    ${approvalCell(getValue(row, ['PIC_Approve']), getValue(row, ['PIC_Time']), getValue(row, ['UserNext']), 4, step)}
+                    ${approvalCell(getValue(row, ['QLSC1_Approve']), getValue(row, ['QLSC1_Time']), getValue(row, ['UserNext']), 5, step)}
                     ${approvalCell(getValue(row, ['PIC_PickNCC']), getValue(row, ['PIC_PickNCC_Time']), getValue(row, ['UserNext']), 7, step)}
-                    ${approvalCell(getValue(row, ['QLSC_PickNCC']), getValue(row, ['QLSC_PickNCC_Time']), getValue(row, ['UserNext']), 10, step)}
-                    ${approvalCell(getValue(row, ['QLTC_PickNCC']), getValue(row, ['QLTC_PickNCC_Time']), getValue(row, ['UserNext']), 11, step)}
-                    ${approvalCell(getValue(row, ['DEFT_PickNCC']), getValue(row, ['DEFT_PickNCC_Time']), getValue(row, ['UserNext']), 12, step)}
-                    <td>${escapeHtml(getValue(row, ['NCC_DuocChon']))}</td>
-                    <td>${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
-                    <td class="text-center">
-                        ${
-                        getValue(row, ['NVCHR_File'])
-                                ? `<button class="btn btn-outline-primary btn-sm btn-download"
-                                data-file="${escapeHtml(getValue(row, ['NVCHR_File']))}">
-                            <i class="fas fa-download"></i>
-                        </button>`
-                                : ''
-                        }
-                    </td>
-                    <td>${escapeHtml(getValue(row, [stepName]))}</td>
+                    ${approvalCell(getValue(row, ['QLSC_PickNCC']), getValue(row, ['QLSC_PickNCC_Time']), getValue(row, ['UserNext']), 9, step)}
+                    ${approvalCell(getValue(row, ['QLTC_PickNCC']), getValue(row, ['QLTC_PickNCC_Time']), getValue(row, ['UserNext']), 10, step)}
+                    ${approvalCell(getValue(row, ['DEFT_PickNCC']), getValue(row, ['DEFT_PickNCC_Time']), getValue(row, ['UserNext']), 11, step)}
+                    ${StatusRow}
                     <td>
                         <div class="action-buttons" role="group" aria-label="${escapeHtml(window.i18nHistoryQuote?.Actions || 'Actions')}">
                             <button type="button" class="btn btn-outline-info btn-view-history" title="${escapeHtml(window.i18nHistoryQuote?.ViewHistoryTooltip || 'View history')}" data-madon="${escapeHtml(maDon)}" data-mahang="${escapeHtml(maHang)}" data-mahangncc="${escapeHtml(maHangNcc)}"><i class="fas fa-history"></i></button>
@@ -1019,12 +1069,12 @@
         document.getElementById('statWaitOrderQlsc').textContent = getValue(row, ['QLSCPur', 'qlsCPur'], 0);
     }
 
-    function renderSummaryProcessingStatus(result) {
-        const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
-        document.getElementById('statCompletedOrders').textContent = getValue(row, ['SoDonHoanThanh', 'soDonHoanThanh'], 0);
-        document.getElementById('statProcessingOrders').textContent = getValue(row, ['SoDonDangXuLy', 'soDonDangXuLy'], 0);
-        document.getElementById('statUnprocessedOrders').textContent = getValue(row, ['SoDonChuaXuLy', 'soDonChuaXuLy'], 0);
-    }
+    //function renderSummaryProcessingStatus(result) {
+    //    const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
+    //    document.getElementById('statCompletedOrders').textContent = getValue(row, ['SoDonHoanThanh', 'soDonHoanThanh'], 0);
+    //    document.getElementById('statProcessingOrders').textContent = getValue(row, ['SoDonDangXuLy', 'soDonDangXuLy'], 0);
+    //    document.getElementById('statUnprocessedOrders').textContent = getValue(row, ['SoDonChuaXuLy', 'soDonChuaXuLy'], 0);
+    //}
 
     function renderSummaryWaitingSupplier(result) {
         const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
@@ -1060,7 +1110,7 @@
             renderPagination(currentPage, totalCountServer);
             renderSummaryCountQuotation(countQuotationResult);
             renderSummaryCountStatus(countStatusResult);
-            renderSummaryProcessingStatus(processingStatusResult);
+            //renderSummaryProcessingStatus(processingStatusResult);
             renderSummaryWaitingSupplier(waitingSupplierResult);
         } catch (error) {
             if (error?.name === 'AbortError') return;

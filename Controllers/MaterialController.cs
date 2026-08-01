@@ -471,26 +471,26 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 for (int r = startRow; r <= lastRow; r++)
                 {
-                    if (ws.Cell(r, 2).GetString() == "")
+                    if (ws.Cell(r, 3).GetString() == "")
                     {
                         break;
                     }
                     if (ws.Cell(r, 3).GetString() == "")
                     {
-                        ws.Cell(r, 28).SetValue("Số đơn yêu cầu không được để trống");
+                        ws.Cell(r, 29).SetValue("Số đơn yêu cầu không được để trống");
                         hasErrors = true;
                         continue;
                     }
                     switch (role)
                     {
                         case "UserShip":
-                            var tenHaiQuan = ws.Cell(r, 24).GetString();
-                            var tenRecomment = ws.Cell(r, 12).GetString();
-                            bool bitReturn = ws.Cell(r, 26).GetString().Trim().ToUpper() == "O";
-                            var reasonReturn = ws.Cell(r, 27).GetString().Trim();
+                            var tenHaiQuan = ws.Cell(r, 25).GetString();
+                            var tenRecomment = ws.Cell(r, 13).GetString();
+                            bool bitReturn = ws.Cell(r, 27).GetString().Trim().ToUpper() == "O";
+                            var reasonReturn = ws.Cell(r, 28).GetString().Trim();
                             if (string.IsNullOrEmpty(reasonReturn) && bitReturn)
                             {
-                                ws.Cell(r, 28).SetValue("Vui lòng nhập lý do trả lại");
+                                ws.Cell(r, 29).SetValue("Vui lòng nhập lý do trả lại");
                                 hasErrors = true;
                                 continue;
                             }
@@ -501,14 +501,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     Id = int.Parse(ws.Cell(r, 3).GetString()),
                                     pheDuyet = bitReturn,
                                     LyDo = reasonReturn,
-                                    PicShip = ws.Cell(r, 25).GetString()
+                                    PicShip = ws.Cell(r, 26).GetString()
                                 });
                             }
                             else
                             {
                                 if (string.IsNullOrWhiteSpace(tenHaiQuan))
                                 {
-                                    ws.Cell(r, 28).SetValue("Tên hải quan không được để trống");
+                                    ws.Cell(r, 29).SetValue("Tên hải quan không được để trống");
                                     hasErrors = true;
                                     continue;
                                 }
@@ -519,7 +519,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         ID = int.Parse(ws.Cell(r, 3).GetString()),
                                         VCHR_TenHaiQuan = tenHaiQuan,
                                         DTM_UserShip = DateTime.Now,
-                                        VCHR_UserShip = ws.Cell(r, 25).GetString()
+                                        VCHR_UserShip = ws.Cell(r, 26).GetString()
                                     });
                                 }
                                 else
@@ -530,7 +530,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         VCHR_TenHaiQuan = tenHaiQuan,
                                         //VCHR_UserShip = GetCurrentUserId(),
                                         DTM_UserShip = DateTime.Now,
-                                        VCHR_UserShip = ws.Cell(r, 25).GetString()
+                                        VCHR_UserShip = ws.Cell(r, 26).GetString()
                                     });
                                 }
                             }
@@ -539,8 +539,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var itemRequestPur = new BaoGia_Confirm_Name_QuotationDTO
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
-                                CHR_NameEN = ws.Cell(r, 13).GetString(),
-                                VCHR_TenRecomment = ws.Cell(r, 12).GetString(),
+                                CHR_NameEN = ws.Cell(r, 14).GetString(),
+                                VCHR_TenRecomment = ws.Cell(r, 13).GetString(),
                             };
                             listUpdateUserPur.Add(itemRequestPur);
                             break;
@@ -548,14 +548,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var itemRequest = new BaoGia_Request_of_QuotationDTO
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
-                                NVCHR_HinhDang = ws.Cell(r, 17).GetString(),
-                                NVCHR_ChatLieu = ws.Cell(r, 18).GetString(),
-                                NVCHR_ThanhPhan = ws.Cell(r, 19).GetString(),
-                                NVCHR_KichThuoc = ws.Cell(r, 20).GetString(),
-                                NVCHR_DongMay = ws.Cell(r, 21).GetString(),
-                                NVCHR_TinhNang = ws.Cell(r, 22).GetString(),
-                                CHR_MaThietBi = ws.Cell(r, 8).GetString(),
-                                CHR_MaHangNCC = ws.Cell(r, 10).GetString()
+                                NVCHR_HinhDang = ws.Cell(r, 18).GetString(),
+                                NVCHR_ChatLieu = ws.Cell(r, 19).GetString(),
+                                NVCHR_ThanhPhan = ws.Cell(r, 20).GetString(),
+                                NVCHR_KichThuoc = ws.Cell(r, 21).GetString(),
+                                NVCHR_DongMay = ws.Cell(r, 22).GetString(),
+                                NVCHR_TinhNang = ws.Cell(r, 23).GetString(),
+                                CHR_MaThietBi = ws.Cell(r, 9).GetString(),
+                                CHR_MaHangNCC = ws.Cell(r, 11).GetString()
                             };
                             listUpdateRequest.Add(itemRequest);
                             break;
@@ -791,6 +791,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Không có dữ liệu để xuất");
                 }
+
+                // hàm hiển thị trạng thái theo role
+                static string GetStatusByRole(string CHR_Status, string CHR_StatusShip, string CHR_StatusAcc, string role)
+                {
+                    return role switch
+                    {
+                        "UserPUR" => CHR_StatusShip == "Confirming" ? "Chờ xác nhận tên - Ship" :
+                            CHR_StatusAcc == "Confirming" ? "Chờ xác nhận tên - Phòng yêu cầu" :
+                            CHR_Status == "Confirming" ? "Chờ xác nhận tên - Pur " : CHR_Status == "Confirmed" ? "Hoàn thành" : "Không xác định",
+                        "UserShip" => CHR_StatusShip ?? "",
+                        "UserAcc" => CHR_StatusAcc ?? "",
+                        _ => CHR_Status ?? "",
+                    };
+                }
+
                 var items = result.Data;
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
                 var templatePath = System.IO.Path.Combine(root, "template", "TemplateCofirmName.xlsx");
@@ -815,42 +830,43 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     // Map fields into template columns similar to ExportSelection
                     ws.Cell(row, 1).SetValue(rq.CHR_CreateBy ?? "");
-                    ws.Cell(row, 2).SetValue(role == "UserPUR" ? rq.CHR_Status ?? "" : rq.CHR_StatusShip ?? "");
+                    ws.Cell(row, 2).SetValue(GetStatusByRole(rq.CHR_Status, rq.CHR_StatusShip, rq.CHR_StatusACC, role));
                     ws.Cell(row, 3).SetValue(rq.ID ?? 0);
                     ws.Cell(row, 4).SetValue(idx);
-                    ws.Cell(row, 5).SetValue(rq.CHR_SectionCode ?? "");
-                    ws.Cell(row, 6).SetValue(rq.CHR_SectionName ?? "");
-                    ws.Cell(row, 7).SetValue(rq.CHR_Phanloai ?? "");
-                    ws.Cell(row, 8).SetValue(rq.CHR_MaThietBi ?? "");
-                    ws.Cell(row, 9).SetValue(maHangNb);
-                    ws.Cell(row, 10).SetValue(rq.maHangNcc ?? "");
-                    ws.Cell(row, 11).SetValue(rq.CHR_CodeNCC + " - " + rq.ShortName ?? "");
-                    ws.Cell(row, 12).SetValue(rq.NVCHR_TenHangHQ ?? "");
-                    ws.Cell(row, 13).SetValue(rq.NameEN ?? "");
-                    ws.Cell(row, 14).SetValue(rq.INT_SoLuong ?? "");
-                    ws.Cell(row, 15).SetValue(rq.NVCHR_DonVi ?? "");
-                    ws.Cell(row, 16).SetValue(rq.NVCHR_ChungLoai ?? "");
-                    ws.Cell(row, 17).SetValue(rq.NVCHR_HinhDang ?? "");
-                    ws.Cell(row, 18).SetValue(rq.NVCHR_ChatLieu ?? "");
-                    ws.Cell(row, 19).SetValue(rq.NVCHR_ThanhPhan ?? "");
-                    ws.Cell(row, 20).SetValue(rq.NVCHR_KichThuoc ?? "");
-                    ws.Cell(row, 21).SetValue(rq.NVCHR_DongMay ?? "");
-                    ws.Cell(row, 22).SetValue(rq.NVCHR_TinhNang ?? "");
-                    ws.Cell(row, 23).SetValue(rq.NVCHR_File ?? "");
-                    ws.Cell(row, 24).SetValue(rq.VCHR_TenHaiQuan ?? "");
+                    ws.Cell(row, 5).SetValue(rq.CHR_MaDon ?? "");
+                    ws.Cell(row, 6).SetValue(rq.CHR_SectionCode ?? "");
+                    ws.Cell(row, 7).SetValue(rq.CHR_SectionName ?? "");
+                    ws.Cell(row, 8).SetValue(rq.CHR_Phanloai ?? "");
+                    ws.Cell(row, 9).SetValue(rq.CHR_MaThietBi ?? "");
+                    ws.Cell(row, 10).SetValue(maHangNb);
+                    ws.Cell(row, 11).SetValue(rq.maHangNcc ?? "");
+                    ws.Cell(row, 12).SetValue(rq.CHR_CodeNCC + " - " + rq.ShortName ?? "");
+                    ws.Cell(row, 13).SetValue(rq.NVCHR_TenHangHQ ?? "");
+                    ws.Cell(row, 14).SetValue(rq.NameEN ?? "");
+                    ws.Cell(row, 15).SetValue(rq.INT_SoLuong ?? "");
+                    ws.Cell(row, 16).SetValue(rq.NVCHR_DonVi ?? "");
+                    ws.Cell(row, 17).SetValue(rq.NVCHR_ChungLoai ?? "");
+                    ws.Cell(row, 18).SetValue(rq.NVCHR_HinhDang ?? "");
+                    ws.Cell(row, 19).SetValue(rq.NVCHR_ChatLieu ?? "");
+                    ws.Cell(row, 20).SetValue(rq.NVCHR_ThanhPhan ?? "");
+                    ws.Cell(row, 21).SetValue(rq.NVCHR_KichThuoc ?? "");
+                    ws.Cell(row, 22).SetValue(rq.NVCHR_DongMay ?? "");
+                    ws.Cell(row, 23).SetValue(rq.NVCHR_TinhNang ?? "");
+                    ws.Cell(row, 24).SetValue(rq.NVCHR_File ?? "");
+                    ws.Cell(row, 25).SetValue(rq.VCHR_TenHaiQuan ?? "");
                     if (role == "UserPUR")
                     {
                         if (rq.VCHR_TenHaiQuan != rq.VCHR_TenRecomment)
                         {
-                            ws.Cell(row, 24).Style.Fill.BackgroundColor = XLColor.DarkPink;
+                            ws.Cell(row, 25).Style.Fill.BackgroundColor = XLColor.DarkPink;
                         }
                     }
-                    ws.Cell(row, 25).SetValue(rq.VCHR_UserShip ?? (rq.VCHR_UpdateBy ?? ""));
+                    ws.Cell(row, 26).SetValue(rq.VCHR_UserShip ?? (rq.VCHR_UpdateBy ?? ""));
 
                     // check tra lai
                     bool isReturn = rq.CHR_StatusShip == "Rejected";
-                    ws.Cell(row, 26).SetValue(isReturn ? "O" : "");
-                    ws.Cell(row, 27).SetValue(isReturn ? rq.NVCHR_LyDo ?? "" : "");
+                    ws.Cell(row, 27).SetValue(isReturn ? "O" : "");
+                    ws.Cell(row, 28).SetValue(isReturn ? rq.NVCHR_LyDo ?? "" : "");
                     row++;
                     idx++;
                 }

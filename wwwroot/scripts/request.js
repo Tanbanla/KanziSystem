@@ -1,6 +1,62 @@
+const ROUTES = {
+    // Request controllers
+    insertRequest: '/ipcs/Request/_Insert_request',
+    insertRequestGA: '/ipcs/Request/_Insert_request_GA',
+    getRate: '/ipcs/Request/_get_rate',
+    getPhongChiuphi: '/ipcs/Request/_get_phongchiuphi',
+    getVitri: '/ipcs/Request/_get_vitri',
+    sendMail: '/ipcs/Request/_send_mail',
+    getConfirm: '/ipcs/Request/_get_confirm',
+    getConfirmGA: '/ipcs/Request/_get_confirm_GA',
+    getRequest: '/ipcs/Request/_get_request',
+    loadModalTongdon: '/ipcs/Request/_load_modal_tongdon',
+    updateRequest: '/ipcs/Request/_update_request',
+    updateRequestGA: '/ipcs/Request/_update_request_GA',
+    updateDongyTatCa: '/ipcs/Request/_update_dongytatca',
+    updateDongyTatCaGA: '/ipcs/Request/_update_dongytatca_GA',
+    reject: '/ipcs/Request/_reject',
+    rejectGA: '/ipcs/Request/_reject_GA',
+    huydonProd: '/ipcs/Request/_huydon_prod',
+    huydonGA: '/ipcs/Request/_huydon_GA',
+
+    // Import controllers
+    exportModalDetail: '/ipcs/Import/ExportModalDetail',
+    loadAccount: '/ipcs/Import/_load_account',
+
+    // External API
+    employeeByAdid: 'http://172.26.248.62:8507/api/Employee/by-adid/',
+};
+//const ROUTES = {
+//    // Request controllers
+//    insertRequest: '/Request/_Insert_request',
+//    insertRequestGA: '/Request/_Insert_request_GA',
+//    getRate: '/Request/_get_rate',
+//    getPhongChiuphi: '/Request/_get_phongchiuphi',
+//    getVitri: '/Request/_get_vitri',
+//    sendMail: '/Request/_send_mail',
+//    getConfirm: '/Request/_get_confirm',
+//    getConfirmGA: '/Request/_get_confirm_GA',
+//    getRequest: '/Request/_get_request',
+//    loadModalTongdon: '/Request/_load_modal_tongdon',
+//    updateRequest: '/Request/_update_request',
+//    updateRequestGA: '/Request/_update_request_GA',
+//    updateDongyTatCa: '/Request/_update_dongytatca',
+//    updateDongyTatCaGA: '/Request/_update_dongytatca_GA',
+//    reject: '/Request/_reject',
+//    rejectGA: '/Request/_reject_GA',
+//    huydonProd: '/Request/_huydon_prod',
+//    huydonGA: '/Request/_huydon_GA',
+
+//    // Import controllers
+//    exportModalDetail: '/Import/ExportModalDetail',
+//    loadAccount: '/Import/_load_account',
+
+//    // External API
+//    employeeByAdid: 'http://172.26.248.62:8507/api/Employee/by-adid/',
+//};
+
 function _insert_request() {
     // truyền list
-   
     let dataList = [];
     // Chọn tất cả các dòng có class 'input-row'
     const rows = document.querySelectorAll('.input-row');
@@ -16,18 +72,17 @@ function _insert_request() {
             Price: parseFloat(row.querySelector('.dg').value),
             Currency: row.querySelector('.nt').value,
             Total_exchange: parseFloat(row.querySelector('.tcp').value),
-            Total: parseFloat( row.querySelector('.tcp').value),
+            Total: parseFloat(row.querySelector('.tcp').value),
             Aim: row.querySelector('.md').value,
             Phongchiuchiphi: (row.querySelector('.pcp').value).split(':')[0],
             Vitri: row.querySelector('.vt').value,
             Poisition: row.querySelector('.gc').value
-          
         };
         // Thêm đối tượng vào danh sách tổng
         dataList.push(rowData);
     });
     var mucdichkhac = "";
-    if (document.getElementById('mdk').checked == true) {
+    if (document.getElementById('mdk') && document.getElementById('mdk').checked == true) {
         mucdichkhac = "OTHER AIM";
     }
     var name_dept = document.getElementById("name_dept").value;
@@ -75,14 +130,11 @@ function _insert_request() {
     }
     else {
         $.ajax({
-            url: '/ipcs/Request/_Insert_request',
+            url: ROUTES.insertRequest,
             type: 'POST',
             dataType: 'JSON',
-            // 1. Thêm contentType để Server biết đây là dữ liệu JSON
             contentType: 'application/json; charset=utf-8',
-            // 2. Bỏ traditional: true vì chúng ta sẽ dùng JSON.stringify
             data: JSON.stringify({
-                // Bao bọc tất cả các biến vào một Object và chuyển thành chuỗi JSON
                 Cost_Center: Cost_Center,
                 Declaration: Declaration,
                 Dealine: Dealine,
@@ -126,18 +178,14 @@ function _insert_request() {
                 _load_confirm();
             }
         });
-       
-       
     }
-  
 }
+
 function _insert_request_GA() {
     // truyền list
     let dataList = [];
-    // Chọn tất cả các dòng có class 'input-row'
     const rows = document.querySelectorAll('.input-row');
     rows.forEach((row) => {
-        // Lấy dữ liệu từ các phần tử bên trong dòng hiện tại
         let rowData = {
             Material_Code: (row.querySelector('.tenhang').value).split(':')[0],
             Material_Name: (row.querySelector('.tenhang').value).split(':')[1],
@@ -153,13 +201,12 @@ function _insert_request_GA() {
             Phongchiuchiphi: (row.querySelector('.pcp').value).split(':')[0],
             Vitri: row.querySelector('.vt').value,
             Poisition: row.querySelector('.gc').value,
-        };      
-        // Thêm đối tượng vào danh sách tổng
+        };
         dataList.push(rowData);
     });
 
     var mucdichkhac = "";
-    if (document.getElementById('mdk').checked == true) {
+    if (document.getElementById('mdk') && document.getElementById('mdk').checked == true) {
         mucdichkhac = "OTHER AIM";
     }
     var name_dept = document.getElementById("name_dept").value;
@@ -184,7 +231,7 @@ function _insert_request_GA() {
     var adid_dt = document.getElementById("GA_cv_duthao").value;
     var adid_tt = document.getElementById("GA_cv_thamtra").value;
     var adid_pd = document.getElementById("GA_cv_pheduyet").value;
-  
+
     var adid_xk = document.getElementById("GA_cv_xuatkho").value;
     var adid_qlsc = document.getElementById("GA_cv_dongy_QLSC").value;
     var adid_qltc = document.getElementById("GA_cv_dongy_QLTC").value;
@@ -192,7 +239,7 @@ function _insert_request_GA() {
     var ten_dt = document.getElementById("GA_ten_duthao").value;
     var ten_tt = document.getElementById("GA_ten_thamtra").selectedOptions[0].textContent;
     var ten_pd = document.getElementById("GA_ten_pheduyet").selectedOptions[0].textContent;
- 
+
     var ten_xk = document.getElementById("GA_ten_xuatkho").value;
     var ten_qlsc = document.getElementById("GA_ten_dongy_QLSC").value;
     var ten_qltc = document.getElementById("GA_ten_dongy_QLTC").value;
@@ -200,7 +247,7 @@ function _insert_request_GA() {
     var mail_dt = document.getElementById("GA_mail_duthao").value;
     var mail_tt = document.getElementById("GA_mail_thamtra").value;
     var mail_pd = document.getElementById("GA_mail_pheduyet").value;
-   
+
     var mail_xk = document.getElementById("GA_mail_xuatkho").value;
     var mail_qlsc = document.getElementById("GA_mail_dongy_QLSC").value;
     var mail_qltc = document.getElementById("GA_mail_dongy_QLTC").value;
@@ -213,14 +260,11 @@ function _insert_request_GA() {
     }
     else {
         $.ajax({
-            url: '/ipcs/Request/_Insert_request_GA',
+            url: ROUTES.insertRequestGA,
             type: 'POST',
             dataType: 'JSON',
-            // 1. Thêm contentType để Server biết đây là dữ liệu JSON
             contentType: 'application/json; charset=utf-8',
-            // 2. Bỏ traditional: true vì chúng ta sẽ dùng JSON.stringify
             data: JSON.stringify({
-                // Bao bọc tất cả các biến vào một Object và chuyển thành chuỗi JSON
                 Cost_Center: Cost_Center,
                 Declaration: Declaration,
                 Dealine: Dealine,
@@ -247,9 +291,6 @@ function _insert_request_GA() {
                 mail_dt: mail_dt,
                 mail_tt: mail_tt,
                 mail_pd: mail_pd,
-                //adid_dy: adid_dy,
-                //ten_dy: ten_dy,
-                //mail_dy: mail_dy,
                 adid_xk: adid_xk,
                 ten_xk: ten_xk,
                 mail_xk: mail_xk,
@@ -272,8 +313,9 @@ function _insert_request_GA() {
         });
     }
 }
-async function _load_rate() {
-    fetch('/ipcs/Request/_get_rate', {
+
+function _load_rate() {
+    fetch(ROUTES.getRate, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -292,8 +334,9 @@ async function _load_rate() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-async function _load_phongchiuphi() {
-    fetch('/ipcs/Request/_get_phongchiuphi', {
+
+function _load_phongchiuphi() {
+    fetch(ROUTES.getPhongChiuphi, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -306,11 +349,9 @@ async function _load_phongchiuphi() {
             return response.json();
         })
         .then(data => {
-            const selectElements = document.querySelectorAll('.pcp'); // Khuyên dùng querySelectorAll
+            const selectElements = document.querySelectorAll('.pcp');
             selectElements.forEach(select => {
-                // Xóa trắng hoặc giữ lại option mặc định trước khi gán
                 select.innerHTML = '<option></option>';
-
                 data.forEach(item => {
                     select.innerHTML += `<option value="${item}">${item}</option>`;
                 });
@@ -320,18 +361,18 @@ async function _load_phongchiuphi() {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-function _load_vitri(cost,idd) {
-   
+
+function _load_vitri(cost, idd) {
     const params = new URLSearchParams();
     params.append('cost', cost);
     var id = idd.split('_')[1];
-  
-    fetch('/ipcs/Request/_get_vitri', {
+
+    fetch(ROUTES.getVitri, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body : params.toString()
+        body: params.toString()
     })
         .then(response => {
             if (!response.ok) {
@@ -340,22 +381,19 @@ function _load_vitri(cost,idd) {
             return response.json();
         })
         .then(data => {
-            
-                // Xóa trắng hoặc giữ lại option mặc định trước khi gán
-                document.getElementById('vt_' + id).innerHTML = '';
-
-                data.forEach(item => {
-                    document.getElementById('vt_' + id).innerHTML += `<option value="${item}">${item}</option>`;
-                });
-            
+            document.getElementById('vt_' + id).innerHTML = '';
+            data.forEach(item => {
+                document.getElementById('vt_' + id).innerHTML += `<option value="${item}">${item}</option>`;
+            });
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 // lấy mail theo ADID
 async function get_mail(us) {
-    const url = `http://172.26.248.62:8507/api/Employee/by-adid/${us}`;
+    const url = ROUTES.employeeByAdid + us;
 
     try {
         const response = await fetch(url);
@@ -374,10 +412,11 @@ async function get_mail(us) {
         console.error("Không thể lấy dữ liệu:", error);
     }
 }
+
 // gửi mail
 async function send_mail(mail_to, Urgent) {
     $.ajax({
-        url: '/ipcs/Request/_send_mail',
+        url: ROUTES.sendMail,
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -386,13 +425,13 @@ async function send_mail(mail_to, Urgent) {
         success: function (response) {
             alert("Đăng ký thành công !");
             location.reload();
-            document.querySelectorAll('.close').forEach(button => button.click());           
+            document.querySelectorAll('.close').forEach(button => button.click());
             _load_confirm();
         }
     })
 }
-async function _load_confirm() {
 
+async function _load_confirm() {
     var Urgent = document.getElementById("trangthaidon").value;
     var Total = document.getElementById("giadonhang").value;
     var Code_Request = document.getElementById("mnl").value;
@@ -406,7 +445,7 @@ async function _load_confirm() {
     formData.append('Code_Request', Code_Request);
     formData.append('INT_STEP', INT_STEP);
 
-    fetch('/ipcs/Request/_get_confirm', {
+    fetch(ROUTES.getConfirm, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -416,16 +455,16 @@ async function _load_confirm() {
             const tbody = document.getElementById('list_approve');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
+                _updateHeaderRecordCount(0);
                 return;
             }
-            // Cấu hình trạng thái: [Tên hiển thị, Badge class, Vị trí bước hiện tại/từ chối]
             const stepMap = {
                 "0": ["Đợi người dự thảo", "warning", 1],
                 "1": ["Đợi người thẩm tra", "info", 2],
                 "2": ["Đợi người phê duyệt", "pink", 3],
                 "3": ["Đợi bên tiếp nhận", "success", 4],
                 "4": ["Đợi phụ trách kho", "light", 5],
-                "5": ["Hoàn thành", "secondary", 6], // Vị trí 6 để tất cả 5 chấm đều success
+                "5": ["Hoàn thành", "secondary", 6],
                 "6": ["Bị từ chối", "danger", 1],
                 "7": ["Bị từ chối", "danger", 2],
                 "8": ["Bị từ chối", "danger", 3],
@@ -438,7 +477,6 @@ async function _load_confirm() {
                 const isReject = parseInt(s) >= 6;
                 const currentStep = config[2];
 
-                // Tạo các dấu chấm (chamtron)
                 const dots = Array.from({ length: 5 }, (_, i) => {
                     const stepIdx = i + 1;
                     if (isReject && stepIdx === currentStep) return "<span class='text-danger'><b>×</b></span>";
@@ -459,7 +497,8 @@ async function _load_confirm() {
                     <td>${item.cost_Center}</td>
                     <td>${item.create_Date}</td>
                     <td>${item.dealine}</td>
-                    <td>${item.total}</td>
+                    <td class="text-right">${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</td>
+                    <td>USD</td>
                     <td>${item.user_Create}</td>
                     <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
                     <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
@@ -471,8 +510,8 @@ async function _load_confirm() {
         })
         .catch(err => console.error('Fetch error:', err));
 }
-async function _load_confirm_GA() {
 
+async function _load_confirm_GA() {
     var Urgent = document.getElementById("trangthaidon").value;
     var Total = document.getElementById("giadonhang").value;
     var Code_Request = document.getElementById("mnl").value;
@@ -486,9 +525,7 @@ async function _load_confirm_GA() {
     formData.append('Code_Request', Code_Request);
     formData.append('INT_STEP', INT_STEP);
 
-    fetch('/ipcs/Request/_get_confirm_GA', {
-    //fetch('/Request/_get_confirm_GA', {
-   
+    fetch(ROUTES.getConfirmGA, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -498,30 +535,29 @@ async function _load_confirm_GA() {
             const tbody = document.getElementById('list_approve');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="21" style="text-align:center">Không có dữ liệu</td></tr>';
+                _updateHeaderRecordCount(0);
                 return;
             }
-            // Cấu hình trạng thái: [Tên hiển thị, Badge class, Vị trí bước hiện tại/từ chối]
             const stepMap = {
                 "0": ["Đợi người dự thảo", "warning", 1],
                 "1": ["Đợi người thẩm tra", "info", 2],
                 "2": ["Đợi người phê duyệt", "pink", 3],
                 "3": ["Đợi đảm nhiệm kho", "success", 4],
                 "4": ["Đợi QLSC phòng tiếp nhận", "success", 5],
-                "5": ["Đợi QLTC phòng tiếp nhận", "success", 6], // Vị trí 6 để tất cả 5 chấm đều success
+                "5": ["Đợi QLTC phòng tiếp nhận", "success", 6],
                 "6": ["Bị từ chối", "danger", 1],
                 "7": ["Bị từ chối", "danger", 2],
                 "8": ["Bị từ chối", "danger", 3],
                 "9": ["Bị từ chối", "danger", 4],
                 "10": ["Bị từ chối", "danger", 5],
-                "11": ["Hoàn thành", "secondary", 6], 
+                "11": ["Hoàn thành", "secondary", 6],
             };
-            tbody.innerHTML = data.map((item,index) => {
+            tbody.innerHTML = data.map((item, index) => {
                 const s = item.inT_STEP;
                 const config = stepMap[s] || ["Không xác định", "dark", 0];
                 const isReject = parseInt(s) >= 6;
                 const currentStep = config[2];
 
-                // Tạo các dấu chấm (chamtron)
                 const dots = Array.from({ length: 6 }, (_, i) => {
                     const stepIdx = i + 1;
                     if (isReject && stepIdx === currentStep) return "<span class='text-danger'><b>×</b></span>";
@@ -544,7 +580,8 @@ async function _load_confirm_GA() {
                     <td>${item.cost_Center}</td>
                     <td>${item.create_Date}</td>
                     <td>${item.dealine}</td>
-                    <td>${item.total.toLocaleString('en-US') }</td>
+                    <td class="text-right">${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</td>
+                    <td>USD</td>
                     <td>${item.user_Create}</td>
                     <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
                     <td>${item.chR_TEN_NGUOITHAMTRA} ${dots[1]}</td>
@@ -554,15 +591,13 @@ async function _load_confirm_GA() {
                     <td>${item.chR_TEN_QLTC} ${dots[5]}</td>
                 </tr>`;
             }).join('');
-
         })
         .catch(err => console.error('Fetch error:', err));
 }
-function _modal_info(cost_request, step) {
 
+function _modal_info(cost_request, step) {
     $.ajax({
-        url: '/ipcs/Request/_get_request',
-        //url: '/Request/_get_request',
+        url: ROUTES.getRequest,
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -621,17 +656,15 @@ function _modal_info(cost_request, step) {
                     document.getElementById("regency_0").innerHTML = "QLTC";
                 }
             }
-           
-       
+
             var tongdon = 0;
             for (var i = 0; i < response.length; i++) {
                 var tongtien = response[i].total_exchange;
-                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td class="text-right">${response[i].amount.toLocaleString('en-US')}</td><td>${response[i].unit}</td><td class="text-right">${response[i].price.toLocaleString('en-US')}</td><td>${response[i].currency}</td><td class="text-right">${tongtien.toLocaleString('en-US')}</td><td>${response[i].aim}</td><td>${response[i].poisition}</td>`;
+                document.getElementById("load_detail_0").innerHTML += `<td>${i + 1}</td><td>${response[i].material_Code}</td><td>${response[i].material_Name}</td><td>${response[i].unit}</td><td>${response[i].account_Code}</td><td>${response[i].account_Name}</td><td class="text-right">${response[i].amount}</td><td>${response[i].unit}</td><td class="text-right">${response[i].price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td><td>${response[i].currency}</td><td class="text-right">${tongtien.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</td><td>${response[i].aim}</td><td>${response[i].poisition}</td>`;
                 tongdon += parseFloat(tongtien);
             }
             document.getElementById("tongtientrongdon_0").innerHTML = tongdon.toLocaleString('en-US');
 
-            // Gán nút hiển thị theo khối
             try {
                 if (response[0].group_Code.split(' ')[0] == "PROD") {
                     document.getElementById("hiennutGA").style.display = 'none';
@@ -642,15 +675,16 @@ function _modal_info(cost_request, step) {
                     document.getElementById("hiennutGA").style.display = '';
                 }
             }
-            catch { }         
+            catch { }
         }
     })
 }
+
 async function _dlxuatkho_trangthai(id) {
     var code_request = document.getElementById("madonhang" + id).innerHTML;
     const params = new URLSearchParams();
     params.append('code_request', code_request);
-    fetch('/ipcs/Import/ExportModalDetail', {
+    fetch(ROUTES.exportModalDetail, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -665,7 +699,6 @@ async function _dlxuatkho_trangthai(id) {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const timestamp = new Date().getTime();
             a.download = `HangTrongDanhMuc_${code_request}.xlsm`;
             document.body.appendChild(a);
             a.click();
@@ -678,15 +711,15 @@ async function _dlxuatkho_trangthai(id) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 function _update_request(id) {
-
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;
     var step = document.getElementById("step" + id).innerHTML;
     var urgent = document.getElementById("urgent" + id).innerHTML;
-   
+
     $.ajax({
-        url: '/ipcs/Request/_update_request',
+        url: ROUTES.updateRequest,
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -694,22 +727,21 @@ function _update_request(id) {
         },
         success: function (response) {
             alert(response);
-            document.querySelectorAll('.close').forEach(button => button.click());           
-            //document.getElementById("cls" + id).innerHTML = "";
+            document.querySelectorAll('.close').forEach(button => button.click());
             var us = document.getElementById("us").innerHTML;
             _load_confirm(us);
         }
-    })  
+    })
 }
+
 function _update_request_PROD_Slide(id) {
-
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;
     var step = document.getElementById("step" + id).innerHTML;
     var urgent = document.getElementById("urgent" + id).innerHTML;
 
     $.ajax({
-        url: '/ipcs/Request/_update_request',
+        url: ROUTES.updateRequest,
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -717,15 +749,14 @@ function _update_request_PROD_Slide(id) {
         },
         success: function (response) {
             alert(response);
-            //document.querySelectorAll('.close').forEach(button => button.click());
             document.getElementById("cls_" + id).innerHTML = "";
             var us = document.getElementById("us").innerHTML;
             _load_confirm(us);
         }
     })
 }
-function _update_request_GA(id) {
 
+function _update_request_GA(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;
     var step = document.getElementById("step" + id).innerHTML;
@@ -737,9 +768,7 @@ function _update_request_GA(id) {
     params.append('step', step);
     params.append('urgent', urgent);
 
-    fetch('/ipcs/Request/_update_request_GA', {
-    //fetch('/Request/_update_request_GA', {
-   
+    fetch(ROUTES.updateRequestGA, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -753,8 +782,7 @@ function _update_request_GA(id) {
     })
         .then(data => {
             alert(data);
-               document.querySelectorAll('.close').forEach(button => button.click());
-            //document.getElementById("cls" + id).innerHTML = "";
+            document.querySelectorAll('.close').forEach(button => button.click());
             var us = document.getElementById("us").innerHTML;
             _load_confirm_GA(us);
         })
@@ -763,8 +791,8 @@ function _update_request_GA(id) {
         });
 
 }
-function _update_request_GA_Slide(id) {
 
+function _update_request_GA_Slide(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;
     var step = document.getElementById("step" + id).innerHTML;
@@ -776,8 +804,7 @@ function _update_request_GA_Slide(id) {
     params.append('step', step);
     params.append('urgent', urgent);
 
-    fetch('/ipcs/Request/_update_request_GA', {
- 
+    fetch(ROUTES.updateRequestGA, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -791,7 +818,6 @@ function _update_request_GA_Slide(id) {
     })
         .then(data => {
             alert(data);
-            //document.querySelectorAll('.close').forEach(button => button.click());
             document.getElementById("cls_" + id).innerHTML = "";
             var us = document.getElementById("us").innerHTML;
             _load_confirm_GA(us);
@@ -801,14 +827,14 @@ function _update_request_GA_Slide(id) {
         });
 
 }
-function _update_request_all(request) {
 
+function _update_request_all(request) {
     var us = document.getElementById("us").innerHTML;
     const params = new URLSearchParams();
     params.append('us', us);
     params.append('madon', request);
- 
-    fetch('/ipcs/Request/_update_dongytatca', {
+
+    fetch(ROUTES.updateDongyTatCa, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -829,13 +855,14 @@ function _update_request_all(request) {
         });
 
 }
+
 function _update_request_all_GA(request) {
     var us = document.getElementById("us").innerHTML;
     const params = new URLSearchParams();
     params.append('us', us);
     params.append('madon', request);
 
-    fetch('/ipcs/Request/_update_dongytatca_GA', {
+    fetch(ROUTES.updateDongyTatCaGA, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -848,32 +875,28 @@ function _update_request_all_GA(request) {
         return response.json();
     })
         .then(data => {
-               document.querySelectorAll('.close').forEach(button => button.click());
+            document.querySelectorAll('.close').forEach(button => button.click());
             _load_confirm_GA(us);
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
-function _dongy_all() {
 
+function _dongy_all() {
     const checkboxes = document.querySelectorAll('input.item:checked');
     checkboxes.forEach((item) => {
         if (item.checked) {
             _update_request_all(item.value);
         }
     });
-    // --- Hiển thị thông báo góc phải ---
     const thongBao = document.getElementById('thong-bao-goc-phai');
-
-    // Hiển thị thông báo
     thongBao.style.display = 'block';
-
-    // Tự động ẩn sau 3 giây (3000ms)
     setTimeout(() => {
         thongBao.style.display = 'none';
     }, 3000);
 }
+
 function _reject(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;
@@ -887,8 +910,8 @@ function _reject(id) {
     params.append('step', step);
     params.append('urgent', urgent);
     params.append('reason', reason);
-  
-    fetch('/ipcs/Request/_reject', {
+
+    fetch(ROUTES.reject, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -902,18 +925,15 @@ function _reject(id) {
     })
         .then(data => {
             alert("Từ chối đơn yêu cầu !");
-
-         /*   document.getElementById("cls" + id).innerHTML = "";*/
             document.querySelectorAll('.close').forEach(button => button.click());
             var us = document.getElementById("us").innerHTML;
-          
             _load_confirm(us);
-
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 function _reject2(id) {
     var id_request = document.getElementById("id_request" + id).innerHTML;
     var regency = document.getElementById("regency" + id).innerHTML;
@@ -928,7 +948,7 @@ function _reject2(id) {
     params.append('urgent', urgent);
     params.append('reason', reason);
 
-    fetch('/ipcs/Request/_reject_GA', {
+    fetch(ROUTES.rejectGA, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -943,16 +963,14 @@ function _reject2(id) {
         .then(data => {
             alert("Từ chối đơn yêu cầu !");
             document.querySelectorAll('.close').forEach(button => button.click());
-            /*document.getElementById("cls" + id).innerHTML = "";*/
             var us = document.getElementById("us").innerHTML;
-           
             _load_confirm(us);
-
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 function _reset() {
     document.getElementById("trangthaidon").value = "";
     document.getElementById("giadonhang").value = "";
@@ -960,8 +978,9 @@ function _reset() {
     document.getElementById("tinhtrangdon").value = "";
     _load_confirm();
 }
-function _load_account() { 
-    fetch('/ipcs/Import/_load_account', {
+
+function _load_account() {
+    fetch(ROUTES.loadAccount, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -977,22 +996,22 @@ function _load_account() {
             for (var i = 0; i < data.length; i++) {
                 document.getElementById("stk_1").innerHTML += `<option>${data[i]}</option>`;
             }
-
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 function Huy_don() {
     var x = confirm("Bạn có chắc muốn hủy đơn yêu cầu này không ?");
-    if(x) {
+    if (x) {
         var reason = document.getElementById("txtLyDo").value;
         var id = document.getElementById("id_huy").value;
         const params = new URLSearchParams();
         params.append('id_request', id);
         params.append('reason', reason);
 
-        fetch('/ipcs/Request/_huydon_prod', {
+        fetch(ROUTES.huydonProd, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -1007,16 +1026,14 @@ function Huy_don() {
             .then(data => {
                 document.querySelectorAll('.close').forEach(button => button.click());
                 var us = document.getElementById("us").innerHTML;
-
                 _load_confirm(us);
-
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
             });
     }
-   
 }
+
 function Huy_don_GA() {
     var x = confirm("Bạn có chắc muốn hủy đơn yêu cầu này không ?");
     if (x) {
@@ -1026,7 +1043,7 @@ function Huy_don_GA() {
         params.append('id_request', id);
         params.append('reason', reason);
 
-        fetch('/ipcs/Request/_huydon_GA', {
+        fetch(ROUTES.huydonGA, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -1039,21 +1056,18 @@ function Huy_don_GA() {
             return response.json();
         })
             .then(data => {
-               
                 var us = document.getElementById("us").innerHTML;
                 _load_confirm_GA(us);
-
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
             });
     }
-
 }
-function _modal_info_tongdon(cost_request, step) {
 
+function _modal_info_tongdon(cost_request, step) {
     $.ajax({
-        url: '/ipcs/Request/_load_modal_tongdon',
+        url: ROUTES.loadModalTongdon,
         type: 'POST',
         dataType: 'JSON',
         data: {
@@ -1113,7 +1127,6 @@ function _modal_info_tongdon(cost_request, step) {
                 }
             }
 
-
             var tongdon = 0;
             var tongdonthucte = 0;
             for (var i = 0; i < response.length; i++) {
@@ -1127,7 +1140,6 @@ function _modal_info_tongdon(cost_request, step) {
             document.getElementById("tongtientrongdon_0").innerHTML = tongdon.toLocaleString('en-US');
             document.getElementById("tongtienthucte_0").innerHTML = tongdonthucte.toLocaleString('en-US');
 
-            // Gán nút hiển thị theo khối
             try {
                 if (response[0].group_Code.split(' ')[0] == "PROD") {
                     document.getElementById("hiennutGA").style.display = 'none';
@@ -1138,7 +1150,22 @@ function _modal_info_tongdon(cost_request, step) {
                     document.getElementById("hiennutGA").style.display = '';
                 }
             }
-            catch { }
+            catch (error) {
+                console.log("Error in setting display:", error);
+            }
         }
     })
+}
+
+// helper: cập nhật badge ở navbar (hiển thị "N bản ghi")
+function _updateNavRecordCount(count) {
+    const el = document.getElementById('nav-record-count');
+    if (!el) return;
+    if (!count || count === 0) {
+        el.style.display = 'none';
+        el.textContent = '';
+    } else {
+        el.style.display = 'inline-block';
+        el.textContent = `${count} bản ghi`;
+    }
 }

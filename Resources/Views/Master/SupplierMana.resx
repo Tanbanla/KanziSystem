@@ -283,7 +283,7 @@
     <value>Xác nhận đồng ý?</value>
   </data>
   <data name="ConfirmDeleteMessage" xml:space="preserve">
-    <value>Bạn có chắc chắn muốn xóa nhà cung cấp này?</value>
+    <value>Bạn có chắc chắn muốn xóa loại hàng này</value>
   </data>
   <data name="DeleteSuccessTitle" xml:space="preserve">
     <value>Thành công</value>

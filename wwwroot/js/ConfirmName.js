@@ -276,10 +276,10 @@
                 if (field.key === 'status') {
                     if (role === "UserShip") {
                         td.innerHTML = statusBadge(r.CHR_StatusShip);
-                    } else if (role === "UserAcc") {
-                        td.innerHTML = statusBadge(r.CHR_StatusACC);
-                    } else {
+                    } else if (role === "UserPUR") {
                         td.innerHTML = statusBadge(r.CHR_Status);
+                    } else {
+                        td.innerHTML = statusBadge(r.CHR_StatusACC);
                     }
                     td.style.textAlign = 'center';
                 } else if (field.key === 'tenHQ') {

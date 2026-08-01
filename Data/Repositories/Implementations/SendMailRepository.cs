@@ -10,7 +10,7 @@ using System.Net.NetworkInformation;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
-    public class SendMailRepository: BaseRepository<TM_MASTER_MAIL, int>, ISendMailRepository
+    public class SendMailRepository : BaseRepository<TM_MASTER_MAIL, int>, ISendMailRepository
     {
         private readonly COST_MANAGEMENTContext _context;
         private readonly IWebHostEnvironment _env;
@@ -32,18 +32,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<string>> GetSuppliersToNotifyAsync()
         {
 
-          var res =  await _context.BaoGia_Request_of_Quotations
-                .Where(m => (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false)
-                && m.BIT_LayBaoGia == true && m.CHR_MaNCC != "" && m.ID_StepBaoGia == 6)//&& m.CHR_MaNCC != "L4AMIVN"
-                .Select(m => m.CHR_MaNCC)
-                .Distinct()
-                .ToListAsync();
+            var res = await _context.BaoGia_Request_of_Quotations
+                  .Where(m => (m.BIT_IsTemplate == null || m.BIT_IsTemplate == false)
+                  && m.BIT_LayBaoGia == true && m.CHR_MaNCC != "" && m.ID_StepBaoGia == 6)//&& m.CHR_MaNCC != "L4AMIVN"
+                  .Select(m => m.CHR_MaNCC)
+                  .Distinct()
+                  .ToListAsync();
             //&& m.ID_Status == "WAIT_SEND_MAIL"
             if (res == null || res.Count == 0)
             {
                 return new List<string>();
             }
-           return res;
+            return res;
         }
         // Lay thong tin don bao gia cua nha cung cap
         public async Task<List<dynamic>> GetBaoGiaRequestBySupplierAsync(string supplierCode)
@@ -52,8 +52,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM BaoGia_Request_of_Quotation AS q
                 LEFT JOIN IM_NCC_NEW AS n ON q.CHR_MaNCC = n.Ma
                 WHERE q.CHR_MaNCC = @SupplierCode
-                  and ID_Status = 'WAIT_SEND_MAIL'
-                  -- AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
+                 -- and ID_Status = 'WAIT_SEND_MAIL'
+                  AND (q.BIT_IsTemplate IS NULL OR q.BIT_IsTemplate = 0) 
                   AND q.BIT_LayBaoGia = 1 and q.ID_StepBaoGia = 6";
             //and ID_Status = 'WAIT_SEND_MAIL'
             var parameter = new { SupplierCode = supplierCode };
@@ -116,8 +116,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             var res = await _context.BaoGia_Master_Approver_Send_Mails
                 .Where(m => (m.CHR_CodeSection == section || string.IsNullOrEmpty(section)) && m.ID_BaoGiaStep == step && m.CHR_Status == "ON")
-                .GroupBy(m => m.CHR_UserAdid) 
-                .Select(g => g.Key) 
+                .GroupBy(m => m.CHR_UserAdid)
+                .Select(g => g.Key)
                 .ToListAsync();
 
             if (res == null || res.Count == 0)
@@ -147,10 +147,24 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var exists = await _context.BaoGia_Detail_of_Quotations
                     .AnyAsync(c => c.ID_RequestQuote == detail.ID_RequestQuote);
                 if (exists) continue;
+
+                if (string.IsNullOrEmpty(detail.CHR_MaHangNCC))
+                {
+                    detail.CHR_MaHangNCC = "";
+                }
+
                 listDetailOK.Add(detail);
             }
             await _context.BaoGia_Detail_of_Quotations.AddRangeAsync(listDetailOK);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.InnerException?.Message);
+                throw;
+            }
             return true;
         }
         // Lấy file từ link 

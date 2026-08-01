@@ -6,6 +6,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
     public class ApprovalController : Controller
     {
+
         public IActionResult Approval()
         {
          

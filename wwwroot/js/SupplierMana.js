@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
         deleteSupplierDetail: (id) => (window.apiBaseUrl || '') +`/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
         addListSupplierDetail: (window.apiBaseUrl || '') + '/Master/AddListSupplierDetail',
         ImportSupplierDetail: (window.apiBaseUrl || '') + '/Master/ImportSupplierDetail', //UpdateMaterialInfo
-        ImportExcelMaterial: (window.apiBaseUrl || '') + '/Master/ImportExcelMaterial'
+        ImportExcelMaterial: (window.apiBaseUrl || '') + '/Master/ImportExcelMaterial',
+        ExportTableExcel: (window.apiBaseUrl || '') + '/Master/ExportTableExcel'
     };
 
     const tableBody = document.querySelector('#suppliersTable tbody');
@@ -30,8 +31,71 @@ document.addEventListener('DOMContentLoaded', function () {
     const downloadMaster = document.getElementById('btnExportMaster');
     const btnImportExcelMaterial = document.getElementById('btnImportExcelMaterial');
     const btnTemplateImportExcel = document.getElementById('btnTemplateImportExcel');
+    const btnExportTableExcel = document.getElementById('btnExportTableExcel');
 
 
+    if (btnExportTableExcel) {
+        btnExportTableExcel.addEventListener('click', async () => {
+            const T = window.i18nSupplierMana || {};
+
+            try {
+                const codeVendor = document.getElementById('selectedNccCode')?.textContent?.trim();
+
+                if (!codeVendor) {
+                    showDialog({
+                        title: T.ErrorTitle || 'Lỗi',
+                        message: 'Chưa chọn nhà cung cấp',
+                        type: 'error'
+                    });
+                    return;
+                }
+
+                const rep = await fetch(
+                    `${api.ExportTableExcel}?codeVendor=${encodeURIComponent(codeVendor)}`,
+                    {
+                        method: 'GET'
+                    }
+                );
+
+                if (!rep.ok) {
+                    const errorText = await rep.text();
+                    throw new Error(errorText);
+                }
+
+                const blob = await rep.blob();
+
+                let fileName = 'Export.xlsx';
+                const disposition = rep.headers.get('Content-Disposition');
+
+                if (disposition) {
+                    const match = disposition.match(/filename="?([^"]+)"?/);
+                    if (match && match[1]) {
+                        fileName = match[1];
+                    }
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+
+                a.href = url;
+                a.download = fileName;
+
+                document.body.appendChild(a);
+                a.click();
+
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+            } catch (err) {
+                showDialog({
+                    title: T.ErrorTitle || 'Lỗi',
+                    message: (T.ExportFailed || 'Xuất file thất bại') + ': ' +
+                        (err?.message || err),
+                    type: 'error'
+                });
+            }
+        });
+    }
     if (btnTemplateImportExcel) {
         btnTemplateImportExcel.addEventListener('click', async () => {
             const T = window.i18nSupplierMana || {};

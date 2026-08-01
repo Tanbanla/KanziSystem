@@ -21,6 +21,7 @@
     <None Remove="Data\File_import_ex.xlsx" />
     <None Remove="Data\Form_Export_WH.xlsx" />
     <None Remove="Data\Log_WH.xlsx" />
+    <None Remove="Data\Nhaptiendo.xlsx" />
     <None Remove="Data\Template_HangTrongDanhMuc.xlsm" />
   </ItemGroup>
 
@@ -34,6 +35,7 @@
     <Content Include="Data\Log_WH.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\Nhaptiendo.xlsx" />
     <Content Include="Data\Template_HangTrongDanhMuc.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -48,6 +50,8 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="ExcelDataReader" Version="3.9.0" />
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -78,6 +82,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\template\MaterialMaster.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\template\NccMasterActions.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\template\NccMaster.xlsx">

@@ -140,12 +140,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Json(kh);
         }
-        //public JsonResult load_soluonghientai(string manguyenlieu, string us, string khochuyen)
-        //{
-        //    SQL_Connect_DB20 db = new SQL_Connect_DB20();
-        //    string khoi = db.ReturnString("SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] WHERE [CHR_USERID] = '" + us + "'");
-        //    var sl = db.ReturnString("SELECT [Hientai] FROM [KHO] WHERE [MaNguyenLieu] = '" + manguyenlieu) + "' AND [Group_Code] = '" + khoi + "' AND [Kho] = '" + khochuyen + "'");
-        //}
         public PartialViewResult _modal()
         {
             return PartialView();
@@ -399,13 +393,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         CHR_Status = "Active",
                         CHR_CreateBy = user,
                         DTM_CreateBy = DateTime.Now,
-                        CHR_Mail = ws.Cell(r, 6).GetString().Trim(),
+                        CHR_Mail = ws.Cell(r, 6)
+                         .GetString()
+                         .Replace("\r", "")
+                         .Replace("\n", "")
+                         .Trim(),
                         CHR_PIC = "SDT: " +ws.Cell(r, 7).GetString().Trim()+  ",Name: " + ws.Cell(r, 8).GetString().Trim()
                     };
                     // Lọc trùng dữ liệu trong file excel trước khi thêm vào danh sách, tránh trường hợp file có nhiều
                     if (items.Where(x => x.CHR_MaNCC == dto.CHR_MaNCC && x.NVCHR_ChungLoai == dto.NVCHR_ChungLoai && x.NVCHR_SanXuat == dto.NVCHR_SanXuat).Any())
                     {
-                        //break;
+                        continue;
                     }
                     else
                     {
@@ -1413,6 +1411,131 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        //  nhập chủng loại nhà cung cấp + thao tác
+        [HttpPost]
+        public async Task<IActionResult> ImportExcelCategory([FromForm] ImportSupplierDetailDTO insertFile)
+        {
+            if (insertFile.FileExcel == null || insertFile.FileExcel.Length == 0)
+            {
+                return BadRequest("File không hợp lệ");
+            }
+
+            var items = new List<BaoGia_NCC_CategoryDTO>();
+            var user = GetCurrentUserId() ?? "system";
+            try
+            {
+                using var stream = insertFile.FileExcel.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null) return BadRequest("Không tìm thấy worksheet");
+
+                // lấy dữ liệu từ dòng 3
+                int startRow = 2;
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
+
+                for (int r = startRow; r <= lastRow; r++)
+                {
+                    if (ws.Cell(r, 2).GetString() == "" || ws.Cell(r, 2).GetString() == null)
+                    {
+                        break;
+                    }
+                    // Map theo thứ tự cột trong bảng ở giao diện
+                    var dto = new BaoGia_NCC_CategoryDTO
+                    {
+                        Id = 0,
+                        CHR_MaNCC = ws.Cell(r, 2).GetString().Trim(),
+                        NVCHR_TenNCC = ws.Cell(r, 4).GetString().Trim(),
+                        NVCHR_ChungLoai = ws.Cell(r, 1).GetString().Trim(),
+                        NVCHR_SanXuat = ws.Cell(r, 3).GetString().Trim(),
+                        CHR_Status = "Active",
+                        CHR_CreateBy = user,
+                        DTM_CreateBy = DateTime.Now,
+                        CHR_Mail = ws.Cell(r, 6)
+                         .GetString()
+                         .Replace("\r", "")
+                         .Replace("\n", "")
+                         .Trim(),
+                        CHR_PIC = "SDT: " + ws.Cell(r, 7).GetString().Trim() + ",Name: " + ws.Cell(r, 8).GetString().Trim()
+                    };
+                    // Lọc trùng dữ liệu trong file excel trước khi thêm vào danh sách, tránh trường hợp file có nhiều
+                    if (items.Where(x => x.CHR_MaNCC == dto.CHR_MaNCC && x.NVCHR_ChungLoai == dto.NVCHR_ChungLoai && x.NVCHR_SanXuat == dto.NVCHR_SanXuat).Any())
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        items.Add(dto);
+                    }
+                }
+                if (items.Count == 0)
+                {
+                    return BadRequest("File không có dữ liệu hợp lệ");
+                }
+                var reasult = await _baoGiaNccCategoryService.AddListBaoGiaNccCategory(items);
+                if (!reasult.Success)
+                {
+                    return BadRequest("Error Insert database: " + reasult.Message);
+                }
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
+        // Xuat du lieu table master ncc category
+        [HttpGet]
+        public async Task<IActionResult> ExportTableExcel(string codeVendor)
+        {
+            if (string.IsNullOrEmpty(codeVendor))
+            {
+                return BadRequest("Mã nhà cung cấp không hợp lệ");
+            }
+
+            try
+            {
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemplateNCC.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemplateNCC.xlsx");
+                }
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+                var dataAsync = await _baoGiaNccCategoryService.GetBaoGiaNccCategoryByMaNCC(codeVendor);
+                if (dataAsync == null || !dataAsync.Success || dataAsync.Data == null)
+                {
+                    return BadRequest("Error exporting master ncc category data: " + dataAsync?.Message);
+                }
+                int startRow = 2;
+                foreach (var item in dataAsync.Data)
+                {
+                    ws.Cell(startRow, 1).Value = item.NVCHR_ChungLoai ?? string.Empty;
+                    ws.Cell(startRow, 2).Value = item.NVCHR_SanXuat ?? string.Empty;
+                    ws.Cell(startRow, 3).Value = item.CHR_PIC ?? string.Empty;
+                    ws.Cell(startRow, 4).Value = item.CHR_Mail ?? string.Empty;
+                    
+                    startRow++;
+                }
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"ExportMasterNccCategory_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
         // Xác định mã loại vật liệu dựa trên phân loại (I hoặc O)
         private string GetMaterialType(string phanLoai)
         {
@@ -1439,5 +1562,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var match = Regex.Match(materialCode, @"\d+");
             return match.Success && int.TryParse(match.Value, out int number) ? number : 0;
         }
+
     }
 }

@@ -624,10 +624,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         }
         public static string _xuatkho(string code_request, string adid_nx, string nguoinhan, string nguoixuatkho, DateTime thoigian, string manguyenlieu, string soluong, string giathucte, string donvi, string kho, string tongchiphi, string vitri, string phong, string khoi, string id_rq)
         {
+           
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
+            var checkkhoi = _db.ReturnString("select Group_Code from REQUEST where Code_Request = '" + code_request + "'");
             try
             {
-                if (string.IsNullOrEmpty(thoigian.ToString()) || thoigian.ToString().Split(" ")[0] == "01/01/0001" || thoigian.ToString().Split(" ")[0] == "1900-01-01")
+                if (string.IsNullOrEmpty(thoigian.ToString()) || thoigian.ToString().Split(" ")[0] == "01/01/0001" || thoigian.ToString().Split(" ")[0] == "1900-01-01" || thoigian.ToString().Split(" ")[0] == "0001-01-01")
                 {
                     thoigian = DateTime.Now;
                 }
@@ -656,14 +658,24 @@ namespace PRJ_WAREHOUSE_BIVN.Models
            
                     string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
                         ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi],[Sotaikhoan])
-                        VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', '{thoigian.ToString("yyyy-MM-dd  HH:mm:ss")}', N'{nguoixuatkho}', '{kho}', '{khoi}', '{phongchiuphi}', N'{vitrii}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}','{sotaikhoan}');
+                        VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', N'{nguoixuatkho}', '{kho}', '{khoi}', '{phongchiuphi}', N'{vitrii}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}','{sotaikhoan}');
                         SELECT SCOPE_IDENTITY();";
 
                     // hứng ID vừa tạo
                     string idKhoNhapXuat = _db.ReturnString(sqlLog);
 
+                // Kiểm tra nếu ID rỗng, null hoặc bằng 0 -> Insert thất bại
+                if (string.IsNullOrEmpty(idKhoNhapXuat) || idKhoNhapXuat == "0")
+                {
+
+                    string sqlHoanTacKho = $"UPDATE [KHO] SET [Hientai] = [Hientai] + {slXuat} WHERE [MaNguyenLieu] = '{manguyenlieu}' AND [Kho] = '{kho}' AND [Group_Code] = '{khoi}'";
+                    _db.GET_DATA_FROM_SQL(sqlHoanTacKho);
+
+                    return $"Lỗi: Không thể ghi nhận lịch sử xuất kho cho mã {manguyenlieu}. Hệ thống đã hoàn tác số lượng kho.";
+                }
+
                 // Ghi log vào bảng lịch sử KHO_NHAPXUAT
-                if (khoi == "GA")
+                if (checkkhoi == "GA")
                 {
                     var laytigia = _db.ReturnString(" select Exchange_rate from REQUEST where Code_Request = '" + code_request + "'");
                     // Cập nhật trạng thái trong REQUEST_DETAIL
@@ -674,14 +686,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Status] = 'DONE',
                             [Currency_Real] = [Currency],
                             [Last_Update] = GETDATE(),
-                            [Total_Real] = ({slXuat} * {giathucte}) / {laytigia},
+                            [Total_Real] = (({slXuat}*{giathucte})/{laytigia}),
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}',
                             [Kho] = '{kho}',
                             [Id_LichsuXuat] = '{idKhoNhapXuat}'
                             WHERE [Id_RequestDetail] = '{id_rq}'";
 
-                    _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
+                     _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
 
                     // đẩy vào đơn gốc
                     var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
@@ -690,7 +702,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     string UpdateRequest = "";
                     UpdateRequest = UpdateRequest + $"UPDATE [REQUEST] SET [Total_exchange_real] = {tongtien_1}";
                     UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + laytigia + "'";
-                    UpdateRequest = UpdateRequest + ",[Currency_Real] = 'VND'";
+                    UpdateRequest = UpdateRequest + ",[Currency_Real] = [Currency]";
                     UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
                     UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]='" + nguoinhan + "'";
                     UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
@@ -724,13 +736,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     string UpdateRequest = "";
                     UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongtien + "'";
                     UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
-                    UpdateRequest = UpdateRequest + ",[Currency_Real] = 'USD'";
+                    UpdateRequest = UpdateRequest + ",[Currency_Real] = [Currency]";
                     UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
                     UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]= N'" + nguoinhan + "'";
                     UpdateRequest = UpdateRequest + ",[Freeze] = NULL WHERE [Code_Request] = '" + code_request + "'";
 
                     _db.GET_DATA_FROM_SQL(UpdateRequest);
-                }              
+                }
+                
                 var idrq = _db.ReturnString("SELECT Id_Request FROM REQUEST WHERE Code_Request = '" + code_request + "'");
                 CheckDone(code_request, idrq);
                

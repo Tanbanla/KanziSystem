@@ -1,4 +1,5 @@
 using Dapper;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -6,6 +7,7 @@ using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Collections.Concurrent;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -550,14 +552,30 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         string? MaHang,string? user)
         {
             var sql = @"
-                SELECT 
-                    SUM(CASE WHEN CAST(r.DTM_KyHan AS DATE) = CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END) AS DenHanLuaChon,
-                    SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) = 1 THEN 1 ELSE 0 END) AS ConMotNgayHetHan,
-                    SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) > 1 THEN 1 ELSE 0 END) AS ConLai,
-                    SUM(CASE WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) < 0 THEN 1 ELSE 0 END) AS QuaHan
-                FROM [BaoGia_Request_of_Quotation] as r
+                SELECT
+                    COUNT(DISTINCT CASE
+                        WHEN CAST(r.DTM_KyHan AS DATE) = CAST(GETDATE() AS DATE)
+                        THEN CONCAT(r.CHR_MaDon, '|', r.CHR_MaHangNoiBo)
+                    END) AS DenHanLuaChon,
+
+                    COUNT(DISTINCT CASE
+                        WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) = 1
+                        THEN CONCAT(r.CHR_MaDon, '|', r.CHR_MaHangNoiBo)
+                    END) AS ConMotNgayHetHan,
+
+                    COUNT(DISTINCT CASE
+                        WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) > 1
+                        THEN CONCAT(r.CHR_MaDon, '|', r.CHR_MaHangNoiBo)
+                    END) AS ConLai,
+
+                    COUNT(DISTINCT CASE
+                        WHEN DATEDIFF(DAY, CAST(GETDATE() AS DATE), CAST(r.DTM_KyHan AS DATE)) < 0
+                        THEN CONCAT(r.CHR_MaDon, '|', r.CHR_MaHangNoiBo)
+                    END) AS QuaHan
+                FROM BaoGia_Request_of_Quotation r
                 WHERE r.BIT_LayBaoGia = 1
-                  AND r.ID_StepBaoGia > 2 AND r.ID_StepBaoGia < 12
+                  AND r.ID_StepBaoGia > 6
+                  AND r.ID_StepBaoGia < 9
                   AND r.DTM_KyHan IS NOT NULL
             ";
 
@@ -702,7 +720,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         r.CHR_CreateBy,
                         r.ID_StepBaoGia,
                         r.CHR_MaNCC,
-                        r.CHR_UserApproval
+                        r.CHR_UserApproval,
+						r.DTM_CreateDate
                     FROM BaoGia_Request_of_Quotation r
             " + whereSql + @"
                 ),
@@ -710,45 +729,59 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     SELECT
                         f.CHR_MaDon,
                         f.CHR_MaHangNoiBo,
+						MAX(f.DTM_CreateDate) as DTM_CreateDate,
                         MAX(f.CHR_MaHangNCC) AS CHR_MaHangNCC,
                         MAX(f.CHR_NameEN) AS CHR_NameEN,
                         MAX(f.DTM_KyHan) AS DTM_KyHan,
                         MAX(f.CHR_CreateBy) AS CHR_CreateBy,
-                        MAX(f.ID_StepBaoGia) AS Step,
-                        MAX(f.CHR_UserApproval) as UserNext
+                        MIN(f.ID_StepBaoGia) AS Step,
+                        MIN(f.CHR_UserApproval) as UserNext
                     FROM FILTERED f
                     GROUP BY
                         f.CHR_MaDon,
                         f.CHR_MaHangNoiBo
                 ),
-                NCC_ROW AS (
-	                SELECT
-		                CHR_MaDon,
-		                CHR_MaHangNoiBo,
-		                ShortName,
-						CHR_Status,
-		                MAX(ID_StepBaoGia) AS ID_StepBaoGia,
-		                ROW_NUMBER() OVER (
-			                PARTITION BY CHR_MaDon, CHR_MaHangNoiBo
-			                ORDER BY ShortName
-		                ) AS rn
-	                FROM (
-		                SELECT DISTINCT
-			                f.CHR_MaDon,
-			                f.CHR_MaHangNoiBo,
-			                ISNULL(n.ShortName, f.CHR_MaNCC) AS ShortName,
-			                f.ID_StepBaoGia,
-							d.CHR_Status
-		                FROM FILTERED f
-		                LEFT JOIN IM_NCC_NEW n ON f.CHR_MaNCC = n.Ma
-					 LEFT JOIN BaoGia_Detail_of_Quotation d
+                NCC_GROUP AS (
+                    SELECT
+                        CHR_MaDon,
+                        CHR_MaHangNoiBo,
+                        ShortName,
+                        CHR_Status,
+                        MAX(NVCHR_File) AS NVCHR_File,
+                        MAX(ID_StepBaoGia) AS ID_StepBaoGia,
+                        MAX(CAST(BIT_Select AS INT)) AS BIT_Select
+                    FROM (
+                        SELECT DISTINCT
+                            f.CHR_MaDon,
+                            f.CHR_MaHangNoiBo,
+                            ISNULL(n.ShortName, f.CHR_MaNCC) AS ShortName,
+                            f.ID_StepBaoGia,
+                            d.CHR_Status,
+                            d.NVCHR_File,
+                            ISNULL(d.BIT_Select,0) AS BIT_Select
+                        FROM FILTERED f
+                        LEFT JOIN IM_NCC_NEW n
+                            ON f.CHR_MaNCC = n.Ma
+                        LEFT JOIN BaoGia_Detail_of_Quotation d
                             ON d.ID_RequestQuote = f.ID
-	                ) t
-	                GROUP BY 
-		                CHR_MaDon,
-		                CHR_MaHangNoiBo,
-		                ShortName,
-						CHR_Status
+                    ) t
+                    GROUP BY
+                        CHR_MaDon,
+                        CHR_MaHangNoiBo,
+                        ShortName,
+                        CHR_Status
+                ),
+
+                NCC_ROW AS (
+                    SELECT
+                        *,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY CHR_MaDon, CHR_MaHangNoiBo
+                            ORDER BY
+                                BIT_Select DESC,   -- NCC được chọn luôn lên đầu
+                                ShortName
+                        ) AS rn
+                    FROM NCC_GROUP
                 ),
                 NCC_PIVOT AS (
                     SELECT
@@ -768,7 +801,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         MAX(CASE WHEN rn = 2 THEN CHR_Status END) AS Status_2,
                         MAX(CASE WHEN rn = 3 THEN CHR_Status END) AS Status_3,
                         MAX(CASE WHEN rn = 4 THEN CHR_Status END) AS Status_4,
-                        MAX(CASE WHEN rn = 5 THEN CHR_Status END) AS Status_5
+                        MAX(CASE WHEN rn = 5 THEN CHR_Status END) AS Status_5,
+						MAX(CASE WHEN rn = 1 THEN NVCHR_File END) AS Link_1,
+                        MAX(CASE WHEN rn = 2 THEN NVCHR_File END) AS Link_2,
+                        MAX(CASE WHEN rn = 3 THEN NVCHR_File END) AS Link_3,
+                        MAX(CASE WHEN rn = 4 THEN NVCHR_File END) AS Link_4,
+                        MAX(CASE WHEN rn = 5 THEN NVCHR_File END) AS Link_5
                     FROM NCC_ROW
                     GROUP BY CHR_MaDon, CHR_MaHangNoiBo
                 ),
@@ -812,29 +850,38 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     FROM HIS_RAW
                     GROUP BY CHR_MaDon, CHR_MaHangNoiBo
                 ),
-                PICK AS (
-                    SELECT *
-                    FROM (
-                        SELECT
-                            f.CHR_MaDon,
-                            f.CHR_MaHangNoiBo,
-                            ISNULL(n.ShortName, n.Ma) AS NCC_DuocChon,
-                            d.NVCHR_ReasonPick,
-                            d.NVCHR_File,
-                            f.ID_StepBaoGia AS PickStep,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
-                                ORDER BY d.ID DESC
-                            ) AS rn
-                        FROM FILTERED f
-                        INNER JOIN BaoGia_Detail_of_Quotation d
-                            ON d.ID_RequestQuote = f.ID
-                            AND d.BIT_Select = 1
-                        LEFT JOIN IM_NCC_NEW n
-                            ON f.CHR_MaNCC = n.Ma
-                    ) t
-                    WHERE rn = 1
-                )   
+              PICK AS (
+                SELECT *
+                FROM (
+                    SELECT
+                        f.CHR_MaDon,
+                        f.CHR_MaHangNoiBo,
+                        ISNULL(n.ShortName, n.Ma) AS NCC_DuocChon,
+                        d.NVCHR_ReasonPick,
+                        d.NVCHR_File,
+                        f.ID_StepBaoGia AS PickStep,
+                        d.BIT_Select,
+                        d.CHR_Status,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
+                            ORDER BY
+                                CASE
+                                    WHEN d.BIT_Select = 1 THEN 1
+                                    WHEN d.BIT_Select IS NULL THEN 2
+                                END,
+                                f.ID_StepBaoGia ASC,
+								d.ID DESC
+                        ) AS rn
+                    FROM FILTERED f
+                    INNER JOIN BaoGia_Detail_of_Quotation d
+                        ON d.ID_RequestQuote = f.ID
+                    LEFT JOIN IM_NCC_NEW n
+                        ON f.CHR_MaNCC = n.Ma
+                    WHERE d.BIT_Select = 1
+                       OR d.BIT_Select IS NULL
+                ) t
+                WHERE rn = 1
+            )
             ";
 
             sql = cteSql + @"
@@ -865,6 +912,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 					ncc.Status_3,
 					ncc.Status_4,
 					ncc.Status_5,
+					ncc.Link_1,
+					ncc.Link_2,
+					ncc.Link_3,
+					ncc.Link_4,
+					ncc.Link_5,
                     h.PIC_Approve, h.PIC_Time,
                     h.QLSC_Approve, h.QLSC_Time,
                     h.QLTC_Approve, h.QLTC_Time,
@@ -898,7 +950,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (pageSize > 0 && pageIndex > 0)
             {
                 sql += @"
-                    ORDER BY m.CHR_MaHangNoiBo
+                    ORDER BY m.DTM_CreateDate desc
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY
                 ";
@@ -908,7 +960,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             else
             {
                 sql += @"
-                    ORDER BY m.CHR_MaHangNoiBo
+                    ORDER BY m.DTM_CreateDate desc
                 ";
             }
 

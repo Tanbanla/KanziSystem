@@ -72,13 +72,10 @@
             <div class="card-body p-0">
                 <div class="form-row">
                     <div class="form-group col-md-1">
-                        <label for="inputEmail4"> @Languages.Khoi :</label>
-                        <!-- ĐÃ SỬA: Thêm + '_CPK' vào hàm onchange -->
-                        <select class="form-control" id="group_code" onchange="_load_name_inv(this.value + '_CPK')" style="background-color:#ffff0029">
+                        <label for="inputEmail4"> @Languages.Khoi :</label>                     
+                        <select class="form-control" id="group_code" style="background-color:#ffff0029" >
                             <option>PROD</option>
                             <option>GA</option>
-                            <option>IT</option>
-                            <option>PUR</option>
                         </select>
                     </div>
                     <div class="form-group col-md-2">
@@ -189,7 +186,7 @@
                                         <td class="row-number text-center fw-bold">@index</td>
                                         <td>
                                             <select class="form-control tenhang" id="tenhang_@index" onchange="_load_material_1(this.value, this.id)">
-                                                <option value="@item.Material_Code:@item.Material_Name" selected>@item.Material_Name</option>
+                                                <option value="@item.Material_Name" selected>@item.Material_Name</option>
                                             </select>
                                         </td>
                                         <td>
@@ -197,10 +194,10 @@
                                                 <option>@item.Account_Code</option>
                                             </select>
                                         </td>
-                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_@index" min="0"></td>
-                                        <td><input type="text" class="form-control dv" id="dv_@index" value="@item.Unit"></td>
-                                        <td><input type="number" class="form-control dg" id="dg_@index" value="@item.Price"></td>
-                                        <td><input type="text" class="form-control nt" id="nt_@index" value="@item.Currency"></td>
+                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_@index" min="0" oninput="caculator(this.id)"></td>
+                                        <td><input type="text" class="form-control dv" id="dv_@index" value="@item.Unit" readonly ></td>
+                                        <td><input type="number" class="form-control dg" id="dg_@index" value="@item.Price" readonly> </td>
+                                        <td><input type="text" class="form-control nt" id="nt_@index" value="@item.Currency" readonly></td>
 
                                         <td><input type="text" class="form-control tcp" id="tcp_@index" value="@item.Total_exchange" readonly></td>
 
@@ -225,13 +222,13 @@
                 </div>
                 <div id="gyc">
                     <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>
-                    <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>                 
+                    <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>
                 </div>
                 <br />
                 <br />
             </div>
         </div>
-</div>
+    </div>
 </div>
 @await Html.PartialAsync("_modal", "Import")
 
@@ -244,6 +241,23 @@
 <script src="~/scripts/get_api_ga.js"></script>
 
 <script>
+    // Centralized endpoints - change server-side routing here if needed
+    var ApiEndpoints = {
+        infoMaterial: '@Url.Action("_info_material", "Import", new { area = "ipcs" })',
+        loadMaterial: '@Url.Action("_load_material", "Import", new { area = "ipcs" })',
+        getPhongChiuphi: '@Url.Action("_get_phongchiuphi", "Request", new { area = "ipcs" })',
+        loadAccount: '@Url.Action("_load_account", "Import", new { area = "ipcs" })',
+        request: '@Url.Action("request", "Import", new { area = "ipcs" })'
+    };
+
+    //   var ApiEndpoints = {
+    //     infoMaterial: '@Url.Action("_info_material", "Import", new { area = "" })',
+    //     loadMaterial: '@Url.Action("_load_material", "Import", new { area = "" })',
+    //     getPhongChiuphi: '@Url.Action("_get_phongchiuphi", "Request", new { area = "" })',
+    //     loadAccount: '@Url.Action("_load_account", "Import", new { area = "" })',
+    //     request: '@Url.Action("request", "Import", new { area = "" })'
+    // };
+
     window.onload = function(){
         //let group_code = document.getElementById("group_code").value + "_CPK";
         let group_code = document.getElementById("group_code").value;
@@ -256,7 +270,7 @@
         _load_account_1();
     }
 
-        function _load_material_1(Material_Code, id) {
+    function _load_material_1(Material_Code, id) {
         // THÊM DÒNG NÀY: Chặn lỗi nếu mã rỗng
         if (!Material_Code || Material_Code.trim() === "") return;
 
@@ -274,7 +288,7 @@
         params.append('Account_Name_VN', '');
         params.append('Group_Code', groupcode);
 
-        fetch('/Import/_info_material', {
+        fetch(ApiEndpoints.infoMaterial, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -314,7 +328,7 @@
         });
     }
 
-           document.getElementById('btn-add-row').addEventListener('click', function() {
+    document.getElementById('btn-add-row').addEventListener('click', function() {
         const tbody = document.querySelector('#dynamic-table tbody');
         const firstRow = tbody.querySelector('.input-row');
 
@@ -369,10 +383,7 @@
         const newTenHangId = newRow.querySelector('.tenhang').id;
         let group_code = document.getElementById("group_code").value;
 
-        // Kiểm tra xem hàm có yêu cầu nối chuỗi '_CPK' không (tùy vào logic backend của bạn)
-        // Nếu dropdown đang nối chuỗi thì có thể dùng:
-        // group_code = group_code + "_CPK";
-
+ 
         // 8. Kích hoạt giao diện Select2 cho dòng mới
            if ($.fn.select2) {
                 $('#' + newTenHangId).select2({ width: '100%' });
@@ -391,13 +402,14 @@
             _load_name_inv1(group_code, newTenHangId);
         }
     });
-       async function _load_name_inv1(group_code, targetSelectId) {
+
+    async function _load_name_inv1(group_code, targetSelectId) {
         const params = new URLSearchParams({
             group_code: group_code,
             loaichiphi: (document.getElementById("loaichiphi") ? document.getElementById("loaichiphi").value : '')
         });
 
-        fetch('/Import/_load_material', { // Mở comment URL bạn đang dùng (hoặc /ipcs/Import/_load_material)
+        fetch(ApiEndpoints.loadMaterial, { // use centralized endpoint
             method: 'POST',
             body: params
         })
@@ -408,7 +420,7 @@
             if (targetSelectId) {
                 let options = '<option value=""></option>';
                 data.forEach(item => {
-                   
+
                     options += `<option value="${item}">${item}</option>`;
                 });
                 $('#' + targetSelectId).html(options).trigger('change');
@@ -428,49 +440,51 @@
             console.error("Lỗi khi load danh sách bằng _load_name_inv1:", error);
         });
     }
-        // Xử lý xóa dòng
-        document.querySelector('#dynamic-table').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('btn-remove')) {
-                const row = e.target.closest('tr');
-                const rowCount = document.querySelectorAll('#dynamic-table tbody tr').length;
-                if (rowCount > 1) {
-                    row.remove();
-                    updateRowNumbers(); // Cập nhật lại số thứ tự sau khi xóa
-                    tinhTongTatCa();
-                }
+
+    // Xử lý xóa dòng
+    document.querySelector('#dynamic-table').addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('btn-remove')) {
+            const row = e.target.closest('tr');
+            const rowCount = document.querySelectorAll('#dynamic-table tbody tr').length;
+            if (rowCount > 1) {
+                row.remove();
+                updateRowNumbers(); // Cập nhật lại số thứ tự sau khi xóa
+                tinhTongTatCa();
             }
-        });
-         function updateRowNumbers() {
-            const rows = document.querySelectorAll('#dynamic-table tbody tr');
-            rows.forEach((row, index) => {
-                const i = index + 1; // Số thứ tự mới
-
-                // 1. Cập nhật số hiển thị
-                const stt = row.querySelector('.row-number');
-                if (stt) stt.innerText = i;
-
-                // 2. Danh sách các ID cần cập nhật theo đúng hậu tố _i
-                const idList = ['tenhang', 'stk', 'kho', 'tk', 'sl', 'dv', 'dg', 'nt', 'tcp', 'md', 'pcp', 'vt', 'gc'];
-
-                idList.forEach(name => {
-                    const el = row.querySelector(`[id^="${name}_"]`); // Tìm phần tử có id bắt đầu bằng name_
-                    if (el) {
-                        el.id = `${name}_${i}`;
-
-                        // Cập nhật hàm sự kiện inline nếu có
-                        if (name === 'tenhang') {
-                            el.setAttribute('onchange', `_load_material_1(this.value, this.id)`);
-                        }
-                        if (name === 'sl') {
-                            el.setAttribute('onblur', `caculator(this.id)`);
-                            el.setAttribute('onchange', `caculator(this.id)`);
-                        }
-                    }
-                });
-            });
         }
-    
-     function caculator(id) {
+    });
+
+    function updateRowNumbers() {
+        const rows = document.querySelectorAll('#dynamic-table tbody tr');
+        rows.forEach((row, index) => {
+            const i = index + 1; // Số thứ tự mới
+
+            // 1. Cập nhật số hiển thị
+            const stt = row.querySelector('.row-number');
+            if (stt) stt.innerText = i;
+
+            // 2. Danh sách các ID cần cập nhật theo đúng hậu tố _i
+            const idList = ['tenhang', 'stk', 'kho', 'tk', 'sl', 'dv', 'dg', 'nt', 'tcp', 'md', 'pcp', 'vt', 'gc'];
+
+            idList.forEach(name => {
+                const el = row.querySelector(`[id^="${name}_"]`); // Tìm phần tử có id bắt đầu bằng name_
+                if (el) {
+                    el.id = `${name}_${i}`;
+
+                    // Cập nhật hàm sự kiện inline nếu có
+                    if (name === 'tenhang') {
+                        el.setAttribute('onchange', `_load_material_1(this.value, this.id)`);
+                    }
+                    if (name === 'sl') {
+                        el.setAttribute('onblur', `caculator(this.id)`);
+                        el.setAttribute('onchange', `caculator(this.id)`);
+                    }
+                }
+            });
+        });
+    }
+
+    function caculator(id) {
         // Lấy số thứ tự dòng từ ID (ví dụ: sl_1 -> 1)
         var idd = id.split('_')[1];
 
@@ -483,19 +497,11 @@
         // Gán giá trị vào ô TCP (định dạng số thực hoặc 0 nếu NaN)
         document.getElementById("tcp_" + idd).value = (isNaN(tcpValue) ? 0 : tcpValue).toFixed(2);
 
-        //document.getElementById("sl_" + idd).setAttribute('max', parseFloat(document.getElementById("tk_" + idd).value));
-        //var currentVal = parseFloat(document.getElementById("sl_" + idd).value);
-        //var tonKho = parseFloat(document.getElementById("tk_" + idd).value);
-        // Nếu nhập nhiều hơn tồn kho
-        // if (currentVal > tonKho) {
-        //     alert("Số lượng xuất không được vượt quá tồn kho (" + tonKho + ")");
-        //     //document.getElementById("sl_" + idd).value = tonKho; // Tự động đưa về giá trị Max (tồn kho)
-        // }
         // Gọi hàm tính tổng tất cả các dòng
         tinhTongTatCa();
     }
 
-       function tinhTongTatCa() {
+    function tinhTongTatCa() {
         let tongMoi = 0;
         const allTcp = document.querySelectorAll('.tcp');
 
@@ -524,7 +530,7 @@
     }
 
     function _load_phongchiuphi_1() {
-        fetch('/Request/_get_phongchiuphi', {
+        fetch(ApiEndpoints.getPhongChiuphi, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -549,7 +555,7 @@
     }
 
     function _load_account_1() {
-        fetch('/Import/_load_account', {
+        fetch(ApiEndpoints.loadAccount, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -584,7 +590,7 @@
         const params = new URLSearchParams();
         params.append('iD_REQUEST', iD_REQUEST);
 
-        fetch('/Import/request', {
+        fetch(ApiEndpoints.request, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -643,6 +649,92 @@
             return false; // Ngăn chặn việc gửi dữ liệu
         }
 
-    return true; // Trạng thái hợp lệ, cho phép gửi
-}
+        return true; // Trạng thái hợp lệ, cho phép gửi
+    }
+
+    function check_mucdichkhac() {
+        // mặc định là chi phí cố định
+        if(document.getElementById("group_code").value == "GA"){
+
+              $('#loaichiphi').val('COMMON').prop('disabled', false);
+        }
+        if(document.getElementById("group_code").value == "PROD"){
+              $('#loaichiphi').val('EUQIMENT').change();
+              $('#loaichiphi').val('EUQIMENT').prop('disabled', true);
+        }
+
+        // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
+        const lstMaterial = document.getElementById("lstMaterial");
+        if (lstMaterial) lstMaterial.innerHTML = "";
+
+        // 2. Định nghĩa dòng mẫu mới (Cột STK có thể thay đổi tùy ý ở đây)
+        const tbody = document.querySelector('#dynamic-table tbody');
+        const templateRow = `
+            <tr class="input-row">
+                <td class="row-number text-center fw-bold">1</td>
+                <td>
+                    <select class="form-control select2 tenhang" onchange="_load_material(this.value, this.id)" id="tenhang_1">
+                        <option value=""></option>
+                    </select>
+                </td>
+                <td>
+                    <select id="stk_1" class="form-control stk" ></select>
+                </td>
+                <td hidden><input type="text" class="form-control kho" id="kho_1" readonly /></td>
+                <td hidden><input type="text" class="form-control tk" id="tk_1" readonly /></td>
+                <td><input type="number" class="form-control sl" id="sl_1" min="0" oninput="caculator(this.id)"></td>
+                <td><input type="text" class="form-control dv" id="dv_1" readonly></td>
+                <td><input type="number" class="form-control dg" id="dg_1" readonly></td>
+                <td><input type="text" class="form-control nt" id="nt_1" readonly></td>
+                <td><input type="text" class="form-control tcp" id="tcp_1" readonly></td>
+                <td><input type="text" class="form-control md" id="md_1"></td>
+                <td>
+                    <select class="form-control pcp" onchange="_load_vitri(this.value, this.id)" id="pcp_1"></select>
+                </td>
+                <td>
+                    <select class="form-control vt" id="vt_1"></select>
+                </td>
+                <td><input type="text" class="form-control gc" id="gc_1"></td>
+                <td>
+                    <button type="button" class="btn btn-outline-danger btn-remove" style="display: none;">&times;</button>
+                </td>
+            </tr>`;
+
+        // 3. Thay thế nội dung bảng
+        tbody.innerHTML = templateRow;
+         let group_code = document.getElementById("group_code").value + "_CPK";
+        _load_name_inv(group_code);
+        _load_phongchiuphi();
+        _load_account();
+        // 5. Tính toán lại tổng tiền (về 0)
+        tinhTongTatCa();
+    }
+
+    function uncheck_mucdichkhac() {
+        // 1. Mở khóa và reset loại chi phí
+        $('#loaichiphi').prop('disabled', false);
+        $('#loaichiphi').val('').change(); // Hoặc set về giá trị mặc định ban đầu
+        $('#loaichiphi').val('AUXILIARY').change();
+        // 2. Reset danh sách vật tư (nếu cần)
+        const lstMaterial = document.getElementById("lstMaterial");
+        if (lstMaterial) lstMaterial.innerHTML = "";
+
+        // 3. Load lại dữ liệu ban đầu (không có hậu tố _CPK)
+        let group_code = document.getElementById("group_code").value;
+
+        // Gọi lại các hàm load dữ liệu mặc định
+        _load_name_inv(group_code);
+        _load_phongchiuphi();
+
+        // Reset tổng tiền
+        tinhTongTatCa();
+    }
+
+    function mucdichkhac(el) {
+        if ($(el).is(':checked')) {
+            check_mucdichkhac();
+        } else {
+            uncheck_mucdichkhac();
+        }
+    }
 </script>

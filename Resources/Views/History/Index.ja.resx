@@ -475,7 +475,7 @@
     <value>ダッシュボード概要</value>
   </data>
   <data name="SummaryTable1Title" xml:space="preserve">
-    <value>表1 : 仕入先選定待ち</value>
+    <value>表1 : 取引先決定状況</value>
   </data>
   <data name="DueSoon" xml:space="preserve">
     <value>期限当日</value>
@@ -490,22 +490,22 @@
     <value>期限超過</value>
   </data>
   <data name="SummaryTable2Title" xml:space="preserve">
-    <value>表2 : 期限ステータス</value>
+    <value>表2 :見積回収期間状況</value>
   </data>
   <data name="WaitDeptPic" xml:space="preserve">
     <value>部門PIC待ち</value>
   </data>
   <data name="WaitDeptQlsc" xml:space="preserve">
-    <value>部門QLSC待ち</value>
+    <value>部門初級管理職待ち</value>
   </data>
   <data name="WaitDeptQltc" xml:space="preserve">
-    <value>部門QLTC待ち</value>
+    <value>部門中級管理職待ち</value>
   </data>
   <data name="WaitOrderPic" xml:space="preserve">
     <value>購買PIC待ち</value>
   </data>
   <data name="WaitOrderQlsc" xml:space="preserve">
-    <value>購買QLSC待ち</value>
+    <value>購買初級管理職待ち</value>
   </data>
   <data name="SummaryTable3Title" xml:space="preserve">
     <value>表3：申請承認状況</value>
@@ -523,46 +523,46 @@
     <value>表4：申請処理状況</value>
   </data>
   <data name="TotalWaitingItems" xml:space="preserve">
-    <value> 取得対象コード数</value>
+    <value>見積回収数量</value>
   </data>
   <data name="TotalSelectedItems" xml:space="preserve">
-    <value>仕入先選択対象コード数</value>
+    <value>取引先決定品数</value>
   </data>
   <data name="TotalBothStatusItems" xml:space="preserve">
-    <value>仕入先選択済みコード数</value>
+    <value>取引先決定済品数</value>
   </data>
   <data name="TotalAllItems" xml:space="preserve">
-    <value>選択待ち</value>
+    <value>取引先決定待ち品数</value>
   </data>
   <data name="HistoryTableTitle" xml:space="preserve">
     <value>履歴テーブル</value>
   </data>
   <data name="LegendTitle" xml:space="preserve">
-    <value>色の凡例</value>
+    <value>色ガイド</value>
   </data>
   <data name="LegendRejectedQuote" xml:space="preserve">
-    <value>黄色: 見積依頼却下</value>
+    <value>差戻し</value>
   </data>
   <data name="LegendSupplierSubmitted" xml:space="preserve">
-    <value>緑（仕入先セル）: 見積提出済み</value>
+    <value>見積提出済み</value>
   </data>
   <data name="LegendSupplierNotSubmitted" xml:space="preserve">
-    <value>白（仕入先セル）: 見積未提出</value>
+    <value>見積未提出</value>
   </data>
   <data name="LegendOverdue" xml:space="preserve">
-    <value>赤: 見積依頼期限超過</value>
+    <value>期限超過</value>
   </data>
   <data name="LegendGroup1" xml:space="preserve">
-    <value>Group 1 - 依頼承認</value>
+    <value>グループ1: 依頼承認</value>
   </data>
   <data name="LegendGroup2" xml:space="preserve">
-    <value>Group 2 - 仕入先選定承認</value>
+    <value>グループ2: 仕入先選定承認</value>
   </data>
   <data name="LegendGroup3" xml:space="preserve">
-    <value>Group 3 - 仕入先選定結果</value>
+    <value>グループ3: 仕入先選定結果</value>
   </data>
   <data name="LegendGroup4" xml:space="preserve">
-    <value>Group 4 - ステータス/操作</value>
+    <value>グループ4: ステータス/操作</value>
   </data>
   <data name="No" xml:space="preserve">
     <value>No.</value>
@@ -629,5 +629,26 @@
   </data>
   <data name="ExportTable" xml:space="preserve">
     <value>テーブルデータファイルのエクスポート</value>
+  </data>
+  <data name="Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="LegendSelectedSupplier" xml:space="preserve">
+    <value>選定仕入先</value>
+  </data>
+  <data name="AllRefuse" xml:space="preserve">
+    <value>すべてのサプライヤーが見積もり提供を拒否した。</value>
+  </data>
+  <data name="WaitingApprover" xml:space="preserve">
+    <value>承認待ち</value>
+  </data>
+  <data name="SubmittedApprover" xml:space="preserve">
+    <value>申請は承認されました。</value>
+  </data>
+  <data name="NotQuotation" xml:space="preserve">
+    <value>見積り取得不可</value>
   </data>
 </root>

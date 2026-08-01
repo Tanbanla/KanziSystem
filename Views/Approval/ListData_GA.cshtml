@@ -11,81 +11,122 @@
         border-radius: 3px;
         height: 41px;
     }
-    /* 2. Tạo vùng chứa các nút điều hướng ở dưới */
+
+    /* --- CỐ ĐỊNH THANH CÔNG CỤ TRÊN CÙNG MÀN HÌNH --- */
+    .card .card-header {
+        position: sticky;
+        top: 0;
+        background-color: #ffffff !important; /* Màu nền trắng để che chữ bên dưới khi cuộn */
+        z-index: 1060; /* Ưu tiên cao nhất để luôn nằm trên cùng */
+        border-bottom: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* --- CẤU HÌNH VÙNG CHỨA BẢNG CHÍNH (THAY PX THÀNH VH) --- */
+    .main-table-responsive {
+        max-height: calc(100vh - 220px);
+        min-height: 400px;
+        overflow-y: auto;
+        overflow-x: auto;
+        position: relative;
+        border: 1px solid #dee2e6;
+    }
+
+    .main-table-responsive .table {
+        width: 100%;
+        margin-bottom: 0;
+        /*  white-space: nowrap; */
+    }
+
+    /* Ghim dòng tiêu đề thứ nhất (Dính ngay dưới thanh công cụ) */
+    .main-table-responsive .table thead tr.header-row-1 th {
+        position: sticky;
+        top: 0; /* Nếu cuộn toàn bộ trang thì đổi thành chiều cao thanh header (ví dụ: 61px) */
+        background-color: #2233b0 !important;
+        z-index: 1040;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Ghim dòng tiêu đề thứ hai (Dính sát dưới dòng tiêu đề thứ nhất) */
+    .main-table-responsive .table thead tr.header-row-2 th {
+        position: sticky;
+        top: 38px; /* Chiều cao thực tế của tr thứ nhất */
+        background-color: #2233b0 !important;
+        z-index: 1035;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .main-table-responsive .table thead tr.header-row-1 th.bg-white {
+        background-color: #2233b0 !important;
+    }
+
+    /* --- CSS CHO SWIPER / MODAL CHI TIẾT --- */
     .custom-controls {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 80px; /* Khoảng cách giữa nút Prev và Next */
+        gap: 80px;
         margin-top: 20px;
         position: relative;
         height: 50px;
     }
 
-    /* 3. Định dạng lại nút Next và Prev */
-    .swiper-button-next,
-    .swiper-button-prev {
-        position: static !important; /* Bỏ chế độ tuyệt đối (absolute) */
+    .swiper-button-next, .swiper-button-prev {
+        position: static !important;
         width: 40px !important;
         height: 40px !important;
         margin: 0 !important;
-        background-color: #f8f9fa; /* Màu nền nút */
-        color: #28a745 !important; /* Màu mũi tên xanh lá */
-        float: right;
+        background-color: #f8f9fa;
+        color: #28a745 !important;
     }
 
-        /* Chỉnh kích thước mũi tên nhỏ lại cho cân đối */
-        .swiper-button-next:after,
-        .swiper-button-prev:after {
-            font-size: 15px !important;
-            font-weight: bold;
-        }
+    .swiper-button-next:after, .swiper-button-prev:after {
+        font-size: 15px !important;
+        font-weight: bold;
+    }
 
-    /* 4. Đưa số phân trang vào giữa 2 nút */
     .swiper-pagination {
         position: static !important;
         width: auto !important;
         padding: 0 15px;
-        font-size: 16px !important; /* Tăng kích thước chữ số */
-        font-weight: bold !important; /* Làm đậm số */
-        color: #495057 !important; /* Màu sắc của số hiển thị */
+        font-size: 16px !important;
+        font-weight: bold !important;
+        color: #495057 !important;
         display: flex;
         align-items: center;
     }
 
-    /* Tùy chỉnh màu sắc riêng cho số trang hiện tại */
     .swiper-pagination-current {
-        color: #28a745 !important; /* Đổi số trang hiện tại thành màu xanh lá giống màu nút */
+        color: #28a745 !important;
     }
 
-    /* Hiệu ứng khi di chuột qua nút */
-    .swiper-button-next:hover,
-    .swiper-button-prev:hover {
+    .swiper-button-next:hover, .swiper-button-prev:hover {
         background-color: #28a745;
         color: white !important;
     }
-    /* Container bọc bảng có id hoặc class cụ thể để tránh ảnh hưởng bảng khác */
+
     .table-responsive-custom {
-        max-height: 600px; /* Hoặc chiều cao bạn muốn */
-        overflow-y: auto;
+        height: auto;
+        width: 100%;
+        overflow-y: visible;
+        /* Giữ lại thanh cuộn ngang phòng trường hợp màn hình quá bé không chứa hết số cột */
+        overflow-x: auto;
         position: relative;
     }
 
-    /* Dòng header thứ nhất: Dính sát đỉnh (top: 0) */
     #modal-silder .table thead tr:nth-child(1) td,
     #modal-silder .table thead tr:nth-child(1) th {
         position: sticky;
         top: 0;
-        background-color: #e8f3ff !important; /* Phải có màu nền để không lộ chữ bên dưới */
+        background-color: #e8f3ff !important;
         z-index: 1000;
         border-bottom: 1px solid #dee2e6;
     }
 
-    /* Dòng header thứ hai: Dính bên dưới dòng thứ nhất */
     #modal-silder .table thead tr:nth-child(2) td,
     #modal-silder .table thead tr:nth-child(2) th {
         position: sticky;
-        top: 52px; /* TĂNG/GIẢM số này cho đến khi khít với dòng 1 */
+        top: 52px;
         background-color: #e8f3ff !important;
         z-index: 999;
     }
@@ -149,35 +190,39 @@
                 <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
-                <div style="max-height: 600px; overflow-y: auto; border: 1px solid #dee2e6;">
-                    <table class="table table-bordered">
-                        <thead class="bg-primary" style="position: sticky; top: 0; background: #e8f3ff; z-index: 999;">
-                            <tr>
-                                <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" id="idd" /></th>
-                                <th rowspan="2">@Languages.chitiet</th>
-                                <th rowspan="2">No.</th>
-                                <th rowspan="2">@Languages.Tinhtrangdon</th>
-                                <th rowspan="2">@Languages.Trangthaidon</th>
-                                <th rowspan="2">@Languages.mayeucau</th>
-                                <th rowspan="2">Cost Center</th>
-                                <th rowspan="2">@Languages.Ngayyeucau</th>
-                                <th rowspan="2">@Languages.thoihanmuonnhan</th>
-                                <th rowspan="2">@Languages.tongtien</th>
-                                <th rowspan="2">@Languages.nguoitao</th>
-                                <th colspan="3">@Languages.phongbanyeucau</th>
-                                <th colspan="3">@Languages.phongtiepnhan</th>
-                            </tr>
-                            <tr>
-                                <th>@Languages.nguoiduthao</th>
-                                <th>@Languages.nguoithamtra</th>
-                                <th>@Languages.nguoipheduyet</th>
-                                <th>@Languages.Damnhiem</th>
-                                <th>@Languages.dongyboi QLSC</th>
-                                <th>@Languages.dongyboi QLTC</th>
-                            </tr>
-                        </thead>
-                        <tbody id="list_approve"></tbody>
-                    </table>
+                <div style=" border: 1px solid #dee2e6;">
+                    <div class="main-table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="bg-primary ">
+                                <tr class="header-row-1 bg-primary">
+                                    <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" id="idd" /></th>
+                                    <th rowspan="2">@Languages.chitiet</th>
+                                    <th rowspan="2">No.</th>
+                                    <th rowspan="2">@Languages.Tinhtrangdon</th>
+                                    <th rowspan="2">@Languages.Trangthaidon</th>
+                                    <th rowspan="2">@Languages.mayeucau</th>
+                                    <th rowspan="2">Cost Center</th>
+                                    <th rowspan="2">@Languages.Ngayyeucau</th>
+                                    <th rowspan="2">@Languages.thoihanmuonnhan</th>
+                                    <th rowspan="2">@Languages.tongtien</th>
+                                    <th rowspan="2">@Languages.loaitien</th>
+                                    <th rowspan="2">@Languages.nguoitao</th>
+                                    <th colspan="3">@Languages.phongbanyeucau</th>
+                                    <th colspan="3">@Languages.phongtiepnhan</th>
+                                </tr>
+                                <tr class="header-row-2 bg-primary">
+                                    <th>@Languages.nguoiduthao</th>
+                                    <th>@Languages.nguoithamtra</th>
+                                    <th>@Languages.nguoipheduyet</th>
+                                    <th>@Languages.Damnhiem</th>
+                                    <th>@Languages.dongyboi QLSC</th>
+                                    <th>@Languages.dongyboi QLTC</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="list_approve"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -339,10 +384,24 @@
                     for (var a = 0; a < response.length; a++) {
                         var tongtien = response[a].total_exchange;
                         // Sửa lỗi: Đã bọc các cột td vào trong cặp thẻ tr
-                        document.getElementById("load_detail" + i).innerHTML += `<tr><td>${a + 1}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td class="text-right">${response[a].amount.toLocaleString('en-US')}</td><td>${response[a].unit}</td><td class="text-right">${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td class="text-right">${tongtien.toLocaleString('en-US')}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td></tr>`;
+                            document.getElementById("load_detail" + i).innerHTML += `<tr>
+                              <td>${a + 1}</td>
+                              <td>${response[a].material_Code}</td>
+                              <td>${response[a].material_Name}</td>
+                              <td>${response[a].unit}</td>
+                              <td>${response[a].account_Code}</td>
+                              <td>${response[a].account_Name}</td>
+                              <td class="text-right">${response[a].amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                              <td>${response[a].unit}</td>
+                              <td class="text-right">${response[a].price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                              <td>${response[a].currency}</td>
+                              <td class="text-right">${tongtien.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>                            
+                              <td>${response[a].aim}</td>
+                              <td>${response[a].poisition}</td>
+                            </tr>`;
                         tongdon += parseFloat(tongtien);
                     }
-                    document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US');
+                    document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 }
             });
             ajaxPromises.push(ajaxRequest);
@@ -391,4 +450,26 @@
             thongBao.style.display = 'none';
         }, 3000);
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var swiper = new Swiper(".mySwiper", {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            mousewheel: false,
+
+            // Cấu hình lại phần keyboard tại đây
+            keyboard: {
+                enabled: true,
+                pageUpDown: true, // Bắt buộc phải có dòng này để dùng PgUp/PgDn
+            },
+        });
+    });
 </script>

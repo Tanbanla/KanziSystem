@@ -153,7 +153,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         wsMaterial.Cells[i + 2, 6].Value = DataListMaterial[i].Group_Code;
                         wsMaterial.Cells[i + 2, 7].Value = DataListMaterial[i].Kho;
                         wsMaterial.Cells[i + 2, 8].Value = DataListMaterial[i].DTM_UPDATE;
-
                     }
                     package.Save();
                 }
@@ -459,7 +458,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             else
             {
-                 get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM_GA] where ID_REQUEST = '" + get_id + "' and ( INT_STEP >= 3 and INT_STEP <= 5  OR INT_STEP = 11) ");
+                 get_adid = sql.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM_GA] where ID_REQUEST = '" + get_id + "' and ((INT_STEP >= 3 and INT_STEP <= 5)  OR INT_STEP = 11) ");
                  if(get_adid.Rows.Count > 0)
                  {
                     nguoitao = get_adid.Rows[0]["CHR_ADID_NGUOITAO"].ToString()! + " \n " + checklist.Rows[0]["Create_Date"].ToString()!.Split(' ')[0];
@@ -522,11 +521,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cells["K" + currentRow].Value = firstLoad.Group_Code!.Contains("GA") ? "VND" : "USD";
                         ws.Cells["L" + currentRow].Formula = (item.Amount * item.Price).ToString();
                         ws.Cells["M" + currentRow].Value = item.Aim;
+                        ws.Cells["O" + kiten].Value = item.Poisition ;
                     }
-
-                    int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng                                       
-                    ws.Cells["L" + (totalRow)].Formula = $"=SUM(L{startRow}:L{totalRow - 1})";
-                    ws.Calculate();
+                    if(totalItems > 12)
+                    {
+                        int totalRow = startRow + totalItems; // Dòng ngay sau dòng dữ liệu cuối cùng                                       
+                        ws.Cells["L" + (totalRow)].Formula = $"=SUM(L{startRow}:L{totalRow - 1})";
+                    }
+                    else
+                    {
+                        ws.Cells["L21"].Formula = $"=SUM(L9:L20)";
+                    }
+                        ws.Calculate();
 
                     ws.Cells["O5"].Value = nguoitao;
                     ws.Cells["K5"].Value = qltc;
@@ -541,7 +547,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         ws.Cells["M5"].Value = nguoilamdon;                           
                     }
-
+                  
                     // Tính toán lại toàn bộ công thức trong sheet trước khi lưu
                     ws.Calculate();
                     package.Save();
@@ -559,7 +565,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest($"Lỗi xử lý: {ex.Message}");
             }
-
         }
         [HttpPost]
         public JsonResult chuyenkho(string malinhkien, string soluonghientai, string khochuyen, string khonhan, string vitri, string soluongchuyen, string ngaychuyen, string us)
@@ -729,6 +734,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             sql.GET_DATA_FROM_SQL("INSERT INTO [KHO_NHAPXUAT]([MaNguyenLieu],[Hanhdong],[Soluong],[Loai],[Thoigian],[Nguoicapnhat],[Kho],[Khoi],[TenNguyenlieu],[Donvi],[MaNguoinhap],[Gia],[Ngaynhaokho],[Soluongtruocthaydoi],[Soluongsauthaydoi]) VALUES(N'" + request.MaNguyenLieu.Trim().ToUpper() + "',N'Nhập hàng đặc biệt vào kho " + request.Kho + ", Ghi chú: " + request.GhiChu + "','" + Convert.ToDouble(request.Soluong.ToString()!.Trim()) + "','NHAP','" + request.NgayNhapKho.ToString("MM/dd/yyyy HH:mm:ss") + "','" + request.us + "','" + request.Kho + "','" + request.Khoi + "',N'" + Nguyenlieu.Rows[0]["Material_Name_JP"].ToString()!.Trim() + "',N'" + Nguyenlieu.Rows[0]["Unit"].ToString()!.Trim() + "','" + Manhanvien + "','0','" + request.NgayNhapKho.ToString("MM/dd/yyyy HH:mm:ss") + "','" + SoluongTruocthaydoi + "','" + (Convert.ToDouble(request.Soluong.ToString()!.Trim()) + SoluongTruocthaydoi) + "')");
 
             return Json("OK");
+        }
+
+        public ActionResult SuDungLai(string iD_REQUEST)
+        {
+            var model = GetListRequestDetail(iD_REQUEST); // Danh sách chi tiết (IEnumerable)
+            ViewBag.MasterData = iD_REQUEST;      // Thông tin tổng quát đơn hàng
+            return View(model);
         }
     }
     public class NhapKhoRequest

@@ -5,6 +5,19 @@
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
     <link rel="stylesheet" href="~/css/supplierMana.css" />
+    <style>
+        /* Ensure custom dialog overlays appear above Bootstrap modals */
+        .cm-dialog-overlay, #cmConfirmDialog {
+            z-index: 2100 !important;
+            position: fixed;
+        }
+        .cm-dialog-backdrop {
+            z-index: 2099 !important;
+        }
+        .cm-dialog {
+            z-index: 2101 !important;
+        }
+    </style>
 </head>
 <div class="container-fluid py-3">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -176,11 +189,11 @@
         </div>
     </div>
 </div>
-<!-- Dialogs máº·t hÃ ng nhÃ  cung cáº¥p -->
+<!-- Dialogs -->
 <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header">  
                 <div class="d-flex align-items-center w-100 justify-content-between">
                     <div>
                         <h6 class="modal-title">@Localizer["SupplierItemsTitle"]</h6>
@@ -193,16 +206,17 @@
                     </div>
                 </div>
             </div>
-            @* style="max-height:300px;overflow:auto;" *@
             <div class="modal-body">
                 <div style="margin-bottom: 12px;">
                     <button type="button" class="btn btn-outline-success btn-sm" id="btnImportItemsExcel"><i class="fas fa-file-excel"></i> @Localizer["ImportExcel"]</button>
                     <input type="file" id="itemsExcelFileInput" accept=".xlsx,.xls" style="display:none" />
                     <button type="button" class="btn btn-outline-primary btn-sm" id="btnExportTemplateExcel"><i class="fas fa-download"></i> @Localizer["TemplateFile"]</button>
+
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnExportTableExcel"><i class="fas fa-download"></i> Xuất dữ liệu bảng</button>
                 </div>
                 <div class="row g-3">
                     <div class="col-12">
-                        <div class="table-responsive border rounded" >
+                        <div class="table-wrapper">
                             <table class="table table-sm table-hover table-bordered align-middle" id="supplierItemsTable" style="max-height:300px;overflow:auto;">
                                 <thead class="table-light">
                                     <tr class="text-center align-middle">
@@ -267,6 +281,14 @@
             var panel1 = document.getElementById('itemModal');
             if (panel1 && panel1.parentElement !== document.body) {
                 document.body.appendChild(panel1);
+            }
+            var overlay = document.getElementById('cmDialogOverlay');
+            if (overlay && overlay.parentElement !== document.body) {
+                document.body.appendChild(overlay);
+            }
+            var confirm = document.getElementById('cmConfirmDialog');
+            if (confirm && confirm.parentElement !== document.body) {
+                document.body.appendChild(confirm);
             }
         })();
     </script>

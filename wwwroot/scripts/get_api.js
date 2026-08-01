@@ -1,3 +1,40 @@
+const CONFIG = (() => {
+    const API_BASE = 'http://172.26.248.62:8507';
+
+    return {
+        API_BASE,
+        ROUTES: {
+            // External API (absolute)
+            employeeByAdid: (adid) => `${API_BASE}/api/Employee/by-adid/${adid}`,
+            employeeSearch: `${API_BASE}/api/Employee/search-by-condition`,
+
+            // Internal (Razor Pages / Controllers) - relative paths
+            layPhongBan: '/ipcs/Request/_layphongban',
+            loadUserInventory: '/ipcs/Import/_load_userinventory',
+            getIdUser: '/ipcs/Import/_getid_user',
+            loadUQ: '/ipcs/User/Load_UQ'
+        }
+    };
+})();
+
+//const CONFIG = (() => {
+//    const API_BASE = 'http://172.26.248.62:8507/api';
+
+//    return {
+//        API_BASE,
+//        ROUTES: {
+//            // External API (absolute)
+//            employeeByAdid: (adid) => `${API_BASE}/Employee/by-adid/${adid}`,
+//            employeeSearch: `${API_BASE}/Employee/search-by-condition`,
+
+//            // Internal (Razor Pages / Controllers) - relative paths
+//            layPhongBan: '/Request/_layphongban',
+//            loadUserInventory: '/Import/_load_userinventory',
+//            getIdUser: '/Import/_getid_user',
+//            loadUQ: '/User/Load_UQ'
+//        }
+//    };
+//})();
 
 let phongban = "";
 let centercode = "";
@@ -11,10 +48,13 @@ async function getEmployeeData() {
    
      if (ph == "") {
          alert("Chưa chọn phòng");
-     }
+    }
+    if (!kiemTraViTriKhopNhau()) {
+     
+    }
     const formData = new URLSearchParams();
     formData.append('ph', ph);
-     fetch('/ipcs/Request/_layphongban', {
+     fetch(CONFIG.ROUTES.layPhongBan, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -31,7 +71,7 @@ async function getEmployeeData() {
     let us = document.getElementById("us").innerHTML;
 
     const employeeId = us.trim();
-    const url = `http://172.26.248.62:8507/api/Employee/by-adid/${employeeId}`;
+    const url = CONFIG.ROUTES.employeeByAdid(employeeId);
 
     try {
         const response = await fetch(url);
@@ -87,7 +127,7 @@ async function get_block() {
     const params = new URLSearchParams();
     params.append('group_code', group_code);
 
-    fetch('/ipcs/Import/_load_userinventory', {
+    fetch(CONFIG.ROUTES.loadUserInventory, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
@@ -133,7 +173,7 @@ async function get_useriv(id) {
     const params = new URLSearchParams();
     params.append('id', id.split('_')[0]);
 
-    fetch('/ipcs/Import/_getid_user', {
+    fetch(CONFIG.ROUTES.getIdUser, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
@@ -166,7 +206,7 @@ const createSearchData = (position) => ({
 });
 // Hàm gọi API và gán vào Combobox
 async function loadToCombo(position, comboId) {
-    const response = await fetch('http://172.26.248.62:8507/api/Employee/search-by-condition', {
+    const response = await fetch(CONFIG.ROUTES.employeeSearch, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createSearchData(position))
@@ -189,7 +229,7 @@ async function loadToCombo(position, comboId) {
             const params = new URLSearchParams();
             params.append('adid', usUQ);
 
-            const rsUQ = await fetch('/ipcs/User/Load_UQ', {
+            const rsUQ = await fetch(CONFIG.ROUTES.loadUQ, {
                 method: 'POST',
                 body: params
             });
@@ -221,7 +261,7 @@ const createSearchData_GD = (position) => ({
 }); 
 // Hàm gọi API và gán vào Combobox
 async function loadToCombo_GD(position, comboId) {
-    const response = await fetch('http://172.26.248.62:8507/api/Employee/search-by-condition', {
+    const response = await fetch(CONFIG.ROUTES.employeeSearch, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createSearchData_GD(position))
@@ -235,7 +275,7 @@ async function loadToCombo_GD(position, comboId) {
         const params = new URLSearchParams();
         params.append('adid', usUQ);
 
-        const rsUQ = await fetch('/ipcs/User/Load_UQ', {
+        const rsUQ = await fetch(CONFIG.ROUTES.loadUQ, {
             method: 'POST',
             body: params
         });
@@ -261,7 +301,7 @@ const createSearchData_TBP = (position) => ({
 });
 // Hàm gọi API và gán vào Combobox
 async function loadToCombo_TBP(position, comboId) {
-    const response = await fetch('http://172.26.248.62:8507/api/Employee/search-by-condition', {
+    const response = await fetch(CONFIG.ROUTES.employeeSearch, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createSearchData_TBP(position))
@@ -276,7 +316,7 @@ async function loadToCombo_TBP(position, comboId) {
         const params = new URLSearchParams();
         params.append('adid', usUQ);
 
-        const rsUQ = await fetch('/ipcs/User/Load_UQ', {
+        const rsUQ = await fetch(CONFIG.ROUTES.loadUQ, {
             method: 'POST',
             body: params
         });
@@ -290,7 +330,7 @@ async function loadToCombo_TBP(position, comboId) {
 }
 // lấy mail theo ADID
  async function get_info(us, comboId) {
-    const url = `http://172.26.248.62:8507/api/Employee/by-adid/${us}`;
+    const url = CONFIG.ROUTES.employeeByAdid(us);
 
     try {
         const response = await fetch(url);
@@ -309,7 +349,7 @@ async function loadToCombo_TBP(position, comboId) {
 }
 
  async function GA_get_info(us, comboId) {
-    const url = `http://172.26.248.62:8507/api/Employee/by-adid/${us}`;
+    const url = CONFIG.ROUTES.employeeByAdid(us);
 
     try {
         const response = await fetch(url);
@@ -332,7 +372,7 @@ async function loadToCombo_TBP(position, comboId) {
     const params = new URLSearchParams();
     params.append('id', id.split('_')[0]);
 
-     fetch('/ipcs/Import/_getid_user', {
+     fetch(CONFIG.ROUTES.getIdUser, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params

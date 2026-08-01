@@ -111,7 +111,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(historyByMaterial.Message);
             }
-
+            var stepByRole = GetRolesUser() == "UserPUR" ? 8 : 12;
 
             try
             {
@@ -345,9 +345,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         GetStatusName(rq.ID_Status),
                         GetStepName(rq.ID_StepBaoGia),
                         GetReason(rq.ID, rq.ID_Status),
-                        selectMark,
-                        rq.NVCHR_ReasonPick ?? string.Empty,
-                        rq.NVCHR_File ?? string.Empty
+                        rq.ID_StepBaoGia > stepByRole ? selectMark : string.Empty,
+                        rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
+                        rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_File ?? string.Empty : string.Empty
                     });
                 }
 
@@ -484,33 +484,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         continue;
                     }
                     dto.CHR_MaDon = maDon;
-                    dto.CHR_SectionCode = ws.Cell(i, 4).GetString();
-                    dto.CHR_SectionName = ws.Cell(i, 5).GetString();
-                    dto.CHR_Phanloai = ws.Cell(i, 6).GetString();
-                    dto.CHR_MaThietBi = ws.Cell(i, 7).GetString();
-                    dto.CHR_MaHangNoiBo = ws.Cell(i, 8).GetString();
-                    dto.CHR_MaHangNCC = ws.Cell(i, 9).GetString();
-                    dto.NVCHR_NameVN = ws.Cell(i, 10).GetString();
-                    dto.CHR_NameEN = ws.Cell(i, 11).GetString();
+                    dto.CHR_SectionCode = ws.Cell(i, 4).GetString() ?? string.Empty;
+                    dto.CHR_SectionName = ws.Cell(i, 5).GetString() ?? string.Empty;
+                    dto.CHR_Phanloai = ws.Cell(i, 6).GetString() ?? string.Empty;
+                    dto.CHR_MaThietBi = ws.Cell(i, 7).GetString() ?? string.Empty;
+                    dto.CHR_MaHangNoiBo = ws.Cell(i, 8).GetString() ?? "";
+                    dto.CHR_MaHangNCC = ws.Cell(i, 9).GetString() ?? string.Empty;
+                    dto.NVCHR_NameVN = ws.Cell(i, 10).GetString() ?? string.Empty;
+                    dto.CHR_NameEN = ws.Cell(i, 11).GetString() ?? string.Empty;
                     dto.INT_SoLuong = ConvertHelper.ParseDouble(ws.Cell(i, 12).GetString());
-                    dto.NVCHR_DonVi = ws.Cell(i, 13).GetString();
-                    dto.NVCHR_ChungLoai = ws.Cell(i, 14).GetString();
-                    dto.NVCHR_HinhDang = ws.Cell(i, 15).GetString();
-                    dto.NVCHR_ChatLieu = ws.Cell(i, 16).GetString();
-                    dto.NVCHR_ThanhPhan = ws.Cell(i, 17).GetString();
-                    dto.NVCHR_KichThuoc = ws.Cell(i, 18).GetString();
-                    dto.NVCHR_DongMay = ws.Cell(i, 19).GetString();
-                    dto.NVCHR_TinhNang = ws.Cell(i, 20).GetString();
-                    dto.NVCHR_Rohs = ws.Cell(i, 21).GetString();
-                    dto.NVCHR_COCQ = ws.Cell(i, 22).GetString();
-                    dto.NVCHR_MSDS = ws.Cell(i, 23).GetString();
-                    dto.NVCHR_AnToan = ws.Cell(i, 24).GetString();
-                    dto.NVCHR_FileThietKe = ws.Cell(i, 25).GetString();
-                    dto.NVCHR_NhaSanXuat = ws.Cell(i, 26).GetString();
-                    dto.CHR_MaNCC = ws.Cell(i, 27).GetString();
-                    dto.NVCHR_TenNCC = ws.Cell(i, 28).GetString();
+                    dto.NVCHR_DonVi = ws.Cell(i, 13).GetString() ?? string.Empty;
+                    dto.NVCHR_ChungLoai = ws.Cell(i, 14).GetString() ?? string.Empty;
+                    dto.NVCHR_HinhDang = ws.Cell(i, 15).GetString() ?? string.Empty;
+                    dto.NVCHR_ChatLieu = ws.Cell(i, 16).GetString() ?? string.Empty ;
+                    dto.NVCHR_ThanhPhan = ws.Cell(i, 17).GetString() ?? string.Empty;
+                    dto.NVCHR_KichThuoc = ws.Cell(i, 18).GetString() ?? string.Empty;
+                    dto.NVCHR_DongMay = ws.Cell(i, 19).GetString() ?? string.Empty;
+                    dto.NVCHR_TinhNang = ws.Cell(i, 20).GetString() ?? string.Empty;
+                    dto.NVCHR_Rohs = ws.Cell(i, 21).GetString() ?? string.Empty;
+                    dto.NVCHR_COCQ = ws.Cell(i, 22).GetString() ?? string.Empty;
+                    dto.NVCHR_MSDS = ws.Cell(i, 23).GetString() ?? string.Empty;
+                    dto.NVCHR_AnToan = ws.Cell(i, 24).GetString() ?? string.Empty;
+                    dto.NVCHR_FileThietKe = ws.Cell(i, 25).GetString() ?? string.Empty;
+                    dto.NVCHR_NhaSanXuat = ws.Cell(i, 26).GetString() ?? string.Empty;
+                    dto.CHR_MaNCC = ws.Cell(i, 27).GetString() ?? string.Empty;
+                    dto.NVCHR_TenNCC = ws.Cell(i, 28).GetString() ?? string.Empty;
                     dto.BIT_LayBaoGia = ConvertHelper.ParseBool(ws.Cell(i, 29).GetString());
-                    dto.NVCHR_LyDo = ws.Cell(i, 30).GetString();
+                    dto.NVCHR_LyDo = ws.Cell(i, 30).GetString() ?? string.Empty;
                     dto.DTM_NgayMuonNhan = ConvertHelper.ParseDate(ws.Cell(i, 31).GetString());
                     dto.DTM_KyHan = ConvertHelper.ParseDate(ws.Cell(i, 32).GetString());
                     dto.CHR_Gap = ws.Cell(i, 33).GetString() == "X" ? "false" : "true";
@@ -988,7 +988,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     searchModel.TrangThai,
                     GetCurrentUserId(),
                     -1,
-                    -1, 
+                    -1,
                     searchModel.to,
                     searchModel.from,
                     searchModel.ChungLoai
@@ -997,6 +997,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest(result.Message);
                 }
+
+                var stepByRole = GetRolesUser() == "UserPUR" ? 8 : 12;
 
                 var rows = result.Data?.Data?.ToList() ?? new List<dynamic>();
 
@@ -1058,11 +1060,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return null;
                 }
 
-                static bool GetBool(IDictionary<string, object?> item, params string[] keys)
+                static bool? GetBool(IDictionary<string, object?> item, params string[] keys)
                 {
                     foreach (var key in keys)
                     {
-                        if (!item.TryGetValue(key, out var value) || value == null) continue;
+                        if (!item.TryGetValue(key, out var value)) continue;
+
+                        if (value == null) return null;
 
                         try
                         {
@@ -1091,16 +1095,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     string? userNext,
                     int cellStep,
                     int currentStep)
-                    {
+                {
 
-                    if (!string.IsNullOrWhiteSpace(approver))
+                    if (cellStep < currentStep)
                     {
-                        return approvedAt.HasValue
-                            ? $"{approver}\n{approvedAt.Value:dd/MM/yyyy HH:mm}"
-                            : approver;
-                    }
-
-                    if (cellStep == currentStep + 1)
+                        if (!string.IsNullOrWhiteSpace(approver))
+                        {
+                            return approvedAt.HasValue
+                                ? $"{approver}\n{approvedAt.Value:dd/MM/yyyy HH:mm}"
+                                : approver;
+                        }
+                    }else if (cellStep == currentStep)
                     {
                         return string.IsNullOrWhiteSpace(userNext) ? string.Empty : userNext;
                     }
@@ -1113,7 +1118,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var workbook = new XLWorkbook();
                 var ws = workbook.Worksheets.Add("History");
 
-                const int totalColumns = 24;
+                const int totalColumns = 22;
                 const int headerRow1 = 1;
                 const int headerRow2 = 2;
                 const int dataStartRow = 3;
@@ -1143,39 +1148,34 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 ws.Cell(headerRow1, 8).Value = L("Supplier3", "Supplier 3");
                 ws.Cell(headerRow1, 9).Value = L("Supplier4", "Supplier 4");
                 ws.Cell(headerRow1, 10).Value = L("Supplier5", "Supplier 5");
-                ws.Cell(headerRow1, 11).Value = L("SelectionDeadline", "Selection deadline");
-                ws.Cell(headerRow1, 12).Value = L("RequesterUser", "Requester user");
+                ws.Cell(headerRow1, 11).Value = L("ReasonForSupplierSelection", "Reason for supplier selection");
+                ws.Cell(headerRow1, 12).Value = L("SelectionDeadline", "Selection deadline");
+                ws.Cell(headerRow1, 13).Value = L("RequesterUser", "Requester user");
 
-                ws.Range(headerRow1, 13, headerRow1, 16).Merge().Value = L("ApprovalOrderGroup", "Approval order");
-                ws.Range(headerRow1, 17, headerRow1, 20).Merge().Value = L("ApprovalSupplierGroup", "Approval supplier");
-                ws.Range(headerRow1, 21, headerRow1, 23).Merge().Value = L("ResultSupplierGroup", "Result supplier");
-                ws.Cell(headerRow1, 24).Value = L("Status", "Status");
+                ws.Range(headerRow1, 14, headerRow1, 17).Merge().Value = L("ApprovalOrderGroup", "Approval order");
+                ws.Range(headerRow1, 18, headerRow1, 21).Merge().Value = L("ApprovalSupplierGroup", "Approval supplier");
+                ws.Cell(headerRow1, 22).Value = L("Status", "Status");
 
-                ws.Cell(headerRow2, 13).Value = "QLSC";
-                ws.Cell(headerRow2, 14).Value = "QLTC";
-                ws.Cell(headerRow2, 15).Value = "PUR PIC";
-                ws.Cell(headerRow2, 16).Value = "PUR QLSC";
+                ws.Cell(headerRow2, 14).Value = "QLSC";
+                ws.Cell(headerRow2, 15).Value = "QLTC";
+                ws.Cell(headerRow2, 16).Value = "PUR PIC";
+                ws.Cell(headerRow2, 17).Value = "PUR QLSC";
 
-                ws.Cell(headerRow2, 17).Value = "PUR PIC";
-                ws.Cell(headerRow2, 18).Value = "QLSC";
-                ws.Cell(headerRow2, 19).Value = "QLTC";
-                ws.Cell(headerRow2, 20).Value = "QLCC";
+                ws.Cell(headerRow2, 18).Value = "PUR PIC";
+                ws.Cell(headerRow2, 19).Value = "QLSC";
+                ws.Cell(headerRow2, 20).Value = "QLTC";
+                ws.Cell(headerRow2, 21).Value = "QLCC";
 
-                ws.Cell(headerRow2, 21).Value = L("SelectedSupplier", "Selected supplier");
-                ws.Cell(headerRow2, 22).Value = L("SelectedSupplierReason", "Selected supplier reason");
-                ws.Cell(headerRow2, 23).Value = L("QuotationLink", "Quotation link");
-
-                for (var col = 1; col <= 12; col++)
+                for (var col = 1; col <= 13; col++)
                 {
                     ws.Range(headerRow1, col, headerRow2, col).Merge();
                 }
-                ws.Range(headerRow1, 24, headerRow2, 24).Merge();
+                ws.Range(headerRow1, 22, headerRow2, 22).Merge();
 
-                ws.Range(headerRow1, 1, headerRow2, 12).Style.Fill.BackgroundColor = baseHeaderColor;
-                ws.Range(headerRow1, 13, headerRow2, 16).Style.Fill.BackgroundColor = group1Color;
-                ws.Range(headerRow1, 17, headerRow2, 20).Style.Fill.BackgroundColor = group2Color;
-                ws.Range(headerRow1, 21, headerRow2, 23).Style.Fill.BackgroundColor = group3Color;
-                ws.Range(headerRow1, 24, headerRow2, 24).Style.Fill.BackgroundColor = group4Color;
+                ws.Range(headerRow1, 1, headerRow2, 13).Style.Fill.BackgroundColor = baseHeaderColor;
+                ws.Range(headerRow1, 14, headerRow2, 17).Style.Fill.BackgroundColor = group1Color;
+                ws.Range(headerRow1, 18, headerRow2, 21).Style.Fill.BackgroundColor = group2Color;
+                ws.Range(headerRow1, 22, headerRow2, 22).Style.Fill.BackgroundColor = group4Color;
 
                 var headerRange = ws.Range(headerRow1, 1, headerRow2, totalColumns);
                 headerRange.Style.Font.Bold = true;
@@ -1195,11 +1195,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var supplier4 = GetString(item, "NCC_4");
                     var supplier5 = GetString(item, "NCC_5");
 
-                    var bitNcc1 = GetBool(item, "BitNCC_1", "bitNCC_1");
-                    var bitNcc2 = GetBool(item, "BitNCC_2", "bitNCC_2");
-                    var bitNcc3 = GetBool(item, "BitNCC_3", "bitNCC_3");
-                    var bitNcc4 = GetBool(item, "BitNCC_4", "bitNCC_4");
-                    var bitNcc5 = GetBool(item, "BitNCC_5", "bitNCC_5");
+                    var bitNcc1 = GetBool(item, "BitNCC_1");
+                    var bitNcc2 = GetBool(item, "BitNCC_2");
+                    var bitNcc3 = GetBool(item, "BitNCC_3");
+                    var bitNcc4 = GetBool(item, "BitNCC_4");
+                    var bitNcc5 = GetBool(item, "BitNCC_5");
 
                     var status1 = GetString(item, "Status_1");
                     var status2 = GetString(item, "Status_2");
@@ -1228,7 +1228,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         supplier5
                     }.Count(s => !string.IsNullOrWhiteSpace(s));
 
-
+                    var isAllRefuse = countSL == allRefuse;
                     ws.Cell(excelRow, 1).Value = i + 1;
                     ws.Cell(excelRow, 2).Value = GetString(item, "CHR_MaDon");
                     ws.Cell(excelRow, 3).Value = GetString(item, "CHR_MaHangNoiBo");
@@ -1239,19 +1239,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var isOverdue = deadline.HasValue && deadline.Value.Date < DateTime.Today;
 
                     var step = GetInt(item, "Step", "INT_Step");
+                    var selectedSupplier = GetString(item, "NCC_DuocChon");
+
                     void ApplySupplierStyle(int col, string supplierText, object bitValue, string statusText)
                     {
                         var cell = ws.Cell(excelRow, col);
                         cell.Value = supplierText ?? "";
 
-                        if (step < 7)
+                        if (step < 5 || bitValue == null)
                         {
                             cell.Style.Fill.BackgroundColor = XLColor.White;
                             return;
                         }
 
                         // RULE 1: ALL REFUSE -> đỏ
-                        if (allRefuse == countSL)
+                        if (isAllRefuse)
                         {
                             cell.Style.Fill.BackgroundColor = overdueColor;
                             cell.Style.Font.FontColor = XLColor.White;
@@ -1281,6 +1283,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             cell.Style.Fill.BackgroundColor = XLColor.White;
                         }
+
+                        var isPickedSupplier =
+                            step > stepByRole
+                            && !string.IsNullOrWhiteSpace(selectedSupplier)
+                            && !string.IsNullOrWhiteSpace(supplierText)
+                            && string.Equals(supplierText.Trim(), selectedSupplier.Trim(), StringComparison.OrdinalIgnoreCase);
+
+                        if (isPickedSupplier)
+                        {
+                            cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#CFE2FF");
+                            cell.Style.Font.FontColor = XLColor.FromHtml("#0D6EFD");
+                        }
                     }
                     ApplySupplierStyle(6, supplier1, bitNcc1, status1);
                     ApplySupplierStyle(7, supplier2, bitNcc2, status2);
@@ -1288,69 +1302,62 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ApplySupplierStyle(9, supplier4, bitNcc4, status4);
                     ApplySupplierStyle(10, supplier5, bitNcc5, status5);
 
+                    ws.Cell(excelRow, 11).Value = GetString(item, "NVCHR_ReasonPick");
+
                     if (deadline.HasValue)
                     {
-                        ws.Cell(excelRow, 11).Value = deadline.Value;
-                        ws.Cell(excelRow, 11).Style.DateFormat.Format = "dd/MM/yyyy";
+                        ws.Cell(excelRow, 12).Value = deadline.Value;
+                        ws.Cell(excelRow, 12).Style.DateFormat.Format = "dd/MM/yyyy";
                         if (isOverdue)
                         {
-                            ws.Cell(excelRow, 11).Style.Fill.BackgroundColor = overdueColor;
-                            ws.Cell(excelRow, 11).Style.Font.FontColor = XLColor.White;
+                            ws.Cell(excelRow, 12).Style.Fill.BackgroundColor = overdueColor;
+                            ws.Cell(excelRow, 12).Style.Font.FontColor = XLColor.White;
                         }
                     }
 
-                    ws.Cell(excelRow, 12).Value = GetString(item, "CHR_CreateBy");
+                    ws.Cell(excelRow, 13).Value = GetString(item, "CHR_CreateBy");
 
-                    var approvalValues = new[]
+                    var approvals = new[]
                     {
-                        BuildApprovalText(GetString(item, "QLSC_Approve"), GetDateTime(item, "QLSC_Time"), GetString(item, "UserNext"),3,step),
-                        BuildApprovalText(GetString(item, "QLTC_Approve"), GetDateTime(item, "QLTC_Time"), GetString(item, "UserNext"),4,step),
-                        BuildApprovalText(GetString(item, "PIC_Approve"), GetDateTime(item, "PIC_Time"), GetString(item, "UserNext"),5,step),
-                        BuildApprovalText(GetString(item, "QLSC1_Approve"), GetDateTime(item, "QLSC1_Time"), GetString(item, "UserNext"),6,step),
-                        BuildApprovalText(GetString(item, "PIC_PickNCC"), GetDateTime(item, "PIC_PickNCC_Time"), GetString(item, "UserNext"),7,step),
-                        BuildApprovalText(GetString(item, "QLSC_PickNCC"), GetDateTime(item, "QLSC_PickNCC_Time"), GetString(item, "UserNext"),10,step),
-                        BuildApprovalText(GetString(item, "QLTC_PickNCC"), GetDateTime(item, "QLTC_PickNCC_Time"), GetString(item, "UserNext"),11,step),
-                        BuildApprovalText(GetString(item, "DEFT_PickNCC"), GetDateTime(item, "DEFT_PickNCC_Time"), GetString(item, "UserNext"),12,step)
+                        new { Approver = GetString(item, "QLSC_Approve"),      Time = GetDateTime(item, "QLSC_Time"),          Step = 2 },
+                        new { Approver = GetString(item, "QLTC_Approve"),      Time = GetDateTime(item, "QLTC_Time"),          Step = 3 },
+                        new { Approver = GetString(item, "PIC_Approve"),       Time = GetDateTime(item, "PIC_Time"),           Step = 4 },
+                        new { Approver = GetString(item, "QLSC1_Approve"),     Time = GetDateTime(item, "QLSC1_Time"),         Step = 5 },
+                        new { Approver = GetString(item, "PIC_PickNCC"),       Time = GetDateTime(item, "PIC_PickNCC_Time"),   Step = 7 },
+                        new { Approver = GetString(item, "QLSC_PickNCC"),      Time = GetDateTime(item, "QLSC_PickNCC_Time"),  Step = 9 },
+                        new { Approver = GetString(item, "QLTC_PickNCC"),      Time = GetDateTime(item, "QLTC_PickNCC_Time"),  Step = 10 },
+                        new { Approver = GetString(item, "DEFT_PickNCC"),      Time = GetDateTime(item, "DEFT_PickNCC_Time"),  Step = 11 }
                     };
 
-                    for (var offset = 0; offset < approvalValues.Length; offset++)
+                    for (var offset = 0; offset < approvals.Length; offset++)
                     {
-                        var col = 13 + offset;
-                        var cellValue = approvalValues[offset];
+                        var approval = approvals[offset];
+                        var col = 14 + offset;
+
+                        var cellValue = BuildApprovalText(
+                            approval.Approver,
+                            approval.Time,
+                            GetString(item, "UserNext"),
+                            approval.Step,
+                            step);
 
                         ws.Cell(excelRow, col).Value = cellValue;
 
-                        // Lấy lại approver tương ứng để biết đã duyệt hay chưa
-                        var isApproved = !string.IsNullOrWhiteSpace(new[]
-                        {
-                            GetString(item, "QLSC_Approve"),
-                            GetString(item, "QLTC_Approve"),
-                            GetString(item, "PIC_Approve"),
-                            GetString(item, "QLSC1_Approve"),
-                            GetString(item, "PIC_PickNCC"),
-                            GetString(item, "QLSC_PickNCC"),
-                            GetString(item, "QLTC_PickNCC"),
-                            GetString(item, "DEFT_PickNCC")
-                        }[offset]);
-
-                        if (isApproved)
+                        if (approval.Step < step &&
+                            !string.IsNullOrWhiteSpace(approval.Approver))
                         {
                             ws.Cell(excelRow, col).Style.Fill.BackgroundColor = group3Color;
                         }
                     }
 
-                    ws.Cell(excelRow, 21).Value = GetString(item, "NCC_DuocChon");
-                    ws.Cell(excelRow, 22).Value = GetString(item, "NVCHR_ReasonPick");
-                    ws.Cell(excelRow, 23).Value = GetString(item, "NVCHR_File");
-
                     var statusText = currentLang switch
                     {
-                        "en" => GetString(item, "CHR_StepNameEN", "CHR_StepName"),
-                        "ja" => GetString(item, "CHR_StepNameJP", "CHR_StepName"),
-                        _ => GetString(item, "CHR_StepName")
+                        "en" => isAllRefuse ? "All suppliers refused to provide a quote." : GetString(item, "CHR_StepNameEN", "CHR_StepName"),
+                        "ja" => isAllRefuse ? "すべてのサプライヤーが見積もり提供を拒否した。" : GetString(item, "CHR_StepNameJP", "CHR_StepName"),
+                        _ => isAllRefuse ? "Toàn bộ các NCC đã từ chối báo giá" : GetString(item, "CHR_StepName")
                     };
-                    ws.Cell(excelRow, 24).Value = statusText;
-                    ws.Cell(excelRow, 24).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFF9CC");
+                    ws.Cell(excelRow, 22).Value = statusText;
+                    ws.Cell(excelRow, 22).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFF9CC");
                 }
 
                 var lastRow = Math.Max(dataStartRow, dataStartRow + rows.Count - 1);
@@ -1371,9 +1378,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 ws.Column(8).Width = 14;
                 ws.Column(9).Width = 14;
                 ws.Column(10).Width = 14;
-                ws.Column(11).Width = 14;
-                ws.Column(12).Width = 16;
-                ws.Column(13).Width = 20;
+                ws.Column(11).Width = 28;
+                ws.Column(12).Width = 14;
+                ws.Column(13).Width = 16;
                 ws.Column(14).Width = 20;
                 ws.Column(15).Width = 20;
                 ws.Column(16).Width = 20;
@@ -1381,10 +1388,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 ws.Column(18).Width = 20;
                 ws.Column(19).Width = 20;
                 ws.Column(20).Width = 20;
-                ws.Column(21).Width = 16;
-                ws.Column(22).Width = 28;
-                ws.Column(23).Width = 24;
-                ws.Column(24).Width = 20;
+                ws.Column(21).Width = 20;
+                ws.Column(22).Width = 20;
 
                 ws.Row(headerRow1).Height = 24;
                 ws.Row(headerRow2).Height = 24;
@@ -1411,13 +1416,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var result = await _baoGiaService.ExportHistoryBaoGiaAsync(searchModel.MaDon,
                 searchModel.MaNcc, searchModel.Section,
                 searchModel.NguoiYeuCau, searchModel.MaHang,
-                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai,searchModel.to, searchModel.from);
+                searchModel.TrangThai, searchModel.Step, GetCurrentUserId(), searchModel.ChungLoai, searchModel.to, searchModel.from);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
 
-
+            var stepByRole = GetRolesUser() == "UserPUR" ? 8 : 12;
             try
             {
                 var historyData = result.Data;
@@ -1622,9 +1627,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         GetStatusName(rq.ID_Status),
                         GetStepName(rq.ID_StepBaoGia),
                         GetReason(rq.ID, rq.ID_Status),
-                        selectMark,
-                        rq.NVCHR_ReasonPick ?? string.Empty,
-                        rq.NVCHR_File ?? string.Empty 
+                        rq.ID_StepBaoGia > stepByRole ? selectMark : string.Empty,
+                        rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
+                        rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_File ?? string.Empty : string.Empty
                     });
                 }
 
@@ -1684,7 +1689,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var rqFile = await _fileImportService.GetFileToLinkAsync(urlFile);
 
                 if (!rqFile.Success || rqFile.Data == null)
-                    return BadRequest(rqFile.Message);
+                    return BadRequest(urlFile);//+ rqFile.Message
 
                 var file = rqFile.Data;
 
@@ -1696,7 +1701,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Lỗi khi download: " + ex.Message);
+                return BadRequest("Chi tiết: " + ex.Message);
             }
         }
     }

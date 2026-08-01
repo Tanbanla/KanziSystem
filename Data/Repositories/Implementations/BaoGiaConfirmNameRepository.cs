@@ -236,94 +236,52 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Luu thong tin
-        public async Task<List<BaoGia_Confirm_Name_Quotation>> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames)
+        public async Task<List<BaoGia_Confirm_Name_Quotation>> AddListAsync(
+            List<BaoGia_Confirm_Name_Quotation> confirmNames)
         {
             if (confirmNames == null || !confirmNames.Any())
             {
-                throw new ArgumentException("The list of confirm names cannot be null or empty.", nameof(confirmNames));
+                throw new ArgumentException(
+                    "The list of confirm names cannot be null or empty.",
+                    nameof(confirmNames));
             }
-            var notNeedConfirmName = (await _context.BaoGia_Vender_NotConfirms
-                .Where(x => x.CHR_MaNcc != null && x.CHR_Status == "ON")
-                .Select(x => x.CHR_MaNcc)
-                .Distinct()
-                .ToListAsync())
-                .ToHashSet();
 
             var requestIds = confirmNames
                 .Select(x => x.ID_RequestQuote)
                 .Distinct()
                 .ToList();
 
-            var existingIds = await _context.BaoGia_Confirm_Name_Quotations
-                .Where(c => requestIds.Contains(c.ID_RequestQuote))
-                .Select(c => c.ID_RequestQuote)
+            // Luôn update Request
+            var requests = await _context.BaoGia_Request_of_Quotations
+                .Where(x => requestIds.Contains(x.ID))
                 .ToListAsync();
 
+            foreach (var request in requests)
+            {
+                request.ID_StepBaoGia = 12;
+                request.ID_Status = "WAIT_CONFIRM_NAME";
+            }
+
+            // Lấy các Request đã có Confirm Name
+            var existingRequestIds = (await _context.BaoGia_Confirm_Name_Quotations
+                .Where(x => requestIds.Contains(x.ID_RequestQuote))
+                .Select(x => x.ID_RequestQuote)
+                .ToListAsync())
+                .ToHashSet();
+
+            // Chỉ insert những Request chưa có
             var newConfirmNames = confirmNames
-                .Where(c => !existingIds.Contains(c.ID_RequestQuote))
+                .Where(x => !existingRequestIds.Contains(x.ID_RequestQuote))
                 .ToList();
 
-            if (!newConfirmNames.Any())
+            if (newConfirmNames.Any())
             {
-                throw new InvalidOperationException("All provided confirm names already exist in the database.");
-            }
-
-            var newIds = newConfirmNames.Select(x => x.ID_RequestQuote).ToList();
-
-            var details = await _context.BaoGia_Detail_of_Quotations
-                .Where(d => newIds.Contains(d.ID_RequestQuote) && !string.IsNullOrWhiteSpace(d.NVCHR_TenHangHQ))
-                .ToListAsync();
-
-            var requests = await _context.BaoGia_Request_of_Quotations
-                .Where(r => newIds.Contains(r.ID))
-                .ToListAsync();
-
-            var nameByRequest = details
-                .GroupBy(d => d.ID_RequestQuote)
-                .ToDictionary(g => g.Key, g => g.First().NVCHR_TenHangHQ);
-
-            var requestDict = requests.ToDictionary(r => r.ID);
-
-            var finalConfirmNames = new List<BaoGia_Confirm_Name_Quotation>();
-            var listNotNeedConfirmName = new List<BaoGia_Confirm_Name_Quotation>();
-
-            foreach (var item in newConfirmNames)
-            {
-                if (item == null) continue;
-
-                if (nameByRequest.TryGetValue(item.ID_RequestQuote, out var tenHaiQuan)
-                    && !string.IsNullOrWhiteSpace(tenHaiQuan))
-                {
-                    item.VCHR_TenRecomment = tenHaiQuan;
-                }
-
-                if (requestDict.TryGetValue(item.ID_RequestQuote, out var rq))
-                {
-                    if (!string.IsNullOrEmpty(rq.CHR_MaNCC) &&
-                        notNeedConfirmName.Contains(rq.CHR_MaNCC))
-                    {
-                        rq.ID_StepBaoGia = 13;
-                        rq.ID_Status = "DONE";
-
-                        listNotNeedConfirmName.Add(item);
-                    }
-                    else
-                    {
-                        rq.ID_StepBaoGia = 12;
-                        rq.ID_Status = "WAIT_CONFIRM_NAME";
-
-                        finalConfirmNames.Add(item);
-                    }
-                }
-            }
-
-            if (finalConfirmNames.Any())
-            {
-                await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(finalConfirmNames);
+                await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(newConfirmNames);
             }
 
             await _context.SaveChangesAsync();
-            return listNotNeedConfirmName;
+
+            return newConfirmNames;
         }
         // luu thong tin nhap file
         public async Task<bool> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role)
@@ -563,14 +521,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
                LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] as c 
                    ON r.ID = c.ID_RequestQuote
-               WHERE c.ID IN @ListCheck
-               --AND NOT EXISTS (
-                 --  SELECT 1 
-                 --  FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r2
-                 --  WHERE r2.CHR_MaDon = r.CHR_MaDon
-                 --  AND r2.BIT_LayBaoGia = 1 
-                 --  AND r2.ID_StepBaoGia != 13
-               --)";
+               WHERE c.ID IN @ListCheck";
 
             using (var connection = _conn)
             {
@@ -682,7 +633,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (!string.IsNullOrWhiteSpace(SoDon))
             {
                 var md = SoDon.Trim();
-                whereBuilder.Append(" AND ISNULL(ID_RequestQuote, '') LIKE @SoDon");
+                whereBuilder.Append(" AND ISNULL(CHR_MaDon, '') LIKE @SoDon");
                 parameters.Add("@SoDon", $"%{md}%");
             }
             if (!string.IsNullOrWhiteSpace(section))
@@ -707,13 +658,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 }
                 else
                 {
-                    whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
+                    whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
                 }
                 parameters.Add("@TrangThai", TrangThai.Trim());
             }
 
             var selectSql = new StringBuilder();
-            selectSql.Append("SELECT DISTINCT c.* ,r.CHR_CreateBy,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo,r.CHR_NameEN as NameEN,d.CHR_MaHangNCC as maHangNcc,d.INT_SoLuong,");
+            selectSql.Append("SELECT DISTINCT c.*, r.CHR_MaDon ,r.CHR_CreateBy,r.CHR_SectionCode,r.CHR_SectionName,r.CHR_Phanloai, r.CHR_MaThietBi, r.CHR_MaHangNoiBo,r.CHR_NameEN as NameEN,d.CHR_MaHangNCC as maHangNcc,d.INT_SoLuong,");
             selectSql.Append(" d.NVCHR_DonVi,d.NVCHR_TenHangHQ, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang,n.ShortName, d.CHR_CodeNCC, d.NVCHR_File ");
             selectSql.Append(baseFrom);
             selectSql.Append(whereBuilder.ToString());
@@ -799,6 +750,32 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             return hasChanges && await _context.SaveChangesAsync() > 0;
+        }
+        // Done
+         public async Task<List<ResultCheckCofirmName>> DoneConfirmNameAsync(List<int> listDone)
+        {
+            if (listDone == null || !listDone.Any())
+                throw new Exception("Invalid list of IDs.");
+            var confirmNames = await _context.BaoGia_Request_of_Quotations
+                .Where(x => listDone.Contains(x.ID))
+                .ToListAsync();
+            if (!confirmNames.Any())
+                throw new Exception("No confirm names found.");
+            // update
+            foreach (var confirmName in confirmNames)
+            {
+                confirmName.ID_StepBaoGia = 13;
+                confirmName.ID_Status = "DONE";
+            }
+
+            // get list
+            string sql = @"
+               SELECT DISTINCT r.CHR_MaDon as MaDon, r.CHR_SectionCode as Section, r.CHR_CreateBy as UserCreate, r.ID as ID
+               FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+               WHERE r.ID IN @ListCheck";
+
+            var result = await _conn.QueryAsync<ResultCheckCofirmName>(sql, new { ListCheck = listDone });
+            return result.ToList();
         }
     }
 }

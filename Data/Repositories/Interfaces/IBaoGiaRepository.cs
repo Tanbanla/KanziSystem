@@ -38,7 +38,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // update thông tin màn hình lịch sử báo giá
         public Task<UpdateHistoryResult> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_Quotation> baoGias);
         // Get thông tin đơn phê duyệt lựa chọn ncc
-        public Task<List<dynamic>> GetSupplierApprovalInfoAsync(string maDon);
+        public Task<List<dynamic>> GetSupplierApprovalInfoAsync(string maDon, string user);
         // Xuất file phê duyệt báo giá 
         public Task<List<dynamic>> GetExportApprovalInfoAsync(List<string> listMaDon, string adid);
         // Phê duyệt thông tin lựa chọn nhà cung cấp

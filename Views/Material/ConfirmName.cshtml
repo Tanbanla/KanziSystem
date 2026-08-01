@@ -228,7 +228,6 @@
         }
     </datalist>
     <script src="~/js/utils/date.js"></script>
-    <script src="~/js/ConfirmName.js" asp-append-version="true"></script>
     <script>
         window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
         window.i18nConfirmName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
@@ -289,4 +288,5 @@
             Reason = Localizer["Reason"].Value
         }));
     </script>
+    <script src="~/js/ConfirmName.js" asp-append-version="true"></script>
 }

@@ -123,13 +123,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // update thông tin lựa chọn nhà  cung cấp
-        public async Task<GenericResponse<BaoGia_Request_of_Quotation>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos, string userApproverNext)
+        public async Task<GenericResponse<BaoGia_Request_of_Quotation>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos, string userApproverNext, string userUpdate)
         {
             var result = new GenericResponse<BaoGia_Request_of_Quotation>();
             try
             {
                 var data = _mapper.Map<List<BaoGia_Detail_of_Quotation>>(dtos);
-                result.Data = await _repo.UpdatePickSupplierDetailAsync(data, userApproverNext);
+                result.Data = await _repo.UpdatePickSupplierDetailAsync(data, userApproverNext, userUpdate);
                 result.Success = true;
             }
             catch (Exception ex)

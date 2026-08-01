@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.BIT_LayBaoGia === true ? 'O' : 'X'}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_LyDo || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
-                    <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NVCHR_NameNCC || ''}</td>
+                    <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.ShortName ||d.NVCHR_NameNCC || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;  ${getMismatchStyle(d.IsMatch_MaHangNCC)}">${d.CodeEquipmentNCC || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left; ${getMismatchStyle(d.IsMatch_NameVN)}">${d.NVCHR_TenHangHQ || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
@@ -1181,12 +1181,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             <td class="text-start">${i.CHR_SectionName || ''}</td>
                             <td class="text-center">${i.CHR_CreateBy || ''}</td>
                             <td>${i.suppliesList || ''}</td>
-                            <td>${i.categoryList || ''}</td>
                             <td class="text-center">${i.DTM_KyHan ? new Date(i.DTM_KyHan).toLocaleDateString('vi-VN') : ''}</td>
                             <td class="text-center">${i.DTM_NgayMuonNhan ? new Date(i.DTM_NgayMuonNhan).toLocaleDateString('vi-VN') : ''}</td>
                             <td class="text-center"><span class="badge status-badge ${statusClass}">${mapNameStatus}</span></td>
                         </tr>
                      `;
+                    //                            <td>${i.categoryList || ''}</td>
                 }).join('');
                 tbody.innerHTML = rowsHtml;
                 const T = window.i18nQuotationResults || {};
@@ -1570,7 +1570,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     };
 
                     tr.appendChild(addTd(getVal(d, 'CHR_MaNCC', 'chR_MaNCC')));
-                    tr.appendChild(addTd(getVal(d, 'NVCHR_NameNCC', 'nvchR_NameNCC'), 'text-start'));
+                    tr.appendChild(addTd(getVal(d, 'ShortName', 'shortName'), 'text-start'));
                     tr.appendChild(addTd(getVal(d, 'CHR_MaHangNCC', 'chR_MaHangNCC'), null, mismatchStyle(getVal(d, 'IsMatch_MaHangNCC', 'IsMatch_MaHangNCC'))));
                     //tr.appendChild(addTd(getVal(d, 'NVCHR_TenHangHQ', 'nvchR_TenHangHQ'), 'text-start', mismatchStyle(getVal(d, 'IsMatch_NameVN', 'IsMatch_NameVN'))));
                     //tr.appendChild(addTd(getVal(d, 'NameENByNCC', 'nameENByNCC'), null, mismatchStyle(getVal(d, 'IsMatch_NameEN', 'IsMatch_NameEN'))));

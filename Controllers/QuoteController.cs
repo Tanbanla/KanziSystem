@@ -173,7 +173,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // kiểm tra số lượng nhà cung cấp cho mỗi sản phẩm (MaHangNoiBo, MaHangNCC) không vượt quá 5
             var violatingGroups = danhSachBaoGia
                 .Where(d => d != null && d.BIT_LayBaoGia == true)
-                .GroupBy(d => (MaHangNoiBo: (d.CHR_MaHangNoiBo ?? string.Empty).Trim(), MaHangNcc: (d.CHR_MaHangNCC ?? string.Empty).Trim()))
+                .GroupBy(d => (MaHangNoiBo: (d.CHR_MaHangNoiBo ??  string.Empty).Trim(), MaHangNcc: (d.CHR_MaHangNCC ?? string.Empty).Trim()
+                , CHR_NameEN: (d.CHR_NameEN ?? string.Empty).Trim(), CHR_MaThietBi: (d.CHR_MaThietBi ?? string.Empty).Trim()
+                ))
                 .Select(g => new
                 {
                     Key = g.Key,

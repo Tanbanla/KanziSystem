@@ -15,13 +15,15 @@
         border-top: 1px solid #dee2e6;
     }
 
-    /* Container bọc bảng có id hoặc class cụ thể để tránh ảnh hưởng bảng khác */
-    .table-responsive-custom {
-        max-height: 500px; /* Hoặc chiều cao bạn muốn */
-        overflow-y: auto;
+
+    .table-responsive-custom {      
+        height: auto;     
+        width: 100%;  
+        overflow-y: visible;
+        /* Giữ lại thanh cuộn ngang phòng trường hợp màn hình quá bé không chứa hết số cột */
+        overflow-x: auto;
         position: relative;
     }
-
     /* Dòng header thứ nhất: Dính sát đỉnh (top: 0) */
     #modal-silder .table thead tr:nth-child(1) td,
     #modal-silder .table thead tr:nth-child(1) th {
@@ -32,8 +34,6 @@
         border-bottom: 1px solid #dee2e6;
     }
 
-    /* Dòng header thứ hai: Dính bên dưới dòng thứ nhất */
-    /* Bạn phải kiểm tra chiều cao thực tế của dòng 1, thường là khoảng 45px đến 55px */
     #modal-silder .table thead tr:nth-child(2) td,
     #modal-silder .table thead tr:nth-child(2) th {
         position: sticky;
@@ -291,7 +291,13 @@
                 clickable: true,
             },
             mousewheel: true,
-            keyboard: true,
+
+            // Cấu hình lại phần keyboard tại đây
+            keyboard: {
+                enabled: true,
+                pageUpDown: true, // Bắt buộc phải có dòng này để dùng PgUp/PgDn
+            },
         });
     });
-</script> *@
+</script>
+ *@

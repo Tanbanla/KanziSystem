@@ -121,12 +121,19 @@
         </div>
     </div>
     <!-- Part 1: Dashboard summary -->
-    <section class="history-section mb-3">
-        <div class="history-section-header">
+    <section class="history-section mb-4">
+        <div class="history-section-header d-flex align-items-center">
             <h6 class="mb-0 fw-bold text-dark">@Localizer["DashboardSummary"]</h6>
+            <div style="margin-left: 12px;"></div>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnToggleDashboardSummary" aria-expanded="false">
+                    <i class="fas fa-eye-slash me-1" aria-hidden="true"></i>
+                    <span id="btnToggleDashboardSummaryText">@Localizer["Hide"].Value</span>
+                </button>
+            </div>
         </div>
-        <div class="row g-3 history-summary-grid">
-            <div class="col-12 col-sm-6 col-xl-3">
+        <div id="dashboardSummaryContent" class="row g-3 history-summary-grid">
+            <div class="col-12 col-md-6 col-xl-4">
                 <div class="card shadow-sm history-summary-card h-100">
                     <div class="card-header bg-white">
                         <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SummaryTable1Title"]</h6>
@@ -155,7 +162,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col-12 col-md-6 col-xl-4">
                 <div class="card shadow-sm history-summary-card h-100">
                     <div class="card-header bg-white">
                         <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SummaryTable2Title"]</h6>
@@ -184,7 +191,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-xl-3">
+            <div class="col-12 col-md-6 col-xl-4">
                 <div class="card shadow-sm history-summary-card h-100">
                     <div class="card-header bg-white">
                         <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SummaryTable3Title"]</h6>
@@ -217,7 +224,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-xl-3">
+          @*   <div class="col-12 col-sm-6 col-xl-3" hidden>
                 <div class="card shadow-sm history-summary-card h-100">
                     <div class="card-header bg-white">
                         <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SummaryTable4Title"]</h6>
@@ -241,110 +248,119 @@
                         </table>
                     </div>
                 </div>
-            </div>
+            </div> *@
         </div>
     </section>
 
-    <!-- Part 2: Filter area -->
+    <!-- Part 2 + 3: Combined filter area and data table -->
     <section class="history-section mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-white">
-                <h6 class="mb-0 fw-bold text-dark">@Localizer["Filters"]</h6>
-            </div>
-            <div class="card-body">
-                <form id="historyFilterForm" class="row g-2 history-filter-grid">
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <label for="searchMaDon" class="form-label">@Localizer["OrderCode"]</label>
-                        <select id="searchMaDon" name="searchMaDon" class="form-control searchable-select">
-                            <option value="">@Localizer["SelectOrderCode"]</option>
-                            @foreach (var s in madons)
-                            {
-                                <option value="@s">@s</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <label for="searchPhongBan" class="form-label">@Localizer["Department"]</label>
-                        <select id="searchPhongBan" name="searchPhongBan" class="form-select searchable-select">
-                            <option value="" selected>@Localizer["SelectDepartment"]</option>
-                            @foreach (var s in listPhong)
-                            {
-                                <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <label for="searchNguoiTao" class="form-label">@Localizer["Creator"]</label>
-                        <input type="text" class="form-control" id="searchNguoiTao" name="searchNguoiTao" placeholder="@Localizer["EnterCreator"]">
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
-                        <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
-                            <option value="" selected>@Localizer["SelectMaterialCode"]</option>
-                            @foreach (var s in listMaterials)
-                            {
-                                <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <label for="searchNhaCungCap" class="form-label">@Localizer["Supplier"]</label>
-                        <select id="searchNhaCungCap" name="searchNhaCungCap" class="form-select searchable-select">
-                            <option value="" selected>@Localizer["SelectSupplier"]</option>
-                            @foreach (var s in listNCC)
-                            {
-                                <option value="@s.Ma">@s.Ma - @s.Ten</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <label for="statusFilter" class="form-label small text-uppercase fw-semibold">@Localizer["OrderStatus"]</label>
-                        <select id="statusFilter" name="statusFilter" class="form-control searchable-select">
-                            <option value="" selected>@Localizer["All"]</option>
-                            <option value="APPROVAL">@Localizer["Approving"]</option>
-                            <option value="WAIT">@Localizer["Waiting"]</option>
-                            <option value="RETURN">@Localizer["RETURN"]</option>
-                            <option value="DONE">@Localizer["DONE"]</option>
-                            <option value="DELETE">@Localizer["DELETE"]</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <label class="form-label">@Localizer["DateRange"]</label>
-                        <div class="d-flex gap-2">
-                            <input type="date" class="form-control" id="dateFrom" name="dateFrom">
-                            <input type="date" class="form-control" id="dateTo" name="dateTo">
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-3 d-flex gap-2 align-items-end history-filter-actions">
-                        <button type="button" class="btn btn-primary flex-fill" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
-                        <button type="button" class="btn btn-outline-secondary flex-fill" id="btnResetFilters"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
-                    </div>
-                </form>
-            </div>
+    <div class="card shadow-sm h-100">
+        <div class="card-header bg-white border-0 pb-1">
+            <h6 class="mb-0 fw-bold text-dark">@Localizer["Filters"]</h6>
         </div>
-    </section>
-    <!-- Part 3: Data table -->
-    <section class="history-section">
-    <div class="card mt-3">
-        <div class="card-header bg-white">
+        <div class="card-body pt-2 pb-3">
+            <form id="historyFilterForm" class="row g-2 history-filter-grid">
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label for="searchMaDon" class="form-label">@Localizer["OrderCode"]</label>
+                    <select id="searchMaDon" name="searchMaDon" class="form-control searchable-select">
+                        <option value="">@Localizer["SelectOrderCode"]</option>
+                        @foreach (var s in madons)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label for="searchPhongBan" class="form-label">@Localizer["Department"]</label>
+                    <select id="searchPhongBan" name="searchPhongBan" class="form-select searchable-select">
+                        <option value="" selected>@Localizer["SelectDepartment"]</option>
+                        @foreach (var s in listPhong)
+                        {
+                            <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label for="searchNguoiTao" class="form-label">@Localizer["Creator"]</label>
+                    <input type="text" class="form-control" id="searchNguoiTao" name="searchNguoiTao" placeholder="@Localizer["EnterCreator"]">
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label for="searchMaVatTu" class="form-label">@Localizer["MaterialCode"]</label>
+                    <select id="searchMaVatTu" name="searchMaVatTu" class="form-select searchMaVatTu searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
+                        <option value="" selected>@Localizer["SelectMaterialCode"]</option>
+                        @foreach (var s in listMaterials)
+                        {
+                            <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label for="searchNhaCungCap" class="form-label">@Localizer["Supplier"]</label>
+                    <select id="searchNhaCungCap" name="searchNhaCungCap" class="form-select searchable-select">
+                        <option value="" selected>@Localizer["SelectSupplier"]</option>
+                        @foreach (var s in listNCC)
+                        {
+                            <option value="@s.Ma">@s.Ma - @s.Ten</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label for="statusFilter" class="form-label small text-uppercase fw-semibold">@Localizer["OrderStatus"]</label>
+                    <select id="statusFilter" name="statusFilter" class="form-control searchable-select">
+                        <option value="" selected>@Localizer["All"]</option>
+                        <option value="APPROVAL">@Localizer["Approving"]</option>
+                        <option value="WAIT">@Localizer["Waiting"]</option>
+                        <option value="RETURN">@Localizer["RETURN"]</option>
+                        <option value="DONE">@Localizer["DONE"]</option>
+                        <option value="DELETE">@Localizer["DELETE"]</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <label class="form-label">@Localizer["DateRange"]</label>
+                    <div class="d-flex gap-2">
+                        <input type="date" class="form-control" id="dateFrom" name="dateFrom">
+                        <input type="date" class="form-control" id="dateTo" name="dateTo">
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3 d-flex gap-2 align-items-end history-filter-actions">
+                    <button type="button" class="btn btn-primary flex-fill" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
+                    <button type="button" class="btn btn-outline-secondary flex-fill" id="btnResetFilters"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-header bg-white border-top">
             <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["HistoryTableTitle"]</h6>
         </div>
-        <div class="card-body px-0">
+        <div class="card-body px-0 pt-0">
             <div class="table-responsive" id="historyGroupTableContainer">
-                <div class="legend" aria-hidden="false" title="@Localizer["LegendTitle"]">
-                    <div class="item"><span class="swatch yellow" aria-hidden="true"></span><span>@Localizer["LegendRejectedQuote"]</span></div>
-                    <div class="item"><span class="swatch green" aria-hidden="true"></span><span>@Localizer["LegendSupplierSubmitted"]</span></div>
-                    <div class="item"><span class="swatch white" style="border:1px solid #ccc;" aria-hidden="true"></span><span>@Localizer["LegendSupplierNotSubmitted"]</span></div>
-
-                    <div class="item"><span class="swatch red" aria-hidden="true"></span><span>@Localizer["LegendOverdue"]</span></div>
-                    <div class="separator" aria-hidden="true"></div>
-                    <div class="item"><span class="swatch group1" aria-hidden="true"></span><span>@Localizer["LegendGroup1"]</span></div>
-                    <div class="item"><span class="swatch group2" aria-hidden="true"></span><span>@Localizer["LegendGroup2"]</span></div>
-                    <div class="item"><span class="swatch group3" aria-hidden="true"></span><span>@Localizer["LegendGroup3"]</span></div>
-                    <div class="item"><span class="swatch group4" aria-hidden="true"></span><span>@Localizer["LegendGroup4"]</span></div>
-                </div>
                 <table class="approval-table">
                     <thead>
+                        <tr class="legend-row">
+                             <th colspan="5"></th>
+                             <th colspan="5" class="legend-cell">
+                                 <div class="legend compact mb-0">
+                                     <div class="item"><span class="swatch yellow" aria-hidden="true"></span><span>@Localizer["LegendRejectedQuote"]</span></div>
+                                     <div class="item"><span class="swatch green" aria-hidden="true"></span><span>@Localizer["LegendSupplierSubmitted"]</span></div>
+                                     <div class="item"><span class="swatch white" aria-hidden="true"></span><span>@Localizer["LegendSupplierNotSubmitted"]</span></div>
+                                     <div class="item"><span class="swatch selected" aria-hidden="true"></span><span>@Localizer["LegendSelectedSupplier"]</span></div>
+                                      <div class="item"><span class="swatch red" aria-hidden="true"></span><span>@Localizer["NotQuotation"]</span></div>
+                                 </div>
+                             </th>
+                             <th></th>
+                             <th class="legend-cell">
+                                 <div class="legend compact mb-0 justify-content-center">
+                                     <div class="item"><span class="swatch red" aria-hidden="true"></span><span>@Localizer["LegendOverdue"]</span></div>
+                                 </div>
+                             </th>
+                             <th></th>
+                             <th colspan="8" class="legend-cell">
+                                 <div class="legend compact mb-0">
+                                     <div class="item"><span class="swatch green" aria-hidden="true"></span><span>@Localizer["SubmittedApprover"]</span></div>
+                                     <div class="item"><span class="swatch white" aria-hidden="true"></span><span>@Localizer["WaitingApprover"]</span></div>
+                                 </div>
+                             </th>
+                             <th colspan="2"></th>
+                        </tr>
                         <tr>
                             <th rowspan="2">@Localizer["No"]</th>
                             <th rowspan="2">@Localizer["OrderNo"]</th>
@@ -356,11 +372,11 @@
                             <th rowspan="2">@Localizer["Supplier3"]</th>
                             <th rowspan="2">@Localizer["Supplier4"]</th>
                             <th rowspan="2">@Localizer["Supplier5"]</th>
+                            <th rowspan="2">@Localizer["SelectedSupplierReason"]</th>
                             <th rowspan="2">@Localizer["SelectionDeadline"]</th>
                             <th rowspan="2">@Localizer["RequesterUser"]</th>
                             <th class="group1" colspan="4">@Localizer["ApprovalOrderGroup"]</th>
                             <th class="group2" colspan="4">@Localizer["ApprovalSupplierGroup"]</th>
-                            <th class="group3" colspan="3">@Localizer["ResultSupplierGroup"]</th>
                             <th class="group4" rowspan="2">@Localizer["Status"]</th>
                             <th class="group4" rowspan="2">@Localizer["Action"]</th>
                         </tr>
@@ -373,11 +389,7 @@
                             <th class="group2">PUR PIC</th>
                             <th class="group2">QLSC</th>
                             <th class="group2">QLTC</th>
-                            <th class="group2">QLCC</th>
-                                                        
-                            <th class="group3">@Localizer["SelectedSupplier"]</th>
-                            <th class="group3">@Localizer["SelectedSupplierReason"]</th>
-                            <th class="group3">@Localizer["QuotationLink"]</th>
+                            <th class="group2">QLCC</th>                     
                         </tr>
                     </thead>
                     <tbody>
@@ -496,6 +508,9 @@
         ViewHistoryTooltip = Localizer["ViewHistoryTooltip"].Value,
         ReturnTooltip = Localizer["ReturnTooltip"].Value,
         DeleteTooltip = Localizer["DeleteTooltip"].Value,
+        Hide = Localizer["Hide"].Value,
+        Show = Localizer["Show"].Value,
+        AllRefuse = Localizer["AllRefuse"].Value
     }));
 </script>
 @section Scripts {
@@ -507,6 +522,48 @@
             var panel = document.getElementById('editHistoryModal');
             if (panel && panel.parentElement !== document.body) {
                 document.body.appendChild(panel);
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            var content = document.getElementById('dashboardSummaryContent');
+            var btn = document.getElementById('btnToggleDashboardSummary');
+            var btnText = document.getElementById('btnToggleDashboardSummaryText');
+            var storageKey = 'history_dashboard_visible';
+
+            function setVisible(visible, save) {
+                if (!content) return;
+                content.style.display = visible ? '' : 'none';
+                if (btn) {
+                    btn.setAttribute('aria-expanded', visible ? 'true' : 'false');
+                    var icon = btn.querySelector('i');
+                    if (icon) {
+                        icon.className = visible ? 'fas fa-eye-slash me-1' : 'fas fa-eye me-1';
+                    }
+                    if (btnText) {
+                        btnText.textContent = visible ? window.i18nHistoryQuote?.Hide : window.i18nHistoryQuote?.Show;
+                    }
+                }
+                if (save) localStorage.setItem(storageKey, visible ? '1' : '0');
+            }
+
+            try {
+                var saved = localStorage.getItem(storageKey);
+                if (saved === '0') {
+                    setVisible(false, false);
+                } else {
+                    setVisible(true, false);
+                }
+            } catch (e) {
+
+            }
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    var isVisible = content && content.style.display !== 'none';
+                    setVisible(!isVisible, true);
+                });
             }
         })();
     </script>

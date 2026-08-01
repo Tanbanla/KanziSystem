@@ -31,6 +31,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             }
             catch { return new DataTable(); }
         }
+   
         public string ReturnString(string command)
         {
             try
@@ -81,6 +82,18 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 }
             }
             catch { return new DataTable(); }
+        }
+        public bool EXECUTE_SQL(string query, object parameters = null)
+        {
+            try
+            {
+                using (SqlConnection cn = new SqlConnection(connectString_Test))
+                {
+                    int rowsAffected = cn.Execute(query, parameters);
+                    return rowsAffected > 0;
+                }
+            }
+            catch { return false; }
         }
         public int ExecuteSP(string spName, object? param = null)
         {

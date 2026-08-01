@@ -342,13 +342,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     FROM [BaoGia_Request_of_Quotation] bg
                     WHERE bg.CHR_MaDon = rr.CHR_MaDon AND ISNULL(bg.CHR_MaNCC, '') != ''
                     FOR XML PATH('')
-                ), 1, 2, '') AS suppliesList,
-                STUFF((
-                    SELECT DISTINCT '; ' + ISNULL(NVCHR_ChungLoai, '')
-                    FROM [BaoGia_Request_of_Quotation] bg
-                    WHERE bg.CHR_MaDon = rr.CHR_MaDon AND ISNULL(bg.NVCHR_ChungLoai, '') != ''
-                    FOR XML PATH('')
-                ), 1, 2, '') AS categoryList
+                ), 1, 2, '') AS suppliesList
+                --,STUFF((
+                --    SELECT DISTINCT '; ' + ISNULL(NVCHR_ChungLoai, '')
+                --    FROM [BaoGia_Request_of_Quotation] bg
+                --    WHERE bg.CHR_MaDon = rr.CHR_MaDon AND ISNULL(bg.NVCHR_ChungLoai, '') != ''
+                --    FOR XML PATH('')
+                --), 1, 2, '') AS categoryList
             FROM rq rr
             {(string.IsNullOrEmpty(status) ? "" : "WHERE CASE WHEN rr.ID_StepBaoGia = 6 THEN N'WAITING_NCC' WHEN rr.ID_StepBaoGia = 7 THEN N'WAITING_PICK_NCC' WHEN rr.ID_StepBaoGia IN (9,10,11) THEN N'WAITING_APPROVER' ELSE 'NO' END = @Status")}
             ORDER BY rr.CHR_MaDon DESC
@@ -575,10 +575,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 		            END AS BIT) AS IsMatch_AnToan,
                  CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) or d.DTM_ShipTime is null ) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
                  CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet,
-	             st.NVCHR_TenStatus  as status
+	             st.NVCHR_TenStatus  as status,
+                 n.ShortName
              FROM BaoGia_Request_of_Quotation r
              LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
              LEFT JOIN BaoGia_Status st on r.ID_Status = st.VCHR_CodeStatus
+             left Join IM_NCC_NEW as n on r.CHR_MaNCC = n.Ma
              WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1 ");
 
             var parameters = new DynamicParameters();
@@ -730,7 +732,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     dto.CHR_SectionName = baoGia.CHR_SectionName;   
                     dto.CHR_Phanloai = baoGia.CHR_Phanloai;
                     dto.CHR_MaThietBi = baoGia.CHR_MaThietBi;
-                    dto.CHR_MaHangNoiBo = baoGia.CHR_MaHangNoiBo;
+                    dto.CHR_MaHangNoiBo = baoGia.CHR_MaHangNoiBo ?? "";
                     dto.CHR_MaHangNCC = baoGia.CHR_MaHangNCC;
                     dto.NVCHR_NameVN = baoGia.NVCHR_NameVN;
                     dto.CHR_NameEN = baoGia.CHR_NameEN;
@@ -794,24 +796,28 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             };
         }
         // Get thông tin đơn phê duyệt lựa chọn ncc
-        public async Task<List<dynamic>> GetSupplierApprovalInfoAsync(string maDon)
+        public async Task<List<dynamic>> GetSupplierApprovalInfoAsync(string maDon, string user)
         {
             var sql = new StringBuilder(@"
             WITH StatusCheck AS (
                 SELECT 
                     distinct
-                    r.id,
-                    r.CHR_MaDon,
-                    r.CHR_MaHangNoiBo
+                    r.id
                 FROM BaoGia_Request_of_Quotation r
                 LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-                WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
+                WHERE r.ID_StepBaoGia BETWEEN 9 AND 11 and r.BIT_LayBaoGia = 1");
 
             var parameters = new DynamicParameters();
             if (!string.IsNullOrEmpty(maDon))
             {
                 sql.Append(" AND r.CHR_MaDon = @MaDon");
                 parameters.Add("MaDon", maDon);
+            }
+
+            if (!string.IsNullOrEmpty(user))
+            {
+                sql.Append(" AND r.CHR_UserApproval = @User");
+                parameters.Add("User", user);
             }
 
             sql.Append(@"
@@ -877,16 +883,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     ELSE 0 
                 END AS BIT) AS IsMatch_AnToan,
                 CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) or d.DTM_ShipTime is null ) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
-                CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet
-            FROM BaoGia_Request_of_Quotation r
-            LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-            INNER JOIN StatusCheck sc ON r.id = sc.id
-            WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
-
-            if (!string.IsNullOrEmpty(maDon))
-            {
-                sql.Append(" AND r.CHR_MaDon = @MaDon");
-            }
+                CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' then 0 else 1 end as bit) As IsMatchCamKet,
+                n.ShortName
+				FROM BaoGia_Request_of_Quotation r
+				INNER JOIN StatusCheck sc ON r.id = sc.id
+				LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+				LEFT JOIN IM_NCC_NEW n ON r.CHR_MaNCC = n.Ma");
 
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
             return data;
@@ -997,10 +999,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sc.UserQltc,
                 sc.LyDoDeft,
                 sc.LyDoQlsc,
-                sc.LyDoQltc
+                sc.LyDoQltc,
+                n.ShortName
             FROM BaoGia_Request_of_Quotation r
             LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
             LEFT JOIN StatusCheck sc ON r.id = sc.id
+            left Join IM_NCC_NEW as n on r.CHR_MaNCC = n.Ma
             WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
 
             if (!string.IsNullOrEmpty(adid))
@@ -1389,7 +1393,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                     var actionType = data.ID_StepBaoGia == 10 ? "QLSC_PICK_NCC" :
                                     (data.ID_StepBaoGia == 11 ? "QLTC_PICK_NCC" : "DEFT_PICK_NCC");
-
                     historyList.Add(new BaoGia_History_Request_of_Quotation
                     {
                         ID_RequestQuote = item.Id,

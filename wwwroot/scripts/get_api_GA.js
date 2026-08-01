@@ -7,7 +7,10 @@ async function getEmployeeData_GA() {
     var ph = document.getElementById("name_dept").value;
      if (ph == "") {
          alert("Chưa chọn phòng");
-     }
+    }
+    if (!kiemTraViTriKhopNhau()) {
+      
+    }
     const formData = new URLSearchParams();
     formData.append('ph', ph);
 
@@ -20,7 +23,6 @@ async function getEmployeeData_GA() {
         .then(data => {
             // tìm cost phòng theo like
             cost_GA = data + "%";
-
         })
         .catch(err => console.error('Fetch error:', err));
 
@@ -71,7 +73,6 @@ async function getEmployeeData_GA() {
         console.error("Không thể lấy dữ liệu:", error);
     }
 }
-
 // Lấy danh sách user kho và đồng ý
 async function get_block_GA() {
     var group_code = document.getElementById("group_code").value;
@@ -205,7 +206,6 @@ async function loadToCombo_GA(position, comboId) {
         
     }
 }
-
 // Hàm tạo Payload (dữ liệu gửi đi)
  createSearchData_GD_GA = (position) => ({
     "SearchTerm": "",
@@ -247,7 +247,6 @@ async function loadToCombo_GD_GA(position, comboId) {
     document.getElementById("GA_cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
     document.getElementById("GA_mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
 }
-
 // Hàm tạo Payload (dữ liệu gửi đi)
 const createSearchData_TBP_GA = (position) => ({
     "SearchTerm": "",

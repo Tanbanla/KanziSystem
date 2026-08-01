@@ -166,6 +166,7 @@
         
         $.ajax({
             url: '/ipcs/Request/view_rqall',           
+            //url: '/Request/view_rqall',           
             type: 'GET',
             data: {
                 StartDate: Request_Date,
@@ -186,8 +187,8 @@
                     console.log(data);
                     $.each(data, function (index, item) {
                          var huydon = "";
-                        if(item.Status == "WAITCONFIRM" ){
-
+                        if(item.Status == "WAITCONFIRM" )
+                        {
                              huydon = `<button class="btn btn-danger" onclick="moModalHuyDon('${item.Id_Request}')" ><i class="fa fa-ban text-white" style="cursor:pointer"  ></i> Hủy đơn</button>`;
                         }
                         var domau = "text-secondary";

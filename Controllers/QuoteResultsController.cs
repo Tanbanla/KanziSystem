@@ -84,6 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(_localizer["ReasonRequiredForItems"].Value);
             }
             var allRowsData = new List<BaoGiaImportModel>();
+            var currentUserId = GetCurrentUserId();
             foreach (var item in vm.listPick)
             {
                 allRowsData.Add(new BaoGiaImportModel
@@ -103,14 +104,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(errorMessage);
             }
 
-            var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(vm.listPick, vm.UserApproverNext);
+            var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(vm.listPick, vm.UserApproverNext, currentUserId);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
             var req = result.Data;
             var userSend = vm.UserApproverNext;
-            var currentUserId = GetCurrentUserId();
+
             _ = Task.Run(async () =>
             {
                 using (var scope = _serviceScopeFactory.CreateScope())
@@ -232,7 +233,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.ShortName ?? item.NVCHR_TenNCC ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
                     // Vendor input
@@ -566,11 +567,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var baoGiaConfirmNameService = scope.ServiceProvider.GetRequiredService<IBaoGiaConfirmNameService>();
                                 var baoGiaDetailService = scope.ServiceProvider.GetRequiredService<IBaoGiaDetailService>();
                                 var baoGiaService = scope.ServiceProvider.GetRequiredService<IBaoGiaService>();
-                       
+                                var nccNewService = scope.ServiceProvider.GetRequiredService<ITmNccNewService>();
+
                                 var checkSendMail = true;
-                                
 
                                 var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
+                                var listNotNeedConfirmName = new List<int>();
+
+
+                                //lấy dữ liệu không cần xác nhận tên hải quan
+                                var RepNotConfirmNameAsync = await nccNewService.ListNotConfirmName();
+                                var NotConfirmNames = RepNotConfirmNameAsync.Data.ToList();
+
                                 foreach (var material in listOk)
                                 {
                                     var detailsResult = await baoGiaDetailService.GetByIdRequestQuoteAsync(material.ID);
@@ -581,12 +589,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     }
                                     if (material.ID_StepBaoGia >= 12 && detailsResult.Data.BIT_Select == true)
                                     {
+
+
+                                        if (NotConfirmNames.Contains(detailsResult.Data.CHR_CodeNCC))
+                                        {
+                                            listNotNeedConfirmName.Add(material.ID);
+                                            continue;
+                                        }
                                         // dữ liệu xác nhận tên
                                         var cf = new BaoGia_Confirm_Name_QuotationDTO();
                                         cf.ID_RequestQuote = material.ID;
                                         cf.DTM_CreateDate = DateTime.Now;
                                         cf.VCHR_CreateBy = "System";
-                                        cf.VCHR_TenRecomment = material.NVCHR_NameVN;
+                                        cf.VCHR_TenRecomment = detailsResult.Data.NVCHR_TenHangHQ ?? material.NVCHR_NameVN ?? "";
                                         cf.CHR_Status = "";
                                         cf.CHR_StatusACC = "";
                                         cf.CHR_StatusShip = "Confirming";
@@ -626,37 +641,39 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 if (listConfirm.Any())
                                 {
                                     // lưu thông tin xác nhận tên
-                                    var listNotNeedConfirmName = await baoGiaConfirmNameService.AddListAsync(listConfirm);
-                                    // gửi mail thông báo hoàn thành
-                                    if(listNotNeedConfirmName.Data.Count >0 && listNotNeedConfirmName.Success)
+                                    var NeedConfirmName = await baoGiaConfirmNameService.AddListAsync(listConfirm);
+                                    if (!NeedConfirmName.Success)
                                     {
-                                        var listCheck = listNotNeedConfirmName.Data.Select(c => c.ID_RequestQuote).ToList();
-
-                                        var listDone = await baoGiaConfirmNameService.CheckDonHangConfirmedAsync(listCheck);
-                                        if (!listDone.Success)
-                                        {
-                                            _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
-                                            return;
-                                        }
-
-                                        foreach (var item in listDone.Data)
-                                        {
-                                            // gửi mail thông báo đơn đã hoàn thành xác nhận tên hải quan
-                                            var emailDone = await sendMailService.SendMailAsync(
-                                                item.UserCreate + "@brothergroup.net",
-                                                string.Empty,
-                                                18,
-                                                "SelectQuote/SelectQuoteSection",
-                                                true,
-                                                item.Section,
-                                                item.MaDon,
-                                                item.UserCreate);
-                                        }
+                                        _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + NeedConfirmName.Message);
                                     }
-
                                     //gửi mail thông báo có yêu cầu xác nhận tên mới
                                     var emailResult = await sendMailService.SendMailToConfirmItemAsync(13, 17, "Material/ConfirmName", true, "", "", currentUserId);
 
+                                }
+                                // sen mail done
+                                if (listNotNeedConfirmName.Any())
+                                {
+                                    // gửi mail thông báo hoàn thành
+                                    var listDone = await baoGiaConfirmNameService.DoneConfirmNameAsync(listNotNeedConfirmName);
+                                    if (!listDone.Success)
+                                    {
+                                        _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
+                                        return;
+                                    }
+                                    foreach (var item in listDone.Data)
+                                    {
+                                        // gửi mail thông báo đơn đã hoàn thành xác nhận tên hải quan
+                                        var emailDone = await sendMailService.SendMailAsync(
+                                            item.UserCreate + "@brothergroup.net",
+                                            string.Empty,
+                                            18,
+                                            "SelectQuote/SelectQuoteSection",
+                                            true,
+                                            item.Section,
+                                            item.MaDon,
+                                            item.UserCreate
+                                        );
+                                    }
                                 }
                             }
                             catch (Exception ex)
@@ -667,15 +684,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     });
                 }
                 // send mail Approval return
-                // danh sach PIC
-                var result = await _approverService.GetApproverByStepAndSectionAsync(4, "3110");
-                if (!result.Success)
-                {
-                    return BadRequest(_localizer["CannotGetPICInfo", result.Message].Value);
-                }
-                var dataPic = result.Data;
                 if (listNG.Any())
                 {
+                    // danh sach PIC
+                    var result = await _approverService.GetApproverByStepAndSectionAsync(4, "3110");
+                    if (!result.Success)
+                    {
+                        return BadRequest(_localizer["CannotGetPICInfo", result.Message].Value);
+                    }
+                    var dataPic = result.Data;
                     _ = Task.Run(async () =>
                     {
                         using (var scope = _serviceScopeFactory.CreateScope())
@@ -1060,7 +1077,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         NVCHR_Note = i.NVCHR_Note?.ToString() ?? ""
                     }).ToList();
 
-                    var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(dtoList, vm.userNextApproval);
+                    var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(dtoList, vm.userNextApproval, GetCurrentUserId());
                     if (!result.Success)
                     {
                         return BadRequest(result.Message);
@@ -1098,6 +1115,385 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Ok(result);
         }
         // Xuất dữ liệu để lựa chọn phê duyệt NCC
+        //[HttpPost]
+        //public async Task<IActionResult> ExportFileExcelApproverResult([FromBody] List<string> model)
+        //{
+        //    //if (model == null || model.Count == 0)
+        //    //{
+        //    //    return BadRequest(_localizer["PleaseSelectQuoteRequest"]);
+        //    //}
+        //    try
+        //    {
+        //        var result = await _baoGiaService.GetExportApprovalInfoAsync(model, GetCurrentUserId());
+        //        if (!result.Success)
+        //        {
+        //            return BadRequest(result.Message);
+        //        }
+        //        if (result.Data == null)
+        //        {
+        //            return BadRequest(_localizer["NoDataToExport"].Value);
+        //        }
+        //        var dataList = result.Data;
+
+        //        // Thu thập tất cả dữ liệu để kiểm tra lỗi
+        //        var allRowsData = new List<dynamic>();
+        //        foreach (var item in dataList)
+        //        {
+        //            allRowsData.Add(new
+        //            {
+        //                Item = item,
+        //                MaDon = item.CHR_MaDon ?? "",
+        //                ID = item.ID?.ToString() ?? "",
+        //                MaThietBi = item.CHR_MaThietBi ?? "",
+        //                MaHangNoiBo = item.CHR_MaHangNoiBo ?? "",
+        //                CodeVender = item.CHR_MaNCC ?? "",
+        //                MaHangNCC_Vendor = item.CodeEquipmentNCC ?? "",
+        //                MaHangNCC_BIVN = item.CHR_MaHangNCC ?? "",
+        //                TenHangVN = item.NVCHR_NameVN ?? "",
+        //                TenHangEng = item.CHR_NameEN ?? "",
+        //                ChungLoaiHang = item.NVCHR_ChungLoai ?? "",
+        //                DonGiaUSD = item.FL_USD ?? 0.0,
+        //                DonGiaVND = item.FL_VND ?? 0.0,
+        //                SoLuong = item.INT_SoLuong ?? 0,
+        //                DonVi = item.NVCHR_DonVi ?? "",
+        //                NhaSanXuat = item.NVCHR_NhaSanXuat ?? "",
+        //                BIT_Select = item.BIT_Select == true ? "O" : "X",
+        //                NVCHR_ReasonPick = item.NVCHR_ReasonPick ?? "",
+        //                NVCHR_Note = item.NVCHR_Note ?? ""
+        //            });
+        //        }
+
+        //        // Kiểm tra lỗi cho từng dòng
+        //        var errorDetails = new Dictionary<string, List<string>>();
+        //        foreach (var rowData in allRowsData)
+        //        {
+        //            var errors = new List<string>();
+        //            var maDon = rowData.MaDon;
+        //            var maHangNB = rowData.MaHangNoiBo;
+        //            var maThietBi = rowData.MaThietBi;
+        //            var chungLoaiHang = rowData.ChungLoaiHang;
+        //            var bitSelect = rowData.BIT_Select;
+        //            var reason = rowData.NVCHR_ReasonPick;
+        //            var tenHangEng = rowData.TenHangEng;
+        //            var tenHangVN = rowData.TenHangVN;
+        //            var codeVender = rowData.CodeVender;
+        //            var maHangNCC = !string.IsNullOrEmpty(rowData.MaHangNCC_Vendor)
+        //                ? rowData.MaHangNCC_Vendor
+        //                : rowData.MaHangNCC_BIVN;
+        //            var donGiaUSD = rowData.DonGiaUSD;
+        //            var donGiaVND = rowData.DonGiaVND;
+        //            string id = rowData.ID;
+
+        //            // Kiểm tra lỗi
+        //            var vendorCodesForSameProduct = allRowsData
+        //                .Where(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O") && x.MaThietBi == maThietBi)
+        //                .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
+        //                .Where(v => !string.IsNullOrEmpty(v))
+        //                .Distinct()
+        //                .Count();
+
+        //            if (vendorCodesForSameProduct >= 2 && bitSelect.Contains("O"))
+        //            {
+        //                errors.Add(_localizer["VendorCodeMultipleSelected", maHangNB, vendorCodesForSameProduct].Value);
+        //            }
+
+        //            var hasAnySelect = allRowsData.Any(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"));
+        //            if (!hasAnySelect && !string.IsNullOrEmpty(maHangNB))
+        //            {
+        //                errors.Add(_localizer["VendorCodeNotSelected", maHangNB].Value);
+        //            }
+
+        //            var vendorsForEquipmentAndCategory = allRowsData
+        //                .Where(x => (x.MaThietBi == maThietBi && x.ChungLoaiHang == chungLoaiHang && x.BIT_Select.Contains("O")) && !string.IsNullOrEmpty(maThietBi))
+        //                .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
+        //                .Where(v => !string.IsNullOrEmpty(v))
+        //                .Distinct()
+        //                .Count();
+
+        //            if (vendorsForEquipmentAndCategory > 1 && bitSelect.Contains("O"))
+        //            {
+        //                errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi, chungLoaiHang, vendorsForEquipmentAndCategory].Value);
+        //            }
+
+        //            //var tenHangList = allRowsData
+        //            //    .Where(x => x.MaHangNoiBo == maHangNB)
+        //            //    .Select(x => new { TenEng = x.TenHangEng, TenVN = x.TenHangVN })
+        //            //    .Distinct()
+        //            //    .ToList();
+
+        //            //if (tenHangList.Count > 1)
+        //            //{
+        //            //    errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
+        //            //}
+
+        //            if (bitSelect.Contains("O"))
+        //            {
+        //                var allPricesForProduct = allRowsData
+        //                    .Where(x => x.MaHangNoiBo == maHangNB && x.DonGiaUSD > 0)
+        //                    .Select(x => new { x.DonGiaUSD, x.DonGiaVND })
+        //                    .ToList();
+
+        //                if (allPricesForProduct.Any() && allPricesForProduct.Count > 1)
+        //                {
+        //                    decimal minPriceUSD = (decimal)allPricesForProduct.Min(x => x.DonGiaUSD);
+        //                    decimal currentPriceUSD = (decimal)donGiaUSD;
+
+        //                    if (Math.Abs(currentPriceUSD - minPriceUSD) > 0.01m)
+        //                    {
+        //                        errors.Add(_localizer["SelectedPriceNotLowest", currentPriceUSD.ToString("N2"), minPriceUSD.ToString("N2")].Value);
+        //                    }
+        //                }
+        //            }
+
+        //            var duplicatePrice = allRowsData
+        //                .Where(x => x.MaHangNoiBo == maHangNB &&
+        //                       ((!string.IsNullOrEmpty(x.MaHangNCC_Vendor) && x.MaHangNCC_Vendor == maHangNCC) ||
+        //                        (!string.IsNullOrEmpty(x.MaHangNCC_BIVN) && x.MaHangNCC_BIVN == maHangNCC)) && x.CodeVender == codeVender)
+        //                .Select(x => new { x.DonGiaUSD, x.DonGiaVND })
+        //                .Distinct()
+        //                .Count();
+
+        //            if (duplicatePrice > 1)
+        //            {
+        //                errors.Add(_localizer["DuplicatePriceForVendor", maHangNB, maHangNCC].Value);
+        //            }
+
+        //            if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
+        //            {
+        //                errors.Add(_localizer["SelectedVendorNoReason"].Value);
+        //            }
+
+        //            // Lưu lỗi vào dictionary với key là ID
+        //            if (errors.Any())
+        //            {
+        //                errorDetails[id] = errors;
+        //            }
+        //        }
+
+        //        // Calculate totals for system columns
+        //        var totals = new Dictionary<string, (double vnd, double usd)>();
+        //        foreach (var item in dataList)
+        //        {
+        //            string key = $"{item.CHR_MaDon ?? ""}|" +
+        //                $"{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}|{item.CHR_MaNCC ?? ""}" +
+        //                $"|{(string.IsNullOrEmpty(item.CodeEquipmentNCC) ? item.ID.ToString() : item.CodeEquipmentNCC)}";
+        //            double vnd = item.FL_VND * item.soluong ?? 0.0;
+        //            double usd = item.FL_USD * item.soluong ?? 0.0;
+        //            if (!totals.ContainsKey(key))
+        //            {
+        //                totals[key] = (0.0, 0.0);
+        //            }
+        //            var current = totals[key];
+        //            totals[key] = (current.Item1 + vnd, current.Item2 + usd);
+        //        }
+
+        //        var root = _env.WebRootPath ?? _env.ContentRootPath;
+        //        var templatePath = Path.Combine(root, "template", "TemplateQuotationResults.xlsx");
+        //        if (!System.IO.File.Exists(templatePath))
+        //        {
+        //            return BadRequest(_localizer["TemplateNotFound", "TemplateQuotationResults.xlsx"].Value);
+        //        }
+
+        //        using var fs = System.IO.File.OpenRead(templatePath);
+        //        using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+        //        var ws = workbook.Worksheets.FirstOrDefault();
+        //        if (ws == null)
+        //        {
+        //            return BadRequest(_localizer["WorksheetNotFound"].Value);
+        //        }
+        //        int rowStart = 4;
+        //        foreach (var item in dataList)
+        //        {
+        //            var enUs = new CultureInfo("en-US");
+        //            int col = 1;
+        //            // BIVN Input
+        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(
+        //                item.ID_StepBaoGia == 9 ? "Chief/Expert Approval" : (item.ID_StepBaoGia == 10 ? "Section Manager Approval" : "Dept Manager Approval"));
+        //            ws.Cell(rowStart, col++).SetValue(item.ID ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNCC ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_NameVN ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.CHR_NameEN ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.INT_SoLuong ?? 0);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_DonVi ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChungLoai ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_HinhDang ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChatLieu ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ThanhPhan ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_KichThuoc ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_DongMay ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_TinhNang ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_Rohs ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_COCQ ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_MSDS ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_AnToan ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.ShortName ?? item.NVCHR_TenNCC ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
+        //            // Vendor input
+        //            // Mã hàng NCC - tô màu nếu không khớp
+        //            var codeEquipmentCell = ws.Cell(rowStart, col++);
+        //            codeEquipmentCell.SetValue(item.CodeEquipmentNCC ?? string.Empty);
+        //            if (!item.IsMatch_MaHangNCC)
+        //            {
+        //                codeEquipmentCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // Tên hàng tiếng Việt - tô màu nếu không khớp
+        //            var nameVNCell = ws.Cell(rowStart, col++);
+        //            nameVNCell.SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
+        //            if (!item.IsMatch_NameVN)
+        //            {
+        //                nameVNCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // Tên hàng tiếng Anh - tô màu nếu không khớp
+        //            var nameENCell = ws.Cell(rowStart, col++);
+        //            nameENCell.SetValue(item.NameENByNCC ?? string.Empty);
+        //            if (!item.IsMatch_NameEN)
+        //            {
+        //                nameENCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // Số lượng - tô màu nếu không khớp
+        //            var quantityCell = ws.Cell(rowStart, col++);
+        //            quantityCell.SetValue(item.soluong ?? 0);
+        //            if (!item.IsMatch_SoLuong)
+        //            {
+        //                quantityCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // Đơn vị - tô màu nếu không khớp
+        //            var unitCell = ws.Cell(rowStart, col++);
+        //            unitCell.SetValue(item.donvi ?? string.Empty);
+        //            if (!item.IsMatch_DonVi)
+        //            {
+        //                unitCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Vendor maker
+        //            ws.Cell(rowStart, col++).SetValue((item.FL_USD ?? 0));
+        //            ws.Cell(rowStart, col++).SetValue((item.FL_VND ?? 0).ToString("N0", enUs));
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_MOQ ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_Packing ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.DTM_LeadTime ?? string.Empty);
+
+        //            // Ngày giao hàng - tô màu nếu không khớp
+        //            var shipTimeCell = ws.Cell(rowStart, col++);
+        //            shipTimeCell.SetValue(item.DTM_ShipTime ?? string.Empty);
+        //            if (!item.IsMatch_Ngay)
+        //            {
+        //                shipTimeCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // Rohs - tô màu nếu không khớp
+        //            var rohsCell = ws.Cell(rowStart, col++);
+        //            rohsCell.SetValue(item.VCHR_Rohs ?? string.Empty);
+        //            if (!item.IsMatch_Rohs)
+        //            {
+        //                rohsCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // CO/CQ - tô màu nếu không khớp
+        //            var cocqCell = ws.Cell(rowStart, col++);
+        //            cocqCell.SetValue(item.VCHR_COCQ ?? string.Empty);
+        //            if (!item.IsMatch_COCQ)
+        //            {
+        //                cocqCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // MSDS - tô màu nếu không khớp
+        //            var msdsCell = ws.Cell(rowStart, col++);
+        //            msdsCell.SetValue(item.VCHR_MSDS ?? string.Empty);
+        //            if (!item.IsMatch_MSDS)
+        //            {
+        //                msdsCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // An toàn - tô màu nếu không khớp
+        //            var anToanCell = ws.Cell(rowStart, col++);
+        //            anToanCell.SetValue(item.VCHR_AnToan ?? string.Empty);
+        //            if (!item.IsMatch_AnToan)
+        //            {
+        //                anToanCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            // Cam kết - tô màu nếu không khớp
+        //            var camKetCell = ws.Cell(rowStart, col++);
+        //            camKetCell.SetValue(item.VCHR_CamKet ?? string.Empty);
+        //            if (!item.IsMatchCamKet)
+        //            {
+        //                camKetCell.Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_DeliveryTerm ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_PaymentTerm ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_File ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.DTM_EffectiveDate?.ToString("dd/MM/yyyy") ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.DTM_ExpiryDate?.ToString("dd/MM/yyyy") ?? string.Empty);
+        //            // System count
+        //            string key = $"{item.CHR_MaDon ?? ""}|{(string.IsNullOrEmpty(item.CHR_MaThietBi) ? item.ID.ToString() : item.CHR_MaThietBi)}" +
+        //                $"|{item.CHR_MaNCC ?? ""}|{(string.IsNullOrEmpty(item.CodeEquipmentNCC) ? item.ID.ToString() : item.CodeEquipmentNCC)}";
+        //            var tot = totals.ContainsKey(key) ? totals[key] : (0.0, 0.0);
+        //            string totalCell = "";
+        //            if (tot.Item1 != 0)
+        //            {
+        //                totalCell = tot.Item1.ToString("N0", enUs) + " VND";
+        //            }
+        //            else if (tot.Item2 != 0)
+        //            {
+        //                totalCell = Math.Round(tot.Item2, 4).ToString("0.0000", enUs) + " USD";
+        //            }
+        //            ws.Cell(rowStart, col++).SetValue(totalCell);
+        //            ws.Cell(rowStart, col++).SetValue(item.BIT_Select == true ? "O" : "X");
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_ReasonPick ?? string.Empty);
+        //            ws.Cell(rowStart, col++).SetValue(item.NVCHR_Note ?? string.Empty);
+        //            // Approval
+        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 9 ? item.UserQlsc ?? "" : "");
+        //            ws.Cell(rowStart, col++).SetValue(GetApprovalStatus(item.ID_StepBaoGia, 9, item.LyDoQlsc));
+        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 9 ? item.LyDoQlsc ?? "" : "");
+
+        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 10 ? item.UserQltc ?? "" : "");
+        //            ws.Cell(rowStart, col++).SetValue(GetApprovalStatus(item.ID_StepBaoGia, 10, item.LyDoQltc));
+        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 10 ? item.LyDoQltc ?? "" : "");
+
+        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 11 ? item.UserDeft ?? "" : "");
+        //            ws.Cell(rowStart, col++).SetValue(GetApprovalStatus(item.ID_StepBaoGia, 11, item.LyDoDeft));
+        //            ws.Cell(rowStart, col++).SetValue(item.ID_StepBaoGia > 11 ? item.LyDoDeft ?? "" : "");
+
+        //            // Thêm cột "Lỗi chi tiết" vào cuối
+        //            string itemId = item.ID?.ToString() ?? "";
+        //            if (errorDetails.ContainsKey(itemId) && errorDetails[itemId].Any())
+        //            {
+        //                ws.Cell(rowStart, col++).SetValue(string.Join("; ", errorDetails[itemId]));
+        //                ws.Row(rowStart).Style.Fill.BackgroundColor = XLColor.LightPink;
+        //            }
+        //            else
+        //            {
+        //                ws.Cell(rowStart, col++).SetValue("");
+        //            }
+
+        //            rowStart++;
+        //        }
+        //        using var outStream = new MemoryStream();
+        //        workbook.SaveAs(outStream);
+        //        var bytes = outStream.ToArray();
+        //        var fileName = $"QuotationResults_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+        //        const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        //        return File(bytes, contentType, fileName);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(_localizer["ExportError", ex.Message].Value);
+        //    }
+
+        //}
+
         [HttpPost]
         public async Task<IActionResult> ExportFileExcelApproverResult([FromBody] List<string> model)
         {
@@ -1148,6 +1544,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 // Kiểm tra lỗi cho từng dòng
                 var errorDetails = new Dictionary<string, List<string>>();
+                var errorGroups = new HashSet<string>();
+
                 foreach (var rowData in allRowsData)
                 {
                     var errors = new List<string>();
@@ -1250,6 +1648,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (errors.Any())
                     {
                         errorDetails[id] = errors;
+                        // Thêm nhóm (MaDon|MaHangNoiBo|MaThietBi)
+                        string groupKey = $"{maDon}|{maHangNB}|{maThietBi}";
+                        errorGroups.Add(groupKey);
                     }
                 }
 
@@ -1289,6 +1690,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     var enUs = new CultureInfo("en-US");
                     int col = 1;
+
+                    // Xác định nhóm của dòng hiện tại
+                    string groupKey = $"{item.CHR_MaDon ?? ""}|{item.CHR_MaHangNoiBo ?? ""}|{item.CHR_MaThietBi ?? ""}";
+                    // Nếu nhóm có lỗi, tô toàn bộ dòng màu đỏ
+                    if (errorGroups.Contains(groupKey))
+                    {
+                        ws.Row(rowStart).Style.Fill.BackgroundColor = XLColor.LightPink;
+                    }
+
                     // BIVN Input
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(
@@ -1315,7 +1725,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC ?? string.Empty);
-                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.ShortName ?? item.NVCHR_TenNCC ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
                     // Vendor input
@@ -1454,7 +1864,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (errorDetails.ContainsKey(itemId) && errorDetails[itemId].Any())
                     {
                         ws.Cell(rowStart, col++).SetValue(string.Join("; ", errorDetails[itemId]));
-                        ws.Row(rowStart).Style.Fill.BackgroundColor = XLColor.LightPink;
                     }
                     else
                     {
@@ -1474,8 +1883,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(_localizer["ExportError", ex.Message].Value);
             }
-
         }
+
         // lấy thông tin theo chi tiêt mã đơn phe duyet
         [HttpPost]
         public async Task<IActionResult> GetSupplierApprovalInfor([FromBody] string maDon)
@@ -1484,7 +1893,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(_localizer["OrderCodeRequired"].Value);
             }
-            var result = await _baoGiaService.GetSupplierApprovalInfoAsync(maDon);
+            var result = await _baoGiaService.GetSupplierApprovalInfoAsync(maDon, GetCurrentUserId());
             if (!result.Success)
             {
                 return BadRequest(result.Message);

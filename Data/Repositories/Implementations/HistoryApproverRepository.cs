@@ -89,8 +89,55 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lấy danh sách phê duyệt của người dùng
         public async Task<List<BaoGia_Request_of_Quotation>> GetListApprover(string adid, string? soDon, string? maHang, string? section, string? statusApprover)
         {
-            var sql = @"SELECT DISTINCT r.* FROM [BaoGia_Request_of_Quotation] as r
+            var sql = @"SELECT DISTINCT
+                r.ID,
+                r.BIT_IsTemplate,
+                r.BIT_LayBaoGia,
+                r.CHR_CreateBy,
+                r.CHR_Gap,
+                r.CHR_MaDon,
+                r.CHR_MaHangNCC,
+                r.CHR_MaHangNoiBo,
+                r.CHR_MaNCC,
+                r.CHR_MaThietBi,
+                r.CHR_NameEN,
+                r.CHR_Phanloai,
+                r.CHR_SectionCode,
+                r.CHR_SectionName,
+                r.DTM_CreateDate,
+                r.DTM_Deadline,
+                r.DTM_KyHan,
+                r.DTM_NgayMuonNhan,
+                r.DTM_UpdateLater,
+                r.ID_Status,
+                r.INT_SoLanUpdate,
+                r.NVCHR_AnToan,
+                r.NVCHR_COCQ,
+                r.NVCHR_ChatLieu,
+                r.NVCHR_ChungLoai,
+                r.NVCHR_DonVi,
+                r.NVCHR_DongMay,
+                r.NVCHR_FileThietKe,
+                r.NVCHR_HinhDang,
+                r.NVCHR_KichThuoc,
+                r.NVCHR_LyDo,
+                r.NVCHR_MSDS,
+                r.NVCHR_NameVN,
+                r.NVCHR_NhaSanXuat,
+                r.NVCHR_Rohs,
+                n.ShortName AS NVCHR_TenNCC,
+                r.NVCHR_ThanhPhan,
+                r.NVCHR_TinhNang,
+                r.CHR_UserApproval,
+                r.NVCHR_UserRequest,
+                r.INT_SoLuong,
+                r.ID_StepBaoGia,
+                r.NVCHR_ReasonQuotation,
+                r.CHR_LinkFile
+                FROM [BaoGia_Request_of_Quotation] as r
                 LEFT JOIN BaoGia_Master_Approver_Send_Mail as m ON m.ID_BaoGiaStep = r.ID_StepBaoGia
+                LEFT JOIN IM_NCC_NEW n 
+                    ON r.CHR_MaNCC = n.Ma
                 WHERE (r.CHR_UserApproval = @Adid OR (r.ID_StepBaoGia = 4 AND m.CHR_UserAdid = @Adid)) 
                   AND r.ID_StepBaoGia < 6 
                   AND r.ID_StepBaoGia > 1

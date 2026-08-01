@@ -1,4 +1,36 @@
 
+const API_ENDPOINTS = {
+    loadInv: '/ipcs/Import/_load_inv',
+    loadMaterial: '/ipcs/Import/_load_material',
+    importFileExcel: '/ipcs/Import/ImportFileExcel',
+    infoMaterial: '/ipcs/Import/_info_material',
+    loadUserInfo: '/ipcs/Import/_load_user_info',
+    loadDept: '/ipcs/Import/_load_dept',
+    masterLoadFac: '/ipcs/Master/load_fac',
+    masterLoadSec: '/ipcs/Master/load_sec',
+    masterLoadWh: '/ipcs/Master/load_wh',
+    truyXuatLyLich: '/ipcs/Master/_truyxuatlylich',
+    chuyenkho: '/ipcs/Import/chuyenkho'
+};
+
+//const API_ENDPOINTS = {
+//    loadInv: '/Import/_load_inv',
+//    loadMaterial: '/Import/_load_material',
+//    importFileExcel: '/Import/ImportFileExcel',
+//    infoMaterial: '/Import/_info_material',
+//    loadUserInfo: '/Import/_load_user_info',
+//    loadDept: '/Import/_load_dept',
+//    masterLoadFac: '/Master/load_fac',
+//    masterLoadSec: '/Master/load_sec',
+//    masterLoadWh: '/Master/load_wh',
+//    truyXuatLyLich: '/Master/_truyxuatlylich',
+//    chuyenkho: '/Import/chuyenkho'
+//};
+
+function getEndpoint(key) {
+    return API_ENDPOINTS[key];
+}
+
 // --- 1. Quản lý Trạng thái Phân trang ---
 const userPagingState = {
     fullData: [],
@@ -23,7 +55,7 @@ async function _load_inv() {
     params.append('Group_Code', Group_Code);
     params.append('UserName', UserName);
 
-    fetch('/ipcs/Import/_load_inv', {
+    fetch(getEndpoint('loadInv'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -175,8 +207,7 @@ function initSelect2($element) {
 // Cập nhật lại hàm load trong import_process.js hoặc tại đây
 async function _load_name_inv(group_code) {
     const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
-   fetch('/ipcs/Import/_load_material', {
-    //fetch('/Import/_load_material', {
+    fetch(getEndpoint('loadMaterial'), {
         method: 'POST',
         body: params
     })
@@ -215,7 +246,8 @@ async function _load_info_adid() {
     const params = new URLSearchParams();
     params.append('us', us);
 
-    fetch('/ipcs/Import/_load_user_info', {
+    fetch(getEndpoint('loadUserInfo'), {
+    //fetch('/Import/_load_user_info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
@@ -241,7 +273,7 @@ async function _load_dept(dept) {
     params.append('dept', dept);
     params.append('us', us);
 
-    fetch('/ipcs/Import/_load_dept', {
+    fetch(getEndpoint('loadDept'), {
     //fetch('/Import/_load_dept', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -266,7 +298,7 @@ async function _load_material(Material_Code, id) {
     params.append('Account_Name_VN', '');
     params.append('Group_Code', groupcode);
 
-    fetch('/ipcs/Import/_info_material', {
+    fetch(getEndpoint('infoMaterial'), {
     //fetch('/Import/_info_material', {
         method: 'POST',
         headers: {
@@ -310,7 +342,7 @@ function _modal11(ma, kho, soluon, ten, khoi) {
 }
 async function _Fac() {
 
-    fetch('/ipcs/Master/load_fac', {
+    fetch(getEndpoint('masterLoadFac'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -336,7 +368,7 @@ async function _Fac() {
 async function _SEC(fac) {
 
     const params = new URLSearchParams({ fac: fac });
-    fetch('/ipcs/Master/load_sec', {
+    fetch(getEndpoint('masterLoadSec'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -365,7 +397,7 @@ async function _WH() {
     var sec = document.getElementById("phongban_chuyen").value;
 
     const params = new URLSearchParams({ fac: fac, sec: sec });
-    fetch('/ipcs/Master/load_wh', {
+    fetch(getEndpoint('masterLoadWh'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -393,7 +425,7 @@ async function _log_material(malinhkien, kho) {
 
     document.getElementById("modal-17").click();
     const params = new URLSearchParams({ malinhkien: malinhkien, kho: kho });
-    fetch('/ipcs/Master/_truyxuatlylich', {
+    fetch(getEndpoint('truyXuatLyLich'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -470,7 +502,7 @@ async function UploadFileFormat() {
     formData.append("us", us);
     formData.append("khoi", khoi);
     try {
-        const response = await fetch('/ipcs/Import/ImportFileExcel', {
+        const response = await fetch(getEndpoint('importFileExcel'), {
             method: 'POST',
             body: formData
         });
@@ -534,7 +566,7 @@ async function chuyenkhoo() {
    
     const params = new URLSearchParams();
     params.append('malinhkien', malinhkien);
-    params.append('khochuyen', khochuyen);
+    params.append('khochuyen', khochuyen);  
     params.append('soluonghientai', soluonghientai);
     params.append('khonhan', khonhan);
     params.append('vitri', vitri);
@@ -548,10 +580,10 @@ async function chuyenkhoo() {
         alert("Kho chuyển và kho nhận phải khác nhau ");
     }
     else {
-        fetch('/ipcs/Import/chuyenkho', {
+        fetch(getEndpoint('chuyenkho'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params
+            body: params.toString()
         })
             .then(response => response.json())
             .then(data => {
@@ -561,4 +593,3 @@ async function chuyenkhoo() {
             .catch(error => console.error('Error:', error));
     }
 }
-   

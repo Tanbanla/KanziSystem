@@ -427,6 +427,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                             FL_VND = 0,
                             NVCHR_MOQ = "",
                             DTM_LeadTime = "",
+                            BIT_Select = null,
                             DTM_ShipTime = null,
                             VCHR_Rohs = "",
                             VCHR_COCQ = "",
@@ -508,12 +509,34 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             // cap nhat trang thai da gui mail
             if (listSended.Any())
             {
-               await _repo.UpdateMailSentStatusAsync(listSended);
+                try
+                {
+                    await _repo.UpdateMailSentStatusAsync(listSended);
+                }
+                catch (Exception ex)
+                {
+                    return new GenericResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Bug Update: " + ex.Message
+                    };
+                }
             }
 
             if (listBaoGiaDetail.Any())
             {
-               await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
+                try
+                {
+                    await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
+                }
+                catch (Exception ex)
+                {
+                    return new GenericResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Bug Insert: " + ex.Message
+                    };
+                }
             }
 
             return new GenericResponse<bool>

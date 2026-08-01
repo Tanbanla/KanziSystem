@@ -60,17 +60,26 @@
                     {
                         <li class="dropdown">
                             <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
-                                <i class="fa fa-user"></i>
-                                @Localizer["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User")!
+                                <i class="fa fa-user-check"></i>
+                                @Localizer["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User")!                            
+
                                 <div class="d-sm-none d-lg-inline-block"></div>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <div class="dropdown-title">
+                              @*   <div class="dropdown-title">
                                     @Localizer["LoggedInAt"]: @(Context.Session.GetString("LoginTime") ?? "N/A")
-                                </div>
+                                </div> *@
+                             @*    <a href="@Url.Action("Profile", "Account")" class="dropdown-item has-icon">
+                                    <i class="fa fa-user-check"></i> Phê duyệt xuất kho PROD   <span class="badge badge-danger" id="header-record-count-prod">0</span>
+                                </a>
+                                <a href="@Url.Action("Profile", "Account")" class="dropdown-item has-icon">
+                                    <i class="fa fa-user-check"></i> Phê duyệt xuất kho GA   <span class="badge badge-danger" id="header-record-count-ga">0</span>
+                                </a> *@
                                 <a href="@Url.Action("Profile", "Account")" class="dropdown-item has-icon">
                                     <i class="far fa-user"></i> @Localizer["Profile"]
                                 </a>
+                              
+                             
                                 <div class="dropdown-divider"></div>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
@@ -171,10 +180,11 @@
                                     }
                                     else
                                     {
-                                        <a class="dropdown-item py-2" href="~/History/HistoryQuote">
+                                        <a class="dropdown-item py-2" href="~/History/Index">
                                             <i class="fas fa-history me-2"></i>
                                             <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                         </a>
+                                    }
                                     }
                                     
                                 </li>
@@ -202,7 +212,8 @@
                             <ul class="dropdown-menu">
                                 @*   <li><a class="nav-link" href="~/Delivery/PO_Info"><i class="ion ion-ios-information"></i> Thông tin PO</a></li> @* thông tin PO *@
                                 @*  <li><a class="nav-link" href="~/Approval/Approval"><i class="ion ion-social-dropbox"></i> Nhận hàng PO</a></li> *@ @* Nhập hàng PO 
-                             @*    <li><a class="nav-link" href="~/Delivery/Giaohang"><i class="ion ion-ios-cart"></i>Giao hàng PO</a></li> @* Nhập kho *@ 
+                             @*    <li><a class="nav-link" href="~/Delivery/Giaohang"><i class="ion ion-ios-cart"></i>Giao hàng PO</a></li> @* Nhập kho *@
+                                <li><a class="nav-link" href="~/ManagerDelivery/ManageDelivery"><i class="fas fa-reply"></i>@Languages.Giaohang</a></li>
                                 <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="ion ion-ios-cart"></i> @Languages.NhaphangPO</a></li> @* Nhập hàng PO  *@
                                 @*   <li><a class="nav-link" href="~/Delivery/"><i class="ion ion-ios-home-outline"></i> @Languages.Nhapkho</a></li>   *@
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
@@ -229,6 +240,8 @@
 @*                                 <li><a class="dropdown-item py-2" href="~/Master/master_material"><i class="ion ion-android-options"></i> @Localizer["MenuMasterMaterial"]</a></li> *@
                                 <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/User/QuanlyUyquyen"><i class="fas fa-handshake"></i> @Languages.uyquyen</a></li>
+                                <li><a class="dropdown-item py-2" href="~/ManagerDelivery/UsingManager"><i class="fas fa-handshake"></i> Using</a></li>
+                                <li><a class="dropdown-item py-2" href="~/ManagerDelivery/Giaonhanhang_Master"><i class="fas fa-handshake"></i> Master Giao trả hàng</a></li>
                                 @if (User.FindFirst("Roles")?.Value == "UserPUR")
                                 {
                                     <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>
@@ -246,7 +259,10 @@
                     <div class="section-header">
                         <div class="section-header-breadcrumb" style="margin-left: 0px;">
                             <div class="breadcrumb-item "><a href="#"><i class="ion ion-ios-home"></i> @Localizer["BreadcrumbHome"]</a></div>
-                            <div class="breadcrumb-item active">@ViewBag.Title</div>
+                            <div class="breadcrumb-item active">
+                                <span id="page-title">@ViewBag.Title</span>
+                                <span id="page-record-count" class="badge badge-primary ml-2" style="display:none; font-weight:600;"></span>
+                            </div>
                         </div>
                     </div>
                     <br />
@@ -330,5 +346,6 @@
             window.location.href = newUrl;
         }
     </script>
+
 </body>
 </html>

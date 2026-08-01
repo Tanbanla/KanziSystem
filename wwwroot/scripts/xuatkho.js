@@ -1,3 +1,24 @@
+
+/* Resolve controller base path - flexible, can be set from server or global config */
+const CONTROLLER_BASE = (function () {
+    try {
+        // Priority:
+        // 1. window variable set by server or layout: window.XuatKhoControllerBase = '/area/Controller';
+        // 2. hidden input with id 'controllerBase' injected by Razor Page
+        // 3. default value '/ipcs/Import'
+        if (typeof window !== 'undefined' && window.XuatKhoControllerBase) {
+            return window.XuatKhoControllerBase;
+        }
+        const el = typeof document !== 'undefined' && document.getElementById('controllerBase');
+        if (el && el.value) {
+            return el.value;
+        }
+    } catch (e) {
+        // ignore and fallback
+    }
+    return '/ipcs/Import';
+})();
+
 // Load trang xuất kho 
 function _load_xuatkho() {
     var mayeucau = document.getElementById("mayeucau").value;
@@ -6,8 +27,7 @@ function _load_xuatkho() {
     var us = document.getElementById("us").innerHTML;
     var thangnam = document.getElementById("thangnam").value;
     const params = new URLSearchParams({ us: us, mayeucau: mayeucau, nguoitao: nguoitao, khoi: khoi, thangnam: thangnam });
-    fetch('/ipcs/Import/_load_xuatkhohang', {
-    //fetch('/Import/_load_xuatkhohang', {
+    fetch(`${CONTROLLER_BASE}/_load_xuatkhohang`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -25,8 +45,7 @@ function _load_xuatkho() {
             // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
             const htmlContent = data.map(user => {
                 let loaichiphi = "";
-                if (user.declaration == "AUXILIARY")
-                {
+                if (user.declaration == "AUXILIARY") {
                     loaichiphi = "Chi phí biến đổi theo sản lượng";
                 }
                 if (user.declaration == "EUQIMENT") {
@@ -54,10 +73,10 @@ function _load_xuatkho() {
                 }
                 if (user.status == "DONE") {
                     tinhtrang = "Đã hoàn thành";
-                } 
+                }
                 if (user.status == "ACCEPT") {
                     tinhtrang = "Chờ xác nhận";
-                } 
+                }
                 return `<tr class="main-row">
                 <td class="text-primary text-center" onclick="_modal_chitietxuatkho('${user.code_Request}')"><button type="button" class="btn btn-outline-success" style="padding:2px 5px 2px 5px" >chi tiết</button></td>
                 <td>${tinhtrang}</td>
@@ -138,7 +157,7 @@ function _load_body_detail(code_request) {
     const params = new URLSearchParams();
     params.append('code_request', code_request);
 
-    fetch('/ipcs/Import/_load_body_detail', {
+    fetch(`${CONTROLLER_BASE}/_load_body_detail`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -155,8 +174,8 @@ function _load_body_detail(code_request) {
             const container = document.getElementById("_bd_" + code_request);
             console.log(data);
             container.innerHTML = "";
-            data.forEach((item,i) => {
-                    container.innerHTML += `<tr>
+            data.forEach((item, i) => {
+                container.innerHTML += `<tr>
                     <td>${i + 1}</td>
                     <td>${item.material_Code}</td>
                     <td>${item.material_Name}</td>                 
@@ -185,7 +204,7 @@ function _load_tonkhotheonhamay(mahang, sl, id_rq, unit) {
     const params = new URLSearchParams();
     params.append('mahang', mahang);
 
-    fetch('/ipcs/Import/_tonkhotheonhamay', {
+    fetch(`${CONTROLLER_BASE}/_tonkhotheonhamay`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -220,7 +239,7 @@ function _soluongtontainhamay(kho) {
     params.append('mahang', mahang);
     params.append('kho', kho);
 
-    fetch('/ipcs/Import/_chonnhamay', {
+    fetch(`${CONTROLLER_BASE}/_chonnhamay`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -332,7 +351,7 @@ function _xuatkho(btn = null) {
             params.append('tongchiphiold', tongchiphiold);
             params.append('id_rq', idChiTietDong);
 
-            let p = fetch('/ipcs/Import/_xuatkhothucte', {
+            let p = fetch(`${CONTROLLER_BASE}/_xuatkhothucte`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -366,7 +385,7 @@ function _dlxuatkho() {
     var code_request = document.getElementById("madonn").innerHTML;
     const params = new URLSearchParams();
     params.append('code_request', code_request);
-    fetch('/ipcs/Import/ExportModalDetail', {
+    fetch(`${CONTROLLER_BASE}/ExportModalDetail`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -400,7 +419,7 @@ function _modal_chitietxuatkho(code_request) {
     const params = new URLSearchParams();
     params.append('code_request', code_request);
 
-    fetch('/ipcs/Import/_load_modal_detail', {
+    fetch(`${CONTROLLER_BASE}/_load_modal_detail`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

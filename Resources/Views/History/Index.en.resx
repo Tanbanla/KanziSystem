@@ -538,31 +538,31 @@
     <value>History table</value>
   </data>
   <data name="LegendTitle" xml:space="preserve">
-    <value>Color legend</value>
+    <value>Color guide</value>
   </data>
   <data name="LegendRejectedQuote" xml:space="preserve">
-    <value>Yellow: Quotation rejected</value>
+    <value>Rejected</value>
   </data>
   <data name="LegendSupplierSubmitted" xml:space="preserve">
-    <value>Green (supplier cell): Supplier submitted quotation</value>
+    <value>Quote submitted</value>
   </data>
   <data name="LegendSupplierNotSubmitted" xml:space="preserve">
-    <value>White (supplier cell): Supplier has not submitted quotation</value>
+    <value>Quote not submitted</value>
   </data>
   <data name="LegendOverdue" xml:space="preserve">
-    <value>Red: Quotation request overdue</value>
+    <value>Overdue</value>
   </data>
   <data name="LegendGroup1" xml:space="preserve">
-    <value>Group 1 - Order approval</value>
+    <value>Group 1: Order approval</value>
   </data>
   <data name="LegendGroup2" xml:space="preserve">
-    <value>Group 2 - Supplier selection approval</value>
+    <value>Group 2: Supplier selection approval</value>
   </data>
   <data name="LegendGroup3" xml:space="preserve">
-    <value>Group 3 - Supplier selection result</value>
+    <value>Group 3: Supplier result</value>
   </data>
   <data name="LegendGroup4" xml:space="preserve">
-    <value>Group 4 - Status/Action</value>
+    <value>Group 4: Status/Action</value>
   </data>
   <data name="No" xml:space="preserve">
     <value>No.</value>
@@ -629,5 +629,26 @@
   </data>
   <data name="ExportTable" xml:space="preserve">
     <value>Export table data file</value>
+  </data>
+  <data name="Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="LegendSelectedSupplier" xml:space="preserve">
+    <value>Selected supplier</value>
+  </data>
+  <data name="AllRefuse" xml:space="preserve">
+    <value>All suppliers refused to provide a quote.</value>
+  </data>
+  <data name="WaitingApprover" xml:space="preserve">
+    <value>Waiting for approval</value>
+  </data>
+  <data name="SubmittedApprover" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="NotQuotation" xml:space="preserve">
+    <value>Unable to obtain quotation</value>
   </data>
 </root>

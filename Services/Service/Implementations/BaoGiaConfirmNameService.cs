@@ -296,5 +296,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Done
+        public async Task<GenericResponse<List<ResultCheckCofirmName>>> DoneConfirmNameAsync(List<int> listDone)
+        {
+            var result = new GenericResponse<List<ResultCheckCofirmName>>();
+            try
+            {
+                result.Data = await _repo.DoneConfirmNameAsync(listDone);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

@@ -41,5 +41,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<dynamic>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user);
         // Update Name HQ role PIC PUR
         Task<bool> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user);
+        // Done
+        Task<List<ResultCheckCofirmName>> DoneConfirmNameAsync(List<int> listDone);
     }
 }

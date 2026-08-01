@@ -508,7 +508,7 @@
     <value>希望配送日</value>
   </data>
   <data name="tongtien" xml:space="preserve">
-    <value>合計注文数</value>
+    <value>合計金額</value>
   </data>
   <data name="tongtienthucte" xml:space="preserve">
     <value>実計金額</value>
@@ -551,5 +551,8 @@
   </data>
   <data name="uyquyen" xml:space="preserve">
     <value>権限を与える</value>
+  </data>
+  <data name="Giaohang" xml:space="preserve">
+    <value>配達する</value>
   </data>
 </root>

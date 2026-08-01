@@ -153,7 +153,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 DTM_ExpiryDate = null,
                                 CHR_UpdateBy = null,
                                 NVCHR_File = ws.Cell(r, 30).GetString(),
-                                BIT_Select = false,
+                                BIT_Select = null,
                                 CHR_Status = "Refuse"
                             };
 

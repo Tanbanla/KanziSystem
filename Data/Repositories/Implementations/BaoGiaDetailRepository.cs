@@ -328,7 +328,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result;
         }
         // update thông tin lựa chọn nhà  cung cấp
-        public async Task<BaoGia_Request_of_Quotation> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos, string userApproverNext)
+        public async Task<BaoGia_Request_of_Quotation> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_Quotation> dtos, string userApproverNext, string userUpdate)
         {
             if (dtos == null || dtos.Count == 0)
             {
@@ -362,7 +362,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     // Update deltail
                     detail.BIT_Select = item.BIT_Select;
                     detail.NVCHR_ReasonPick = item.NVCHR_ReasonPick;
-                    detail.CHR_UpdateBy = item.CHR_UpdateBy;
+                    detail.CHR_UpdateBy = userUpdate;
                     detail.NVCHR_Note = item.NVCHR_Note;
                     // luu lịch sử thay đổi
                     var historyD = new BaoGia_History_Detail_Request
@@ -371,7 +371,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         ID_RQ_Detail = detail.ID,
                         NVCHR_dataOld = System.Text.Json.JsonSerializer.Serialize(detail),
                         NVCHR_dataNew = System.Text.Json.JsonSerializer.Serialize(item),
-                        CHR_CreateBy = item.CHR_UpdateBy,
+                        CHR_CreateBy = userUpdate,
                         DTM_CreateBy = DateTime.Now
                     };
                     historyDetailList.Add(historyD);
@@ -380,8 +380,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     {
                         ID_RequestQuote = rq.ID,
                         CHR_MaDon = rq.CHR_MaDon?? string.Empty,
-                        CHR_UpdateBy = item.CHR_UpdateBy ?? string.Empty,
-                        NVCHR_UpdateName = item.CHR_UpdateBy ?? string.Empty,
+                        CHR_UpdateBy = userUpdate ?? string.Empty,
+                        NVCHR_UpdateName = userUpdate ?? string.Empty,
                         CHR_Updatedate = DateTime.Now,
                         CHR_ChangedColumns = null,
                         CHR_OldData = null,

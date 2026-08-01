@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -50,7 +51,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<UpdateHistoryResult>> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias);
 
         // Get thông tin đơn phê duyệt lựa chọn ncc
-        public Task<GenericResponse<List<dynamic>>> GetSupplierApprovalInfoAsync(string maDon);
+        public Task<GenericResponse<List<dynamic>>> GetSupplierApprovalInfoAsync(string maDon, string user);
 
         // Xuất file phê duyệt báo giá
         public Task<GenericResponse<List<dynamic>>> GetExportApprovalInfoAsync(List<string> listMaDon,string adid);

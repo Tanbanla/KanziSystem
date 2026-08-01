@@ -58,8 +58,9 @@
         min-width: 2.375rem;
         line-height: 36px;
     }
+
     .form-group {
-        margin-bottom : 10px;
+        margin-bottom: 10px;
     }
 </style>
 <div class="row">
@@ -131,13 +132,13 @@
                     </div>
                     <div class="form-group col-md-1">
                         <label class="text-danger">@Languages.thoihanmuonnhan</label>
-                        <input type="date" class="form-control" id="thoihan" style="background-color:#ffff0029" required/>
+                        <input type="date" class="form-control" id="thoihan" style="background-color:#ffff0029" required />
                     </div>
-                    <div class="form-group col-md-1"> 
+                    <div class="form-group col-md-1">
                         <label>@Languages.loaihang </label>
                         <select class="form-control" id="typee" style="background-color:#ffff0029" read>
                             <option>NEW</option>
-                           @*  <option>REUSE</option> *@
+                            @*  <option>REUSE</option> *@
                         </select>
                     </div>
                     <div class="form-group col-md-1">
@@ -151,7 +152,7 @@
                     <div class="form-group col-md-1">
                         <label for="inputCity">@Languages.thanhtien  </label> <code style="float:right"><b>USD</b></code>
                         <input type="text" class="form-control" id="thanhtien" value="0" readonly>
-                    </div>                  
+                    </div>
                     <div class="form-group col-md-2">
                         <label for="inputCity">Chọn file  </label> <code style="float:right"><b></b></code>
                         <input id="mstFile" accept=".xlsx" type="file" class="form-control" />
@@ -159,7 +160,7 @@
                     <div class="form-group col-md-1">
                         <label for="inputCity"><a href="/ipcs/Import/ExportToExcel"> File mẫu excel </a></label> <code style="float:right"><b></b></code>
                         <button id="btnUpload" onclick="UploadFileFormat()" type="button" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Import file</button>
-                    </div>                  
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="table-responsive">
@@ -218,11 +219,11 @@
                         </table>
                     </div>
                     <button type="button" class="btn btn-success btn-sm" id="btn-add-row">+ @Languages.themdongmoi </button>
-                </div>               
+                </div>
                 <div id="gyc">
                     <button class="btn btn-info float-right" id="modal-6" onclick="getEmployeeData()">✉ @Languages.guiyeucau</button>
-                      <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>                  
-                 @*     <button class="btn btn-info float-right" id="modal-6" >✉ @Languages.guiyeucau</button>
+                    <button class="btn btn-info float-right" id="modal-20" onclick="getEmployeeData_GA()">✉ @Languages.guiyeucau</button>
+                    @*     <button class="btn btn-info float-right" id="modal-6" >✉ @Languages.guiyeucau</button>
                     <button class="btn btn-info float-right" id="modal-20">✉ @Languages.guiyeucau</button> *@
                 </div>
                 <br />
@@ -249,17 +250,17 @@
 
         //initSelect2($('.select2'));
     }
-       function check_mucdichkhac() { 
+       function check_mucdichkhac() {
         // mặc định là chi phí cố định
         if(document.getElementById("group_code").value == "GA"){
-          
+
               $('#loaichiphi').val('COMMON').prop('disabled', false);
         }
         if(document.getElementById("group_code").value == "PROD"){
               $('#loaichiphi').val('EUQIMENT').change();
               $('#loaichiphi').val('EUQIMENT').prop('disabled', true);
         }
-      
+
         // 1. Reset danh sách vật tư (nếu có dropdown bên ngoài)
         const lstMaterial = document.getElementById("lstMaterial");
         if (lstMaterial) lstMaterial.innerHTML = "";
@@ -335,7 +336,7 @@
         } else {
             uncheck_mucdichkhac();
         }
-    }   
+    }
        function updateRowNumbers() {
         const rows = document.querySelectorAll('#dynamic-table tbody tr');
         rows.forEach((row, index) => {
@@ -347,7 +348,7 @@
 
             // 2. Danh sách các ID cần cập nhật theo đúng hậu tố _i
             const idList = ['tenhang', 'stk', 'kho', 'tk', 'sl', 'dv', 'dg', 'nt', 'tcp', 'md', 'pcp', 'vt', 'gc'];
-           
+
             idList.forEach(name => {
                 const el = row.querySelector(`[id^="${name}_"]`); // Tìm phần tử có id bắt đầu bằng name_
                 if (el) {
@@ -372,7 +373,7 @@
         document.getElementById('btn-add-row').addEventListener('click', function() {
             const tbody = document.querySelector('#dynamic-table tbody');
             const firstRow = tbody.querySelector('.input-row');
-               
+
             // 1. Clone dòng đầu tiên
             const newRow = firstRow.cloneNode(true);
             const lastRow = tbody.querySelector('.input-row:last-child');
@@ -396,11 +397,11 @@
                 const $el = $(this);
                 const id = $el.attr('id') || '';
                 if (id.includes('stk_') || id.includes('kho_' ) || id.includes('tk_' )|| id.includes('sl_' )|| id.includes('dv_' )|| id.includes('dg_' )|| id.includes('nt_' )  || id.includes('tcp_' )) {
-                // Bạn có thể xóa giá trị (đã làm ở trên)         
-                    $el.val('');            
+                // Bạn có thể xóa giá trị (đã làm ở trên)
+                    $el.val('');
                 }
             });
-              
+
             // 3. Hiển thị nút xóa cho dòng mới
             const removeBtn = newRow.querySelector('.btn-remove');
             if (removeBtn) {
@@ -457,7 +458,7 @@
         tinhTongTatCa();
     }
 
-    function tinhTongTatCa() {
+       function tinhTongTatCa() {
         let tongMoi = 0;
         const allTcp = document.querySelectorAll('.tcp');
 
@@ -480,9 +481,37 @@
         }
 
         const displayTotal = document.getElementById("thanhtien");
-        if (displayTotal) {         
+        if (displayTotal) {
             displayTotal.value = tongMoi.toFixed(2)
         }
     }
+       function kiemTraViTriKhopNhau() {
+            // 1. Lấy giá trị của ô vị trí chung (phía trên bảng)
+            const viTriChung = document.getElementById("placee").value.trim();
 
+            // 2. Lấy tất cả các thẻ select vị trí chi tiết trong bảng (có class là 'vt')
+            const danhSachViTriChiTiet = document.querySelectorAll("#dynamic-table tbody .vt");
+
+            let isValid = true;
+            let cacDongLoi = [];
+
+            // 3. Duyệt qua từng dòng để so sánh
+            danhSachViTriChiTiet.forEach((selectBox, index) => {
+                const viTriChiTiet = selectBox.value.trim();
+
+                // Nếu giá trị không khớp, đánh dấu lỗi và lưu lại vị trí dòng
+                if (viTriChiTiet !== viTriChung) {
+                    isValid = false;
+                    cacDongLoi.push(index + 1); // index + 1 để lấy đúng số thứ tự dòng hiển thị
+                }
+            });
+
+            // 4. Hiển thị thông báo nếu có lỗi
+            if (!isValid) {
+                alert("Cảnh báo: Vị trí tại các dòng số " + cacDongLoi.join(", ") + " không khớp với Vị trí  ( " + (viTriChung || "Chưa nhập") + " ). Vui lòng kiểm tra lại!");
+                return false; // Ngăn chặn việc gửi dữ liệu
+            }
+
+        return true; // Trạng thái hợp lệ, cho phép gửi
+    }
 </script>

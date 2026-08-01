@@ -4,6 +4,7 @@ using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -129,6 +130,23 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 " left join IM_NCC_NEW as n on n.Ma = c.CHR_MaNCC";
             return (await _conn.QueryAsync<dynamic>(sql)).ToList();
 
+        }
+        // Lấy danh sách nhà cung cấp không cần xác nhận thủ tục hải quan
+        public async Task<List<string>> ListNotConfirmName()
+        {
+            var result = new HashSet<string>();
+            var tb1 = await _context.BaoGia_Vender_NotConfirms.
+                Where(c => c.CHR_Status == "ON").
+                Select(c => c.CHR_MaNcc).ToListAsync();
+
+            var tb2 = await _context.IM_NCC_NEWs.
+                Where(c => c.Khuvuc != null && c.Khuvuc.Contains("Overseas")).
+                Select(c => c.Ma).ToListAsync();
+
+            result.UnionWith(tb1);
+            result.UnionWith(tb2);
+
+            return result.ToList();
         }
     }
 }

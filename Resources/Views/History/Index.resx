@@ -538,31 +538,31 @@
     <value>Bảng lịch sử</value>
   </data>
   <data name="LegendTitle" xml:space="preserve">
-    <value>Chú thích màu</value>
+    <value>Ý nghĩa màu</value>
   </data>
   <data name="LegendRejectedQuote" xml:space="preserve">
-    <value>Màu vàng: Từ chối báo giá</value>
+    <value>Từ chối</value>
   </data>
   <data name="LegendSupplierSubmitted" xml:space="preserve">
-    <value>Màu xanh lá (ô NCC): Đã gửi báo giá</value>
+    <value>Đã gửi báo giá</value>
   </data>
   <data name="LegendSupplierNotSubmitted" xml:space="preserve">
-    <value>Màu trắng (ô NCC): Nhà cung cấp chưa gửi báo giá</value>
+    <value>Chưa gửi báo giá</value>
   </data>
   <data name="LegendOverdue" xml:space="preserve">
-    <value>Màu đỏ: Quá hạn xin báo giá</value>
+    <value>Quá hạn</value>
   </data>
   <data name="LegendGroup1" xml:space="preserve">
-    <value>Group 1 - Phê duyệt đơn</value>
+    <value>Nhóm 1: Duyệt đơn</value>
   </data>
   <data name="LegendGroup2" xml:space="preserve">
-    <value>Group 2 - Phê duyệt chọn NCC</value>
+    <value>Nhóm 2: Duyệt chọn NCC</value>
   </data>
   <data name="LegendGroup3" xml:space="preserve">
-    <value>Group 3 - Kết quả lựa chọn NCC</value>
+    <value>Nhóm 3: Kết quả NCC</value>
   </data>
   <data name="LegendGroup4" xml:space="preserve">
-    <value>Group 4 - Trạng thái/Action</value>
+    <value>Nhóm 4: Trạng thái/Thao tác</value>
   </data>
   <data name="No" xml:space="preserve">
     <value>STT</value>
@@ -629,5 +629,26 @@
   </data>
   <data name="ExportTable" xml:space="preserve">
     <value>Xuất file dữ liệu bảng</value>
+  </data>
+  <data name="Hide" xml:space="preserve">
+    <value>Ẩn</value>
+  </data>
+  <data name="Show" xml:space="preserve">
+    <value>Hiển thị</value>
+  </data>
+  <data name="LegendSelectedSupplier" xml:space="preserve">
+    <value>NCC được chọn</value>
+  </data>
+  <data name="AllRefuse" xml:space="preserve">
+    <value>Toàn bộ các NCC đã từ chối báo giá</value>
+  </data>
+  <data name="WaitingApprover" xml:space="preserve">
+    <value>Chờ phê duyệt</value>
+  </data>
+  <data name="SubmittedApprover" xml:space="preserve">
+    <value>Đơn đã phê duyệt</value>
+  </data>
+  <data name="NotQuotation" xml:space="preserve">
+    <value>Không lấy được báo giá</value>
   </data>
 </root>

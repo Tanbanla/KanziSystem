@@ -608,7 +608,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.ToTable("BaoGia_Detail_of_Quotation");
 
             entity.Property(e => e.BIT_Commit).HasDefaultValue(false);
-            entity.Property(e => e.BIT_Select).HasDefaultValue(false);
+            entity.Property(e => e.BIT_Select);
             entity.Property(e => e.CHR_CodeNCC)
                 .HasMaxLength(150)
                 .IsUnicode(false);

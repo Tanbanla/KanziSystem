@@ -237,8 +237,8 @@ function _load_request_condition() {
         params.append('ngayyc', ngayyc);
         params.append('loaicp', loaicp);
 
-        //fetch('/Request/get_requestcondition', {
         fetch('/ipcs/Request/get_requestcondition', {
+        //fetch('/Request/get_requestcondition', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -309,8 +309,8 @@ function _load_request_condition() {
                     {
                         quyen = `<td  title="Xóa đơn" ><i class="fa fa-trash text-danger" onclick="xoa_don_prod('${item.iD_REQUEST}')"/></i> </td>
                                 <td title="Sửa đơn" >${suadon}</td>
-                                <td title="Hủy đơn" >${huydon}</td>`;
-                                //<td><a href="/Request/SuDungLai?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-pen text-success" ></i> </a></td>
+                                <td title="Hủy đơn" >${huydon}</td>
+                                <td><a href="/ipcs/Import/SuDungLai?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-reply-all text-danger" ></i> </a></td>`;
                     }
             return `
                     <tr>
@@ -439,7 +439,8 @@ async function _load_request_condition_ga() {
                 {
                         quyen = `<td  title="Xóa đơn" ><i class="fa fa-trash text-danger" onclick="xoa_don_GA('${item.iD_REQUEST}')"/></i></td>
                             <td title="Sửa đơn" >${suadon} </td>
-                            <td title="Hủy đơn" >${huydon} </td>`;
+                            <td title="Hủy đơn" >${huydon} </td>
+                            <td><a href="/ipcs/Import/SuDungLai?iD_REQUEST=${item.iD_REQUEST}"> <i class="fa fa-reply-all text-danger" ></i> </a></td>`;
                 }        
             return `
                 <tr>
@@ -471,63 +472,63 @@ async function _load_request_condition_ga() {
     .catch(error => console.error('Error:', error));
 }
 function xoa_don_prod(iD_REQUEST){
-var x = confirm("Bạn có muốn xóa đơn không !");
-if(x){
-        const params = new URLSearchParams();
-        params.append('iD_REQUEST', iD_REQUEST);
+    var x = confirm("Bạn có muốn xóa đơn không !");
+    if(x){
+            const params = new URLSearchParams();
+            params.append('iD_REQUEST', iD_REQUEST);
 
-            fetch('/ipcs/Import/_XOADONPROD', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString()
+                fetch('/ipcs/Import/_XOADONPROD', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+            })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
         })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-        .then(data => {
-            alert(data);
-                _load_request_condition();
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+            .then(data => {
+                alert(data);
+                    _load_request_condition();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
 
-    }   
+        }   
 }
 function xoa_don_GA(iD_REQUEST){
-var x = confirm("Bạn có muốn xóa đơn không !");
-if(x){
-        const params = new URLSearchParams();
-        params.append('iD_REQUEST', iD_REQUEST);
+    var x = confirm("Bạn có muốn xóa đơn không !");
+        if(x){
+            const params = new URLSearchParams();
+            params.append('iD_REQUEST', iD_REQUEST);
 
-            fetch('/ipcs/Import/_XOADONGA', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params.toString()
+                fetch('/ipcs/Import/_XOADONGA', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString()
+            })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
         })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            .then(data => {
+                alert(data);
+                    _load_request_condition_ga();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+
         }
-        return response.json();
-    })
-        .then(data => {
-            alert(data);
-                _load_request_condition_ga();
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-
     }
-}
 function _modal_sua(iD_REQUEST) {
     document.getElementById("modal-23").click();
 

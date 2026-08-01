@@ -150,7 +150,7 @@
         // Giả sử bạn lấy user hiện tại từ một biến global hoặc input ẩn
         var user = document.getElementById("us").innerHTML;
 
-        var Group_Code = document.getElementById("khoi").value;
+        //var Group_Code = document.getElementById("khoi").value;
         var Code_Request = document.getElementById("mnl").value;
         var Tinhtrang = document.getElementById("tinhtrangdon").value;
         var Cost_Center = document.getElementById("cost").value;
@@ -169,7 +169,7 @@
                 StartDate: Request_Date,
                 EndDate: ngayyc,
                 us: user,
-                Group_Code : Group_Code,
+                Group_Code : "",
                 Code_Request: Code_Request,
                 Tinhtrang : Tinhtrang,
                 Cost_Center : Cost_Center,
@@ -178,6 +178,7 @@
                 loaicp :loaicp
             },
             success: function (data) {
+            var Group_Code = data[0].Group_Code;
               if(Group_Code == "PROD"){
                       var html = '';
                 if (data && data.length > 0) {
@@ -269,7 +270,7 @@
                         html += `<td>${loaichiphi}</td>`;
                         html += `<td>${item.Total.toLocaleString()}</td>`;
                         html += `<td>${item.User_Create}</td>`;
-                        html += `<td colspan="3"> ${reset_don}</td>`;
+                        html += `<td colspan="3"> ${resetdon}</td>`;
                         html += '</tr>';
                     });
                 } else {

@@ -3,13 +3,33 @@
 @model IEnumerable<PoDetailViewModel>
 @{
     ViewData["Title"] = "Quản lý nhận hàng";
-    int stt = 1; // Biến đếm số thứ tự
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalRecords = ViewBag.TotalRecords ?? 0;
+    var pageSize = ViewBag.PageSize ?? 500;
+    var searchTerm = ViewBag.SearchTerm;
+    var currentTab = ViewBag.CurrentTab ?? "ngoai";
+    var reqMonth = ViewBag.ReqMonth as string;
+    int stt = (currentPage - 1) * pageSize + 1;
+
+    // Lấy thông tin quyền hạn của User
+    var userSection = User.FindFirst("Section")?.Value;
 }
 
 <style>
+    .badge-warning {
+        background-color: #ffc107;
+    }
+
+    .badge-info {
+        background-color: #17a2b8;
+        color: white;
+    }
+
     .table.table-bordered th {
         border-color: #d6d1d1;
     }
+
     body {
         background-color: #f8f9fa;
         font-size: 14px;
@@ -17,7 +37,7 @@
 
     .input-group-text, select.form-control:not([size]):not([multiple]), .form-control:not(.form-control-sm):not(.form-control-lg) {
         font-size: 13px;
-        padding: 15px 12px;
+      
         height: 38px;
     }
 
@@ -30,7 +50,6 @@
     .table-responsive {
         max-height: 600px;
         overflow-y: auto;
-
     }
 
     .table th {
@@ -39,6 +58,10 @@
         z-index: 1;
         vertical-align: middle;
         border-color: #d6d1d1;
+    }
+
+    .table:not(.table-sm) thead th {
+        color: #241b87;
     }
 
     .bg-pur {
@@ -59,14 +82,12 @@
         background-color: #fce8e6;
     }
 
-    /* Đảm bảo khoảng cách nhỏ giữa 2 nút trong ô hành động */
     .btn-action-gap {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    /* Vùng kéo thả file Excel chuyên dụng */
     .excel-dropzone {
         border: 2px dashed #28a745;
         background-color: #f8fff9;
@@ -77,12 +98,11 @@
         transition: all 0.2s ease;
     }
 
-    .excel-dropzone:hover {
-        background-color: #f0fdf2;
-        border-color: #218838;
-    }
+        .excel-dropzone:hover {
+            background-color: #f0fdf2;
+            border-color: #218838;
+        }
 
-    /* Style cho hàng hiển thị thông tin mở rộng */
     .detail-row {
         background-color: #ffffff !important;
     }
@@ -105,421 +125,389 @@
     .nav-tabs .nav-link.active {
         color: white;
         background-color: #2335b7;
-      
     }
 
     .nav-tabs .nav-item .nav-link.active {
         color: #e4e4e4;
     }
+
+    .modal.show {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .bg-white {
+        background-color: #ebf7ff !important;
+    }
 </style>
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-pane" type="button" role="tab">Hàng ngoài danh mục</button>
+        <button class="nav-link @(currentTab == "ngoai" ? "active" : "")" onclick="changeTab('ngoai')" type="button">Hàng ngoài danh mục</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-pane" type="button" role="tab">Hàng trong danh mục</button>
+        <button class="nav-link @(currentTab == "trong" ? "active" : "")" onclick="changeTab('trong')" type="button">Hàng trong danh mục</button>
     </li>
-    <li style="margin-left:200px">
-        <h4 class="text-primary mb-0"><i class="fa-solid ion-clipboard me-2"></i>&nbsp; THEO DÕI TIẾN ĐỘ ĐƠN HÀNG & THANH TOÁN (PO) </h4>
+    <li class="ms-auto align-self-center pe-3" style="margin-left:180px">
+        <h4 class="text-primary mb-0"><i class="fa-solid ion-clipboard me-2"></i> THEO DÕI TIẾN ĐỘ ĐƠN HÀNG & THANH TOÁN (PO) </h4>
     </li>
 </ul>
 
-<div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="home-pane" role="tabpanel" aria-labelledby="home-tab">
-        <div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">
-            <div class="card">
-                <div class="card-body">
-                    <form class="row g-3">
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
-                            <input type="text" class="form-control" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
-                            <input type="month" class="form-control" value="@DateTime.Now.ToString("yyyy-06")">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
-                            <select class="form-control" style="padding: 5px 12px;">
-                                <option value="">-- Tất cả trạng thái --</option>
-                                <option value="Yes">Có (Yes) - Đang cảnh báo</option>
-                                <option value="No">Không (No)</option>
-                                <option value="Wait">Chờ phòng ban xác nhận</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end gap-2">
-                            <button type="button" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
-                            <button type="reset" class="btn btn-outline-secondary"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</button>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button class="btn btn-outline-danger"><i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel</button>
-                            <button type="button" class="btn btn-outline-success" id="btnOpenImportExcel"><i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="card">
-               
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover mb-0 align-middle">
-                            <thead style="font-size:12px">
-                                <tr class="text-center text-uppercase fs-7">
-                                    <th class="bg-white text-dark">No.</th>
-                                    <th class="bg-pur text-white">Ngày YC</th>
-                                    <th class="bg-pur text-white">Ngày YC giao</th>
-                                    <th class="bg-pur text-white" width="80px">Số PO</th>
-                                    <th class="bg-pur text-white" width="230px">Tên hàng</th>
-                                    <th class="bg-pur text-white">Mã hàng</th>
-                                    <th class="bg-pur text-white">Số lượng</th>
-                                    <th class="bg-pur text-white">Đơn vị</th>
-                                    <th class="bg-pur text-white" width="200px">Tên NCC</th>
-                                    <th class="bg-pur text-white" width="100" title="Người phát hành">ĐN PH PO</th>
-                                    <th class="bg-white text-primary">Ngày gửi PO</th>
-                                    <th class="bg-pur text-white">ĐN Follow NCC</th>
-                                    <th class="bg-white text-primary">Ngày GH</th>
-                                    <th class="bg-white text-primary">Lịch giao (OK/NG)</th>
-                                    <th class="bg-white text-primary">Ảnh hưởng SX</th>
-                                    <th class="bg-white text-primary" colspan="3">NHẬP DỮ LIỆU</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model != null && Model.Any())
-                                {
-                                    foreach (var item in Model.Where(x => x.Danhmuc == "OUT"))
-                                    {
-                                        <tr class="main-row @(item.Ngayyc != null ? "row-alert-yes" : "")" data-luongvekho="@(item.LuongvekhoKhonhap)">
-                                            <td class="text-center fw-bold">@(stt++)</td>
-                                            <td class="text-center">@item.Ngayyc</td>
-                                            <td class="text-center">@item.Ngayycgiao </td>
-                                            <td class="text-center fw-bold text-primary">@item.SoPO</td>
-                                            <td>@item.Tentiengviet</td>
-                                            <td class="text-center fw-bold">@item.Mahang</td>
-                                            <td class="text-end">@item.Soluong.ToString("N0")</td>
-                                            <td class="text-center">@item.Donvi</td>
-                                            <td>@item.Nhacungcap</td>
-                                            <td class="text-center">@(item.DNphathanhpo)</td>
-                                            <td>@item.ngayguiPO</td>
-                                            <td class="text-center fw-bold text-danger">@(item.DNphathanhpo)</td>
-                                            <td></td>
-                                            <td class="text-center cursor-pointer toggle-detail" data-target="#info-@item.PO_Detail_Id">
-                                                <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                                            </td>
-                                            <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
-                                                        data-po="@item.SoPO"
-                                                        data-item-name="@item.Tentiengviet"
-                                                        data-item-code="@item.Mahang"
-                                                        data-req-date="@(item.ngaynccxngiao)">
-                                                    <i class="fa-solid ion-compose"></i> Dự kiến
-                                                </button>
-                                            </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
-                                                        data-po="@item.SoPO"
-                                                        data-item-name="@item.Tentiengviet"
-                                                        data-item-code="@item.Mahang"
-                                                        data-req-date="@(item.ngaynccxngiao)">
-                                                    <i class="fa-solid fa fa-pen"></i> Chính thức
-                                                </button>
-                                            </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
-                                                        data-po="@item.SoPO"
-                                                        data-item-name="@item.Tentiengviet"
-                                                        data-item-code="@item.Mahang"
-                                                        data-order-qty="@item.Soluong"
-                                                        data-req-date="@(item.ngaynccxngiao)">
-                                                    <i class="fa-solid fa fa-credit-card"></i> Thanh toán
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu PO nào.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
-                    <span class="text-muted">
-                        Hiển thị @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1)
-                        - @(Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalRecords))
-                        trong tổng số @ViewBag.TotalRecords dữ liệu
-                    </span>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage - 1 })">Trước</a>
-                            </li>
+<div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">
+    <div class="card mb-0">
+        <div class="card-body">
+            <form id="filterForm" asp-action="ManageDelivery" method="get" class="row g-3">
+                <input type="hidden" name="tab" id="activeTab" value="@currentTab" />
 
-                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                            {
-
-                                if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
-                                {
-                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                                        <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i })">@i</a>
-                                    </li>
-                                }
-                                else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
-                                {
-                                    <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-                                }
-                            }
-
-                            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage + 1 })">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
+                    <input type="text" name="searchTerm" class="form-control" value="@searchTerm" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
                 </div>
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
+                    <input type="month" name="reqMonth" class="form-control" value="@(!string.IsNullOrEmpty(reqMonth) ? reqMonth : DateTime.Now.ToString("yyyy-MM"))">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
+                    <select name="impactStatus" class="form-control">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="Yes">Có (Yes) - Đang cảnh báo</option>
+                        <option value="No">Không (No)</option>
+                        <option value="Wait">Chờ phòng ban xác nhận</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
+                    <a href="@Url.Action("ManageDelivery", new { tab = currentTab })" class="btn btn-outline-secondary ml-1"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</a>
+                </div>
+                <div class="col-md-4 d-flex align-items-end gap-2 justify-content-end">
+                    <button type="button" class="btn btn-outline-danger" id="btnExportExcel" onclick="exportExcel()">
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel
+                    </button>
+                    <button type="button" class="btn btn-outline-success ml-1" id="btnOpenImportExcel">
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0 align-middle" style="font-size:12px">
+                    <thead>
+                        <tr class="text-center text-uppercase fs-7">
+                            <th class="bg-white text-dark" hidden>ID</th>
+                            <th class="bg-pur text-white">Ngày YC</th>
+                            <th class="bg-pur text-white">Ngày YC giao</th>
+                            <th class="bg-pur text-white" width="80px">Số PO</th>
+                            <th class="bg-pur text-white" width="230px">Tên hàng</th>
+                            <th class="bg-pur text-white">Mã hàng</th>
+                            <th class="bg-pur text-white">SL</th>
+                            <th class="bg-pur text-white">Đơn vị</th>
+                            <th class="bg-pur text-white" width="200px">Tên NCC</th>
+                            <th class="bg-pur text-white" width="60" title="Người phát hành">ĐN PH PO</th>
+                            <th class="bg-white" width="80px">Ngày gửi PO</th>
+                            <th class="bg-pur text-white">ĐN Follow NCC</th>
+                            <th class="bg-white" width="80px">Ngày NCC giao</th>
+                            <th class="bg-white" width="80px">GH thực tế</th>
+                            <th class="bg-white">
+                                @(currentTab == "trong" ? "Cảnh báo" : "Lịch giao (OK/NG)")
+                            </th>
+                            <th class="bg-white">Ảnh hưởng SX</th>
+                            <th class="bg-white" width="80px">Cửa GH Cổng GH</th>
+                            <th class="bg-white">Người nhận</th>
+                            <th class="bg-white">Số ĐNTT</th>
+                            <th class="bg-white">Số hóa đơn</th>
 
-    <div class="tab-pane fade" id="profile-pane" role="tabpanel" aria-labelledby="profile-tab">
-        <div class="container-fluid py-4" style="background-color: #efefef82; padding-top: 0.5rem !important;">
-            <div class="card">
-                <div class="card-body">
-                    <form class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
-                            <input type="text" class="form-control" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
-                            <input type="month" class="form-control" value="2026-05">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
-                            <select class="form-control" style="padding: 5px 12px;">
-                                <option value="">-- Tất cả trạng thái --</option>
-                                <option value="Yes">Có (Yes) - Đang cảnh báo</option>
-                                <option value="No">Không (No)</option>
-                                <option value="Wait">Chờ phòng ban xác nhận</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
-                            <button type="reset" class="btn btn-outline-secondary"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover mb-0 align-middle">
-                            <thead>
-                                <tr class="text-center text-uppercase fs-7">
-                                    <th class="text-dark">No.</th>
-                                    <th class="bg-pur text-white">Ngày YC</th>
-                                    <th class="bg-pur text-white">Ngày YC giao</th>
-                                    <th class="bg-pur text-white">Số PO</th>
-                                    <th class="bg-pur text-white">Tên hàng</th>
-                                    <th class="bg-pur text-white">Mã hàng</th>
-                                    <th class="bg-pur text-white">Số lượng</th>
-                                    <th class="bg-pur text-white">Đơn vị</th>
-                                    <th class="bg-pur text-white">Tên NCC</th>
-                                    <th class="bg-pur text-white">Time GH</th>
-                                    <th class="bg-pur text-white" width="100">ĐN phát hành PO</th>
-                                    <th class="text-dark">Ngày gửi PO</th>
-                                    <th class="bg-pur text-white">ĐN Follow NCC</th>
-                                    <th class="text-dark">Ngày NCC XN Giao</th>
-                                    <th class="text-dark">Lịch giao (OK/NG)</th>
-                                    <th class="text-dark">Ảnh hưởng SX</th>
-                                    <th class="text-dark">Cảnh báo</th>
-                                    <th class="text-dark">Trạng thái</th>
-                                    <th class="text-dark" colspan="3">NHẬP DỮ LIỆU</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model != null && Model.Any())
-                                {
-                                    foreach (var item in Model.Where(x => x.Danhmuc == "IN"))
-                                    {
-                                        <tr class="main-row @(item.Ngayyc != null ? "row-alert-yes" : "")" data-luongvekho="@(item.LuongvekhoKhonhap)">
-                                            <td class="text-center fw-bold">@(stt++)</td>
-                                            <td class="text-center">@item.Ngayyc</td>
-                                            <td class="text-center">@item.Ngayycgiao </td>
-                                            <td class="text-center fw-bold text-primary">@item.SoPO</td>
-                                            <td>@item.Tentiengviet</td>
-                                            <td class="text-center fw-bold">@item.Mahang</td>
-                                            <td class="text-end">@item.Soluong.ToString("N0")</td>
-                                            <td class="text-center">@item.Donvi</td>
-                                            <td>@item.Nhacungcap</td>
-                                            <td class="text-center">@item.DNphathanhpo</td>
-                                            <td>@item.ngayguiPO</td>
-                                            <td class="text-center fw-bold text-danger">@item.DNphathanhpo</td>
-                                            <td></td>
-                                            <td class="text-center cursor-pointer toggle-detail" data-target="#info-@item.PO_Detail_Id">
-                                                <span class="badge badge-ng p-2 w-100">NG <i class="fa-solid fa fa-caret-down ms-1"></i></span>
-                                            </td>
-                                            <td class="text-center fw-bold text-danger"><i class="fa-solid ion-alert-circled me-1"></i>Có (Yes)</td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
-                                                        data-po="@item.SoPO"
-                                                        data-item-name="@item.Tentiengviet"
-                                                        data-item-code="@item.Mahang"
-                                                        data-req-date="@item.ngaynccxngiao">
-                                                    <i class="fa-solid ion-compose"></i> Dự kiến
-                                                </button>
-                                            </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
-                                                        data-po="@item.SoPO"
-                                                        data-item-name="@item.Tentiengviet"
-                                                        data-item-code="@item.Mahang"
-                                                        data-req-date="@item.ngaynccxngiao">
-                                                    <i class="fa-solid fa fa-pen"></i> Chính thức
-                                                </button>
-                                            </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
-                                                        data-po="@item.SoPO"
-                                                        data-item-name="@item.Tentiengviet"
-                                                        data-item-code="@item.Mahang"
-                                                        data-order-qty="@item.Soluong"
-                                                        data-req-date="@(item.ngaynccxngiao)">
-                                                    <i class="fa-solid fa fa-credit-card"></i> Thanh toán
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="20" class="text-center text-muted py-4">Không có dữ liệu PO nào.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
-                    <span class="text-muted">
-                        Hiển thị @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1)
-                        - @(Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalRecords))
-                        trong tổng số @ViewBag.TotalRecords dữ liệu
-                    </span>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage - 1 })">Trước</a>
-                            </li>
-                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                            {                              
-                                if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
-                                {
-                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                                        <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i })">@i</a>
-                                    </li>
-                                }
-                                else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
-                                {
-                                    <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-                                }
+                            @* --- LOGIC HEADER DỰA TRÊN USER SECTION --- *@
+                            @if (userSection == "3100")
+                            {
+                                <th class="bg-white" colspan="3">NHẬP DỮ LIỆU</th>
                             }
-                            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("ManageDelivery", new { page = ViewBag.CurrentPage + 1 })">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+                            else
+                            {
+                                <th class="bg-white" width="130px">ẢNH HƯỞNG SX</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            var i = 1;
+                            @foreach (var item in Model)
+                            {
+                                string rowBgClass = "";
+                                string valLichGiao = !string.IsNullOrEmpty(item.lichgiao) ? item.lichgiao.Trim().ToUpper() : "";
+
+                                if (valLichGiao == "OK")
+                                {
+                                    rowBgClass = "row-bg-ok";
+                                }
+                                else if (valLichGiao == "NG")
+                                {
+                                    rowBgClass = "row-bg-ng";
+                                }
+                                else if (!string.IsNullOrEmpty(item.Ngayyc))
+                                {
+                                    rowBgClass = "row-alert-yes";
+                                }
+
+                                <tr class="main-row @rowBgClass"
+                                    data-id="@item.PO_Detail_Id"
+                                    data-send-date="@(string.IsNullOrEmpty(item.ngayguiPO) ? "---" : item.ngayguiPO)"
+                                    data-confirm-date="@(string.IsNullOrEmpty(item.ngaynccxngiao) ? "---" : item.ngaynccxngiao)"
+                                    data-impact="@(string.IsNullOrEmpty(item.anhuongsx) ? "---" : item.anhuongsx)"
+                                    data-luongvekho="@(item.LuongvekhoKhonhap)"
+                                    data-ngay-ghchinhthuc="@(string.IsNullOrEmpty(item.Ngay_GHchinhthuc) ? "---" : item.Ngay_GHchinhthuc)"
+                                    data-gio-gh="@(string.IsNullOrEmpty(item.Gio_GH) ? "" : item.Gio_GH)"
+                                    data-cua-gh="@(string.IsNullOrEmpty(item.Cua_GH) ? "---" : item.Cua_GH)"
+                                    data-cong-nhanhang="@(string.IsNullOrEmpty(item.Cong_Nhanhang) ? "---" : item.Cong_Nhanhang)"
+                                    data-nguoi-nhanhang="@(string.IsNullOrEmpty(item.Nguoi_Nhanhang) ? "---" : item.Nguoi_Nhanhang)"
+                                    data-sl-thucte="@(string.IsNullOrEmpty(item.SL_Thucte) ? "---" : item.SL_Thucte)"
+                                    data-so-dntt="@(string.IsNullOrEmpty(item.So_DNTT) ? "---" : item.So_DNTT)"
+                                    data-so-hoadon="@(string.IsNullOrEmpty(item.So_hoadon) ? "---" : item.So_hoadon)">
+
+                                    <td class="text-center fw-bold" hidden>@(item.PO_Detail_Id)</td>
+                                    <td class="text-center">@item.Ngayyc</td>
+                                    <td class="text-center">@item.Ngayycgiao</td>
+                                    <td class="text-center fw-bold text-primary">@item.SoPO</td>
+                                    <td>@item.Tentiengviet</td>
+                                    <td class="text-center fw-bold">@item.Mahang</td>
+                                    <td class="text-end">@item.Soluong.ToString("N0")</td>
+                                    <td class="text-center">@item.Donvi</td>
+                                    <td>@item.Nhacungcap</td>
+                                    <td class="text-center">@(item.DNphathanhpo)</td>
+                                    <td>@item.ngayguiPO</td>
+                                    <td class="text-center fw-bold text-danger"></td>
+                                    <td>@item.ngaynccxngiao</td>
+                                    <td>@item.Ngay_GHchinhthuc</td>
+
+                                    <!-- Cột Trạng thái & Toggle -->
+                                    <td class="text-center cursor-pointer toggle-detail">
+                                        @if (currentTab == "trong")
+                                        {
+                                            if (!string.IsNullOrEmpty(item.lichgiao))
+                                            {
+                                                string badgeClass = "badge-secondary";
+                                                string val = item.lichgiao.ToLower().Trim();
+                                                if (val == "ok") badgeClass = "badge-ok";
+                                                else if (val.Contains("dưới an toàn")) badgeClass = "badge-warning text-dark";
+                                                else if (val.Contains("put in")) badgeClass = "badge-info";
+                                                else if (val.Contains("put out")) badgeClass = "bg-pur text-white";
+                                                else badgeClass = "badge-ng";
+
+                                                <span class="badge @badgeClass p-2 w-100">
+                                                    @item.lichgiao <i class="fa-solid fa fa-caret-down ms-1"></i>
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!string.IsNullOrEmpty(item.lichgiao))
+                                            {
+                                                <span class="badge @(item.lichgiao == "OK" ? "badge-ok" : "badge-ng") p-2 w-100">
+                                                    @item.lichgiao <i class="fa-solid fa fa-caret-down ms-1"></i>
+                                                </span>
+                                            }
+                                        }
+                                    </td>
+
+                                    <!-- Cột Ảnh hưởng SX -->
+                                    <td class="text-center fw-bold">
+                                        @if (item.anhuongsx == "No")
+                                        {
+                                            <span class="text-success">@item.anhuongsx</span>
+                                        }
+                                        else if (item.anhuongsx == "Yes")
+                                        {
+                                            <span class="text-danger">@item.anhuongsx</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">---</span>
+                                        }
+                                    </td>
+                                    <td>@item.Cua_GH/@item.Cong_Nhanhang</td>
+                                    <td>@item.Nguoi_Nhanhang</td>
+                                    <td>@item.So_DNTT</td>
+                                    <td>@item.So_hoadon</td>
+
+                                    <!-- --- PHÂN QUYỀN HIỂN THỊ CÁC NÚT THAO TÁC --- -->
+                                    @if (userSection == "3100")
+                                    {
+                                        <!-- Cột 1: Nút Dự kiến -->
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
+                                                    data-po="@item.SoPO" data-item-name="@item.Tentiengviet" data-item-code="@item.Mahang"
+                                                    data-req-date="@item.Ngayycgiao" data-po-detail-id="@item.PO_Detail_Id"
+                                                    data-po-ncc="@item.MaNhacungcap" data-send-date="@item.ngayguiPO" data-confirm-date="@item.ngaynccxngiao"
+                                                    title="Cập nhật thông tin dự kiến">
+                                                <i class="fa-solid ion-compose"></i>
+                                            </button>
+                                        </td>
+
+                                        <!-- Cột 2: Nút Chính thức -->
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-success w-100 btn-official-po"
+                                                    data-po="@item.SoPO" data-item-name="@item.Tentiengviet" data-item-code="@item.Mahang"
+                                                    data-req-date="@item.Ngayycgiao" data-po-detail-id="@item.PO_Detail_Id" data-po-ncc="@item.MaNhacungcap"
+                                                    title="Nhập nhận hàng thực tế">
+                                                <i class="fa-solid fa fa-pen"></i>
+                                            </button>
+                                        </td>
+
+                                        <!-- Cột 3: Nút Thanh toán -->
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
+                                                    data-po="@item.SoPO" data-item-name="@item.Tentiengviet" data-item-code="@item.Mahang"
+                                                    data-order-qty="@item.Soluong" data-req-date="@item.Ngayycgiao" data-po-detail-id="@item.PO_Detail_Id"
+                                                    title="Nhập hồ sơ thanh toán">
+                                                <i class="fa-solid fa fa-credit-card"></i>
+                                            </button>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <!-- Cột dành cho bộ phận khác: Chỉ hiện nút khi Lịch giao cảnh báo NG -->
+                                        <td class="text-center">
+                                            @if (valLichGiao == "NG")
+                                            {
+                                                <button class="btn btn-sm btn-danger fw-bold w-100 btn-impact-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-po-detail-id="@item.PO_Detail_Id"
+                                                        data-current-impact="@item.anhuongsx"
+                                                        title="Bấm để xác nhận ảnh hưởng sản xuất">
+                                                    <i class="fa-solid fa fa-triangle-exclamation me-1"></i> Nhập AH SX
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fs-7">---</span>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="23" class="text-center text-muted py-4">Không có dữ liệu PO nào phù hợp với điều kiện lọc.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+            <span class="text-muted">
+                Hiển thị @((currentPage - 1) * pageSize + (totalRecords > 0 ? 1 : 0))
+                - @(Math.Min(currentPage * pageSize, totalRecords))
+                trong tổng số @totalRecords dữ liệu
+            </span>
+            @if (totalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth })">Trước</a>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth })">@i</a>
+                                </li>
+                            }
+                            else if (i == currentPage - 3 || i == currentPage + 3)
+                            {
+                                <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                            }
+                        }
+                        <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth })">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+<!-- 1. Modal Cập Nhật Dự Kiến -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-light">
-                <h5 class="modal-title text-primary" id="updateModalLabel">
-                    <i class="fa-solid fa fa-pen-to-square me-1"></i> Cập nhật Tiến độ PO: <span id="modalPoNumber"></span>
-                </h5>
-                <button type="button" class="btn-close btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title text-primary"><i class="fa-solid fa fa-pen-to-square me-1"></i> Cập nhật Tiến độ PO: <span id="modalPoNumber"></span></h5>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('updateModal')">x</button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-info py-2 mb-3 fs-7">
-                    <strong>Mặt hàng:</strong> <span id="modalItemName"></span> (<span id="modalItemCode"></span>) <br>
+                    <strong>Mặt hàng:</strong> <span id="modalItemName"></span> (<span id="modalItemCode"></span>)
+                    <span id="modalPoDetailId" style="display:none;"></span> <br>
                     <strong>Ngày YC giao trên PO:</strong> <span class="text-dark fw-bold" id="modalReqDate"></span>
                 </div>
-
                 <form id="updateForm">
                     <div class="mb-3">
                         <label class="form-label fw-bold text-dark">1. Ngày gửi PO cho NCC</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-regular fa fa-calendar"></i></span>
-                            <input type="date" id="modalSendPoDate" class="form-control" placeholder="Chọn ngày gửi PO">
+                            <input type="date" id="modalSendPoDate" class="form-control">
                         </div>
-                        <div class="form-text text-muted">Hệ thống sẽ mail nhắc nhở PIC PUR sau 2 ngày phát hành nếu bỏ trống.</div>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label fw-bold text-dark">2. Ngày NCC xác nhận giao (Dự kiến)</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-regular fa fa-calendar-check"></i></span>
-                            <input type="date" id="modalConfirmDate" class="form-control" placeholder="Chọn ngày NCC cam kết giao">
+                            <input type="date" id="modalConfirmDate" class="form-control">
                         </div>
-                        <div class="form-text text-muted">Sau 5 ngày gửi PO nếu chưa nhập, hệ thống sẽ gửi mail cảnh báo.</div>
                     </div>
-
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">3. Phạm vi áp dụng</label>
+                        <div class="d-flex gap-4 mt-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="updateScope" id="full_PO" value="full" checked>
+                                <label class="form-check-label cursor-pointer text-success" for="full_PO">
+                                    Áp dụng cho tất cả các mã trong PO
+                                </label>
+                            </div>
+                            <div class="form-check ml-2">
+                                <input class="form-check-input" type="radio" name="updateScope" id="single_item" value="single">
+                                <label class="form-check-label cursor-pointer text-danger" for="single_item">
+                                    Chỉ áp dụng cho mã dòng này
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <hr>
-
-                    <div class="mb-3 p-3 bg-light rounded border border-warning">
-                        <label class="form-label fw-bold text-warning-emphasis d-block mb-2">
-                            <i class="fa-solid fa fa-users-gear me-1"></i> Dành cho Phòng ban yêu cầu (PR1-MC / User RQ)
-                        </label>
-                        <label class="form-label fw-semibold">Xác nhận ảnh hưởng tới sản xuất:</label>
-                        <div class="d-flex gap-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexRadioImpact" id="radioNo" value="No">
-                                <label class="form-check-label text-success fw-bold" for="radioNo">Không ảnh hưởng (No)</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexRadioImpact" id="radioYes" value="Yes">
-                                <label class="form-check-label text-danger fw-bold" for="radioYes">Có ảnh hưởng (Yes)</label>
-                            </div>
-                        </div>
-                        <div class="form-text text-danger mt-1">Lưu ý: If chọn "Yes", cảnh báo sẽ duy trì liên tục trên hệ thống cho tới khi hàng về kho.</div>
-                    </div>
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" id="btnSaveInfo" class="btn btn-primary">
-                    <i class="fa-solid fa fa-floppy-disk me-1"></i> Lưu thông tin
-                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('updateModal')">Đóng</button>
+                <button type="button" id="btnSaveInfo" class="btn btn-primary"><i class="fa-solid fa fa-floppy-disk me-1"></i> Lưu thông tin</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="officialModal" tabindex="-1" aria-labelledby="officialModalLabel" aria-hidden="true">
+<!-- 2. Modal Nhập Giao Hàng Chính Thức -->
+<div class="modal fade" id="officialModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content border-success">
             <div class="modal-header text-success">
-                <h5 class="modal-title fw-bold" id="officialModalLabel">
-                    <i class="fa-solid fa fa-circle-check me-1"></i> Nhập nhận hàng thực tế PO: <span id="offPoNumber"></span>
-                </h5>
-                <button type="button" class="btn-close btn" data-bs-dismiss="modal" aria-label="Close">x</button>
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa fa-circle-check me-1"></i> Nhập nhận hàng thực tế PO: <span id="offPoNumber"></span></h5>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('officialModal')">x</button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-success py-2 mb-3 fs-7">
-                    <strong>Mặt hàng:</strong> <span id="offItemName"></span> (<span id="offItemCode"></span>) <br>
+                    <strong>Mặt hàng:</strong> <span id="offItemName"></span> (<span id="offItemCode"></span>)
+                    <span id="offPoDetailId" style="display:none;"></span><br>
                     <strong>Ngày YC giao trên PO:</strong> <span class="fw-bold text-dark" id="offReqDate"></span>
                 </div>
-
                 <form id="officialForm">
                     <div class="row g-3 mb-3">
                         <div class="col-6">
@@ -531,443 +519,627 @@
                             <input type="time" id="modalActualTime" class="form-control border-success">
                         </div>
                     </div>
-
                     <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label class="form-label fw-bold text-dark">Cửa giao hàng</label>
-                            <select id="modalGate" class="form-control" style="padding: 5px 12px">
-                                <option value="F1">F1</option>
-                                <option value="F2">F2</option>
-                                <option value="F3">F3</option>
-                                <option value="F4">F4</option>
-                                <option value="F5">F5</option>
-                                <option value="F6">F6</option>
-                            </select>
+                            <input type="text" id="cuagiaohang" class="form-control border border-success" />
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-dark">Kho nhận hàng</label>
-                            <select id="modalWarehouse" class="form-control" style="padding: 5px 12px">
-                                <option value="Kho F1">Kho F1</option>
-                                <option value="Kho F2">Kho F2</option>
-                                <option value="Kho F3">Kho F3</option>
-                            </select>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-dark">Cổng nhận hàng</label>
+                            <div class="border border-success rounded p-2 bg-white">
+                                <div class="row g-2 mb-0">
+                                    <div class="col-4">
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="A" id="gateA"><label class="form-check-label fs-7" for="gateA">A</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="B" id="gateB"><label class="form-check-label fs-7" for="gateB">B</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="C" id="gateC"><label class="form-check-label fs-7" for="gateC">C</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="D" id="gateD"><label class="form-check-label fs-7" for="gateD">D</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="E" id="gateE"><label class="form-check-label fs-7" for="gateE">E</label></div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="F" id="gateF"><label class="form-check-label fs-7" for="gateF">F</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="G" id="gateG"><label class="form-check-label fs-7" for="gateG">G</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="H" id="gateH"><label class="form-check-label fs-7" for="gateH">H</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="I" id="gateI"><label class="form-check-label fs-7" for="gateI">I</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="TTF A" id="gateTTFA"><label class="form-check-label fs-7" for="gateTTFA">TTF A</label></div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="TTF B" id="gateTTFB"><label class="form-check-label fs-7" for="gateTTFB">TTF B</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="ISD F1" id="gateISDF1"><label class="form-check-label fs-7" for="gateISDF1">ISD F1</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="ISD F4" id="gateISDF4"><label class="form-check-label fs-7" for="gateISDF4">ISD F4</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="ISD F5" id="gateISDF5"><label class="form-check-label fs-7" for="gateISDF5">ISD F5</label></div>
+                                        <div class="form-check"><input class="form-check-input cong-nhan-hang-cb border-success" type="checkbox" value="ISD TTF" id="gateISDTTF"><label class="form-check-label fs-7" for="gateISDTTF">ISD TTF</label></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Người nhận hàng</label>
+                            <input type="text" id="nguoinhanhang" class="form-control border border-success" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-dark">Nhà cung cấp</label>
+                            <input type="text" id="nhacungcap" class="form-control" readonly />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">3. Phạm vi áp dụng</label>
+                        <div class="d-flex gap-4 mt-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="updateScopeOfficial" id="full_PO_tt" value="full" checked>
+                                <label class="form-check-label cursor-pointer text-success" for="full_PO_tt">
+                                    Áp dụng cho tất cả các mã trong PO
+                                </label>
+                            </div>
+                            <div class="form-check ml-2">
+                                <input class="form-check-input" type="radio" name="updateScopeOfficial" id="single_item_tt" value="single">
+                                <label class="form-check-label cursor-pointer text-danger" for="single_item_tt">
+                                    Chỉ áp dụng cho mã dòng này
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                <button type="button" id="btnSaveOfficial" class="btn btn-success fw-bold">
-                    <i class="fa-solid fa fa-circle-check me-1"></i> Hoàn thành nhận hàng
-                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('officialModal')">Đóng</button>
+                <button type="button" id="btnSaveOfficial" class="btn btn-success fw-bold"><i class="fa-solid fa fa-circle-check me-1"></i> Lưu thông tin</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+<!-- 3. Modal Nhập Thông Tin Thanh Toán -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content border-info">
             <div class="modal-header text-info">
-                <h5 class="modal-title fw-bold" id="paymentModalLabel">
-                    <i class="fa-solid fa fa-credit-card me-1"></i> Nhập thông tin thanh toán PO: <span id="payPoNumber"></span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white btn" data-bs-dismiss="modal" aria-label="Close">x</button>
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa fa-credit-card me-1"></i> Nhập thông tin thanh toán PO: <span id="payPoNumber"></span></h5>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('paymentModal')">x</button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-info py-2 mb-3 fs-7">
                     <strong>Mặt hàng:</strong> <span id="payItemName"></span> (<span id="payItemCode"></span>) <br>
                     <strong>Số lượng đặt hàng:</strong> <span class="fw-bold text-primary" id="payOrderQty"></span>
+                    <span id="payPoDetailId" style="display:none;"></span>
                 </div>
-
                 <form id="paymentForm">
                     <div class="mb-3">
                         <label class="form-label fw-bold text-dark">Số lượng thanh toán thực tế</label>
                         <div class="input-group">
                             <span class="input-group-text border-info text-info"><i class="fa-solid fa fa-calculator"></i></span>
-                            <input type="number" id="modalPayQty" class="form-control border-info" placeholder="Nhập số lượng thực tế cần thanh toán" required>
+                            <input type="number" step="any" id="modalPayQty" class="form-control border-info" required>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label fw-bold text-dark">Số ĐNTT (Đề nghị thanh toán)</label>
                         <div class="input-group">
                             <span class="input-group-text border-info text-info"><i class="fa-solid fa fa-file-invoice text-info"></i></span>
-                            <input type="text" id="modalDnttNumber" class="form-control border-info" placeholder="Nhập số ĐNTT" required>
+                            <input type="text" id="modalDnttNumber" class="form-control border-info" required>
                         </div>
                     </div>
-
-                    <div class="mb-2">
+                    <div class="mb-3">
                         <label class="form-label fw-bold text-dark">Số Hóa đơn (Invoice Number)</label>
                         <div class="input-group">
                             <span class="input-group-text border-info text-info"><i class="fa-solid fa fa text-info">📑</i></span>
-                            <input type="text" id="modalInvoiceNumber" class="form-control border-info" placeholder="Nhập mã số hóa đơn">
+                            <input type="text" id="modalInvoiceNumber" class="form-control border-info">
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-dark">Phạm vi áp dụng</label>
+                        <div class="d-flex gap-4 mt-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="updateScopePayment" id="full_PO_pay" value="full" checked>
+                                <label class="form-check-label cursor-pointer text-success" for="full_PO_pay">
+                                    Áp dụng cho tất cả các mã trong PO
+                                </label>
+                            </div>
+                            <div class="form-check ml-2">
+                                <input class="form-check-input" type="radio" name="updateScopePayment" id="single_item_pay" value="single">
+                                <label class="form-check-label cursor-pointer text-danger" for="single_item_pay">
+                                    Chỉ áp dụng cho mã dòng này
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                <button type="button" id="btnSavePayment" class="btn btn-info text-white fw-bold">
-                    <i class="fa-solid fa fa-floppy-disk me-1"></i> Lưu hồ sơ thanh toán
-                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('paymentModal')">Đóng</button>
+                <button type="button" id="btnSavePayment" class="btn btn-info text-white fw-bold"><i class="fa-solid fa fa-floppy-disk me-1"></i> Lưu hồ sơ thanh toán</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+<!-- 4. Modal Import Excel -->
+<div class="modal fade" id="importExcelModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content border-success">
             <div class="modal-header text-success">
-                <h5 class="modal-title fw-bold" id="importExcelModalLabel">
-                    <i class="fa-solid fa fa-file-excel me-1"></i> Import Tiến Độ / Đơn Hàng Từ Excel
-                </h5>
-                <button type="button" class="btn-close btn-close-white btn" data-bs-dismiss="modal" aria-label="Close">x</button>
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa fa-file-excel me-1"></i> Import Tiến Độ / Đơn Hàng Từ Excel</h5>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('importExcelModal')">x</button>
             </div>
             <div class="modal-body">
                 <div class="mb-3 d-flex justify-content-between align-items-center p-2 bg-light rounded border">
-                    <span class="fs-7 text-muted"><i class="fa-solid fa fa-circle-info me-1"></i> Sử dụng file mẫu chuẩn để tránh lỗi dữ liệu.</span>
+                    <span class="fs-7 text-muted"><i class="fa-solid fa fa-circle-info me-1"></i> File mẫu chuẩn</span>
                     <a href="#" class="btn btn-xs btn-link text-success p-0 fw-bold text-decoration-none"><i class="fa-solid fa fa-download me-1"></i> Tải Template</a>
                 </div>
-
                 <form id="importExcelForm">
                     <div class="mb-3">
                         <label class="form-label fw-bold text-dark">Chọn tệp tin Excel (.xlsx, .xls)</label>
                         <div class="excel-dropzone" onclick="document.getElementById('excelFileInput').click()">
                             <i class="fa-solid fa fa-cloud-arrow-up text-success mb-2" style="font-size: 2rem;"></i>
                             <p class="mb-1 fw-semibold text-secondary" id="dropzoneText">Kéo thả file vào đây hoặc click để chọn file</p>
-                            <span class="fs-7 text-muted">Dung lượng tối đa: 10MB</span>
                             <input type="file" id="excelFileInput" class="d-none" accept=".xlsx, .xls">
                         </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-bold text-dark">Tên Sheet dữ liệu (Mặc định Sheet đầu tiên)</label>
-                        <input type="text" id="modalExcelSheetName" class="form-control" placeholder="Ví dụ: Sheet1, Data_PO...">
                     </div>
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" id="btnExecuteImport" class="btn btn-success fw-bold">
-                    <i class="fa-solid fa fa-upload me-1"></i> Thực hiện Import
-                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeMyModal('importExcelModal')">Đóng</button>
+                <button type="button" id="btnExecuteImport" class="btn btn-success fw-bold"><i class="fa-solid fa fa-upload me-1"></i> Thực hiện Import</button>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // --- LOGIC MỚI: ĐÓNG MỞ HÀNG THÔNG TIN PHỤ BÊN DƯỚI DÒNG ---
-        const toggleButtons = document.querySelectorAll('.toggle-detail');
-        toggleButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const targetSelector = this.getAttribute('data-target');
-                const targetRow = document.querySelector(targetSelector);
-                if(targetRow) {
-                    targetRow.classList.toggle('show');
-                    // Đổi icon caret lên/xuống trực quan
-                    const icon = this.querySelector('i');
-                    if(targetRow.classList.contains('show')) {
-                        icon.className = "fa-solid fa fa-caret-up ms-1";
-                    } else {
-                        icon.className = "fa-solid fa fa-caret-down ms-1";
-                    }
-                }
-            });
-        });
+<!-- 5. Modal Xác Nhận Ảnh Hưởng Sản Xuất (Dành cho bộ phận khác khi NG) -->
+<div class="modal fade" id="impactModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa fa-triangle-exclamation me-1"></i> Xác Nhận Ảnh Hưởng SX</h6>
+                <button type="button" class="btn btn-outline-light btn-close btn-close-white" onclick="closeMyModal('impactModal')">x</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-light border py-2 mb-3 fs-7">
+                    <strong>Mã hàng:</strong> <span id="impItemCode" class="text-primary fw-bold"></span><br>
+                    <strong>PO:</strong> <span id="impPoNumber"></span>
+                    <span id="impPoDetailId" style="display:none;"></span>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold text-dark">Lịch giao NG có ảnh hưởng SX không?</label>
+                    <select id="selectImpactStatus" class="form-control form-select border-danger fw-bold">
+                        <option value="Yes" class="text-danger">Có (Yes) - Bị ảnh hưởng</option>
+                        <option value="No" class="text-success">Không (No) - An toàn</option>
+                        <option value="Wait" class="text-warning">Chờ xác nhận (Wait)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeMyModal('impactModal')">Đóng</button>
+                <button type="button" id="btnSaveImpact" class="btn btn-sm btn-danger fw-bold">Lưu xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        // --- KHỞI TẠO MODAL 1: DỰ KIẾN ---
-        const estModalEl = document.getElementById('updateModal');
-        let bsEstModal = null;
-        if (estModalEl) {
-            document.body.appendChild(estModalEl);
-            bsEstModal = new bootstrap.Modal(estModalEl, { backdrop: true, focus: true });
-
-            estModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    if (bsEstModal) bsEstModal.hide();
-                });
-            });
-        }
-
-        // --- KHỞI TẠO MODAL 2: CHÍNH THỨC ---
-        const offModalEl = document.getElementById('officialModal');
-        let bsOffModal = null;
-        if (offModalEl) {
-            document.body.appendChild(offModalEl);
-            bsOffModal = new bootstrap.Modal(offModalEl, { backdrop: true, focus: true });
-
-            offModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    if (bsOffModal) bsOffModal.hide();
-                });
-            });
-        }
-
-        // --- KHỞI TẠO MODAL 3: THANH TOÁN ---
-        const payModalEl = document.getElementById('paymentModal');
-        let bsPayModal = null;
-        if (payModalEl) {
-            document.body.appendChild(payModalEl);
-            bsPayModal = new bootstrap.Modal(payModalEl, { backdrop: true, focus: true });
-
-            payModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    if (bsPayModal) bsPayModal.hide();
-                });
-            });
-        }
-
-        // --- KHỞI TẠO MODAL 4: IMPORT EXCEL ---
-        const importModalEl = document.getElementById('importExcelModal');
-        let bsImportModal = null;
-        if (importModalEl) {
-            document.body.appendChild(importModalEl);
-            bsImportModal = new bootstrap.Modal(importModalEl, { backdrop: true, focus: true });
-
-            importModalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    if (bsImportModal) bsImportModal.hide();
-                });
-            });
-        }
-
-        // Hàm phụ trợ xử lý định dạng chuỗi ngày tháng
-        function convertToDateInputValue(dateStr) {
-            if (!dateStr || dateStr.trim() === "") return "";
-            const months = {
-                'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06',
-                'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12'
-            };
-
-            let parts = [];
-            if(dateStr.includes('-')) { parts = dateStr.split('-'); }
-            else if(dateStr.includes('/')) { parts = dateStr.split('/'); }
-
-            if (parts.length !== 3) return "";
-
-            const day = parts[0].padStart(2, '0');
-            const monthStr = parts[1].toLowerCase();
-            let month = '01';
-
-            if (isNaN(monthStr)) {
-                month = months[monthStr] || '01';
-            } else {
-                month = monthStr.padStart(2, '0');
+@section Scripts {
+    <script>
+        function changeTab(tabName) {
+            var tabInput = document.getElementById('activeTab');
+            if (tabInput) {
+                tabInput.value = tabName;
             }
-            const year = parts[2];
-            return `${year}-${month}-${day}`;
+            var filterForm = document.getElementById('filterForm');
+            if (filterForm) {
+                filterForm.submit();
+            }
         }
 
-        // --- LOGIC EVENT: MỞ MODAL IMPORT EXCEL ---
-        const btnOpenImportExcel = document.getElementById('btnOpenImportExcel');
-        if (btnOpenImportExcel) {
-            btnOpenImportExcel.addEventListener('click', function () {
-                document.getElementById('importExcelForm').reset();
-                document.getElementById('dropzoneText').textContent = "Kéo thả file vào đây hoặc click để chọn file";
-                if (bsImportModal) bsImportModal.show();
-            });
+        let bsEstModal, bsOffModal, bsPayModal, bsImportModal, bsImpactModal;
+
+        function closeMyModal(modalName) {
+            if (modalName === 'updateModal' && bsEstModal) bsEstModal.hide();
+            if (modalName === 'officialModal' && bsOffModal) bsOffModal.hide();
+            if (modalName === 'paymentModal' && bsPayModal) bsPayModal.hide();
+            if (modalName === 'importExcelModal' && bsImportModal) bsImportModal.hide();
+            if (modalName === 'impactModal' && bsImpactModal) bsImpactModal.hide();
         }
 
-        // --- HIỂN THỊ TÊN FILE KHI CHỌN FILE EXCEL ---
-        const excelFileInput = document.getElementById('excelFileInput');
-        if (excelFileInput) {
-            excelFileInput.addEventListener('change', function () {
+        function exportExcel() {
+            const form = document.getElementById('filterForm');
+            const formData = new FormData(form);
+            const searchParams = new URLSearchParams(formData);
+            window.location.href = '@Url.Action("ExportExcel", "ManagerDelivery")?' + searchParams.toString();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. Khởi tạo tất cả Bootstrap Modals
+            bsEstModal = new bootstrap.Modal(document.getElementById('updateModal'), { backdrop: false });
+            bsOffModal = new bootstrap.Modal(document.getElementById('officialModal'), { backdrop: false });
+            bsPayModal = new bootstrap.Modal(document.getElementById('paymentModal'), { backdrop: false });
+            bsImportModal = new bootstrap.Modal(document.getElementById('importExcelModal'), { backdrop: false });
+            bsImpactModal = new bootstrap.Modal(document.getElementById('impactModal'), { backdrop: false });
+
+            // 2. EVENT DELEGATION cho toàn bộ bảng
+            const tableBody = document.querySelector('.table tbody');
+
+            if (tableBody) {
+                tableBody.addEventListener('click', function (e) {
+
+                    // --- A. XỬ LÝ CLICK XEM CHI TIẾT (TOGGLE) ---
+                    const toggleCell = e.target.closest('.toggle-detail');
+                    if (toggleCell) {
+                        const tr = toggleCell.closest('tr.main-row');
+                        if (!tr) return;
+
+                        const id = tr.getAttribute('data-id');
+                        let targetRow = document.getElementById('info-' + id);
+                        const icon = toggleCell.querySelector('i');
+
+                        if (!targetRow) {
+                            // Dữ liệu Dự kiến
+                            const sendDate = tr.getAttribute('data-send-date');
+                            const confirmDate = tr.getAttribute('data-confirm-date');
+                            const impact = tr.getAttribute('data-impact');
+
+                            // Dữ liệu Thực tế nhận hàng
+                            const ngayGh = tr.getAttribute('data-ngay-ghchinhthuc');
+                            const gioGh = tr.getAttribute('data-gio-gh');
+                            const tgGiao = (ngayGh !== "---") ? `${ngayGh} ${gioGh}`.trim() : "---";
+                            const cuaGh = tr.getAttribute('data-cua-gh');
+                            const congNh = tr.getAttribute('data-cong-nhanhang');
+                            const noiGiao = (cuaGh !== "---" || congNh !== "---") ? `${cuaGh} / ${congNh}` : "---";
+                            const nguoiNh = tr.getAttribute('data-nguoi-nhanhang');
+
+                            // Dữ liệu Thanh toán
+                            const slThucTe = tr.getAttribute('data-sl-thucte');
+                            const soDntt = tr.getAttribute('data-so-dntt');
+                            const soHoaDon = tr.getAttribute('data-so-hoadon');
+
+                            // HTML Chi tiết
+                            const detailHtml = [
+                                '<tr id="info-', id, '" class="detail-row" style="display:none;">',
+                                '<td colspan="23">',
+                                '<div class="detail-container">',
+                                '<h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>',
+                                '<div class="row g-3">',
+                                '<div class="col-md-4">',
+                                '<div class="p-2 border rounded bg-light">',
+                                '<strong class="text-primary d-block mb-1"> 1. Dữ liệu Dự Kiến </strong>',
+                                '<span class="d-block fs-7">Ngày gửi PO: <b class="text-dark">', sendDate, '</b></span>',
+                                '<span class="d-block fs-7">Ngày NCC hẹn giao: <b class="text-danger">', confirmDate, '</b></span>',
+                                '<span class="d-block fs-7">Ảnh hưởng SX: <b class="text-danger">', impact, '</b></span>',
+                                '</div>',
+                                '</div>',
+                                '<div class="col-md-4">',
+                                '<div class="p-2 border rounded bg-light">',
+                                '<strong class="text-success d-block mb-1"> 2. Thực Tế Nhận Hàng </strong>',
+                                '<span class="d-block fs-7">Ngày giao thực tế: <b class="text-dark">', tgGiao, '</b></span>',
+                                '<span class="d-block fs-7">Cửa giao / Cổng nhận: <b class="text-dark">', noiGiao, '</b></span>',
+                                '<span class="d-block fs-7">Người nhận hàng: <b class="text-dark">', nguoiNh, '</b></span>',
+                                '</div>',
+                                '</div>',
+                                '<div class="col-md-4">',
+                                '<div class="p-2 border rounded bg-light">',
+                                '<strong class="text-info d-block mb-1"> 3. Chứng Từ Thanh Toán </strong>',
+                                '<span class="d-block fs-7">Số lượng thanh toán: <b class="text-dark">', slThucTe, '</b></span>',
+                                '<span class="d-block fs-7">Số ĐNTT: <b class="text-dark">', soDntt, '</b></span>',
+                                '<span class="d-block fs-7">Số Hóa đơn: <b class="text-dark">', soHoaDon, '</b></span>',
+                                '</div>',
+                                '</div>',
+                                '</div>',
+                                '</div>',
+                                '</tr>'
+                            ].join('');
+
+                            tr.insertAdjacentHTML('afterend', detailHtml);
+                            targetRow = tr.nextElementSibling;
+                        }
+
+                        if (targetRow.style.display === 'none') {
+                            targetRow.style.display = 'table-row';
+                            if (icon) icon.className = "fa-solid fa fa-caret-up ms-1";
+                        } else {
+                            targetRow.style.display = 'none';
+                            if (icon) icon.className = "fa-solid fa fa-caret-down ms-1";
+                        }
+                        return;
+                    }
+
+                    // --- B. XỬ LÝ CLICK NÚT DỰ KIẾN ---
+                    const btnUpdate = e.target.closest('.btn-update-po');
+                    if (btnUpdate) {
+                        e.preventDefault();
+                        document.getElementById('modalPoNumber').textContent = btnUpdate.getAttribute('data-po');
+                        document.getElementById('modalItemName').textContent = btnUpdate.getAttribute('data-item-name');
+                        document.getElementById('modalItemCode').textContent = btnUpdate.getAttribute('data-item-code');
+                        document.getElementById('modalReqDate').textContent = btnUpdate.getAttribute('data-req-date');
+                        document.getElementById('modalPoDetailId').textContent = btnUpdate.getAttribute('data-po-detail-id');
+
+                        const sendDate = btnUpdate.getAttribute('data-send-date');
+                        const confirmDate = btnUpdate.getAttribute('data-confirm-date');
+
+                        document.getElementById('modalSendPoDate').value = (sendDate && sendDate !== "---") ? sendDate : '';
+                        document.getElementById('modalConfirmDate').value = (confirmDate && confirmDate !== "---") ? confirmDate : '';
+
+                        bsEstModal.show();
+                        return;
+                    }
+
+                    // --- C. XỬ LÝ CLICK NÚT CHÍNH THỨC ---
+                    const btnOfficial = e.target.closest('.btn-official-po');
+                    if (btnOfficial) {
+                        e.preventDefault();
+                        document.getElementById('offPoNumber').textContent = btnOfficial.getAttribute('data-po');
+                        document.getElementById('offItemName').textContent = btnOfficial.getAttribute('data-item-name');
+                        document.getElementById('offItemCode').textContent = btnOfficial.getAttribute('data-item-code');
+                        document.getElementById('offReqDate').textContent = btnOfficial.getAttribute('data-req-date');
+                        document.getElementById('nhacungcap').value = btnOfficial.getAttribute('data-po-ncc');
+                        document.getElementById('offPoDetailId').textContent = btnOfficial.getAttribute('data-po-detail-id');
+
+                        // Reset form
+                        $('#modalActualDate').val('');
+                        $('#modalActualTime').val('');
+                        $('#cuagiaohang').val('');
+                        $('.cong-nhan-hang-cb').prop('checked', false);
+                        $('#nguoinhanhang').val('');
+
+                        bsOffModal.show();
+                        return;
+                    }
+
+                    // --- D. XỬ LÝ CLICK NÚT THANH TOÁN ---
+                    const btnPayment = e.target.closest('.btn-payment-po');
+                    if (btnPayment) {
+                        e.preventDefault();
+                        document.getElementById('payPoNumber').textContent = btnPayment.getAttribute('data-po');
+                        document.getElementById('payItemName').textContent = btnPayment.getAttribute('data-item-name');
+                        document.getElementById('payItemCode').textContent = btnPayment.getAttribute('data-item-code');
+                        document.getElementById('payOrderQty').textContent = btnPayment.getAttribute('data-order-qty');
+                        document.getElementById('payPoDetailId').textContent = btnPayment.getAttribute('data-po-detail-id');
+
+                        const qty = btnPayment.getAttribute('data-order-qty');
+                        document.getElementById('modalPayQty').value = qty ? qty.replace(/,/g, '') : '';
+                        document.getElementById('modalDnttNumber').value = '';
+                        document.getElementById('modalInvoiceNumber').value = '';
+
+                        $('#full_PO_pay').prop('checked', true);
+                        $('#modalPayQty').prop('disabled', true);
+
+                        bsPayModal.show();
+                        return;
+                    }
+
+                    // --- E. XỬ LÝ CLICK NÚT NHẬP ẢNH HƯỞNG SX (BỘ PHẬN KHÁC) ---
+                    const btnImpact = e.target.closest('.btn-impact-po');
+                    if (btnImpact) {
+                        e.preventDefault();
+                        document.getElementById('impPoNumber').textContent = btnImpact.getAttribute('data-po');
+                        document.getElementById('impItemCode').textContent = btnImpact.getAttribute('data-item-code');
+                        document.getElementById('impPoDetailId').textContent = btnImpact.getAttribute('data-po-detail-id');
+
+                        const curImpact = btnImpact.getAttribute('data-current-impact');
+                        if (curImpact && curImpact !== "---") {
+                            document.getElementById('selectImpactStatus').value = curImpact;
+                        } else {
+                            document.getElementById('selectImpactStatus').value = "Yes"; // Mặc định Yes khi NG
+                        }
+
+                        bsImpactModal.show();
+                        return;
+                    }
+                });
+            }
+
+            // 3. SỰ KIỆN NGOÀI BẢNG (Import Excel, Checkbox phạm vi...)
+            document.getElementById('btnOpenImportExcel')?.addEventListener('click', () => bsImportModal.show());
+
+            document.getElementById('excelFileInput')?.addEventListener('change', function () {
                 if (this.files && this.files.length > 0) {
                     document.getElementById('dropzoneText').textContent = "📌 Đã chọn file: " + this.files[0].name;
                 }
             });
-        }
 
-        // --- LOGIC EVENT: THỰC HIỆN IMPORT EXCEL ---
-        const btnExecuteImport = document.getElementById('btnExecuteImport');
-        if (btnExecuteImport) {
-            btnExecuteImport.addEventListener('click', function () {
-                const fileInput = document.getElementById('excelFileInput');
-                if (!fileInput.files || fileInput.files.length === 0) {
-                    alert("Vui lòng chọn tệp tin Excel trước khi thực hiện Import!");
+            document.getElementById('btnExecuteImport')?.addEventListener('click', function () {
+                alert("Đọc tệp tin thành công!\nHệ thống đang phân tích dữ liệu và cập nhật danh sách PO.");
+                bsImportModal.hide();
+            });
+
+            // Toggle ô nhập Số lượng ở Modal Thanh toán
+            $('input[name="updateScopePayment"]').on('change', function () {
+                if ($(this).val() === 'full') {
+                    $('#modalPayQty').prop('disabled', true);
+                } else {
+                    $('#modalPayQty').prop('disabled', false);
+                    $('#modalPayQty').focus();
+                }
+            });
+
+            // --- 4. GỌI API AJAX ---
+
+            // LƯU THANH TOÁN (AJAX)
+            $('#btnSavePayment').off('click').on('click', function (e) {
+                e.preventDefault();
+                var scopeVal = $('input[name="updateScopePayment"]:checked').val() || 'full';
+                var qtyVal = parseFloat($('#modalPayQty').val()) || 0;
+
+                var formData = {
+                    PoNumber: $('#payPoNumber').text().trim(),
+                    PoDetailId: parseInt($('#payPoDetailId').text().trim()) || 0,
+                    SlThucTe: qtyVal,
+                    SoDntt: $('#modalDnttNumber').val().trim(),
+                    SoHoaDon: $('#modalInvoiceNumber').val().trim(),
+                    Scope: scopeVal
+                };
+
+                if (scopeVal === 'single' && formData.SlThucTe <= 0) {
+                    alert('Vui lòng nhập Số lượng thanh toán thực tế!');
+                    $('#modalPayQty').focus();
                     return;
                 }
-                alert("Đọc tệp tin thành công!\nHệ thống đang phân tích dữ liệu và cập nhật danh sách PO.");
-                if (bsImportModal) bsImportModal.hide();
+                if (!formData.SoDntt) {
+                    alert('Vui lòng nhập Số ĐNTT!');
+                    $('#modalDnttNumber').focus();
+                    return;
+                }
+
+                var $btn = $(this);
+                var originalText = $btn.html();
+                $btn.html('<i class="fa-solid fa fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
+
+                $.ajax({
+                    url: '/ManagerDelivery/UpdateThanhToan',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message || 'Cập nhật thanh toán thành công!');
+                            bsPayModal.hide();
+                            window.location.reload();
+                        } else {
+                            alert('Thất bại: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Có lỗi xảy ra trong quá trình gửi dữ liệu lên máy chủ.');
+                        console.error(error);
+                    },
+                    complete: function () {
+                        $btn.html(originalText).prop('disabled', false);
+                    }
+                });
             });
-        }
 
-        // --- LOGIC EVENT: NÚT NHẬP DỰ KIẾN ---
-        const estButtons = document.querySelectorAll('.btn-update-po');
-        estButtons.forEach(button => {
-            button.addEventListener('click', function (e) {
+            // LƯU CHÍNH THỨC (AJAX)
+            $('#btnSaveOfficial').off('click').on('click', function (e) {
                 e.preventDefault();
+                var selectedGates = $('.cong-nhan-hang-cb:checked').map(function () {
+                    return this.value;
+                }).get().join(', ');
 
-                const poNumber = this.getAttribute('data-po') || '';
-                const itemName = this.getAttribute('data-item-name') || '';
-                const itemCode = this.getAttribute('data-item-code') || '';
-                const reqDate = this.getAttribute('data-req-date') || '';
-                const sendDate = this.getAttribute('data-send-date') || '';
-                const confirmDate = this.getAttribute('data-confirm-date') || '';
-                const impact = this.getAttribute('data-impact') || '';
+                var formData = {
+                    PoNumber: $('#offPoNumber').text().trim(),
+                    PoDetailId: parseInt($('#offPoDetailId').text().trim()) || 0,
+                    ActualDate: $('#modalActualDate').val(),
+                    ActualTime: $('#modalActualTime').val(),
+                    CuaGiaoHang: $('#cuagiaohang').val().trim(),
+                    CongNhanHang: selectedGates,
+                    NguoiNhanHang: $('#nguoinhanhang').val().trim(),
+                    Scope: $('input[name="updateScopeOfficial"]:checked').val() || 'full'
+                };
 
-                document.getElementById('modalPoNumber').textContent = poNumber;
-                document.getElementById('modalItemName').textContent = itemName;
-                document.getElementById('modalItemCode').textContent = itemCode;
-                document.getElementById('modalReqDate').textContent = reqDate;
-
-                const inputSendDate = document.getElementById('modalSendPoDate');
-                if (sendDate && sendDate.trim() !== "") {
-                    inputSendDate.value = convertToDateInputValue(sendDate);
-                    inputSendDate.classList.add('bg-light');
-                } else {
-                    inputSendDate.value = "";
-                    inputSendDate.classList.remove('bg-light');
+                if (!formData.ActualDate) {
+                    alert('Vui lòng chọn ngày giao hàng chính thức!');
+                    $('#modalActualDate').focus();
+                    return;
                 }
 
-                const inputConfirmDate = document.getElementById('modalConfirmDate');
-                if (confirmDate && confirmDate.trim() !== "") {
-                    inputConfirmDate.value = convertToDateInputValue(confirmDate);
-                    inputConfirmDate.classList.add('bg-light');
-                } else {
-                    inputConfirmDate.value = "";
-                    inputConfirmDate.classList.remove('bg-light');
-                }
+                var $btn = $(this);
+                var originalText = $btn.html();
+                $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
 
-                const radioYes = document.getElementById('radioYes');
-                const radioNo = document.getElementById('radioNo');
-                const radioInputs = document.querySelectorAll('input[name="flexRadioImpact"]');
+                $.ajax({
+                    url: '/ManagerDelivery/UpdateChinhThuc',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message || 'Cập nhật tiến độ thành công!');
+                            bsOffModal.hide();
+                            window.location.reload();
+                        } else {
+                            alert('Thất bại: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Có lỗi xảy ra trong quá trình gửi dữ liệu lên máy chủ.');
+                        console.error(error);
+                    },
+                    complete: function () {
+                        $btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
 
-                if (impact === "Yes") {
-                    radioYes.checked = true;
-                    radioInputs.forEach(radio => radio.disabled = true);
-                } else if (impact === "No") {
-                    radioNo.checked = true;
-                    radioInputs.forEach(radio => radio.disabled = true);
-                } else {
-                    radioNo.checked = true;
-                    radioInputs.forEach(radio => radio.disabled = false);
+            // LƯU DỰ KIẾN (FETCH API)
+            document.getElementById('btnSaveInfo')?.addEventListener('click', async () => {
+                const poNumber = document.getElementById('modalPoNumber').textContent;
+                const sendDate = document.getElementById('modalSendPoDate').value;
+                const confirmDate = document.getElementById('modalConfirmDate').value;
+                const poDetailId = document.getElementById('modalPoDetailId').textContent;
+                const scope = document.querySelector('input[name="updateScope"]:checked')?.value || "full";
+
+                if (!sendDate && !confirmDate) {
+                    alert("Vui lòng nhập ít nhất một thông tin: Ngày gửi PO hoặc Ngày NCC xác nhận!");
+                    return;
                 }
 
                 const btnSave = document.getElementById('btnSaveInfo');
-                if (sendDate && sendDate.trim() !== "" && confirmDate && confirmDate.trim() !== "" && (impact === "Yes" || impact === "No")) {
-                    btnSave.style.display = 'none';
-                } else {
-                    btnSave.style.display = 'block';
+                const originalHtml = btnSave.innerHTML;
+                btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...';
+                btnSave.disabled = true;
+
+                try {
+                    const res = await fetch('/ManagerDelivery/UpdateDuKien', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            PoNumber: poNumber,
+                            PoDetailId: parseInt(poDetailId),
+                            SendDate: sendDate,
+                            ConfirmDate: confirmDate,
+                            Scope: scope
+                        })
+                    });
+                    const data = await res.json();
+                    if (data && data.success) {
+                        alert(data.message || "Lưu thành công!");
+                        bsEstModal.hide();
+                        window.location.reload();
+                    } else {
+                        alert("Lỗi: " + (data && data.message ? data.message : "Không thể lưu dữ liệu."));
+                    }
+                } catch (err) {
+                    console.error('Error:', err);
+                    alert("Có lỗi xảy ra khi kết nối tới máy chủ.");
+                } finally {
+                    btnSave.innerHTML = originalHtml;
+                    btnSave.disabled = false;
                 }
-
-                if (bsEstModal) bsEstModal.show();
             });
-        });
 
-        // --- LOGIC EVENT: NÚT NHẬP CHÍNH THỨC ---
-        const offButtons = document.querySelectorAll('.btn-official-po');
-        offButtons.forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
+            // LƯU ẢNH HƯỞNG SẢN XUẤT (BỘ PHẬN KHÁC) - FETCH API
+            document.getElementById('btnSaveImpact')?.addEventListener('click', async () => {
+                const poDetailId = document.getElementById('impPoDetailId').textContent;
+                const status = document.getElementById('selectImpactStatus').value;
+                const btn = document.getElementById('btnSaveImpact');
 
-                const poNumber = this.getAttribute('data-po') || '';
-                const itemName = this.getAttribute('data-item-name') || '';
-                const itemCode = this.getAttribute('data-item-code') || '';
-                const reqDate = this.getAttribute('data-req-date') || '';
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                btn.disabled = true;
 
-                document.getElementById('offPoNumber').textContent = poNumber;
-                document.getElementById('offItemName').textContent = itemName;
-                document.getElementById('offItemCode').textContent = itemCode;
-                document.getElementById('offReqDate').textContent = reqDate;
-
-                document.getElementById('officialForm').reset();
-
-                if (bsOffModal) bsOffModal.show();
-            });
-        });
-
-        // --- LOGIC EVENT: NÚT THANH TOÁN ---
-        const payButtons = document.querySelectorAll('.btn-payment-po');
-        payButtons.forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                const poNumber = this.getAttribute('data-po') || '';
-                const itemName = this.getAttribute('data-item-name') || '';
-                const itemCode = this.getAttribute('data-item-code') || '';
-                const orderQty = this.getAttribute('data-order-qty') || '';
-
-                document.getElementById('payPoNumber').textContent = poNumber;
-                document.getElementById('payItemName').textContent = itemName;
-                document.getElementById('payItemCode').textContent = itemCode;
-                document.getElementById('payOrderQty').textContent = orderQty;
-
-                document.getElementById('paymentForm').reset();
-                document.getElementById('modalPayQty').value = orderQty.replace(/,/g, '');
-
-                if (bsPayModal) bsPayModal.show();
-            });
-        });
-
-        // --- LOGIC EVENT: LƯU MODAL DỰ KIẾN ---
-        const btnSaveInfo = document.getElementById('btnSaveInfo');
-        if (btnSaveInfo) {
-            btnSaveInfo.addEventListener('click', function() {
-                alert('Lưu dữ liệu thành công! Hệ thống sẽ tự động tính toán OK/NG và kích hoạt luồng Mail.');
-                if (bsEstModal) bsEstModal.hide();
-            });
-        }
-
-        // --- LOGIC EVENT: LƯU MODAL CHÍNH THỨC ---
-        const btnSaveOfficial = document.getElementById('btnSaveOfficial');
-        if (btnSaveOfficial) {
-            btnSaveOfficial.addEventListener('click', function() {
-                const actualDate = document.getElementById('modalActualDate').value;
-                if (!actualDate) {
-                    alert("Vui lòng nhập Ngày nhận hàng thực tế!");
-                    return;
+                try {
+                    const res = await fetch('/ManagerDelivery/UpdateAnhHuongSX', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            PoDetailId: parseInt(poDetailId),
+                            ImpactStatus: status
+                        })
+                    });
+                    const data = await res.json();
+                    if (data && data.success) {
+                        bsImpactModal.hide();
+                        window.location.reload();
+                    } else {
+                        alert("Lỗi: " + (data.message || "Không thể cập nhật."));
+                    }
+                } catch (err) {
+                    console.error('Error:', err);
+                    alert("Lỗi kết nối tới máy chủ.");
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
-                alert("Xác nhận nhập kho hàng thành công! Trạng thái đơn hàng sẽ được lưu chính thức.");
-                if (bsOffModal) bsOffModal.hide();
             });
-        }
 
-        // --- LOGIC EVENT: LƯU MODAL THANH TOÁN ---
-        const btnSavePayment = document.getElementById('btnSavePayment');
-        if (btnSavePayment) {
-            btnSavePayment.addEventListener('click', function() {
-                const payQty = document.getElementById('modalPayQty').value;
-                const dntt = document.getElementById('modalDnttNumber').value;
-
-                if (!payQty || !dntt) {
-                    alert("Vui lòng điền đầy đủ Số lượng thanh toán thực tế và Số ĐNTT!");
-                    return;
-                }
-
-                alert("Cập nhật thông tin hồ sơ thanh toán thành công!");
-                if (bsPayModal) bsPayModal.hide();
-            });
-        }
-
-        // --- RESET FORM KHI ĐÓNG MODAL DỰ KIẾN ---
-        if (estModalEl) {
-            estModalEl.addEventListener('hidden.bs.modal', function () {
-                document.getElementById('updateForm').reset();
-                document.getElementById('modalSendPoDate').classList.remove('bg-light');
-                document.getElementById('modalConfirmDate').classList.remove('bg-light');
-                document.querySelectorAll('input[name="flexRadioImpact"]').forEach(radio => {
-                    radio.disabled = false;
-                });
-                document.getElementById('btnSaveInfo').style.display = 'block';
-            });
-        } 
-    });
-
-    // Xử lý sự kiện click chuyển Tabs Bootstrap mượt mà
-    document.querySelectorAll('.nav-link').forEach(button => {
-        button.addEventListener('click', function () {
-            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
-
-            this.classList.add('active');
-            const target = document.querySelector(this.getAttribute('data-bs-target'));
-            if(target) {
-                target.classList.add('show', 'active');
-            }
         });
-    });
-</script>
+    </script>
+}

@@ -89,7 +89,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             return _inv;
         }
         public static List<string> _getname_material(string group_code, string loaichiphi)
-        {
+         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
             var groupcode = "and Group_Code = '" + group_code + "'";
             if (group_code == "PROD")

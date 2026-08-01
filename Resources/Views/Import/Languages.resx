@@ -552,4 +552,7 @@
   <data name="uyquyen" xml:space="preserve">
     <value>Ủy quyền</value>
   </data>
+  <data name="Giaohang" xml:space="preserve">
+    <value>Giao hàng PO</value>
+  </data>
 </root>

@@ -173,5 +173,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // Lấy danh sách nhà cung cấp không cần xác nhận thủ tục hải quan
+        public async Task<GenericResponse<List<string>>> ListNotConfirmName()
+        {
+            var result = new GenericResponse<List<string>>();
+            try
+            {
+                var list = await _repo.ListNotConfirmName();
+                result.Data = list;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

@@ -1,0 +1,155 @@
+@model List<PE_THEODOITIENDO>
+
+@{
+    ViewBag.Title = "Quản lý tiến độ PO";
+}
+
+<div class="container-fluid mt-4">
+    <h3 class="mb-3 text-uppercase fw-bold text-primary">Theo dõi tiến độ giao hàng</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <!-- Thêm id="tableContainer" và bỏ max-height cứng -->
+            <div class="table-responsive" id="tableContainer" style="overflow-y: auto;">
+                <table class="table table-bordered table-striped table-hover mb-0 text-nowrap align-middle" id="poTable">
+                    <thead class="bg-primary text-white sticky-top" style="z-index: 2;">
+                        <!-- Hàng 1: Tiêu đề cột -->
+                        <tr class="text-center">
+                            <th>STT</th>
+                            <th>Số PO</th>
+                            <th>Chi tiết PO</th>
+                            <th>Mã NCC</th>
+                            <th>Tên NCC</th>
+                            <th>Ngày Gửi PO</th>
+                            <th>Ngày NCC XN</th>
+                            <th>Ngày GH Chính Thức</th>
+                            <th>Giờ GH</th>
+                            <th>Cửa GH</th>
+                            <th>Cổng Nhận</th>
+                            <th>Người Nhận</th>
+                            <th>Ảnh Hưởng SX</th>
+                            <th>Số DNTT</th>
+                            <th>Số Hóa Đơn</th>
+                            <th>SL An Toàn</th>
+                            <th>SL Thực Tế</th>
+                        </tr>
+                        <!-- Hàng 2: Các ô input tìm kiếm theo cột -->
+                        <tr class="bg-light">
+                            <th></th> <!-- Cột STT không cần tìm kiếm -->
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="1"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="2"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="3"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="4"></th>
+                            <th><input type="date" class="form-control form-control-sm col-search" data-col="5"></th>
+                            <th><input type="date" class="form-control form-control-sm col-search" data-col="6"></th>
+                            <th><input type="date" class="form-control form-control-sm col-search" data-col="7"></th>
+                            <th><input type="time" class="form-control form-control-sm col-search" data-col="8"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="9"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="10"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="11"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="12"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="13"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="14"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="15"></th>
+                            <th><input type="text" class="form-control form-control-sm col-search" data-col="16"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            int stt = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="text-center">@(stt++)</td>
+                                    <td class="fw-bold text-primary">@item.SoPO</td>
+                                    <td>@item.Id_Detail_PO</td>
+                                    <td>@item.MaNCC</td>
+                                    <td>@item.TenNCC</td>
+                                    <td>@item.Ngay_gui_PO </td>
+                                    <td>@item.Ngay_NCC_xacnhanGH</td>
+                                    <td>@item.Ngay_GHchinhthuc </td>
+                                    <td class="text-center">@item.Gio_GH</td>
+                                    <td class="text-center">@item.Cua_GH</td>
+                                    <td>@item.Cong_Nhanhang</td>
+                                    <td>@item.Nguoi_Nhanhang</td>
+                                    <td>@item.Anh_huong_SX</td>
+                                    <td>@item.So_DNTT</td>
+                                    <td>@item.So_hoadon</td>
+                                    <td class="text-end">@item.Soluongantoan</td>
+                                    <td class="text-end fw-bold text-success">
+                                        @String.Format("{0:N0}", item.SL_Thucte)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr id="noDataRow">
+                                <td colspan="17" class="text-center text-danger py-4">
+                                    Không có dữ liệu tiến độ PO từ 01/06/2026.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // === 1. XỬ LÝ AUTO HEIGHT CHO BẢNG ===
+            function adjustTableHeight() {
+                const tableContainer = document.getElementById('tableContainer');
+                // Lấy vị trí Y của bảng so với đỉnh màn hình
+                const offsetTop = tableContainer.getBoundingClientRect().top;
+                // Chiều cao màn hình (100vh) trừ đi offsetTop và trừ thêm 20px margin bottom cho đẹp
+                tableContainer.style.maxHeight = `calc(100vh - ${offsetTop + 20}px)`;
+            }
+
+            // Gọi hàm tính toán lúc vừa tải trang
+            adjustTableHeight();
+            // Cập nhật lại khi người dùng thay đổi kích thước cửa sổ trình duyệt
+            window.addEventListener('resize', adjustTableHeight);
+
+
+            // === 2. XỬ LÝ TÌM KIẾM THEO CỘT ===
+            const searchInputs = document.querySelectorAll('.col-search');
+            const tableBody = document.getElementById("tableBody");
+            const rows = tableBody.getElementsByTagName("tr");
+
+            // Lắng nghe cả sự kiện 'keyup' (khi gõ phím) và 'change' (khi dùng chuột chọn date/time)
+            searchInputs.forEach(input => {
+                input.addEventListener('keyup', filterTableByColumns);
+                input.addEventListener('change', filterTableByColumns);
+            });
+
+            function filterTableByColumns() {
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].id === "noDataRow") continue;
+
+                    let isRowVisible = true;
+                    const cells = rows[i].getElementsByTagName("td");
+
+                    searchInputs.forEach(input => {
+                        const colIndex = input.getAttribute('data-col');
+                        const filterValue = input.value.toLowerCase().trim();
+
+                        if (filterValue !== "" && cells[colIndex]) {
+                            const cellText = cells[colIndex].textContent || cells[colIndex].innerText;
+
+                            if (cellText.toLowerCase().indexOf(filterValue) === -1) {
+                                isRowVisible = false;
+                            }
+                        }
+                    });
+
+                    rows[i].style.display = isRowVisible ? "" : "none";
+                }
+            }
+        });
+    </script>
+}

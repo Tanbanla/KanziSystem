@@ -173,7 +173,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
-            if(model.mailnguoitao == model.mail_dt)
+            if(model.adidnguoitao == model.adid_dt)
             {
                 REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
             }
@@ -378,10 +378,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 regency = "XUATKHO";
             }
-            if (regency == "XUATKHO" && step == "5")
-            {
-                regency = "QLTC";
-            }
+        
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             var get_ma = _db.ReturnString("select Code_Request from REQUEST where Id_Request = '" + id_request + "'");
 
@@ -398,10 +395,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
             var buoc = int.Parse(step) + 1;
-            if(step == "5")
-            {
-                buoc = 5;
-            }
+                   
             var mail_send = _db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + id_request + "'");
             // Định nghĩa cột email tương ứng với từng bước
             string? columnName = buoc switch
@@ -411,18 +405,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 3 => "CHR_MAIL_XUATKHO",
                 4 => "CHR_MAIL_QLSC",
                 5 => "CHR_MAIL_QLTC",
+                6 => "",
                 _ => null
-            };
-
+            };  
             if (columnName == null) return Json("Bước không hợp lệ!");
 
             // Lấy địa chỉ email từ DataTable
-            string mailTo = mail_send.Rows[0][columnName].ToString()!;
           
-            var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());                        
+           
             // Gửi mail 
-          
-            if (step == "5")
+
+            if (buoc == 6)
             {
                 string guiden = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
                 body = $@"Xin chào <br />
@@ -433,7 +426,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
                 REQUEST_PROCESS_GA._sendmail(body, guiden, subject);
             }
-            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+            if (buoc == 6)
+            {
+                columnName = "CHR_MAIL_QLTC";
+                buoc = 20;
+            }
+            else if(buoc != 20)
+            {
+                string mailTo = mail_send.Rows[0][columnName].ToString()!;
+                REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+            }
+          
+            var up = REQUEST_PROCESS_GA._update_request(id_request, regency, buoc.ToString());
+          
             return Json("OK");
         }
         public JsonResult _update_dongytatca(string us, string madon)
@@ -524,12 +529,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             int buoc = int.Parse(get_if.Rows[0][0].ToString()!) + 1;
 
         
-            if (get_if.Rows[0][0].ToString()! == "5")
-            {
-                buoc = 5;
-            }
+          
             var mail_send = db.GET_DATA_FROM_SQL("select * from PE_REQUEST_CONFIRM_GA where ID_REQUEST = '" + get_id + "'");
             // Định nghĩa cột email tương ứng với từng bước
+
+            
             string? columnName = buoc switch
             {
                 1 => "CHR_MAIL_NGUOITHAMTRA",
@@ -537,34 +541,40 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 3 => "CHR_MAIL_XUATKHO",
                 4 => "CHR_MAIL_QLSC",
                 5 => "CHR_MAIL_QLTC",
+                6 => "",
                 _ => null
             };
-
+          
             if (columnName == null) return Json("Bước không hợp lệ!");
 
             // Lấy địa chỉ email
-            string mailTo = mail_send.Rows[0][columnName].ToString()!;
-            string mailTohoanthanh = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
-            var up = "";
-            // Cập nhật lại nội dung Body
-            if (int.Parse(get_if.Rows[0][0].ToString()!) == 5)
+         
+            if (buoc == 6)
             {
+                columnName = "CHR_MAIL_QLTC";
+                buoc = 20;
+            }
+            // Cập nhật lại nội dung Body
+            string mailTo = mail_send.Rows[0][columnName].ToString()!;
+            if (buoc == 20)
+            {
+               mailTo = mail_send.Rows[0]["CHR_MAIL_NGUOITAO"].ToString()!;
                 body = $@"Xin chào <br />
                      Đơn yêu cầu mã : {catmadon} của bạn ở trạng thái ĐỒNG Ý phê duyệt <br /><br />
                      Bạn vui lòng click vào đường link dưới đây để xác nhận <br /><br />
                      <a href='http://apbivnap18/ipcs/Approval/ListData_GA'> Link </a> <br />
                      ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
                      ※このメールは自動的に送付されたので, 返事をしないでください。";
-                 up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], get_if.Rows[0][0].ToString()!);
-                 REQUEST_PROCESS_GA._sendmail(body, mailTohoanthanh, subject);
+                REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
             }
-           
-            up = REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
-            REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
-            
-            // update đơn
+            else
+            {
+                REQUEST_PROCESS_GA._sendmail(body, mailTo, subject);
+            }          
+            REQUEST_PROCESS_GA._update_request(get_id, columnName.Split('_')[2], buoc.ToString());
           
-            return Json(up);
+
+            return Json("OK");
         }
         public JsonResult _reject(string id_request, string reason, string regency, string step, string urgent)
         {
@@ -584,8 +594,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
               ※Email này được gửi một cách tự động, xin vui lòng không trả lời.<br />
               ※このメールは自動的に送付されたので、返事をしないでください。";
 
-
-
             var stepMap = new Dictionary<string, string>
             {
                 { "0", "6" }, { "1", "7" }, { "2", "8" }, { "3", "9" },{ "4", "10" }
@@ -599,6 +607,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // Gửi về người tạo đơn
             string mail_nguoidat = mail_send.Trim();
             REQUEST_PROCESS._sendmail(body, mail_nguoidat, subject);
+
+            // xóa trạng thái về refuse trong bảng request
+            _db.GET_DATA_FROM_SQL("update [REQUEST] set [Status] = 'REFUSE' where Id_Request = '" + id_request + "'");
             return Json("Hoàn thành !");
         }
         public JsonResult _huydon_prod(string id_request, string reason)
@@ -683,6 +694,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             string mail_nguoidat = mail_send.Trim();
             REQUEST_PROCESS_GA._sendmail(body, mail_nguoidat, subject);
+            // xóa trạng thái về refuse trong bảng request
+            _db.GET_DATA_FROM_SQL("update [REQUEST] set [Status] = 'REFUSE' where Id_Request = '" + id_request + "'");
+
             return Json("Hoàn thành !");
         }
         public JsonResult get_requestcondition(string loaicp, string ngayyc,string Group_Code, string Code_Request, string INT_STEP, string Cost_Center, string Request_Date, string Total, string Urgent, string us, string costt_ct)

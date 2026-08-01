@@ -552,4 +552,7 @@
   <data name="uyquyen" xml:space="preserve">
     <value>Delegate</value>
   </data>
+  <data name="Giaohang" xml:space="preserve">
+    <value>Delivery</value>
+  </data>
 </root>

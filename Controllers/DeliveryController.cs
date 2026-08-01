@@ -855,5 +855,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json("Lỗi :" + ex.Message);
             }
         }
+
+   
     }
 }
