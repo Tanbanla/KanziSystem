@@ -275,6 +275,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.DTM_ExpiryDate = item.DTM_ExpiryDate;
                     detail.BIT_Select = null;
                     detail.CHR_Status = item.CHR_Status;
+                    detail.NVCHR_dataOld = item.NVCHR_dataOld;
                 }
                 // save step BaoGia_Request
                 var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);

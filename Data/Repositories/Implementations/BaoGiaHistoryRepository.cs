@@ -549,7 +549,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
         // tính tổng số đơn đến hạn
         public async Task<List<dynamic>> GetCountQuotation(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
-        string? MaHang,string? user)
+        string? MaHang, string? user)
         {
             var sql = @"
                 SELECT
@@ -622,11 +622,362 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result;
         }
         // Lấy thông tin lịch sử báo giá
+        //   public async Task<ListRequest<dynamic>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
+        //   string? MaHang, string? status, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
+        //   {
+        //       var sql = string.Empty;
+
+        //       var whereClauses = new List<string>();
+        //       var parameters = new Dapper.DynamicParameters();
+
+        //       whereClauses.Add("r.BIT_LayBaoGia = 1");
+
+        //       if (!string.IsNullOrEmpty(MaDon))
+        //       {
+        //           whereClauses.Add("r.CHR_MaDon = @MaDon");
+        //           parameters.Add("MaDon", MaDon);
+        //       }
+        //       if (!string.IsNullOrEmpty(MaNcc))
+        //       {
+        //           whereClauses.Add("r.CHR_MaNCC LIKE @MaNcc");
+        //           parameters.Add("MaNcc", "%" + MaNcc + "%");
+        //       }
+        //       if (!string.IsNullOrEmpty(chungLoai))
+        //       {
+        //           whereClauses.Add("r.NVCHR_ChungLoai LIKE @ChungLoai");
+        //           parameters.Add("ChungLoai", "%" + chungLoai + "%");
+        //       }
+        //       if (!string.IsNullOrEmpty(Section))
+        //       {
+        //           whereClauses.Add("r.CHR_SectionCode LIKE @Section");
+        //           parameters.Add("Section", "%" + Section + "%");
+        //       }
+        //       if (!string.IsNullOrEmpty(nguoiYeuCau))
+        //       {
+        //           whereClauses.Add("r.CHR_CreateBy LIKE @NguoiYeuCau");
+        //           parameters.Add("NguoiYeuCau", "%" + nguoiYeuCau + "%");
+        //       }
+        //       if (!string.IsNullOrEmpty(MaHang))
+        //       {
+        //           whereClauses.Add("r.CHR_MaHangNoiBo LIKE @MaHang");
+        //           parameters.Add("MaHang", "%" + MaHang + "%");
+        //       }
+        //       if (!string.IsNullOrEmpty(user))
+        //       {
+        //           parameters.Add("Adid", user);
+        //           whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
+        //       }
+
+        //       var statusSql = "1=1";
+        //       switch (status)
+        //       {
+        //           case "RETURN":
+        //               statusSql = "r.ID_Status LIKE 'RETURN%'";
+        //               break;
+        //           case "DONE":
+        //               statusSql = "r.ID_Status = 'DONE' AND r.ID_Status NOT LIKE 'DELETE'";
+        //               break;
+        //           case "APPROVAL":
+        //               statusSql = "r.ID_Status LIKE 'APPROVAL%' AND r.ID_Status NOT LIKE 'DELETE'";
+        //               break;
+        //           case "WAIT":
+        //               statusSql = "r.ID_Status LIKE '%WAIT%' AND r.ID_Status NOT LIKE 'DELETE'";
+        //               break;
+        //           case "DELETE":
+        //               statusSql = "r.ID_Status LIKE 'DELETE'";
+        //               break;
+        //           default:
+        //               statusSql = "r.ID_Status NOT LIKE 'DELETE' AND (r.ID_Status NOT LIKE 'RETURN%' or r.ID_StepBaoGia = 8)";
+        //               break;
+        //       }
+        //       whereClauses.Add("(" + statusSql + ")");
+
+        //       // date range filters (use DTM_CreateDate)
+        //       if (dateFrom.HasValue)
+        //       {
+        //           whereClauses.Add("r.DTM_CreateDate >= @DateFrom");
+        //           parameters.Add("DateFrom", dateFrom.Value.Date);
+        //       }
+        //       if (dateTo.HasValue)
+        //       {
+        //           whereClauses.Add("r.DTM_CreateDate < @DateTo");
+        //           parameters.Add("DateTo", dateTo.Value.Date.AddDays(1));
+        //       }
+
+        //       var whereSql = whereClauses.Any()
+        //           ? " WHERE " + string.Join(" AND ", whereClauses)
+        //           : string.Empty;
+
+        //       var cteSql = @"
+        //           ;WITH FILTERED AS (
+        //               SELECT
+        //                   r.ID,
+        //                   r.CHR_MaDon,
+        //                   r.CHR_MaHangNCC,
+        //                   r.CHR_MaHangNoiBo,
+        //                   r.CHR_NameEN,
+        //                   r.DTM_KyHan,
+        //                   r.CHR_CreateBy,
+        //                   r.ID_StepBaoGia,
+        //                   r.CHR_MaNCC,
+        //                   r.CHR_UserApproval,
+        //	r.DTM_CreateDate
+        //               FROM BaoGia_Request_of_Quotation r
+        //       " + whereSql + @"
+        //           ),
+        //           MAIN AS (
+        //               SELECT
+        //                   f.CHR_MaDon,
+        //                   f.CHR_MaHangNoiBo,
+        //	MAX(f.DTM_CreateDate) as DTM_CreateDate,
+        //                   MAX(f.CHR_MaHangNCC) AS CHR_MaHangNCC,
+        //                   MAX(f.CHR_NameEN) AS CHR_NameEN,
+        //                   MAX(f.DTM_KyHan) AS DTM_KyHan,
+        //                   MAX(f.CHR_CreateBy) AS CHR_CreateBy,
+        //                   MIN(f.ID_StepBaoGia) AS Step,
+        //                   MIN(f.CHR_UserApproval) as UserNext
+        //               FROM FILTERED f
+        //               GROUP BY
+        //                   f.CHR_MaDon,
+        //                   f.CHR_MaHangNoiBo
+        //           ),
+        //           NCC_GROUP AS (
+        //               SELECT
+        //                   CHR_MaDon,
+        //                   CHR_MaHangNoiBo,
+        //                   ShortName,
+        //                   CHR_Status,
+        //                   MAX(NVCHR_File) AS NVCHR_File,
+        //                   MAX(ID_StepBaoGia) AS ID_StepBaoGia,
+        //                   MAX(CAST(BIT_Select AS INT)) AS BIT_Select
+        //               FROM (
+        //                   SELECT DISTINCT
+        //                       f.CHR_MaDon,
+        //                       f.CHR_MaHangNoiBo,
+        //                       ISNULL(n.ShortName, f.CHR_MaNCC) AS ShortName,
+        //                       f.ID_StepBaoGia,
+        //                       d.CHR_Status,
+        //                       d.NVCHR_File,
+        //                       ISNULL(d.BIT_Select,0) AS BIT_Select
+        //                   FROM FILTERED f
+        //                   LEFT JOIN IM_NCC_NEW n
+        //                       ON f.CHR_MaNCC = n.Ma
+        //                   LEFT JOIN BaoGia_Detail_of_Quotation d
+        //                       ON d.ID_RequestQuote = f.ID
+        //               ) t
+        //               GROUP BY
+        //                   CHR_MaDon,
+        //                   CHR_MaHangNoiBo,
+        //                   ShortName,
+        //                   CHR_Status
+        //           ),
+
+        //           NCC_ROW AS (
+        //               SELECT
+        //                   *,
+        //                   ROW_NUMBER() OVER (
+        //                       PARTITION BY CHR_MaDon, CHR_MaHangNoiBo
+        //                       ORDER BY
+        //                           BIT_Select DESC,   -- NCC được chọn luôn lên đầu
+        //                           ShortName
+        //                   ) AS rn
+        //               FROM NCC_GROUP
+        //           ),
+        //           NCC_PIVOT AS (
+        //               SELECT
+        //                   CHR_MaDon,
+        //                   CHR_MaHangNoiBo,
+        //                   MAX(CASE WHEN rn = 1 THEN ShortName END) AS NCC_1,
+        //                   MAX(CASE WHEN rn = 2 THEN ShortName END) AS NCC_2,
+        //                   MAX(CASE WHEN rn = 3 THEN ShortName END) AS NCC_3,
+        //                   MAX(CASE WHEN rn = 4 THEN ShortName END) AS NCC_4,
+        //                   MAX(CASE WHEN rn = 5 THEN ShortName END) AS NCC_5,
+        //             MAX(CASE WHEN rn = 1 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_1,
+        //                   MAX(CASE WHEN rn = 2 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_2,
+        //                   MAX(CASE WHEN rn = 3 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_3,
+        //                   MAX(CASE WHEN rn = 4 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_4,
+        //                   MAX(CASE WHEN rn = 5 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_5,
+        //	MAX(CASE WHEN rn = 1 THEN CHR_Status END) AS Status_1,
+        //                   MAX(CASE WHEN rn = 2 THEN CHR_Status END) AS Status_2,
+        //                   MAX(CASE WHEN rn = 3 THEN CHR_Status END) AS Status_3,
+        //                   MAX(CASE WHEN rn = 4 THEN CHR_Status END) AS Status_4,
+        //                   MAX(CASE WHEN rn = 5 THEN CHR_Status END) AS Status_5,
+        //	MAX(CASE WHEN rn = 1 THEN NVCHR_File END) AS Link_1,
+        //                   MAX(CASE WHEN rn = 2 THEN NVCHR_File END) AS Link_2,
+        //                   MAX(CASE WHEN rn = 3 THEN NVCHR_File END) AS Link_3,
+        //                   MAX(CASE WHEN rn = 4 THEN NVCHR_File END) AS Link_4,
+        //                   MAX(CASE WHEN rn = 5 THEN NVCHR_File END) AS Link_5
+        //               FROM NCC_ROW
+        //               GROUP BY CHR_MaDon, CHR_MaHangNoiBo
+        //           ),
+        //           HIS_RAW AS (
+        //               SELECT
+        //                   f.CHR_MaDon,
+        //                   f.CHR_MaHangNoiBo,
+        //                   h.CHR_ActionType,
+        //                   h.NVCHR_UpdateName,
+        //                   TRY_CONVERT(DATETIME, h.CHR_Updatedate) AS ApproveTime
+        //               FROM BaoGia_History_Request_of_Quotation h
+        //               INNER JOIN FILTERED f
+        //                   ON f.ID = h.ID_RequestQuote
+        //               WHERE h.CHR_ActionType IN (
+        //                   'QLSC','QLTC','PIC',
+        //                   'QLSC_1','PIC_PICK_NCC',
+        //                   'QLSC_PICK_NCC','QLTC_PICK_NCC',
+        //                   'DEFT_PICK_NCC'
+        //               )
+        //           ),
+        //           HIS AS (
+        //               SELECT
+        //                   CHR_MaDon,
+        //                   CHR_MaHangNoiBo,
+        //             MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
+        //             MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
+        //             MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
+        //             MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
+        //             MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
+        //             MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
+        //             MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
+        //               FROM HIS_RAW
+        //               GROUP BY CHR_MaDon, CHR_MaHangNoiBo
+        //           ),
+        //         PICK AS (
+        //           SELECT *
+        //           FROM (
+        //               SELECT
+        //                   f.CHR_MaDon,
+        //                   f.CHR_MaHangNoiBo,
+        //                   ISNULL(n.ShortName, n.Ma) AS NCC_DuocChon,
+        //                   d.NVCHR_ReasonPick,
+        //                   d.NVCHR_File,
+        //                   f.ID_StepBaoGia AS PickStep,
+        //                   d.BIT_Select,
+        //                   d.CHR_Status,
+        //                   ROW_NUMBER() OVER (
+        //                       PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
+        //                       ORDER BY
+        //                           CASE
+        //                               WHEN d.BIT_Select = 1 THEN 1
+        //                               WHEN d.BIT_Select IS NULL THEN 2
+        //                           END,
+        //                           f.ID_StepBaoGia ASC,
+        //			d.ID DESC
+        //                   ) AS rn
+        //               FROM FILTERED f
+        //               INNER JOIN BaoGia_Detail_of_Quotation d
+        //                   ON d.ID_RequestQuote = f.ID
+        //               LEFT JOIN IM_NCC_NEW n
+        //                   ON f.CHR_MaNCC = n.Ma
+        //               WHERE d.BIT_Select = 1
+        //                  OR d.BIT_Select IS NULL
+        //           ) t
+        //           WHERE rn = 1
+        //       )
+        //       ";
+
+        //       sql = cteSql + @"
+        //           SELECT
+        //               m.CHR_MaDon,
+        //               m.CHR_MaHangNoiBo,
+        //               m.CHR_MaHangNCC,
+        //               m.CHR_NameEN,
+        //               m.DTM_KyHan,
+        //               m.CHR_CreateBy,
+        //m.UserNext,
+        //ISNULL(p.PickStep, m.Step) AS Step,
+        //s.CHR_StepName,
+        //s.CHR_StepNameEN,
+        //s.CHR_StepNameJP,
+        //               ncc.NCC_1,
+        //               ncc.NCC_2,
+        //               ncc.NCC_3,
+        //               ncc.NCC_4,
+        //               ncc.NCC_5,
+        //ncc.BitNCC_1,
+        //               ncc.BitNCC_2,
+        //               ncc.BitNCC_3,
+        //               ncc.BitNCC_4,
+        //               ncc.BitNCC_5,
+        //ncc.Status_1,
+        //ncc.Status_2,
+        //ncc.Status_3,
+        //ncc.Status_4,
+        //ncc.Status_5,
+        //ncc.Link_1,
+        //ncc.Link_2,
+        //ncc.Link_3,
+        //ncc.Link_4,
+        //ncc.Link_5,
+        //               h.PIC_Approve, h.PIC_Time,
+        //               h.QLSC_Approve, h.QLSC_Time,
+        //               h.QLTC_Approve, h.QLTC_Time,
+        //               h.QLSC1_Approve, h.QLSC1_Time,
+        //               h.PIC_PickNCC, h.PIC_PickNCC_Time,
+        //               h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
+        //               h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
+        //               h.DEFT_PickNCC, h.DEFT_PickNCC_Time,
+        //               p.NCC_DuocChon,
+        //               p.NVCHR_ReasonPick,
+        //               p.NVCHR_File
+        //           FROM MAIN m
+        //           LEFT JOIN NCC_PIVOT ncc
+        //               ON m.CHR_MaDon = ncc.CHR_MaDon
+        //               AND m.CHR_MaHangNoiBo = ncc.CHR_MaHangNoiBo
+        //           LEFT JOIN HIS h
+        //               ON m.CHR_MaDon = h.CHR_MaDon
+        //               AND m.CHR_MaHangNoiBo = h.CHR_MaHangNoiBo
+        //           LEFT JOIN PICK p
+        //               ON m.CHR_MaDon = p.CHR_MaDon
+        //               AND m.CHR_MaHangNoiBo = p.CHR_MaHangNoiBo
+        //           LEFT JOIN BaoGia_Step s
+        //               ON ISNULL(p.PickStep, m.Step) = s.INT_StepNumber
+        //       ";
+
+        //       var countSql = cteSql + @"
+        //           SELECT COUNT(1)
+        //           FROM MAIN
+        //       ";
+
+        //       if (pageSize > 0 && pageIndex > 0)
+        //       {
+        //           sql += @"
+        //               ORDER BY m.DTM_CreateDate desc
+        //               OFFSET @Offset ROWS
+        //               FETCH NEXT @PageSize ROWS ONLY
+        //           ";
+        //           parameters.Add("Offset", (pageIndex - 1) * pageSize);
+        //           parameters.Add("PageSize", pageSize);
+        //       }
+        //       else
+        //       {
+        //           sql += @"
+        //               ORDER BY m.DTM_CreateDate desc
+        //           ";
+        //       }
+
+        //       var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+        //       var totalCount = (await _conn.ExecuteScalarAsync<long>(countSql, parameters));
+
+        //       return new ListRequest<dynamic>
+        //       {
+        //           Data = data,
+        //           TotalCount = totalCount
+        //       };
+        //   }
+
+        // Lấy thông tin lịch sử báo giá
         public async Task<ListRequest<dynamic>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? status, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
         {
-            var sql = string.Empty;
-
             var whereClauses = new List<string>();
             var parameters = new Dapper.DynamicParameters();
 
@@ -668,31 +1019,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 whereClauses.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @Adid)");
             }
 
-            var statusSql = "1=1";
-            switch (status)
-            {
-                case "RETURN":
-                    statusSql = "r.ID_Status LIKE 'RETURN%'";
-                    break;
-                case "DONE":
-                    statusSql = "r.ID_Status = 'DONE' AND r.ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "APPROVAL":
-                    statusSql = "r.ID_Status LIKE 'APPROVAL%' AND r.ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "WAIT":
-                    statusSql = "r.ID_Status LIKE '%WAIT%' AND r.ID_Status NOT LIKE 'DELETE'";
-                    break;
-                case "DELETE":
-                    statusSql = "r.ID_Status LIKE 'DELETE'";
-                    break;
-                default:
-                    statusSql = "r.ID_Status NOT LIKE 'DELETE' AND (r.ID_Status NOT LIKE 'RETURN%' or r.ID_StepBaoGia = 8)";
-                    break;
-            }
-            whereClauses.Add("(" + statusSql + ")");
-
-            // date range filters (use DTM_CreateDate)
+            // Lọc theo Ngày tạo
             if (dateFrom.HasValue)
             {
                 whereClauses.Add("r.DTM_CreateDate >= @DateFrom");
@@ -708,34 +1035,60 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 ? " WHERE " + string.Join(" AND ", whereClauses)
                 : string.Empty;
 
+            // Build điều kiện Filter Status riêng cho câu SQL cuối cùng
+            var finalStatusClause = "1=1";
+            switch (status)
+            {
+                case "RETURN":
+                    finalStatusClause = "f.ID_Status LIKE 'RETURN%'";
+                    break;
+                case "DONE":
+                    finalStatusClause = "f.ID_Status = 'DONE' AND f.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "APPROVAL":
+                    finalStatusClause = "f.ID_Status LIKE 'APPROVAL%' AND f.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "WAIT":
+                    finalStatusClause = "f.ID_Status LIKE '%WAIT%' AND f.ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DELETE":
+                    finalStatusClause = "f.ID_Status LIKE 'DELETE'";
+                    break;
+                default:
+                    finalStatusClause = "f.ID_Status NOT LIKE 'DELETE' AND (f.ID_Status NOT LIKE 'RETURN%' OR f.Step = 8)";
+                    break;
+            }
+
             var cteSql = @"
-                ;WITH FILTERED AS (
-                    SELECT
-                        r.ID,
-                        r.CHR_MaDon,
-                        r.CHR_MaHangNCC,
-                        r.CHR_MaHangNoiBo,
-                        r.CHR_NameEN,
-                        r.DTM_KyHan,
-                        r.CHR_CreateBy,
-                        r.ID_StepBaoGia,
-                        r.CHR_MaNCC,
-                        r.CHR_UserApproval,
-						r.DTM_CreateDate
-                    FROM BaoGia_Request_of_Quotation r
+            ;WITH FILTERED AS (
+                SELECT
+                    r.ID,
+                    r.CHR_MaDon,
+                    r.CHR_MaHangNCC,
+                    r.CHR_MaHangNoiBo,
+                    r.CHR_NameEN,
+                    r.DTM_KyHan,
+                    r.CHR_CreateBy,
+                    r.ID_StepBaoGia,
+                    r.CHR_MaNCC,
+                    r.CHR_UserApproval,
+                    r.DTM_CreateDate,
+                    r.ID_Status
+                FROM BaoGia_Request_of_Quotation r
             " + whereSql + @"
                 ),
                 MAIN AS (
                     SELECT
                         f.CHR_MaDon,
                         f.CHR_MaHangNoiBo,
-						MAX(f.DTM_CreateDate) as DTM_CreateDate,
+                        MAX(f.DTM_CreateDate) AS DTM_CreateDate,
                         MAX(f.CHR_MaHangNCC) AS CHR_MaHangNCC,
                         MAX(f.CHR_NameEN) AS CHR_NameEN,
                         MAX(f.DTM_KyHan) AS DTM_KyHan,
                         MAX(f.CHR_CreateBy) AS CHR_CreateBy,
                         MIN(f.ID_StepBaoGia) AS Step,
-                        MIN(f.CHR_UserApproval) as UserNext
+                        MIN(f.CHR_UserApproval) AS UserNext,
+                        MAX(f.ID_Status) AS ID_Status
                     FROM FILTERED f
                     GROUP BY
                         f.CHR_MaDon,
@@ -771,14 +1124,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         ShortName,
                         CHR_Status
                 ),
-
                 NCC_ROW AS (
                     SELECT
                         *,
                         ROW_NUMBER() OVER (
                             PARTITION BY CHR_MaDon, CHR_MaHangNoiBo
                             ORDER BY
-                                BIT_Select DESC,   -- NCC được chọn luôn lên đầu
+                                BIT_Select DESC,
                                 ShortName
                         ) AS rn
                     FROM NCC_GROUP
@@ -792,17 +1144,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         MAX(CASE WHEN rn = 3 THEN ShortName END) AS NCC_3,
                         MAX(CASE WHEN rn = 4 THEN ShortName END) AS NCC_4,
                         MAX(CASE WHEN rn = 5 THEN ShortName END) AS NCC_5,
-		                MAX(CASE WHEN rn = 1 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_1,
-                        MAX(CASE WHEN rn = 2 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_2,
-                        MAX(CASE WHEN rn = 3 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_3,
-                        MAX(CASE WHEN rn = 4 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_4,
-                        MAX(CASE WHEN rn = 5 and ID_StepBaoGia >6 THEN 1 END) AS BitNCC_5,
-						MAX(CASE WHEN rn = 1 THEN CHR_Status END) AS Status_1,
+                        MAX(CASE WHEN rn = 1 AND ID_StepBaoGia > 6 THEN 1 END) AS BitNCC_1,
+                        MAX(CASE WHEN rn = 2 AND ID_StepBaoGia > 6 THEN 1 END) AS BitNCC_2,
+                        MAX(CASE WHEN rn = 3 AND ID_StepBaoGia > 6 THEN 1 END) AS BitNCC_3,
+                        MAX(CASE WHEN rn = 4 AND ID_StepBaoGia > 6 THEN 1 END) AS BitNCC_4,
+                        MAX(CASE WHEN rn = 5 AND ID_StepBaoGia > 6 THEN 1 END) AS BitNCC_5,
+                        MAX(CASE WHEN rn = 1 THEN CHR_Status END) AS Status_1,
                         MAX(CASE WHEN rn = 2 THEN CHR_Status END) AS Status_2,
                         MAX(CASE WHEN rn = 3 THEN CHR_Status END) AS Status_3,
                         MAX(CASE WHEN rn = 4 THEN CHR_Status END) AS Status_4,
                         MAX(CASE WHEN rn = 5 THEN CHR_Status END) AS Status_5,
-						MAX(CASE WHEN rn = 1 THEN NVCHR_File END) AS Link_1,
+                        MAX(CASE WHEN rn = 1 THEN NVCHR_File END) AS Link_1,
                         MAX(CASE WHEN rn = 2 THEN NVCHR_File END) AS Link_2,
                         MAX(CASE WHEN rn = 3 THEN NVCHR_File END) AS Link_3,
                         MAX(CASE WHEN rn = 4 THEN NVCHR_File END) AS Link_4,
@@ -831,126 +1183,120 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     SELECT
                         CHR_MaDon,
                         CHR_MaHangNoiBo,
-		                MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
-		                MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
-		                MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
-		                MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
-		                MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
-		                MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
-		                MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
-		                MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
-		                MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
-		                MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
-		                MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
-		                MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
-		                MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
-		                MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
-		                MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
-		                MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
+                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN NVCHR_UpdateName END) AS PIC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC' THEN ApproveTime END) AS PIC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN NVCHR_UpdateName END) AS QLSC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC' THEN ApproveTime END) AS QLSC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN NVCHR_UpdateName END) AS QLTC_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC' THEN ApproveTime END) AS QLTC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN NVCHR_UpdateName END) AS QLSC1_Approve,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_1' THEN ApproveTime END) AS QLSC1_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN NVCHR_UpdateName END) AS PIC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'PIC_PICK_NCC' THEN ApproveTime END) AS PIC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLSC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'QLSC_PICK_NCC' THEN ApproveTime END) AS QLSC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN NVCHR_UpdateName END) AS QLTC_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'QLTC_PICK_NCC' THEN ApproveTime END) AS QLTC_PickNCC_Time,
+                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN NVCHR_UpdateName END) AS DEFT_PickNCC,
+                        MAX(CASE WHEN CHR_ActionType = 'DEFT_PICK_NCC' THEN ApproveTime END) AS DEFT_PickNCC_Time
                     FROM HIS_RAW
                     GROUP BY CHR_MaDon, CHR_MaHangNoiBo
                 ),
-              PICK AS (
-                SELECT *
-                FROM (
+                PICK AS (
+                    SELECT *
+                    FROM (
+                        SELECT
+                            f.CHR_MaDon,
+                            f.CHR_MaHangNoiBo,
+                            ISNULL(n.ShortName, n.Ma) AS NCC_DuocChon,
+                            d.NVCHR_ReasonPick,
+                            d.NVCHR_File,
+                            f.ID_StepBaoGia AS PickStep,
+                            d.BIT_Select,
+                            d.CHR_Status,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
+                                ORDER BY
+                                    CASE
+                                        WHEN d.BIT_Select = 1 THEN 1
+                                        WHEN d.BIT_Select IS NULL THEN 2
+                                    END,
+                                    f.ID_StepBaoGia ASC,
+                                    d.ID DESC
+                            ) AS rn
+                        FROM FILTERED f
+                        INNER JOIN BaoGia_Detail_of_Quotation d
+                            ON d.ID_RequestQuote = f.ID
+                        LEFT JOIN IM_NCC_NEW n
+                            ON f.CHR_MaNCC = n.Ma
+                        WHERE d.BIT_Select = 1
+                            OR d.BIT_Select IS NULL
+                    ) t
+                    WHERE rn = 1
+                ),
+                FINAL AS (
                     SELECT
-                        f.CHR_MaDon,
-                        f.CHR_MaHangNoiBo,
-                        ISNULL(n.ShortName, n.Ma) AS NCC_DuocChon,
-                        d.NVCHR_ReasonPick,
-                        d.NVCHR_File,
-                        f.ID_StepBaoGia AS PickStep,
-                        d.BIT_Select,
-                        d.CHR_Status,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
-                            ORDER BY
-                                CASE
-                                    WHEN d.BIT_Select = 1 THEN 1
-                                    WHEN d.BIT_Select IS NULL THEN 2
-                                END,
-                                f.ID_StepBaoGia ASC,
-								d.ID DESC
-                        ) AS rn
-                    FROM FILTERED f
-                    INNER JOIN BaoGia_Detail_of_Quotation d
-                        ON d.ID_RequestQuote = f.ID
-                    LEFT JOIN IM_NCC_NEW n
-                        ON f.CHR_MaNCC = n.Ma
-                    WHERE d.BIT_Select = 1
-                       OR d.BIT_Select IS NULL
-                ) t
-                WHERE rn = 1
-            )
+                        m.CHR_MaDon,
+                        m.CHR_MaHangNoiBo,
+                        m.CHR_MaHangNCC,
+                        m.CHR_NameEN,
+                        m.DTM_KyHan,
+                        m.CHR_CreateBy,
+                        m.UserNext,
+                        m.DTM_CreateDate,
+                        m.ID_Status,
+                        ISNULL(p.PickStep, m.Step) AS Step,
+                        s.CHR_StepName,
+                        s.CHR_StepNameEN,
+                        s.CHR_StepNameJP,
+                        ncc.NCC_1, ncc.NCC_2, ncc.NCC_3, ncc.NCC_4, ncc.NCC_5,
+                        ncc.BitNCC_1, ncc.BitNCC_2, ncc.BitNCC_3, ncc.BitNCC_4, ncc.BitNCC_5,
+                        ncc.Status_1, ncc.Status_2, ncc.Status_3, ncc.Status_4, ncc.Status_5,
+                        ncc.Link_1, ncc.Link_2, ncc.Link_3, ncc.Link_4, ncc.Link_5,
+                        h.PIC_Approve, h.PIC_Time,
+                        h.QLSC_Approve, h.QLSC_Time,
+                        h.QLTC_Approve, h.QLTC_Time,
+                        h.QLSC1_Approve, h.QLSC1_Time,
+                        h.PIC_PickNCC, h.PIC_PickNCC_Time,
+                        h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
+                        h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
+                        h.DEFT_PickNCC, h.DEFT_PickNCC_Time,
+                        p.NCC_DuocChon,
+                        p.NVCHR_ReasonPick,
+                        p.NVCHR_File
+                    FROM MAIN m
+                    LEFT JOIN NCC_PIVOT ncc
+                        ON m.CHR_MaDon = ncc.CHR_MaDon
+                        AND m.CHR_MaHangNoiBo = ncc.CHR_MaHangNoiBo
+                    LEFT JOIN HIS h
+                        ON m.CHR_MaDon = h.CHR_MaDon
+                        AND m.CHR_MaHangNoiBo = h.CHR_MaHangNoiBo
+                    LEFT JOIN PICK p
+                        ON m.CHR_MaDon = p.CHR_MaDon
+                        AND m.CHR_MaHangNoiBo = p.CHR_MaHangNoiBo
+                    LEFT JOIN BaoGia_Step s
+                        ON ISNULL(p.PickStep, m.Step) = s.INT_StepNumber
+                )
             ";
 
-            sql = cteSql + @"
-                SELECT
-                    m.CHR_MaDon,
-                    m.CHR_MaHangNoiBo,
-                    m.CHR_MaHangNCC,
-                    m.CHR_NameEN,
-                    m.DTM_KyHan,
-                    m.CHR_CreateBy,
-					m.UserNext,
-					ISNULL(p.PickStep, m.Step) AS Step,
-					s.CHR_StepName,
-					s.CHR_StepNameEN,
-					s.CHR_StepNameJP,
-                    ncc.NCC_1,
-                    ncc.NCC_2,
-                    ncc.NCC_3,
-                    ncc.NCC_4,
-                    ncc.NCC_5,
-					ncc.BitNCC_1,
-                    ncc.BitNCC_2,
-                    ncc.BitNCC_3,
-                    ncc.BitNCC_4,
-                    ncc.BitNCC_5,
-					ncc.Status_1,
-					ncc.Status_2,
-					ncc.Status_3,
-					ncc.Status_4,
-					ncc.Status_5,
-					ncc.Link_1,
-					ncc.Link_2,
-					ncc.Link_3,
-					ncc.Link_4,
-					ncc.Link_5,
-                    h.PIC_Approve, h.PIC_Time,
-                    h.QLSC_Approve, h.QLSC_Time,
-                    h.QLTC_Approve, h.QLTC_Time,
-                    h.QLSC1_Approve, h.QLSC1_Time,
-                    h.PIC_PickNCC, h.PIC_PickNCC_Time,
-                    h.QLSC_PickNCC, h.QLSC_PickNCC_Time,
-                    h.QLTC_PickNCC, h.QLTC_PickNCC_Time,
-                    h.DEFT_PickNCC, h.DEFT_PickNCC_Time,
-                    p.NCC_DuocChon,
-                    p.NVCHR_ReasonPick,
-                    p.NVCHR_File
-                FROM MAIN m
-                LEFT JOIN NCC_PIVOT ncc
-                    ON m.CHR_MaDon = ncc.CHR_MaDon
-                    AND m.CHR_MaHangNoiBo = ncc.CHR_MaHangNoiBo
-                LEFT JOIN HIS h
-                    ON m.CHR_MaDon = h.CHR_MaDon
-                    AND m.CHR_MaHangNoiBo = h.CHR_MaHangNoiBo
-                LEFT JOIN PICK p
-                    ON m.CHR_MaDon = p.CHR_MaDon
-                    AND m.CHR_MaHangNoiBo = p.CHR_MaHangNoiBo
-                LEFT JOIN BaoGia_Step s
-                    ON ISNULL(p.PickStep, m.Step) = s.INT_StepNumber
+            // Truy vấn dữ liệu sau khi lọc status trên kết quả gom nhóm
+            var sqlData = cteSql + $@"
+                SELECT * 
+                FROM FINAL f
+                WHERE {finalStatusClause}
             ";
 
-            var countSql = cteSql + @"
+            // Count tổng số bản ghi sau khi lọc status
+            var countSql = cteSql + $@"
                 SELECT COUNT(1)
-                FROM MAIN
+                FROM FINAL f
+                WHERE {finalStatusClause}
             ";
 
             if (pageSize > 0 && pageIndex > 0)
             {
-                sql += @"
-                    ORDER BY m.DTM_CreateDate desc
+                sqlData += @"
+                    ORDER BY f.DTM_CreateDate DESC
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY
                 ";
@@ -959,13 +1305,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             else
             {
-                sql += @"
-                    ORDER BY m.DTM_CreateDate desc
+                sqlData += @"
+                    ORDER BY f.DTM_CreateDate DESC
                 ";
             }
 
-            var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
-            var totalCount = (await _conn.ExecuteScalarAsync<long>(countSql, parameters));
+            var data = (await _conn.QueryAsync<dynamic>(sqlData, parameters)).ToList();
+            var totalCount = await _conn.ExecuteScalarAsync<long>(countSql, parameters);
 
             return new ListRequest<dynamic>
             {
@@ -973,10 +1319,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 TotalCount = totalCount
             };
         }
-
         // Tính tổng theo trạng thái đơn
         public async Task<List<dynamic>> GetCountStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
-        string? MaHang,string? user)
+        string? MaHang, string? user)
         {
             var sql = @"
             WITH DonHang AS (
