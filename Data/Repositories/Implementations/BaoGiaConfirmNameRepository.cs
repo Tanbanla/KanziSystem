@@ -10,6 +10,7 @@ using PRJ_WAREHOUSE_BIVN.Controllers;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using System.Data;
 using System.Text;
 
@@ -18,10 +19,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
     public class BaoGiaConfirmNameRepository : BaseRepository<BaoGia_Confirm_Name_Quotation, int>, IBaoGiaConfirmNameRepository
     {
         private readonly COST_MANAGEMENTContext _context;
-        public BaoGiaConfirmNameRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration
+        private readonly IFileImportService _fileImportService;
+        public BaoGiaConfirmNameRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration, IFileImportService fileImportService
         ) : base(context, options, configuration)
         {
             _context = context;
+            _fileImportService = fileImportService;
         }
         //search thông tin xác nhận tên hàng
         public async Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user, int pageIndex, int pageSize)
@@ -284,9 +287,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return newConfirmNames;
         }
         // luu thong tin nhap file
-        public async Task<bool> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role)
+        public async Task<bool> SaveFromFileAsync(List<ConfirmNameInputExcel> confirmNames, string user, string? Role)
         {
-            var role = string.IsNullOrWhiteSpace(Role) ? "UserPUR" : Role.Trim();
             if (confirmNames == null) return false;
 
             var now = DateTime.Now;
@@ -300,41 +302,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .FirstOrDefaultAsync();
                 if (rq == null) continue;
 
-                // Role enforcement
-                if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
-                {
-                    row.VCHR_TenHaiQuan = i.VCHR_TenHaiQuan;
-                    row.VCHR_UserShip = user;
-                    row.DTM_UserShip = now;
-                    row.CHR_StatusShip = "Confirmed";
-                    row.CHR_Status = "Confirmed";
+                // update rq
+                rq.ID_StepBaoGia = 13;
+                rq.ID_Status = "DONE";
+                rq.NVCHR_NameVN = i.VCHR_TenHaiQuan;
 
-                    //if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
-                    //{
-                    //    rq.NVCHR_NameVN = row.VCHR_TenHaiQuan;
-                    //    rq.ID_StepBaoGia = 13;
-                    //    rq.ID_Status = "DONE";
-                    //}
-                }
-                else // UserPUR
-                {
-                    row.VCHR_TenHaiQuan = i.VCHR_TenHaiQuan;
-                    row.VCHR_MaHangNoiBo = i.VCHR_MaHangNoiBo;
-                    row.NVCHR_LyDo = i.NVCHR_LyDo;
-                    row.NVCHR_Note = i.NVCHR_Note;
-                    row.CHR_Status = "";
-                    row.CHR_StatusShip = "Confirming";
-                    row.VCHR_UserPUR = user;
-                    row.DTM_UserPUR = now;
-                }
-
-                //if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
-                //    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
-                //{
-                //    row.CHR_Status = "Confirming"; // đang xác nhận
-                //}
+                // update confirm name
+                row.VCHR_TenHaiQuan = i.VCHR_TenHaiQuan;
+                row.VCHR_UserShip = user;
+                row.DTM_UserShip = now;
+                row.CHR_StatusShip = "Confirmed";
+                row.CHR_Status = "Confirmed";
+                row.CHR_StatusACC = "Confirmed";
                 row.DTM_UpdateDate = now;
                 row.VCHR_UpdateBy = user;
+
             }
             await _context.SaveChangesAsync();
             return true;
@@ -487,10 +469,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.CHR_StatusACC = "Confirming";
                 row.VCHR_UserShip = item.PicShip;
 
-                // Update infor request quote
-                //rq.ID_StepBaoGia = 6;
-                //rq.ID_Status = "RETURN_SHIP";
-
                 // Create history
                 var history = new BaoGia_History_Request_of_Quotation
                 {
@@ -511,7 +489,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
-        public async Task<List<ResultCheckCofirmName>> CheckDonHangConfirmedAsync(List<int> listCheck)
+        public async Task<List<ResultCheckCofirmName>> SearchSendMailConfirmNameAsync(List<int> listCheck)
         {
             if (listCheck == null || !listCheck.Any())
                 throw new Exception("Invalid list of IDs.");
@@ -566,8 +544,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 confirmName.CHR_Status = "Confirmed";
                 confirmName.CHR_StatusACC = "Confirmed";
                 confirmName.CHR_StatusShip = "Confirming";
-                confirmName.DTM_UserPUR = DateTime.Now;
-                confirmName.VCHR_UserPUR = user;
+                confirmName.DTM_UserAcc = DateTime.Now;
+                confirmName.VCHR_UserAcc = user;
                 hasChanges = true;
             }
             if (hasChanges)
@@ -578,7 +556,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return false;
         }
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public async Task<bool> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user)
+        public async Task<bool> UpdateRequestForPICPURAsync(List<ConfirmNameInputExcel> baoGia, string user)
         {
             if (baoGia == null || !baoGia.Any()) return false;
             foreach (var item in baoGia)
@@ -675,9 +653,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return data.ToList();
         }
         // Update Name HQ role PIC PUR
-        public async Task<bool> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user)
+        public async Task<List<int>> UpdateNameHQRolePICPURAsync(List<ConfirmNameInputExcel> baoGia, string user)
         {
-            if (baoGia == null || baoGia.Count == 0) return false;
+            if (baoGia == null || baoGia.Count == 0) throw new Exception("Danh sách nhập không được để trống.");
 
             var ids = baoGia.Select(x => x.ID).ToList();
 
@@ -686,7 +664,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .Where(x => ids.Contains(x.ID))
                 .ToListAsync();
 
-            if (!confirmNames.Any()) return false;
+            if (!confirmNames.Any()) throw new  Exception("Không tìm thấy dữ liệu tương ứng trong hệ thống.");
 
             // Map 
             var confirmDict = confirmNames.ToDictionary(x => x.ID);
@@ -712,6 +690,25 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var requestDict = requestQuotes.GroupBy(x => x.ID)
                 .ToDictionary(g => g.Key, g => g.First());
 
+            // Cache link đã tồn tại trong DB để tránh lưu file trùng
+            var inputLinks = baoGia
+                .Select(x => x.LinkQ?.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var existingLinkRows = await _context.BaoGia_Detail_of_Quotations
+                .Where(x =>
+                    (!string.IsNullOrEmpty(x.NVCHR_dataOld) && inputLinks.Contains(x.NVCHR_dataOld)) ||
+                    (!string.IsNullOrEmpty(x.NVCHR_File) && inputLinks.Contains(x.NVCHR_File)))
+                .Select(x => new { x.NVCHR_dataOld, x.NVCHR_File })
+                .ToListAsync();
+
+            var existingLinkMap = existingLinkRows
+                .Where(x => !string.IsNullOrWhiteSpace(x.NVCHR_dataOld) && !string.IsNullOrWhiteSpace(x.NVCHR_File))
+                .GroupBy(x => x.NVCHR_dataOld!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().NVCHR_File!, StringComparer.OrdinalIgnoreCase);
+
             bool hasChanges = false;
             var now = DateTime.Now;
 
@@ -720,36 +717,132 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 if (!confirmDict.TryGetValue(item.ID, out var confirmName))
                     continue;
 
+                bool rowChanged = false;
+
                 // update detail
                 if (detailDict.TryGetValue(confirmName.ID_RequestQuote, out var detail))
                 {
-                    detail.NVCHR_TenHangHQ = item.VCHR_TenRecomment;
-                    detail.CHR_NameEN = item.CHR_NameEN;
+                    if (!string.Equals(detail.NVCHR_TenHangHQ, item.VCHR_TenRecomment, StringComparison.Ordinal))
+                    {
+                        detail.NVCHR_TenHangHQ = item.VCHR_TenRecomment;
+                        rowChanged = true;
+                    }
+
+                    if (!string.Equals(detail.CHR_NameEN, item.CHR_NameEN, StringComparison.Ordinal))
+                    {
+                        detail.CHR_NameEN = item.CHR_NameEN;
+                        rowChanged = true;
+                    }
+
+                    var newLink = item.LinkQ?.Trim();
+                    if (!string.IsNullOrWhiteSpace(newLink))
+                    {
+                        var sameAsCurrent =
+                            string.Equals(detail.NVCHR_dataOld, newLink, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(detail.NVCHR_File, newLink, StringComparison.OrdinalIgnoreCase);
+
+                        if (!sameAsCurrent)
+                        {
+                            if (existingLinkMap.TryGetValue(newLink, out var existedSavedPath) && !string.IsNullOrWhiteSpace(existedSavedPath))
+                            {
+                                detail.NVCHR_dataOld = newLink;
+                                detail.NVCHR_File = existedSavedPath;
+                                rowChanged = true;
+                            }
+                            else
+                            {
+                                var saveRes = await _fileImportService.SaveFileFromPathAsync(newLink);
+                                if (!string.IsNullOrWhiteSpace(saveRes.Data))
+                                {
+                                    detail.NVCHR_dataOld = newLink;
+                                    detail.NVCHR_File = saveRes.Data;
+                                    existingLinkMap[newLink] = saveRes.Data;
+                                    rowChanged = true;
+                                }
+                            }
+                        }
+                    }
                 }
+
                 // update request quote
                 if (requestDict.TryGetValue(confirmName.ID_RequestQuote, out var requestQuote))
                 {
-                    requestQuote.NVCHR_NameVN = item.VCHR_TenRecomment;
-                    requestQuote.ID_StepBaoGia = 13;
-                    requestQuote.ID_Status = "DONE";
-                    requestQuote.CHR_NameEN = item.CHR_NameEN;
+                    if (!string.Equals(requestQuote.NVCHR_NameVN, item.VCHR_TenRecomment, StringComparison.Ordinal))
+                    {
+                        requestQuote.NVCHR_NameVN = item.VCHR_TenRecomment;
+                        rowChanged = true;
+                    }
+
+                    if (requestQuote.ID_StepBaoGia != 13)
+                    {
+                        requestQuote.ID_StepBaoGia = 13;
+                        rowChanged = true;
+                    }
+
+                    if (!string.Equals(requestQuote.ID_Status, "DONE", StringComparison.Ordinal))
+                    {
+                        requestQuote.ID_Status = "DONE";
+                        rowChanged = true;
+                    }
+
+                    if (!string.Equals(requestQuote.CHR_NameEN, item.CHR_NameEN, StringComparison.Ordinal))
+                    {
+                        requestQuote.CHR_NameEN = item.CHR_NameEN;
+                        rowChanged = true;
+                    }
 
                 }
 
                 // update confirm name
-                confirmName.VCHR_TenRecomment = item.VCHR_TenRecomment;
-                confirmName.CHR_Status = "Confirmed";
-                confirmName.CHR_StatusShip = "Confirmed";
-                confirmName.VCHR_UserPUR = user;
-                confirmName.DTM_UserPUR = now;
-                confirmName.DTM_UpdateDate = now;
-                confirmName.VCHR_UpdateBy = user;
-                confirmName.CHR_NameEN = item.CHR_NameEN;
+                if (!string.Equals(confirmName.VCHR_TenRecomment, item.VCHR_TenRecomment, StringComparison.Ordinal))
+                {
+                    confirmName.VCHR_TenRecomment = item.VCHR_TenRecomment;
+                    rowChanged = true;
+                }
 
-                hasChanges = true;
+                if (!string.Equals(confirmName.CHR_Status, "Confirmed", StringComparison.Ordinal))
+                {
+                    confirmName.CHR_Status = "Confirmed";
+                    rowChanged = true;
+                }
+
+                if (!string.Equals(confirmName.CHR_StatusShip, "Confirmed", StringComparison.Ordinal))
+                {
+                    confirmName.CHR_StatusShip = "Confirmed";
+                    rowChanged = true;
+                }
+
+                if (!string.Equals(confirmName.VCHR_UserPUR, user, StringComparison.Ordinal))
+                {
+                    confirmName.VCHR_UserPUR = user;
+                    rowChanged = true;
+                }
+
+                if (!string.Equals(confirmName.VCHR_UpdateBy, user, StringComparison.Ordinal))
+                {
+                    confirmName.VCHR_UpdateBy = user;
+                    rowChanged = true;
+                }
+
+                if (!string.Equals(confirmName.CHR_NameEN, item.CHR_NameEN, StringComparison.Ordinal))
+                {
+                    confirmName.CHR_NameEN = item.CHR_NameEN;
+                    rowChanged = true;
+                }
+
+                if (rowChanged)
+                {
+                    confirmName.DTM_UserPUR = now;
+                    confirmName.DTM_UpdateDate = now;
+                    hasChanges = true;
+                }
             }
 
-            return hasChanges && await _context.SaveChangesAsync() > 0;
+            if(hasChanges)
+            {
+                await _context.SaveChangesAsync();
+            }
+            return requestQuoteIds;
         }
         // Done
          public async Task<List<ResultCheckCofirmName>> DoneConfirmNameAsync(List<int> listDone)
@@ -776,6 +869,26 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var result = await _conn.QueryAsync<ResultCheckCofirmName>(sql, new { ListCheck = listDone });
             return result.ToList();
+        }
+
+        // Check đơn đã hoàn thành hay chưa
+        public async Task<List<int>> CheckConfirmNameDoneAsync(List<int> listCheck)
+        {
+            if (listCheck == null || !listCheck.Any())
+                throw new Exception("Invalid list of IDs.");
+
+            string sql = @"
+               SELECT c.ID
+               FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
+               LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] as c 
+                   ON r.ID = c.ID_RequestQuote
+               WHERE r.ID_StepBaoGia = 13 and c.ID IN @ListCheck";
+
+            using (var connection = _conn)
+            {
+                var result = await connection.QueryAsync<int>(sql, new { ListCheck = listCheck });
+                return result.ToList();
+            }
         }
     }
 }

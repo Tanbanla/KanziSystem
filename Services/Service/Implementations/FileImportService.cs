@@ -126,6 +126,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 return result;
             }
         }
+
         private static string ReplaceFirstIgnoreCase(string input, string oldValue, string newValue)
         {
             if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(oldValue)) return input;
@@ -207,5 +208,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 return result;
             }
         }
+
+
+
     }
 }

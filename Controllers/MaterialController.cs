@@ -452,11 +452,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var user = GetCurrentUserId();
             var roleAsync = await _tmUserService.GetRoleAsync(user);
             var role = roleAsync.Success ? roleAsync.Data : string.Empty;
-            var itemOK = new List<BaoGia_Confirm_Name_Quotation>();
+            var itemOK = new List<ConfirmNameInputExcel>();
             var itemNG = new List<ConfirmNameDTO>();
-            var listDifferent = new List<BaoGia_Confirm_Name_Quotation>();
+            var listDifferent = new List<ConfirmNameInputExcel>();
             var listUpdateRequest = new List<BaoGia_Request_of_QuotationDTO>();
-            var listUpdateUserPur = new List<BaoGia_Confirm_Name_QuotationDTO>();
+            var listUpdateUserPur = new List<ConfirmNameInputExcel>();
+            var listCheck = new List<int>();
             var hasErrors = false;
             try
             {
@@ -475,12 +476,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         break;
                     }
-                    if (ws.Cell(r, 3).GetString() == "")
-                    {
-                        ws.Cell(r, 29).SetValue("Số đơn yêu cầu không được để trống");
-                        hasErrors = true;
-                        continue;
-                    }
+                    listCheck.Add(int.Parse(ws.Cell(r, 3).GetString()));
                     switch (role)
                     {
                         case "UserShip":
@@ -514,7 +510,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 }
                                 if (tenHaiQuan.Trim().ToUpper() != tenRecomment.Trim().ToUpper())
                                 {
-                                    listDifferent.Add(new BaoGia_Confirm_Name_Quotation
+                                    listDifferent.Add(new ConfirmNameInputExcel
                                     {
                                         ID = int.Parse(ws.Cell(r, 3).GetString()),
                                         VCHR_TenHaiQuan = tenHaiQuan,
@@ -524,7 +520,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 }
                                 else
                                 {
-                                    itemOK.Add(new BaoGia_Confirm_Name_Quotation
+                                    itemOK.Add(new ConfirmNameInputExcel
                                     {
                                         ID = int.Parse(ws.Cell(r, 3).GetString()),
                                         VCHR_TenHaiQuan = tenHaiQuan,
@@ -536,11 +532,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             break;
                         case "UserPUR":
-                            var itemRequestPur = new BaoGia_Confirm_Name_QuotationDTO
+                            var itemRequestPur = new ConfirmNameInputExcel
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
                                 CHR_NameEN = ws.Cell(r, 14).GetString(),
                                 VCHR_TenRecomment = ws.Cell(r, 13).GetString(),
+                                LinkQ = ws.Cell(r, 24).GetString(),
                             };
                             listUpdateUserPur.Add(itemRequestPur);
                             break;
@@ -548,14 +545,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var itemRequest = new BaoGia_Request_of_QuotationDTO
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
+                                CHR_MaThietBi = ws.Cell(r, 9).GetString(),
+                                CHR_MaHangNCC = ws.Cell(r, 11).GetString(),
                                 NVCHR_HinhDang = ws.Cell(r, 18).GetString(),
                                 NVCHR_ChatLieu = ws.Cell(r, 19).GetString(),
                                 NVCHR_ThanhPhan = ws.Cell(r, 20).GetString(),
                                 NVCHR_KichThuoc = ws.Cell(r, 21).GetString(),
                                 NVCHR_DongMay = ws.Cell(r, 22).GetString(),
-                                NVCHR_TinhNang = ws.Cell(r, 23).GetString(),
-                                CHR_MaThietBi = ws.Cell(r, 9).GetString(),
-                                CHR_MaHangNCC = ws.Cell(r, 11).GetString()
+                                NVCHR_TinhNang = ws.Cell(r, 23).GetString()
                             };
                             listUpdateRequest.Add(itemRequest);
                             break;
@@ -574,14 +571,37 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                     return File(bytes, contentType, fileName);
                 }
+                if (listCheck.Count() != listCheck.Distinct().Count())
+                {
+                    return BadRequest("File có dữ liệu trùng lặp, vui lòng kiểm tra lại");
+                }
+                if (listCheck.Any())
+                {
+                    var checkResult = await _confirmNameService.CheckConfirmNameDoneAsync(listCheck);
+                    if (!checkResult.Success)
+                    {
+                        return BadRequest("Bug check confirmName: " + checkResult.Message);
+                    }
+                    if(checkResult.Data.Count != 0)
+                    {
+                        var duplicateIds = string.Join(", ", checkResult.Data);
+                        return BadRequest($"Các ID sau đã được xác nhận, vui lòng kiểm tra lại các số đơn: {duplicateIds}");
+                    }
+                }
                 if (role == "UserShip")
                 {
                     // gửi mail thông báo đã hoàn thành xác nhận tên đến PIC PUR
                     if (itemOK.Any())
                     {
                         // Lưu dữ liệu hợp lệ vào database
-                        await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
-                        var listCheck = itemOK.Select(d => d.ID).ToList();
+                        var rp =  await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
+                        if (!rp.Success)
+                        {
+                            return BadRequest("Bug insert confirmName: "+ rp.Message);
+                        }
+
+                        var listIdSendMail = itemOK.Select(d => d.ID).ToList();
+
                         // Send Mail PIC khi đơn hoàn thành xác nhận tên hải quan
                         _ = Task.Run(async () =>
                         {
@@ -589,7 +609,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             {
                                 try
                                 {
-                                    var listDone = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                    var listDone = await _confirmNameService.SearchSendMailConfirmNameAsync(listIdSendMail);
                                     if (!listDone.Success)
                                     {
                                         _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
@@ -624,8 +644,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // Nếu có dữ liệu bị trả lại gửi đến PIC phòng ban để chỉnh sửa lại thông tin
                     if (itemNG.Any())
                     {
-                        await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
-                        var listCheck = itemNG.Select(d => d.Id).ToList();
+                        var rp = await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
+                        if (!rp.Success)
+                        {
+                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                        }
+
+                        var listIdSendMail = itemNG.Select(d => d.Id).ToList();
                         // Send Mail PIC phụ trách xác nhận tên mới (User Ship) khi có yêu cầu trả lại
                         _ = Task.Run(async () =>
                         {
@@ -634,7 +659,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 try
                                 {
 
-                                    var listPIC = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                    var listPIC = await _confirmNameService.SearchSendMailConfirmNameAsync(listIdSendMail);
                                     if (!listPIC.Success)
                                     {
                                         _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listPIC.Message);
@@ -671,7 +696,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     // với các dữ liệu tên bị lệch
                     if (listDifferent.Count() > 0)
                     {
-                        await _confirmNameService.UpdateRequestForPICPURAsync(listDifferent, user);
+                       var rp =  await _confirmNameService.UpdateRequestForPICPURAsync(listDifferent, user);
+                        if (!rp.Success)
+                        {
+                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                        }
+
                         _ = Task.Run(async () =>
                         {
                             using (var scope = _serviceScopeFactory.CreateScope())
@@ -715,9 +745,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     if (listUpdateUserPur.Any())
                     {
-                        await _confirmNameService.UpdateNameHQRolePICPURAsync(listUpdateUserPur, user);
+                        var rp = await _confirmNameService.UpdateNameHQRolePICPURAsync(listUpdateUserPur, user);
+                        if (!rp.Success)
+                        {
+                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                        }
 
-                        var listCheck = listUpdateUserPur.Select(d => d.ID).ToList();
+                        var listIdSendMail = listUpdateUserPur.Select(d => d.ID).ToList();
                         // Send Mail PIC khi đơn hoàn thành xác nhận tên hải quan
                         _ = Task.Run(async () =>
                         {
@@ -725,7 +759,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             {
                                 try
                                 {
-                                    var listDone = await _confirmNameService.CheckDonHangConfirmedAsync(listCheck);
+                                    var listDone = await _confirmNameService.SearchSendMailConfirmNameAsync(listIdSendMail);
                                     if (!listDone.Success)
                                     {
                                         _logger.LogError("Lỗi khi kiểm tra đơn hàng đã được xác nhận: " + listDone.Message);
@@ -761,7 +795,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     if (listUpdateRequest.Any())
                     {
-                        await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
+                        var rp = await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
+                        if (!rp.Success)
+                        {
+                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                        }
                     }
                 }
 
@@ -800,9 +838,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         "UserPUR" => CHR_StatusShip == "Confirming" ? "Chờ xác nhận tên - Ship" :
                             CHR_StatusAcc == "Confirming" ? "Chờ xác nhận tên - Phòng yêu cầu" :
                             CHR_Status == "Confirming" ? "Chờ xác nhận tên - Pur " : CHR_Status == "Confirmed" ? "Hoàn thành" : "Không xác định",
-                        "UserShip" => CHR_StatusShip ?? "",
-                        "UserAcc" => CHR_StatusAcc ?? "",
-                        _ => CHR_Status ?? "",
+                        "UserShip" => CHR_StatusShip == "Confirming" ? "Chờ xác nhận tên - Ship" : CHR_StatusShip == "Confirmed" ? "Hoàn thành" : "Trả lại",
+                        _=> CHR_StatusAcc == "Confirming" ? "Chờ bổ sung thông tin - phòng ban" : CHR_StatusAcc == "Confirmed" ? "Hoàn thành" : "",
                     };
                 }
 
@@ -827,7 +864,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 foreach (var rq in items)
                 {
                     var maHangNb = rq.VCHR_MaHangNoiBo ?? (rq.CHR_MaHangNoiBo ?? "");
-
+                    var a = GetStatusByRole(rq.CHR_Status, rq.CHR_StatusShip, rq.CHR_StatusACC, role);
                     // Map fields into template columns similar to ExportSelection
                     ws.Cell(row, 1).SetValue(rq.CHR_CreateBy ?? "");
                     ws.Cell(row, 2).SetValue(GetStatusByRole(rq.CHR_Status, rq.CHR_StatusShip, rq.CHR_StatusACC, role));

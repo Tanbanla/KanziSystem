@@ -501,6 +501,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 if (dict.TryGetValue(i.ID, out var link))
                 {
+                    i.NVCHR_dataOld = i.NVCHR_File;
                     i.NVCHR_File = link;
                 }
             }

@@ -558,5 +558,21 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // check trạng thái đơn báo giá
+        public async Task<GenericResponse<List<int>>> CheckStepAsync(List<int> ids, List<int> stepCheck)
+        {
+            var result = new GenericResponse<List<int>>();
+            try
+            {
+                result.Data = await _repo.CheckStepAsync(ids, stepCheck);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

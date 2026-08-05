@@ -19,7 +19,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Insert thong tin danh sach
         public Task<GenericResponse<List<BaoGia_Confirm_Name_QuotationDTO>>> AddListAsync(List<BaoGia_Confirm_Name_QuotationDTO> confirmNames);
         // luu thong tin nhap file
-        public Task<GenericResponse<bool>> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role);
+        public Task<GenericResponse<bool>> SaveFromFileAsync(List<ConfirmNameInputExcel> confirmNames, string user, string? Role);
         // luu thong tin 
         public Task<GenericResponse<bool>> SaveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Approvers
@@ -30,17 +30,19 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<List<dynamic>>> ExportCodeConfirmedAsync();
         // Từ chối xác nhận tên hàng
         public Task<GenericResponse<bool>> RejectConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
-        // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
-        public Task<GenericResponse<List<ResultCheckCofirmName>>> CheckDonHangConfirmedAsync(List<int> listCheck);
+        // Lấy thông tin gửi mail 
+        public Task<GenericResponse<List<ResultCheckCofirmName>>> SearchSendMailConfirmNameAsync(List<int> listCheck);
         // Cập nhật thông tin đơn báo giá sau khi trả lại
         public Task<GenericResponse<bool>> UpdateRequestFromFileAsync(List<BaoGia_Request_of_QuotationDTO> baoGia, string user);
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user);
+        public Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<ConfirmNameInputExcel> baoGia, string user);
         //Export file ten hanh xac nhan
         Task<GenericResponse<List<dynamic>>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user);
         // Update Name HQ role PIC PUR
-        Task<GenericResponse<bool>> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_QuotationDTO> baoGia, string user);
+        Task<GenericResponse<bool>> UpdateNameHQRolePICPURAsync(List<ConfirmNameInputExcel> baoGia, string user);
         // Done
         Task<GenericResponse<List<ResultCheckCofirmName>>> DoneConfirmNameAsync(List<int> listDone);
+        // Check đơn đã hoàn thành hay chưa
+        Task<GenericResponse<List<int>>> CheckConfirmNameDoneAsync(List<int> listCheck);
     }
 }

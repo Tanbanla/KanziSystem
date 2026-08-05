@@ -305,6 +305,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
                 }
+                // Check thông tin xem có ở trạng thái cho phép cập nhật báo giá hay không
+                //var listStep = new List<int> { 6, 7, 8 };
+                //var checkStatus = await _baoGiaService.CheckStepAsync(items.Select(c => c.ID).ToList(), listStep);
+
                 // lấy thông tin để lưu file nhập báo giá
                 var listInforFile = items.Select(c => c.NVCHR_File).Distinct().ToList();
 
@@ -338,6 +342,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var checkKey = dto.NVCHR_File?.Trim().Trim('"', '\'') ?? dto.NVCHR_File;
                     if (savedMap.TryGetValue(checkKey, out var saved) && !string.IsNullOrWhiteSpace(saved))
                     {
+                        dto.NVCHR_dataOld = dto.NVCHR_File;
                         dto.NVCHR_File = saved;
                     }
 

@@ -115,6 +115,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
 
+            sql.GET_DATA_FROM_SQL_TEST(@"UPDATE b
+                        SET b.Anh_huong_SX = 'No'
+                        FROM PE_THEODOITIENDO b
+                        JOIN [COST_MANAGEMENT].[dbo].[PO] a ON a.PO_Detail_Id = b.Id_Detail_PO
+                        WHERE a.Ngaygiaohangdukien IS NOT NULL 
+                          AND b.Ngay_NCC_xacnhanGH IS NOT NULL
+                          AND MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
+                          AND YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
+                          AND (b.Anh_huong_SX IS NULL OR b.Anh_huong_SX <> 'No');");
+
             var us = User.FindFirst("UserId")?.Value;
             var checkus = sql.ReturnString($"select [Group_Code] from [GROUP_MEMBER] where CHR_USERID = '{us}'");
             var khoi = "";
@@ -150,44 +160,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 object valNgayNcc = lst.Rows[i]["Ngay_NCC_xacnhanGH"];
                 po.ngaynccxngiao = (valNgayNcc != null && valNgayNcc != DBNull.Value) ? Convert.ToDateTime(valNgayNcc).ToString("yyyy-MM-dd") : "";
 
-                // XỬ LÝ LOGIC LỊCH GIAO (OK/NG)
-                // Khởi tạo mặc định ban đầu là rỗng
-                po.lichgiao = "";
-
-                // Chỉ thực hiện so sánh khi CẢ HAI ngày đều có dữ liệu
-                if (!string.IsNullOrEmpty(po.Ngayycgiao) && !string.IsNullOrEmpty(po.ngaynccxngiao))
+                po.anhuongsx = lst.Rows[i]["Anh_huong_SX"].ToString();
+                if(po.anhuongsx == "No")
                 {
-                    DateTime dtNgayYcGiao;
-                    DateTime dtNgayNccXacNhan;
-
-                    // Dùng TryParse để ép kiểu an toàn. Nếu cả 2 đều là ngày tháng hợp lệ thì mới so sánh
-                    if (DateTime.TryParse(po.Ngayycgiao, out dtNgayYcGiao) && DateTime.TryParse(po.ngaynccxngiao, out dtNgayNccXacNhan))
-                    {
-                        // So sánh cùng Tháng và cùng Năm
-                        if (dtNgayYcGiao.Month == dtNgayNccXacNhan.Month && dtNgayYcGiao.Year == dtNgayNccXacNhan.Year)
-                        {
-                            po.lichgiao = "OK";
-                        }
-                        else
-                        {
-                            po.lichgiao = "NG";
-                        }
-                    }
-                    else
-                    {
-                       
-                        po.lichgiao = "";
-                    }
-                }
-
-                // NẾU LỊCH GIAO OK THÌ ÉP ẢNH HƯỞNG SX = "No", NGƯỢC LẠI LẤY TỪ DATABASE
-                if (po.lichgiao == "OK")
-                {
-                    po.anhuongsx = "No";
+                    po.lichgiao = "OK";
                 }
                 else
                 {
-                    po.anhuongsx = lst.Rows[i]["Anh_huong_SX"].ToString();
+                    po.lichgiao = "NG";
                 }
                 po.trangthai = "";
                 po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
@@ -516,10 +496,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var us = User.FindFirst("UserId")?.Value;
             var checkus = sql.ReturnString($"select [Group_Code] from [GROUP_MEMBER] where CHR_USERID = '{us}'");
             var khoi = "";
-            if (checkus == "PUR") { khoi = "AND Group_Code = 'PUR'"; }
-            ;
-            if (checkus == "GA") { khoi = "AND Group_Code = 'GA'"; }
-            ;
+            if (checkus == "PUR") { khoi = "AND Group_Code = 'PUR'"; };
+            if (checkus == "GA") { khoi = "AND Group_Code = 'GA'"; };
 
             string query = $@"SELECT * FROM [COST_MANAGEMENT].[dbo].[PO] as a 
                       LEFT JOIN PE_THEODOITIENDO as b ON a.PO_Detail_Id = b.Id_Detail_PO 
@@ -669,7 +647,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     x.Ngay_GHchinhthuc,
                     x.lichgiao,
                     x.anhuongsx,
-                    Cua_Cong_GH = $"{x.Cua_GH}/{x.Cong_Nhanhang}",
+                    x.Cua_GH,
+                    x.Cong_Nhanhang,               
                     x.Nguoi_Nhanhang,
                     x.So_DNTT,
                     x.So_hoadon

@@ -675,16 +675,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     statusSql = "r.ID_Status LIKE 'RETURN%'";
                     break;
                 case "DONE":
-                    statusSql = "r.ID_Status = 'DONE' AND r.ID_Status NOT LIKE 'DELETE'";
+                    statusSql = "r.ID_StepBaoGia = 13 AND r.ID_Status NOT LIKE 'DELETE'";
                     break;
                 case "APPROVAL":
-                    statusSql = "r.ID_Status LIKE 'APPROVAL%' AND r.ID_Status NOT LIKE 'DELETE'";
+                    statusSql = "r.ID_StepBaoGia in (2,3,4,5,9,10,11) AND r.ID_Status NOT LIKE 'DELETE'";
                     break;
                 case "WAIT":
-                    statusSql = "r.ID_Status LIKE '%WAIT%' AND r.ID_Status NOT LIKE 'DELETE'";
+                    statusSql = "r.ID_StepBaoGia in (6,7,8) AND r.ID_Status NOT LIKE 'DELETE'";
                     break;
                 case "DELETE":
                     statusSql = "r.ID_Status LIKE 'DELETE'";
+                    break;
+                case "CONFIRMING":
+                    statusSql = "r.ID_StepBaoGia = 12 AND r.ID_Status NOT LIKE 'DELETE'";
                     break;
                 default:
                     statusSql = "r.ID_Status NOT LIKE 'DELETE' AND (r.ID_Status NOT LIKE 'RETURN%' or r.ID_StepBaoGia = 8)";
@@ -862,6 +865,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         f.ID_StepBaoGia AS PickStep,
                         d.BIT_Select,
                         d.CHR_Status,
+                        d.FL_USD,
                         ROW_NUMBER() OVER (
                             PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
                             ORDER BY
@@ -927,7 +931,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     h.DEFT_PickNCC, h.DEFT_PickNCC_Time,
                     p.NCC_DuocChon,
                     p.NVCHR_ReasonPick,
-                    p.NVCHR_File
+                    p.NVCHR_File,
+				    p.FL_USD
                 FROM MAIN m
                 LEFT JOIN NCC_PIVOT ncc
                     ON m.CHR_MaDon = ncc.CHR_MaDon

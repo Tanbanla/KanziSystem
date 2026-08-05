@@ -651,4 +651,10 @@
   <data name="NotQuotation" xml:space="preserve">
     <value>Không lấy được báo giá</value>
   </data>
+  <data name="CONFIRMING" xml:space="preserve">
+    <value>Chờ xác nhận tên hải quan</value>
+  </data>
+  <data name="Cost" xml:space="preserve">
+    <value>Giá</value>
+  </data>
 </root>

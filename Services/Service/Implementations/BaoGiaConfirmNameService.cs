@@ -11,11 +11,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
     public class BaoGiaConfirmNameService : BaseService<BaoGia_Confirm_Name_Quotation, int, BaoGia_Confirm_Name_QuotationDTO>, IBaoGiaConfirmNameService
     {
         private readonly IBaoGiaConfirmNameRepository _repo;
+        private readonly IBaoGiaDetailRepository _detailBaoGiaRespository;
         private readonly IMapper _mapper;
-        public BaoGiaConfirmNameService(IBaoGiaConfirmNameRepository repo, IMapper mapper) : base(repo, mapper)
+        public BaoGiaConfirmNameService(IBaoGiaConfirmNameRepository repo, IBaoGiaDetailRepository baoGiaDetailRepository, IMapper mapper) : base(repo, mapper)
         {
             _repo = repo;
             _mapper = mapper;
+            _detailBaoGiaRespository = baoGiaDetailRepository;
         }
         // search thông tin xác nhận tên hàng
         public async Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role,string user, int pageIndex, int pageSize)
@@ -118,7 +120,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // luu thong tin nhap file
-        public async Task<GenericResponse<bool>> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role)
+        public async Task<GenericResponse<bool>> SaveFromFileAsync(List<ConfirmNameInputExcel> confirmNames, string user, string? Role)
         {
             var result = new GenericResponse<bool>();
             try
@@ -215,12 +217,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
-        public async Task<GenericResponse<List<ResultCheckCofirmName>>> CheckDonHangConfirmedAsync(List<int> listCheck)
+        public async Task<GenericResponse<List<ResultCheckCofirmName>>> SearchSendMailConfirmNameAsync(List<int> listCheck)
         {
             var result = new GenericResponse<List<ResultCheckCofirmName>>();
             try
             {
-                result.Data = await _repo.CheckDonHangConfirmedAsync(listCheck);
+                result.Data = await _repo.SearchSendMailConfirmNameAsync(listCheck);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -248,7 +250,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public async Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user)
+        public async Task<GenericResponse<bool>> UpdateRequestForPICPURAsync(List<ConfirmNameInputExcel> baoGia, string user)
         {
             var result = new GenericResponse<bool>();
             try
@@ -280,13 +282,18 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Update Name HQ role PIC PUR
-        public async Task<GenericResponse<bool>> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_QuotationDTO> baoGia, string user)
+        public async Task<GenericResponse<bool>> UpdateNameHQRolePICPURAsync(List<ConfirmNameInputExcel> baoGia, string user)
         {
             var result = new GenericResponse<bool>();
             try
             {
-                var dt = _mapper.Map<List<BaoGia_Confirm_Name_Quotation>>(baoGia);
-                result.Data = await _repo.UpdateNameHQRolePICPURAsync(dt, user);
+                // Lưu thông tin xác nhận tên
+                var rp = await _repo.UpdateNameHQRolePICPURAsync(baoGia, user);
+
+                // Chuyển link sang link báo giá mới
+                
+
+                result.Data = true;
                 result.Success = true;
             }
             catch (Exception ex)
@@ -311,6 +318,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = false;
             }
             return result;
+        }
+        // Check đơn đã hoàn thành hay chưa
+        public async Task<GenericResponse<List<int>>> CheckConfirmNameDoneAsync(List<int> listCheck)
+        {
+            var result = new GenericResponse<List<int>>();
+            try
+            {
+                result.Data = await _repo.CheckConfirmNameDoneAsync(listCheck);
+                result.Success = true;
+
+            }
+            catch(Exception ex) {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+
         }
     }
 }

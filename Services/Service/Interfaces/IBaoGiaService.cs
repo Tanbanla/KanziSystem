@@ -90,5 +90,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<List<string>>> GetListNccNotConfirmNameAsync();
         // kiểm tra đơn + mã hàng đã được quyền lựa chọn nhà cung cấp hay chưa
         Task<GenericResponse<List<BaoGiaImportModel>>> CheckPermissionSelectSupplierAsync(List<BaoGiaImportModel> baoGiaImportModels);
+        // check trạng thái đơn báo giá
+        Task<GenericResponse<List<int>>> CheckStepAsync(List<int> ids, List<int> stepCheck);
     }
 }

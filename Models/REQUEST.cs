@@ -677,7 +677,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 // Ghi log vào bảng lịch sử KHO_NHAPXUAT
                 if (checkkhoi == "GA")
                 {
-                    var laytigia = _db.ReturnString(" select Exchange_rate from REQUEST where Code_Request = '" + code_request + "'");
+                    var laytigia = _db.ReturnString("select Exchange_rate from REQUEST where Code_Request = '" + code_request + "'");
                     // Cập nhật trạng thái trong REQUEST_DETAIL
                     string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
                             [Amount_Real] = '{slXuat}', 
@@ -686,7 +686,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Status] = 'DONE',
                             [Currency_Real] = [Currency],
                             [Last_Update] = GETDATE(),
-                            [Total_Real] = (({slXuat}*{giathucte})/{laytigia}),
+                            [Total_Real] = ({slXuat}*{giathucte})/{laytigia},
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}',
                             [Kho] = '{kho}',
@@ -713,6 +713,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 // xuất kho khối PROD
                 else
                 {
+                    var laytigia = _db.ReturnString("select Exchange_rate from REQUEST where Code_Request = '" + code_request + "'");
                     // Cập nhật trạng thái trong REQUEST_DETAIL
                     string sqlUpdateDetail = $@"UPDATE REQUEST_DETAIL SET 
                             [Amount_Real] = '{slXuat}', 
@@ -735,7 +736,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
 
                     string UpdateRequest = "";
                     UpdateRequest = UpdateRequest + "UPDATE [REQUEST] SET [Total_exchange_real] = '" + tongtien + "'";
-                    UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + giathucte + "'";
+                    UpdateRequest = UpdateRequest + ",[Exchange_rate_Real] = '" + laytigia + "'";
                     UpdateRequest = UpdateRequest + ",[Currency_Real] = [Currency]";
                     UpdateRequest = UpdateRequest + ",[Total_Real] = '" + tongtien + "' ,[Status] = 'PROGRESS' ";
                     UpdateRequest = UpdateRequest + ",[Last_Update] = GETDATE(),[User_Update]= N'" + nguoinhan + "'";

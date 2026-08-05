@@ -827,22 +827,6 @@
         }
     }
 
-    //function approvalCell(name, time, userNext, cellStep, currentStep) {
-    //    const text = String(name || '').trim();
-
-    //    if (text) {
-    //        const dt = formatDateTime(time);
-    //        return `<td style="background:#cfe3c6;">
-    //        ${escapeHtml(text)}
-    //        ${dt ? `<div class="small text-muted">${escapeHtml(dt)}</div>` : ''}
-    //    </td>`;
-    //    }
-
-    //    if (cellStep === currentStep + 1) {
-    //        return `<td>${escapeHtml(userNext)}</td>`;
-    //    }
-    //    return `<td></td>`;
-    //}
     function approvalCell(name, time, userNext, cellStep, currentStep) {
         const text = String(name || '').trim();
 
@@ -856,6 +840,12 @@
             }
         } else if (cellStep === currentStep) {
             return `<td>${escapeHtml(userNext)}</td>`;
+        }
+        return `<td></td>`;
+    }
+    function costCell(flUsed, cellStep) {
+        if (cellStep > 11 && (flUsed != null && flUsed != '')) {
+            return `<td>${escapeHtml(flUsed)} USD</td>`;
         }
         return `<td></td>`;
     }
@@ -927,7 +917,7 @@
         if (!tblBody) return;
 
         if (!rows || rows.length === 0) {
-            const colSpan = document.querySelectorAll('.approval-table thead tr:last-child th')?.length + 14 || 25;
+            const colSpan = document.querySelectorAll('.approval-table thead tr:last-child th')?.length + 16 || 27;
             tblBody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center text-muted py-3">${escapeHtml(window.i18nHistoryQuote?.MsgNoDataToEdit || 'Không có dữ liệu')}</td></tr>`;
             return;
         }
@@ -984,6 +974,7 @@
                     ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), getValue(row, ['Status_4', 'status_4']), step, isAllRefuse, selectedSupplier, link4)}
                     ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), getValue(row, ['Status_5', 'status_5']), step, isAllRefuse, selectedSupplier, link5)}
                     <td>${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
+                    ${costCell(getValue(row, ['FL_USD']), step)}
                     <td style="${overdue ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_CreateBy']))}</td>
                     ${approvalCell(getValue(row, ['QLSC_Approve']), getValue(row, ['QLSC_Time']), getValue(row, ['UserNext']), 2, step)}
@@ -1049,7 +1040,7 @@
 
         } catch (err) {
             console.error(err);
-            alert("Lỗi khi tải file: " + err.message);
+            alert("Chi tiết: " + err.message);
         }
     });
     function renderSummaryCountQuotation(result) {
