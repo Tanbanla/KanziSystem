@@ -507,7 +507,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     workbook.SaveAs(outStream);
                     return File(outStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ImportErrors_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
                 }
-
                 if (!items.Any())
                     return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
 

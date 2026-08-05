@@ -651,4 +651,10 @@
   <data name="NotQuotation" xml:space="preserve">
     <value>Unable to obtain quotation</value>
   </data>
+  <data name="CONFIRMING" xml:space="preserve">
+    <value>Waiting for customs name confirmation</value>
+  </data>
+  <data name="Cost" xml:space="preserve">
+    <value>Cost</value>
+  </data>
 </root>

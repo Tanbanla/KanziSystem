@@ -74,7 +74,7 @@
                     <div class="form-group col-md-1">
                         <label for="inputEmail4"> @Languages.Khoi :</label>
                         <!-- ĐÃ SỬA: Thêm + '_CPK' vào hàm onchange -->
-                        <select class="form-control" id="group_code" onchange="_load_name_inv(this.value + '_CPK')" style="background-color:#ffff0029">
+                        <select class="form-control" id="group_code" onchange="_load_name_inv(this.value)" style="background-color:#ffff0029">
                             <option>PROD</option>
                             <option>GA</option>
                             <option>IT</option>
@@ -247,13 +247,13 @@
     window.onload = function(){
         //let group_code = document.getElementById("group_code").value + "_CPK";
         let group_code = document.getElementById("group_code").value;
-
-        _load_name_inv(group_code);
+        alert(group_code);
+        _load_name_inv(group_code);          
         _load_request();
         _load_rate();
         _load_info_adid();
         _load_phongchiuphi_1();
-        _load_account_1();
+        _load_account_1();        
     }
 
         function _load_material_1(Material_Code, id) {
@@ -305,7 +305,7 @@
                     var sq = parseFloat(document.getElementById("sl_" + idd).value) || 0;
                     document.getElementById("tcp_" + idd).value = (pr * sq).toFixed(2);
                 }
-                //document.getElementById("tenhang_" + idd).value = data[0].material_Code;
+             
                 tinhTongTatCa();
             }
         })
@@ -314,7 +314,7 @@
         });
     }
 
-           document.getElementById('btn-add-row').addEventListener('click', function() {
+        document.getElementById('btn-add-row').addEventListener('click', function() {
         const tbody = document.querySelector('#dynamic-table tbody');
         const firstRow = tbody.querySelector('.input-row');
 
@@ -413,16 +413,6 @@
                 });
                 $('#' + targetSelectId).html(options).trigger('change');
             }
-
-            // 2. Giữ nguyên logic đóng mở Modal của bạn
-            if (group_code == "GA") {
-                if(document.getElementById("modal-20")) document.getElementById("modal-20").style.display = '';
-                if(document.getElementById("modal-6")) document.getElementById("modal-6").style.display = 'none';
-            }
-            if (group_code == "PROD") {
-                if(document.getElementById("modal-20")) document.getElementById("modal-20").style.display = 'none';
-                if(document.getElementById("modal-6")) document.getElementById("modal-6").style.display = '';
-            }
         })
         .catch(error => {
             console.error("Lỗi khi load danh sách bằng _load_name_inv1:", error);
@@ -470,7 +460,7 @@
             });
         }
     
-     function caculator(id) {
+    function caculator(id) {
         // Lấy số thứ tự dòng từ ID (ví dụ: sl_1 -> 1)
         var idd = id.split('_')[1];
 
@@ -495,7 +485,7 @@
         tinhTongTatCa();
     }
 
-       function tinhTongTatCa() {
+    function tinhTongTatCa() {
         let tongMoi = 0;
         const allTcp = document.querySelectorAll('.tcp');
 
@@ -514,7 +504,7 @@
         const groupCode = document.getElementById("group_code").value;
         if (groupCode === "GA") {
             let tigia = parseNumber(document.getElementById("rate").value) || 1;
-            tongMoi = tongMoi / tigia;
+            tongMoi = tongMoi/tigia;
         }
 
         const displayTotal = document.getElementById("thanhtien");

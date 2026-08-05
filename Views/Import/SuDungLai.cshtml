@@ -72,8 +72,8 @@
             <div class="card-body p-0">
                 <div class="form-row">
                     <div class="form-group col-md-1">
-                        <label for="inputEmail4"> @Languages.Khoi :</label>                     
-                        <select class="form-control" id="group_code" style="background-color:#ffff0029" >
+                        <label for="inputEmail4"> @Languages.Khoi :</label>
+                        <select class="form-control" id="group_code" style="background-color:#ffff0029">
                             <option>PROD</option>
                             <option>GA</option>
                         </select>
@@ -194,8 +194,8 @@
                                                 <option>@item.Account_Code</option>
                                             </select>
                                         </td>
-                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_@index" min="0" oninput="caculator(this.id)"></td>
-                                        <td><input type="text" class="form-control dv" id="dv_@index" value="@item.Unit" readonly ></td>
+                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_@index" min="0"></td>
+                                        <td><input type="text" class="form-control dv" id="dv_@index" value="@item.Unit" readonly></td>
                                         <td><input type="number" class="form-control dg" id="dg_@index" value="@item.Price" readonly> </td>
                                         <td><input type="text" class="form-control nt" id="nt_@index" value="@item.Currency" readonly></td>
 
@@ -241,7 +241,7 @@
 <script src="~/scripts/get_api_ga.js"></script>
 
 <script>
-    // Centralized endpoints - change server-side routing here if needed
+    
     var ApiEndpoints = {
         infoMaterial: '@Url.Action("_info_material", "Import", new { area = "ipcs" })',
         loadMaterial: '@Url.Action("_load_material", "Import", new { area = "ipcs" })',
@@ -271,7 +271,7 @@
     }
 
     function _load_material_1(Material_Code, id) {
-        // THÊM DÒNG NÀY: Chặn lỗi nếu mã rỗng
+        // Chặn lỗi nếu mã rỗng
         if (!Material_Code || Material_Code.trim() === "") return;
 
         let idd = id.split('_')[1];
@@ -302,7 +302,7 @@
             return response.json();
         })
         .then(data => {
-            // Dữ liệu trả về đôi khi rỗng (undefined), nên bọc an toàn
+            // Dữ liệu trả về đôi khi rỗng (undefined)
             if(data && data.length > 0) {
                 document.getElementById("stk_" + idd).value = data[0].account_Code + ":" + data[0].account_Name_EN;
                 if (data[0].unit_Note == "" || data[0].unit_Note == "-") {
@@ -383,7 +383,7 @@
         const newTenHangId = newRow.querySelector('.tenhang').id;
         let group_code = document.getElementById("group_code").value;
 
- 
+
         // 8. Kích hoạt giao diện Select2 cho dòng mới
            if ($.fn.select2) {
                 $('#' + newTenHangId).select2({ width: '100%' });
@@ -426,15 +426,7 @@
                 $('#' + targetSelectId).html(options).trigger('change');
             }
 
-            // 2. Giữ nguyên logic đóng mở Modal của bạn
-            if (group_code == "GA") {
-                if(document.getElementById("modal-20")) document.getElementById("modal-20").style.display = '';
-                if(document.getElementById("modal-6")) document.getElementById("modal-6").style.display = 'none';
-            }
-            if (group_code == "PROD") {
-                if(document.getElementById("modal-20")) document.getElementById("modal-20").style.display = 'none';
-                if(document.getElementById("modal-6")) document.getElementById("modal-6").style.display = '';
-            }
+          
         })
         .catch(error => {
             console.error("Lỗi khi load danh sách bằng _load_name_inv1:", error);
@@ -615,6 +607,14 @@
 
             if (data[0].urgent == true) {
                 document.getElementById("gap").checked = true;
+            }
+             if (data[0].group_Code == "GA") {
+              
+                if(document.getElementById("modal-6")) document.getElementById("modal-6").style.display = 'none';
+            }
+            if (data[0].group_Code == "PROD") {
+                if(document.getElementById("modal-20")) document.getElementById("modal-20").style.display = 'none';
+              
             }
         })
         .catch(error => {

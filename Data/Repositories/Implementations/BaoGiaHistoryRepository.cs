@@ -973,7 +973,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         //           TotalCount = totalCount
         //       };
         //   }
-
         // Lấy thông tin lịch sử báo giá
         public async Task<ListRequest<dynamic>> GetHistoryAsync(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? status, string? user, int pageIndex, int pageSize, DateTime? dateTo, DateTime? dateFrom, string? chungLoai)
@@ -1060,22 +1059,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             var cteSql = @"
-            ;WITH FILTERED AS (
-                SELECT
-                    r.ID,
-                    r.CHR_MaDon,
-                    r.CHR_MaHangNCC,
-                    r.CHR_MaHangNoiBo,
-                    r.CHR_NameEN,
-                    r.DTM_KyHan,
-                    r.CHR_CreateBy,
-                    r.ID_StepBaoGia,
-                    r.CHR_MaNCC,
-                    r.CHR_UserApproval,
-                    r.DTM_CreateDate,
-                    r.ID_Status
-                FROM BaoGia_Request_of_Quotation r
-            " + whereSql + @"
+                ;WITH FILTERED AS (
+                    SELECT
+                        r.ID,
+                        r.CHR_MaDon,
+                        r.CHR_MaHangNCC,
+                        r.CHR_MaHangNoiBo,
+                        r.CHR_NameEN,
+                        r.DTM_KyHan,
+                        r.CHR_CreateBy,
+                        r.ID_StepBaoGia,
+                        r.CHR_MaNCC,
+                        r.CHR_UserApproval,
+                        r.DTM_CreateDate,
+                        r.ID_Status
+                    FROM BaoGia_Request_of_Quotation r
+                    " + whereSql + @"
                 ),
                 MAIN AS (
                     SELECT
@@ -1214,6 +1213,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                             f.ID_StepBaoGia AS PickStep,
                             d.BIT_Select,
                             d.CHR_Status,
+                            d.FL_USD,
                             ROW_NUMBER() OVER (
                                 PARTITION BY f.CHR_MaDon, f.CHR_MaHangNoiBo
                                 ORDER BY
@@ -1230,7 +1230,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         LEFT JOIN IM_NCC_NEW n
                             ON f.CHR_MaNCC = n.Ma
                         WHERE d.BIT_Select = 1
-                            OR d.BIT_Select IS NULL
+                        OR d.BIT_Select IS NULL
                     ) t
                     WHERE rn = 1
                 ),
@@ -1263,7 +1263,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         h.DEFT_PickNCC, h.DEFT_PickNCC_Time,
                         p.NCC_DuocChon,
                         p.NVCHR_ReasonPick,
-                        p.NVCHR_File
+                        p.NVCHR_File,
+                        p.FL_USD
                     FROM MAIN m
                     LEFT JOIN NCC_PIVOT ncc
                         ON m.CHR_MaDon = ncc.CHR_MaDon
@@ -1318,7 +1319,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Data = data,
                 TotalCount = totalCount
             };
-        }
+}
+
         // Tính tổng theo trạng thái đơn
         public async Task<List<dynamic>> GetCountStatus(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau,
         string? MaHang, string? user)

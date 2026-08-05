@@ -12,6 +12,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -1805,6 +1806,16 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return baoGiaImportModels
                 .Where(x => invalidSet.Contains($"{x.MaDon}|{x.MaHangNoiBo}"))
                 .ToList();
+        }
+
+        // check trạng thái đơn báo giá
+        public async Task<List<int>> CheckStepAsync(List<int> ids, List<int> stepCheck)
+        {
+            var result = await _context.BaoGia_Request_of_Quotations
+                .Where(x => ids.Contains(x.ID) && stepCheck.Contains((int)x.ID_StepBaoGia))
+                .Select(x => x.ID)
+                .ToListAsync();
+            return result;
         }
     }
 }

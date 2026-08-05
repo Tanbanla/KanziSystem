@@ -95,8 +95,8 @@ async function getEmployeeData() {
             document.getElementById("mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
 
             loadToCombo("Section Manager", "thamtra");            
-            loadToCombo("Dept Manager", "pheduyet");
-            //loadToCombo_TBP("Dept Manager", "pheduyet");
+            loadToCombo_PTBP("10 : Deputy General Manager", "pheduyet");
+           
         }
         if (giatien >= 3000 && giatien < 10000) {
             document.getElementById("ten_duthao").innerHTML = `<option>${data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
@@ -104,12 +104,12 @@ async function getEmployeeData() {
             document.getElementById("mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
 
             loadToCombo("Section Manager", "thamtra");
-            loadToCombo_TBP("Dept Manager", "pheduyet");
+            loadToCombo_TBP("General Manager", "pheduyet");
         }
         if (giatien >= 10000) {
 
             loadToCombo("Section Manager", "duthao");
-            loadToCombo_TBP("Dept Manager", "thamtra");
+            loadToCombo_TBP("General Manager", "thamtra");
             loadToCombo_GD("Director", "pheduyet");
         }
 
@@ -217,7 +217,7 @@ async function loadToCombo(position, comboId) {
     if (result.Data.Data.length == 0) {
 
         //alert("Cost phòng ban chưa được đăng ký hoặc bị hủy !");
-        loadToCombo_TBP("Dept Manager", "pheduyet");
+        loadToCombo_PTBP("10 : Deputy General Manager", "pheduyet");
         //loadToCombo_TBP("Section Manager", "thamtra");
     }
     try {
@@ -247,6 +247,63 @@ async function loadToCombo(position, comboId) {
        
     }    
 }
+
+const createSearchData_PTBP = (position) => ({
+    "SearchTerm": "",
+    "SearchFields": ["CHR_EMPLOYEE_NAME"],
+    "PageNumber": 1, "PageSize": 10,
+    "Filters": [
+
+        { "Field": "CHR_DEPT", "Value": phongban, "Operator": "like", "LogicType": "AND" },
+        { "Field": "CHR_POSITION", "Value": position, "Operator": "=", "LogicType": "AND" },
+        { "Field": "DTM_LEAVE_DATE", "Value": "", "Operator": "is null", "LogicType": "AND" }
+    ],
+    "SortOptions": [{ "Field": "ID", "SortDirection": "DESC" }]
+});
+// Hàm gọi API và gán vào Combobox
+async function loadToCombo_PTBP(position, comboId) {
+    const response = await fetch(CONFIG.ROUTES.employeeSearch, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createSearchData_PTBP(position))
+    });
+
+    const result = await response.json();
+
+    if (result.Data.Data.length == 0) {
+
+        //alert("Cost phòng ban chưa được đăng ký hoặc bị hủy !");
+        loadToCombo_TBP("General Manager", "pheduyet");
+        //loadToCombo_TBP("Section Manager", "thamtra");
+    }
+    try {
+        document.getElementById("ten_" + comboId).innerHTML = "";
+        for (var i = 0; i < result.Data.Data.length; i++) {
+            document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;
+            // lấy danh sách user ủy quyền
+            var usUQ = result.Data.Data[i].CHR_EMPLOYEE_ADID;
+            const params = new URLSearchParams();
+            params.append('adid', usUQ);
+
+            const rsUQ = await fetch(CONFIG.ROUTES.loadUQ, {
+                method: 'POST',
+                body: params
+            });
+            const kq = await rsUQ.json();
+            for (var a = 0; a < kq.length; a++) {
+                document.getElementById("ten_" + comboId).innerHTML += `<option value="${kq[a].chR_ADID_NguoiduocUQ}">${kq[a].chR_TEN_NguoiduocUQ}</option>`;
+            }
+        }
+
+        document.getElementById("cv_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_ADID;
+        document.getElementById("mail_" + comboId).value = result.Data.Data[0].CHR_EMPLOYEE_MAIL;
+        // xử lý trường hợp ủy quyền
+    }
+    catch {
+
+    }
+}
+
 
 // Hàm tạo Payload (dữ liệu gửi đi)
 const createSearchData_GD = (position) => ({
@@ -293,7 +350,7 @@ const createSearchData_TBP = (position) => ({
     "SearchFields": ["CHR_EMPLOYEE_NAME"],
     "PageNumber": 1, "PageSize": 10,
     "Filters": [
-        { "Field": "CHR_POSITION_GROUP", "Value": position, "Operator": "=", "LogicType": "AND" },
+        { "Field": "CHR_POSITION", "Value": position, "Operator": "=", "LogicType": "AND" },
         { "Field": "CHR_DEPT", "Value": phongban, "Operator": "=", "LogicType": "AND" },
         { "Field": "DTM_LEAVE_DATE", "Value": "", "Operator": "is null", "LogicType": "AND" }
     ],

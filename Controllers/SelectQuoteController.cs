@@ -81,7 +81,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 var role = GetRolesUser();
-                if (role == "UserPUR" && selectedMaDon.Count > 5)
+                if (role == "UserPUR" && selectedMaDon.Count > 2)
                 {
                     var maDonList = await _baoGiaService.GetMaDonYeuCauHangHoaAsync();
                     selectedMaDon = maDonList.Data.ToList();

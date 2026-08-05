@@ -651,4 +651,10 @@
   <data name="NotQuotation" xml:space="preserve">
     <value>見積り取得不可</value>
   </data>
+  <data name="CONFIRMING" xml:space="preserve">
+    <value>税関での氏名確認待ち</value>
+  </data>
+  <data name="Cost" xml:space="preserve">
+    <value>料金</value>
+  </data>
 </root>

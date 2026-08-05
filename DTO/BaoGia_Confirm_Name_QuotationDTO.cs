@@ -47,3 +47,21 @@ public partial class BaoGia_Confirm_Name_QuotationDTO
 
     public string? CHR_NameEN { get; set; }
 }
+
+// DTO input excel
+public partial class ConfirmNameInputExcel
+{
+    public int ID { get; set; }
+
+    public string? VCHR_TenHaiQuan { get; set; }
+
+    public string? CHR_NameEN { get; set; }
+
+    public string? VCHR_TenRecomment { get; set; }
+
+    public DateTime? DTM_UserShip { get; set; }
+
+    public string? VCHR_UserShip { get; set; }
+
+    public string? LinkQ { get; set; }
+}

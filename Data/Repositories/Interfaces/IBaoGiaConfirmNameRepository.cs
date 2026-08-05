@@ -20,7 +20,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Insert thong tin danh sach
         Task<List<BaoGia_Confirm_Name_Quotation>> AddListAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames);
         // luu thong tin nhap file
-        public Task<bool> SaveFromFileAsync(List<BaoGia_Confirm_Name_Quotation> confirmNames, string user, string? Role);
+        public Task<bool> SaveFromFileAsync(List<ConfirmNameInputExcel> confirmNames, string user, string? Role);
         // Saves
         public Task<bool> SaveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Approvers
@@ -32,16 +32,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Từ chối xác nhận tên hàng
         public Task<bool> RejectConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Check mã đơn đã xác nhận tên hàng đã hoàn thành hay chưa
-        public Task<List<ResultCheckCofirmName>> CheckDonHangConfirmedAsync(List<int> listCheck);
+        public Task<List<ResultCheckCofirmName>> SearchSendMailConfirmNameAsync(List<int> listCheck);
         // Cập nhật thông tin đơn báo giá sau khi trả lại
         public Task<bool> UpdateRequestFromFileAsync(List<BaoGia_Request_of_Quotation> baoGia, string user);
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public Task<bool> UpdateRequestForPICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user);
+        public Task<bool> UpdateRequestForPICPURAsync(List<ConfirmNameInputExcel> baoGia, string user);
         //Export file ten hanh xac nhan
         Task<List<dynamic>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user);
         // Update Name HQ role PIC PUR
-        Task<bool> UpdateNameHQRolePICPURAsync(List<BaoGia_Confirm_Name_Quotation> baoGia, string user);
+        Task<List<int>> UpdateNameHQRolePICPURAsync(List<ConfirmNameInputExcel> baoGia, string user);
         // Done
         Task<List<ResultCheckCofirmName>> DoneConfirmNameAsync(List<int> listDone);
+        // Check đơn đã hoàn thành hay chưa
+        Task<List<int>> CheckConfirmNameDoneAsync(List<int> listCheck);
+
     }
 }

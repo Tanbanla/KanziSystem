@@ -72,5 +72,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<string>> GetListNccNotConfirmNameAsync();
         // kiểm tra đơn + mã hàng đã được quyền lựa chọn nhà cung cấp hay chưa
         Task<List<BaoGiaImportModel>> CheckPermissionSelectSupplierAsync(List<BaoGiaImportModel> baoGiaImportModels);
+        // check trạng thái đơn báo giá
+        Task<List<int>> CheckStepAsync(List<int> ids, List<int> stepCheck);
+
     }
 }

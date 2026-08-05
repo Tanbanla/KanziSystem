@@ -856,12 +856,12 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.INT_SoLanUpdate).HasDefaultValue(0);
             entity.Property(e => e.NVCHR_AnToan).HasMaxLength(450);
             entity.Property(e => e.NVCHR_COCQ).HasMaxLength(450);
-            entity.Property(e => e.NVCHR_ChatLieu).HasMaxLength(500);
+            entity.Property(e => e.NVCHR_ChatLieu);
             entity.Property(e => e.NVCHR_ChungLoai).HasMaxLength(350);
             entity.Property(e => e.NVCHR_DonVi).HasMaxLength(250);
             entity.Property(e => e.NVCHR_DongMay).HasMaxLength(550);
-            entity.Property(e => e.NVCHR_FileThietKe).HasMaxLength(350);
-            entity.Property(e => e.NVCHR_HinhDang).HasMaxLength(550);
+            entity.Property(e => e.NVCHR_FileThietKe);
+            entity.Property(e => e.NVCHR_HinhDang);
             entity.Property(e => e.NVCHR_KichThuoc).HasMaxLength(550);
             entity.Property(e => e.NVCHR_LyDo).HasMaxLength(550);
             entity.Property(e => e.NVCHR_MSDS).HasMaxLength(450);
@@ -869,8 +869,8 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_NhaSanXuat).HasMaxLength(450);
             entity.Property(e => e.NVCHR_Rohs).HasMaxLength(450);
             entity.Property(e => e.NVCHR_TenNCC).HasMaxLength(550);
-            entity.Property(e => e.NVCHR_ThanhPhan).HasMaxLength(550);
-            entity.Property(e => e.NVCHR_TinhNang).HasMaxLength(550);
+            entity.Property(e => e.NVCHR_ThanhPhan);
+            entity.Property(e => e.NVCHR_TinhNang);
             entity.Property(e => e.NVCHR_UserRequest).HasMaxLength(200);
             entity.Property(e => e.NVCHR_ReasonQuotation).HasMaxLength(250);
             entity.Property(e => e.CHR_LinkFile).HasMaxLength(1500);
