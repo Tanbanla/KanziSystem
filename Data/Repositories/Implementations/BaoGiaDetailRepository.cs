@@ -26,7 +26,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             _context = context;
         }
-        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, int? PageSize, int? PageIndex)
+        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM,string? status, int? PageSize, int? PageIndex)
         {
             var baseFrom = new StringBuilder();
             baseFrom.Append(@"FROM [BaoGia_Detail_of_Quotation] as d
@@ -71,6 +71,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 whereBuilder.Append(" AND CONVERT(DATE, r.DTM_NgayMuonNhan) = CONVERT(DATE, @Day)");
                 parameters.Add("Day", dayMM);
             }
+            // filter status
+            switch(status){
+                case "DONE":
+                    whereBuilder.Append(" AND r.ID_StepBaoGia > 6");
+                    break;
+                case "WAIT":
+                    whereBuilder.Append(" AND r.ID_StepBaoGia = 6");
+                    break;
+                default:
+                    break;
+            }
 
             // Build select SQL
             var selectSql = new StringBuilder();
@@ -78,6 +89,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.CHR_MaHangNoiBo, 
                     r.CHR_MaDon,
                     r.ID_StepBaoGia,
+                    r.DTM_KyHan,
                     CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
                     CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
                     CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
@@ -123,6 +135,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("Offset", offset);
                 parameters.Add("PageSize", PageSize);
             }
+
+            var a = selectSql.ToString();
+
             var result = await _conn.QueryAsync<dynamic>(selectSql.ToString(), parameters);
 
             // Build count SQL using same FROM/WHERE so total respects filters
@@ -238,7 +253,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         NVCHR_dataOld = System.Text.Json.JsonSerializer.Serialize(detail),
                         NVCHR_dataNew = System.Text.Json.JsonSerializer.Serialize(item),
                         CHR_CreateBy = item.CHR_UpdateBy,
-                        DTM_CreateBy = DateTime.Now
+                        DTM_CreateBy = DateTime.Now,
+                        NVCHR_ReasonUpdate = item.NVCHR_ReasonUpdate
                     };
                     historyList.Add(history);
 
@@ -276,6 +292,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.BIT_Select = null;
                     detail.CHR_Status = item.CHR_Status;
                     detail.NVCHR_dataOld = item.NVCHR_dataOld;
+                    detail.NVCHR_ReasonUpdate = item.NVCHR_ReasonUpdate;
                 }
                 // save step BaoGia_Request
                 var rq = await _context.BaoGia_Request_of_Quotations.FindAsync(detail.ID_RequestQuote);

@@ -12,6 +12,7 @@
     let currentPage = 1;
     let pageSize = Number(pageSizeSelect?.value) || 50;
     let currentGroups = [];
+    let editOrderRows = [];
     let totalCountServer = 0;
     const role = window.HistoryData.role || 'User';
 
@@ -180,18 +181,18 @@
 
                 const importResult = await response.json().catch(() => null);
 
-                // If import does not require selecting approver, show success
+                // 
                 if (!importResult?.isReturn) {
                     showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Cập nhật người phê duyệt thành công'), type: 'success' });
                     applyFilters(1);
                     return;
                 }
 
-                // If import indicates a return flow, prompt user to select approver/section
+                // 
                 const step = 2;
                 const section = importResult?.sectionCode || '';
 
-                // Require user to select an approver when isReturn === true
+                // 
                 let selected = await openApproverSelector(step, section);
                 while (!selected) {
                     showDialog({ title: T.Notification || 'Thông báo', message: (T.MustSelectApprover || 'Bạn phải chọn người phê duyệt trước khi thoát'), type: 'warning' });
@@ -917,7 +918,7 @@
         if (!tblBody) return;
 
         if (!rows || rows.length === 0) {
-            const colSpan = document.querySelectorAll('.approval-table thead tr:last-child th')?.length + 16 || 27;
+            const colSpan = document.querySelectorAll('.approval-table thead tr:last-child th')?.length + 17 || 28;
             tblBody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center text-muted py-3">${escapeHtml(window.i18nHistoryQuote?.MsgNoDataToEdit || 'Không có dữ liệu')}</td></tr>`;
             return;
         }
@@ -933,6 +934,16 @@
             const maDon = getValue(row, ['CHR_MaDon']);
             const maHang = getValue(row, ['CHR_MaHangNoiBo']);
             const maHangNcc = getValue(row, ['CHR_MaHangNCC']);
+            const editAction = `
+                <button type="button"
+                        class="btn btn-edit-history bg-transparent border-0 shadow-none p-0"
+                        title="Edit"
+                        data-mahangncc="${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}"
+                        data-mahangnb="${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}"
+                        data-name="${escapeHtml(getValue(row, ['CHR_NameEN']))}"
+                        data-madon="${escapeHtml(maDon)}">
+                    <i class="fas fa-edit text-primary"></i>
+                </button>`;
             const countStatus = [
                 row.Status_1,
                 row.Status_2,
@@ -968,6 +979,7 @@
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_NameEN']))}</td>
+                    <td style="max-width: 120px;" >${escapeHtml(getValue(row, ['NVCHR_ChungLoai']))}</td>
                     ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), getValue(row, ['Status_1', 'status_1']), step, isAllRefuse, selectedSupplier, link1)}
                     ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), getValue(row, ['Status_2', 'status_2']), step, isAllRefuse, selectedSupplier, link2)}
                     ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), getValue(row, ['Status_3', 'status_3']), step, isAllRefuse, selectedSupplier, link3)}
@@ -988,6 +1000,7 @@
                     ${StatusRow}
                     <td>
                         <div class="action-buttons" role="group" aria-label="${escapeHtml(window.i18nHistoryQuote?.Actions || 'Actions')}">
+                            ${editAction}
                             <button type="button" class="btn btn-outline-info btn-view-history" title="${escapeHtml(window.i18nHistoryQuote?.ViewHistoryTooltip || 'View history')}" data-madon="${escapeHtml(maDon)}" data-mahang="${escapeHtml(maHang)}" data-mahangncc="${escapeHtml(maHangNcc)}"><i class="fas fa-history"></i></button>
                             ${returnAction}
                             <button type="button" class="btn btn-outline-danger btn-delete-history" title="${escapeHtml(window.i18nHistoryQuote?.DeleteTooltip || 'Delete')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-trash"></i></button>
@@ -1060,12 +1073,6 @@
         document.getElementById('statWaitOrderQlsc').textContent = getValue(row, ['QLSCPur', 'qlsCPur'], 0);
     }
 
-    //function renderSummaryProcessingStatus(result) {
-    //    const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
-    //    document.getElementById('statCompletedOrders').textContent = getValue(row, ['SoDonHoanThanh', 'soDonHoanThanh'], 0);
-    //    document.getElementById('statProcessingOrders').textContent = getValue(row, ['SoDonDangXuLy', 'soDonDangXuLy'], 0);
-    //    document.getElementById('statUnprocessedOrders').textContent = getValue(row, ['SoDonChuaXuLy', 'soDonChuaXuLy'], 0);
-    //}
 
     function renderSummaryWaitingSupplier(result) {
         const row = Array.isArray(result) ? (result[0] || {}) : (result || {});
@@ -1168,6 +1175,353 @@
 
         if (button.classList.contains('btn-delete-history')) {
             await handleDeleteHistory(button);
+        }
+
+        if (button.classList.contains('btn-edit-history')) {
+            await openEditModal(button);
+            return;
+        }
+    });
+    async function openEditModal(button) {
+        const payload = {
+            MaDon: button.dataset.madon || '',
+            MaHangNCC: '',
+            MaHang: button.dataset.mahangnb || '',
+            NameEn: button.dataset.name || ''
+        };
+
+        const preferredVendorCode = button.dataset.mahangncc || '';
+
+        try {
+            showLoading(window.i18nHistoryQuote?.LoadingData || 'Processing...');
+            const response = await fetch((window.apiBaseUrl || '') + '/History/SearchOrderInfo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const T = window.i18nHistoryQuote || {};
+            if (!response.ok) {
+                throw new Error(T.MsgLoadHistoryFailed || 'Load history failed');
+            }
+
+            const result = await response.json();
+            const data = Array.isArray(result)
+                ? result
+                : (Array.isArray(result?.data) ? result.data : (Array.isArray(result?.Data) ? result.Data : []));
+
+            if (!Array.isArray(data) || data.length === 0) {
+                showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + (T.MsgNoDataToEdit || 'Không có dữ liệu để chỉnh sửa.') + '</div>');
+                return;
+            }
+
+            editOrderRows = data;
+            initEditSupplierSelector(preferredVendorCode);
+            showEditModal();
+        } catch (err) {
+            console.error(err);
+            const T = window.i18nHistoryQuote || {};
+            showDialog(T.Notification || 'Thông báo', '<div class="text-danger">' + ((err && err.message) || T.MsgNotFoundData || 'Không tìm thấy dữ liệu.') + '</div>');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function initEditSupplierSelector(preferredVendorCode) {
+        const supplierSelect = document.getElementById('editSupplierSelect');
+        const supplierCount = document.getElementById('editSupplierCount');
+        if (!supplierSelect) {
+            fillEditFormFromDto(editOrderRows[0]);
+            return;
+        }
+
+        supplierSelect.innerHTML = '';
+        editOrderRows.forEach((row, index) => {
+            const option = document.createElement('option');
+            const vendorCode = getValue(row, ['CHR_MaNCC', 'chR_MaNCC'], '');
+            const vendorName = getValue(row, ['NVCHR_TenNCC', 'nvchR_TenNCC'], '');
+            const vendorItemCode = getValue(row, ['CHR_MaHangNCC', 'chR_MaHangNCC'], '');
+
+            option.value = String(index);
+            option.textContent = `${vendorCode || '-'}${vendorName ? ` - ${vendorName}` : ''}${vendorItemCode ? ` (${vendorItemCode})` : ''}`;
+            supplierSelect.appendChild(option);
+        });
+
+        if (supplierCount) {
+            supplierCount.textContent = `${editOrderRows.length}`;
+        }
+
+        let selectedIndex = 0;
+        if (preferredVendorCode) {
+            const foundIndex = editOrderRows.findIndex(x =>
+                String(getValue(x, ['CHR_MaHangNCC', 'chR_MaHangNCC'], '')).trim().toLowerCase() === preferredVendorCode.trim().toLowerCase()
+            );
+            if (foundIndex >= 0) selectedIndex = foundIndex;
+        }
+
+        supplierSelect.value = String(selectedIndex);
+        fillEditFormFromDto(editOrderRows[selectedIndex]);
+
+        if (!supplierSelect.dataset.boundChange) {
+            supplierSelect.addEventListener('change', function () {
+                const idx = Number(this.value);
+                if (Number.isInteger(idx) && idx >= 0 && idx < editOrderRows.length) {
+                    fillEditFormFromDto(editOrderRows[idx]);
+                }
+            });
+            supplierSelect.dataset.boundChange = '1';
+        }
+    }
+
+    function fillEditFormFromDto(dto) {
+        if (!dto) return;
+
+        function setControlValue(id, val, textForOption) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            try {
+                if (el.tagName === 'SELECT') {
+                    const strVal = val == null ? '' : String(val);
+                    const exists = Array.from(el.options).some(o => String(o.value) === strVal);
+                    if (!exists && strVal !== '') {
+                        const opt = document.createElement('option');
+                        opt.value = strVal;
+                        opt.text = textForOption ?? strVal;
+                        el.appendChild(opt);
+                    }
+                    el.value = strVal;
+                    try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+                } else {
+                    el.value = val ?? '';
+                }
+            } catch (e) { try { el.value = val ?? ''; } catch { } }
+        }
+
+        const read = (keys, fallback = '') => getValue(dto, keys, fallback);
+        const toDateInput = (d) => { try { if (!d) return ''; const dt = new Date(d); return dt.toISOString().slice(0, 10); } catch { return ''; } };
+
+        const requestId = read(['ID', 'id'], '');
+        const requestIdEl = document.getElementById('editRequestId');
+        if (requestIdEl) requestIdEl.value = requestId;
+
+        setControlValue('editMaDon', read(['CHR_MaDon', 'chR_MaDon'], ''));
+        setControlValue('editRequester', read(['CHR_CreateBy', 'chR_CreateBy'], ''));
+        setControlValue('editSectionCode', read(['CHR_SectionCode', 'chR_SectionCode'], ''));
+        setControlValue('editSectionName', read(['CHR_SectionName', 'chR_SectionName'], ''));
+
+        const supplierCode = read(['CHR_MaNCC', 'chR_MaNCC'], '');
+        const supplierName = read(['NVCHR_TenNCC', 'nvchR_TenNCC'], '');
+        setControlValue('editNhaCungCap', supplierCode);
+        setControlValue('editTenNCC', supplierName);
+        setControlValue('editSupplierCodeDisplay', supplierCode);
+        setControlValue('editSupplierNameDisplay', supplierName);
+
+        setControlValue('editChungLoai', read(['NVCHR_ChungLoai', 'nvchR_ChungLoai'], ''));
+        setControlValue('editPhanLoai', read(['CHR_Phanloai', 'chR_Phanloai'], ''));
+        setControlValue('editMaThietBi', read(['CHR_MaThietBi', 'chR_MaThietBi'], ''));
+        setControlValue('editMaHangNoiBo', read(['CHR_MaHangNoiBo', 'chR_MaHangNoiBo'], ''));
+        setControlValue('editMaHangNCC', read(['CHR_MaHangNCC', 'chR_MaHangNCC'], ''));
+        setControlValue('editTenHangVN', read(['NVCHR_NameVN', 'nvchR_NameVN'], ''));
+        setControlValue('editTenHangEN', read(['CHR_NameEN', 'chR_NameEN'], ''));
+        setControlValue('editSoLuong', read(['INT_SoLuong', 'inT_SoLuong'], ''));
+        setControlValue('editDonVi', read(['NVCHR_DonVi', 'nvchR_DonVi'], ''));
+        setControlValue('editHinhDang', read(['NVCHR_HinhDang', 'nvchR_HinhDang'], ''));
+        setControlValue('editChatLieu', read(['NVCHR_ChatLieu', 'nvchR_ChatLieu'], ''));
+        setControlValue('editThanhPhan', read(['NVCHR_ThanhPhan', 'nvchR_ThanhPhan'], ''));
+        setControlValue('editKichThuoc', read(['NVCHR_KichThuoc', 'nvchR_KichThuoc'], ''));
+        setControlValue('editDongMay', read(['NVCHR_DongMay', 'nvchR_DongMay'], ''));
+        setControlValue('editTinhNang', read(['NVCHR_TinhNang', 'nvchR_TinhNang'], ''));
+        setControlValue('editRohs', read(['NVCHR_Rohs', 'nvchR_Rohs'], ''));
+        setControlValue('editCOCQ', read(['NVCHR_COCQ', 'nvchR_COCQ'], ''));
+        setControlValue('editMSDS', read(['NVCHR_MSDS', 'nvchR_MSDS'], ''));
+        setControlValue('editAnToan', read(['NVCHR_AnToan', 'nvchR_AnToan'], ''));
+        setControlValue('editFileThietKe', read(['NVCHR_FileThietKe', 'nvchR_FileThietKe'], ''));
+        setControlValue('editNhaSanXuat', read(['NVCHR_NhaSanXuat', 'nvchR_NhaSanXuat'], ''));
+        setControlValue('editStatus', read(['ID_Status', 'iD_Status'], ''));
+        setControlValue('editStep', read(['ID_StepBaoGia', 'iD_StepBaoGia'], ''));
+        setControlValue('editSoLanUpdate', read(['INT_SoLanUpdate', 'inT_SoLanUpdate'], ''));
+
+        const layBaoGia = read(['BIT_LayBaoGia', 'biT_LayBaoGia'], false);
+        setControlValue('editLayBaoGia', (layBaoGia === true || String(layBaoGia).toLowerCase() === 'true') ? 'true' : 'false');
+        setControlValue('editLyDo', read(['NVCHR_LyDo', 'nvchR_LyDo'], ''));
+        setControlValue('editNgayMuonNhan', toDateInput(read(['DTM_NgayMuonNhan', 'dtM_NgayMuonNhan'], null)));
+        setControlValue('editKyHan', toDateInput(read(['DTM_KyHan', 'dtM_KyHan'], null)));
+
+        const urgent = read(['CHR_Gap', 'chR_Gap'], false);
+        setControlValue('editGap', (urgent === true || String(urgent).toLowerCase() === 'true') ? 'true' : 'false');
+
+        setControlValue('editDaycreate', toDateInput(read(['DTM_CreateDate', 'dtM_CreateDate'], null)) || '');
+        setControlValue('editUpdateLater', toDateInput(read(['DTM_UpdateLater', 'dtM_UpdateLater'], null)) || '');
+        setControlValue('editDeadline', toDateInput(read(['DTM_Deadline', 'dtM_Deadline'], null)) || '');
+
+        const isTemplate = read(['BIT_IsTemplate', 'biT_IsTemplate'], '');
+        setControlValue('editIsTemplate', isTemplate === '' ? '' : ((isTemplate === true || String(isTemplate).toLowerCase() === 'true') ? 'true' : 'false'));
+
+        try { if (window.jQuery) buildSearchableDropdown($(document)); else buildSearchableDropdown(document); } catch { }
+    }
+    function showEditModal() {
+        const modalEl = document.getElementById('editHistoryModal');
+        if (!modalEl) return;
+        try {
+            const bs = window.bootstrap;
+            if (bs && bs.Modal) {
+                const m = bs.Modal.getOrCreateInstance(modalEl);
+                m.show();
+            } else {
+                // Fallback: manually show modal
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                modalEl.setAttribute('aria-hidden', 'false');
+                // prevent body scroll
+                document.body.classList.add('modal-open');
+            }
+        } catch {
+            // Fallback: manually show modal
+            modalEl.style.display = 'block';
+            modalEl.classList.add('show');
+            modalEl.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+        }
+    }
+
+    function hideEditModal() {
+        const modalEl = document.getElementById('editHistoryModal');
+        if (!modalEl) return;
+        try {
+            const active = document.activeElement;
+            if (active && modalEl.contains(active)) {
+                if (typeof active.blur === 'function') active.blur();
+                const fallbackFocus = document.getElementById('btnApplyFilters') || document.body;
+                if (fallbackFocus && typeof fallbackFocus.focus === 'function') fallbackFocus.focus();
+            }
+        } catch { }
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        modalEl.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        try {
+            const dialog = modalEl.querySelector('.modal-dialog');
+            if (dialog) {
+                dialog.style.maxWidth = '';
+                dialog.style.width = '';
+                dialog.style.margin = '';
+            }
+        } catch { }
+        const backdrop = document.querySelector('.custom-modal-backdrop');
+        if (backdrop) backdrop.remove();
+    }
+    // đóng modal 
+    document.getElementById('btnCloseEdit_1')?.addEventListener('click', function () {
+        hideEditModal();
+    });
+    document.getElementById('btnCloseEdit_2')?.addEventListener('click', function () {
+        hideEditModal();
+    });
+
+    function collectEditFormDto() {
+        const gv = id => document.getElementById(id)?.value || '';
+        const toIso = d => {
+            if (!d) return null;
+            try {
+                const parts = d.split('-');
+                return new Date(Date.UTC(+parts[0], +parts[1] - 1, +parts[2], 7, 0, 0)).toISOString();
+            } catch {
+                return null;
+            }
+        };
+
+        return {
+            ID: Number(gv('editRequestId') || 0),
+            CHR_MaDon: gv('editMaDon') || '',
+            CHR_SectionCode: gv('editSectionCode') || '',
+            CHR_SectionName: gv('editSectionName') || '',
+            CHR_Phanloai: gv('editPhanLoai') || '',
+            CHR_MaThietBi: gv('editMaThietBi') || '',
+            CHR_MaHangNoiBo: gv('editMaHangNoiBo') || '',
+            CHR_MaHangNCC: gv('editMaHangNCC') || '',
+            NVCHR_NameVN: gv('editTenHangVN') || '',
+            CHR_NameEN: gv('editTenHangEN') || '',
+            INT_SoLuong: gv('editSoLuong') ? parseFloat(gv('editSoLuong')) : -1,
+            NVCHR_DonVi: gv('editDonVi') || '',
+            NVCHR_ChungLoai: gv('editChungLoai') || '',
+            NVCHR_HinhDang: gv('editHinhDang') || '',
+            NVCHR_ChatLieu: gv('editChatLieu') || '',
+            NVCHR_ThanhPhan: gv('editThanhPhan') || '',
+            NVCHR_KichThuoc: gv('editKichThuoc') || '',
+            NVCHR_DongMay: gv('editDongMay') || '',
+            NVCHR_TinhNang: gv('editTinhNang') || '',
+            NVCHR_Rohs: gv('editRohs') || '',
+            NVCHR_COCQ: gv('editCOCQ') || '',
+            NVCHR_MSDS: gv('editMSDS') || '',
+            NVCHR_AnToan: gv('editAnToan') || '',
+            NVCHR_FileThietKe: gv('editFileThietKe') || '',
+            NVCHR_NhaSanXuat: gv('editNhaSanXuat') || '',
+            CHR_MaNCC: gv('editNhaCungCap') || '',
+            NVCHR_TenNCC: gv('editTenNCC') || '',
+            BIT_LayBaoGia: gv('editLayBaoGia') === 'true',
+            NVCHR_LyDo: gv('editLyDo') || '',
+            DTM_NgayMuonNhan: toIso(gv('editNgayMuonNhan')),
+            DTM_KyHan: toIso(gv('editKyHan')),
+            CHR_Gap: gv('editGap') || '',
+            CHR_CreateBy: gv('editRequester') || '',
+            DTM_CreateDate: toIso(gv('editDaycreate')),
+            ID_Status: gv('editStatus'),
+            ID_StepBaoGia: gv('editStep'),
+            INT_SoLanUpdate: gv('editSoLanUpdate') ? parseInt(gv('editSoLanUpdate')) + 1 : 1,
+            DTM_UpdateLater: toIso(gv('editUpdateLater')),
+            DTM_Deadline: toIso(gv('editDeadline')),
+            BIT_IsTemplate: gv('editIsTemplate') ? (gv('editIsTemplate') === 'true') : null
+        };
+    }
+
+    document.getElementById('btnSaveHistoryEdit')?.addEventListener('click', async function () {
+        const T = window.i18nHistoryQuote || {};
+        const saveBtn = this;
+        const dto = collectEditFormDto();
+
+        if (!dto || !dto.ID) {
+            showDialog({
+                title: T.Notification || 'Thông báo',
+                message: T.MsgNoDataToEdit || 'Không có dữ liệu để chỉnh sửa.',
+                type: 'warning'
+            });
+            return;
+        }
+
+        try {
+            saveBtn.disabled = true;
+            showLoading(T.LoadingData || 'Đang xử lý...');
+
+            const response = await fetch(apiUrl('/History/UpdateBaoGiaById'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dto)
+            });
+
+            const text = await response.text().catch(() => '');
+            if (!response.ok) {
+                hideEditModal();
+                throw new Error(text || (T.MsgSaveFailed || 'Lưu thất bại'));
+            }
+
+            hideEditModal();
+            showDialog({
+                title: T.Notification || 'Thông báo',
+                message: T.MsgSaveSuccess || 'Đã lưu thành công.',
+                type: 'success'
+            });
+            applyFilters(currentPage || 1);
+        } catch (err) {
+            hideEditModal();
+            console.error(err);
+            showDialog({
+                title: T.Notification || 'Thông báo',
+                message: err?.message || (T.MsgSaveFailed || 'Lưu thất bại'),
+                type: 'error'
+            });
+        } finally {
+            saveBtn.disabled = false;
+            hideLoading();
         }
     });
 

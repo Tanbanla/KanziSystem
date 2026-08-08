@@ -1,14 +1,15 @@
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using ClosedXML.Excel;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using System.Globalization;
 using MiniExcel = MiniExcelLibs.MiniExcel;
 using Path = System.IO.Path;
-using System.Globalization;
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
     public class HistoryController : BaseAuthController
@@ -25,6 +26,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IMaterialService _materialService;
         private readonly IConfiguration _configuration;
         private readonly IFileImportService _fileImportService;
+        private readonly ITmUserService _tmUserService;
 
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IDepartmentService _deparmentService;
@@ -35,7 +37,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<HistoryController> logger, IServiceScopeFactory serviceScopeFactory,
             IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration
             , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService,
-            IStringLocalizer<HistoryController> localizer, IFileImportService fileImportService
+            IStringLocalizer<HistoryController> localizer, IFileImportService fileImportService, ITmUserService tmUserService
             )
         {
             _env = env;
@@ -53,6 +55,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _tmNccNewService = tmNccNewService;
             _localizer = localizer;
             _fileImportService = fileImportService;
+            _tmUserService = tmUserService;
         }
         // tìm kiếm đơn báo giá
         [HttpPost]
@@ -720,21 +723,53 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result.Data);
         }
+        // tìm kiếm thông tin đơn hàng, theo mã đơn, mã hàng nội bộ
+        [HttpPost]
+        public async Task<IActionResult> SearchOrderInfo([FromBody] SearchHistoryInfoByMaDonModel vm)
+        {
+            if(vm == null)
+            {
+                return BadRequest("Data error");
+            }
+
+            var result = await _baoGiaService.GetOrderInfoAsync(vm.MaDon, vm.MaHangNCC, vm.MaHang, vm.NameEn);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
+
         // update bao gia theo id
         [HttpPost]
         public async Task<IActionResult> UpdateBaoGiaById([FromBody] BaoGia_Request_of_QuotationDTO baogia)
         {
-            if (baogia.ID_StepBaoGia >= 6)
+            if (baogia == null)
             {
-                return BadRequest("Đơn đã phê duyệt không sửa");
+                return BadRequest("Error data update");
             }
+            //
+            var user = GetCurrentUserId();
+            var roleAsync = await _tmUserService.GetRoleAsync(user);
+            var role = roleAsync.Success ? roleAsync.Data : string.Empty;
+
+            if(role != "UserPUR")
+            {
+                // Check trạng thái đơn
+                var checkStatus = await _baoGiaService.CheckStepAsync([baogia.ID], [1, 2, 3, 4, 5]);
+
+                if (!checkStatus.Success || checkStatus.Data.Count > 0)
+                {
+                    return BadRequest("Đơn đã được phê duyệt hoặc không hợp lệ để cập nhật");
+                }
+            } 
+
             baogia.DTM_UpdateLater = DateTime.Now;
             var result = await _baoGiaService.CapNhatDonBaoGiaAsync(baogia);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
-            // result.Data contains inserted DTOs with IDs
             try
             {
                 var insertedList = result.Data;
@@ -742,7 +777,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     ID_RequestQuote = insertedList.ID,
                     CHR_MaDon = insertedList.CHR_MaDon ?? string.Empty,
-                    CHR_UpdateBy = GetCurrentUserId() ?? string.Empty,
+                    CHR_UpdateBy = user ?? string.Empty,
                     NVCHR_UpdateName = GetCurrentUserFullName() ?? string.Empty,
                     CHR_Updatedate = DateTime.Now,
                     CHR_ChangedColumns = null,
@@ -1118,7 +1153,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var workbook = new XLWorkbook();
                 var ws = workbook.Worksheets.Add("History");
 
-                const int totalColumns = 22;
+                const int totalColumns = 24;
                 const int headerRow1 = 1;
                 const int headerRow2 = 2;
                 const int dataStartRow = 3;
@@ -1143,39 +1178,40 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 ws.Cell(headerRow1, 3).Value = L("InternalCode", "Internal Code");
                 ws.Cell(headerRow1, 4).Value = "Vendor's good code";
                 ws.Cell(headerRow1, 5).Value = "Part name (English)";
-                ws.Cell(headerRow1, 6).Value = L("Supplier1", "Supplier 1");
-                ws.Cell(headerRow1, 7).Value = L("Supplier2", "Supplier 2");
-                ws.Cell(headerRow1, 8).Value = L("Supplier3", "Supplier 3");
-                ws.Cell(headerRow1, 9).Value = L("Supplier4", "Supplier 4");
-                ws.Cell(headerRow1, 10).Value = L("Supplier5", "Supplier 5");
-                ws.Cell(headerRow1, 11).Value = L("ReasonForSupplierSelection", "Reason for supplier selection");
-                ws.Cell(headerRow1, 12).Value = L("SelectionDeadline", "Selection deadline");
-                ws.Cell(headerRow1, 13).Value = L("RequesterUser", "Requester user");
+                ws.Cell(headerRow1, 6).Value = "Category";
+                ws.Cell(headerRow1, 7).Value = L("Supplier1", "Supplier 1");
+                ws.Cell(headerRow1, 8).Value = L("Supplier2", "Supplier 2");
+                ws.Cell(headerRow1, 9).Value = L("Supplier3", "Supplier 3");
+                ws.Cell(headerRow1, 10).Value = L("Supplier4", "Supplier 4");
+                ws.Cell(headerRow1, 11).Value = L("Supplier5", "Supplier 5");
+                ws.Cell(headerRow1, 12).Value = L("ReasonForSupplierSelection", "Reason for supplier selection");
+                ws.Cell(headerRow1, 13).Value = "Price (USD)";
+                ws.Cell(headerRow1, 14).Value = L("SelectionDeadline", "Selection deadline");
+                ws.Cell(headerRow1, 15).Value = L("RequesterUser", "Requester user");
 
-                ws.Range(headerRow1, 14, headerRow1, 17).Merge().Value = L("ApprovalOrderGroup", "Approval order");
-                ws.Range(headerRow1, 18, headerRow1, 21).Merge().Value = L("ApprovalSupplierGroup", "Approval supplier");
-                ws.Cell(headerRow1, 22).Value = L("Status", "Status");
+                ws.Range(headerRow1, 16, headerRow1, 19).Merge().Value = L("ApprovalOrderGroup", "Approval order");
+                ws.Range(headerRow1, 20, headerRow1, 23).Merge().Value = L("ApprovalSupplierGroup", "Approval supplier");
+                ws.Cell(headerRow1, 24).Value = L("Status", "Status");
 
-                ws.Cell(headerRow2, 14).Value = "QLSC";
-                ws.Cell(headerRow2, 15).Value = "QLTC";
-                ws.Cell(headerRow2, 16).Value = "PUR PIC";
-                ws.Cell(headerRow2, 17).Value = "PUR QLSC";
-
+                ws.Cell(headerRow2, 16).Value = "QLSC";
+                ws.Cell(headerRow2, 17).Value = "QLTC";
                 ws.Cell(headerRow2, 18).Value = "PUR PIC";
-                ws.Cell(headerRow2, 19).Value = "QLSC";
-                ws.Cell(headerRow2, 20).Value = "QLTC";
-                ws.Cell(headerRow2, 21).Value = "QLCC";
+                ws.Cell(headerRow2, 19).Value = "PUR QLSC";
 
-                for (var col = 1; col <= 13; col++)
+                ws.Cell(headerRow2, 20).Value = "PUR PIC";
+                ws.Cell(headerRow2, 21).Value = "QLSC";
+                ws.Cell(headerRow2, 22).Value = "QLTC";
+                ws.Cell(headerRow2, 23).Value = "QLCC";
+
+                for (var col = 1; col <= 15; col++)
                 {
                     ws.Range(headerRow1, col, headerRow2, col).Merge();
                 }
-                ws.Range(headerRow1, 22, headerRow2, 22).Merge();
-
-                ws.Range(headerRow1, 1, headerRow2, 13).Style.Fill.BackgroundColor = baseHeaderColor;
-                ws.Range(headerRow1, 14, headerRow2, 17).Style.Fill.BackgroundColor = group1Color;
-                ws.Range(headerRow1, 18, headerRow2, 21).Style.Fill.BackgroundColor = group2Color;
-                ws.Range(headerRow1, 22, headerRow2, 22).Style.Fill.BackgroundColor = group4Color;
+                ws.Range(headerRow1, 24, headerRow2, 24).Merge();
+                ws.Range(headerRow1, 1, headerRow2, 15).Style.Fill.BackgroundColor = baseHeaderColor;
+                ws.Range(headerRow1, 16, headerRow2, 19).Style.Fill.BackgroundColor = group1Color;
+                ws.Range(headerRow1, 20, headerRow2, 23).Style.Fill.BackgroundColor = group2Color;
+                ws.Range(headerRow1, 24, headerRow2, 24).Style.Fill.BackgroundColor = group4Color;
 
                 var headerRange = ws.Range(headerRow1, 1, headerRow2, totalColumns);
                 headerRange.Style.Font.Bold = true;
@@ -1234,6 +1270,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(excelRow, 3).Value = GetString(item, "CHR_MaHangNoiBo");
                     ws.Cell(excelRow, 4).Value = GetString(item, "CHR_MaHangNCC");
                     ws.Cell(excelRow, 5).Value = GetString(item, "CHR_NameEN");
+                    ws.Cell(excelRow, 6).Value = GetString(item, "NVCHR_ChungLoai");
 
                     var deadline = GetDateTime(item, "DTM_KyHan");
                     var isOverdue = deadline.HasValue && deadline.Value.Date < DateTime.Today;
@@ -1260,7 +1297,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             return;
                         }
 
-                        // RULE 2: logic cũ JS
+                        // RULE 2
                         var raw = Convert.ToString(bitValue)?.Trim().ToLower();
                         var isRefuse = (statusText ?? "").Trim().ToLower() == "refuse";
                         var isValue = string.IsNullOrEmpty(supplierText);
@@ -1296,26 +1333,36 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             cell.Style.Font.FontColor = XLColor.FromHtml("#0D6EFD");
                         }
                     }
-                    ApplySupplierStyle(6, supplier1, bitNcc1, status1);
-                    ApplySupplierStyle(7, supplier2, bitNcc2, status2);
-                    ApplySupplierStyle(8, supplier3, bitNcc3, status3);
-                    ApplySupplierStyle(9, supplier4, bitNcc4, status4);
-                    ApplySupplierStyle(10, supplier5, bitNcc5, status5);
+                    ApplySupplierStyle(7, supplier1, bitNcc1, status1);
+                    ApplySupplierStyle(8, supplier2, bitNcc2, status2);
+                    ApplySupplierStyle(9, supplier3, bitNcc3, status3);
+                    ApplySupplierStyle(10, supplier4, bitNcc4, status4);
+                    ApplySupplierStyle(11, supplier5, bitNcc5, status5);
 
-                    ws.Cell(excelRow, 11).Value = GetString(item, "NVCHR_ReasonPick");
+                    ws.Cell(excelRow, 12).Value = GetString(item, "NVCHR_ReasonPick");
+
+                    var price = GetString(item, "FL_USD");
+                    if(price == "" || step < 11)
+                    {
+                        ws.Cell(excelRow, 13).Value = "";
+                    }
+                    else
+                    {
+                        ws.Cell(excelRow, 13).Value = price + " USD";
+                    }
 
                     if (deadline.HasValue)
                     {
-                        ws.Cell(excelRow, 12).Value = deadline.Value;
-                        ws.Cell(excelRow, 12).Style.DateFormat.Format = "dd/MM/yyyy";
+                        ws.Cell(excelRow, 14).Value = deadline.Value;
+                        ws.Cell(excelRow, 14).Style.DateFormat.Format = "dd/MM/yyyy";
                         if (isOverdue)
                         {
-                            ws.Cell(excelRow, 12).Style.Fill.BackgroundColor = overdueColor;
-                            ws.Cell(excelRow, 12).Style.Font.FontColor = XLColor.White;
+                            ws.Cell(excelRow, 14).Style.Fill.BackgroundColor = overdueColor;
+                            ws.Cell(excelRow, 14).Style.Font.FontColor = XLColor.White;
                         }
                     }
 
-                    ws.Cell(excelRow, 13).Value = GetString(item, "CHR_CreateBy");
+                    ws.Cell(excelRow, 15).Value = GetString(item, "CHR_CreateBy");
 
                     var approvals = new[]
                     {
@@ -1332,7 +1379,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     for (var offset = 0; offset < approvals.Length; offset++)
                     {
                         var approval = approvals[offset];
-                        var col = 14 + offset;
+                        var col = 16 + offset;
 
                         var cellValue = BuildApprovalText(
                             approval.Approver,
@@ -1356,8 +1403,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         "ja" => isAllRefuse ? "すべてのサプライヤーが見積もり提供を拒否した。" : GetString(item, "CHR_StepNameJP", "CHR_StepName"),
                         _ => isAllRefuse ? "Toàn bộ các NCC đã từ chối báo giá" : GetString(item, "CHR_StepName")
                     };
-                    ws.Cell(excelRow, 22).Value = statusText;
-                    ws.Cell(excelRow, 22).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFF9CC");
+                    ws.Cell(excelRow, 24).Value = statusText;
+                    ws.Cell(excelRow, 24).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFF9CC");
                 }
 
                 var lastRow = Math.Max(dataStartRow, dataStartRow + rows.Count - 1);
@@ -1373,15 +1420,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 ws.Column(3).Width = 16;
                 ws.Column(4).Width = 18;
                 ws.Column(5).Width = 30;
-                ws.Column(6).Width = 14;
+                ws.Column(6).Width = 16;
                 ws.Column(7).Width = 14;
                 ws.Column(8).Width = 14;
                 ws.Column(9).Width = 14;
                 ws.Column(10).Width = 14;
                 ws.Column(11).Width = 28;
-                ws.Column(12).Width = 14;
-                ws.Column(13).Width = 16;
-                ws.Column(14).Width = 20;
+                ws.Column(12).Width = 15;
+                ws.Column(13).Width = 14;
+                ws.Column(14).Width = 16;
                 ws.Column(15).Width = 20;
                 ws.Column(16).Width = 20;
                 ws.Column(17).Width = 20;
@@ -1390,6 +1437,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 ws.Column(20).Width = 20;
                 ws.Column(21).Width = 20;
                 ws.Column(22).Width = 20;
+                ws.Column(23).Width = 20;
+                ws.Column(24).Width = 20;
 
                 ws.Row(headerRow1).Height = 24;
                 ws.Row(headerRow2).Height = 24;

@@ -200,12 +200,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public async Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, string? status, int pageIndex, int pageSize)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.SearchThongTinNhapBaoGiaAsync(maDon, section, maHang, user, pageIndex, pageSize);
+                result.Data = await _repo.SearchThongTinNhapBaoGiaAsync(maDon, section, maHang, user, status, pageIndex, pageSize);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -565,6 +565,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             try
             {
                 result.Data = await _repo.CheckStepAsync(ids, stepCheck);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // check infor báo giá theo mã đơn, mã hàng, mã ncc
+        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> GetOrderInfoAsync(string? maDon, string? maHangNCC, string? maHangNB, string? NameEn)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
+            try
+            {
+                var data = await _repo.GetOrderInfoAsync(maDon, maHangNCC, maHangNB, NameEn);
+                result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(data);
                 result.Success = true;
             }
             catch (Exception ex)

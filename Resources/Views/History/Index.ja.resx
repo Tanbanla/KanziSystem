@@ -657,4 +657,13 @@
   <data name="Cost" xml:space="preserve">
     <value>料金</value>
   </data>
+  <data name="SuppelierNeedEdit" xml:space="preserve">
+    <value>サプライヤーは修正を行う必要があります</value>
+  </data>
+  <data name="SupplierCode" xml:space="preserve">
+    <value>サプライヤーコード</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>サプライヤー名</value>
+  </data>
 </root>

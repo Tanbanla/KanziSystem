@@ -10,6 +10,7 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.ApprovalQuote;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -369,23 +370,40 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var latestCode = await materialService.MaterialCodeLater(materialType);
                                     var nextNumber = ExtractNumberFromCode(latestCode.Data);
 
-                                    var processedSuppliers = new Dictionary<string, MATERIALDTO>(StringComparer.OrdinalIgnoreCase);
+                                    var processedSuppliers =
+                                       new Dictionary<(string CHR_MaHangNCC, string CHR_NameEN), MATERIALDTO>();
 
                                     var materialsBySupplier = materialsInGroup
-                                        .GroupBy(m => string.IsNullOrEmpty(m.CHR_MaHangNCC) ? m.CHR_NameEN : m.CHR_MaHangNCC)
-                                        .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
+                                        .GroupBy(m => (
+                                            CHR_MaHangNCC: (m.CHR_MaHangNCC ?? "").Trim(),
+                                            CHR_NameEN: (m.CHR_NameEN ?? "").Trim()
+                                        ))
+                                        .ToDictionary(
+                                            g => g.Key,
+                                            g => g.ToList()
+                                        );
                                     foreach (var supplierGroup in materialsBySupplier)
                                     {
-                                        var supplierCode = supplierGroup.Key;
+                                        var supplierKey = supplierGroup.Key;
                                         var materials = supplierGroup.Value;
 
-                                        // Gọi service check material code
-                                        var checkCode = await materialService.CheckMaterialCode(supplierCode, materials.First().NVCHR_ChungLoai);
+                                        var supplierCode = supplierKey.CHR_MaHangNCC;
+                                        var supplierName = supplierKey.CHR_NameEN;
+
+                                        var checkCode = await materialService.CheckMaterialCode(
+                                            supplierCode,
+                                            materials.First().NVCHR_ChungLoai
+                                        );
 
                                         if (!checkCode.Success)
                                         {
-                                            _logger.LogError(checkCode.Message, "Lỗi khi check Material code for {MaHangNCC}, Type: {Type}", supplierCode, materialType);
+                                            _logger.LogError(
+                                                checkCode.Message,
+                                                "Lỗi khi check Material code for {MaHangNCC}, NameEN: {NameEN}, Type: {Type}",
+                                                supplierCode,
+                                                supplierName,
+                                                materialType
+                                            );
                                             continue;
                                         }
 
@@ -393,7 +411,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                                         if (!string.IsNullOrEmpty(existingMaterialCode))
                                         {
-                                            // Trường hợp đã tồn tại material code
                                             foreach (var material in materials)
                                             {
                                                 confirmNames.Add(new ConfirmNameDTO
@@ -405,7 +422,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         }
                                         else
                                         {
-                                            if (processedSuppliers.TryGetValue(supplierCode, out var existingMaterial))
+                                            if (processedSuppliers.TryGetValue(supplierKey, out var existingMaterial))
                                             {
                                                 foreach (var material in materials)
                                                 {
@@ -429,7 +446,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                 var Group = "";
                                                 switch (materialType)
                                                 {
-                                                    case "A":                                                   
+                                                    case "A":
                                                     case "E":
                                                         OutSide = "IN";
                                                         Group = "PUR";
@@ -467,7 +484,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                                 };
 
                                                 MaterialNews.Add(newMaterial);
-                                                processedSuppliers[supplierCode] = newMaterial;
+                                                processedSuppliers[supplierKey] = newMaterial;
 
                                                 foreach (var material in materials)
                                                 {

@@ -16,6 +16,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Path = System.IO.Path;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
     public class InputQuotationController(IExchangeRateService exchangeRateService, IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
@@ -305,6 +306,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         //        {
         //            return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
         //        }
+        //        // Check thông tin xem có ở trạng thái cho phép cập nhật báo giá hay không
+        //        //var listStep = new List<int> { 6, 7, 8 };
+        //        //var checkStatus = await _baoGiaService.CheckStepAsync(items.Select(c => c.ID).ToList(), listStep);
+
         //        // lấy thông tin để lưu file nhập báo giá
         //        var listInforFile = items.Select(c => c.NVCHR_File).Distinct().ToList();
 
@@ -338,6 +343,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         //            var checkKey = dto.NVCHR_File?.Trim().Trim('"', '\'') ?? dto.NVCHR_File;
         //            if (savedMap.TryGetValue(checkKey, out var saved) && !string.IsNullOrWhiteSpace(saved))
         //            {
+        //                dto.NVCHR_dataOld = dto.NVCHR_File;
         //                dto.NVCHR_File = saved;
         //            }
 
@@ -383,7 +389,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         //}
 
         [HttpPost]
-        public async Task<IActionResult> ImportExcelInputQuote([FromForm] IFormFile file)
+        public async Task<IActionResult> ImportExcelInputQuote([FromForm] IFormFile file, List<int> idChecks)
         {
             try
             {
@@ -433,7 +439,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                         if (errors.Any())
                         {
-                            ws.Cell(r, 33).SetValue(string.Join("; ", errors));
+                            ws.Cell(r, 35).SetValue(string.Join("; ", errors));
                             ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
                             hasErrors = true;
                             continue;
@@ -441,6 +447,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
 
                     int idRequestQuote = 0;
+                    string reason = ws.Cell(r, 34).GetString();
                     var col32Val = ws.Cell(r, 32).GetString();
 
                     if (!string.IsNullOrEmpty(col32Val))
@@ -461,7 +468,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (idRequestQuote == 0)
                     {
-                        ws.Cell(r, 33).SetValue("Không tìm thấy đơn hàng tương ứng trong hệ thống");
+                        ws.Cell(r, 35).SetValue("Không tìm thấy đơn hàng tương ứng trong hệ thống");
+                        ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
+                        hasErrors = true;
+                        continue;
+                    }
+
+                    // Kiểm tra đơn đã có lý do nêus up lại hay chưa
+                    if (int.TryParse(col32Val, out var id) && idChecks.Contains(id) && reason == "")
+                    {
+                        ws.Cell(r, 35).SetValue("Đơn đã nhập trước đó! Voi lòng nhập lý do sửa vào cột 34");
                         ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
                         hasErrors = true;
                         continue;
@@ -497,7 +513,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         DTM_ExpiryDate = isRefuse ? null : ConvertHelper.ParseDate(ws.Cell(r, 26).GetString()),
                         CHR_UpdateBy = isRefuse ? null : GetCurrentUserId(),
                         NVCHR_File = ws.Cell(r, 30).GetString()?.Trim().Trim('"', '\''),
-                        CHR_Status = isRefuse ? "Refuse" : null
+                        CHR_Status = isRefuse ? "Refuse" : null,
+                        NVCHR_ReasonUpdate = reason
                     });
                 }
 
@@ -558,24 +575,206 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        // Kiểm tra Step đơn
+        [HttpPost]
+        public async Task<IActionResult> CheckImportExcelInputQuote([FromForm] IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("Không có file");
+
+                var ids = new List<int>();
+
+                using var stream = file.OpenReadStream();
+                using var workbook = new XLWorkbook(stream);
+
+                var ws = workbook.Worksheets.FirstOrDefault();
+
+                if (ws == null)
+                    return BadRequest("Không tìm thấy worksheet");
+
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? 13;
+
+                for (int r = 13; r <= lastRow; r++)
+                {
+                    var col1Val = ws.Cell(r, 1).GetString();
+                    if (string.IsNullOrWhiteSpace(col1Val))
+                        break;
+
+                    int idRequestQuote = int.Parse(ws.Cell(r, 32).GetString());
+
+                    if (idRequestQuote > 0)
+                    {
+                        ids.Add(idRequestQuote);
+                    }
+                }
+
+                ids = ids.Distinct().ToList();
+
+                var duplicatedIds = await _baoGiaService.CheckStepAsync(
+                    ids,
+                    new List<int> { 6,7,8 });
+                if (!duplicatedIds.Success)
+                {
+                    return BadRequest("Lỗi khi kiểm tra đơn. Chi tiết: "+duplicatedIds.Message);
+                }
+
+
+                return Ok(duplicatedIds.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
         // MARK : Màn hình Input Quote - Tìm kiếm báo giá theo các tiêu chí
         [HttpPost]
         public async Task<IActionResult> SearchInputQuote([FromBody] SearchInputQuote searchModel)
         {
             if (searchModel == null) return BadRequest("Không nhận Search Input");
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
-                searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM, searchModel.pageSize, searchModel.pageIndex);
+                searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM,
+                searchModel.status,searchModel.pageSize, searchModel.pageIndex);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
             return Ok(result.Data);
         }
+        // export excel tab2
+        [HttpPost]
+        public async Task<IActionResult> ExportExcelTab2([FromBody] SearchInputQuote searchInputQuote)
+        {
+            if (searchInputQuote == null)
+                return BadRequest("Không nhận Search Input");
+
+            var result = await _baoGiaDetailService.SearchBaoGiaAsync(
+                searchInputQuote.idRequestQuote,
+                searchInputQuote.maDon,
+                searchInputQuote.maVatTu,
+                searchInputQuote.maNcc,
+                searchInputQuote.section,
+                GetCurrentUserId(),
+                searchInputQuote.dayMM,
+                searchInputQuote.status,
+                searchInputQuote.pageSize,
+                searchInputQuote.pageIndex);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            try
+            {
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TmSendMailNew_Reason.xlsx");
+
+                if (!System.IO.File.Exists(templatePath))
+                    return BadRequest("Không tìm thấy file mẫu!");
+
+                using var workbook = new XLWorkbook(templatePath);
+                var ws = workbook.Worksheets.First();
+
+                var data = result?.Data?.Data?.ToList();
+
+                if (data == null || !data.Any())
+                {
+                    return BadRequest("Không có dữ liệu để xuất Excel");
+                }
+
+                int startRow = 13;
+                int row = startRow;
+
+                foreach (var item in data)
+                {
+                    bool isRefuse = string.Equals(
+                        item.CHR_Status,
+                        "Refuse",
+                        StringComparison.OrdinalIgnoreCase);
+
+                    ws.Cell(row, 1).Value = item.CHR_MaDon ?? "";
+                    ws.Cell(row, 2).Value = item.CHR_CodeNCC ?? "";
+                    ws.Cell(row, 3).Value = item.NVCHR_NameNCC ?? "";
+                    ws.Cell(row, 4).Value = item.CHR_MaVatTu ?? "";
+
+                    ws.Cell(row, 10).Value = item.NVCHR_TenHangHQ ?? "";
+
+                    ws.Cell(row, 11).Value = item.CHR_MaHangNCC ?? "";
+                    ws.Cell(row, 12).Value = item.NVCHR_TenHangHQ ?? "";
+                    ws.Cell(row, 13).Value = item.CHR_NameEN ?? "";
+
+                    ws.Cell(row, 14).Value = item.INT_SoLuong ?? "";
+                    ws.Cell(row, 15).Value = item.NVCHR_DonVi ?? "";
+
+                    if (isRefuse)
+                    {
+                        var range = ws.Range(row, 1, row, 34);
+
+                        range.Style.Fill.BackgroundColor = XLColor.LightPink;
+                        range.Style.Font.FontColor = XLColor.DarkRed;
+                        range.Style.Font.Bold = true;
+
+                        ws.Cell(row, 16).Value = "Refuse";
+                        ws.Cell(row, 17).Value = "Refuse";
+                    }
+                    else
+                    {
+                        ws.Cell(row, 16).Value = item.FL_USD ?? "";
+                        ws.Cell(row, 17).Value = item.FL_VND ?? "";
+                    }
+
+                    ws.Cell(row, 18).Value = item.NVCHR_MOQ ?? "";
+                    ws.Cell(row, 19).Value = item.NVCHR_Packing ?? "";
+
+                    ws.Cell(row, 20).Value = item.DTM_LeadTime ?? "";
+
+
+                    ws.Cell(row, 21).Value = item.DTM_ShipTime ?? "";
+
+                    ws.Cell(row, 22).Value = item.VCHR_CamKet ?? "";
+                    ws.Cell(row, 23).Value = item.NVCHR_DeliveryTerm ?? "";
+                    ws.Cell(row, 24).Value = item.NVCHR_PaymentTerm ?? "";
+
+                    ws.Cell(row, 25).Value = item.DTM_EffectiveDate ?? "";
+                    ws.Cell(row, 26).Value = item.DTM_ExpiryDate ?? "";
+
+                    ws.Cell(row, 28).Value = item.DTM_NgayMuonNhan ?? "";
+                    ws.Cell(row, 29).Value = item.DTM_KyHan ?? "";
+
+                    ws.Cell(row, 30).Value = item.NVCHR_File ?? "";
+
+                    // Cột dùng để import update lại
+                    ws.Cell(row, 32).Value = item.ID;
+
+                    // Lý do sửa
+                    ws.Cell(row, 34).Value = item.NVCHR_ReasonUpdate ?? "";
+
+                    row++;
+                }
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"InputQuote_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ExportExcelTab2 Error");
+                return BadRequest(ex.Message);
+            }
+        }
+
         // Tìm kiếm hiển thị danh sách nhập báo giá theo số đơn hàng
         [HttpPost]
         public async Task<IActionResult> SearchInputQuoteBySoDon([FromBody] ThongTinBaoGiaGomNhomModel mod)
         {
-            var result = await _baoGiaService.SearchThongTinNhapBaoGiaAsync(mod.maDon, mod.section, mod.maHang, GetCurrentUserId(), mod.pageIndex, mod.pageSize);
+            var result = await _baoGiaService.SearchThongTinNhapBaoGiaAsync(mod.maDon, mod.section, mod.maHang, GetCurrentUserId(), mod.status, mod.pageIndex, mod.pageSize);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

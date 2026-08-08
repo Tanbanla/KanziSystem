@@ -573,4 +573,34 @@
   <data name="DueDay" xml:space="preserve">
     <value>価格の有効期限</value>
   </data>
+  <data name="DuplicateQuotationFound" xml:space="preserve">
+    <value>&lt;strong&gt;{0}&lt;/strong&gt; 件の見積依頼は既に取込済み、または次の処理ステップに進んでいます。</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="DuplicateQuotationOverwrite" xml:space="preserve">
+    <value>インポートを続行すると既存データが上書きされます。</value>
+  </data>
+  <data name="DuplicateQuotationIdList" xml:space="preserve">
+    <value>ID一覧</value>
+  </data>
+  <data name="DuplicateQuotationConfirm" xml:space="preserve">
+    <value>続行しますか？</value>
+  </data>
+  <data name="ContinueImport" xml:space="preserve">
+    <value>インポートを続行</value>
+  </data>
+  <data name="Wait" xml:space="preserve">
+    <value>見積もり入力待ち</value>
+  </data>
+  <data name="DoneInput" xml:space="preserve">
+    <value>見積もりが入力されました</value>
+  </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>エクセル出力</value>
+  </data>
+  <data name="ExportLoading" xml:space="preserve">
+    <value>Excelへエクスポートしています。少々お待ちください...</value>
+  </data>
 </root>

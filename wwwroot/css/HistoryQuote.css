@@ -170,6 +170,7 @@
     .approval-table td:nth-child(3),
     .approval-table td:nth-child(4),
     .approval-table td:nth-child(5),
+    .approval-table td:nth-child(6),
     .approval-table td:nth-child(11),
     .approval-table td:nth-child(12),
     .approval-table td:nth-child(21),
@@ -293,4 +294,16 @@
     .action-buttons .btn-outline-danger:hover {
         border: none;
         box-shadow: none;
+    }
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 1050;
+}
+
+    .modal.show {
+        display: block;
     }

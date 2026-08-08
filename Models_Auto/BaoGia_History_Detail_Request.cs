@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -16,4 +16,6 @@ public partial class BaoGia_History_Detail_Request
     public string? CHR_CreateBy { get; set; }
 
     public DateTime? DTM_CreateBy { get; set; }
+
+    public string? NVCHR_ReasonUpdate { get; set; }
 }

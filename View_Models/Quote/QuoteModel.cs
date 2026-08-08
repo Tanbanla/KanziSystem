@@ -83,6 +83,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string? maNcc { get; set; }
         public string? section { get; set; }
         public DateTime? dayMM { get; set; }
+        public string? status { get; set; }
         public int? pageIndex { get; set; }
         public int? pageSize { get; set; }
     }
@@ -219,5 +220,6 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string MaDon { get; set; } = string.Empty;
         public string MaHang { get; set; } = string.Empty;
         public string MaHangNCC { get; set; } = string.Empty;
+        public string NameEn { get; set; } = string.Empty;
     }
 }

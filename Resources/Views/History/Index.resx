@@ -657,4 +657,13 @@
   <data name="Cost" xml:space="preserve">
     <value>Giá</value>
   </data>
+  <data name="SuppelierNeedEdit" xml:space="preserve">
+    <value>Nhà cung cấp cần chỉnh sửa</value>
+  </data>
+  <data name="SupplierCode" xml:space="preserve">
+    <value>Mã nhà cung cấp</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>Tên nhà cung cấp</value>
+  </data>
 </root>

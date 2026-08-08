@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -94,4 +94,6 @@ public partial class BaoGia_Detail_of_Quotation
     public DateTime? DTM_EffectiveDate { get; set; }
 
     public DateTime? DTM_ExpiryDate { get; set; }
+
+    public string? NVCHR_ReasonUpdate { get; set; }
 }

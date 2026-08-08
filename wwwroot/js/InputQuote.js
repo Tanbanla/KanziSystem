@@ -63,6 +63,7 @@
             maDon: document.getElementById('searchMaDon')?.value || '',
             section: document.getElementById('searchPhongBan')?.value || '',
             maHang: document.getElementById('searchMaterial')?.value || '',
+            status: document.getElementById('searchStatus')?.value || '',
             pageSize: quoteState.pageSize,
             pageIndex: quoteState.pageIndex
         };
@@ -182,7 +183,7 @@
     }
     // Download sample Excel file
     function exportSampleExcel() {
-        const url = (window.apiBaseUrl || '') + '/template/TmSendMailNew.xlsx';
+        const url = (window.apiBaseUrl || '') + '/template/TmSendMailNew_Reason.xlsx';
         const a = document.createElement('a');
         a.href = url;
         a.download = 'Sample_Export.xlsx';
@@ -227,7 +228,121 @@
             day: '2-digit'
         });
     }
+    // show dialog
+    function getDialogEls() {
+        const overlay = document.getElementById('cmDialogOverlay');
+        const titleEl = document.getElementById('cmDialogTitle');
+        const bodyEl = document.getElementById('cmDialogBody');
+        const footerEl = document.getElementById('cmDialogFooter');
+        return { overlay, titleEl, bodyEl, footerEl };
+    }
+    function hideDialog() {
+        const { overlay } = getDialogEls();
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+    }
+    function showConfirmDialog({
+        title = 'Xác nhận',
+        message = '',
+        confirmText = 'Đồng ý',
+        cancelText = 'Hủy'
+    } = {}) {
 
+        return new Promise((resolve) => {
+
+            const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+
+            if (!overlay) {
+                resolve(window.confirm(message));
+                return;
+            }
+
+            titleEl.textContent = title;
+
+            bodyEl.innerHTML = `
+            <div class="d-flex align-items-start gap-2">
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+                <div>${message}</div>
+            </div>
+        `;
+
+            footerEl.innerHTML = '';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'cm-btn cm-btn-outline';
+            cancelBtn.textContent = cancelText;
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = 'cm-btn cm-btn-primary';
+            confirmBtn.textContent = confirmText;
+
+            footerEl.appendChild(cancelBtn);
+            footerEl.appendChild(confirmBtn);
+
+            overlay.setAttribute('aria-hidden', 'false');
+            overlay.style.display = 'flex';
+
+            const closeDialog = (result) => {
+                hideDialog();
+                resolve(result);
+            };
+
+            confirmBtn.addEventListener('click', () => closeDialog(true), { once: true });
+            cancelBtn.addEventListener('click', () => closeDialog(false), { once: true });
+
+            const closeBtns = overlay.querySelectorAll('[data-cm-action="close"],[data-cm-action="overlay"]');
+
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => closeDialog(false), { once: true });
+            });
+        });
+    }
+    function showLoading(message = 'Đang xuất Excel, vui lòng chờ...') {
+
+        let loading = document.getElementById('globalLoadingExport');
+
+        if (!loading) {
+
+            loading = document.createElement('div');
+            loading.id = 'globalLoadingExport';
+
+            loading.innerHTML = `
+            <div class="loading-content">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="mt-3">${message}</div>
+            </div>
+        `;
+
+            loading.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.35);
+            z-index: 99999;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        `;
+
+            document.body.appendChild(loading);
+
+            const content = loading.querySelector('.loading-content');
+            content.style.cssText = `
+            background:#fff;
+            padding:24px 32px;
+            border-radius:12px;
+            text-align:center;
+            min-width:280px;
+            box-shadow:0 4px 20px rgba(0,0,0,.2);
+            font-weight:500;
+        `;
+        }
+    }
+
+    function hideLoading() {
+        document.getElementById('globalLoadingExport')?.remove();
+    }
     function showAlert(type, message) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
@@ -279,6 +394,7 @@
             maVatTu: '',
             maNcc: '',
             section: '',
+            status: '',
             dayMM: null
         }
     };
@@ -299,6 +415,7 @@
                 maVatTu: (document.getElementById('supplierSearchMaVatTu')?.value || '').trim(),
                 maNcc: (document.getElementById('supplierSearchMaNcc')?.value || '').trim(),
                 section: (document.getElementById('supplierSearchSection')?.value || '').trim(),
+                status: (document.getElementById('supplierSearchStatus')?.value || '').trim(),
                 dayMM: document.getElementById('supplierSearchDayMM')?.value || null
             };
             supplierState.currentPage = 1;
@@ -306,79 +423,279 @@
         });
 
         // Import Excel button
-        document.getElementById('supplierImportExcelBtn')?.addEventListener('click', function() {
+        document.getElementById('supplierImportExcelBtn')?.addEventListener('click', function () {
+
             // Tạo input file ẩn
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
-            fileInput.accept = '.xlsx, .xls';
+            fileInput.accept = '.xlsx,.xls';
             fileInput.style.display = 'none';
+
             document.body.appendChild(fileInput);
 
-            fileInput.addEventListener('change', function() {
-                const file = fileInput.files[0];
-                if (!file) return;
+            fileInput.addEventListener('change', async function () {
 
-                // Kiểm tra loại file
-                const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
-                if (!allowedTypes.includes(file.type)) {
-                    showAlert('danger', window.i18nInputQuote.InvalidFileType || 'Chỉ chấp nhận file Excel (.xlsx, .xls)');
-                    document.body.removeChild(fileInput);
-                    return;
-                }
+                try {
 
-                // Tạo FormData
-                const formData = new FormData();
-                formData.append('file', file);
+                    const file = fileInput.files[0];
 
-                // Gửi request
-                fetch((window.apiBaseUrl || '') + '/InputQuotation/ImportExcelInputQuote', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
+                    if (!file) {
+                        return;
+                    }
+
+                    // Kiểm tra loại file
+                    const allowedTypes = [
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/vnd.ms-excel'
+                    ];
+
+                    if (!allowedTypes.includes(file.type)) {
+                        showAlert(
+                            'danger',
+                            window.i18nInputQuote.InvalidFileType ||
+                            'Chỉ chấp nhận file Excel (.xlsx, .xls)'
+                        );
+                        return;
+                    }
+
+                    // Tạo FormData
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+
+                    const checkResponse = await fetch(
+                        (window.apiBaseUrl || '') + '/InputQuotation/CheckImportExcelInputQuote',
+                        {
+                            method: 'POST',
+                            body: formData
+                        }
+                    );
+
+                    if (!checkResponse.ok) {
+                        const errorText = await checkResponse.text();
+                        throw new Error(errorText || 'Lỗi khi kiểm tra dữ liệu import');
+                    }
+
+                    const duplicatedIds = await checkResponse.json();
+
+                    // Có đơn đã qua step 6,7,8
+                    if (Array.isArray(duplicatedIds) && duplicatedIds.length > 0) {
+
+                        const message =
+                            `
+                                <div>
+                                    <p>
+                                        ${(window.i18nInputQuote.DuplicateQuotationFound || '')
+                                                            .replace('{0}', duplicatedIds.length)}
+                                    </p>
+
+                                    <p>
+                                        ${window.i18nInputQuote.DuplicateQuotationOverwrite || ''}
+                                    </p>
+
+                                    <div class="mt-2">
+                                        <strong>
+                                            ${window.i18nInputQuote.DuplicateQuotationIdList || 'ID List'}:
+                                        </strong>
+
+                                        <div class="border rounded p-2 mt-1 bg-light"
+                                            style="max-height:200px;overflow:auto;">
+                                            ${duplicatedIds.join('<br>')}
+                                        </div>
+                                    </div>
+
+                                    <p class="text-danger mt-3 mb-0">
+                                        ${window.i18nInputQuote.DuplicateQuotationConfirm || ''}
+                                    </p>
+                                </div>
+                            `;
+
+                        const confirmed = await showConfirmDialog({
+                            title: window.i18nInputQuote.Notification || 'Notification',
+                            message: message,
+                            confirmText: window.i18nInputQuote.ContinueImport || 'Continue',
+                            cancelText: window.i18nInputQuote.Close || 'Cancel'
+                        });
+
+                        if (!confirmed) {
+                            return;
+                        }
+                    }
+
+                    const importFormData = new FormData();
+                    importFormData.append('file', file);
+
+                    if (Array.isArray(duplicatedIds) && duplicatedIds.length > 0) {
+                        duplicatedIds.forEach(id => {
+                            importFormData.append('idChecks', id);
+                        });
+                    }
+
+                    const response = await fetch(
+                        (window.apiBaseUrl || '') + '/InputQuotation/ImportExcelInputQuote',
+                        {
+                            method: 'POST',
+                            body: importFormData
+                        }
+                    );
                     if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text || 'Lỗi server'); });
+                        const text = await response.text();
+                        throw new Error(text || 'Lỗi server');
                     }
 
                     const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
-                        // Trả về file lỗi
-                        return response.blob().then(blob => {
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `ImportErrors_${new Date().toISOString().slice(0, 19).replace(/:/g, '')}.xlsx`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(url);
-                            showAlert('warning', window.i18nInputQuote.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.');
-                        });
-                    } else {
-                        // Thành công
-                        return response.json().then(data => {
-                            showAlert('success', window.i18nInputQuote.DataUpdatedSuccessfully || 'Dữ liệu đã được cập nhật thành công');
-                        });
+
+                    // Trả về file lỗi
+                    if (
+                        contentType &&
+                        contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                    ) {
+
+                        const blob = await response.blob();
+
+                        const url = window.URL.createObjectURL(blob);
+
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `ImportErrors_${new Date()
+                            .toISOString()
+                            .slice(0, 19)
+                            .replace(/:/g, '')}.xlsx`;
+
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+
+                        window.URL.revokeObjectURL(url);
+
+                        showAlert(
+                            'warning',
+                            window.i18nInputQuote.FileHasErrorsDownloaded ||
+                            'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'
+                        );
                     }
-                })
-                .catch(error => {
-                    showAlert('danger', (window.i18nInputQuote.ErrorPrefix || 'Lỗi: ') + error.message);
-                })
-                .finally(() => {
-                    document.body.removeChild(fileInput);
-                });
+                    else {
+
+                        await response.json();
+
+                        showAlert(
+                            'success',
+                            window.i18nInputQuote.DataUpdatedSuccessfully ||
+                            'Dữ liệu đã được cập nhật thành công'
+                        );
+
+                        // reload
+                        loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
+                    }
+
+                }
+                catch (error) {
+
+                    showAlert(
+                        'danger',
+                        (window.i18nInputQuote.ErrorPrefix || 'Lỗi: ') + error.message
+                    );
+                }
+                finally {
+
+                    if (document.body.contains(fileInput)) {
+                        document.body.removeChild(fileInput);
+                    }
+                }
             });
 
-            // Trigger click để mở file picker
+            // Mở hộp chọn file
             fileInput.click();
         });
-
         // Page size change
         document.getElementById('supplierPageSizeSelect')?.addEventListener('change', function() {
             supplierState.pageSize = parseInt(this.value) || 10;
             supplierState.currentPage = 1;
             loadSupplierQuotes(supplierState.searchParams, supplierState.currentPage, supplierState.pageSize);
         });
+
+        // Export excel tab2
+        document.getElementById('supplierExportExcelBtn')
+            ?.addEventListener('click', async function (e) {
+
+                e.preventDefault();
+
+                try {
+
+                    showLoading((window.i18nInputQuote.ExportLoading || 'Đang xuất Excel, vui lòng chờ...'));
+
+                    const body = {
+                        idRequestQuote: 0,
+                        maDon: (document.getElementById('supplierSearchMaDon')?.value || '').trim(),
+                        maVatTu: (document.getElementById('supplierSearchMaVatTu')?.value || '').trim(),
+                        maNcc: (document.getElementById('supplierSearchMaNcc')?.value || '').trim(),
+                        section: (document.getElementById('supplierSearchSection')?.value || '').trim(),
+                        status: (document.getElementById('supplierSearchStatus')?.value || '').trim(),
+                        dayMM: document.getElementById('supplierSearchDayMM')?.value || null,
+                        pageSize: -1,
+                        pageIndex: -1
+                    };
+
+                    const response = await fetch(
+                        (window.apiBaseUrl || '') + '/InputQuotation/ExportExcelTab2',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(body)
+                        });
+
+                    if (!response.ok) {
+
+                        let errorMessage = 'Lỗi khi xuất Excel';
+
+                        try {
+                            errorMessage = await response.text();
+                        }
+                        catch { }
+
+                        throw new Error(errorMessage);
+                    }
+
+                    const blob = await response.blob();
+
+                    const fileName =
+                        `InputQuote_${new Date()
+                            .toISOString()
+                            .replace(/[-:T]/g, '')
+                            .slice(0, 14)}.xlsx`;
+
+                    const url = window.URL.createObjectURL(blob);
+
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    window.URL.revokeObjectURL(url);
+
+                    showAlert(
+                        'success',
+                        'Xuất Excel thành công'
+                    );
+                }
+                catch (error) {
+
+                    showAlert(
+                        'danger',
+                        (window.i18nInputQuote.ErrorPrefix || 'Lỗi: ')
+                        + error.message
+                    );
+                }
+                finally {
+
+                    hideLoading();
+                }
+            });
     }
 
     // Load supplier quotes
@@ -748,6 +1065,7 @@
                     maVatTu: document.getElementById('supplierSearchMaVatTu')?.value || '',
                     maNcc: document.getElementById('supplierSearchMaNcc')?.value || '',
                     section: document.getElementById('supplierSearchSection')?.value || '',
+                    status: document.getElementById('supplierSearchStatus')?.value || '',
                     dayMM: document.getElementById('supplierSearchDayMM')?.value || null
                 };
                 supplierState.currentPage = 1;

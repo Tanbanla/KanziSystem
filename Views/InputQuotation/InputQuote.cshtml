@@ -75,9 +75,9 @@
                          <div class="col-12 col-md-3">
                             <label for="searchStatus" class="form-label small text-uppercase fw-semibold">@Localizer["Status"]</label>
                             <select id="searchStatus" name="searchStatus" class="form-select searchStatus searchable-select">
-                                <option value="1" selected>@Localizer["SelectAll"]</option>
-                                <option value="2">@Localizer["Confirm"]</option>
-                                <option value="3">@Localizer["Done"]</option>
+                                <option value="" >@Localizer["SelectAll"]</option>
+                                <option value="Confirm"selected>@Localizer["Confirm"]</option>
+                                <option value="Done">@Localizer["Done"]</option>
                             </select>
                         </div>
                         <div class="col-12 d-flex gap-2 mt-2">
@@ -141,66 +141,130 @@
             <!-- Search Form -->
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SupplierSearchTitle"]</h6>
+                    <h6 class="mb-0 text-secondary" style="color:black !important">
+                        @Localizer["SupplierSearchTitle"]
+                    </h6>
                 </div>
+
                 <div class="card-body pt-3 pb-2">
-                    <form id="supplierFilterForm" class="row g-4 align-items-end">
-                        <div class="col-12 col-md-2">
-                            <label for="supplierSearchMaDon" class="form-label small text-uppercase fw-semibold">@Localizer["OrderCode"]</label>
-                            <select id="supplierSearchMaDon" name="supplierSearchMaDon" class="form-select supplierSearchMaDon searchable-select">
-                                <option value="" selected>@Localizer["SelectQuotation"]</option>
+                    <div class="row g-3">
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label for="supplierSearchMaDon" class="form-label small text-uppercase fw-semibold">
+                                @Localizer["OrderCode"]
+                            </label>
+                            <select id="supplierSearchMaDon"
+                                    name="supplierSearchMaDon"
+                                    class="form-select supplierSearchMaDon searchable-select">
+                                <option value="" selected>
+                                    @Localizer["SelectQuotation"]
+                                </option>
                                 @foreach (var s in madons)
                                 {
                                     <option value="@s">@s</option>
                                 }
                             </select>
                         </div>
-                        <div class="col-12 col-md-2">
-                            <label for="supplierSearchMaNcc" class="form-label small text-uppercase fw-semibold">@Localizer["SupplierCode"]</label>
-                            <select id="supplierSearchMaNcc" name="supplierSearchMaNcc" class="form-select supplierSearchMaNcc searchable-select">
-                                <option value="" selected>@Localizer["SelectSupplier"]</option>
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label for="supplierSearchMaNcc" class="form-label small text-uppercase fw-semibold">
+                                @Localizer["SupplierCode"]
+                            </label>
+                            <select id="supplierSearchMaNcc"
+                                    name="supplierSearchMaNcc"
+                                    class="form-select supplierSearchMaNcc searchable-select">
+                                <option value="" selected>
+                                    @Localizer["SelectSupplier"]
+                                </option>
                                 @foreach (var s in nccNews)
                                 {
                                     <option value="@s.Ma">@s.Ma - @s.Ten</option>
                                 }
                             </select>
                         </div>
-                        <div class="col-12 col-md-2">
-                            <label for="supplierSearchMaVatTu" class="form-label small text-uppercase fw-semibold">@Localizer["MaterialCode"]</label>
-                            <select id="supplierSearchMaVatTu" name="supplierSearchMaVatTu" class="form-select supplierSearchMaVatTu searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
-                                <option value="" selected>@Localizer["SelectMaterial"]</option>
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label for="supplierSearchMaVatTu" class="form-label small text-uppercase fw-semibold">
+                                @Localizer["MaterialCode"]
+                            </label>
+                            <select id="supplierSearchMaVatTu"
+                                    name="supplierSearchMaVatTu"
+                                    class="form-select supplierSearchMaVatTu searchable-select"
+                                    data-remote="true"
+                                    data-api="/Material/SearchMaterialView"
+                                    data-page-size="500">
+                                <option value="" selected>
+                                    @Localizer["SelectMaterial"]
+                                </option>
                                 @foreach (var s in mATERIAs)
                                 {
-                                    <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                                    <option value="@s.Material_Code">
+                                        @s.Material_Code - @s.Material_Name_VN
+                                    </option>
                                 }
                             </select>
                         </div>
-                        <div class="col-12 col-md-2">
-                            <label for="supplierSearchSection" class="form-label small text-uppercase fw-semibold">@Localizer["DepartmentCode"]</label>
-                            <select id="supplierSearchSection" name="supplierSearchSection" class="form-select supplierSearchSection searchable-select">
-                                <option value="" selected>@Localizer["SelectDepartment"]</option>
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label for="supplierSearchSection" class="form-label small text-uppercase fw-semibold">
+                                @Localizer["DepartmentCode"]
+                            </label>
+                            <select id="supplierSearchSection"
+                                    name="supplierSearchSection"
+                                    class="form-select supplierSearchSection searchable-select">
+                                <option value="" selected>
+                                    @Localizer["SelectDepartment"]
+                                </option>
                                 @foreach (var s in nhomViTri)
                                 {
-                                    <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
+                                    <option value="@s.Cost_Center">
+                                        @s.Cost_Center - @s.Name
+                                    </option>
                                 }
                             </select>
                         </div>
-                        <div class="col-12 col-md-2">
-                            <label for="supplierSearchDayMM" class="form-label small text-uppercase fw-semibold">@Localizer["Date"]</label>
-                            <input type="date" id="supplierSearchDayMM" class="form-control">
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label for="supplierSearchDayMM" class="form-label small text-uppercase fw-semibold">
+                                @Localizer["Date"]
+                            </label>
+                            <input type="date"
+                                    id="supplierSearchDayMM"
+                                    class="form-control">
                         </div>
-                        <div class="col-12 col-md-2 text-md-end mt-2 mt-md-0">
-                            <div class="d-flex justify-content-md-end gap-2">
-                                <button type="button" class="btn btn-primary btn-sm" id="supplierSearchBtn">
-                                    <i class="fas fa-search"></i> @Localizer["Search"]
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label for="supplierSearchStatus" class="form-label small text-uppercase fw-semibold">
+                                Trạng thái
+                            </label>
+                            <select id="supplierSearchStatus"
+                                    name="supplierSearchStatus"
+                                    class="form-select searchable-select">
+                                <option value="" selected>@Localizer["SelectAll"]</option>
+                                <option value="WAIT">@Localizer["Wait"]</option>
+                                <option value="DONE">@Localizer["DoneInput"]</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap justify-content-end align-items-center">
+                                <button class="btn btn-primary btn-sm me-2 px-3" id="supplierSearchBtn">
+                                    <i class="fas fa-search me-1"></i>@Localizer["Search"]
                                 </button>
-                                <div style="margin-left: 8px;"></div>
-                                <button type="button" class="btn btn-success btn-sm" id="supplierImportExcelBtn">
-                                    <i class="fas fa-file-excel"></i> @Localizer["ImportExcel"]
+                                <div style="margin-left: 6px;"></div>
+                                <button class="btn btn-success btn-sm me-2 px-3" id="supplierImportExcelBtn">
+                                    <i class="fas fa-file-excel me-1"></i>@Localizer["ImportExcel"]
+                                </button>
+                                <div style="margin-left: 6px;"></div>
+                                <button class="btn btn-danger btn-sm px-3" id="supplierExportExcelBtn">
+                                    <i class="fas fa-file-download me-1"></i>@Localizer["ExportExcel"]
                                 </button>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
 
@@ -273,7 +337,18 @@
         </div>
     </div>
 </div>
-
+<!-- Custom dialog root -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer"></div>
+    </div>
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
 <script>
     window.inputQuoteData = {
         user: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentUser)),
@@ -389,7 +464,15 @@
         Safety = Localizer["Safety"].Value,
         Commitment = Localizer["Commitment"].Value,
         PaymentTerms = Localizer["PaymentTerms"].Value,
-        InputTime = Localizer["InputTime"].Value
+        InputTime = Localizer["InputTime"].Value,
+        DuplicateQuotationFound = Localizer["DuplicateQuotationFound"].Value,
+        DuplicateQuotationOverwrite = Localizer["DuplicateQuotationOverwrite"].Value,
+        DuplicateQuotationIdList = Localizer["DuplicateQuotationIdList"].Value,
+        DuplicateQuotationConfirm = Localizer["DuplicateQuotationConfirm"].Value,
+        ContinueImport = Localizer["ContinueImport"].Value,
+        Notification = Localizer["Notification"].Value,
+        ExportLoading = Localizer["ExportLoading"].Value
+
     }));
 </script>
 @section Scripts {

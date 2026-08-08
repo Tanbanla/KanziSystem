@@ -657,4 +657,13 @@
   <data name="Cost" xml:space="preserve">
     <value>Cost</value>
   </data>
+  <data name="SuppelierNeedEdit" xml:space="preserve">
+    <value>The supplier needs to make edits</value>
+  </data>
+  <data name="SupplierCode" xml:space="preserve">
+    <value>Supplier Code</value>
+  </data>
+  <data name="SupplierName" xml:space="preserve">
+    <value>Supplier Name</value>
+  </data>
 </root>

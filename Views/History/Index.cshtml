@@ -20,7 +20,7 @@
 </head>
 
 <div class="container-fluid" id="quote-history">
-        <!-- Global loading overlay -->
+     <!-- Global loading overlay -->
     <div id="globalLoading" aria-hidden="true">
         <div class="loader-box">
             <div class="spinner" aria-hidden="true"></div>
@@ -224,31 +224,6 @@
                     </div>
                 </div>
             </div>
-          @*   <div class="col-12 col-sm-6 col-xl-3" hidden>
-                <div class="card shadow-sm history-summary-card h-100">
-                    <div class="card-header bg-white">
-                        <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SummaryTable4Title"]</h6>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="summary-table mb-0">
-                            <tbody>
-                                <tr>
-                                    <td>@Localizer["CompletedOrders"]</td>
-                                    <td><strong id="statCompletedOrders">0</strong></td>
-                                </tr>
-                                <tr>
-                                    <td>@Localizer["ProcessingOrders"]</td>
-                                    <td><strong id="statProcessingOrders">0</strong></td>
-                                </tr>
-                                <tr>
-                                    <td>@Localizer["UnprocessedOrders"]</td>
-                                    <td><strong id="statUnprocessedOrders">0</strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div> *@
         </div>
     </section>
 
@@ -337,7 +312,7 @@
                 <table class="approval-table">
                     <thead>
                         <tr class="legend-row">
-                             <th colspan="5"></th>
+                             <th colspan="6"></th>
                              <th colspan="5" class="legend-cell">
                                  <div class="legend compact mb-0">
                                      <div class="item"><span class="swatch yellow" aria-hidden="true"></span><span>@Localizer["LegendRejectedQuote"]</span></div>
@@ -366,8 +341,9 @@
                             <th rowspan="2">@Localizer["No"]</th>
                             <th rowspan="2">@Localizer["OrderNo"]</th>
                             <th rowspan="2">@Localizer["InternalCode"]</th>
-                            <th rowspan="2">@Localizer["VendorGoodCode"]<br/>Vendor's good code</th>
-                            <th rowspan="2">@Localizer["PartNameEnglish"]<br/>Part name (English)</th>
+                            <th rowspan="2">@Localizer["VendorGoodCode"]</th>
+                            <th rowspan="2">@Localizer["PartNameEnglish"]</th>
+                            <th rowspan="2">@Localizer["Category"]</th>
                             <th rowspan="2">@Localizer["Supplier1"]</th>
                             <th rowspan="2">@Localizer["Supplier2"]</th>
                             <th rowspan="2">@Localizer["Supplier3"]</th>
@@ -423,6 +399,222 @@
     </div>
     </section>
 </div>
+<!-- Edit modal for uncompleted orders -->
+<div class="modal fade" id="editHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Localizer["EditModalTitle"]</h5>
+                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
+                    <i class="fas fa-times fa-sm"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 75vh; overflow-y: auto">
+                <form id="editHistoryForm" class="row g-3">
+                    <input type="hidden" id="editRequestId" />
+                    <input type="hidden" id="editSectionName" />
+                    <input type="hidden" id="editNhaCungCap" />
+                    <input type="hidden" id="editTenNCC" />
+                    <input type="hidden" id="editStatus" />
+                    <input type="hidden" id="editStep" />
+                    <input type="hidden" id="editSoLanUpdate" />
+                    <input type="hidden" id="editDaycreate" />
+                    <input type="hidden" id="editUpdateLater" />
+                    <input type="hidden" id="editDeadline" />
+                    <input type="hidden" id="editIsTemplate" />
+
+                    <div class="col-12">
+                        <div class="border rounded p-3 bg-light-subtle">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">@Localizer["OrderCodeGroup"]</label>
+                                    <input type="text" class="form-control" id="editMaDon" readonly />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">@Localizer["Requester"]</label>
+                                    <input type="text" class="form-control" id="editRequester" readonly />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">@Localizer["InternalMaterialCode"]</label>
+                                    <input type="text" class="form-control" id="editMaHangNoiBo" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">@Localizer["Supplier"]</h6>
+                                <span id="editSupplierCount" style="color: white" class="badge bg-primary">0</span>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">@Localizer["SuppelierNeedEdit"]</label>
+                                    <select id="editSupplierSelect" class="form-select"></select>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <label class="form-label">@Localizer["SupplierCode"]</label>
+                                    <input type="text" class="form-control" id="editSupplierCodeDisplay" readonly />
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <label class="form-label">@Localizer["SupplierName"]</label>
+                                    <input type="text" class="form-control" id="editSupplierNameDisplay" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["DepartmentCode"]</label>
+                        <select id="editSectionCode" name="editSectionCode" class="form-select editSectionCode searchable-select">
+                            <option value="">@Localizer["SelectDepartment"].Value</option>
+                            @foreach (var s in listPhong)
+                            {
+                                <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["Classification"]</label>
+                        <select id="editPhanLoai" name="editPhanLoai" class="form-select editPhanLoai searchable-select">
+                            <option value="">--</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="E">E</option>
+                            <option value="I">I</option>
+                            <option value="NO LIST">NO LIST</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label w-100">@Localizer["Category"]</label>
+                        <select id="editChungLoai" class="form-select editChungLoai searchable-select">
+                            <option value="">--</option>
+                            @foreach (var c in categoryS)
+                            {
+                                <option value="@c">@c</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["EquipmentCode"]</label>
+                        <input type="text" class="form-control" id="editMaThietBi" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["SupplierItemCode"]</label>
+                        <input type="text" class="form-control" id="editMaHangNCC" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["Unit"]</label>
+                        <input type="text" class="form-control" id="editDonVi" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["ItemNameVN"]</label>
+                        <input type="text" class="form-control" id="editTenHangVN" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["ItemNameEN"]</label>
+                        <input type="text" class="form-control" id="editTenHangEN" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">@Localizer["Quantity"]</label>
+                        <input type="number" class="form-control" id="editSoLuong" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">@Localizer["DesiredReceiveDate"]</label>
+                        <input type="date" class="form-control" id="editNgayMuonNhan" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">@Localizer["SupplierSelectionDeadline"]</label>
+                        <input type="date" class="form-control" id="editKyHan" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label w-100">@Localizer["Urgent"]</label>
+                        <select class="form-select" id="editGap" style="min-height: 40px">
+                            <option value="false">X</option>
+                            <option value="true">O</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["Shape"]</label>
+                        <input type="text" class="form-control" id="editHinhDang" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["Material"]</label>
+                        <input type="text" class="form-control" id="editChatLieu" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["Composition"]</label>
+                        <input type="text" class="form-control" id="editThanhPhan" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["Dimensions"]</label>
+                        <input type="text" class="form-control" id="editKichThuoc" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["UsedForMachine"]</label>
+                        <input type="text" class="form-control" id="editDongMay" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">@Localizer["Feature"]</label>
+                        <input type="text" class="form-control" id="editTinhNang" />
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label w-100">@Localizer["Rohs"]</label>
+                        <select id="editRohs" name="editRohs" class="form-select editRohs" style="min-height: 40px;">
+                            <option value="No Need" selected>No Need</option>
+                            <option value="Need">Need</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label w-100">@Localizer["COCQ"]</label>
+                        <select id="editCOCQ" name="editCOCQ" class="form-select editCOCQ" style="min-height: 40px;">
+                            <option value="" selected>-- Chọn CO/CQ --</option>
+                            <option value="CO">CO</option>
+                            <option value="CQ">CQ</option>
+                            <option value="CO&CQ">CO&CQ</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label w-100">@Localizer["GetQuotation"]</label>
+                        <select class="form-select" id="editLayBaoGia" style="min-height: 40px;">
+                            <option value="true">O</option>
+                            <option value="false">X</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">@Localizer["MSDS"]</label>
+                        <input type="text" class="form-control" id="editMSDS" />
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">@Localizer["SafetyStandard"]</label>
+                        <input type="text" class="form-control" id="editAnToan" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["DesignFile"]</label>
+                        <input type="text" class="form-control" id="editFileThietKe" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["Manufacturer"]</label>
+                        <input type="text" class="form-control" id="editNhaSanXuat" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">@Localizer["Reason"]</label>
+                        <input type="text" class="form-control lydoTb" id="editLyDo"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="@Localizer["Close"]" aria-controls="editHistoryModal">@Localizer["Close"]</button>
+                <button type="button" class="btn btn-primary" id="btnSaveHistoryEdit">@Localizer["Save"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Dialogs reused from Quote -->
 <div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">

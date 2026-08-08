@@ -1695,13 +1695,13 @@
         qs('#quoteTableBody')?.addEventListener('input', (e) => {
             const t = e.target;
             if (t.classList.contains('chungLoaiTb') || t.classList.contains('hinhDang') || t.classList.contains('chatLieu') || t.classList.contains('thanhPhan') || t.classList.contains('kichThuoc') || t.classList.contains('viTriSuDung') || t.classList.contains('tinhNang')) {
-                updateTenThuTucHaiQuan(t.closest('tr'));
+                //updateTenThuTucHaiQuan(t.closest('tr'));
             }
         });
         qs('#quoteTableBody')?.addEventListener('change', (e) => {
             const t = e.target;
             if (t.classList.contains('chungLoaiTb')) {
-                updateTenThuTucHaiQuan(t.closest('tr'));
+               // updateTenThuTucHaiQuan(t.closest('tr'));
             }
         });
 

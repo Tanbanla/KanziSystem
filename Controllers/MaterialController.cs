@@ -386,7 +386,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                         var listConfirm = new List<BaoGia_Confirm_Name_QuotationDTO>();
-                        //PhuongThuy.VuThi@brother-bivn.com.vn;nguyenduy.khanh@brother-bivn.com.vn;nguyenthilan.huong2@brother-bivn.com.vn
                         // gửi mail thông báo có yêu cầu xác nhận tên mới 
                         var emailResult = await sendMailService.SendMailAsync(
                             "nguyenduy.khanh@brother-bivn.com.vn",

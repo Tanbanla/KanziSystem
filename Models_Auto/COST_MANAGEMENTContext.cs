@@ -660,6 +660,7 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.VCHR_Rohs)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.NVCHR_ReasonUpdate).HasMaxLength(550);
         });
 
         modelBuilder.Entity<BaoGia_History_Approver_of_Quotation>(entity =>
@@ -702,6 +703,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.DTM_CreateBy).HasColumnType("datetime");
+            entity.Property(e => e.NVCHR_ReasonUpdate).HasMaxLength(550);
         });
 
         modelBuilder.Entity<BaoGia_History_Request_of_Quotation>(entity =>

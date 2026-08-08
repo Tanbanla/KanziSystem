@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -572,5 +572,35 @@
   </data>
   <data name="DueDay" xml:space="preserve">
     <value>Expiration date of the price</value>
+  </data>
+  <data name="DuplicateQuotationFound" xml:space="preserve">
+    <value>&lt;strong&gt;{0}&lt;/strong&gt; quotations have already been imported or are currently in a subsequent processing step.</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>Notification</value>
+  </data>
+  <data name="DuplicateQuotationOverwrite" xml:space="preserve">
+    <value>Continuing the import will overwrite existing data.</value>
+  </data>
+  <data name="DuplicateQuotationIdList" xml:space="preserve">
+    <value>Order ID List</value>
+  </data>
+  <data name="DuplicateQuotationConfirm" xml:space="preserve">
+    <value>Do you want to continue?</value>
+  </data>
+  <data name="ContinueImport" xml:space="preserve">
+    <value>Continue Import</value>
+  </data>
+  <data name="Wait" xml:space="preserve">
+    <value>Awaiting quote entry</value>
+  </data>
+  <data name="DoneInput" xml:space="preserve">
+    <value>Quote entered</value>
+  </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>Export Excel</value>
+  </data>
+  <data name="ExportLoading" xml:space="preserve">
+    <value>Exporting to Excel, please wait...</value>
   </data>
 </root>

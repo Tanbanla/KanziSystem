@@ -28,7 +28,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Xuất báo giá
         public Task<List<int>> ExportBaoGiaAsync(string? maDon);
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, int pageIndex, int pageSize);
+        public Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, string? status, int pageIndex, int pageSize);
 
         // Lấy thông tin kèm chi tiết báo giá
         public Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize);
@@ -74,6 +74,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<BaoGiaImportModel>> CheckPermissionSelectSupplierAsync(List<BaoGiaImportModel> baoGiaImportModels);
         // check trạng thái đơn báo giá
         Task<List<int>> CheckStepAsync(List<int> ids, List<int> stepCheck);
-
+        // check infor báo giá theo mã đơn, mã hàng, mã ncc
+        Task<List<BaoGia_Request_of_Quotation>> GetOrderInfoAsync(string? maDon, string? maHangNCC, string? maHangNB, string? NameEn);
     }
 }

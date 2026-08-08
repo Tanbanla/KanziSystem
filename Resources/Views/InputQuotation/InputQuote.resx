@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -572,5 +572,35 @@
   </data>
   <data name="DueDay" xml:space="preserve">
     <value>Ngày giá hết hiệu lực</value>
+  </data>
+  <data name="DuplicateQuotationFound" xml:space="preserve">
+    <value>Có &lt;strong&gt;{0}&lt;/strong&gt; đơn đã được nhập báo giá trước đó hoặc đang ở bước xử lý tiếp theo.</value>
+  </data>
+  <data name="Notification" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="DuplicateQuotationOverwrite" xml:space="preserve">
+    <value>Tiếp tục import sẽ ghi đè dữ liệu hiện tại.</value>
+  </data>
+  <data name="DuplicateQuotationIdList" xml:space="preserve">
+    <value>Danh sách ID</value>
+  </data>
+  <data name="DuplicateQuotationConfirm" xml:space="preserve">
+    <value>Bạn có muốn tiếp tục không?</value>
+  </data>
+  <data name="ContinueImport" xml:space="preserve">
+    <value>Tiếp tục Import</value>
+  </data>
+  <data name="Wait" xml:space="preserve">
+    <value>Chờ nhập báo giá</value>
+  </data>
+  <data name="DoneInput" xml:space="preserve">
+    <value>Đã nhập báo giá</value>
+  </data>
+  <data name="ExportExcel" xml:space="preserve">
+    <value>Xuất Excel</value>
+  </data>
+  <data name="ExportLoading" xml:space="preserve">
+    <value>Đang xuất Excel, vui lòng chờ...</value>
   </data>
 </root>

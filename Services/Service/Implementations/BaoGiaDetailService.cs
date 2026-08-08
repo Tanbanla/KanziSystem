@@ -20,12 +20,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _fileImportService = fileImportService;
         }
         // Tìm kiếm thông tin liên quan đến báo giá
-        public async Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, int? PageSize, int? PageIndex)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, string? status, int? PageSize, int? PageIndex)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                var data = await _repo.SearchBaoGiaAsync(idRequest, maDon, maVatTu, maNcc, section, user, dayMM, PageSize, PageIndex);
+                var data = await _repo.SearchBaoGiaAsync(idRequest, maDon, maVatTu, maNcc, section, user, dayMM, status, PageSize, PageIndex);
                 result.Data = data;
                 result.Success = true;
             }

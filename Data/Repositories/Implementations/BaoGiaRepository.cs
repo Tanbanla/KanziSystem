@@ -13,6 +13,7 @@ using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -397,115 +398,190 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return a;
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(
+            string? maDon,
+            string? section,
+            string? maHang,
+            string? user,
+            string? status,
+            int pageIndex,
+            int pageSize)
         {
             var cteBuilder = new StringBuilder();
+
             cteBuilder.Append(@"
-            WITH BangTongHop AS (
-                SELECT 
-                    r.CHR_MaDon, 
-                    CONVERT(DATE, r.DTM_CreateDate) AS DTM_CreateDate, 
-                    r.CHR_SectionName, 
+            WITH BangTongHop AS
+            (
+                SELECT
+                    r.CHR_MaDon,
+                    CONVERT(DATE, r.DTM_CreateDate) AS DTM_CreateDate,
+                    r.CHR_SectionName,
                     r.CHR_CreateBy,
                     r.CHR_MaHangNoiBo,
                     r.CHR_MaNCC,
                     r.ID_StepBaoGia
-                FROM [BaoGia_Request_of_Quotation] r
-	            left join [BaoGia_Master_Approver_Send_Mail] as s 
-	            on r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE 1 = 1 
-                    AND r.ID_StepBaoGia > 5 ");
+                FROM BaoGia_Request_of_Quotation r
+                LEFT JOIN BaoGia_Master_Approver_Send_Mail s
+                    ON r.CHR_SectionCode = s.CHR_CodeSection
+                WHERE r.ID_StepBaoGia > 5
+            ");
 
             var parameters = new DynamicParameters();
 
-            if (!string.IsNullOrEmpty(user))
+            if (!string.IsNullOrWhiteSpace(user))
             {
                 cteBuilder.Append(" AND s.CHR_UserAdid = @Adid");
                 parameters.Add("Adid", user);
             }
-            if (!string.IsNullOrEmpty(maDon))
+
+            if (!string.IsNullOrWhiteSpace(maDon))
             {
                 cteBuilder.Append(" AND r.CHR_MaDon = @MaDon");
                 parameters.Add("MaDon", maDon);
             }
-            if (!string.IsNullOrEmpty(maHang))
+
+            if (!string.IsNullOrWhiteSpace(maHang))
             {
                 cteBuilder.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
                 parameters.Add("MaHang", maHang);
             }
-            if (!string.IsNullOrEmpty(section))
+
+            if (!string.IsNullOrWhiteSpace(section))
             {
                 cteBuilder.Append(" AND r.CHR_SectionCode = @Section");
                 parameters.Add("Section", section);
             }
 
-            // Build main select using the CTE
-            var sql = new StringBuilder();
-            sql.Append(cteBuilder.ToString());
-            sql.Append(@"
-            )
-            SELECT DISTINCT 
-                t1.CHR_MaDon, 
-                t1.DTM_CreateDate, 
-                t1.CHR_SectionName, 
-                t1.CHR_CreateBy,
-    
-                -- Số lượng linh kiện
+            cteBuilder.Append(@"
+                ),
+                TongHop AS
                 (
-                    SELECT COUNT(DISTINCT t2.CHR_MaHangNoiBo)
-                    FROM BangTongHop t2
-                    WHERE t2.CHR_MaDon = t1.CHR_MaDon
-                ) AS SoLuongLinhKien,
-    
-                -- Danh sách nhà cung cấp
-                STUFF((
-                    SELECT DISTINCT ', ' + t2.CHR_MaNCC
-                    FROM BangTongHop t2
-                    WHERE t2.CHR_MaDon = t1.CHR_MaDon 
-                        AND t2.CHR_MaNCC IS NOT NULL 
-                        AND t2.CHR_MaNCC != ''
-                    FOR XML PATH('')
-                ), 1, 2, '') AS DanhSachNCC,
-    
-                -- Trạng thái
-                CASE 
-                    WHEN NOT EXISTS (
-                        SELECT 1 
-                        FROM BangTongHop t3
-                        WHERE t3.CHR_MaDon = t1.CHR_MaDon 
-                            AND t3.ID_StepBaoGia != 6
-                    ) THEN 'Confirm'
-                    ELSE 'Done'
-                END AS TrangThai
+                    SELECT
+                        CHR_MaDon,
+                        MAX(DTM_CreateDate) AS DTM_CreateDate,
+                        MAX(CHR_SectionName) AS CHR_SectionName,
+                        MAX(CHR_CreateBy) AS CHR_CreateBy,
+                        COUNT(DISTINCT CHR_MaHangNoiBo) AS SoLuongLinhKien,
+                        MIN(ID_StepBaoGia) AS MinStep,
+                        MAX(ID_StepBaoGia) AS MaxStep
+                    FROM BangTongHop
+                    GROUP BY CHR_MaDon
+                )");
 
-            FROM BangTongHop t1");
+            var sql = new StringBuilder();
+            sql.Append(cteBuilder);
+
+            sql.Append(@"
+                SELECT
+                    t.CHR_MaDon,
+                    t.DTM_CreateDate,
+                    t.CHR_SectionName,
+                    t.CHR_CreateBy,
+                    t.SoLuongLinhKien,
+
+                    STUFF
+                    (
+                        (
+                            SELECT DISTINCT
+                                ', ' + b.CHR_MaNCC
+                            FROM BangTongHop b
+                            WHERE b.CHR_MaDon = t.CHR_MaDon
+                              AND ISNULL(b.CHR_MaNCC, '') <> ''
+                            FOR XML PATH('')
+                        ),
+                        1,
+                        2,
+                        ''
+                    ) AS DanhSachNCC,
+
+                    CASE
+                        WHEN t.MinStep = 6
+                         AND t.MaxStep = 6
+                        THEN 'Confirm'
+                        ELSE 'Done'
+                    END AS TrangThai
+
+                FROM TongHop t
+                WHERE 1 = 1
+            ");
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                if (status.Equals("Confirm", StringComparison.OrdinalIgnoreCase))
+                {
+                    sql.Append(@"
+                        AND t.MinStep = 6
+                        AND t.MaxStep = 6 ");
+                }
+                else if (status.Equals("Done", StringComparison.OrdinalIgnoreCase))
+                {
+                    sql.Append(@"
+                        AND NOT (t.MinStep = 6 AND t.MaxStep = 6) ");
+                }
+            }
 
             if (pageSize > 0 && pageIndex > 0)
             {
-                sql.Append(" ORDER BY TrangThai,t1.DTM_CreateDate DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                sql.Append(@"
+                    ORDER BY
+                        CASE
+                            WHEN t.MinStep = 6 AND t.MaxStep = 6 THEN 0
+                            ELSE 1
+                        END,
+                        t.DTM_CreateDate DESC
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @PageSize ROWS ONLY");
+
                 parameters.Add("Offset", (pageIndex - 1) * pageSize);
                 parameters.Add("PageSize", pageSize);
             }
             else
             {
-                sql.Append(" ORDER BY TrangThai,t1.DTM_CreateDate DESC");
+                sql.Append(@"
+                ORDER BY
+                    CASE
+                        WHEN t.MinStep = 6 AND t.MaxStep = 6 THEN 0
+                        ELSE 1
+                    END,
+                    t.DTM_CreateDate DESC");
             }
-            var a = sql.ToString();
-            var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
 
-            // Build count sql using same CTE and filters so total respects search
+            var result = await _conn.QueryAsync<dynamic>(
+                sql.ToString(),
+                parameters);
+
+            // COUNT
             var countSql = new StringBuilder();
-            countSql.Append(cteBuilder.ToString());
-            countSql.Append(@"
-            )
-            SELECT COUNT(DISTINCT CONCAT(CHR_MaDon, '|', CONVERT(DATE, DTM_CreateDate), '|', CHR_SectionName, '|', CHR_CreateBy)) FROM BangTongHop");
+            countSql.Append(cteBuilder);
 
-            var total = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), parameters);
+            countSql.Append(@"
+                SELECT COUNT(*)
+                FROM TongHop t
+                WHERE 1 = 1 ");
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                if (status.Equals("Confirm", StringComparison.OrdinalIgnoreCase))
+                {
+                    countSql.Append(@"
+                        AND t.MinStep = 6
+                        AND t.MaxStep = 6 ");
+                }
+                else if (status.Equals("Done", StringComparison.OrdinalIgnoreCase))
+                {
+                    countSql.Append(@"
+                        AND NOT (t.MinStep = 6 AND t.MaxStep = 6) ");
+                }
+            }
+
+            var total = await _conn.ExecuteScalarAsync<int>(
+                countSql.ToString(),
+                parameters);
 
             return new ListRequest<dynamic>
             {
                 Data = result.ToList(),
-                TotalCount = total,
+                TotalCount = total
             };
         }
         // Lấy thông tin kèm chi tiết báo giá
@@ -1812,9 +1888,24 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<int>> CheckStepAsync(List<int> ids, List<int> stepCheck)
         {
             var result = await _context.BaoGia_Request_of_Quotations
-                .Where(x => ids.Contains(x.ID) && stepCheck.Contains((int)x.ID_StepBaoGia))
+                .Where(x => ids.Contains(x.ID) && !stepCheck.Contains((int)x.ID_StepBaoGia))
                 .Select(x => x.ID)
                 .ToListAsync();
+            return result;
+        }
+        // check infor báo giá theo mã đơn, mã hàng, mã ncc
+        public async Task<List<BaoGia_Request_of_Quotation>> GetOrderInfoAsync(string? maDon, string? maHangNCC, string? maHangNB, string? NameEn)
+        {
+            var result = await _context.BaoGia_Request_of_Quotations
+                .Where(x =>
+                    (string.IsNullOrEmpty(maDon) || x.CHR_MaDon == maDon) &&
+                    (string.IsNullOrEmpty(maHangNB) || x.CHR_MaHangNoiBo == maHangNB) &&
+                    (string.IsNullOrEmpty(NameEn) || x.CHR_NameEN == NameEn))
+                .OrderBy(x => x.CHR_MaNCC)
+                .ThenBy(x => x.ID)
+                .AsNoTracking()
+                .ToListAsync();
+
             return result;
         }
     }
