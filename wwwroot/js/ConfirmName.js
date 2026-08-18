@@ -24,7 +24,6 @@
         itemsExcelFileInput: document.getElementById('itemsExcelFileInput'),
         btnRejectSelected: document.getElementById('btnRejectSelected'),
         btnRejectAccSelected: document.getElementById('btnRejectAccSelected'),
-        btnCodeLocalCofirmed: document.getElementById('btnCodeLocalCofirmed')
     };
 
     let state = { pageIndex: 1, pageSize: 20, total: 0, listData: [] };
@@ -160,7 +159,7 @@
         } finally { hideLoading(); }
     }
     function canEditTenHQ() { return role === 'UserShip' || role === 'UserPUR'; }
-    function canEditMaNB() { return role === 'UserAcc' || role === 'UserPUR'; }
+    function canEditMaNB() { return  role === 'UserPUR'; }
     function canApprove() { return role === 'UserPUR'; }
 
     function renderRows(data) {
@@ -286,17 +285,6 @@
                     if (field.editable) {
                         td.innerHTML = `<input class="form-control form-control-sm js-tenhq" data-id="${r.ID}" value="${r.VCHR_TenHaiQuan || ''}" />`;
                     }
-                    //else {
-                    //    td.innerHTML = `<div class="cell-sm">${r.VCHR_TenHaiQuan || ''}</div>`;
-                    //}
-                } else if (field.key === 'maNB') {
-                    if (canEditMaNB()) {
-                        const listAttr = role === 'UserAcc' ? ' list="maNBList"' : '';
-                        td.innerHTML = `<input class="form-control form-control-sm js-manb" data-id="${r.ID}" value="${r.VCHR_MaHangNoiBo || ''}"${listAttr} />`;
-                    }
-                    //else {
-                    //    td.innerHTML = `<div>${r.VCHR_MaHangNoiBo || ''}</div>`;
-                    //}
                 } else if (field.key === 'actions') {
                     // Save button should always be present. Approve/Reject only for approvers.
                     const actions = [
@@ -312,7 +300,7 @@
                 } else if (field.key === 'handler') {
                     const handler = [
                         r.VCHR_UserShip && `Ship: ${r.VCHR_UserShip} (${formatDate(r.DTM_UserShip)})`,
-                        r.VCHR_UserAcc && `Acc: ${r.VCHR_UserAcc} (${formatDate(r.DTM_UserAcc)})`,
+                        r.VCHR_UserAcc && `Section: ${r.VCHR_UserAcc} (${formatDate(r.DTM_UserAcc)})`,
                         r.VCHR_UserPUR && `PUR: ${r.VCHR_UserPUR} (${formatDate(r.DTM_UserPUR)})`
                     ].filter(Boolean).join('<br/>');
                     td.innerHTML = handler || ((T.CreatedByPrefix || 'Khởi tạo bởi ') + r.VCHR_CreateBy);
@@ -378,6 +366,16 @@
 
     }
 
+    function getFieldValue(el) {
+        return ((el && el.value) || '').toString().trim();
+    }
+
+    function setFieldValue(el, value) {
+        if (!el) return;
+        el.value = value;
+        try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch { }
+    }
+
     function formatDate(d) {
         if (window.cmMomentFormat) { return window.cmMomentFormat(d); }
         if (!d) return '';
@@ -388,10 +386,10 @@
     }
     async function search() {
         const body = {
-            tenHang: els.tenHang.value.trim(),
-            soDon: els.soDon.value.trim(),
-            trangThai: els.trangThai.value,
-            Section: els.vitri.value,
+            tenHang: getFieldValue(els.tenHang),
+            soDon: getFieldValue(els.soDon),
+            trangThai: getFieldValue(els.trangThai),
+            Section: getFieldValue(els.vitri),
             pageIndex: state.pageIndex,
             pageSize: state.pageSize
         };
@@ -462,9 +460,6 @@
     els.btnExportTable.addEventListener('click', () => { exportTable(); });
     els.btnImportExcel.addEventListener('click', () => itemsExcelFileInput?.click());
     els.itemsExcelFileInput.addEventListener('change', async (e) => { importExcel(e); });
-    if (role == 'UserAcc') {
-        els.btnCodeLocalCofirmed.addEventListener('click', () => { exportCodeCofirmed(); });
-    }
     // cac ham excel
     async function exportTemplate() {
         try {
@@ -541,10 +536,10 @@
         try {
             showLoading(T.Processing || 'Đang xuất...');
             const body = {
-                tenHang: els.tenHang.value.trim(),
-                soDon: els.soDon.value.trim(),
-                trangThai: els.trangThai.value,
-                Section: els.vitri.value,
+                tenHang: getFieldValue(els.tenHang),
+                soDon: getFieldValue(els.soDon),
+                trangThai: getFieldValue(els.trangThai),
+                Section: getFieldValue(els.vitri),
                 pageIndex: 1,//state.pageIndex,
                 pageSize: 1000//state.pageSize
             };
@@ -620,14 +615,13 @@
         resetBtn.addEventListener('click', () => {
             const T = window.i18nConfirmName || {};
             // clear inputs
-            els.tenHang.value = '';
-            els.soDon.value = '';
-            els.trangThai.value = '';
+            setFieldValue(els.tenHang, '');
+            setFieldValue(els.soDon, '');
+            setFieldValue(els.trangThai, '');
             // reset searchable select if present
             const sp = document.getElementById('searchPhongBan');
             if (sp) {
-                sp.value = '';
-                try { sp.dispatchEvent(new Event('change', { bubbles: true })); } catch { }
+                setFieldValue(sp, '');
                 // if enhanced UI exists update text
                 const wrapper = sp.nextElementSibling;
                 if (wrapper && wrapper.classList.contains('ms-container')) {
@@ -646,7 +640,11 @@
     els.next.addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize)); if (state.pageIndex < totalPages) { state.pageIndex++; search(); } });
     // enhance searchable selects inside the page
     try {
-        buildSearchableDropdown(document.getElementById('confirm-name'));
+        if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
+            window.KanziSearchableDropdown.init(document.getElementById('confirm-name'));
+        } else {
+            buildSearchableDropdown(document.getElementById('confirm-name'));
+        }
     } catch (e) { /* ignore if function not available */ }
     // Custom dialogs
     function showConfirmDialog(title, message) {

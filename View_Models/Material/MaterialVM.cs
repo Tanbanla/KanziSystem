@@ -7,6 +7,12 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Material
         public List<DEPARTMENTDTO> vitris { get; set; } = new List<DEPARTMENTDTO>();
 
         public List<dynamic> confirmedCodes { get; set; } = new List<dynamic>();
+
+        // danh sach vat tu
+        public List<MATERIALDTO> DanhSachVatTu { get; set; } = new List<MATERIALDTO>();
+        // Danh sach mã đơn 
+        public List<string> DanhSachMaDon { get; set; } = new List<string>();
+
         // Request/Response DTOs for ConfirmName APIs
         public class ConfirmNameSearchRequest
         {

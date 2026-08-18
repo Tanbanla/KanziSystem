@@ -330,4 +330,55 @@
   <data name="TemplateImportExcel" xml:space="preserve">
     <value>Excelインポートテンプレート</value>
   </data>
+  <data name="ExportTableData" xml:space="preserve">
+    <value>テーブルデータをエクスポート</value>
+  </data>
+  <data name="SearchCategoryLabel" xml:space="preserve">
+    <value>カテゴリ検索</value>
+  </data>
+  <data name="SearchCategoryPlaceholder" xml:space="preserve">
+    <value>カテゴリ名を入力...</value>
+  </data>
+  <data name="SearchCategoryButton" xml:space="preserve">
+    <value>検索</value>
+  </data>
+  <data name="AddCategorySectionTitle" xml:space="preserve">
+    <value>仕入先にカテゴリを追加</value>
+  </data>
+  <data name="CategoryPlaceholder" xml:space="preserve">
+    <value>カテゴリ</value>
+  </data>
+  <data name="MadeInPlaceholder" xml:space="preserve">
+    <value>生産国</value>
+  </data>
+  <data name="PICPlaceholder" xml:space="preserve">
+    <value>PIC</value>
+  </data>
+  <data name="MailPlaceholder" xml:space="preserve">
+    <value>メール</value>
+  </data>
+  <data name="AddCategoryButton" xml:space="preserve">
+    <value>カテゴリ追加</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>有効</value>
+  </data>
+  <data name="StatusInactive" xml:space="preserve">
+    <value>無効</value>
+  </data>
+  <data name="MissingCategoryNameMessage" xml:space="preserve">
+    <value>カテゴリを入力してください</value>
+  </data>
+  <data name="MissingCategorySupplierMessage" xml:space="preserve">
+    <value>カテゴリ追加の前に仕入先を選択してください</value>
+  </data>
+  <data name="AddCategoryFailedMessage" xml:space="preserve">
+    <value>カテゴリの追加に失敗しました</value>
+  </data>
+  <data name="AddCategorySuccessMessage" xml:space="preserve">
+    <value>仕入先にカテゴリを追加しました</value>
+  </data>
+  <data name="UnexpectedErrorMessage" xml:space="preserve">
+    <value>予期しないエラーが発生しました</value>
+  </data>
 </root>

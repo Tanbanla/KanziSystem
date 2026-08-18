@@ -76,5 +76,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<int>> CheckStepAsync(List<int> ids, List<int> stepCheck);
         // check infor báo giá theo mã đơn, mã hàng, mã ncc
         Task<List<BaoGia_Request_of_Quotation>> GetOrderInfoAsync(string? maDon, string? maHangNCC, string? maHangNB, string? NameEn);
+        // get detail bao gia Done
+        Task<List<dynamic>> SearchRequestDoneDetail(string? maDon, string? maHang, string? user);
+
+        // Export Excel báo giá Done
+        Task<List<dynamic>> ExportExcelBaoGiaDoneAsync(string? maDon, string? section, string? maHang, string? maNCC, string user);
+
+        // Search báo giá còn hiệu lực
+        Task<ListRequest<dynamic>> SearchBaoGiaConHieuLucAsync(SearchQuotationResultsModel search, string? user);
     }
 }

@@ -41,13 +41,53 @@
         </div>
     </div>
 
+    <div class="row g-3 mb-3" id="kpiRow">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <button type="button" class="kpi-card text-start w-100" data-kpi-status="Confirming">
+                <div class="kpi-title">@Localizer["StatusConfirming"]</div>
+                <div class="kpi-value" id="kpiConfirming">0</div>
+            </button>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <button type="button" class="kpi-card text-start w-100" data-kpi-status="Confirmed">
+                <div class="kpi-title">@Localizer["StatusConfirmed"]</div>
+                <div class="kpi-value" id="kpiConfirmed">0</div>
+            </button>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <button type="button" class="kpi-card text-start w-100" data-kpi-status="Rejected">
+                <div class="kpi-title">@Localizer["StatusRejected"]</div>
+                <div class="kpi-value" id="kpiRejected">0</div>
+            </button>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card kpi-muted h-100">
+                <div class="kpi-title">@Localizer["Total"]</div>
+                <div class="kpi-value" id="kpiTotal">0</div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs modern-tabs" id="confirmTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tabPending" type="button" role="tab" data-tab="pending">
+                @Localizer["StatusConfirming"]
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tabConfirmed" type="button" role="tab" data-tab="confirmed">
+                @Localizer["StatusConfirmed"]
+            </button>
+        </li>
+    </ul>
+
     <div class="card shadow-sm">
         <div class="card-header bg-white">
             <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["Search"]</h6>
         </div>
         <div class="card-body">
             <form id="searchForm" class="row g-3">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <label class="form-label mb-1">@Localizer["ItemName"]</label>
                     <select id="tenHang" name="tenHang" class="form-select searchMaterial searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500" style="min-height:50px;">
                         <option value="" selected>@Localizer["SelectInternalMaterialCode"]</option>
@@ -57,7 +97,7 @@
                         }
                     </select>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4">
+                <div class="col-12 col-sm-6 col-md-3">
                     <label class="form-label mb-1">@Localizer["OrderCode"]</label>
                     <select id="soDon" name="soDon" class="form-select searchable-select" style="min-height:50px;">
                         <option value="" selected>@Localizer["SelectOrderCode"]</option>
@@ -67,7 +107,7 @@
                         }
                     </select>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4">
+                <div class="col-12 col-sm-6 col-md-3">
 
                     <label for="maPhongBan" class="form-label small text-uppercase fw-semibold">@Localizer["DepartmentCode"]</label>
                     <select id="searchPhongBan" name="searchPhongBan" class="form-select searchPhongBan searchable-select" style="min-height:50px;">
@@ -79,8 +119,27 @@
                     </select>
                 </div>
 
-                <!-- Hàng 2: 2 cột - Trạng thái và nút tìm kiếm -->
-                <div class="col-12 col-sm-6 col-md-4">
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label mb-1">@Localizer["CreatedByPrefix"]</label>
+                    <input type="text" class="form-control" id="createdByFilter" placeholder="ADID"  />
+                </div>
+
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label mb-1">Từ ngày</label>
+                    <input type="date" class="form-control" id="fromDateFilter"  />
+                </div>
+
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label mb-1">Đến ngày</label>
+                    <input type="date" class="form-control" id="toDateFilter" />
+                </div>
+
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label mb-1">Tìm nhanh</label>
+                    <input type="text" class="form-control" id="quickSearch" placeholder="Mã đơn / mã vật tư / tên" />
+                </div>
+
+                <div class="col-12 col-sm-6 col-md-3">
 
                     <label class="form-label mb-1 d-block">@Localizer["ConfirmStatus"]</label>
                     <select id="trangThai" name="trangThai" class="form-select trangThai searchable-select" style="min-height:50px;">
@@ -89,7 +148,6 @@
                             <option value="">@Localizer["All"]</option>
                             <option value="Confirming" selected>@Localizer["StatusConfirming"]</option>
                             <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
-                            // <option value="RejectedAcc">@Localizer["StatusRejectedAcc"]</option>
                             <option value="Rejected">@Localizer["StatusRejected"]</option>
                         }
                         else
@@ -97,12 +155,12 @@
                             <option value="">@Localizer["All"]</option>
                             <option value="Confirming" selected>@Localizer["StatusConfirming"]</option>
                             <option value="Confirmed">@Localizer["StatusConfirmed"]</option>
-                            // <option value="RejectedAcc">@Localizer["StatusRejectedAcc"]</option>
                             <option value="Rejected">@Localizer["StatusRejected"]</option>
                         }
                     </select>
                 </div>
-                <div class="col-12 col-sm-6 col-md-2 d-flex align-items-end gap-2">
+
+                <div class="col-12 col-sm-6 col-md-3 d-flex align-items-end gap-2" style="margin-top: 4px;">
                     <button type="button" class="btn btn-outline-secondary" id="btnReset"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
                     <div style="min-width: 6px;"></div>
                     <button type="button" class="btn btn-primary" id="btnSearch">
@@ -114,38 +172,58 @@
     </div>
 
     <div class="card shadow-sm mt-3">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["List"]</h6>
-            <div class="d-flex align-items-center gap-2">
-                <input type="checkbox" id="chkSelectAll" title="Chọn tất cả" style="margin-right:6px;" />
-                <button type="button" class="btn btn-sm btn-outline-primary" id="btnSaveSelected">
-                    <i class="fas fa-save me-1"></i> @Localizer["SaveSelected"]
-                </button>
-                <div style="min-width: 6px;"></div>
-                @if (role == "UserPUR")
-                {
-                    <button type="button" class="btn btn-sm btn-outline-success" id="btnApproveSelected">
-                        <i class="fas fa-check me-1"></i> @Localizer["ApproveSelected"]
+        <div class="card-header bg-white p-2">
+            <div class="action-bar d-flex justify-content-between align-items-center flex-wrap gap-2" id="pendingActionBar">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="checkbox" id="chkSelectAll" title="Chọn tất cả" />
+                    <span class="small text-muted">Đã chọn: <b id="selectedCount">0</b></span>
+                </div>
+                <div style="margin-right: 6px;"></div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="btnSaveSelected">
+                        <i class="fas fa-save me-1"></i> @Localizer["SaveSelected"]
                     </button>
-                    <div style="min-width: 6px;"></div>
-                }
-                @if (role == "UserShip")
-                {
-                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnRejectAccSelected">
-                        <i class="fas fa-check me-1"></i> @Localizer["RejectSelected"]
-                    </button>
-                    <div style="margin-left: 6px;"></div>
-                }
-                <div class="small text-muted">@Localizer["Role"]: <b>@role</b></div>
+                    @if (role == "UserShip")
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="btnRejectAccSelected">
+                            <i class="fas fa-times me-1"></i> @Localizer["RejectSelected"]
+                        </button>
+                    }
+                    <div style="margin-right: 6px;"></div>
+                    <div class="small text-muted">@Localizer["Role"]: <b>@role</b></div>
+                </div>
             </div>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 70vh;">
-                <table class="table table-sm table-hover table-bordered align-middle mb-0" id="confirmTable">
-                    <tbody id="confirmTableBody">
-                        <tr><td colspan="1" class="text-center text-muted">@Localizer["NoData"]</td></tr>
-                    </tbody>
-                </table>
+            <div id="pendingTabPane" class="tab-pane-area">
+                <div class="table-responsive modern-table-wrap">
+                    <table class="table table-sm table-hover align-middle mb-0" id="confirmTable">
+                        <thead>
+                            <tr>
+                                <th style="width:40px"><input type="checkbox" id="_row_check_all" /></th>
+                                <th>@Localizer["RequestQuoteNumber"]</th>
+                                <th>@Localizer["ConfirmCode"]</th>
+                                <th>@Localizer["VietnameseItemNameDraft"]</th>
+                                <th>@Localizer["ConfirmName"]</th>
+                                <th>@Localizer["EnglishItemName"]</th>
+                                <th>@Localizer["CreatedByPrefix"]</th>
+                                <th>@Localizer["CreatedDate"]</th>
+                                <th>@Localizer["Handler"]</th>
+                                <th>@Localizer["Status"]</th>
+                                <th class="text-center">@Localizer["Actions"]</th>
+                            </tr>
+                        </thead>
+                        <tbody id="confirmTableBody">
+                            <tr><td colspan="11" class="text-center text-muted py-4">@Localizer["NoData"]</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="confirmedTabPane" class="tab-pane-area d-none">
+                <div class="card-list" id="confirmedCardList">
+                    <div class="text-center text-muted py-4">@Localizer["NoData"]</div>
+                </div>
             </div>
         </div>
         <div class="card-footer">
@@ -177,6 +255,50 @@
                 </div>
             </div>
         </div>
+
+    <div class="drawer-overlay" id="confirmDrawerOverlay" aria-hidden="true"></div>
+    <aside class="detail-drawer" id="confirmDetailDrawer" aria-hidden="true">
+        <div class="drawer-header">
+            <h5 class="mb-0">Chi tiết xác nhận vật tư</h5>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCloseDrawer">✕</button>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section mb-3">
+                <h6 class="drawer-section-title">Thông tin đơn</h6>
+                <div class="detail-grid">
+                    <div><span>Mã đơn</span><b id="dMaDon">-</b></div>
+                    <div><span>Mã vật tư</span><b id="dMaVatTu">-</b></div>
+                    <div><span>Tên hải quan</span><b id="dTenHaiQuan">-</b></div>
+                    <div><span>Tên tiếng Anh</span><b id="dTenEN">-</b></div>
+                    <div><span>Tên đề xuất</span><b id="dTenDeXuat">-</b></div>
+                    <div><span>Trạng thái</span><b id="dTrangThai">-</b></div>
+                </div>
+            </div>
+
+            <div class="drawer-section mb-3">
+                <h6 class="drawer-section-title">Thông tin nghiệp vụ</h6>
+                <div class="detail-grid">
+                    <div><span>Người tạo</span><b id="dCreateBy">-</b></div>
+                    <div><span>Ngày tạo</span><b id="dCreateDate">-</b></div>
+                    <div><span>Người sửa cuối</span><b id="dUpdateBy">-</b></div>
+                    <div><span>Ngày sửa cuối</span><b id="dUpdateDate">-</b></div>
+                    <div><span>Người PUR xác nhận</span><b id="dUserPur">-</b></div>
+                    <div><span>Ngày PUR xác nhận</span><b id="dUserPurDate">-</b></div>
+                    <div><span>Người SHIP xác nhận</span><b id="dUserShip">-</b></div>
+                    <div><span>Ngày SHIP xác nhận</span><b id="dUserShipDate">-</b></div>
+                    <div><span>Ghi chú</span><b id="dNote">-</b></div>
+                    <div><span>Lý do từ chối</span><b id="dRejectReason">-</b></div>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <h6 class="drawer-section-title">Lịch sử thay đổi</h6>
+                <div class="history-timeline" id="drawerHistoryTimeline">
+                    <div class="text-muted small">Chưa có dữ liệu</div>
+                </div>
+            </div>
+        </div>
+    </aside>
     </div>
 </div>
 
@@ -235,6 +357,13 @@
     <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
     <script src="~/js/utils/date.js"></script>
     <script>
+        (function() {
+            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
+            var panel = document.getElementById('confirmDetailDrawer');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        })();
         window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
         window.i18nConfirmName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
             NoData = Localizer["NoData"].Value,
@@ -294,5 +423,5 @@
             Reason = Localizer["Reason"].Value
         }));
     </script>
-    <script src="~/js/ConfirmName.js" asp-append-version="true"></script>
+    <script src="~/js/ConfirmNameV2.js" asp-append-version="true"></script>
 }

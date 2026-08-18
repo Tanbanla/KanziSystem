@@ -30,7 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
         _load_material();
     });
 
-    document.getElementById("btnDownload")?.addEventListener("click", function () {
+    document.getElementById("btnDownload")?.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         _download_material();
     });
 
@@ -513,7 +515,53 @@ function escapeHtml(value) {
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }
+// Input material info from excel file
+document.getElementById('btnImportExcelMaterial')?.addEventListener('click', () => document.getElementById('itemsExcelFileInputMaterial')?.click());
+document.getElementById('itemsExcelFileInputMaterial')?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+        const fd = new FormData();
+        fd.append('FileExcel', file);
+        const res = await fetch('/Master/ImportExcelMaterial', { method: 'POST', body: fd });
+        if (!res.ok) {
+            let txt = await res.text();
+            const T = window.i18nSupplierMana || {};
+            showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportFailed || 'Nhập thất bại') + ': ' + (txt || res.statusText), type: 'error' });
+        } else {
+            const T = window.i18nSupplierMana || {};
+            showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportSuccess || 'Nhập file thành công'), type: 'success' });
+            await loadSupplierItems(currentItemSupplier.ma);
+        }
+    } catch (err) {
+        const T = window.i18nSupplierMana || {};
+        showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.CannotSendFile || 'Không thể gửi file') + ': ' + (err.message || err), type: 'error' });
+    }
+    e.target.value = '';
+});
+// download template excel file
+document.getElementById('btnTemplateImportExcel')?.addEventListener('click', async () => {
+    const T = window.i18nSupplierMana || {};
+    try {
+        const templates = [
+            { url: (window.apiBaseUrl || '') + '/template/MaterialMasterActions.xlsx', filename: 'Mẫu file Master Material.xlsx' },
+        ];
 
+        for (const template of templates) {
+            const a = document.createElement('a');
+            a.href = template.url;
+            a.download = template.filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        showDialog({ title: (T.SuccessTitle || 'Thành công'), message: (T.ExportSuccess || 'Xuất file mẫu hoàn tất'), type: 'success' });
+    } catch (err) {
+        const T = window.i18nSupplierMana || {};
+        showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.ExportFailed || 'Xuất file thất bại') + ': ' + (err && err.message ? err.message : err), type: 'error' });
+    }
+});
 async function _download_material() {
     try {
         const res = await fetch(apiUrl("/Material/ExportMaterialViewToExcel"), {
@@ -535,14 +583,26 @@ async function _download_material() {
         const disposition = res.headers.get("Content-Disposition");
         let fileName = "Material.xlsx";
 
-        if (disposition && disposition.includes("filename=")) {
-            fileName = disposition.split("filename=")[1].replace(/"/g, "");
+        if (disposition) {
+            const fileNameStarMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+
+            if (fileNameStarMatch?.[1]) {
+                fileName = decodeURIComponent(fileNameStarMatch[1]);
+            } else {
+                const fileNameMatch = disposition.match(/filename="?([^"]+)"?/i);
+
+                if (fileNameMatch?.[1]) {
+                    fileName = fileNameMatch[1];
+                }
+            }
         }
 
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = fileName;
+        a.target = "_blank";
+        a.rel = "noopener";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -558,4 +618,70 @@ function apiUrl(path) {
     const base = (window.apiBaseUrl || '').trim().replace(/\/$/, '');
     if (!base) return path;
     return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+// show message dialog
+function getDialogEls() {
+    const overlay = document.getElementById('cmDialogOverlay');
+    const titleEl = document.getElementById('cmDialogTitle');
+    const bodyEl = document.getElementById('cmDialogBody');
+    const footerEl = document.getElementById('cmDialogFooter');
+    return { overlay, titleEl, bodyEl, footerEl };
+}
+function showDialog({ title = (window.i18nSupplierMana && window.i18nSupplierMana.Notification) || 'Thông báo', message = '', type = 'info', buttons } = {}) {
+    const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+    if (!overlay) return alert(message);
+
+    // Ensure overlay is attached to body so fixed positioning is not clipped by parent containers
+    try {
+        if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
+    } catch (e) { /* ignore */ }
+
+    titleEl.textContent = title;
+    bodyEl.innerHTML = `<div class="d-flex align-items-start gap-2">
+            <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : type === 'error' ? 'fa-exclamation-circle text-danger' : 'fa-info-circle text-primary'}"></i>
+            <div>${message}</div>
+        </div>`;
+    footerEl.innerHTML = '';
+    const okBtn = document.createElement('button');
+    okBtn.className = 'cm-btn cm-btn-primary';
+    const T = window.i18nSupplierMana || {};
+    okBtn.textContent = (buttons && buttons.okText) || (T.OK || 'Đồng ý');
+    okBtn.addEventListener('click', () => hideDialog());
+    footerEl.appendChild(okBtn);
+
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.style.display = 'flex';
+    attachDialogCloseHandlers();
+}
+function hideDialog() {
+    const { overlay } = getDialogEls();
+    if (overlay) {
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+}
+
+function attachDialogCloseHandlers() {
+    const { overlay, footerEl } = getDialogEls();
+    const closeBtn = overlay.querySelector('[data-cm-action="close"]');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            // If a confirm dialog is waiting, resolve it as false
+            if (typeof window.__cmPendingResolve === 'function') {
+                const r = window.__cmPendingResolve;
+                window.__cmPendingResolve = null;
+                r(false);
+            }
+            hideDialog();
+        };
+    }
+    const overlayClick = overlay.querySelector('[data-cm-action="overlay"]');
+    if (overlayClick) overlayClick.onclick = () => {
+        if (typeof window.__cmPendingResolve === 'function') {
+            const r = window.__cmPendingResolve;
+            window.__cmPendingResolve = null;
+            r(false);
+        }
+        hideDialog();
+    };
 }

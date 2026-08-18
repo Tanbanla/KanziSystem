@@ -591,5 +591,53 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+
+        public async Task<GenericResponse<List<dynamic>>> SearchRequestDoneDetail(string? maDon, string? maHang, string? user)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.SearchRequestDoneDetail(maDon, maHang, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Export Excel báo giá Done
+        public async Task<GenericResponse<List<dynamic>>> ExportExcelBaoGiaDoneAsync(string? maDon, string? section, string? maHang, string? maNCC, string user)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.ExportExcelBaoGiaDoneAsync(maDon, section, maHang, maNCC, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Search báo giá còn hiệu lực
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaConHieuLucAsync(SearchQuotationResultsModel search, string? user)
+        {
+            var result = new GenericResponse<ListRequest<dynamic>>();
+            try
+            {
+                result.Data = await _repo.SearchBaoGiaConHieuLucAsync(search, user);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

@@ -193,12 +193,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // check ma hang
-        public async Task<GenericResponse<string>> CheckMaterialCode(string keyword, string category)
+        public async Task<GenericResponse<string>> CheckMaterialCode(string codeNcc, string category, string NameEN)
         {
             var result = new GenericResponse<string>();
             try
             {
-                result.Data = await _repo.CheckMaterialCode(keyword, category);
+                result.Data = await _repo.CheckMaterialCode(codeNcc, category, NameEN);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -345,6 +345,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var data = _mapper.Map<MATERIAL>(mt);
                 var updateResult = await _repo.UpdateMaterialAsync(data);
                 result.Data = updateResult;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+
+        // delete list material
+        public async Task<GenericResponse<bool>> DeleteMaterials(List<string> listCodeMaterial)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var deleteResult = await _repo.DeleteMaterials(listCodeMaterial);
+                result.Data = deleteResult;
                 result.Success = true;
             }
             catch (Exception ex)

@@ -845,10 +845,29 @@
         return `<td></td>`;
     }
     function costCell(flUsed, cellStep) {
-        if (cellStep > 11 && (flUsed != null && flUsed != '')) {
-            return `<td>${escapeHtml(flUsed)} USD</td>`;
+        if (cellStep > 11 && flUsed != null && flUsed !== '') {
+            const value = parseFloat(flUsed);
+            return `<td>${value.toFixed(4).replace(/\.?0+$/, '')} USD</td>`;
         }
         return `<td></td>`;
+    }
+    function StatusCell(statusName, step, isAllRefuse, CHR_Status, CHR_StatusACC, CHR_StatusShip) {
+        if (step === 12) {
+            if (CHR_Status === 'Confirming') {
+              return ` <td>${escapeHtml(window.i18nHistoryQuote?.StatusPUR || 'Chờ xác nhận tên của PUR')}</td>`
+            } else if (CHR_StatusACC === 'Confirming') {
+                return ` <td>${escapeHtml(window.i18nHistoryQuote?.StatusACC || 'Chờ xác nhận tên của phòng ban')}</td>`
+            } else if (CHR_StatusShip === 'Confirming') {
+                return  ` <td>${escapeHtml(window.i18nHistoryQuote?.StatusShip || 'Chờ xác nhận tên của Ship')}</td>`
+            } else {
+                return  ` <td>${escapeHtml(statusName)}</td>`
+            }
+
+        } else {
+          return  isAllRefuse ? ` <td>${escapeHtml(window.i18nHistoryQuote?.AllRefuse || 'Toàn bộ các NCC đã từ chối báo giá')}</td>`
+              : `<td>${escapeHtml(statusName)}</td>`
+        }
+
     }
     function supplierCell(value, bitValue, status, step, isAllRefuse, selectedSupplier, quoteLink) {
         const raw = String(bitValue ?? '').trim().toLowerCase();
@@ -970,8 +989,7 @@
             const returnAction = role === 'UserPUR'
                 ? `<button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-undo"></i></button>`
                 : '';
-            const StatusRow = isAllRefuse ? ` <td>${escapeHtml(window.i18nHistoryQuote?.AllRefuse || 'Toàn bộ các NCC đã từ chối báo giá')}</td>`
-                : `<td>${escapeHtml(getValue(row, [stepName]))}</td>`
+            const StatusRow = StatusCell(getValue(row, [stepName]), step, isAllRefuse, getValue(row, ['CHR_Status']), getValue(row, ['CHR_StatusACC']), getValue(row, ['CHR_StatusShip']));
             html[i] = `
                 <tr>
                     <td>${startNo + i}</td>

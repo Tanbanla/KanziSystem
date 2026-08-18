@@ -43,7 +43,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SendMailSupplier()
         {
-            var res = await _sendMailService.SendMailToSupplierAsync();//_sendMailService.SendMailToSupplierOrDerByCategoryAsync();//
+            var res = await _sendMailService.SendMailToSupplierAsync();
             if (!res.Success)
             {
                 return StatusCode(500, new { success = false, message = res.Message });
@@ -61,6 +61,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return StatusCode(500, new { success = false, message = res.Message });
             }
             return Ok(new { success = true, message = "API is running" });
+        }
+        [HttpGet]
+        [HttpGet("SendMailRequestConfirm")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendMailRequestConfirm()
+        {
+            var res = await _sendMailService.SendMailCofirmNaneOfVendor();
+            if (!res.Success)
+            {
+                return StatusCode(500, new { success = false, message = res.Message });
+            }
+            return Ok(new { success = true, message = "Email API is running" });
         }
         public class EmailRequest
         {

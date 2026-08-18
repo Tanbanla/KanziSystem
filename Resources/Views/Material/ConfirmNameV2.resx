@@ -118,220 +118,220 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>税関名と社内コードの確認</value>
+    <value>Xác nhận tên và mã hàng nội bộ</value>
   </data>
   <data name="HeaderTitle" xml:space="preserve">
-    <value>税関名と社内コードの確認</value>
+    <value>Xác nhận tên và mã hàng nội bộ</value>
   </data>
   <data name="HeaderSubtitle" xml:space="preserve">
     <value>Confirm customs name and internal code</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>検索</value>
+    <value>Tìm kiếm</value>
   </data>
   <data name="ItemName" xml:space="preserve">
-    <value>品目名</value>
+    <value>Tên hàng</value>
   </data>
   <data name="EnterItemName" xml:space="preserve">
-    <value>品目名を入力</value>
+    <value>Nhập tên hàng</value>
   </data>
   <data name="OrderCode" xml:space="preserve">
-    <value>依頼番号</value>
+    <value>Số đơn</value>
   </data>
   <data name="EnterOrderCode" xml:space="preserve">
-    <value>依頼番号を入力</value>
+    <value>Nhập số đơn</value>
   </data>
   <data name="DepartmentCode" xml:space="preserve">
-    <value>部門コード</value>
+    <value>Mã phòng ban</value>
   </data>
   <data name="SelectDepartment" xml:space="preserve">
-    <value>部門を選択</value>
+    <value>Chọn phòng ban</value>
   </data>
   <data name="ConfirmStatus" xml:space="preserve">
-    <value>確認ステータス</value>
+    <value>Trạng thái xác nhận</value>
   </data>
   <data name="All" xml:space="preserve">
-    <value>全て</value>
+    <value>Tất cả</value>
   </data>
   <data name="StatusDraft" xml:space="preserve">
-    <value>新規</value>
+    <value>Mới</value>
   </data>
   <data name="StatusConfirming" xml:space="preserve">
-    <value>確認中</value>
+    <value>Đang xác nhận</value>
   </data>
   <data name="StatusConfirmed" xml:space="preserve">
-    <value>確認済み</value>
+    <value>Đã xác nhận</value>
   </data>
   <data name="StatusRejected" xml:space="preserve">
-    <value>拒否</value>
+    <value>Từ chối</value>
   </data>
   <data name="Reset" xml:space="preserve">
-    <value>リセット</value>
+    <value>Reset</value>
   </data>
   <data name="List" xml:space="preserve">
-    <value>一覧</value>
+    <value>Danh sách</value>
   </data>
   <data name="Role" xml:space="preserve">
-    <value>役割</value>
+    <value>Vai trò</value>
   </data>
   <data name="Detail" xml:space="preserve">
-    <value>詳細</value>
+    <value>Chi tiết</value>
   </data>
   <data name="CustomsNameSuggestion" xml:space="preserve">
-    <value>税関名（提案）</value>
+    <value>Tên hải quan(Đề xuất)</value>
   </data>
   <data name="CustomsItemName" xml:space="preserve">
-    <value>税関品目名</value>
+    <value>Tên hàng HQ</value>
   </data>
   <data name="InternalMaterialCode" xml:space="preserve">
-    <value>社内品目コード</value>
+    <value>Mã hàng nội bộ</value>
   </data>
   <data name="Status" xml:space="preserve">
-    <value>ステータス</value>
+    <value>Trạng thái</value>
   </data>
   <data name="CreatedAt" xml:space="preserve">
-    <value>作成日時</value>
+    <value>Tạo lúc</value>
   </data>
   <data name="Handler" xml:space="preserve">
-    <value>担当者/時間</value>
+    <value>Người/Thời gian xử lý</value>
   </data>
   <data name="Note" xml:space="preserve">
-    <value>備考</value>
+    <value>Ghi chú</value>
   </data>
   <data name="Actions" xml:space="preserve">
-    <value>操作</value>
+    <value>Thao tác</value>
   </data>
   <data name="NoData" xml:space="preserve">
-    <value>データはありません</value>
+    <value>Không có dữ liệu</value>
   </data>
   <data name="DetailModalTitle" xml:space="preserve">
-    <value>部門の依頼詳細</value>
+    <value>Chi tiết yêu cầu báo giá của phòng ban</value>
   </data>
   <data name="Close" xml:space="preserve">
-    <value>閉じる</value>
+    <value>Đóng</value>
   </data>
   <data name="Notification" xml:space="preserve">
-    <value>通知</value>
+    <value>Thông báo</value>
   </data>
   <data name="AreYouSure" xml:space="preserve">
-    <value>よろしいですか？</value>
+    <value>Bạn có chắc chắn?</value>
   </data>
   <data name="OK" xml:space="preserve">
-    <value>OK</value>
+    <value>Đồng ý</value>
   </data>
   <data name="EnterReason" xml:space="preserve">
-    <value>理由を入力</value>
+    <value>Nhập lý do</value>
   </data>
   <data name="PleaseEnterReason" xml:space="preserve">
-    <value>理由を入力してください：</value>
+    <value>Vui lòng nhập lý do:</value>
   </data>
   <data name="EnterReasonPlaceholder" xml:space="preserve">
-    <value>理由を入力</value>
+    <value>Nhập lý do</value>
   </data>
   <data name="Total" xml:space="preserve">
-    <value>合計</value>
+    <value>Tổng</value>
   </data>
   <data name="Approve" xml:space="preserve">
-    <value>同意</value>
+    <value>Đồng ý</value>
   </data>
   <data name="Reject" xml:space="preserve">
-    <value>拒否</value>
+    <value>Từ chối</value>
   </data>
   <data name="CreatedByPrefix" xml:space="preserve">
-    <value>作成者: </value>
+    <value>Khởi tạo bởi </value>
   </data>
   <data name="MsgLoadDetailFailed" xml:space="preserve">
-    <value>詳細を読み込めません</value>
+    <value>Không tải được chi tiết</value>
   </data>
   <data name="MsgGenericError" xml:space="preserve">
-    <value>操作に失敗しました</value>
+    <value>Thao tác thất bại</value>
   </data>
   <data name="MsgSearchFailed" xml:space="preserve">
-    <value>検索に失敗しました</value>
+    <value>Tìm kiếm thất bại</value>
   </data>
   <data name="MsgSaveFailed" xml:space="preserve">
-    <value>保存に失敗しました</value>
+    <value>Lưu thất bại</value>
   </data>
   <data name="ConfirmApproveTitle" xml:space="preserve">
-    <value>承認の確認</value>
+    <value>Xác nhận đồng ý?</value>
   </data>
   <data name="ConfirmApproveMessage" xml:space="preserve">
-    <value>この依頼を承認しますか？</value>
+    <value>Bạn có chắc chắn muốn phê duyệt yêu cầu này?</value>
   </data>
   <data name="SearchEllipsis" xml:space="preserve">
-    <value>検索...</value>
+    <value>Tìm...</value>
   </data>
   <data name="NoResults" xml:space="preserve">
-    <value>結果がありません</value>
+    <value>Không có kết quả</value>
   </data>
   <data name="SelectPlaceholder" xml:space="preserve">
-    <value>-- 選択 --</value>
+    <value>-- Chọn --</value>
   </data>
   <data name="OrderCodeGroup" xml:space="preserve">
-    <value>発注コード（グループ）</value>
+    <value>Mã đơn (Nhóm)</value>
   </data>
   <data name="Requester" xml:space="preserve">
-    <value>依頼者</value>
+    <value>Người yêu cầu</value>
   </data>
   <data name="CreatedDate" xml:space="preserve">
-    <value>作成日</value>
+    <value>Ngày tạo</value>
   </data>
   <data name="CurrentStatus" xml:space="preserve">
-    <value>現在の状況</value>
+    <value>Trạng thái hiện tại</value>
   </data>
   <data name="TotalOrders" xml:space="preserve">
-    <value>総発注数</value>
+    <value>Tổng số đơn</value>
   </data>
   <data name="RelatedSuppliers" xml:space="preserve">
-    <value>関連仕入先</value>
+    <value>NCC liên quan</value>
   </data>
   <data name="Expand" xml:space="preserve">
-    <value>展開</value>
+    <value>Mở rộng</value>
   </data>
   <data name="ViewHistory" xml:space="preserve">
-    <value>履歴表示</value>
+    <value>Xem lịch sử</value>
   </data>
   <data name="Approval" xml:space="preserve">
-    <value>同意</value>
+    <value>Phê duyệt</value>
   </data>
   <data name="Material" xml:space="preserve">
-    <value>材質</value>
+    <value>Vật tư</value>
   </data>
   <data name="Quantity" xml:space="preserve">
-    <value>数量</value>
+    <value>Số lượng</value>
   </data>
   <data name="UpdatedDate" xml:space="preserve">
-    <value>更新日</value>
+    <value>Ngày cập nhật</value>
   </data>
   <data name="EquipmentCode" xml:space="preserve">
-    <value>設備コード</value>
+    <value>Mã thiết bị</value>
   </data>
   <data name="SupplierItemCode" xml:space="preserve">
-    <value>仕入先品目コード</value>
+    <value>Mã hàng NCC</value>
   </data>
   <data name="ItemNameVN" xml:space="preserve">
-    <value>品名（ベトナム語）</value>
+    <value>Tên hàng VN</value>
   </data>
   <data name="ItemNameEN" xml:space="preserve">
-    <value>品名（英語）</value>
+    <value>Tên hàng EN</value>
   </data>
   <data name="Unit" xml:space="preserve">
-    <value>単位</value>
+    <value>Đơn vị</value>
   </data>
   <data name="Shape" xml:space="preserve">
-    <value>形状</value>
+    <value>Hình dáng</value>
   </data>
   <data name="Composition" xml:space="preserve">
-    <value>成分</value>
+    <value>Thành phần</value>
   </data>
   <data name="Dimensions" xml:space="preserve">
-    <value>寸法</value>
+    <value>Kích thước</value>
   </data>
   <data name="UsedForMachine" xml:space="preserve">
-    <value>使用機械</value>
+    <value>Dùng cho máy</value>
   </data>
   <data name="Feature" xml:space="preserve">
-    <value>機能</value>
+    <value>Tính năng</value>
   </data>
   <data name="Rohs" xml:space="preserve">
     <value>ROHS</value>
@@ -343,135 +343,138 @@
     <value>MSDS</value>
   </data>
   <data name="SafetyStandard" xml:space="preserve">
-    <value>安全規格</value>
+    <value>Tiêu chuẩn an toàn</value>
   </data>
   <data name="DesignFile" xml:space="preserve">
-    <value>設計ファイル</value>
+    <value>File thiết kế</value>
   </data>
   <data name="Manufacturer" xml:space="preserve">
-    <value>メーカー</value>
+    <value>Nhà sản xuất</value>
   </data>
   <data name="GetQuotation" xml:space="preserve">
-    <value>見積取得</value>
+    <value>Lấy báo giá</value>
   </data>
   <data name="DesiredReceiveDate" xml:space="preserve">
-    <value>希望受領日</value>
+    <value>Ngày muốn nhận</value>
   </data>
   <data name="SupplierSelectionDeadline" xml:space="preserve">
-    <value>仕入先選定期限</value>
+    <value>Kỳ hạn lựa chọn NCC</value>
   </data>
   <data name="Urgent" xml:space="preserve">
-    <value>緊急</value>
+    <value>Gấp</value>
   </data>
   <data name="Reason" xml:space="preserve">
-    <value>理由</value>
+    <value>Lý do</value>
   </data>
   <data name="Classification" xml:space="preserve">
-    <value>分類</value>
+    <value>Phân loại</value>
   </data>
   <data name="Category" xml:space="preserve">
-    <value>カテゴリ</value>
+    <value>Chủng loại hàng</value>
   </data>
   <data name="OrderStatus" xml:space="preserve">
-    <value>発注状況</value>
+    <value>Trạng thái đơn</value>
   </data>
   <data name="DateRange" xml:space="preserve">
-    <value>期間</value>
+    <value>Thời gian</value>
   </data>
   <data name="Filter" xml:space="preserve">
-    <value>フィルター</value>
+    <value>Bộ lọc</value>
   </data>
   <data name="GroupListByOrder" xml:space="preserve">
-    <value>発注コードでリストをグループ化</value>
+    <value>Nhóm đơn</value>
   </data>
   <data name="Supplier" xml:space="preserve">
-    <value>仕入先</value>
+    <value>Nhà cung cấp</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>確認</value>
+    <value>Xác nhận</value>
   </data>
   <data name="LoadingMessage" xml:space="preserve">
-    <value>処理中...</value>
+    <value>Đang xử lý...</value>
   </data>
   <data name="Success" xml:space="preserve">
-    <value>成功</value>
+    <value>Thành công</value>
   </data>
   <data name="ImportSuccess" xml:space="preserve">
-    <value>ファイルからのインポートに成功しました</value>
+    <value>Nhập bằng file thành công</value>
   </data>
   <data name="Error" xml:space="preserve">
-    <value>エラー</value>
+    <value>Lỗi</value>
   </data>
   <data name="ExportError" xml:space="preserve">
-    <value>ファイルのエクスポートに失敗しました</value>
+    <value>Xuất file thất bại</value>
   </data>
   <data name="Processing" xml:space="preserve">
-    <value>エクスポート中...</value>
+    <value>Đang xuất...</value>
   </data>
   <data name="BtnSave" xml:space="preserve">
-    <value>保存</value>
+    <value>Lưu</value>
   </data>
   <data name="RequestQuoteNumber" xml:space="preserve">
-    <value>見積依頼番号</value>
+    <value>Số đơn yêu cầu báo giá</value>
   </data>
   <data name="Department" xml:space="preserve">
-    <value>部門</value>
+    <value>Phòng ban</value>
   </data>
   <data name="EquipmentClassification" xml:space="preserve">
-    <value>設備分類</value>
+    <value>Phân loại thiết bị</value>
   </data>
   <data name="VietnameseItemNameDraft" xml:space="preserve">
-    <value>税関手続き用ベトナム語品名（下書き）（*）</value>
+    <value>Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)</value>
   </data>
   <data name="EnglishItemName" xml:space="preserve">
-    <value>英語品名（*）</value>
+    <value>Tên hàng tiếng anh(*)</value>
   </data>
   <data name="ItemCategory" xml:space="preserve">
-    <value>品目カテゴリ</value>
+    <value>Chủng loại hàng</value>
   </data>
   <data name="ConfirmName" xml:space="preserve">
-    <value>名前確認</value>
+    <value>Xác nhận tên</value>
   </data>
   <data name="ConfirmCode" xml:space="preserve">
-    <value>コード確認</value>
+    <value>Xác nhận mã</value>
   </data>
   <data name="ImportExcel" xml:space="preserve">
-    <value>Excelをインポート</value>
+    <value>Nhập file Excel</value>
   </data>
   <data name="ExportTemplate" xml:space="preserve">
-    <value>テンプレート Excel</value>
+    <value>Mẫu Excel</value>
   </data>
   <data name="ExportTable" xml:space="preserve">
-    <value>Export table data</value>
+    <value>Xuất dữ liệu bảng</value>
   </data>
   <data name="Record" xml:space="preserve">
-    <value>記録</value>
+    <value>Bản ghi</value>
   </data>
   <data name="Datafield" xml:space="preserve">
-    <value>データフィールド</value>
+    <value>Trường dữ liệu</value>
   </data>
   <data name="PageSize" xml:space="preserve">
-    <value>ページサイズ</value>
+    <value>Hiển thị</value>
   </data>
   <data name="SaveSelected" xml:space="preserve">
-    <value>選択を保存</value>
+    <value>Lưu tất cả</value>
   </data>
   <data name="ApproveSelected" xml:space="preserve">
-    <value>選択項目を承認</value>
+    <value>Phê duyệt mục đã chọn</value>
   </data>
   <data name="RejectSelected" xml:space="preserve">
-    <value>選択項目を却下</value>
+    <value>Từ chối mục đã chọn</value>
   </data>
   <data name="StatusRejectedAcc" xml:space="preserve">
-    <value>拒否コード確認</value>
+    <value>Từ chối xác nhận mã</value>
   </data>
   <data name="CodeLocalExport" xml:space="preserve">
-    <value>エクスポート</value>
+    <value>Xuất file mã đã xác nhận</value>
   </data>
   <data name="SelectInternalMaterialCode" xml:space="preserve">
-    <value>社内品目コードを選択</value>
+    <value>Chọn mã hàng nội bộ</value>
   </data>
   <data name="SelectOrderCode" xml:space="preserve">
-    <value>依頼番号を選択</value>
+    <value>Chọn mã đơn</value>
+  </data>
+  <data name="MaterialCode" xml:space="preserve">
+    <value>Mã hàng nội bộ</value>
   </data>
 </root>

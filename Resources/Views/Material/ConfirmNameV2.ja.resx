@@ -474,4 +474,7 @@
   <data name="SelectOrderCode" xml:space="preserve">
     <value>依頼番号を選択</value>
   </data>
+  <data name="MaterialCode" xml:space="preserve">
+    <value>社内品目コード</value>
+  </data>
 </root>

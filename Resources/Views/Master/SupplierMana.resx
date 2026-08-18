@@ -127,7 +127,7 @@
     <value>Download Excel</value>
   </data>
   <data name="UploadExcel" xml:space="preserve">
-    <value>Upload Excel</value>
+    <value>Excel thêm nhà cung cấp</value>
   </data>
   <data name="SupplierCode" xml:space="preserve">
     <value>Mã</value>
@@ -148,7 +148,7 @@
     <value>Tìm kiếm</value>
   </data>
   <data name="Add" xml:space="preserve">
-    <value>Thêm</value>
+    <value>Thêm nhà cung cấp</value>
   </data>
   <data name="Address" xml:space="preserve">
     <value>Địa chỉ</value>
@@ -329,5 +329,56 @@
   </data>
   <data name="TemplateImportExcel" xml:space="preserve">
     <value>File mẫu nhập Excel</value>
+  </data>
+  <data name="ExportTableData" xml:space="preserve">
+    <value>Xuất dữ liệu bảng</value>
+  </data>
+  <data name="SearchCategoryLabel" xml:space="preserve">
+    <value>Tìm chủng loại</value>
+  </data>
+  <data name="SearchCategoryPlaceholder" xml:space="preserve">
+    <value>Nhập tên chủng loại...</value>
+  </data>
+  <data name="SearchCategoryButton" xml:space="preserve">
+    <value>Tìm</value>
+  </data>
+  <data name="AddCategorySectionTitle" xml:space="preserve">
+    <value>Thêm chủng loại cho nhà cung cấp</value>
+  </data>
+  <data name="CategoryPlaceholder" xml:space="preserve">
+    <value>Chủng loại</value>
+  </data>
+  <data name="MadeInPlaceholder" xml:space="preserve">
+    <value>Sản xuất</value>
+  </data>
+  <data name="PICPlaceholder" xml:space="preserve">
+    <value>PIC</value>
+  </data>
+  <data name="MailPlaceholder" xml:space="preserve">
+    <value>Mail</value>
+  </data>
+  <data name="AddCategoryButton" xml:space="preserve">
+    <value>Thêm chủng loại</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>Hoạt động</value>
+  </data>
+  <data name="StatusInactive" xml:space="preserve">
+    <value>Ngưng hoạt động</value>
+  </data>
+  <data name="MissingCategoryNameMessage" xml:space="preserve">
+    <value>Vui lòng nhập chủng loại</value>
+  </data>
+  <data name="MissingCategorySupplierMessage" xml:space="preserve">
+    <value>Vui lòng chọn nhà cung cấp trước khi thêm chủng loại</value>
+  </data>
+  <data name="AddCategoryFailedMessage" xml:space="preserve">
+    <value>Thêm chủng loại thất bại</value>
+  </data>
+  <data name="AddCategorySuccessMessage" xml:space="preserve">
+    <value>Đã thêm chủng loại cho nhà cung cấp</value>
+  </data>
+  <data name="UnexpectedErrorMessage" xml:space="preserve">
+    <value>Có lỗi xảy ra</value>
   </data>
 </root>

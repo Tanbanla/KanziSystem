@@ -5,6 +5,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public int Id { get; set; }
         public string? Mahang { get; set; }
         public string? Tenhang { get; set; }
+        public string? Vendor_Code { get; set; }
         public string? Vendor { get; set; }
         public string? Maker { get; set; }
         public string? MOQ { get; set; }

@@ -14,6 +14,13 @@
 
     // Lấy thông tin quyền hạn của User
     var userSection = User.FindFirst("Section")?.Value;
+
+    // ----- THÊM CODE XỬ LÝ GOM NHÓM TẠI ĐÂY -----
+    // 1. Lọc ra các dòng có Lịch giao = "NG" VÀ Ảnh hưởng SX khác "No" (hoặc rỗng)
+    var ngItems = Model?.Where(x =>
+        !string.IsNullOrEmpty(x.lichgiao) && x.lichgiao.Trim().ToUpper() == "NG" &&
+        (string.IsNullOrEmpty(x.anhuongsx) || x.anhuongsx.Trim().ToUpper() != "NO")
+    ).ToList() ?? new List<PoDetailViewModel>();
 }
 
 <style>
@@ -138,6 +145,7 @@
     .bg-white {
         background-color: #ebf7ff !important;
     }
+   
 </style>
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -162,8 +170,8 @@
                     <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
                     <input type="text" name="searchTerm" class="form-control" value="@searchTerm" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-semibold">Tháng yêu cầu giao hàng</label>
+                <div class="col-md-1">
+                    <label class="form-label fw-semibold">Tháng yêu cầu</label>
                     <input type="month" name="reqMonth" class="form-control" value="@(!string.IsNullOrEmpty(reqMonth) ? reqMonth : DateTime.Now.ToString("yyyy-MM"))">
                 </div>
                 <div class="col-md-2">
@@ -176,16 +184,29 @@
                     </select>
                 </div>
                 <div class="col-md-2 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc dữ liệu</button>
-                    <a href="@Url.Action("ManageDelivery", new { tab = currentTab })" class="btn btn-outline-secondary ml-1"><i class="fa-solid ion-ios-loop-strong me-1"></i> Làm mới</a>
-                </div>
-                <div class="col-md-4 d-flex align-items-end gap-2 justify-content-end">
-                    <button type="button" class="btn btn-outline-danger" id="btnExportExcel" onclick="exportExcel()">
-                        <i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc</button>                 
+                    <a href="@Url.Action("ManageDelivery", new { tab = currentTab })" class="btn btn-secondary ml-1"><i class="fa-solid ion-ios-loop-strong me-1"></i> Refresh</a>
+                    <button type="button" class="btn btn-outline-danger ml-1" onclick="exportDataExcel()">
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Export
                     </button>
+                </div>
+
+                <div class="col-md-5 d-flex align-items-end gap-2 justify-content-end">
+                 
                     <button type="button" class="btn btn-outline-success ml-1" id="btnOpenImportExcel">
                         <i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel
                     </button>
+                    @if (userSection == "3100")
+                    {
+                        <button type="button" class="btn btn-outline-primary ml-1" id="btnOpenSupplierNg">
+                            <i class="fa-solid fa fa-envelope-open-text me-1"></i> List (NG)                           
+                            <span class="badge bg-danger rounded-pill ms-1" id="demncc"></span>                          
+                        </button>
+                        <button type="button" class="btn btn-outline-info ml-1" id="btnOpenGateRegistration">
+                            <i class="fa-solid fa fa-car-side me-1"></i> Đăng ký ra vào cổng
+                            <span class="badge bg-danger rounded-pill ms-1" id="demgate" style="display:none;"></span>
+                        </button>
+                    }
                 </div>
             </form>
         </div>
@@ -209,10 +230,13 @@
                             <th class="bg-white" width="80px">Ngày gửi PO</th>
                             <th class="bg-pur text-white">ĐN Follow NCC</th>
                             <th class="bg-white" width="80px">Ngày NCC giao</th>
-                            <th class="bg-white" width="80px">GH thực tế</th>
-                            <th class="bg-white">
-                                @(currentTab == "trong" ? "Cảnh báo" : "Lịch giao (OK/NG)")
-                            </th>
+                            <th class="bg-white" width="80px">Ngày thực tế</th>
+                            <th class="bg-white" width="80px">Giờ thực tế</th>
+                            <th class="bg-white">Lịch giao (OK/NG) </th>
+                            @if (currentTab == "trong")
+                            {
+                                <th>Cảnh báo </th>
+                            }                                               
                             <th class="bg-white">Ảnh hưởng SX</th>
                             <th class="bg-white" width="80px">Cửa GH Cổng GH</th>
                             <th class="bg-white">Người nhận</th>
@@ -231,27 +255,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            var i = 1;
+                    @if (Model != null && Model.Any())
+                    {
+                        var i = 1;
                             @foreach (var item in Model)
                             {
                                 string rowBgClass = "";
-                                string valLichGiao = !string.IsNullOrEmpty(item.lichgiao) ? item.lichgiao.Trim().ToUpper() : "";
+                                // 2. Nếu có dữ liệu cả 2 ngày VÀ Ngày YC giao < Ngày NCC xác nhận (Hẹn giao trễ) -> Cảnh báo NG
+                            if (item.lichgiao == "NG")
+                            {                        
+                                rowBgClass = "row-alert-yes"; 
+                            }
+                            if (item.lichgiao == "OK")
+                            {
 
-                                if (valLichGiao == "OK")
-                                {
-                                    rowBgClass = "row-bg-ok";
-                                }
-                                else if (valLichGiao == "NG")
-                                {
-                                    rowBgClass = "row-bg-ng";
-                                }
-                                else if (!string.IsNullOrEmpty(item.Ngayyc))
-                                {
-                                    rowBgClass = "row-alert-yes";
-                                }
-
+                                rowBgClass = "row-alert-ok"; 
+                            }
+                           
                                 <tr class="main-row @rowBgClass"
                                     data-id="@item.PO_Detail_Id"
                                     data-send-date="@(string.IsNullOrEmpty(item.ngayguiPO) ? "---" : item.ngayguiPO)"
@@ -281,6 +301,7 @@
                                     <td class="text-center fw-bold text-danger"></td>
                                     <td>@item.ngaynccxngiao</td>
                                     <td>@item.Ngay_GHchinhthuc</td>
+                                    <td>@item.Gio_GH</td>
 
                                     <!-- Cột Trạng thái & Toggle -->
                                     <td class="text-center cursor-pointer toggle-detail">
@@ -312,7 +333,6 @@
                                         }
                                     </td>
 
-                                    <!-- Cột Ảnh hưởng SX -->
                                     <td class="text-center fw-bold">
                                         @if (item.anhuongsx == "No")
                                         {
@@ -370,7 +390,7 @@
                                     {
                                         <!-- Cột dành cho bộ phận khác: Chỉ hiện nút khi Lịch giao cảnh báo NG -->
                                         <td class="text-center">
-                                            @if (valLichGiao == "NG")
+                                            @if (item.lichgiao == "NG")
                                             {
                                                 <button class="btn btn-sm btn-danger fw-bold w-100 btn-impact-po"
                                                         data-po="@item.SoPO"
@@ -664,8 +684,9 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3 d-flex justify-content-between align-items-center p-2 bg-light rounded border">
-                    <span class="fs-7 text-muted"><i class="fa-solid fa fa-circle-info me-1"></i> File mẫu chuẩn</span>
-                    <a href="#" class="btn btn-xs btn-link text-success p-0 fw-bold text-decoration-none"><i class="fa-solid fa fa-download me-1"></i> Tải Template</a>
+                 
+                    <span class="fs-7 text-muted"><i class="fa-solid fa fa-circle-info me-1"></i> File export</span>
+                    <a href="#" class="btn btn-xs btn-link text-success p-0 fw-bold text-decoration-none" id="btnExportExcel" onclick="exportExcel()"><i class="fa-solid fa fa-download me-1"></i> Tải File</a>
                 </div>
                 <form id="importExcelForm">
                     <div class="mb-3">
@@ -717,8 +738,96 @@
     </div>
 </div>
 
+<!-- Modal Danh Sách PO NG (Dạng Bảng Master-Detail) -->
+<div class="modal fade" id="supplierNgModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 800px;">
+        <div class="modal-content border-primary">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> Danh sách PO Lịch giao NG theo Nhà Cung Cấp</h6>
+                <button type="button" class="btn-close btn-close-white" onclick="closeMyModal('supplierNgModal')"></button>
+            </div>
+            <div class="modal-body p-0 bg-light">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0" style="font-size:13px;">
+                        <thead class="table-primary text-center">
+                            <tr>
+                                <th width="150px">Mã NCC</th>
+                                <th>Tên Nhà Cung Cấp</th>
+                                <th width="180px">Số lượng mã hàng NG</th>
+                            </tr>
+                        </thead>
+                        <!-- Đặt ID cho tbody để JS đổ dữ liệu vào đây -->
+                        <tbody id="supplierNgTableBody">
+                            <!-- Dữ liệu sẽ được load qua AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-success ml-1" id="btnSendWarningMail">
+                    <i class="fa-solid fa fa-envelope me-1"></i> Gửi Mail Cảnh Báo NG
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 7. Modal Danh Sách Đăng Ký Ra Vào Cổng -->
+<div class="modal fade" id="gateRegistrationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 900px;">
+        <div class="modal-content border-info">
+            <div class="modal-header bg-info text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa fa-car-side me-1"></i> Danh sách Đăng ký ra vào cổng</h6>
+                <button type="button" class="btn-close btn-close-white" onclick="closeMyModal('gateRegistrationModal')"></button>
+            </div>
+            <div class="modal-body p-0 bg-light">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0" style="font-size:13px;">
+                        <thead class="table-info text-center">
+                            <tr>
+                                <th width="120px">Mã NCC</th>
+                                <th>Tên Nhà Cung Cấp</th>
+                                <th width="150px">Giờ Giao Dự Kiến</th>
+                                <th width="150px">Số lượng PO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gateRegistrationTableBody">
+                            <!-- Dữ liệu sẽ được load qua AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer py-2 bg-light">            
+                <button type="button" class="btn btn-info text-white fw-bold">
+                    <i class="fa-solid fa fa-print me-1"></i> Đăng ký vào cổng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        function exportDataExcel() {
+            var form = document.getElementById('filterForm');
+
+            // Lưu lại action gốc của form (để sau này filter bình thường không bị lỗi)
+            var originalAction = form.action;
+
+            // Trỏ form sang Action Export
+            form.action = '@Url.Action("ExportExcel", "ManagerDelivery")';
+
+            // Chạy form
+            form.submit();
+
+            // Trả lại action gốc cho form ngay sau đó
+            form.action = originalAction;
+        }
+
+        function exportExcel() {
+            exportDataExcel();
+        }
+
         function changeTab(tabName) {
             var tabInput = document.getElementById('activeTab');
             if (tabInput) {
@@ -730,7 +839,7 @@
             }
         }
 
-        let bsEstModal, bsOffModal, bsPayModal, bsImportModal, bsImpactModal;
+        let bsEstModal, bsOffModal, bsPayModal, bsImportModal, bsImpactModal, bsSupplierModal;
 
         function closeMyModal(modalName) {
             if (modalName === 'updateModal' && bsEstModal) bsEstModal.hide();
@@ -738,6 +847,8 @@
             if (modalName === 'paymentModal' && bsPayModal) bsPayModal.hide();
             if (modalName === 'importExcelModal' && bsImportModal) bsImportModal.hide();
             if (modalName === 'impactModal' && bsImpactModal) bsImpactModal.hide();
+            if (modalName === 'supplierNgModal' && bsSupplierModal) bsSupplierModal.hide();
+            if (modalName === 'gateRegistrationModal' && bsGateModal) bsGateModal.hide();
         }
 
         function exportExcel() {
@@ -754,7 +865,9 @@
             bsPayModal = new bootstrap.Modal(document.getElementById('paymentModal'), { backdrop: false });
             bsImportModal = new bootstrap.Modal(document.getElementById('importExcelModal'), { backdrop: false });
             bsImpactModal = new bootstrap.Modal(document.getElementById('impactModal'), { backdrop: false });
-
+            bsSupplierModal = new bootstrap.Modal(document.getElementById('supplierNgModal'), { backdrop: false });
+            document.getElementById('btnOpenSupplierNg')?.addEventListener('click', () => bsSupplierModal.show());
+            bsGateModal = new bootstrap.Modal(document.getElementById('gateRegistrationModal'), { backdrop: false });
             // 2. EVENT DELEGATION cho toàn bộ bảng
             const tableBody = document.querySelector('.table tbody');
 
@@ -1140,6 +1253,337 @@
                 }
             });
 
+
+            getDemNccCount();
+            getDemGateCount();
         });
+
+        function toggleSupplierDetail(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+
+                if (row.classList.contains('d-none')) {
+                    row.classList.remove('d-none');
+                } else {
+                    row.classList.add('d-none');
+                }
+            }
+           
+        }
+
+        document.getElementById('btnSendWarningMail')?.addEventListener('click', async function () {
+            const btn = this;
+
+            // Xác nhận trước khi gửi để tránh bấm nhầm
+            if (!confirm('Bạn có chắc chắn muốn gửi email cảnh báo hàng NG tới tất cả Người làm đơn?')) {
+                return;
+            }
+
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang gửi...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/ManagerDelivery/SendWarningEmailNG', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message); // Hiển thị "Đã gửi thành công 1 email..."
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+                alert("Đã xảy ra lỗi kết nối khi gửi email.");
+            } finally {
+                // Trả lại trạng thái nút ban đầu
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        });
+
+        // Sự kiện khi click nút mở Modal Danh sách NCC NG
+        document.getElementById('btnOpenSupplierNg')?.addEventListener('click', async function () {
+            // 1. Mở modal lên trước và hiển thị trạng thái đang tải
+            bsSupplierModal.show();
+            const tbody = document.getElementById('supplierNgTableBody');
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-primary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
+
+            try {
+                // 2. Gọi API đến Controller của bạn (Thay ManagerDelivery bằng tên Controller thực tế nếu khác)
+                const response = await fetch('/ManagerDelivery/NCC_NG');
+                const data = await response.json();
+
+                const masterList = data.ncc_ng;       // Dữ liệu nhóm theo NCC
+                const detailList = data.ncc_ng_dt;    // Dữ liệu chi tiết từng PO
+                console.log(masterList);
+                console.log(detailList);
+                if (masterList && masterList.length > 0) {
+                    let html = '';
+                    let suppIdx = 0;
+
+                    // 3. Lặp qua danh sách Master (Nhà cung cấp)
+                    masterList.forEach(ncc => {
+                        suppIdx++;
+
+                        // Tìm các chi tiết (PO) thuộc về nhà cung cấp này
+                        const details = detailList.filter(d => d.mancc === ncc.mancc && d.tenncc === ncc.tenncc);
+
+                        // Dòng Master (Thông tin NCC)
+                        html += `
+                            <tr class="cursor-pointer bg-white fw-bold text-primary" onclick="toggleSupplierDetail('suppRow_${suppIdx}')" title="Click để xem chi tiết">
+                                <td class="text-center align-middle">${ncc.mancc || 'N/A'}</td>
+                                <td class="align-middle">
+                                    ${ncc.tenncc || 'Không xác định'}
+                                    <i class="fa-solid fa fa-caret-down float-end mt-1 text-muted"></i>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <span class="badge bg-danger rounded-pill fs-7 py-1 px-3 text-white">${details.length}</span>
+                                </td>
+                            </tr>
+                        `;
+
+                        // Bắt đầu Dòng Detail (Chi tiết các mã hàng bị ẩn)
+                        html += `
+                            <tr id="suppRow_${suppIdx}" class="d-none" style="background-color: #f0f8ff;">
+                                <td colspan="3" class="p-3">
+                                    <table class="table table-sm table-bordered bg-white mb-0 shadow-sm">
+                                        <thead class="bg-secondary text-white text-center">
+                                            <tr>
+                                                <th width="120px">Số PO</th>
+                                                <th width="100px">Mã hàng</th>
+                                                <th width="150px">Tên hàng</th>
+                                                <th width="60px">Số lượng</th>
+                                                <th width="80px">Đơn vị</th>
+                                                <th width="120px">Ngày YC giao</th>
+                                                <th width="120px">Ngày NCC giao</th>
+                                                <th width="120px">Xác nhận AHSX</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        `;
+
+                        // Lặp qua chi tiết từng dòng dữ liệu PO của NCC đó
+                        details.forEach(item => {
+                            // Format số lượng (thêm dấu phẩy hàng nghìn)
+                            const qtyFormat = parseFloat(item.soluong || 0).toLocaleString();
+
+                            html += `
+                                <tr>
+                                    <td class="text-center fw-bold text-dark align-middle">${item.sopo}</td>
+                                    <td class="text-center align-middle">${item.mahang}</td>
+                                    <td class="align-middle">${item.tenhang}</td>
+                                    <td class="text-end align-middle">${qtyFormat}</td>
+                                    <td class="text-center align-middle">${item.donvi}</td>
+                                    <td class="text-center text-danger align-middle fw-bold">${item.ngayycgiao}</td>
+                                    <td class="text-center text-danger align-middle fw-bold">${item.ngaythuctegiao}</td>
+                                    <td class="text-center text-danger align-middle fw-bold">${item.damnhiemxacnhananhhuong}</td>
+                                </tr>
+                            `;
+                        });
+
+                        // Đóng Dòng Detail
+                        html += `
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    // 4. Gắn HTML vào tbody
+                    tbody.innerHTML = html;
+                } else {
+                    // Không có dữ liệu NG
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center text-success py-4 fw-bold fs-6">
+                                <i class="fa-solid fa-circle-check me-1"></i> Tuyệt vời! Không có mặt hàng nào bị cảnh báo NG.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu Modal NCC_NG:", error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center text-danger py-4 fw-bold">
+                            <i class="fa-solid fa-circle-xmark me-1"></i> Lỗi kết nối. Không thể tải dữ liệu.
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+
+        async function getDemNccCount() {
+                const badgeDemNcc = document.getElementById('demncc');
+                if (!badgeDemNcc) return;
+
+                try {
+                    const response = await fetch('/ManagerDelivery/NCC_NG');
+                    const data = await response.json();
+
+                    if (data && data.ncc_ng) {
+                        const count = data.ncc_ng.length;
+                        badgeDemNcc.textContent = count;
+
+                        // Ẩn badge nếu số lượng = 0 cho giao diện đẹp hơn (tuỳ chọn)
+                        if(count === 0) {
+                            badgeDemNcc.style.display = 'none';
+                        } else {
+                            badgeDemNcc.style.display = 'inline-block';
+                        }
+                    } else {
+                        badgeDemNcc.textContent = "0";
+                        badgeDemNcc.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi tải số lượng NCC_NG:", error);
+                    badgeDemNcc.textContent = "!";
+                }
+            }
+
+        // Sự kiện khi click nút mở Modal Đăng ký ra vào cổng
+        document.getElementById('btnOpenGateRegistration')?.addEventListener('click', async function () {
+            // 1. Mở modal lên trước và hiển thị trạng thái đang tải
+            bsGateModal.show();
+            const tbody = document.getElementById('gateRegistrationTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-info py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
+
+            try {
+                // 2. Gọi API để lấy dữ liệu (Sử dụng API NCC_Giaohang)
+                const response = await fetch('/ManagerDelivery/NCC_Giaohang'); // Đảm bảo đúng tên hàm / URL
+                const data = await response.json();
+
+                const masterList = data.ncc_ng;       // Dữ liệu nhóm theo NCC và Giờ giao
+                const detailList = data.ncc_ng_dt;    // Dữ liệu chi tiết từng PO
+                console.log(masterList);
+                if (masterList && masterList.length > 0) {
+                    let html = '';
+                    let gateIdx = 0;
+
+                    // 3. Lặp qua danh sách Master
+                    masterList.forEach(ncc => {
+                        gateIdx++;
+
+                        // Tìm chi tiết thuộc về nhà cung cấp và giờ giao này
+                        const details = detailList.filter(d => d.mancc === ncc.mancc && d.tenncc === ncc.tenncc && d.giogiao === ncc.giogiao);
+
+                        // Dòng Master
+                        html += `
+                            <tr class="cursor-pointer bg-white fw-bold text-dark" onclick="toggleSupplierDetail('gateRow_${gateIdx}')" title="Click để xem chi tiết">
+                                <td class="text-center align-middle">${ncc.mancc || 'N/A'}</td>
+                                <td class="align-middle text-primary">
+                                    ${ncc.tenncc || 'Không xác định'}
+                                    <i class="fa-solid fa fa-caret-down float-end mt-1 text-muted"></i>
+                                </td>
+                                <td class="text-center align-middle text-danger">${ncc.giogiao || 'Chưa có giờ'}</td>
+                                <td class="text-center align-middle">
+                                    <span class="badge bg-info rounded-pill fs-7 py-1 px-3 text-white">${details.length} </span>
+                                </td>
+                            </tr>
+                        `;
+                        // Dòng Detail
+                        html += `
+                            <tr id="gateRow_${gateIdx}" class="d-none" style="background-color: #f8fbff;">
+                                <td colspan="4" class="p-3">
+                                    <table class="table table-sm table-bordered bg-white mb-0 shadow-sm">
+                                        <thead class="bg-secondary text-white text-center">
+                                            <tr>
+                                                <th width="120px">Số PO</th>
+                                                <th width="100px">Mã hàng</th>
+                                                <th width="150px">Tên hàng</th>
+                                                <th width="80px">Số lượng</th>
+                                                <th width="80px">Ngày NCC giao</th>
+                                                <th width="120px">Cửa / Cổng giao</th>
+                                                <th width="150px">Người nhận</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        `;
+
+                        // Lặp qua chi tiết từng PO
+                        details.forEach(item => {
+                            const qtyFormat = parseFloat(item.soluong || 0).toLocaleString();
+                            html += `
+                                <tr>
+                                    <td class="text-center fw-bold text-dark align-middle">${item.sopo}</td>
+                                    <td class="text-center align-middle">${item.mahang}</td>
+                                    <td class="align-middle">${item.tenhang}</td>
+                                    <td class="text-end align-middle">${qtyFormat} ${item.donvi}</td>
+                                    <td class="text-end align-middle"> ${item.ngaygiaochinhthuc}</td>
+                                    <td class="text-center align-middle fw-bold text-success">${item.cuagiao} / ${item.congnhanhang}</td>
+                                    <td class="text-center align-middle">${item.nguoinhanhang}</td>
+                                </tr>
+                            `;
+                        });
+
+                        // Đóng table Detail
+                        html += `
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    // Gắn HTML vào tbody
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4 fw-bold fs-6">
+                                <i class="fa-solid fa-circle-info me-1"></i> Không có dữ liệu đăng ký ra vào cổng.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu Modal Gate:", error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-danger py-4 fw-bold">
+                            <i class="fa-solid fa-circle-xmark me-1"></i> Lỗi kết nối. Không thể tải dữ liệu.
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+        async function getDemGateCount() {
+            const badgeDemGate = document.getElementById('demgate');
+            if (!badgeDemGate) return;
+
+            try {
+                // Gọi API NCC_Giaohang (không truyền tham số để tự động lấy ngày hiện tại)
+                const response = await fetch('/ManagerDelivery/NCC_Giaohang');
+                const data = await response.json();
+
+                if (data && data.ncc_ng) {
+                    // Đếm số lượng nhóm Master (số lượng lịch giao)
+                    const count = data.ncc_ng.length;
+                    badgeDemGate.textContent = count;
+
+                    // Ẩn badge nếu số lượng = 0
+                    if (count === 0) {
+                        badgeDemGate.style.display = 'none';
+                    } else {
+                        badgeDemGate.style.display = 'inline-block';
+                    }
+                } else {
+                    badgeDemGate.textContent = "0";
+                    badgeDemGate.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải số lượng Đăng ký ra vào cổng:", error);
+                badgeDemGate.style.display = 'inline-block';
+                badgeDemGate.textContent = "!";
+            }
+        }
     </script>
 }

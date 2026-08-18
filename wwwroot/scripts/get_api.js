@@ -214,12 +214,12 @@ async function loadToCombo(position, comboId) {
    
     const result = await response.json();
  
-    if (result.Data.Data.length == 0) {
+    //if (result.Data.Data.length == 0) {
 
-        //alert("Cost phòng ban chưa được đăng ký hoặc bị hủy !");
-        loadToCombo_PTBP("10 : Deputy General Manager", "pheduyet");
-        //loadToCombo_TBP("Section Manager", "thamtra");
-    }
+    //    //alert("Cost phòng ban chưa được đăng ký hoặc bị hủy !");
+    //    loadToCombo_PTBP("10 : Deputy General Manager", "pheduyet");
+    //    //loadToCombo_TBP("Section Manager", "thamtra");
+    //}
     try {
         document.getElementById("ten_" + comboId).innerHTML = "";
         for (var i = 0; i < result.Data.Data.length; i++) {
@@ -304,7 +304,6 @@ async function loadToCombo_PTBP(position, comboId) {
     }
 }
 
-
 // Hàm tạo Payload (dữ liệu gửi đi)
 const createSearchData_GD = (position) => ({
     "SearchTerm": "",
@@ -365,6 +364,12 @@ async function loadToCombo_TBP(position, comboId) {
     });
 
     const result = await response.json();
+    if (result.Data.Data.length == 0) {
+
+        //alert("Cost phòng ban chưa được đăng ký hoặc bị hủy !");
+        loadToCombo_GD("Director", "pheduyet");
+        //loadToCombo_TBP("Section Manager", "thamtra");
+    }
     document.getElementById("ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
         document.getElementById("ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;

@@ -7,16 +7,16 @@ document.addEventListener('DOMContentLoaded', function () {
         supplierDelete: (window.apiBaseUrl || '') + `/Master/DeleteSupplier`,
         supplierExport: (window.apiBaseUrl || '') + '/Master/ExportExcel',
         supplierImport: (window.apiBaseUrl || '') + '/Master/ImportSupplierExcel',
+        InsertCategoryNcc: (window.apiBaseUrl || '') + '/Master/InsertCategoryNcc',
         // Supplier Category Items API (BaoGia_NCC_CategoryDTO)
         getSupplierDetail: (codeNcc) => (window.apiBaseUrl || '') +`/Master/GetSupplierDetail?codeNcc=${encodeURIComponent(codeNcc)}`,
         addSupplierDetail: (window.apiBaseUrl || '') + '/Master/AddSupplierDetail',
         deleteSupplierDetail: (id) => (window.apiBaseUrl || '') +`/Master/DeleteSupplierDetail?req=${encodeURIComponent(id)}`,
         addListSupplierDetail: (window.apiBaseUrl || '') + '/Master/AddListSupplierDetail',
         ImportSupplierDetail: (window.apiBaseUrl || '') + '/Master/ImportSupplierDetail', //UpdateMaterialInfo
-        ImportExcelMaterial: (window.apiBaseUrl || '') + '/Master/ImportExcelMaterial',
         ExportTableExcel: (window.apiBaseUrl || '') + '/Master/ExportTableExcel'
     };
-
+    let currentSupplierItems = [];
     const tableBody = document.querySelector('#suppliersTable tbody');
 
     // pagination state
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const pageInfo = document.getElementById('pageInfo');
     const pageSizeSelect = document.getElementById('pageSizeSelect');
     const downloadMaster = document.getElementById('btnExportMaster');
-    const btnImportExcelMaterial = document.getElementById('btnImportExcelMaterial');
     const btnTemplateImportExcel = document.getElementById('btnTemplateImportExcel');
     const btnExportTableExcel = document.getElementById('btnExportTableExcel');
 
@@ -101,8 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const T = window.i18nSupplierMana || {};
             try {
                 const templates = [
-                    { url: (window.apiBaseUrl || '') + '/template/TemplateImportMaterial.xlsx', filename: 'Mẫu file Master Material.xlsx' },
-                    { url: (window.apiBaseUrl || '') + '/template/NccMaster.xlsx', filename: 'Mẫu file Master Vendor.xlsx' }
+                    { url: (window.apiBaseUrl || '') + '/template/NccMasterActions.xlsx', filename: 'Mẫu file Master Vendor.xlsx' }
                 ];
 
                 for (const template of templates) {
@@ -129,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const base = window.apiBaseUrl || '';
                 const endpoints = [
                     { url: base + '/Master/ExportExcelMasterVendor', defaultName: 'ExportMasterVendor.xlsx' },
-                    { url: base + '/Master/ExportExcelMasterMaterial', defaultName: 'ExportMasterMaterial.xlsx' }
+                   // { url: base + '/Master/ExportExcelMasterMaterial', defaultName: 'ExportMasterMaterial.xlsx' }
                 ];
 
                 for (const ep of endpoints) {
@@ -341,9 +339,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const itemsExcelFileInput = document.getElementById('itemsExcelFileInput');
     const btnImportExcelFirst = document.getElementById('btnImportExcelFirst');
     const itemsExcelFileInputFirst = document.getElementById('itemsExcelFileInputFirst');
+    const btnToggleAddCategory = document.getElementById('btnToggleAddCategory');
+    const addCategoryCollapse = document.getElementById('addCategoryCollapse');
+
+    function setAddCategoryCollapse(show) {
+        if (!addCategoryCollapse) return;
+        addCategoryCollapse.classList.toggle('show', show);
+        addCategoryCollapse.style.display = show ? 'block' : 'none';
+        btnToggleAddCategory?.setAttribute('aria-expanded', show ? 'true' : 'false');
+    }
+
+    btnToggleAddCategory?.addEventListener('click', () => {
+        if (!addCategoryCollapse) return;
+        const isShown = addCategoryCollapse.classList.contains('show');
+        setAddCategoryCollapse(!isShown);
+    });
+
+    setAddCategoryCollapse(false);
 
     async function showDetails(r) {
         currentItemSupplier = { ma: r.ma || '', ten: r.ten || '' };
+        setAddCategoryCollapse(false);
         const codeEl = document.getElementById('selectedNccCode');
         const nameEl = document.getElementById('selectedNccName');
         if (codeEl) codeEl.textContent = currentItemSupplier.ma;
@@ -364,6 +380,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!res.ok) { supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">' + (T.LoadFailed || 'Không tải được dữ liệu') + '</td></tr>'; return; }
             const data = await res.json();
             const list = data.data ?? [];
+
+            currentSupplierItems = Array.isArray(list) ? list : [];
+
             renderSupplierItems(Array.isArray(list) ? list : []);
         } catch (e) {
             supplierItemsTbody.innerHTML = '<tr><td colspan="7" class="text-center">' + (T.LoadFailed || 'Lỗi tải dữ liệu') + '</td></tr>';
@@ -492,31 +511,6 @@ document.addEventListener('DOMContentLoaded', function () {
         e.target.value = '';
     });
 
-    // Input material info from excel file
-    btnImportExcelMaterial?.addEventListener('click', () => itemsExcelFileInputMaterial?.click());
-    itemsExcelFileInputMaterial?.addEventListener('change', async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        try {
-            // property names expected by InsertFileExcelSupplierRequestDTO (multipart/form-data)
-            const fd = new FormData();
-            fd.append('FileExcel', file);
-            const res = await fetch(api.ImportExcelMaterial, { method: 'POST', body: fd });
-            if (!res.ok) {
-                let txt = await res.text();
-                const T = window.i18nSupplierMana || {};
-                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportFailed || 'Nhập thất bại') + ': ' + (txt || res.statusText), type: 'error' });
-            } else {
-                const T = window.i18nSupplierMana || {};
-                showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportSuccess || 'Nhập file thành công'), type: 'success' });
-                await loadSupplierItems(currentItemSupplier.ma);
-            }
-        } catch (err) {
-            const T = window.i18nSupplierMana || {};
-            showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.CannotSendFile || 'Không thể gửi file') + ': ' + (err.message || err), type: 'error' });
-        }
-        e.target.value = '';
-    });
 
     document.getElementById('btnExportExcel')?.addEventListener('click', async () => {
         const ma = document.getElementById('searchMa').value.trim();
@@ -695,5 +689,138 @@ document.addEventListener('DOMContentLoaded', function () {
             btnOk && btnOk.addEventListener('click', onOk);
             open();
         });
+    }
+    // Search Catergory
+    document.getElementById('btnSearchCategory')
+        ?.addEventListener('click', filterCategory);
+
+    document.getElementById('txtSearchCategory')
+        ?.addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') {
+                filterCategory();
+            }
+        });
+
+    function filterCategory() {
+
+        const keyword =
+            document.getElementById('txtSearchCategory')
+                ?.value
+                ?.trim()
+                ?.toLowerCase() || '';
+
+        if (!keyword) {
+            renderSupplierItems(currentSupplierItems);
+            return;
+        }
+
+        const filtered = currentSupplierItems.filter(x =>
+            (x.nvchR_ChungLoai || '')
+                .toLowerCase()
+                .includes(keyword)
+        );
+
+        renderSupplierItems(filtered);
+    }
+    // Thêm loại hàng cho nhà cung cấp 
+    const btnAddCategory =
+        document.getElementById('btnAddCategory');
+    btnAddCategory?.addEventListener('click', addCategoryForSupplier);
+
+    async function addCategoryForSupplier() {
+        const T = window.i18nSupplierMana || {};
+
+        const payload = {
+
+            CHR_MaNCC: currentItemSupplier.ma,
+            NVCHR_TenNCC: currentItemSupplier.ten,
+
+            NVCHR_ChungLoai:
+                document.getElementById('txtCategoryName')
+                    ?.value?.trim(),
+
+            NVCHR_SanXuat:
+                document.getElementById('txtMadeIn')
+                    ?.value?.trim(),
+
+            CHR_Status:
+                document.getElementById('txtStatus')
+                    ?.value?.trim(),
+
+            CHR_PIC:
+                document.getElementById('txtPIC')
+                    ?.value?.trim(),
+
+            CHR_Mail:
+                document.getElementById('txtMail')
+                    ?.value?.trim()
+        };
+
+        if (!payload.CHR_MaNCC) {
+            showDialog({
+                title: T.ErrorTitle || 'Lỗi',
+                message: T.MissingCategorySupplierMessage || 'Vui lòng chọn nhà cung cấp trước khi thêm chủng loại',
+                type: 'error'
+            });
+
+            return;
+        }
+
+        if (!payload.NVCHR_ChungLoai) {
+
+            showDialog({
+                title: T.Notification || 'Thông báo',
+                message: T.MissingCategoryNameMessage || 'Vui lòng nhập chủng loại',
+                type: 'error'
+            });
+
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            Object.entries(payload).forEach(([key, value]) => {
+                formData.append(key, value ?? '');
+            });
+
+            const res = await fetch(api.InsertCategoryNcc, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text().catch(() => '');
+
+                showDialog({
+                    title: T.ErrorTitle || 'Lỗi',
+                    message: (T.AddCategoryFailedMessage || 'Thêm chủng loại thất bại') + (errorText ? `: ${errorText}` : ''),
+                    type: 'error'
+                });
+
+                return;
+            }
+
+            document.getElementById('txtCategoryName').value = '';
+            document.getElementById('txtMadeIn').value = '';
+            document.getElementById('txtPIC').value = '';
+            document.getElementById('txtMail').value = '';
+
+            showDialog({
+                title: T.SuccessTitle || 'Thành công',
+                message: T.AddCategorySuccessMessage || 'Đã thêm chủng loại cho nhà cung cấp',
+                type: 'success'
+            });
+
+            await loadSupplierItems(currentItemSupplier.ma);
+
+        } catch (err) {
+
+            showDialog({
+                title: T.ErrorTitle || 'Lỗi',
+                message: err?.message || T.UnexpectedErrorMessage || 'Có lỗi xảy ra',
+                type: 'error'
+            });
+
+        }
     }
 });

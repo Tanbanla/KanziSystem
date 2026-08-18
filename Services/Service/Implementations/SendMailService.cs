@@ -2,6 +2,7 @@ using AutoMapper;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml.Wordprocessing;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
@@ -62,239 +63,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                Message = sendResult ? "Mail sent successfully" : "Failed to send mail"
            };
         }
-        public async Task<GenericResponse<bool>> SendMailToSupplierAsyncOlder()
-        {
-            string dearMail = "";
-            string titleMail = "";
-            string mailTk = "";
-            // lay thong tin nha cung cap tu db
-            var suppliers = await _repo.GetSuppliersToNotifyAsync();
-            if (suppliers == null || !suppliers.Any())
-            {
-                return new GenericResponse<bool>
-                {
-                    Success = false,
-                    Message = "No suppliers to notify"
-                };
-            }
-
-            // lấy mail 
-            var mail = await _repo.GetMailByIdAsync(19);
-            if (mail == null)
-            {
-                return new GenericResponse<bool>
-                {
-                    Success = false,
-                    Message = "Mail template not found"
-                };
-            }
-
-            // tao danh sach bao gia chi tiet
-            var listBaoGiaDetail = new List<BaoGia_Detail_of_Quotation>();
-            // danh sach cac don da gui mail
-            var listSended = new List<int>();
-
-            foreach (var item in suppliers)
-            {
-                // lay danh sach don link kien xin bao gia 
-                var listRq = await _repo.GetBaoGiaRequestBySupplierAsync(item);
-                if (listRq == null || !listRq.Any())
-                {
-                    continue;
-                }
-
-                // Group requests by request code (CHR_MaDon) ONLY - bỏ ChungLoai
-                var groupsByMaDon = listRq.GroupBy(r => r.CHR_MaDon ?? string.Empty);
-
-                foreach (var grp in groupsByMaDon)
-                {
-                    var rqList = grp.ToList();
-                    if (!rqList.Any())
-                        continue;
-
-                    // lay email nha cung cap (không cần category)
-                    var toEmail = await _repo.GetSupplierEmailAsync(item);
-                    if (string.IsNullOrEmpty(toEmail))
-                    {
-                        continue;
-                    }
-
-                    string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template", "ExportSampleExcel.xlsx");
-
-                    // Tạo tên file với mã đơn và timestamp
-                    string maDon = rqList.FirstOrDefault()?.CHR_MaDon ?? "UnknownMaDon";
-                    string tempFileName = $"{item}_{maDon}.xlsx";
-                    string tempFilePath = Path.Combine(Path.GetTempPath(), tempFileName);
-
-                    // Build table HTML cho mã đơn này
-                    var tableHtml = new StringBuilder();
-                    tableHtml.AppendLine("<table border='1' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;'>");
-                    tableHtml.AppendLine("<tr style='background-color: #f2f2f2; text-align: center; vertical-align: middle; font-weight: bold;'>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 120px;'>Số đơn yêu cầu báo giá<br/>Quotation Request Number</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 120px;'>Mã thiết bị<br/>Equipment code</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Mã hàng nội bộ<br/>BIVN's part code</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Mã hàng của NCC<br/>Vendor's good code</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 200px;'>Tên hàng VN dùng để mở thủ tục hải quan (dự thảo)(*)<br/>Part name (Vietnamese)</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 150px;'>Tên hàng tiếng anh(*)<br/>Part name (English)</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 80px;'>Số lượng<br/>Quantity(*)</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 80px;'>Đơn vị <br/>Unit(*)</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Chủng loại hàng<br/>Part category</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 100px;'>File Thiết kế<br/>Design(*)</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Nhà Sản xuất<br/>Maker</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 130px;'>Mã nhà cung cấp<br/>Vendor code</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 150px;'>Tên nhà cung cấp<br/>Vendor name</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Ngày muốn nhận hàng<br/>Desired delivery date(*)</th>");
-                    tableHtml.AppendLine("<th style='padding: 8px; border: 1px solid #999; min-width: 140px;'>Kỳ hạn báo giá<br/>Deadline for submit quotation</th>");
-                    tableHtml.AppendLine("</tr>");
-
-                    using (var workbook = new XLWorkbook(templatePath))
-                    {
-                        var worksheet = workbook.Worksheet(1);
-                        int rowIndex = 15;
-
-                        worksheet.Column(44).Hide();
-                        foreach (var rq in rqList)
-                        {
-                            // Thêm dòng dữ liệu vào table HTML
-                            tableHtml.AppendLine("<tr style='vertical-align: middle;'>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaDon ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaThietBi ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaHangNoiBo ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaHangNCC ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_NameVN ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_NameEN ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: right;'>{rq.INT_SoLuong?.ToString() ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_DonVi ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_ChungLoai ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.NVCHR_FileThietKe ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_NhaSanXuat ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.CHR_MaNCC ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999;'>{rq.NVCHR_TenNCC ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? ""}</td>");
-                            tableHtml.AppendLine($"<td style='padding: 6px; border: 1px solid #999; text-align: center;'>{rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? ""}</td>");
-                            tableHtml.AppendLine("</tr>");
-
-                            // phần của file dữ liệu đính kèm
-                            worksheet.Cell(1, 3).Value = rq.NVCHR_TenNCC ?? string.Empty;
-                            worksheet.Cell(2, 3).Value = rq.Diachi ?? string.Empty;
-                            worksheet.Cell(rowIndex, 23).Value = rq.CHR_MaDon ?? string.Empty;
-                            worksheet.Cell(rowIndex, 24).Value = rq.CHR_MaThietBi ?? string.Empty;
-                            worksheet.Cell(rowIndex, 25).Value = rq.CHR_MaHangNoiBo ?? string.Empty;
-                            worksheet.Cell(rowIndex, 26).Value = rq.CHR_MaHangNCC ?? string.Empty;
-                            worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_NameVN ?? string.Empty;
-                            worksheet.Cell(rowIndex, 28).Value = rq.CHR_NameEN ?? string.Empty;
-                            worksheet.Cell(rowIndex, 29).Value = rq.INT_SoLuong ?? string.Empty;
-                            worksheet.Cell(rowIndex, 30).Value = rq.NVCHR_DonVi ?? string.Empty;
-                            worksheet.Cell(rowIndex, 31).Value = rq.NVCHR_Rohs ?? string.Empty;
-                            worksheet.Cell(rowIndex, 32).Value = rq.NVCHR_COCQ ?? string.Empty;
-                            worksheet.Cell(rowIndex, 33).Value = rq.NVCHR_MSDS ?? string.Empty;
-                            worksheet.Cell(rowIndex, 34).Value = rq.NVCHR_AnToan ?? string.Empty;
-                            worksheet.Cell(rowIndex, 35).Value = rq.NVCHR_FileThietKe ?? string.Empty;
-                            worksheet.Cell(rowIndex, 36).Value = rq.NVCHR_NhaSanXuat ?? string.Empty;
-                            worksheet.Cell(rowIndex, 37).Value = rq.CHR_MaNCC ?? string.Empty;
-                            worksheet.Cell(rowIndex, 38).Value = rq.ShortName ?? rq.NVCHR_TenNCC ?? string.Empty;
-                            worksheet.Cell(rowIndex, 39).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? "";
-                            worksheet.Cell(rowIndex, 40).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? "";
-                            worksheet.Cell(rowIndex, 41).Value = rq.NVCHR_FileThietKe ?? "";
-                            worksheet.Cell(rowIndex, 44).Value = rq.ID ?? "";
-                            worksheet.Range(rowIndex, 1, rowIndex, 10).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-
-                            var itemDetail = new BaoGia_Detail_of_Quotation
-                            {
-                                ID_RequestQuote = rq.ID,
-                                CHR_CodeNCC = rq.CHR_MaNCC ?? "",
-                                NVCHR_NameNCC = rq.NVCHR_TenNCC ?? "",
-                                DTM_CreateDate = DateTime.Now,
-                                CHR_CreateBy = "System Send Mail",
-                                CHR_MaHangNCC = rq.CHR_MaHangNCC,
-                                NVCHR_TenHangHQ = rq.NVCHR_NameVN,
-                                NVCHR_DonVi = "",
-                                INT_SoLuong = 0,
-                                FL_USD = 0,
-                                FL_VND = 0,
-                                NVCHR_MOQ = "",
-                                DTM_LeadTime = "",
-                                DTM_ShipTime = null,
-                                VCHR_Rohs = "",
-                                VCHR_COCQ = "",
-                                VCHR_MSDS = "",
-                                VCHR_AnToan = "",
-                                VCHR_CamKet = "",
-                                NVCHR_DeliveryTerm = "",
-                                NVCHR_PaymentTerm = "",
-                                NVCHR_File = ""
-                            };
-                            listBaoGiaDetail.Add(itemDetail);
-                            mailTk = rq.CHR_CreateBy + "@brothergroup.net";
-                            dearMail = "nhà cung cấp " + rq.Ten + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
-                            titleMail = (rq.ShortName ?? rq.Ten) + " - Deadline: " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
-                            rowIndex++;
-                        }
-
-                        tableHtml.AppendLine("</table>");
-                        workbook.SaveAs(tempFilePath);
-                    }
-
-                    // Đợi file được giải phóng hoàn toàn
-                    await Task.Delay(100);
-
-                    var bodyTable = mail.CHR_BODY + tableHtml.ToString();
-                    var body = string.Format(bodyTable, dearMail, mailTk);
-                    var email = string.IsNullOrEmpty(mail.CHR_CC) ?
-                    mailPICTo : mail.CHR_CC;
-
-                    var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
-                    {
-                        mail_from = mail.CHR_FROM,
-                        mail_to = "nguyenduy.khanh@brother-bivn.com.vn",//toEmail,
-                        mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",//email,
-                        mail_bcc = mail.CHR_BCC,
-                        title = titleMail,
-                        body = body,
-                        attachmentPaths = new List<string> { tempFilePath }
-                    };
-
-                    var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
-
-                    // Xóa file tạm sau khi gửi email
-                    try
-                    {
-                        if (File.Exists(tempFilePath))
-                        {
-                            File.Delete(tempFilePath);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log lỗi nếu cần
-                        Console.WriteLine($"Không thể xóa file tạm: {ex.Message}");
-                    }
-
-                    if (sendResult.Success)
-                    {
-                        listSended.AddRange(rqList.Select(r => (int)r.ID));
-                    }
-                }
-            }
-
-            // cap nhat trang thai da gui mail
-            if (listSended.Any())
-            {
-               //await _repo.UpdateMailSentStatusAsync(listSended);
-            }
-
-            if (listBaoGiaDetail.Any())
-            {
-               //await _repo.InsertBaoGiaDetailAsync(listBaoGiaDetail);
-            }
-
-            return new GenericResponse<bool>
-            {
-                Success = true,
-                Message = "Mail sent successfully"
-            };
-        }
-
         public async Task<GenericResponse<bool>> SendMailToSupplierAsync()
         {
             string dearMail = "";
@@ -1603,7 +1371,204 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 Message = "Mail sent successfully"
             };
         }
+        // gửi mail xin xác nhận lại tên hàng
+        public async Task<GenericResponse<bool>> SendMailCofirmNaneOfVendor()
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var data = await _repo.GetRequestNeedToConfirmNameAsync();
+                if (data == null || !data.Any())
+                {
+                    result.Success = false;
+                    result.Message = "No requests need to confirm name";
+                    return result;
+                }
+                // Lấy thông tin mẫu mail từ cơ sở dữ liệu
+                var mailTemplate = await _repo.GetMailByIdAsync(22);
+                if(mailTemplate == null)
+                {
+                    result.Success = false;
+                    result.Message = "Mail template not found";
+                    return result;
+                }
 
+                var bodyTemplate = string.IsNullOrWhiteSpace(mailTemplate.CHR_BODY)
+                    ? result.Message = "Mail template body is empty"
+                    : mailTemplate.CHR_BODY;
+
+                string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template", "TmSendMail_ConfirmName.xlsx");
+                var groupsByVendor = data
+                    .Where(x => !string.IsNullOrWhiteSpace((string?)x.CHR_CodeNCC))
+                    .GroupBy(x => ((string?)x.CHR_CodeNCC ?? string.Empty).Trim())
+                    .ToList();
+
+                if (!groupsByVendor.Any())
+                {
+                    result.Success = false;
+                    result.Message = "No suppliers to notify";
+                    return result;
+                }
+
+                int successCount = 0;
+                int failCount = 0;
+
+                foreach (var vendorGroup in groupsByVendor)
+                {
+                    var vendorCode = vendorGroup.Key;
+                    var dataVendor = vendorGroup.ToList();
+                    if (!dataVendor.Any())
+                    {
+                        continue;
+                    }
+
+                    var toEmail = await _repo.GetSupplierEmailAsync(vendorCode);
+                    if (string.IsNullOrWhiteSpace(toEmail))
+                    {
+                        failCount++;
+                        continue;
+                    }
+
+                    string tempFileName = $"{vendorCode}_{DateTime.Now:yyyyMMddHHmmssfff}.xlsx";
+                    string tempFilePath = Path.Combine(Path.GetTempPath(), tempFileName);
+
+                    try
+                    {
+                        using (var workbook = new XLWorkbook(templatePath))
+                        {
+                            var worksheet = workbook.Worksheet(1);
+                            worksheet.Column(30).Hide();
+
+                            int rowIndex = 13;
+                            foreach (var item in dataVendor)
+                            {
+                                var otherRequestList = new List<string>();
+                                if (!string.IsNullOrEmpty((string?)item.NVCHR_Rohs))
+                                    otherRequestList.Add($"ROHS: {item.NVCHR_Rohs}");
+                                if (!string.IsNullOrEmpty((string?)item.NVCHR_COCQ))
+                                    otherRequestList.Add($"COCQ: {item.NVCHR_COCQ}");
+                                if (!string.IsNullOrEmpty((string?)item.NVCHR_MSDS))
+                                    otherRequestList.Add($"MSDS: {item.NVCHR_MSDS}");
+                                if (!string.IsNullOrEmpty((string?)item.NVCHR_AnToan))
+                                    otherRequestList.Add($"An toàn: {item.NVCHR_AnToan}");
+
+                                string otherRequest = string.Join(" & ", otherRequestList);
+
+                                worksheet.Cell(1, 3).Value = (string?)item.NVCHR_NameNCC ?? string.Empty;
+                                worksheet.Cell(2, 3).Value = (string?)item.Diachi ?? string.Empty;
+
+                                worksheet.Cell(rowIndex, 1).Value = (string?)item.CHR_MaDon ?? string.Empty;
+                                worksheet.Cell(rowIndex, 2).Value = (string?)item.CHR_MaThietBi ?? string.Empty;
+                                worksheet.Cell(rowIndex, 3).Value = (string?)item.CHR_MaHangNoiBo ?? string.Empty;
+                                worksheet.Cell(rowIndex, 4).Value = (string?)item.BivnMaHang ?? string.Empty;
+                                worksheet.Cell(rowIndex, 5).Value = (string?)item.VCHR_TenHaiQuan ?? string.Empty;
+                                worksheet.Cell(rowIndex, 6).Value = item.SoluongQ ?? string.Empty;
+                                worksheet.Cell(rowIndex, 7).Value = (string?)item.DonViQ ?? string.Empty;
+                                worksheet.Cell(rowIndex, 8).Value = otherRequest;
+                                worksheet.Cell(rowIndex, 9).Value = string.Empty;
+                                worksheet.Cell(rowIndex, 10).Value = (string?)item.CHR_CodeNCC ?? string.Empty;
+                                worksheet.Cell(rowIndex, 11).Value = (string?)item.VendorMaHang ?? string.Empty;
+                                worksheet.Cell(rowIndex, 12).Value = (string?)item.NVCHR_TenHangHQ ?? string.Empty;
+                                worksheet.Cell(rowIndex, 13).Value = (string?)item.CHR_NameEN ?? string.Empty;
+                                worksheet.Cell(rowIndex, 14).Value = item.SoluongNcc ?? string.Empty;
+                                worksheet.Cell(rowIndex, 15).Value = (string?)item.DonViNcc ?? string.Empty;
+                                worksheet.Cell(rowIndex, 16).Value = item.FL_USD ?? string.Empty;
+                                worksheet.Cell(rowIndex, 17).Value = item.FL_VND ?? string.Empty;
+                                worksheet.Cell(rowIndex, 18).Value = (string?)item.NVCHR_MOQ ?? string.Empty;
+                                worksheet.Cell(rowIndex, 19).Value = (string?)item.NVCHR_Packing ?? string.Empty;
+                                worksheet.Cell(rowIndex, 20).Value = (string?)item.DTM_LeadTime ?? string.Empty;
+                                worksheet.Cell(rowIndex, 21).Value = item.DTM_ShipTime?.ToString("yyyy-MM-dd") ?? string.Empty; ///
+                                worksheet.Cell(rowIndex, 22).Value = (string?)item.VCHR_CamKet ?? string.Empty;
+                                worksheet.Cell(rowIndex, 23).Value = (string?)item.NVCHR_DeliveryTerm ?? string.Empty;
+                                worksheet.Cell(rowIndex, 24).Value = (string?)item.NVCHR_PaymentTerm ?? string.Empty;
+                                worksheet.Cell(rowIndex, 25).Value = item.DTM_EffectiveDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+                                worksheet.Cell(rowIndex, 26).Value = item.DTM_EffectiveDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+                                worksheet.Cell(rowIndex, 27).Value = (string?)item.NVCHR_FileThietKe ?? string.Empty;
+                                worksheet.Cell(rowIndex, 28).Value = item.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? string.Empty;
+                                worksheet.Cell(rowIndex, 29).Value = item.DTM_Deadline?.ToString("yyyy-MM-dd") ?? string.Empty;
+                                worksheet.Cell(rowIndex, 30).Value = (string?)item.NVCHR_File ?? string.Empty;
+                                worksheet.Cell(rowIndex, 31).Value = (string?)item.NVCHR_UserRequest ?? string.Empty;
+                                worksheet.Cell(rowIndex, 32).Value = item.ID ?? string.Empty;
+
+                                rowIndex++;
+                            }
+
+                            workbook.SaveAs(tempFilePath);
+                        }
+
+                        await Task.Delay(100);
+
+                        var firstItem = dataVendor.FirstOrDefault();
+                        string vendorName = (string?)firstItem?.NVCHR_NameNCC ?? "Supplier";
+                        string shortName = (string?)firstItem?.ShortName ?? vendorName;
+                        string expectedDeadline = DateTime.Now.AddHours(4).ToString("yyyy-MM-dd HH:mm");
+
+                        string body = string.Format(bodyTemplate, shortName, vendorName, expectedDeadline);
+                        string titleMail = $"{shortName} - Sửa tên hàng hóa trên báo giá / Please revise the part name on the quotation.";
+                        var emailCC = string.IsNullOrEmpty(mailTemplate.CHR_CC) ? mailPICTo : mailTemplate.CHR_CC;
+
+                        //var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
+                        //{
+                        //    mail_from = mailTemplate.CHR_FROM,
+                        //    mail_to = toEmail,
+                        //    mail_cc = emailCC,
+                        //    mail_bcc = mailTemplate.CHR_BCC,
+                        //    title = titleMail,
+                        //    body = body,
+                        //    attachmentPaths = new List<string> { tempFilePath }
+                        //};
+
+                        var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
+                        {
+                            mail_from = "nguyenduy.khanh@brother-bivn.com.vn",
+                            mail_to = "nguyenthilan.huong2@brother-bivn.com.vn",
+                            mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",
+                            mail_bcc = "nguyenduy.khanh@brother-bivn.com.vn",
+                            title = titleMail,
+                            body = body,
+                            attachmentPaths = new List<string> { tempFilePath }
+                        };
+
+                        var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
+                        if (sendResult.Success)
+                        {
+                            successCount++;
+                        }
+                        else
+                        {
+                            failCount++;
+                        }
+                    }
+                    catch
+                    {
+                        failCount++;
+                    }
+                    finally
+                    {
+                        try
+                        {
+                            if (File.Exists(tempFilePath))
+                            {
+                                File.Delete(tempFilePath);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Không thể xóa file tạm: {ex.Message}");
+                        }
+                    }
+                }
+
+                result.Success = successCount > 0 && failCount == 0;
+                result.Message = $"Sent: {successCount}, Failed: {failCount}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = $"Error sending confirmation mail: {ex.Message}";
+            }
+            return result;
+        }
 
     }
 }

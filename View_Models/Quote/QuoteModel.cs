@@ -222,4 +222,9 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string MaHangNCC { get; set; } = string.Empty;
         public string NameEn { get; set; } = string.Empty;
     }
+    public class QuoteDetailRequest
+    {
+        public string? MaDon { get; set; }
+        public string? MaHang { get; set; }
+    }
 }

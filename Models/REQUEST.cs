@@ -655,14 +655,14 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 var phongchiuphi = _db.ReturnString("select Phongchiuchiphi from REQUEST_DETAIL where Code_Request ='" + code_request + "' and Material_Code = '" + manguyenlieu + "' ");
 
                 string hanhdong = $"Xuất kho {kho} cho request: {code_request}";
-           
-                    string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
+
+                string sqlLog = $@"INSERT INTO [KHO_NHAPXUAT] 
                         ([MaNguyenLieu], [Hanhdong], [Soluong], [Loai], [Thoigian], [Nguoicapnhat], [Kho], [Khoi], [Phong], [Vitri], [Ngaynhaokho], [Soluongtruocthaydoi], [Soluongsauthaydoi],[Sotaikhoan])
                         VALUES ('{manguyenlieu}', N'{hanhdong}', '{slXuat}', 'XUAT', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', N'{nguoixuatkho}', '{kho}', '{khoi}', '{phongchiuphi}', N'{vitrii}', '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}', '{slHienTai}', '{slHienTai - slXuat}','{sotaikhoan}');
                         SELECT SCOPE_IDENTITY();";
 
-                    // hứng ID vừa tạo
-                    string idKhoNhapXuat = _db.ReturnString(sqlLog);
+                // hứng ID vừa tạo
+                string idKhoNhapXuat = _db.ReturnString(sqlLog);
 
                 // Kiểm tra nếu ID rỗng, null hoặc bằng 0 -> Insert thất bại
                 if (string.IsNullOrEmpty(idKhoNhapXuat) || idKhoNhapXuat == "0")
@@ -686,15 +686,15 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                             [Status] = 'DONE',
                             [Currency_Real] = [Currency],
                             [Last_Update] = GETDATE(),
-                            [Total_Real] = ({slXuat}*{giathucte})/{laytigia},
+                            [Total_Real] = (1.0 * {slXuat} * {giathucte}) / {laytigia},
                             [Dealine_Real] = '{thoigian.ToString("yyyy-MM-dd HH:mm:ss")}',
                             [User_Update] = '{nguoixuatkho}',
                             [Kho] = '{kho}',
                             [Id_LichsuXuat] = '{idKhoNhapXuat}'
                             WHERE [Id_RequestDetail] = '{id_rq}'";
 
-                     _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
-
+                    _db.GET_DATA_FROM_SQL(sqlUpdateDetail);
+                   
                     // đẩy vào đơn gốc
                     var tongtien = _db.ReturnString("select SUM(Total_Real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");
                     var tongtien_1 = _db.ReturnString("select SUM(Total_exchange_real) from [REQUEST_DETAIL] where Code_Request  ='" + code_request + "'");

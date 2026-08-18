@@ -275,5 +275,61 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 return new List<string>();
             }
         }
+        // Lấy thông tin các đơn cần xin lại xác nhận tên hàng
+        public async Task<List<dynamic>> GetRequestNeedToConfirmNameAsync()
+        {
+            var sql = @"
+                SELECT r.CHR_MaDon,
+                       r.CHR_MaHangNoiBo,
+                       r.CHR_MaThietBi,
+                       r.CHR_MaHangNCC as BivnMaHang,
+                       d.CHR_MaHangNCC as VendorMaHang,
+                       c.VCHR_TenHaiQuan,
+					   ---Part Other 
+					   r.NVCHR_Rohs,
+					   r.NVCHR_COCQ,
+					   r.NVCHR_MSDS,
+					   r.NVCHR_AnToan,
+					   ----
+                       r.INT_SoLuong as SoluongQ,
+                       r.NVCHR_DonVi as DonViQ,
+                       d.NVCHR_NameNCC,
+                       d.CHR_CodeNCC,
+                       d.NVCHR_TenHangHQ,
+                       r.CHR_NameEN,
+                       d.INT_SoLuong as SoluongNcc,
+                       d.NVCHR_DonVi as DonViNcc,
+                       d.FL_USD,
+                       d.FL_VND,
+                       d.NVCHR_MOQ,
+                       d.NVCHR_Packing,
+                       d.DTM_LeadTime,
+					   d.DTM_ShipTime,
+                       d.VCHR_CamKet,
+					   d.NVCHR_DeliveryTerm,
+                       d.NVCHR_PaymentTerm,
+                       d.DTM_EffectiveDate,
+                       d.DTM_ExpiryDate,
+                       r.NVCHR_FileThietKe,
+                       r.DTM_NgayMuonNhan,
+                       r.DTM_Deadline,
+                       d.NVCHR_File,
+                       r.NVCHR_UserRequest,
+                       r.ID,
+					   n.ShortName,
+					   n.Diachi
+                FROM BaoGia_Confirm_Name_Quotation c
+                LEFT JOIN BaoGia_Request_of_Quotation r
+                    ON c.ID_RequestQuote = r.ID
+                LEFT JOIN BaoGia_Detail_of_Quotation d
+                    ON c.ID_RequestQuote = d.ID_RequestQuote
+                LEFT JOIN IM_NCC_NEW n
+                    ON r.CHR_MaNCC = n.Ma
+                WHERE r.ID_StepBaoGia = 12
+                  AND c.CHR_Status = 'Confirming'";
+
+            var result = await _conn.QueryAsync<dynamic>(sql);
+            return result.ToList();
+        }
     }
 }

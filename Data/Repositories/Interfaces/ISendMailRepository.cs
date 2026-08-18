@@ -33,5 +33,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<string> GetRequesterEmailByAdidAsync(string adid);
         // The list vender not need to send mail
         Task<List<string>> SupplierNeedToSendMailAsync();
+        // Lấy thông tin các đơn cần xin lại xác nhận tên hàng
+        Task<List<dynamic>> GetRequestNeedToConfirmNameAsync();
     }
 }

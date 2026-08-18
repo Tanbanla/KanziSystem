@@ -28,7 +28,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // lay ma hang hien tai
         public Task<GenericResponse<string>> MaterialCodeLater(string type);
         // check ma hang
-        public Task<GenericResponse<string>> CheckMaterialCode(string keyword, string category);
+        public Task<GenericResponse<string>> CheckMaterialCode(string codeNcc, string category, string NameEN);
         // Search date by Material View
         Task<GenericResponse<ListRequest<MATERIAL>>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
         // Export danh sách linh kiện
@@ -37,5 +37,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<bool>> DeleteMaterialAsync(string codeMaterial);
         // Update Material
         Task<GenericResponse<bool>> UpdateMaterialAsync(MATERIALDTO mt);
+        // delete list material
+        Task<GenericResponse<bool>> DeleteMaterials(List<string> listCodeMaterial);
+
     }
 }

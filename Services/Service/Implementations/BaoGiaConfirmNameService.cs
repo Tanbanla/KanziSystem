@@ -5,6 +5,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using static PRJ_WAREHOUSE_BIVN.View_Models.Material.MaterialVM;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
@@ -20,12 +21,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _detailBaoGiaRespository = baoGiaDetailRepository;
         }
         // search thông tin xác nhận tên hàng
-        public async Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role,string user, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(ConfirmNameSearchRequest req, string user, string? role)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.SearchAsync(TenHang, SoDon, TrangThai, section, role, user, pageIndex, pageSize);
+                result.Data = await _repo.SearchAsync(req, user, role);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -335,6 +336,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
 
+        }
+
+        public async Task<GenericResponse<List<ConfirmNameHistoryDTO>>> GetConfirmNameHistoryAsync(int confirmId)
+        {
+            var result = new GenericResponse<List<ConfirmNameHistoryDTO>>();
+            try
+            {
+                result.Data = await _repo.GetConfirmNameHistoryAsync(confirmId);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return result;
         }
     }
 }

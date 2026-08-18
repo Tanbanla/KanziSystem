@@ -20,7 +20,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> SendMailToConfirmItemAsync(int step, int codeMail, string? link, bool? isGap, string? sectionCode, string? sectionName ,string user);
         // Lấy thông tin mail người nhận theo bước
         public Task<GenericResponse<string>> SendMailToRequesterAsync(string sectionCode, int step);
-        // test mail
-        Task<GenericResponse<bool>> SendMailToSupplierAsyncOlder();
+        // gửi mail xin xác nhận lại tên hàng
+        Task<GenericResponse<bool>> SendMailCofirmNaneOfVendor();
     }
 }

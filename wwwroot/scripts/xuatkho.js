@@ -17,6 +17,7 @@ const CONTROLLER_BASE = (function () {
         // ignore and fallback
     }
     return '/ipcs/Import';
+   
 })();
 
 // Load trang xuất kho 

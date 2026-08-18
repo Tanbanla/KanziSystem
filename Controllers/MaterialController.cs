@@ -145,7 +145,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             // Determine role from query or default to UserPUR
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
-            //(Request.Query["role"].ToString() ?? string.Empty).Trim();
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
+            var madons = await LoadMadonAsync(13);
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             if (!role.Success)
             {
@@ -163,10 +164,45 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var vm = new MaterialVM
             {
                 vitris = vitris,
-                confirmedCodes = await LoadConfirmedCodesAsync()
+                confirmedCodes = await LoadConfirmedCodesAsync(),
+                DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
+                DanhSachMaDon = madons ?? new List<string>()
             };
             return View(vm);
         }
+
+        public async Task<IActionResult> ConfirmNameV2()
+        {
+            // Determine role from query or default to UserPUR
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
+            var madons = await LoadMadonAsync(13);
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
+            if (!role.Success)
+            {
+                return BadRequest(role.Message);
+            }
+            if (role.Data == null || (role.Data != "UserPUR" && role.Data != "UserShip" && role.Data != "UserAcc"))
+            {
+                ViewBag.Role = "User";
+            }
+            else
+            {
+                ViewBag.Role = role.Data;
+            }
+            var vitris = await LoadNhomViTriDataAsync();
+            var vm = new MaterialVM
+            {
+                vitris = vitris,
+                confirmedCodes = await LoadConfirmedCodesAsync(),
+                DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
+                DanhSachMaDon = madons ?? new List<string>()
+            };
+            return View(vm);
+        }
+
+
+
         private async Task<List<DEPARTMENTDTO>> LoadNhomViTriDataAsync()
         {
             var nhomViTri = await _deparmentService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId());
@@ -177,18 +213,36 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var result = await _confirmNameService.ExportCodeConfirmedAsync();
             return result.Success && result.Data != null ? result.Data : new List<dynamic>();
         }
+        private async Task<List<string>> LoadMadonAsync(int step)
+        {
+            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step);
+            return madons.Data ?? new List<string>();
+        }
+
         // Search confirm list
         [HttpPost]
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
         {
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
             var user = (string.IsNullOrEmpty(role.Data)) ? GetCurrentUserId() : "";
-            var result = await _confirmNameService.SearchAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role.Data, user, req.pageIndex, req.pageSize);
+            var result = await _confirmNameService.SearchAsync(req, user, role.Data);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
             return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetConfirmNameHistory(int confirmId)
+        {
+            var result = await _confirmNameService.GetConfirmNameHistoryAsync(confirmId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Data ?? new List<ConfirmNameHistoryDTO>());
         }
 
         [HttpPost]
@@ -555,8 +609,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             };
                             listUpdateRequest.Add(itemRequest);
                             break;
-                            //ws.Cell(r, 27).SetValue("Bạn không có quyền update file");
-                            //break;
                     }
 
                 }
@@ -594,9 +646,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         // Lưu dữ liệu hợp lệ vào database
                         var rp =  await _confirmNameService.SaveFromFileAsync(itemOK, user, role);
-                        if (!rp.Success)
+                        if (!rp.Success || !rp.Data)
                         {
-                            return BadRequest("Bug insert confirmName: "+ rp.Message);
+                            return BadRequest("Bug insert confirmName: "+ (rp.Message ?? "Unknown error"));
                         }
 
                         var listIdSendMail = itemOK.Select(d => d.ID).ToList();
@@ -644,9 +696,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (itemNG.Any())
                     {
                         var rp = await _confirmNameService.RejectConfirmNameListAsync(itemNG, user, role);
-                        if (!rp.Success)
+                        if (!rp.Success || !rp.Data)
                         {
-                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                            return BadRequest("Bug insert confirmName: " + (rp.Message ?? "Unknown error"));
                         }
 
                         var listIdSendMail = itemNG.Select(d => d.Id).ToList();
@@ -696,9 +748,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (listDifferent.Count() > 0)
                     {
                        var rp =  await _confirmNameService.UpdateRequestForPICPURAsync(listDifferent, user);
-                        if (!rp.Success)
+                        if (!rp.Success || !rp.Data)
                         {
-                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                            return BadRequest("Bug insert confirmName: " + (rp.Message ?? "Unknown error"));
                         }
 
                         _ = Task.Run(async () =>
@@ -745,9 +797,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (listUpdateUserPur.Any())
                     {
                         var rp = await _confirmNameService.UpdateNameHQRolePICPURAsync(listUpdateUserPur, user);
-                        if (!rp.Success)
+                        if (!rp.Success || !rp.Data)
                         {
-                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                            return BadRequest("Bug insert confirmName: " + (rp.Message ?? "Unknown error"));
                         }
 
                         var listIdSendMail = listUpdateUserPur.Select(d => d.ID).ToList();
@@ -795,9 +847,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (listUpdateRequest.Any())
                     {
                         var rp = await _confirmNameService.UpdateRequestFromFileAsync(listUpdateRequest, user);
-                        if (!rp.Success)
+                        if (!rp.Success || !rp.Data)
                         {
-                            return BadRequest("Bug insert confirmName: " + rp.Message);
+                            return BadRequest("Bug insert confirmName: " + (rp.Message ?? "Unknown error"));
                         }
                     }
                 }
@@ -878,7 +930,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 11).SetValue(rq.maHangNcc ?? "");
                     ws.Cell(row, 12).SetValue(rq.CHR_CodeNCC + " - " + rq.ShortName ?? "");
                     ws.Cell(row, 13).SetValue(rq.NVCHR_TenHangHQ ?? "");
-                    ws.Cell(row, 14).SetValue(rq.NameEN ?? "");
+                    ws.Cell(row, 14).SetValue(rq.NameENVendor ?? rq.NameEN ?? "");
                     ws.Cell(row, 15).SetValue(rq.INT_SoLuong ?? "");
                     ws.Cell(row, 16).SetValue(rq.NVCHR_DonVi ?? "");
                     ws.Cell(row, 17).SetValue(rq.NVCHR_ChungLoai ?? "");

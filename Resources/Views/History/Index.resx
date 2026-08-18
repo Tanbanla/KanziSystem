@@ -666,4 +666,13 @@
   <data name="SupplierName" xml:space="preserve">
     <value>Tên nhà cung cấp</value>
   </data>
+  <data name="StatusPUR" xml:space="preserve">
+    <value>Chờ xác nhận tên của PUR</value>
+  </data>
+  <data name="StatusACC" xml:space="preserve">
+    <value>Chờ xác nhận tên của phòng ban</value>
+  </data>
+  <data name="StatusShip" xml:space="preserve">
+    <value>Chờ xác nhận tên của Ship</value>
+  </data>
 </root>

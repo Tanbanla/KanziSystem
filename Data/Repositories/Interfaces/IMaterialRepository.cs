@@ -27,12 +27,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Lay ma hang lon nhat hien tai
         public Task<string> MaterialCodeLater(string type);
         // check ma hang
-        public Task<string> CheckMaterialCode(string keyword, string category);
+        public Task<string> CheckMaterialCode(string codeNcc, string category, string NameEN);
         // Search date by Material View
         Task<ListRequest<MATERIAL>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
         // Delete Material
         Task<bool> DeleteMaterialAsync(string codeMaterial);
         // Update Material
         Task<bool> UpdateMaterialAsync(MATERIAL mt);
+        // delete list material
+        Task<bool> DeleteMaterials(List<string> listCodeMaterial);
     }
 }

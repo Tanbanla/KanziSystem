@@ -392,7 +392,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                                         var checkCode = await materialService.CheckMaterialCode(
                                             supplierCode,
-                                            materials.First().NVCHR_ChungLoai
+                                            materials.First().NVCHR_ChungLoai ?? "",
+                                            supplierName
                                         );
 
                                         if (!checkCode.Success)

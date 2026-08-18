@@ -432,4 +432,79 @@
   <data name="PriceIncreaseReason" xml:space="preserve">
     <value>価格上昇の理由</value>
   </data>
+  <data name="Notification" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="DialogOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="DetailButtonText" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="SearchErrorPrefix" xml:space="preserve">
+    <value>検索エラー</value>
+  </data>
+  <data name="ExportSelectAtLeastOne" xml:space="preserve">
+    <value>エクスポートするグループを少なくとも1つ選択してください。</value>
+  </data>
+  <data name="ExportFailed" xml:space="preserve">
+    <value>エクスポートに失敗しました</value>
+  </data>
+  <data name="ExportErrorPrefix" xml:space="preserve">
+    <value>エクスポートエラー</value>
+  </data>
+  <data name="DetailLoadErrorPrefix" xml:space="preserve">
+    <value>詳細の読み込みエラー</value>
+  </data>
+  <data name="OrderMaterialRequired" xml:space="preserve">
+    <value>注文コードと品目コードは必須です</value>
+  </data>
+  <data name="PageLabelTemplate" xml:space="preserve">
+    <value>ページ {0} / {1}</value>
+  </data>
+  <data name="PageInfoTemplate" xml:space="preserve">
+    <value>表示 {0} / {1}</value>
+  </data>
+  <data name="ProcessingText" xml:space="preserve">
+    <value>処理中...</value>
+  </data>
+  <data name="ServerError" xml:space="preserve">
+    <value>サーバーエラー</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>終わり</value>
+  </data>
+  <data name="ExportFile" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="ActiveQuotesTab" xml:space="preserve">
+    <value>有効な見積</value>
+  </data>
+  <data name="AllQuotesTab" xml:space="preserve">
+    <value>すべての見積</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>価格</value>
+  </data>
+  <data name="ExpiryDate" xml:space="preserve">
+    <value>有効期限</value>
+  </data>
+  <data name="NoDataText" xml:space="preserve">
+    <value>データがありません</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>有効</value>
+  </data>
+  <data name="StatusSoonExpired" xml:space="preserve">
+    <value>期限間近</value>
+  </data>
+  <data name="StatusExpired" xml:space="preserve">
+    <value>期限切れ</value>
+  </data>
+  <data name="QuoteFileLinkMissing" xml:space="preserve">
+    <value>見積もりファイルのリンクが無効です。</value>
+  </data>
+  <data name="LoadingData" xml:space="preserve">
+    <value>Loading data...</value>
+  </data>
 </root>

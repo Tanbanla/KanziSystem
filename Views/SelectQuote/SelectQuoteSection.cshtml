@@ -10,58 +10,8 @@
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
-    @* Ensure searchable dropdown styles are available (used by Quotation_Results) *@
     <link rel="stylesheet" href="~/css/Quotation_Results.css" />
-    <style>
-        /* sticky header inside scrollable table container */
-        .table-responsive thead th {
-            position: sticky;
-            top: 0;
-            background: #fff;
-            z-index: 5;
-        }
-        /* group header row */
-        #sectionRequestBody .group-row td {
-            background: #f1f3f5;
-            font-weight: 600;
-            padding: 10px;
-        }
-        /* unified header style to match Quotation_Results */
-        .table-header-custom th {
-            background-color: #0d6efd;
-            color: #fff;
-            vertical-align: middle;
-            font-weight: 600;
-        }
-        /* status badge used in Quotation_Results */
-        .status-badge {
-            display: inline-block;
-            padding: .25rem .5rem;
-            border-radius: .375rem;
-            font-size: .75rem;
-            line-height: 1;
-            color: #fff;
-            background-color: #6c757d;
-        }
-
-            .status-badge.bg-warning {
-                background-color: #ffc107;
-                color: #212529;
-            }
-
-            .status-badge.bg-success {
-                background-color: #198754;
-            }
-
-            .status-badge.bg-primary {
-                background-color: #0d6efd;
-            }
-        /* modal detail table header */
-        #detailTable thead th {
-            background-color: #e9ecef;
-            color: #000;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/SelectQuoteSection.css" />
 </head>
 <!-- Global loading overlay -->
 <div id="globalLoading" aria-hidden="true">
@@ -323,7 +273,9 @@
                 </div>
                 <div class="col-12 d-flex gap-2 mt-2">
                     <button type="button" id="btnSearch" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> @Localizer["Search"]</button>
-                    <div style="min-width: 12px;"></div>
+                    <div style="min-width: 6px;"></div>
+                    <button type="button" id="btnExportExcel" class="btn btn-outline-success btn-sm"><i class="fas fa-download"></i> @Localizer["ExportFile"]</button>
+                    <div style="min-width: 6px;"></div>
                     <button type="button" id="btnClear" class="btn btn-outline-secondary btn-sm"><i class="fas fa-eraser"></i> @Localizer["ClearFilters"]</button>
                 </div>
             </form>
@@ -331,53 +283,107 @@
     </div>
 
     <div class="card shadow-sm">
-        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h6 class="mb-0 text-secondary" style="color:black !important">@Localizer["SectionRequestList"]</h6>
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" id="btnExportSelected" class="btn btn-outline-success btn-sm"><i class="fas fa-download"></i> @Localizer["ExportSelected"]</button>
-                <div style="margin-left: 6px;"></div>
-                <small class="text-muted" id="summaryText">@Localizer["SummaryRecords", "0"].Value</small>
-            </div>
+            <small class="text-muted" id="summaryText">@Localizer["SummaryRecords", "0"].Value</small>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 520px;">
-                <table class="table table-sm table-hover table-bordered align-middle mb-0" id="sectionRequestTable">
-                    <thead class="table-header-custom">
-                        <tr class="text-center align-middle">
-                            <th style="width:40px"><input type="checkbox" id="selectAll" title="@Localizer["SelectAll"]" /></th>
-                            <th style="min-width:140px">@Localizer["OrderCode"]</th>
-                            <th style="min-width:140px">@Localizer["RequestSection"]</th>
-                            <th style="min-width:160px">@Localizer["InternalMaterialCode"]</th>
-                            <th style="min-width:220px">@Localizer["ItemName"]</th>
-                            <th style="min-width:100px" class="text-end">@Localizer["Quantity"]</th>
-                            <th style="min-width:90px">@Localizer["Unit"]</th>
-                            <th style="min-width:140px">@Localizer["Supplier"]</th>
-                            <th style="min-width:130px">@Localizer["DesiredReceiveDate"]</th>
-                            <th style="min-width:110px">@Localizer["Status"]</th>
-                            <th style="min-width:90px">@Localizer["Action"]</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sectionRequestBody">
-                        <!-- Rows will be populated by server or JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2">
-                <label class="small mb-0">@Localizer["PageSize"].Value</label>
-                <div style="margin-left: 6px;"></div>
-                <select id="sectionPageSizeSelect" class="form-select form-select-sm" style="width:120px">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <div class="small text-muted" id="sectionPageInfo">&nbsp;</div>
-                <div style="margin-left : 6px;"></div>
-                <div id="sectionPagination" class="btn-group" role="group" aria-label="pagination"></div>
+            <ul class="nav nav-tabs px-3 pt-3 quote-tabs" id="quoteTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-active-quotes" type="button" role="tab" aria-controls="pane-active-quotes" aria-selected="true" data-tab="active">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>@Localizer["ActiveQuotesTab"]</span>
+                        <span class="badge bg-success quote-tab-count" id="countActiveTab">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-all-quotes" type="button" role="tab" aria-controls="pane-all-quotes" aria-selected="false" data-tab="all">
+                        <i class="fas fa-list text-primary"></i>
+                        <span>@Localizer["AllQuotesTab"]</span>
+                        <span class="badge bg-primary quote-tab-count" id="countAllTab">0</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="quoteTabsContent">
+                <div class="tab-pane fade show active" id="pane-active-quotes" role="tabpanel" aria-labelledby="tab-active-quotes" tabindex="0">
+                    <div class="table-wrap">
+                        <table class="table table-sm table-hover table-bordered align-middle mb-0" id="sectionRequestTableActive">
+                            <thead class="table-header-custom">
+                                <tr class="text-center align-middle">
+                                    <th style="width:40px"><input type="checkbox" id="selectAllActive" class="select-all" data-tab="active" title="@Localizer["SelectAll"]" /></th>
+                                    <th style="min-width:120px">@Localizer["OrderCode"]</th>
+                                    <th style="min-width:160px">@Localizer["InternalMaterialCode"]</th>
+                                    <th style="min-width:220px">@Localizer["ItemName"]</th>
+                                    <th style="min-width:140px">@Localizer["EnglishName"]</th>
+                                    <th style="min-width:180px">@Localizer["Supplier"]</th>
+                                    <th style="min-width:120px">@Localizer["Price"]</th>
+                                    <th style="min-width:130px">@Localizer["ExpiryDate"]</th>
+                                    <th style="min-width:130px">@Localizer["Status"]</th>
+                                    <th style="min-width:90px">@Localizer["Action"]</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectionRequestBodyActive"></tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="small mb-0">@Localizer["PageSize"].Value</label>
+                            <div style="padding: 3px;"></div>
+                            <select id="sectionPageSizeSelectActive" class="form-select form-select-sm" style="width:120px">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-muted" id="sectionPageInfoActive">&nbsp;</div>
+                            <div style="padding: 3px;"></div>
+                            <div id="sectionPaginationActive" class="btn-group" role="group" aria-label="pagination"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="pane-all-quotes" role="tabpanel" aria-labelledby="tab-all-quotes" tabindex="0">
+                    <div class="table-wrap">
+                        <table class="table table-sm table-hover table-bordered align-middle mb-0" id="sectionRequestTableAll">
+                            <thead class="table-header-custom">
+                                <tr class="text-center align-middle">
+                                    <th style="width:40px"><input type="checkbox" id="selectAllAll" class="select-all" data-tab="all" title="@Localizer["SelectAll"]" /></th>
+                                    <th style="min-width:140px">@Localizer["OrderCode"]</th>
+                                    <th style="min-width:140px">@Localizer["RequestSection"]</th>
+                                    <th style="min-width:140px">@Localizer["InternalMaterialCode"]</th>
+                                    <th style="min-width:240px">@Localizer["ItemName"]</th>
+                                    <th style="min-width:100px" class="text-start">@Localizer["EnglishName"]</th>
+                                    <th style="min-width:90px">@Localizer["Unit"]</th>
+                                    <th style="min-width:140px">@Localizer["RequesterLabel"]</th>
+                                    <th style="min-width:160px">@Localizer["DesiredReceiveDate"]</th>
+                                    <th style="min-width:110px">@Localizer["Status"]</th>
+                                    <th style="min-width:90px">@Localizer["Action"]</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectionRequestBodyAll"></tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="small mb-0">@Localizer["PageSize"].Value</label>
+                            <div style="padding: 3px;"></div>
+                            <select id="sectionPageSizeSelectAll" class="form-select form-select-sm" style="width:120px">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="small text-muted"id="sectionPageInfoAll">&nbsp;</div>
+                            <div style="padding: 3px;"></div>
+                            <div id="sectionPaginationAll" class="btn-group" role="group" aria-label="pagination"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -396,8 +402,34 @@
 </div>
 @section Scripts {
     <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
-    <script src="~/js/SelectQuote.js" asp-append-version="true"></script>
     <script>
+        window.i18nSelectQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new
+        {
+            Locale = System.Globalization.CultureInfo.CurrentUICulture.Name,
+            Notification = Localizer["Notification"].Value,
+            DialogOk = Localizer["DialogOk"].Value,
+            Cancel = Localizer["Cancel"].Value,
+            Confirm = Localizer["Confirm"].Value,
+            SummaryRecords = Localizer["SummaryRecords"].Value,
+            Done = Localizer["Done"].Value,
+            DetailButtonText = Localizer["DetailButtonText"].Value,
+            SearchErrorPrefix = Localizer["SearchErrorPrefix"].Value,
+            ExportSelectAtLeastOne = Localizer["ExportSelectAtLeastOne"].Value,
+            ExportFailed = Localizer["ExportFailed"].Value,
+            ExportErrorPrefix = Localizer["ExportErrorPrefix"].Value,
+            DetailLoadErrorPrefix = Localizer["DetailLoadErrorPrefix"].Value,
+            OrderMaterialRequired = Localizer["OrderMaterialRequired"].Value,
+            PageLabelTemplate = Localizer["PageLabelTemplate"].Value,
+            PageInfoTemplate = Localizer["PageInfoTemplate"].Value,
+            NoDataText = Localizer["NoDataText"].Value,
+            ProcessingText = Localizer["ProcessingText"].Value,
+            LoadingData = Localizer["LoadingData"].Value,
+            ServerError = Localizer["ServerError"].Value,
+            StatusActive = Localizer["StatusActive"].Value,
+            StatusSoonExpired = Localizer["StatusSoonExpired"].Value,
+            StatusExpired = Localizer["StatusExpired"].Value
+        }));
+
         (function() {
             // Ensure modal panels and overlays are appended to body to avoid being under navbar stacking contexts
             var panel = document.getElementById('detailModal');
@@ -407,4 +439,5 @@
         })();
         window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     </script>
+    <script src="~/js/SelectQuote.js" asp-append-version="true"></script>
 }

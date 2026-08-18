@@ -1,13 +1,14 @@
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using static PRJ_WAREHOUSE_BIVN.View_Models.Material.MaterialVM;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
     public interface IBaoGiaConfirmNameRepository : IBaseRepository<BaoGia_Confirm_Name_Quotation, int>
     {
         // search thông tin xác nhận tên hàng
-        public Task<ListRequest<dynamic>> SearchAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user, int pageIndex, int pageSize);
+        public Task<ListRequest<dynamic>> SearchAsync(ConfirmNameSearchRequest req, string user, string? role);
         // Luu thong tin
         public Task<bool> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User);
         // Them thong tin 
@@ -45,6 +46,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<ResultCheckCofirmName>> DoneConfirmNameAsync(List<int> listDone);
         // Check đơn đã hoàn thành hay chưa
         Task<List<int>> CheckConfirmNameDoneAsync(List<int> listCheck);
+
+        // Lấy lịch sử thay đổi xác nhận tên
+        Task<List<ConfirmNameHistoryDTO>> GetConfirmNameHistoryAsync(int confirmId);
 
     }
 }

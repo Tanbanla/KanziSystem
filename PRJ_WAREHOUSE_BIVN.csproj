@@ -81,6 +81,9 @@
     <Content Update="wwwroot\template\HistoryQuote.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\template\MaterialMasterActions.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\template\MaterialMaster.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -118,6 +121,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\template\Template_Import_Material.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\template\TmSendMail_ConfirmName.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\template\TmSendMailNew_Reason.xlsx">
@@ -167,6 +173,15 @@
     <EmbeddedResource Update="Resources\Views\InputQuotation\InputQuoteDetail.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\Material\ConfirmNameV2.en.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\Material\ConfirmNameV2.ja.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Views\Material\ConfirmNameV2.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Views\QuoteResults\Quotation_Results.en.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -185,10 +200,6 @@
     <EmbeddedResource Update="Resources\Views\SelectQuote\SelectQuoteSection.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="docs\" />
   </ItemGroup>
 
 </Project>

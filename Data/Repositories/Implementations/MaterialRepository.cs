@@ -171,16 +171,32 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 if (material == null)
                     continue;
 
+                //material.Category_VN = dto.Category_VN;
+                //material.Category_EN = dto.Category_EN;
+                //material.Category_JP = dto.Category_JP;
+                //material.Shape = dto.Shape;
+                //material.Material1 = dto.Material;
+                //material.Composition = dto.Composition;
+                //material.Dimension = dto.Dimension;
+                //material.UsedFor = dto.UsedFor;
+                //material.Purpose = dto.Purpose;
+                // Add other fields as needed from MATERIALDTO
+                material.Material_Code = dto.Material_Code;
+                material.Material_Name_VN = dto.Material_Name_VN;
+                material.Material_Name_EN = dto.Material_Name_EN;
+                material.Material_Name_JP = dto.Material_Name_JP;
                 material.Category_VN = dto.Category_VN;
                 material.Category_EN = dto.Category_EN;
                 material.Category_JP = dto.Category_JP;
+                material.Group_Code = dto.Group_Code;
                 material.Shape = dto.Shape;
+                material.Unit = dto.Unit;
                 material.Material1 = dto.Material;
                 material.Composition = dto.Composition;
                 material.Dimension = dto.Dimension;
                 material.UsedFor = dto.UsedFor;
                 material.Purpose = dto.Purpose;
-                // Add other fields as needed from MATERIALDTO
+                material.Code_Suppiler = dto.Code_Suppiler;
             }
 
             await _context.SaveChangesAsync();
@@ -221,15 +237,20 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result ?? string.Empty;
         }
         // check ma hang
-        public async Task<string> CheckMaterialCode(string keyword, string category)
+        public async Task<string> CheckMaterialCode(string codeNcc, string category, string name)
         {
             var result = await _context.MATERIALs
-             .Where(m => m.Material_Code != null
-             && (m.Material_Name_VN == keyword || m.Code_Suppiler == keyword || m.Material_Name_EN == keyword)
-             && m.Category_VN.ToLower().Contains(category.ToLower()))
-             .OrderByDescending(m => m.Material_Code)
-             .Select(m => m.Material_Code)
-             .FirstOrDefaultAsync();
+                .Where(m =>
+                    m.Material_Code != null &&
+                    m.Code_Suppiler == codeNcc &&
+                    m.Category_VN != null &&
+                    m.Category_VN.Contains(category) &&
+                    (m.Material_Name_VN == name ||
+                     m.Material_Name_EN == name ||
+                     m.Material_Name_JP == name))
+                .OrderByDescending(m => m.Material_Code)
+                .Select(m => m.Material_Code)
+                .FirstOrDefaultAsync();
 
             return result ?? string.Empty;
         }
@@ -344,6 +365,16 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             await _context.SaveChangesAsync();
             return true;
-        }   
+        }
+        // delete list material
+        public async Task<bool> DeleteMaterials(List<string> listCodeMaterial)
+        {
+            var materials = await _context.MATERIALs.Where(m => listCodeMaterial.Contains(m.Material_Code)).ToListAsync();
+            if (!materials.Any())
+                return false;
+            _context.MATERIALs.RemoveRange(materials);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

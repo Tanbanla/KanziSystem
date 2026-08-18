@@ -1,6 +1,7 @@
 using Azure.Core;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -363,7 +364,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest("File không hợp lệ");
             }
 
-            var items = new List<BaoGia_NCC_CategoryDTO>();
+            var itemsAdd = new List<BaoGia_NCC_CategoryDTO>();
+            var itemsDeleteCatergory = new List<BaoGia_NCC_CategoryDTO>();
+            //var itemsDeleteNcc = new List<BaoGia_NCC_CategoryDTO>();
             var user = GetCurrentUserId() ?? "system";
             try
             {
@@ -372,7 +375,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var ws = workbook.Worksheets.FirstOrDefault();
                 if (ws == null) return BadRequest("Không tìm thấy worksheet");
 
-                // lấy dữ liệu từ dòng 3
+                // lấy dữ liệu từ dòng 2
                 int startRow = 2;
                 int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
 
@@ -382,44 +385,82 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         break;
                     }
+
+                    var action = ws.Cell(r, 1).GetString().Trim().ToLower();
                     // Map theo thứ tự cột trong bảng ở giao diện
                     var dto = new BaoGia_NCC_CategoryDTO
                     {
                         Id = 0,
-                        CHR_MaNCC = ws.Cell(r, 2).GetString().Trim(),
-                        NVCHR_TenNCC = ws.Cell(r, 4).GetString().Trim(),
-                        NVCHR_ChungLoai = ws.Cell(r, 1).GetString().Trim(),
-                        NVCHR_SanXuat = ws.Cell(r, 3).GetString().Trim(),
+                        CHR_MaNCC = ws.Cell(r, 3).GetString().Trim(),
+                        NVCHR_TenNCC = ws.Cell(r, 5).GetString().Trim(),
+                        NVCHR_ChungLoai = ws.Cell(r, 2).GetString().Trim(),
+                        NVCHR_SanXuat = ws.Cell(r, 4).GetString().Trim(),
                         CHR_Status = "Active",
                         CHR_CreateBy = user,
                         DTM_CreateBy = DateTime.Now,
-                        CHR_Mail = ws.Cell(r, 6)
+                        CHR_Mail = ws.Cell(r, 7)
                          .GetString()
                          .Replace("\r", "")
                          .Replace("\n", "")
                          .Trim(),
-                        CHR_PIC = "SDT: " +ws.Cell(r, 7).GetString().Trim()+  ",Name: " + ws.Cell(r, 8).GetString().Trim()
+                        CHR_PIC = "SDT: " +ws.Cell(r, 8).GetString().Trim()+  ",Name: " + ws.Cell(r, 9).GetString().Trim()
                     };
                     // Lọc trùng dữ liệu trong file excel trước khi thêm vào danh sách, tránh trường hợp file có nhiều
-                    if (items.Where(x => x.CHR_MaNCC == dto.CHR_MaNCC && x.NVCHR_ChungLoai == dto.NVCHR_ChungLoai && x.NVCHR_SanXuat == dto.NVCHR_SanXuat).Any())
+                    if (itemsAdd.Where(x => x.CHR_MaNCC == dto.CHR_MaNCC && x.NVCHR_ChungLoai == dto.NVCHR_ChungLoai).Any())
                     {
                         continue;
                     }
                     else
                     {
-                        items.Add(dto);
+                        switch (action)
+                        {
+                            case "thêm":
+                                itemsAdd.Add(dto);
+                                break;
+                            case "xóa":
+                                itemsDeleteCatergory.Add(dto);
+                                break;
+                            //case "xóa nhà cung cấp":
+                            //    itemsDeleteNcc.Add(dto);
+                            //    break;
+                            default:
+                                break;
+                        }
                     }
                 }
-                if (items.Count == 0)
+                if (itemsAdd.Count == 0  && itemsDeleteCatergory.Count == 0)//&& itemsDeleteNcc.Count == 0
                 {
                     return BadRequest("File không có dữ liệu hợp lệ");
                 }
-                var reasult = await _baoGiaNccCategoryService.AddListBaoGiaNccCategory(items);
-                if (!reasult.Success)
+                // them moi
+                if(itemsAdd.Count > 0)
                 {
-                    return BadRequest("Error Insert database: " + reasult.Message);
+                    var reasult = await _baoGiaNccCategoryService.AddListBaoGiaNccCategory(itemsAdd);
+                    if (!reasult.Success)
+                    {
+                        return BadRequest("Error Insert database: " + reasult.Message);
+                    }
                 }
-                return Ok(items);
+                // xoa chung loai
+                if(itemsDeleteCatergory.Count > 0)
+                {
+                    var reasult = await _baoGiaNccCategoryService.DeleteCategoryNccAsync(itemsDeleteCatergory);
+                    if (!reasult.Success)
+                    {
+                        return BadRequest("Error Delete database: " + reasult.Message);
+                    }
+                }
+                // xoa nha cung cap
+                //if(itemsDeleteNcc.Count > 0)
+                //{
+                //    var reasult = await _baoGiaNccCategoryService.DeleteSupplierAsync(itemsDeleteNcc);
+                //    if (!reasult.Success)
+                //    {
+                //        return BadRequest("Error Delete database: " + reasult.Message);
+                //    }
+                //}
+
+                return Ok(itemsAdd);
             }
             catch (Exception ex)
             {
@@ -427,6 +468,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
 
         }
+        // Thêm chủng loại cho Nhà cung cấp
+        [HttpPost]
+        public async Task<IActionResult> InsertCategoryNccAsync([FromForm] BaoGia_NCC_CategoryDTO dto)
+        {
+            if(dto == null || string.IsNullOrEmpty(dto.NVCHR_ChungLoai) || string.IsNullOrEmpty(dto.CHR_MaNCC))
+            {
+                return BadRequest("Thiếu thông tin dữ liệu dể insert");
+            }
+            try
+            {
+                dto.CHR_CreateBy = GetCurrentUserId() ?? "system";
+                dto.DTM_CreateBy = DateTime.Now;
+                dto.CHR_Status = "Active";
+                var result = await _baoGiaNccCategoryService.InsertCategoryNccAsync(dto);
+                if(!result.Success)
+                {
+                    return BadRequest("Error Insert database: " + result.Message);
+                }
+
+                return Ok(result.Data);    
+            }catch(Exception ex)
+            {
+                return BadRequest("Bug: "+ex.Message);
+            }
+
+        }
+
         // Nhập file cập nhật thông tin phòng ban
         [HttpPost]
         public async Task<IActionResult> ImportSectionExcel([FromForm] IFormFile file)
@@ -1291,78 +1359,137 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 using var stream = insertFile.FileExcel.OpenReadStream();
                 using var workbook = new XLWorkbook(stream);
-                var ws = workbook.Worksheets.FirstOrDefault();
-                if (ws == null) return BadRequest("Không tìm thấy worksheet");
 
-                var rows = new List<(string phanLoai, string codeSupplier, string nameVN, string nameEN, string category)>();
-                int startRow = 2;
+                var ws = workbook.Worksheets.FirstOrDefault();
+
+                if (ws == null)
+                    return BadRequest("Không tìm thấy worksheet");
+
+                var insertRows = new List<MATERIALDTO>();
+                var updateRows = new List<MATERIALDTO>();
+                var deleteRows = new List<MATERIALDTO>();
+
+                int startRow = 3;
                 int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
 
                 for (int r = startRow; r <= lastRow; r++)
                 {
-                    var phanLoai = ws.Cell(r, 1).GetString().Trim();
-                    if (string.IsNullOrWhiteSpace(phanLoai)) continue;
+                    var action = ws.Cell(r, 1).GetString().Trim().ToLower();
 
-                    var nameVN = ws.Cell(r, 4).GetString().Trim();
-                    var codeSupplier = ws.Cell(r, 3).GetString().Trim();
+                    if (string.IsNullOrWhiteSpace(action))
+                        continue;
+                    var MaterialType = ws.Cell(r, 2).GetString().Trim();
+                    var outSide = string.Empty;
+                    switch (MaterialType)
+                    {
+                        case "A":
+                        case "B":
+                        case "C":
+                        case "E":
+                            outSide = "IN";
+                            break;
+                        case "I":
+                        case "O":
+                            outSide = "OUT";
+                            break;
+                        default:
+                            return BadRequest($"Dòng {r}: Giá trị cột 'MaterialType' không hợp lệ. Chỉ chấp nhận 'A', 'B', 'C', 'E', 'I' hoặc 'O'.");
+                    }
 
-                    rows.Add((
-                        phanLoai: phanLoai,
-                        codeSupplier: codeSupplier,
-                        nameVN: nameVN,
-                        nameEN: ws.Cell(r, 5).GetString().Trim(),
-                        category: ws.Cell(r, 6).GetString().Trim()
-                    ));
+                    var material = new MATERIALDTO
+                    {
+                        //MaterialType = ws.Cell(r, 2).GetString().Trim(),
+                        Material_Code = ws.Cell(r, 3).GetString().Trim(),
+                        Code_Suppiler = ws.Cell(r, 4).GetString().Trim(),
+                        Material_Name_EN = ws.Cell(r, 5).GetString().Trim(),
+                        Material_Name_VN = ws.Cell(r, 6).GetString().Trim(),
+                        Category_VN = ws.Cell(r, 7).GetString().Trim(),
+                        Unit = ws.Cell(r, 8).GetString().Trim(),
+                        Group_Code = ws.Cell(r, 9).GetString().Trim(),
+                        Shape = ws.Cell(r, 10).GetString().Trim(),
+                        Material = ws.Cell(r, 11).GetString().Trim(),
+                        Composition = ws.Cell(r, 12).GetString().Trim(),
+                        Dimension = ws.Cell(r, 13).GetString().Trim(),
+                        UsedFor = ws.Cell(r, 14).GetString().Trim(),
+                        Purpose = ws.Cell(r, 15).GetString().Trim(),
+                        CHR_MaterialOutSide = outSide
+                    };
+
+                    switch (action)
+                    {
+                        case "thêm":
+                            insertRows.Add(material);
+                            break;
+
+                        case "sửa":
+                            updateRows.Add(material);
+                            break;
+
+                        case "xóa":
+                            deleteRows.Add(material);
+                            break;
+                    }
                 }
 
-                if (!rows.Any())
-                    return BadRequest("File không có dữ liệu hợp lệ");
+                var materialInsertNews = new List<MATERIALDTO>();
 
-                var materialNews = new List<MATERIALDTO>();
-                var groups = rows.GroupBy(r => GetMaterialType(r.phanLoai));
+                var groups = insertRows.GroupBy(x => GetMaterialType(x.LoaiHang));
 
                 foreach (var group in groups)
                 {
                     var latestCode = await _materialService.MaterialCodeLater(group.Key);
-                    var currentNumber = ExtractNumberFromCode(latestCode.Data) + 1;
 
-                    foreach (var row in group)
+                    int currentNumber = ExtractNumberFromCode(latestCode.Data) + 1;
+
+                    foreach (var item in group)
                     {
-                        var newCode = GenerateMaterialCode(group.Key, currentNumber);
-
-                        // Kiểm tra trùng trong file
-                        if (materialNews.Any(m => m.Material_Code == newCode))
-                            continue;
-
-                        materialNews.Add(new MATERIALDTO
+                        if (string.IsNullOrWhiteSpace(item.Material_Code))
                         {
-                            Material_Code = newCode,
-                            Material_Name_VN = row.nameVN,
-                            Material_Name_EN = row.nameEN,
-                            Code_Suppiler = row.codeSupplier,
-                            Category_VN = row.category,
-                            Shape = "",
-                            Material = "",
-                            Composition = "",
-                            Dimension = "",
-                            UsedFor = "",
-                            Purpose = "",
-                            CHR_MaterialOutSide = "OUT",
-                            Unit = "",
-                        });
-                        currentNumber++;
+                            item.Material_Code = GenerateMaterialCode(group.Key, currentNumber);
+                            currentNumber++;
+                        }
+
+                        materialInsertNews.Add(item);
                     }
                 }
 
-                if (!materialNews.Any())
-                    return BadRequest("Không có dữ liệu hợp lệ để import");
-
-               var rq =  await _materialService.UpdateListThongTinNoList(materialNews);
-                if (!rq.Success)
+                if (materialInsertNews.Any())
                 {
-                    return BadRequest("Insert table Error: "+rq.Message);
+                    var rsInsert = await _materialService.UpdateListThongTinNoList(materialInsertNews);
+
+                    if (!rsInsert.Success)
+                        return BadRequest($"Insert Error: {rsInsert.Message}");
                 }
-                return Ok(new { success = true, count = materialNews.Count });
+
+                if (updateRows.Any())
+                {
+                    var rsUpdate = await _materialService.UpdateListThongTin(updateRows);
+
+                    if (!rsUpdate.Success)
+                        return BadRequest($"Update Error: {rsUpdate.Message}");
+                }
+
+                if (deleteRows.Any())
+                {
+                    var materialCodes = deleteRows
+                        .Where(x => !string.IsNullOrWhiteSpace(x.Material_Code))
+                        .Select(x => x.Material_Code)
+                        .Distinct()
+                        .ToList();
+
+                    var rsDelete = await _materialService.DeleteMaterials(materialCodes);
+
+                    if (!rsDelete.Success)
+                        return BadRequest($"Delete Error: {rsDelete.Message}");
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    InsertCount = materialInsertNews.Count,
+                    UpdateCount = updateRows.Count,
+                    DeleteCount = deleteRows.Count
+                });
             }
             catch (Exception ex)
             {

@@ -210,23 +210,4 @@ body, .modal-content, .card, table, .table, .table th, .table td {
 td[style*="#ffecec"] {
     color: #a00 !important;
 }
-/* Rounded corners for table cells */
-/*table.table.table-bordered {
-    border-collapse: separate !important;
-    border-spacing: 1px !important;
-}
 
-    table.table.table-bordered td,
-    table.table.table-bordered th {
-        border-radius: 6px;
-        padding: .35rem .5rem;
-        box-sizing: border-box;
-    }*/
-
-/* Highlight mismatch */
-/*.mismatch {
-    background-color: #fff3cd !important;
-    color: red !important;
-    border: 1px solid red !important;
-    box-sizing: border-box !important;
-}*/

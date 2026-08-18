@@ -37,11 +37,6 @@
             </button>
             <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
         
-            <button type="button" class="btn btn-outline-danger" id="btnImportExcelMaterial" style="border-radius: 6px; padding: 8px 6px; font-weight: 500;">
-                <i class="fas fa-upload me-1"></i> @Localizer["UploadExcelMaterial"]
-            </button>
-            <input type="file" id="itemsExcelFileInputMaterial" accept=".xlsx,.xls" style="display:none" />
-        
             <button type="button" class="btn btn-primary" id="btnTemplateImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; background: linear-gradient(135deg, #0d6efd, #0b5ed7); border: none; box-shadow: 0 2px 6px rgba(13,110,253,0.2);">
                 <i class="fas fa-download me-1"></i> @Localizer["TemplateImportExcel"]
             </button>
@@ -212,7 +207,112 @@
                     <input type="file" id="itemsExcelFileInput" accept=".xlsx,.xls" style="display:none" />
                     <button type="button" class="btn btn-outline-primary btn-sm" id="btnExportTemplateExcel"><i class="fas fa-download"></i> @Localizer["TemplateFile"]</button>
 
-                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnExportTableExcel"><i class="fas fa-download"></i> Xuất dữ liệu bảng</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnExportTableExcel"><i class="fas fa-download"></i> @Localizer["ExportTableData"]</button>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body py-2">
+                        <div class="row g-2">
+                            <!-- Tìm kiếm chủng loại -->
+                            <div class="col-md-6">
+                                <label class="form-label mb-1" for="txtSearchCategory">@Localizer["SearchCategoryLabel"]</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text"
+                                           class="form-control"
+                                           id="txtSearchCategory"
+                                           placeholder="@Localizer["SearchCategoryPlaceholder"]" />
+                                    <button type="button"
+                                            class="btn btn-outline-primary"
+                                            id="btnSearchCategory">
+                                        <i class="fas fa-search"></i> @Localizer["SearchCategoryButton"]
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <button type="button"
+                            id="btnToggleAddCategory"
+                            class="btn btn-outline-primary btn-sm"
+                            aria-expanded="false"
+                            aria-controls="addCategoryCollapse">
+                        <i class="fas fa-plus-circle me-1"></i>
+                        @Localizer["AddCategorySectionTitle"]
+                    </button>
+                </div>
+                    <div class="collapse" id="addCategoryCollapse">
+                     <div class="card border-primary mb-3">
+                        <div class="card-header bg-light py-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-plus-circle text-primary me-2"></i>
+                                <strong>@Localizer["AddCategorySectionTitle"]</strong>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold">
+                                        @Localizer["Category"]
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                            class="form-control form-control-sm"
+                                            id="txtCategoryName"
+                                            placeholder="@Localizer["CategoryPlaceholder"]">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-semibold">
+                                        @Localizer["MadeIn"]
+                                    </label>
+                                    <input type="text"
+                                            class="form-control form-control-sm"
+                                            id="txtMadeIn"
+                                            placeholder="@Localizer["MadeInPlaceholder"]">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-semibold">
+                                        @Localizer["PIC"]
+                                    </label>
+                                    <input type="text"
+                                            class="form-control form-control-sm"
+                                            id="txtPIC"
+                                            placeholder="@Localizer["PICPlaceholder"]">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold">
+                                        Email
+                                    </label>
+                                    <input type="email"
+                                            class="form-control form-control-sm"
+                                            id="txtMail"
+                                            placeholder="@Localizer["MailPlaceholder"]">
+                                </div>
+
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-12 text-end">
+
+                                    <button type="button"
+                                            class="btn btn-success"
+                                            id="btnAddCategory">
+
+                                        <i class="fas fa-plus me-1"></i>
+                                        @Localizer["AddCategoryButton"]
+
+                                    </button>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="row g-3">
                     <div class="col-12">
@@ -327,6 +427,11 @@
         TemplateFile = Localizer["TemplateFile"].Value,
         SupplierItemsTitle = Localizer["SupplierItemsTitle"].Value,
         SupplierShort = Localizer["SupplierShort"].Value,
-        ItemModalHint = Localizer["ItemModalHint"].Value
+        ItemModalHint = Localizer["ItemModalHint"].Value,
+        MissingCategoryNameMessage = Localizer["MissingCategoryNameMessage"].Value,
+        MissingCategorySupplierMessage = Localizer["MissingCategorySupplierMessage"].Value,
+        AddCategoryFailedMessage = Localizer["AddCategoryFailedMessage"].Value,
+        AddCategorySuccessMessage = Localizer["AddCategorySuccessMessage"].Value,
+        UnexpectedErrorMessage = Localizer["UnexpectedErrorMessage"].Value
     }));
 </script>

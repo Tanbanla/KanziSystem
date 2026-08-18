@@ -57,8 +57,6 @@
 
     // Load list of quotation requests
     function loadQuoteList() {
-        //document.getElementById('supplierSelect')?.value ||
-        // Mock data for now, replace with API call
         const body = {
             maDon: document.getElementById('searchMaDon')?.value || '',
             section: document.getElementById('searchPhongBan')?.value || '',

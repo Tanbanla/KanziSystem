@@ -1,4 +1,9 @@
 if (typeof window.buildSearchableDropdown !== 'function') {
+    function sqText(key, fallback) {
+        const i18n = window.i18nSelectQuote || window.i18nQuotationResults || {};
+        const value = i18n[key];
+        return value == null || value === '' ? fallback : value;
+    }
 
     // show dialog
     function getDialogEls() {
@@ -8,7 +13,7 @@ if (typeof window.buildSearchableDropdown !== 'function') {
         const footerEl = document.getElementById('cmDialogFooter');
         return { overlay, titleEl, bodyEl, footerEl };
     }
-    function showDialog({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', type = 'info', buttons } = {}) {
+    function showDialog({ title = sqText('Notification', 'Thông báo'), message = '', type = 'info', buttons } = {}) {
         const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
         if (!overlay) return alert(message);
 
@@ -24,7 +29,7 @@ if (typeof window.buildSearchableDropdown !== 'function') {
         footerEl.innerHTML = '';
         const okBtn = document.createElement('button');
         okBtn.className = 'cm-btn cm-btn-primary';
-        okBtn.textContent = (buttons && buttons.okText) || ((window.i18nQuotationResults && window.i18nQuotationResults.DialogOk) || 'Đồng ý');
+        okBtn.textContent = (buttons && buttons.okText) || sqText('DialogOk', 'Đồng ý');
         okBtn.addEventListener('click', () => hideDialog());
         footerEl.appendChild(okBtn);
 
@@ -32,7 +37,7 @@ if (typeof window.buildSearchableDropdown !== 'function') {
         overlay.style.display = 'flex';
         attachDialogCloseHandlers();
     }
-    function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotationResults.Notification) || 'Thông báo', message = '', placeholder = '', defaultValue = '' } = {}) {
+    function showPrompt({ title = sqText('Notification', 'Thông báo'), message = '', placeholder = '', defaultValue = '' } = {}) {
         return new Promise((resolve) => {
             const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
             if (!overlay) {
@@ -64,14 +69,14 @@ if (typeof window.buildSearchableDropdown !== 'function') {
             footerEl.innerHTML = '';
             const btnCancel = document.createElement('button');
             btnCancel.className = 'cm-btn cm-btn-outline';
-            btnCancel.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.Cancel) || 'Hủy';
+            btnCancel.textContent = sqText('Cancel', 'Hủy');
             btnCancel.addEventListener('click', () => {
                 hideDialog();
                 resolve(null);
             });
             const btnOk = document.createElement('button');
             btnOk.className = 'cm-btn cm-btn-primary';
-            btnOk.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.Confirm) || 'Đồng ý';
+            btnOk.textContent = sqText('Confirm', 'Đồng ý');
             btnOk.addEventListener('click', () => {
                 const v = inp.value == null ? '' : inp.value.toString();
                 hideDialog();
@@ -141,474 +146,810 @@ if (typeof window.buildSearchableDropdown !== 'function') {
             el.style.display = 'none';
             el.setAttribute('aria-hidden', 'true');
             const msgEl = el.querySelector('.loader-msg');
-            if (msgEl) msgEl.textContent = 'Đang xử lý...';
+            if (msgEl) msgEl.textContent = sqText('ProcessingText', 'Đang xử lý...');
         } catch (e) { }
     }
 
+    function initEnhancements(root) {
+        try {
+            if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
+                window.KanziSearchableDropdown.init(root || document);
+            } else {
+                buildSearchableDropdown(root || document);
+            }
+        } catch (e) {
 
-}
-function initEnhancements(root) {
-    try {
-        if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
-            window.KanziSearchableDropdown.init(root || document);
-        } else {
-            buildSearchableDropdown(root || document);
         }
-    } catch (e) {
 
     }
-
-}
-(function () {
-    function run() {
-        initEnhancements();
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', run);
-    } else { run(); }
-})();
-function showModal() {
-    const modalEl = document.getElementById('detailModal');
-    if (!modalEl) return;
-    try {
-        const bs = window.bootstrap;
-        if (bs && bs.Modal) {
-            const m = bs.Modal.getOrCreateInstance(modalEl);
-            m.show();
-        } else {
+    (function () {
+        function run() {
+            initEnhancements();
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', run);
+        } else { run(); }
+    })();
+    function showModal() {
+        const modalEl = document.getElementById('detailModal');
+        if (!modalEl) return;
+        try {
+            const bs = window.bootstrap;
+            if (bs && bs.Modal) {
+                const m = bs.Modal.getOrCreateInstance(modalEl);
+                m.show();
+            } else {
+                // Fallback: manually show modal
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                modalEl.setAttribute('aria-hidden', 'false');
+                // prevent body scroll
+                document.body.classList.add('modal-open');
+            }
+        } catch {
             // Fallback: manually show modal
             modalEl.style.display = 'block';
             modalEl.classList.add('show');
             modalEl.setAttribute('aria-hidden', 'false');
-            // prevent body scroll
             document.body.classList.add('modal-open');
         }
-    } catch {
-        // Fallback: manually show modal
-        modalEl.style.display = 'block';
-        modalEl.classList.add('show');
-        modalEl.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
     }
-}
-function hideEditModal() {
-    const modalEl = document.getElementById('detailModal');
-    if (!modalEl) return;
-    // Accessibility: if focus is inside modal, blur and move focus before hiding (to avoid aria-hidden ancestor with focused descendant)
-    try {
-        const active = document.activeElement;
-        if (active && modalEl.contains(active)) {
-            if (typeof active.blur === 'function') active.blur();
-            const fallbackFocus = document.getElementById('btnApplyFilters') || document.body;
-            if (fallbackFocus && typeof fallbackFocus.focus === 'function') fallbackFocus.focus();
-        }
-    } catch { }
-    modalEl.style.display = 'none';
-    modalEl.classList.remove('show');
-    modalEl.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('modal-open');
-    // clean up inline sizing
-    try {
-        const dialog = modalEl.querySelector('.modal-dialog');
-        if (dialog) {
-            dialog.style.maxWidth = '';
-            dialog.style.width = '';
-            dialog.style.margin = '';
-        }
-    } catch { }
-    const backdrop = document.querySelector('.custom-modal-backdrop');
-    if (backdrop) backdrop.remove();
-}
-// Pagination and search logic for SelectQuoteSection page
-(function () {
-    const state = {
-        pageIndex: 1,
-        pageSize: 20,
-        totalCount: 0
-    };
-
-    function updateSummary(total) {
-        const el = document.getElementById('summaryText');
-        if (el) el.textContent = window.i18nQuotationResults ? window.i18nQuotationResults.SummaryRecords.replace('{0}', total) : `Tổng số: ${total}`;
-    }
-
-    function renderTable(items) {
-        const tbody = document.getElementById('sectionRequestBody');
-        if (!tbody) return;
-        // helper: map status code/text to badge class similar to Quotation_Results
-        function mapStatusClass(code) {
-            if (!code && code !== 0) return 'bg-secondary';
-            const s = String(code).toUpperCase();
-            if (s === 'WAITING_NCC' || s === 'WAIT_NCC') return 'bg-warning text-dark';
-            if (s === 'WAITING_PICK_NCC' || s === 'PICKED') return 'bg-success';
-            if (s === 'WAITING_APPROVER' || s === 'CONFIRMED') return 'bg-primary';
-            return 'bg-secondary';
-        }
-        function mapStatusText(code) {
-            const T = window.i18nQuotationResults || {};
-            switch ((code || '').toString()) {
-                case 'WAITING_NCC': return T.WaitPickApSupplier || 'Chờ báo gía nhà cung cấp';
-                case 'WAITING_PICK_NCC': return T.SupplierApSelected || 'Chờ chọn nhà cung cấp';
-                case 'WAITING_APPROVER': return T.WaitApConfirmName || 'Chờ phê duyệt';
-                case 'PICKED': return T.SupplierSelected || 'Đã chọn nhà cung cấp';
-                default: return code || '';
-            }
-        }
-        // Simple grouped view by CHR_MaDon
-        const groups = {};
-        items.forEach(d => {
-            const key = d.CHR_MaDon || '(No MaDon)';
-            if (!groups[key]) groups[key] = [];
-            groups[key].push(d);
-        });
-        // expose groups for detail rendering
-        window._selectQuoteGroups = groups;
-        tbody.innerHTML = '';
-        Object.keys(groups).forEach(maDon => {
-            const grp = groups[maDon];
-            const tr = document.createElement('tr');
-            tr.className = 'group-row';
-            // compute aggregates
-            const totalQty = grp.reduce((s, it) => s + (Number(it.INT_SoLuong) || 0), 0);
-            const first = grp[0] || {};
-            const orderCode = maDon;
-            const section = first.CHR_SectionName || first.CHR_SectionCode || '';
-            const material = first.CHR_MaHangNoiBo || '';
-            const name = first.NVCHR_NameVN || '';
-            const unit = first.NVCHR_DonVi || '';
-            const supplier = first.NVCHR_NameNCC || first.NVCHR_NameNCC || '';
-            const wantDate = first.DTM_NgayMuonNhan ? new Date(first.DTM_NgayMuonNhan).toLocaleDateString() : '';
-            const status = first.status || first.CHR_TrangThai || '';
-            const statusClass = mapStatusClass(status);
-            const statusText = mapStatusText(status);
-
-            tr.innerHTML = `
-                <td class="text-center"><input type="checkbox" class="group-select" data-madon="${maDon}"></td>
-                <td class="text-start">${orderCode}</td>
-                <td class="text-start">${section}</td>
-                <td class="text-start">${material}</td>
-                <td class="text-start">${name} <small class="text-muted">(${grp.length})</small></td>
-                <td class="text-end">${totalQty || ''}</td>
-                <td class="text-start">${unit}</td>
-                <td class="text-start">${supplier}</td>
-                <td class="text-center">${wantDate}</td>
-                <td class="text-center"><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td class="text-center"><button type="button" class="btn btn-sm btn-outline-primary btn-view-detail" data-madon="${maDon}">Chi tiết</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        // wire detail buttons and group selects
-        tbody.querySelectorAll('.btn-view-detail').forEach(btn => {
-            btn.onclick = function () { const md = this.dataset.madon; if (md) showGroupDetail(md); };
-        });
-        tbody.querySelectorAll('.group-select').forEach(cb => {
-            cb.addEventListener('change', function () {
-                window._selectedGroups = window._selectedGroups || new Set();
-                const md = this.dataset.madon;
-                if (this.checked) window._selectedGroups.add(md); else window._selectedGroups.delete(md);
-                // update selectAll checkbox
-                const all = document.querySelectorAll('#sectionRequestBody .group-select');
-                const checked = Array.from(all).every(x => x.checked);
-                const selectAll = document.getElementById('selectAll'); if (selectAll) selectAll.checked = checked;
-            });
-        });
-    }
-
-    function showGroupDetail(maDon) {
-        const groups = window._selectQuoteGroups || {};
-        const items = groups[maDon] || [];
-        // populate modal header basic info from first item
-        const first = items[0] || {};
-        document.getElementById('madonhang').textContent = maDon;
-        document.getElementById('mpb_yc').textContent = first.CHR_SectionCode || '';
-        document.getElementById('tenphongban').textContent = first.CHR_SectionName || '';
-        document.getElementById('nyc').textContent = first.DTM_NgayMuonNhan ? new Date(first.DTM_NgayMuonNhan).toLocaleDateString() : '';
-        document.getElementById('thmm').textContent = first.DTM_KyHan ? new Date(first.DTM_KyHan).toLocaleDateString() : '';
-        document.getElementById('requester').textContent = first.CHR_CreateBy || '-';
-        document.getElementById('id_request').textContent = first.ID || maDon;
-        document.getElementById('step').textContent = first.ID_StepBaoGia || '';
-        document.getElementById('regency').textContent = first.ID_Status || '';
-
-        // urgent badge
-        const ub = document.getElementById('urgent-badge');
-        const gap = first.CHR_Gap;
-        const isUrgent = gap === true || String(gap).toLowerCase() === 'true' || String(gap) === '1' || String(gap).toLowerCase() === 'o';
-        if (ub) ub.style.display = isUrgent ? '' : 'none';
-
-        const body = document.getElementById('detailModalBody');
-        if (!body) return;
-        body.innerHTML = '';
-        // render rows using DOM for safety
-        const frag = document.createDocumentFragment();
-        // helper to render mismatch styling for vendor comparison fields
-        const mismatchStyle = (v) => {
-            if (v === false || v === 0 || v === '0' || String(v).toLowerCase() === 'false') {
-                return 'color: #a00; background-color: #ffecec;';
-            }
-            return '';
-        };
-        const getVal = (obj, ...names) => {
-            if (!obj) return '';
-            for (const n of names) {
-                if (obj[n] !== undefined && obj[n] !== null) return obj[n];
-                const alt = Object.keys(obj).find(k => k.toLowerCase() === (n || '').toLowerCase());
-                if (alt && obj[alt] !== undefined && obj[alt] !== null) return obj[alt];
-            }
-            return '';
-        };
-        const formatDate = (val) => {
-            if (!val) return '';
-            try {
-                const d = new Date(val);
-                if (!isNaN(d.getTime())) return d.toLocaleDateString();
-            } catch { }
-            return String(val || '');
-        };
-        const fmtNum = v => { try { return v != null && v !== '' ? Number(v).toLocaleString() : ''; } catch { return v || ''; } };
-        items.forEach((d, idx) => {
-            const tr = document.createElement('tr');
-            const pick = getVal(d, 'BIT_Select', 'bit_Select');
-            tr.className = 'text-center' + (pick === false || String(pick).toLowerCase() === 'false' ? ' table-secondary' : '');
-
-            const addTd = (txt, cls, style) => { const td = document.createElement('td'); td.textContent = txt == null ? '' : String(txt); if (cls) td.className = cls; if (style) td.style.cssText = style; return td; };
-
-            tr.appendChild(addTd(idx + 1));
-            tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
-            tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_ChungLoai', 'NVCHR_ChungLoai')));
-            tr.appendChild(addTd(getVal(d, 'chR_Phanloai', 'CHR_Phanloai')));
-            tr.appendChild(addTd(getVal(d, 'chR_MaHangNCC', 'CHR_MaHangNCC')));
-            // name VN/EN combined
-            const nameVN = getVal(d, 'nvchR_NameVN', 'NVCHR_NameVN') || '';
-            const nameEN = getVal(d, 'nvchR_NameEN', 'NVCHR_NameEN') || '';
-            tr.appendChild(addTd((nameVN + (nameEN ? ' / ' + nameEN : '')).trim(), 'text-start'));
-
-            tr.appendChild(addTd(getVal(d, 'inT_SoLuong', 'INT_SoLuong') || '', 'text-center'));
-            tr.appendChild(addTd(getVal(d, 'nvchR_DonVi', 'NVCHR_DonVi') || '', 'text-center'));
-            tr.appendChild(addTd(getVal(d, 'nvchR_HinhDang', 'NVCHR_HinhDang')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_ChatLieu', 'NVCHR_ChatLieu')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_ThanhPhan', 'NVCHR_ThanhPhan')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_KichThuoc', 'NVCHR_KichThuoc')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_DongMay', 'NVCHR_DongMay')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_TinhNang', 'NVCHR_TinhNang')));
-
-            tr.appendChild(addTd(getVal(d, 'nvchR_FileThietKe', 'NVCHR_FileThietKe')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_NhaSanXuat', 'NVCHR_NhaSanXuat')));
-            tr.appendChild(addTd(getVal(d, 'chR_MaNCC', 'CHR_MaNCC')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_TenNCC', 'NVCHR_TenNCC')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_Rohs', 'NVCHR_Rohs')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_COCQ', 'NVCHR_COCQ')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_MSDS', 'NVCHR_MSDS')));
-            tr.appendChild(addTd(getVal(d, 'nvchR_AnToan', 'NVCHR_AnToan')));
-
-            tr.appendChild(addTd(formatDate(getVal(d, 'dtM_KyHan', 'DTM_KyHan')), 'text-center'));
-            const gap = getVal(d, 'chR_Gap', 'CHR_Gap');
-            const gapLabel = gap != null && gap !== '' ? (String(gap).toLowerCase() === 'true' || String(gap) === '1' ? 'O' : 'X') : '';
-            tr.appendChild(addTd(gapLabel, 'text-center'));
-            const lay = getVal(d, 'biT_LayBaoGia', 'BIT_LayBaoGia');
-            const layLabel = lay != null && lay !== '' ? (String(lay).toLowerCase() === 'true' || String(lay) === '1' ? 'O' : 'X') : '';
-            tr.appendChild(addTd(layLabel, 'text-center'));
-            tr.appendChild(addTd(getVal(d, 'nvchR_LyDo', 'NVCHR_LyDo')));
-
-            // Vendor input columns (read-only)
-            tr.appendChild(addTd(getVal(d, 'CHR_MaNCC', 'chR_MaNCC')));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_NameNCC', 'nvchR_NameNCC'), 'text-start'));
-            tr.appendChild(addTd(getVal(d, 'CHR_MaHangNCC', 'chR_MaHangNCC'), null, mismatchStyle(getVal(d, 'IsMatch_MaHangNCC', 'IsMatch_MaHangNCC'))));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_TenHangHQ', 'nvchR_TenHangHQ'), 'text-start', mismatchStyle(getVal(d, 'IsMatch_NameVN', 'IsMatch_NameVN'))));
-            tr.appendChild(addTd(getVal(d, 'NameENByNCC', 'nameENByNCC'), null, mismatchStyle(getVal(d, 'IsMatch_NameEN', 'IsMatch_NameEN'))));
-            tr.appendChild(addTd(getVal(d, 'soluong', 'INT_SoLuong', 'soluong') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_SoLuong', 'IsMatch_SoLuong'))));
-            tr.appendChild(addTd(getVal(d, 'donvi', 'NVCHR_DonVi') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_DonVi', 'IsMatch_DonVi'))));
-            tr.appendChild(addTd(fmtNum(getVal(d, 'FL_USD', 'fl_usd')), 'text-end'));
-            tr.appendChild(addTd(fmtNum(getVal(d, 'FL_VND', 'fl_vnd')), 'text-end'));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_MOQ', 'nvchr_MOQ')));
-            tr.appendChild(addTd(getVal(d, 'DTM_LeadTime', 'dtm_LeadTime')));
-            tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ShipTime', 'dtm_ShipTime')), null, mismatchStyle(getVal(d, 'IsMatch_Ngay', 'IsMatch_Ngay'))));
-            tr.appendChild(addTd(getVal(d, 'VCHR_Rohs', 'vchr_Rohs'), null, mismatchStyle(getVal(d, 'IsMatch_Rohs', 'IsMatch_Rohs'))));
-            tr.appendChild(addTd(getVal(d, 'VCHR_COCQ', 'vchr_COCQ'), null, mismatchStyle(getVal(d, 'IsMatch_COCQ', 'IsMatch_COCQ'))));
-            tr.appendChild(addTd(getVal(d, 'VCHR_MSDS', 'vchr_MSDS'), null, mismatchStyle(getVal(d, 'IsMatch_MSDS', 'IsMatch_MSDS'))));
-            tr.appendChild(addTd(getVal(d, 'VCHR_AnToan', 'vchr_AnToan'), null, mismatchStyle(getVal(d, 'IsMatch_AnToan', 'IsMatch_AnToan'))));
-            tr.appendChild(addTd(getVal(d, 'VCHR_CamKet', 'vchr_CamKet'), null, mismatchStyle(getVal(d, 'IsMatchCamKet', 'IsMatchCamKet'))));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_DeliveryTerm', 'nvchr_DeliveryTerm')));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_PaymentTerm', 'nvchr_PaymentTerm')));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_File', 'nvchr_File')));
-            tr.appendChild(addTd(formatDate(getVal(d, 'DTM_EffectiveDate', 'dtm_EffectiveDate'))));
-            tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ExpiryDate', 'dtm_ExpiryDate'))));
-
-            // System total (try VND then USD)
-            const totalSys = (getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) ? (fmtNum(getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) + ' VND') : (getVal(d, 'FL_USD', 'fl_usd') ? (fmtNum(getVal(d, 'FL_USD', 'fl_vnd')) + ' USD') : '');
-            tr.appendChild(addTd(totalSys, 'text-center'));
-
-            // PIC selection and reason (display only)
-            //const pick = getVal(d, 'BIT_Select', 'bit_Select');
-            const pickLabel = pick === true || String(pick).toLowerCase() === 'true' ? 'O' : (pick === false || String(pick).toLowerCase() === 'false' ? 'X' : '');
-            tr.appendChild(addTd(pickLabel, 'text-center'));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_ReasonPick', 'nvchr_ReasonPick') || getVal(d, 'NVCHR_LyDo', 'nvchr_LyDo')));
-            tr.appendChild(addTd(getVal(d, 'NVCHR_Note', 'nvchr_Note')));
-            // approval
-            tr.appendChild(addTd(getVal(d, 'userQlsc')));
-            tr.appendChild(addTd((getVal(d, 'lyDoQlsc') === null || getVal(d, 'lyDoQlsc') === "") ? "OK" : "NG"));
-            tr.appendChild(addTd(getVal(d, 'lyDoQlsc')));
-
-            tr.appendChild(addTd(getVal(d, 'userQltc')));
-            tr.appendChild(addTd((getVal(d, 'lyDoQltc') === null || getVal(d, 'lyDoQltc') === "") ? "OK" : "NG"));
-            tr.appendChild(addTd(getVal(d, 'lyDoQltc')));
-
-            tr.appendChild(addTd(getVal(d, 'userDeft')));
-            tr.appendChild(addTd((getVal(d, 'lyDoDeft') === null || getVal(d, 'lyDoDeft') === "") ? "OK" : "NG"));
-            tr.appendChild(addTd(getVal(d, 'lyDoDeft')));
-
-            frag.appendChild(tr);
-        });
-        body.appendChild(frag);
-
-        // show modal
-        showModal();
-    }
-
-    function renderPagination() {
-        const container = document.getElementById('sectionPagination');
-        const pageInfo = document.getElementById('sectionPageInfo');
-        if (!container) return;
-        container.innerHTML = '';
-        const total = state.totalCount || 0;
-        const last = Math.max(1, Math.ceil(total / state.pageSize));
-
-        const createBtn = (text, disabled, cb) => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'btn btn-sm btn-outline-primary';
-            b.textContent = text;
-            if (disabled) b.disabled = true;
-            b.addEventListener('click', cb);
-            return b;
-        };
-
-        container.appendChild(createBtn('<<', state.pageIndex <= 1, () => { state.pageIndex = 1; doSearch(); }));
-        container.appendChild(createBtn('<', state.pageIndex <= 1, () => { state.pageIndex = Math.max(1, state.pageIndex - 1); doSearch(); }));
-
-        const info = document.createElement('span');
-        info.className = 'btn btn-sm disabled';
-        info.textContent = `Trang ${state.pageIndex} / ${last}`;
-        container.appendChild(info);
-
-        container.appendChild(createBtn('>', state.pageIndex >= last, () => { state.pageIndex = Math.min(last, state.pageIndex + 1); doSearch(); }));
-        container.appendChild(createBtn('>>', state.pageIndex >= last, () => { state.pageIndex = last; doSearch(); }));
-
-        if (pageInfo) pageInfo.textContent = `Hiển thị ${Math.min(state.pageSize, total - (state.pageIndex - 1) * state.pageSize)} / ${total}`;
-    }
-
-    async function doSearch() {
+    function hideEditModal() {
+        const modalEl = document.getElementById('detailModal');
+        if (!modalEl) return;
+        // Accessibility: if focus is inside modal, blur and move focus before hiding (to avoid aria-hidden ancestor with focused descendant)
         try {
-            showLoading();
-            const payload = {
+            const active = document.activeElement;
+            if (active && modalEl.contains(active)) {
+                if (typeof active.blur === 'function') active.blur();
+                const fallbackFocus = document.getElementById('btnApplyFilters') || document.body;
+                if (fallbackFocus && typeof fallbackFocus.focus === 'function') fallbackFocus.focus();
+            }
+        } catch { }
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        modalEl.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        // clean up inline sizing
+        try {
+            const dialog = modalEl.querySelector('.modal-dialog');
+            if (dialog) {
+                dialog.style.maxWidth = '';
+                dialog.style.width = '';
+                dialog.style.margin = '';
+            }
+        } catch { }
+        const backdrop = document.querySelector('.custom-modal-backdrop');
+        if (backdrop) backdrop.remove();
+    }
+    // Pagination and search logic for SelectQuoteSection page
+    (function () {
+        const locale = sqText('Locale', 'vi-VN');
+        const TAB_ACTIVE = 'active';
+        const TAB_ALL = 'all';
+
+        const state = {
+            currentTab: TAB_ACTIVE,
+            tabs: {
+                [TAB_ACTIVE]: { pageIndex: 1, pageSize: 20, totalCount: 0, selectedRows: new Set(), items: [] },
+                [TAB_ALL]: { pageIndex: 1, pageSize: 20, totalCount: 0, selectedRows: new Set(), items: [] }
+            }
+        };
+
+        const toRowKey = (maDon, maHang) => `${maDon || ''}|${maHang || ''}`;
+        const getTabState = (tab) => state.tabs[tab] || state.tabs[TAB_ACTIVE];
+
+        function getTabElements(tab) {
+            const suffix = tab === TAB_ACTIVE ? 'Active' : 'All';
+            return {
+                tbody: document.getElementById(`sectionRequestBody${suffix}`),
+                pageInfo: document.getElementById(`sectionPageInfo${suffix}`),
+                pagination: document.getElementById(`sectionPagination${suffix}`),
+                pageSize: document.getElementById(`sectionPageSizeSelect${suffix}`),
+                selectAll: document.getElementById(`selectAll${suffix}`)
+            };
+        }
+
+        function getFiltersPayload(tab) {
+            const tabState = getTabState(tab);
+            return {
                 MaDon: document.getElementById('searchMaDon')?.value || '',
                 Section: document.getElementById('searchPhongBan')?.value || '',
                 MaVatTu: document.getElementById('searchMaterial')?.value || '',
                 MaNcc: document.getElementById('searchSupplier')?.value || '',
-                PageIndex: state.pageIndex,
-                PageSize: state.pageSize
+                PageIndex: tabState.pageIndex,
+                PageSize: tabState.pageSize
             };
-            const res = await fetch((window.apiBaseUrl || '') + '/SelectQuote/SearchQuoteSection', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-            });
-            if (!res.ok) {
-                const txt = await res.text();
-                throw new Error(txt || 'Server error');
-            }
-            const data = await res.json();
-            const items = (data && data.data) ? (Array.isArray(data.data) ? data.data : (data.data.data || [])) : (Array.isArray(data) ? data : []);
-            const total = (data && data.data && typeof data.data.totalCount === 'number') ? data.data.totalCount : (data && typeof data.totalCount === 'number' ? data.totalCount : items.length);
-            state.totalCount = total;
-            renderTable(items);
-            renderPagination();
-            updateSummary(total);
-        } catch (e) {
-            console.error('Search error', e);
-            showDialog({ message: 'Lỗi tìm kiếm: ' + (e && e.message ? e.message : e), type: 'error' });
-        } finally {
-            hideLoading();
         }
-    }
 
-    // wire buttons and controls
-    document.addEventListener('DOMContentLoaded', function () {
-        // search button
-        document.getElementById('btnSearch')?.addEventListener('click', function () { state.pageIndex = 1; doSearch(); });
-        // clear
-        document.getElementById('btnClear')?.addEventListener('click', function () {
-            const form = document.getElementById('filterForm'); if (form) form.reset();
-            // reset any enhanced selects
-            document.querySelectorAll('select.searchable-select').forEach(s => { s.value = ''; try { s.dispatchEvent(new Event('change', { bubbles: true })); } catch { } });
-            state.pageIndex = 1; doSearch();
-        });
-        // page size
-        const ps = document.getElementById('sectionPageSizeSelect');
-        if (ps) {
-            ps.value = state.pageSize.toString();
-            ps.addEventListener('change', function () { state.pageSize = parseInt(ps.value) || 20; state.pageIndex = 1; doSearch(); });
+        function parseResponse(data) {
+            const items = (data && data.data)
+                ? (Array.isArray(data.data) ? data.data : (Array.isArray(data.data.data) ? data.data.data : []))
+                : (Array.isArray(data) ? data : []);
+
+            const total = (data && data.data && typeof data.data.totalCount === 'number')
+                ? data.data.totalCount
+                : (data && typeof data.totalCount === 'number' ? data.totalCount : items.length);
+
+            return { items, total };
         }
-        // selectAll groups
-        const selectAll = document.getElementById('selectAll');
-        if (selectAll) {
-            selectAll.addEventListener('change', function () {
-                const checks = Array.from(document.querySelectorAll('#sectionRequestBody .group-select'));
-                const checked = !!selectAll.checked;
-                window._selectedGroups = window._selectedGroups || new Set();
-                if (checked) {
-                    checks.forEach(c => {
-                        c.checked = true;
-                        const md = c.dataset ? c.dataset.madon : null;
-                        if (md) window._selectedGroups.add(md);
-                        try { c.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) { }
-                        try { c.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
-                    });
-                } else {
-                    checks.forEach(c => {
-                        c.checked = false;
-                        const md = c.dataset ? c.dataset.madon : null;
-                        if (md) window._selectedGroups.delete(md);
-                        try { c.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) { }
-                        try { c.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
-                    });
+
+        function parseDate(val) {
+            if (!val) return null;
+            const d = new Date(val);
+            return Number.isNaN(d.getTime()) ? null : d;
+        }
+
+        function formatDateText(val) {
+            const d = parseDate(val);
+            return d ? d.toLocaleDateString(locale) : '';
+        }
+
+        function getExpiryStatus(item, tab) {
+            const expiry = parseDate(item.DTM_ExpiryDate || item.dtm_ExpiryDate || item.ExpiryDate || item.NgayHetHan || item.DTM_KyHan || item.dtm_KyHan);
+            if (!expiry) {
+                return { label: sqText('Done', 'Hoàn thành'), className: 'bg-secondary' };
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const e = new Date(expiry);
+            e.setHours(0, 0, 0, 0);
+            const days = Math.ceil((e - today) / (1000 * 60 * 60 * 24));
+
+            if (days < 0) {
+                if (tab === TAB_ACTIVE) {
+                    return { label: sqText('StatusActive', 'Còn hiệu lực'), className: 'bg-success' };
                 }
+                return { label: sqText('StatusExpired', 'Hết hạn'), className: 'bg-danger' };
+            }
+            if (days < 30) {
+                return { label: sqText('StatusSoonExpired', 'Sắp hết hạn'), className: 'bg-warning text-dark' };
+            }
+            return { label: sqText('StatusActive', 'Còn hiệu lực'), className: 'bg-success' };
+        }
+
+        function updateDashboard() {
+            const activeState = getTabState(TAB_ACTIVE);
+            const allState = getTabState(TAB_ALL);
+
+            const countActive = document.getElementById('countActiveTab');
+            if (countActive) {
+                countActive.textContent = String(activeState.totalCount || 0);
+                countActive.style.color = '#fff';
+            }
+            const countAll = document.getElementById('countAllTab');
+            if (countAll) {
+                countAll.textContent = String(allState.totalCount || 0);
+                countAll.style.color = '#fff';
+            }
+
+            const summary = document.getElementById('summaryText');
+            const currentState = getTabState(state.currentTab);
+            if (summary) {
+                summary.textContent = sqText('SummaryRecords', '{0} bản ghi').replace('{0}', currentState.totalCount || 0);
+            }
+        }
+        function costCell(flUsed) {
+            if (flUsed != null && flUsed !== '') {
+                const value = parseFloat(flUsed);
+                return `<td class="text-center">${value.toFixed(4).replace(/\.?0+$/, '')} USD</td>`;
+            }
+            return `<td></td>`;
+        }
+        function renderTable(tab, items) {
+            const tabState = getTabState(tab);
+            const els = getTabElements(tab);
+            const tbody = els.tbody;
+            if (!tbody) return;
+            const isActiveTab = tab === TAB_ACTIVE;
+
+            tbody.innerHTML = '';
+
+            if (!items || !items.length) {
+                tbody.innerHTML = `<tr><td colspan="${isActiveTab ? 9 : 11}" class="text-center text-muted py-3">${sqText('NoDataText', 'Không có dữ liệu')}</td></tr>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const tr = document.createElement('tr');
+                const orderCode = item.CHR_MaDon || '';
+                const section = item.PhongYeuCau || '';
+                const materialCode = item.CHR_MaHangNoiBo || '';
+                const itemName = item.TenHang || '';
+                const itemNameEN = item.TenHangEN || '';
+                const unit = item.DonVi || '';
+                const price = item.FL_USD || 0;
+                const requester = item.NguoiYeuCau || '';
+                const wantDate = item.DTM_NgayMuonNhan ? new Date(item.DTM_NgayMuonNhan).toLocaleDateString(locale) : '';
+                const expiryDate = formatDateText(item.DTM_ExpiryDate || item.dtm_ExpiryDate || item.ExpiryDate || item.NgayHetHan || item.DTM_KyHan || item.dtm_KyHan);
+                const supplier = item.ShortName || item.NVCHR_NameNCC || '';
+                const processStatus = item.TrangThai === "Done" ? sqText('Done', 'Hoàn thành') : (item.TrangThai || '');
+                const rowKey = toRowKey(orderCode, materialCode);
+                const checkedAttr = tabState.selectedRows.has(rowKey) ? 'checked' : '';
+                const status = getExpiryStatus(item, tab);
+                const links = item.NVCHR_File || '';
+
+                if (isActiveTab) {
+                    tr.innerHTML = `
+                        <td class="text-center">
+                            <input type="checkbox" class="row-select" data-tab="${tab}" data-madon="${orderCode}" data-material="${materialCode}" ${checkedAttr}>
+                        </td>
+                        <td class="text-center">${orderCode}</td>
+                        <td class="text-center">${materialCode}</td>
+                        <td>${itemName}</td>
+                        <td>${itemNameEN}</td>
+                        <td>${supplier}</td>
+                        ${costCell(price)}
+                        <td class="text-center">${expiryDate}</td>
+                        <td class="text-center"><span class="badge status-pill ${status.className}">${status.label}</span></td>
+                        <td class="text-center table-actions">
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-view-detail" data-madon="${orderCode}" data-material="${materialCode}">
+                                <i class="fas fa-info"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-success btn-view-download" data-links="${links}">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </td>`;
+                } else { //${sqText('DetailButtonText', 'Chi tiết')}
+                    tr.innerHTML = `
+                        <td class="text-center">
+                            <input type="checkbox" class="row-select" data-tab="${tab}" data-madon="${orderCode}" data-material="${materialCode}" ${checkedAttr}>
+                        </td>
+                        <td class="text-center">${orderCode}</td>
+                        <td class="text-center">${section}</td>
+                        <td class="text-center">${materialCode}</td>
+                        <td>${itemName}</td>
+                        <td>${itemNameEN}</td>
+                        <td class="text-center">${unit}</td>
+                        <td class="text-center">${requester}</td>
+                        <td class="text-center">${wantDate}</td>
+                        <td class="text-center"><span class="badge bg-info text-dark">${processStatus}</span></td>
+                        <td class="text-center table-actions">
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-view-detail" data-madon="${orderCode}" data-material="${materialCode}">
+                                <i class="fas fa-circle-info me-1"></i>${sqText('DetailButtonText', 'Chi tiết')}
+                            </button>
+                        </td>`;
+                }
+                tbody.appendChild(tr);
             });
+
+            tbody.querySelectorAll('.btn-view-detail').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const maDon = this.dataset.madon;
+                    const maHang = this.dataset.material;
+                    if (typeof showDetail === 'function') showDetail(maDon, maHang);
+                });
+            });
+
+            tbody.querySelectorAll('.btn-view-download').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const link = this.dataset.links;
+
+                    if (typeof download === 'function') download(link);
+                });
+            });
+
+
+            if (els.selectAll) {
+                const allRows = tbody.querySelectorAll('.row-select');
+                els.selectAll.checked = allRows.length > 0 && [...allRows].every(x => x.checked);
+            }
         }
-        // export selected
-        const btnExportSelected = document.getElementById('btnExportSelected');
-        if (btnExportSelected) {
-            btnExportSelected.addEventListener('click', function () {
-                const selected = Array.from(window._selectedGroups || new Set());
-                if (!selected.length) {
-                    showDialog({ message: 'Vui lòng chọn ít nhất một nhóm để xuất.', type: 'info' });
-                    return;
+
+        async function download(link) {
+            if (!link) {
+                showDialog({ message: sqText('QuoteFileLinkMissing', 'Link file báo giá không có giá trị'), type: 'info' });
+                return;
+            }
+            try {
+                showLoading(sqText('LoadingData', 'Đang tải dữ liệu...'));
+
+                const response = await fetch((window.apiBaseUrl || '') + '/SelectQuote/DownloadQuoteFile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(link)
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(errText || "Download thất bại");
                 }
-                // call export API with selected MaDon
-                fetch((window.apiBaseUrl || '') + '/SelectQuote/ExportSelectedGroups', {
+
+                const blob = await response.blob();
+
+                // tạo link download
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                // lấy tên file từ path
+                a.download = link.split('/').pop() || 'download';
+                document.body.appendChild(a);
+                a.click();
+
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+            } catch (e) {
+                showDialog({ message: `${sqText('DetailLoadErrorPrefix', 'Lỗi tải chi tiết')}: ${e && e.message ? e.message : e}`, type: 'error' });
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function showDetail(maDon, maHang) {
+            if (!maDon || !maHang) {
+                showDialog({ message: sqText('OrderMaterialRequired', 'Mã đơn và Mã hàng không được để trống'), type: 'info' });
+                return;
+            }
+
+            try {
+                showLoading(sqText('LoadingData', 'Đang tải dữ liệu...'));
+                const res = await fetch((window.apiBaseUrl || '') + '/SelectQuote/GetQuoteDetails', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(selected)
-                })
-                    .then(res => {
-                        if (!res.ok) throw new Error('Export failed');
-                        return res.blob();
-                    })
-                    .then(blob => {
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `SelectedGroups_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`;
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                        window.URL.revokeObjectURL(url);
-                    })
-                    .catch(err => {
-                        showDialog({ message: 'Lỗi xuất file: ' + err.message, type: 'error' });
-                    });
-            });
+                    body: JSON.stringify({ maDon, maHang })
+                });
+
+                if (!res.ok) {
+                    const txt = await res.text();
+                    throw new Error(txt || sqText('ServerError', 'Server error'));
+                }
+
+                const data = await res.json();
+                const items = Array.isArray(data) ? data : [];
+                window._selectQuoteGroups = window._selectQuoteGroups || {};
+                window._selectQuoteGroups[maDon] = items;
+                showGroupDetail(maDon);
+            } catch (e) {
+                showDialog({ message: `${sqText('DetailLoadErrorPrefix', 'Lỗi tải chi tiết')}: ${e && e.message ? e.message : e}`, type: 'error' });
+            } finally {
+                hideLoading();
+            }
         }
-        // initial search
-        doSearch();
-    });
-})();
+        window.showDetail = showDetail;
+
+        function showGroupDetail(maDon) {
+            const groups = window._selectQuoteGroups || {};
+            const items = groups[maDon] || [];
+            // populate modal header basic info from first item
+            const first = items[0] || {};
+            document.getElementById('madonhang').textContent = maDon;
+            document.getElementById('khoi').textContent = first.CHR_SectionName || '';
+            document.getElementById('mpb_yc').textContent = first.CHR_SectionCode || '';
+            document.getElementById('tenphongban').textContent = first.CHR_SectionName || '';
+            document.getElementById('nyc').textContent = first.DTM_NgayMuonNhan ? new Date(first.DTM_NgayMuonNhan).toLocaleDateString(locale) : '';
+            document.getElementById('thmm').textContent = first.DTM_KyHan ? new Date(first.DTM_KyHan).toLocaleDateString(locale) : '';
+            document.getElementById('requester').textContent = first.CHR_CreateBy || '-';
+            document.getElementById('id_request').textContent = first.ID || maDon;
+            document.getElementById('step').textContent = first.ID_StepBaoGia || '';
+            document.getElementById('regency').textContent = first.ID_Status || '';
+
+            // urgent badge
+            const ub = document.getElementById('urgent-badge');
+            const gap = first.CHR_Gap;
+            const isUrgent = gap === true || String(gap).toLowerCase() === 'true' || String(gap) === '1' || String(gap).toLowerCase() === 'o';
+            if (ub) ub.style.display = isUrgent ? '' : 'none';
+
+            const body = document.getElementById('detailModalBody');
+            if (!body) return;
+            body.innerHTML = '';
+            // render rows using DOM for safety
+            const frag = document.createDocumentFragment();
+            // helper to render mismatch styling for vendor comparison fields
+            const mismatchStyle = (v) => {
+                if (v === false || v === 0 || v === '0' || String(v).toLowerCase() === 'false') {
+                    return 'color: #a00; background-color: #ffecec;';
+                }
+                return '';
+            };
+            const getVal = (obj, ...names) => {
+                if (!obj) return '';
+                for (const n of names) {
+                    if (obj[n] !== undefined && obj[n] !== null) return obj[n];
+                    const alt = Object.keys(obj).find(k => k.toLowerCase() === (n || '').toLowerCase());
+                    if (alt && obj[alt] !== undefined && obj[alt] !== null) return obj[alt];
+                }
+                return '';
+            };
+            const formatDate = (val) => {
+                if (!val) return '';
+                try {
+                    const d = new Date(val);
+                    if (!isNaN(d.getTime())) return d.toLocaleDateString(locale);
+                } catch { }
+                return String(val || '');
+            };
+            const fmtNum = v => { try { return v != null && v !== '' ? Number(v).toLocaleString() : ''; } catch { return v || ''; } };
+            items.forEach((d, idx) => {
+                const tr = document.createElement('tr');
+                const pick = getVal(d, 'BIT_Select', 'bit_Select');
+                tr.className = 'text-center' + (pick === false || String(pick).toLowerCase() === 'false' ? ' table-secondary' : '');
+
+                const addTd = (txt, cls, style) => { const td = document.createElement('td'); td.textContent = txt == null ? '' : String(txt); if (cls) td.className = cls; if (style) td.style.cssText = style; return td; };
+
+                tr.appendChild(addTd(idx + 1));
+                tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
+                tr.appendChild(addTd(getVal(d, 'chR_MaHangNoiBo', 'CHR_MaHangNoiBo')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_ChungLoai', 'NVCHR_ChungLoai')));
+                tr.appendChild(addTd(getVal(d, 'chR_Phanloai', 'CHR_Phanloai')));
+                tr.appendChild(addTd(getVal(d, 'chR_MaHangNCC', 'CHR_MaHangNCC')));
+                // name VN/EN combined
+                const nameVN = getVal(d, 'nvchR_NameVN', 'NVCHR_NameVN') || '';
+                const nameEN = getVal(d, 'nvchR_NameEN', 'NVCHR_NameEN') || '';
+                tr.appendChild(addTd((nameVN + (nameEN ? ' / ' + nameEN : '')).trim(), 'text-start'));
+
+                tr.appendChild(addTd(getVal(d, 'inT_SoLuong', 'INT_SoLuong') || '', 'text-center'));
+                tr.appendChild(addTd(getVal(d, 'nvchR_DonVi', 'NVCHR_DonVi') || '', 'text-center'));
+                tr.appendChild(addTd(getVal(d, 'nvchR_HinhDang', 'NVCHR_HinhDang')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_ChatLieu', 'NVCHR_ChatLieu')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_ThanhPhan', 'NVCHR_ThanhPhan')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_KichThuoc', 'NVCHR_KichThuoc')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_DongMay', 'NVCHR_DongMay')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_TinhNang', 'NVCHR_TinhNang')));
+
+                tr.appendChild(addTd(getVal(d, 'nvchR_FileThietKe', 'NVCHR_FileThietKe')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_NhaSanXuat', 'NVCHR_NhaSanXuat')));
+                tr.appendChild(addTd(getVal(d, 'chR_MaNCC', 'CHR_MaNCC')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_TenNCC', 'NVCHR_TenNCC')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_Rohs', 'NVCHR_Rohs')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_COCQ', 'NVCHR_COCQ')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_MSDS', 'NVCHR_MSDS')));
+                tr.appendChild(addTd(getVal(d, 'nvchR_AnToan', 'NVCHR_AnToan')));
+
+                tr.appendChild(addTd(formatDate(getVal(d, 'dtM_KyHan', 'DTM_KyHan')), 'text-center'));
+                const gap = getVal(d, 'chR_Gap', 'CHR_Gap');
+                const gapLabel = gap != null && gap !== '' ? (String(gap).toLowerCase() === 'true' || String(gap) === '1' ? 'O' : 'X') : '';
+                tr.appendChild(addTd(gapLabel, 'text-center'));
+                const lay = getVal(d, 'biT_LayBaoGia', 'BIT_LayBaoGia');
+                const layLabel = lay != null && lay !== '' ? (String(lay).toLowerCase() === 'true' || String(lay) === '1' ? 'O' : 'X') : '';
+                tr.appendChild(addTd(layLabel, 'text-center'));
+                tr.appendChild(addTd(getVal(d, 'nvchR_LyDo', 'NVCHR_LyDo')));
+
+                // Vendor input columns (read-only)
+                tr.appendChild(addTd(getVal(d, 'CHR_MaNCC', 'chR_MaNCC')));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_NameNCC', 'nvchR_NameNCC'), 'text-start'));
+                tr.appendChild(addTd(getVal(d, 'CHR_MaHangNCC', 'chR_MaHangNCC'), null, mismatchStyle(getVal(d, 'IsMatch_MaHangNCC', 'IsMatch_MaHangNCC'))));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_TenHangHQ', 'nvchR_TenHangHQ'), 'text-start', mismatchStyle(getVal(d, 'IsMatch_NameVN', 'IsMatch_NameVN'))));
+                tr.appendChild(addTd(getVal(d, 'NameENByNCC', 'nameENByNCC'), null, mismatchStyle(getVal(d, 'IsMatch_NameEN', 'IsMatch_NameEN'))));
+                tr.appendChild(addTd(getVal(d, 'soluong', 'INT_SoLuong', 'soluong') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_SoLuong', 'IsMatch_SoLuong'))));
+                tr.appendChild(addTd(getVal(d, 'donvi', 'NVCHR_DonVi') || '', 'text-center', mismatchStyle(getVal(d, 'IsMatch_DonVi', 'IsMatch_DonVi'))));
+                tr.appendChild(addTd(fmtNum(getVal(d, 'FL_USD', 'fl_usd')), 'text-end'));
+                tr.appendChild(addTd(fmtNum(getVal(d, 'FL_VND', 'fl_vnd')), 'text-end'));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_MOQ', 'nvchr_MOQ')));
+                tr.appendChild(addTd(getVal(d, 'DTM_LeadTime', 'dtm_LeadTime')));
+                tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ShipTime', 'dtm_ShipTime')), null, mismatchStyle(getVal(d, 'IsMatch_Ngay', 'IsMatch_Ngay'))));
+                tr.appendChild(addTd(getVal(d, 'VCHR_Rohs', 'vchr_Rohs'), null, mismatchStyle(getVal(d, 'IsMatch_Rohs', 'IsMatch_Rohs'))));
+                tr.appendChild(addTd(getVal(d, 'VCHR_COCQ', 'vchr_COCQ'), null, mismatchStyle(getVal(d, 'IsMatch_COCQ', 'IsMatch_COCQ'))));
+                tr.appendChild(addTd(getVal(d, 'VCHR_MSDS', 'vchr_MSDS'), null, mismatchStyle(getVal(d, 'IsMatch_MSDS', 'IsMatch_MSDS'))));
+                tr.appendChild(addTd(getVal(d, 'VCHR_AnToan', 'vchr_AnToan'), null, mismatchStyle(getVal(d, 'IsMatch_AnToan', 'IsMatch_AnToan'))));
+                tr.appendChild(addTd(getVal(d, 'VCHR_CamKet', 'vchr_CamKet'), null, mismatchStyle(getVal(d, 'IsMatchCamKet', 'IsMatchCamKet'))));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_DeliveryTerm', 'nvchr_DeliveryTerm')));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_PaymentTerm', 'nvchr_PaymentTerm')));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_File', 'nvchr_File')));
+                tr.appendChild(addTd(formatDate(getVal(d, 'DTM_EffectiveDate', 'dtm_EffectiveDate'))));
+                tr.appendChild(addTd(formatDate(getVal(d, 'DTM_ExpiryDate', 'dtm_ExpiryDate'))));
+
+                // System total (try VND then USD)
+                const totalSys = (getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) ? (fmtNum(getVal(d, 'FL_VND', 'fl_vnd') || getVal(d, 'TotalVND')) + ' VND') : (getVal(d, 'FL_USD', 'fl_usd') ? (fmtNum(getVal(d, 'FL_USD', 'fl_vnd')) + ' USD') : '');
+                tr.appendChild(addTd(totalSys, 'text-center'));
+
+                // PIC selection and reason (display only)
+                //const pick = getVal(d, 'BIT_Select', 'bit_Select');
+                const pickLabel = pick === true || String(pick).toLowerCase() === 'true' ? 'O' : (pick === false || String(pick).toLowerCase() === 'false' ? 'X' : '');
+                tr.appendChild(addTd(pickLabel, 'text-center'));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_ReasonPick', 'nvchr_ReasonPick') || getVal(d, 'NVCHR_LyDo', 'nvchr_LyDo')));
+                tr.appendChild(addTd(getVal(d, 'NVCHR_Note', 'nvchr_Note')));
+                // approval
+                tr.appendChild(addTd(getVal(d, 'userQlsc')));
+                tr.appendChild(addTd((getVal(d, 'lyDoQlsc') === null || getVal(d, 'lyDoQlsc') === "") ? "OK" : "NG"));
+                tr.appendChild(addTd(getVal(d, 'lyDoQlsc')));
+
+                tr.appendChild(addTd(getVal(d, 'userQltc')));
+                tr.appendChild(addTd((getVal(d, 'lyDoQltc') === null || getVal(d, 'lyDoQltc') === "") ? "OK" : "NG"));
+                tr.appendChild(addTd(getVal(d, 'lyDoQltc')));
+
+                tr.appendChild(addTd(getVal(d, 'userDeft')));
+                tr.appendChild(addTd((getVal(d, 'lyDoDeft') === null || getVal(d, 'lyDoDeft') === "") ? "OK" : "NG"));
+                tr.appendChild(addTd(getVal(d, 'lyDoDeft')));
+
+                frag.appendChild(tr);
+            });
+            body.appendChild(frag);
+
+            // show modal
+            showModal();
+        }
+
+        function renderPagination(tab) {
+            const tabState = getTabState(tab);
+            const els = getTabElements(tab);
+            const container = els.pagination;
+            const pageInfo = els.pageInfo;
+            if (!container) return;
+            container.innerHTML = '';
+            const total = tabState.totalCount || 0;
+            const last = Math.max(1, Math.ceil(total / tabState.pageSize));
+
+            const createBtn = (text, disabled, cb) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'btn btn-sm btn-outline-primary';
+                b.textContent = text;
+                if (disabled) b.disabled = true;
+                b.addEventListener('click', cb);
+                return b;
+            };
+
+            container.appendChild(createBtn('<<', tabState.pageIndex <= 1, () => {
+                tabState.pageIndex = 1;
+                doSearch(tab);
+            }));
+            container.appendChild(createBtn('<', tabState.pageIndex <= 1, () => {
+                tabState.pageIndex = Math.max(1, tabState.pageIndex - 1);
+                doSearch(tab);
+            }));
+
+            const info = document.createElement('span');
+            info.className = 'btn btn-sm disabled';
+            container.appendChild(info);
+
+            info.textContent = sqText('PageLabelTemplate', 'Trang {0} / {1}')
+                .replace('{0}', tabState.pageIndex)
+                .replace('{1}', last);
+
+            container.appendChild(createBtn('>', tabState.pageIndex >= last, () => {
+                tabState.pageIndex = Math.min(last, tabState.pageIndex + 1);
+                doSearch(tab);
+            }));
+            container.appendChild(createBtn('>>', tabState.pageIndex >= last, () => {
+                tabState.pageIndex = last;
+                doSearch(tab);
+            }));
+
+            if (pageInfo) {
+                const showing = Math.max(0, Math.min(tabState.pageSize, total - (tabState.pageIndex - 1) * tabState.pageSize));
+                pageInfo.textContent = sqText('PageInfoTemplate', 'Hiển thị {0} / {1}')
+                    .replace('{0}', showing)
+                    .replace('{1}', total);
+            }
+        }
+
+        // export file
+        async function exportFile() {
+            try {
+                showLoading();
+                const payload = {
+                    MaDon: document.getElementById('searchMaDon')?.value || '',
+                    Section: document.getElementById('searchPhongBan')?.value || '',
+                    MaVatTu: document.getElementById('searchMaterial')?.value || '',
+                    MaNcc: document.getElementById('searchSupplier')?.value || '',
+                    PageIndex: getTabState(state.currentTab).pageIndex,
+                    PageSize: getTabState(state.currentTab).pageSize
+                };
+                const res = await fetch((window.apiBaseUrl || '') + '/SelectQuote/ExportSelectedGroups', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const txt = await res.text();
+                    throw new Error(txt || 'Server error');
+                }
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'QuoteSection.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (e) {
+                console.error('Search error', e);
+                showDialog({ message: `${sqText('SearchErrorPrefix', 'Lỗi tìm kiếm')}: ${e && e.message ? e.message : e}`, type: 'error' });
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function doSearch(tab) {
+            try {
+                showLoading();
+                tab = tab || state.currentTab;
+                const payload = getFiltersPayload(tab);
+                const endpoint = tab === TAB_ACTIVE
+                    ? '/SelectQuote/GetActiveQuotes'
+                    : '/SelectQuote/SearchQuoteSection';
+
+                const res = await fetch((window.apiBaseUrl || '') + endpoint, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const txt = await res.text();
+                    throw new Error(txt || 'Server error');
+                }
+                const data = await res.json();
+                const parsed = parseResponse(data);
+                const tabState = getTabState(tab);
+                tabState.items = parsed.items;
+                tabState.totalCount = parsed.total;
+                renderTable(tab, parsed.items);
+                renderPagination(tab);
+                updateDashboard();
+            } catch (e) {
+                console.error('Search error', e);
+                showDialog({ message: `${sqText('SearchErrorPrefix', 'Lỗi tìm kiếm')}: ${e && e.message ? e.message : e}`, type: 'error' });
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function refreshBothTabs() {
+            await doSearch(TAB_ACTIVE);
+            await doSearch(TAB_ALL);
+        }
+
+        async function searchBaoGiaConHieuLuc(resetPage) {
+            if (resetPage) getTabState(TAB_ACTIVE).pageIndex = 1;
+            state.currentTab = TAB_ACTIVE;
+            await doSearch(TAB_ACTIVE);
+        }
+
+        async function searchTatCaBaoGia(resetPage) {
+            if (resetPage) getTabState(TAB_ALL).pageIndex = 1;
+            state.currentTab = TAB_ALL;
+            await doSearch(TAB_ALL);
+        }
+
+        window.searchBaoGiaConHieuLuc = searchBaoGiaConHieuLuc;
+        window.searchTatCaBaoGia = searchTatCaBaoGia;
+
+        function activateTab(tab) {
+            const activeBtn = document.getElementById('tab-active-quotes');
+            const allBtn = document.getElementById('tab-all-quotes');
+            const activePane = document.getElementById('pane-active-quotes');
+            const allPane = document.getElementById('pane-all-quotes');
+
+            const isActive = tab === TAB_ACTIVE;
+            state.currentTab = isActive ? TAB_ACTIVE : TAB_ALL;
+
+            if (activeBtn) {
+                activeBtn.classList.toggle('active', isActive);
+                activeBtn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            }
+            if (allBtn) {
+                allBtn.classList.toggle('active', !isActive);
+                allBtn.setAttribute('aria-selected', !isActive ? 'true' : 'false');
+            }
+            if (activePane) {
+                activePane.classList.toggle('show', isActive);
+                activePane.classList.toggle('active', isActive);
+            }
+            if (allPane) {
+                allPane.classList.toggle('show', !isActive);
+                allPane.classList.toggle('active', !isActive);
+            }
+
+            updateDashboard();
+        }
+
+        // wire buttons and controls
+        document.addEventListener('DOMContentLoaded', function () {
+            // search button
+            document.getElementById('btnSearch')?.addEventListener('click', function () {
+                getTabState(TAB_ACTIVE).pageIndex = 1;
+                getTabState(TAB_ALL).pageIndex = 1;
+                refreshBothTabs();
+            });
+            // clear
+            document.getElementById('btnClear')?.addEventListener('click', function () {
+                const form = document.getElementById('filterForm'); if (form) form.reset();
+                // reset any enhanced selects
+                document.querySelectorAll('select.searchable-select').forEach(s => { s.value = ''; try { s.dispatchEvent(new Event('change', { bubbles: true })); } catch { } });
+                getTabState(TAB_ACTIVE).pageIndex = 1;
+                getTabState(TAB_ALL).pageIndex = 1;
+                refreshBothTabs();
+            });
+            // Export file button
+            document.getElementById('btnExportExcel')?.addEventListener('click', function () {
+                exportFile();
+            });
+            // page size
+            [TAB_ACTIVE, TAB_ALL].forEach(tab => {
+                const els = getTabElements(tab);
+                const tabState = getTabState(tab);
+                if (els.pageSize) {
+                    els.pageSize.value = tabState.pageSize.toString();
+                    els.pageSize.addEventListener('change', function () {
+                        tabState.pageSize = parseInt(els.pageSize.value, 10) || 20;
+                        tabState.pageIndex = 1;
+                        doSearch(tab);
+                    });
+                }
+            });
+
+            document.addEventListener('change', function (e) {
+                const row = e.target.closest('.row-select');
+                if (!row) return;
+                const tab = row.dataset.tab || TAB_ACTIVE;
+                const tabState = getTabState(tab);
+                const key = toRowKey(row.dataset.madon, row.dataset.material);
+                if (row.checked) tabState.selectedRows.add(key);
+                else tabState.selectedRows.delete(key);
+
+                const els = getTabElements(tab);
+                if (els.selectAll && els.tbody) {
+                    const allRows = els.tbody.querySelectorAll('.row-select');
+                    els.selectAll.checked = allRows.length > 0 && [...allRows].every(x => x.checked);
+                }
+            });
+
+            document.querySelectorAll('.select-all').forEach(el => {
+                el.addEventListener('change', function () {
+                    const tab = this.dataset.tab || TAB_ACTIVE;
+                    const els = getTabElements(tab);
+                    const tabState = getTabState(tab);
+                    if (!els.tbody) return;
+                    const rows = els.tbody.querySelectorAll('.row-select');
+                    rows.forEach(r => {
+                        r.checked = this.checked;
+                        const key = toRowKey(r.dataset.madon, r.dataset.material);
+                        if (this.checked) tabState.selectedRows.add(key);
+                        else tabState.selectedRows.delete(key);
+                    });
+                });
+            });
+
+            document.querySelectorAll('#quoteTabs button[data-tab]').forEach(tabBtn => {
+                tabBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const key = this.getAttribute('data-tab') || TAB_ACTIVE;
+                    activateTab(key);
+                    if (key === TAB_ACTIVE) {
+                        searchBaoGiaConHieuLuc(false);
+                    } else {
+                        searchTatCaBaoGia(false);
+                    }
+                });
+            });
+            // export selected
+            //const btnExportSelected = document.getElementById('btnExportSelected');
+            //if (btnExportSelected) {
+            //    btnExportSelected.addEventListener('click', function () {
+            //        const selected = getSelectedOrderCodes();
+            //        if (!selected.length) {
+            //            showDialog({ message: sqText('ExportSelectAtLeastOne', 'Vui lòng chọn ít nhất một nhóm để xuất.'), type: 'info' });
+            //            return;
+            //        }
+            //        // call export API with selected MaDon
+            //        fetch((window.apiBaseUrl || '') + '/SelectQuote/ExportSelectedGroups', {
+            //            method: 'POST',
+            //            headers: { 'Content-Type': 'application/json' },
+            //            body: JSON.stringify(selected)
+            //        })
+            //            .then(res => {
+            //                if (!res.ok) throw new Error(sqText('ExportFailed', 'Xuất file thất bại'));
+            //                return res.blob();
+            //            })
+            //            .then(blob => {
+            //                const url = window.URL.createObjectURL(blob);
+            //                const a = document.createElement('a');
+            //                a.href = url;
+            //                a.download = `SelectedGroups_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`;
+            //                document.body.appendChild(a);
+            //                a.click();
+            //                a.remove();
+            //                window.URL.revokeObjectURL(url);
+            //            })
+            //            .catch(err => {
+            //                showDialog({ message: `${sqText('ExportErrorPrefix', 'Lỗi xuất file')}: ${err.message}`, type: 'error' });
+            //            });
+            //    });
+            //}
+
+            activateTab(TAB_ACTIVE);
+            refreshBothTabs();
+        });
+    })()
+};

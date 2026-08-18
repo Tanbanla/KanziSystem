@@ -95,5 +95,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
 
         // check infor báo giá theo mã đơn, mã hàng, mã ncc
         Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> GetOrderInfoAsync(string? maDon, string? maHangNCC, string? maHangNB, string? NameEn);
+        Task<GenericResponse<List<dynamic>>> SearchRequestDoneDetail(string? maDon, string? maHang, string? user);
+        // Export Excel báo giá Done
+        Task<GenericResponse<List<dynamic>>> ExportExcelBaoGiaDoneAsync(string? maDon, string? section, string? maHang, string? maNCC, string user);
+        // Search báo giá còn hiệu lực
+        Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaConHieuLucAsync(SearchQuotationResultsModel search, string? user);
     }
 }

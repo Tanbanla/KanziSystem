@@ -4,37 +4,98 @@
 }
 
 <style>
-    /* Tổng thể bảng */
+    /* --- BỐ CỤC TỔNG THỂ BẢNG --- */
     .table-master {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 13px;
-        border-collapse: collapse;
+        border-collapse: separate; /* Dùng separate để viền sticky không bị lỗi */
+        border-spacing: 0;
         width: 100%;
         background-color: #fff;
     }
 
         .table-master th, .table-master td {
-            border: 1px solid #a6a6a6 !important;
-            padding: 4px 8px;
+            border-right: 1px solid #d4d4d4;
+            border-bottom: 1px solid #d4d4d4;
+            padding: 6px 10px;
             vertical-align: middle;
-            white-space: nowrap;
         }
 
-        /* Tiêu đề giống giao diện Excel */
-        .table-master thead th {
-            background-color: #dbeaff; /* Xanh nhạt Excel */
-            color: #000;
-            font-weight: 600;
-            text-align: center;
-            height: 38px;
-        }
-
-            /* Màu nổi bật cho Header cột Using */
-            .table-master thead th.bg-using {
-                background-color: #fff2cc !important; /* Vàng nhạt */
+            .table-master td:first-child, .table-master th:first-child {
+                border-left: 1px solid #d4d4d4;
             }
 
-    /* Cột chữ số căn phải */
+        /* --- HIỆU ỨNG HEADER --- */
+        .table-master thead th {
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+            position: sticky;
+            z-index: 10;
+            border-top: 1px solid #d4d4d4;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ghim cố định 2 dòng Header */
+        .table-master thead tr:nth-child(1) th {
+            top: 0;
+            z-index: 11;
+            border-bottom: none;
+            height: 35px;
+        }
+
+        .table-master thead tr:nth-child(2) th {
+            top: 35px;
+            z-index: 10;
+            height: 40px;
+        }
+
+    /* --- MÀU SẮC PHÂN NHÓM HEADER --- */
+    .group-info {
+        background-color: #e2efda !important;
+        color: #385723 !important;
+    }
+    /* Xanh lá nhạt */
+    .group-delivery {
+        background-color: #fff2cc !important;
+        color: #7f6000 !important;
+    }
+    /* Vàng nhạt */
+    .group-standard {
+        background-color: #d9e1f2 !important;
+        color: #2f5597 !important;
+    }
+    /* Xanh dương nhạt */
+    .group-status {
+        background-color: #fce4d6 !important;
+        color: #c65911 !important;
+    }
+    /* Cam nhạt */
+
+    /* Màu sub-header (dòng 2) */
+    .sub-info {
+        background-color: #f2f7ec !important;
+    }
+
+    .sub-delivery {
+        background-color: #fffbf0 !important;
+    }
+
+    .sub-standard {
+        background-color: #f0f3fa !important;
+    }
+
+    .sub-status {
+        background-color: #fef0e8 !important;
+    }
+
+    .bg-using-highlight {
+        background-color: #ffeba1 !important;
+        color: #b30000 !important;
+        font-weight: bold;
+    }
+
+    /* --- CĂN LỀ & HIỆU ỨNG BODY --- */
     .text-end {
         text-align: right !important;
     }
@@ -43,76 +104,112 @@
         text-align: center !important;
     }
 
-    /* Hiệu ứng hover dòng */
-    .table-master tbody tr:hover {
-        background-color: #f2f7ff;
+    .table-master tbody tr:hover td {
+        background-color: #f2f7ff !important;
     }
 
-    /* --- TO MÀU CỘT ĐIỂM GỌI HÀNG --- */
+    /* Dòng xen kẽ (Zebra stripe) */
+    .table-master tbody tr:nth-child(even) td {
+        background-color: #fafafa;
+    }
+
+    /* --- CSS CỘT ĐIỂM GỌI HÀNG --- */
     .badge-status {
         display: block;
         width: 100%;
-        padding: 4px;
-        font-weight: 600;
+        padding: 5px;
+        font-weight: 700;
         text-align: center;
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
     }
 
     .status-ok {
-        background-color: transparent;
-        color: #000;
-        text-align: left !important;
+        background-color: #e2efda;
+        color: #385723;
+        border: none;
+        box-shadow: none;
     }
 
     .status-doi-ung {
-        background-color: #fce4d6 !important; /* Màu hồng/cam nhạt */
-        color: #6c1d45 !important; /* Chữ đỏ tím thẫm */
+        background-color: #f8cbad;
+        color: #843c0c;
+        animation: blink 1.5s infinite;
     }
 
     .status-goi-hang {
-        background-color: #ffff99 !important; /* Vàng sáng */
-        color: #000 !important;
+        background-color: #ffe699;
+        color: #7f6000;
     }
 
     .status-chua-dung {
-        background-color: transparent;
-        color: #333;
-        text-align: left !important;
+        background-color: #f2f2f2;
+        color: #7f7f7f;
+        border: none;
+        box-shadow: none;
+    }
+
+    @@keyframes blink {
+        50%
+
+    {
+        opacity: 0.7;
+    }
+
     }
 </style>
 
-<div class="container-fluid py-3">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 text-primary fw-bold">
-                <i class="fa-solid fa-table me-2"></i>THEO DÕI ĐIỂM GỌI HÀNG & MASTER TỒN KHO AN TOÀN
+<div class="container-fluid">
+    <div class="card shadow border-0" style="border-radius: 8px;">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center" style="border-radius: 8px 8px 0 0;">
+            <h5 class="mb-0 text-info fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+                <i class="fa-solid fa fa-table-list me-2"></i> THEO DÕI ĐIỂM GỌI HÀNG & MASTER TỒN KHO AN TOÀN
             </h5>
             <div>
-                <button type="button" class="btn btn-sm btn-outline-success">
-                    <i class="fa-solid fa-file-excel me-1"></i> Xuất Excel
+                <button type="button" class="btn btn-success shadow-sm">
+                    <i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel
                 </button>
             </div>
         </div>
+
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 780px; overflow-y: auto;">
+            <div class="table-responsive" style="max-height: 75vh; overflow: auto; border-radius: 0 0 8px 8px;">
                 <table class="table-master">
-                    <thead style="position: sticky; top: 0; z-index: 10;">
+                    <thead>
+                        <!-- DÒNG HEADER 1: GỘP NHÓM CỘT -->
                         <tr>
-                            <th>Mã hàng</th>
-                            <th>Tên hàng</th>
-                            <th>Vendor</th>
-                            <th>Maker</th>
-                            <th>MOQ</th>
-                            <th>Tần suất<br />giao hàng</th>
-                            <th>Leadtime<br />giao hàng</th>
-                            <th>Tỉ lệ tồn<br />kho an toàn</th>
-                            <th>Số ngày<br />tồn kho<br />an toàn</th>
-                            <th>Đơn vị</th>
-                            <th>Số lượng<br />tồn kho<br />an toàn</th>
-                            <th class="bg-using">Using<br />tháng<br />hiện tại</th>
-                            <th>Stock hiện<br />tại</th>
-                            <th>Số ngày sử<br />dụng hiện tại</th>
-                            <th>Tỉ lệ tồn<br />kho hiện<br />tại</th>
-                            <th style="min-width: 130px;">Điểm gọi hàng</th>
+                            <th colspan="6" class="group-info">I. THÔNG TIN VẬT TƯ & NCC</th>
+                            <th colspan="3" class="group-delivery">II. QUY ĐỊNH GIAO HÀNG</th>
+                            <th colspan="3" class="group-standard">III. TIÊU CHUẨN AN TOÀN</th>
+                            <th colspan="5" class="group-status">IV. THỰC TẾ & TRẠNG THÁI</th>
+                        </tr>
+
+                        <!-- DÒNG HEADER 2: CHI TIẾT CỘT -->
+                        <tr>
+                            <!-- Nhóm I (Xanh lá) -->
+                            <th class="sub-info">Mã hàng</th>
+                            <th class="sub-info">Tên hàng</th>
+                            <th class="sub-info">Đơn vị</th>
+                            <th class="sub-info">Mã NCC</th>
+                            <th class="sub-info">Tên NCC</th>
+                            <th class="sub-info">Maker</th>
+
+                            <!-- Nhóm II (Vàng) -->
+                            <th class="sub-delivery">MOQ</th>
+                            <th class="sub-delivery">Tần suất GH</th>
+                            <th class="sub-delivery">Leadtime GH</th>
+
+                            <!-- Nhóm III (Xanh dương) -->
+                            <th class="sub-standard">Số ngày kho AT</th>
+                            <th class="sub-standard">Tỉ lệ kho AT</th>
+                            <th class="sub-standard">SL tồn kho AT</th>
+
+                            <!-- Nhóm IV (Cam) -->
+                            <th class="sub-status text-primary">Stock hiện tại</th>
+                            <th class="bg-using-highlight">Using tháng HT</th>
+                            <th class="sub-status">Số ngày dùng HT</th>
+                            <th class="sub-status">Tỉ lệ tồn kho HT</th>
+                            <th class="sub-status" style="min-width: 140px;">Điểm gọi hàng</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,39 +217,43 @@
                         {
                             foreach (var item in Model)
                             {
-                                // Xử lý class CSS theo trạng thái cột cuối
                                 string statusClass = "status-ok";
                                 if (item.DiemGoiHang == "ĐỐI ỨNG GẤP") { statusClass = "status-doi-ung"; }
                                 else if (item.DiemGoiHang == "GỌI HÀNG") { statusClass = "status-goi-hang"; }
                                 else if (item.DiemGoiHang == "CHƯA DÙNG") { statusClass = "status-chua-dung"; }
 
                                 <tr>
-                                    <td class="fw-semibold">@item.Mahang</td>
+                                    <!-- Nhóm I -->
+                                    <td class="fw-bold text-primary">@item.Mahang</td>
                                     <td>@item.Tenhang</td>
+                                    <td class="text-center fw-semibold text-secondary">@item.Donvi</td>
+                                    <td>@item.Vendor_Code</td>
                                     <td>@item.Vendor</td>
                                     <td>@item.Maker</td>
+
+                                    <!-- Nhóm II -->
                                     <td class="text-end">@item.MOQ</td>
                                     <td class="text-end">@(item.Tansuatgiaohang?.ToString("N0") ?? "-")</td>
                                     <td class="text-end">@(item.Leadtimegiaohang?.ToString("N0") ?? "-")</td>
-                                    <td class="text-end">@(item.TiLeTonKhoAnToan.HasValue? item.TiLeTonKhoAnToan.Value.ToString("N0") + "%" : "-")</td>
-                                    <td class="text-end">@(item.Songaytonkhoantoan?.ToString("N0") ?? "-")</td>
-                                    <td class="text-center">@item.Donvi</td>
-                                    <td class="text-end">@(item.Soluongtonkhoantoan?.ToString("N2") ?? "-")</td>
 
-                                    <!-- Cột Using màu vàng -->
-                                    <td class="text-end" style="background-color: #fffaf0;">
+                                    <!-- Nhóm III -->
+                                    <td class="text-end">@(item.Songaytonkhoantoan?.ToString("N0") ?? "-")</td>
+                                    <td class="text-end">@(item.TiLeTonKhoAnToan.HasValue? item.TiLeTonKhoAnToan.Value.ToString("N0") + "%" : "-")</td>
+                                    <td class="text-end fw-semibold text-success">@(item.Soluongtonkhoantoan?.ToString("N2") ?? "-")</td>
+
+                                    <!-- Nhóm IV -->
+                                    <td class="text-end fw-bold text-primary" style="background-color: #f0f7ff;">
+                                        @(item.StockHienTai?.ToString("N0") ?? "-")
+                                    </td>
+                                    <td class="text-end fw-bold" style="background-color: #fffde6;">
                                         @(item.UsingThangHienTai?.ToString("N2") ?? "-")
                                     </td>
-
-                                    <td class="text-end">@(item.StockHienTai?.ToString("N0") ?? "-")</td>
                                     <td class="text-end">@(item.SoNgaySuDungHienTai?.ToString("N2") ?? "-")</td>
                                     <td class="text-end fw-semibold">
                                         @(item.TiLeTonKhoHienTai.HasValue? item.TiLeTonKhoHienTai.Value.ToString("N0") + "%" : "-")
                                     </td>
-
-                                    <!-- Cột Trạng thái có màu tự động -->
-                                    <td class="p-0 text-center @statusClass" style="font-weight: 600; padding-left: 8px !important;">
-                                        @item.DiemGoiHang
+                                    <td class="text-center p-1">
+                                        <span class="badge-status @statusClass">@item.DiemGoiHang</span>
                                     </td>
                                 </tr>
                             }
@@ -160,7 +261,8 @@
                         else
                         {
                             <tr>
-                                <td colspan="16" class="text-center text-muted py-4">
+                                <td colspan="17" class="text-center text-muted py-5" style="font-size: 15px;">
+                                    <i class="fa-solid fa-folder-open fa-2x mb-2" style="color: #ccc;"></i><br />
                                     Không có dữ liệu hiển thị.
                                 </td>
                             </tr>

@@ -1,0 +1,107 @@
+/* sticky header inside scrollable table container */
+.table-responsive thead th {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 5;
+}
+/* group header row */
+#sectionRequestBody .group-row td {
+    background: #f1f3f5;
+    font-weight: 600;
+    padding: 10px;
+}
+/* unified header style to match Quotation_Results */
+.table-header-custom th {
+    background-color: #0d6efd;
+    color: #fff;
+    vertical-align: middle;
+    font-weight: 600;
+}
+/* status badge used in Quotation_Results */
+.status-badge {
+    display: inline-block;
+    padding: .25rem .5rem;
+    border-radius: .375rem;
+    font-size: .75rem;
+    line-height: 1;
+    color: #fff;
+    background-color: #6c757d;
+}
+
+    .status-badge.bg-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .status-badge.bg-success {
+        background-color: #198754;
+    }
+
+    .status-badge.bg-primary {
+        background-color: #0d6efd;
+    }
+/* modal detail table header */
+#detailTable thead th {
+    background-color: #e9ecef;
+    color: #000;
+}
+
+.dashboard-card {
+    border: 1px solid #e9ecef;
+    border-radius: .75rem;
+    background: #fff;
+    padding: .85rem 1rem;
+}
+
+    .dashboard-card .metric-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #0d6efd;
+    }
+
+.quote-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+    .quote-tabs .nav-link.active {
+        color: #0d6efd;
+    }
+
+.quote-tab-count {
+    min-width: 30px;
+    text-align: center;
+    font-size: .75rem;
+}
+
+.table-wrap {
+    max-height: 520px;
+    overflow: auto;
+}
+
+.status-pill {
+    font-size: .75rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: .35rem .6rem;
+}
+
+.table-actions .btn {
+    white-space: nowrap;
+}
+/* Header của 2 bảng */
+#sectionRequestTableActive thead th,
+#sectionRequestTableAll thead th {
+    background-color: #2335b7 !important;
+    color: #fff !important;
+}
+
+    #sectionRequestTableActive thead th *,
+    #sectionRequestTableAll thead th * {
+        color: #fff !important;
+    }

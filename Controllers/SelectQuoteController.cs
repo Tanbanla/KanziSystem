@@ -29,6 +29,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IMasterApproverSendMailService _approverService;
         private readonly IMaterialService _materialService;
         private readonly IConfiguration _configuration;
+        private readonly IFileImportService _fileImportService;
 
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IDepartmentService _deparmentService;
@@ -37,7 +38,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         public SelectQuoteController(IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<SelectQuoteController> logger, IServiceScopeFactory serviceScopeFactory,
-            IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration
+            IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration, IFileImportService fileImportService
             , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService, IStringLocalizer<SelectQuoteController> localizer
             )
         {
@@ -55,6 +56,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _deparmentService = deparmentService;
             _tmNccNewService = tmNccNewService;
             _localizer = localizer;
+            _fileImportService = fileImportService;
         }
         [HttpPost]
         public async Task<IActionResult> SearchQuoteSection([FromBody] SearchQuotationResultsModel mod)
@@ -76,20 +78,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Xuất file cho các nhóm đã chọn
         [HttpPost]
-        public async Task<IActionResult> ExportSelectedGroups([FromBody] List<string> selectedMaDon)
+        public async Task<IActionResult> ExportSelectedGroups([FromBody] SearchQuotationResultsModel selectedMaDon)
         {
+            if(selectedMaDon == null)
+            {
+                return BadRequest("Không nhận được thông tin dữ liệu xuất");
+            }
             try
             {
                 var role = GetRolesUser();
-                if (role == "UserPUR" && selectedMaDon.Count > 2)
-                {
-                    var maDonList = await _baoGiaService.GetMaDonYeuCauHangHoaAsync();
-                    selectedMaDon = maDonList.Data.ToList();
-                }
-                if (selectedMaDon == null || !selectedMaDon.Any())
-                {
-                    return BadRequest("Không có nhóm nào được chọn");
-                }
                 var root = _env.WebRootPath ?? _env.ContentRootPath;
                 var templatePath = Path.Combine(root, "template", "TemplateResults.xlsx");
                 if (!System.IO.File.Exists(templatePath))
@@ -106,108 +103,109 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 var enUs = new CultureInfo("en-US");
                 int rowStart = 4;
-                foreach (var maDon in selectedMaDon)
+                // Lấy danh sách mã đơn được chọn
+                var result = await _baoGiaService.ExportExcelBaoGiaDoneAsync(selectedMaDon.MaDon, selectedMaDon.Section, selectedMaDon.MaVatTu, selectedMaDon.MaNcc, GetCurrentUserId());
+                if (!result.Success || result.Data == null)
                 {
-                    var result = await _baoGiaService.SearchRequestDone(maDon, "", "", "", GetCurrentUserId(), 0, 0);
-                    if (!result.Success || result.Data == null) continue;
-                    var dataList = result.Data.Data;
-                    var totals = new Dictionary<string, (double vnd, double usd)>();
-                    foreach (var item in dataList)
+                    return BadRequest(result.Message ?? "Không có dữ liệu để xuất file");
+                }
+                var dataList = result.Data;
+                var totals = new Dictionary<string, (double vnd, double usd)>();
+                foreach (var item in dataList)
+                {
+                    string key = $"{item.CHR_MaDon ?? ""}|{item.CHR_MaThietBi ?? ""}|{item.CHR_MaNCC ?? ""}";
+                    double vnd = item.FL_VND ?? 0.0;
+                    double usd = item.FL_USD ?? 0.0;
+                    if (!totals.ContainsKey(key))
                     {
-                        string key = $"{item.CHR_MaDon ?? ""}|{item.CHR_MaThietBi ?? ""}|{item.CHR_MaNCC ?? ""}";
-                        double vnd = item.FL_VND ?? 0.0;
-                        double usd = item.FL_USD ?? 0.0;
-                        if (!totals.ContainsKey(key))
-                        {
-                            totals[key] = (0.0, 0.0);
-                        }
-                        var current = totals[key];
-                        totals[key] = (current.Item1 + vnd, current.Item2 + usd);
+                        totals[key] = (0.0, 0.0);
                     }
-                    foreach (var item in dataList)
+                    var current = totals[key];
+                    totals[key] = (current.Item1 + vnd, current.Item2 + usd);
+                }
+                foreach (var item in dataList)
+                {
+                    int col = 1;
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.ID_Status ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.ID ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_NameVN ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_NameEN ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.INT_SoLuong ?? 0);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_DonVi ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChungLoai ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_HinhDang ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChatLieu ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_ThanhPhan ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_KichThuoc ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_DongMay ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TinhNang ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_Rohs ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_COCQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_MSDS ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_AnToan ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
+                    // Vendor input
+                    ws.Cell(rowStart, col++).SetValue(item.CodeEquipmentNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NameENByNCC ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.soluong ?? 0); // Vendor quantity
+                    ws.Cell(rowStart, col++).SetValue(item.donvi ?? string.Empty); // Vendor unit
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Vendor maker
+                    ws.Cell(rowStart, col++).SetValue(item.FL_USD ?? 0.0);
+                    ws.Cell(rowStart, col++).SetValue((item.FL_VND ?? 0).ToString("N0", enUs));
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_MOQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_Packing ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_LeadTime ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_ShipTime ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_Rohs ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_COCQ ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_MSDS ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_AnToan ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.VCHR_CamKet ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_DeliveryTerm ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_PaymentTerm ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_File ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_EffectiveDate?.ToString("dd/MM/yyyy") ?? string.Empty);
+                    ws.Cell(rowStart, col++).SetValue(item.DTM_ExpiryDate?.ToString("dd/MM/yyyy") ?? string.Empty);
+                    // System total
+                    // System count
+                    string key = $"{item.CHR_MaDon ?? ""}|{item.CHR_MaThietBi ?? ""}|{item.CHR_MaNCC ?? ""}";
+                    var tot = totals.ContainsKey(key) ? totals[key] : (0.0, 0.0);
+                    string totalCell = "";
+                    if (tot.Item1 != 0)
                     {
-                        int col = 1;
-                        ws.Cell(rowStart, col++).SetValue(item.CHR_MaDon ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.ID_Status ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.ID ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNCC ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_NameVN ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.CHR_NameEN ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.INT_SoLuong ?? 0);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_DonVi ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChungLoai ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_HinhDang ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_ChatLieu ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_ThanhPhan ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_KichThuoc ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_DongMay ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_TinhNang ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_Rohs ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_COCQ ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_MSDS ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_AnToan ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.DTM_NgayMuonNhan?.ToString("dd/MM/yyyy") ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.DTM_KyHan?.ToString("dd/MM/yyyy") ?? string.Empty);
-                        // Vendor input
-                        ws.Cell(rowStart, col++).SetValue(item.CodeEquipmentNCC ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenHangHQ ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NameENByNCC ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.soluong ?? 0); // Vendor quantity
-                        ws.Cell(rowStart, col++).SetValue(item.donvi ?? string.Empty); // Vendor unit
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat ?? string.Empty); // Vendor maker
-                        ws.Cell(rowStart, col++).SetValue(item.FL_USD ?? 0.0);
-                        ws.Cell(rowStart, col++).SetValue((item.FL_VND ?? 0).ToString("N0", enUs));
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_MOQ ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_Packing ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.DTM_LeadTime ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.DTM_ShipTime ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.VCHR_Rohs ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.VCHR_COCQ ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.VCHR_MSDS ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.VCHR_AnToan ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.VCHR_CamKet ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_DeliveryTerm ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_PaymentTerm ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_File ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.DTM_EffectiveDate?.ToString("dd/MM/yyyy") ?? string.Empty);
-                        ws.Cell(rowStart, col++).SetValue(item.DTM_ExpiryDate?.ToString("dd/MM/yyyy") ?? string.Empty);
-                        // System total
-                        // System count
-                        string key = $"{item.CHR_MaDon ?? ""}|{item.CHR_MaThietBi ?? ""}|{item.CHR_MaNCC ?? ""}";
-                        var tot = totals.ContainsKey(key) ? totals[key] : (0.0, 0.0);
-                        string totalCell = "";
-                        if (tot.Item1 != 0)
-                        {
-                            totalCell = tot.Item1.ToString("N0", enUs) + " VND";
-                        }
-                        else if (tot.Item2 != 0)
-                        {
-                            totalCell = Math.Round(tot.Item2, 4).ToString("0.0000", enUs) + " USD";
-                        }
-                        ws.Cell(rowStart, col++).SetValue(totalCell); // placeholder
-                        ws.Cell(rowStart, col++).SetValue(item.BIT_Select == true ? "O" : "X"); // BIT_Select
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_ReasonPick); // Reason
-                        col++;
-                        // Approval
-                        ws.Cell(rowStart, col++).SetValue(item.UserQlsc ?? "");
-                        ws.Cell(rowStart, col++).SetValue((item.LyDoQlsc == null || item.LyDoQlsc == "") ? "OK" : "NG");
-                        ws.Cell(rowStart, col++).SetValue(item.LyDoQlsc ?? "");
-                        ws.Cell(rowStart, col++).SetValue(item.UserQltc ?? "");
-                        ws.Cell(rowStart, col++).SetValue((item.LyDoQltc == null || item.LyDoQltc == "") ? "OK" : "NG");
-                        ws.Cell(rowStart, col++).SetValue(item.LyDoQltc ?? "");
-                        ws.Cell(rowStart, col++).SetValue(item.UserDeft ?? "");
-                        ws.Cell(rowStart, col++).SetValue((item.LyDoDeft == null || item.LyDoDeft == "") ? "OK" : "NG");
-                        ws.Cell(rowStart, col++).SetValue(item.LyDoDeft ?? "");
-                        // user request
-                        ws.Cell(rowStart, col++).SetValue(item.NVCHR_UserRequest ?? "");
-                        rowStart++;
+                        totalCell = tot.Item1.ToString("N0", enUs) + " VND";
                     }
+                    else if (tot.Item2 != 0)
+                    {
+                        totalCell = Math.Round(tot.Item2, 4).ToString("0.0000", enUs) + " USD";
+                    }
+                    ws.Cell(rowStart, col++).SetValue(totalCell); // placeholder
+                    ws.Cell(rowStart, col++).SetValue(item.BIT_Select == true ? "O" : "X"); // BIT_Select
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_ReasonPick); // Reason
+                    col++;
+                    // Approval
+                    ws.Cell(rowStart, col++).SetValue(item.UserQlsc ?? "");
+                    ws.Cell(rowStart, col++).SetValue((item.LyDoQlsc == null || item.LyDoQlsc == "") ? "OK" : "NG");
+                    ws.Cell(rowStart, col++).SetValue(item.LyDoQlsc ?? "");
+                    ws.Cell(rowStart, col++).SetValue(item.UserQltc ?? "");
+                    ws.Cell(rowStart, col++).SetValue((item.LyDoQltc == null || item.LyDoQltc == "") ? "OK" : "NG");
+                    ws.Cell(rowStart, col++).SetValue(item.LyDoQltc ?? "");
+                    ws.Cell(rowStart, col++).SetValue(item.UserDeft ?? "");
+                    ws.Cell(rowStart, col++).SetValue((item.LyDoDeft == null || item.LyDoDeft == "") ? "OK" : "NG");
+                    ws.Cell(rowStart, col++).SetValue(item.LyDoDeft ?? "");
+                    // user request
+                    ws.Cell(rowStart, col++).SetValue(item.NVCHR_UserRequest ?? "");
+                    rowStart++;
                 }
 
                 using var outStream = new MemoryStream();
@@ -222,6 +220,77 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        // lấy thông tin chi tiết
+        [HttpPost]
+        public async Task<IActionResult> GetQuoteDetails([FromBody] QuoteDetailRequest? request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.MaDon) || string.IsNullOrWhiteSpace(request?.MaHang))
+            {
+                return BadRequest("Mã đơn và Mã hàng không được để trống");
+            }
+            try
+            {
+                var rq = await _baoGiaService.SearchRequestDoneDetail(request.MaDon, request.MaHang, GetCurrentUserId() ?? "");
+                if (!rq.Success)
+                {
+                    return BadRequest(rq.Message);
+                }
+                return Ok(rq.Data);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest("Error get details: " + ex.Message);
+            }
+        }
+        // MARK: lấy báo giá còn hiệu lực
+        [HttpPost]
+        public async Task<IActionResult> GetActiveQuotes([FromBody] SearchQuotationResultsModel mod)
+        {
+            if (mod == null) return BadRequest("No data view model search");
+            try
+            {
+                var userAdid = GetCurrentUserId() ?? "";
+                var result = await _baoGiaService.SearchBaoGiaConHieuLucAsync(mod, userAdid);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error search: " + ex.Message);
+            }
+        }
+        // Download thông tin file kết quả báo giá
+        [HttpPost]
+        public async Task<IActionResult> DownloadQuoteFile([FromBody] string urlFile)
+        {
+            if (string.IsNullOrEmpty(urlFile))
+                return BadRequest("Không có đường dẫn file");
+
+            try
+            {
+                var rqFile = await _fileImportService.GetFileToLinkAsync(urlFile);
+
+                if (!rqFile.Success || rqFile.Data == null)
+                    return BadRequest(urlFile);
+
+                var file = rqFile.Data;
+
+                return File(
+                    file.OpenReadStream(),
+                    file.ContentType ?? "application/octet-stream",
+                    file.FileName
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Chi tiết: " + ex.Message);
+            }
+        }
+
         // MARK: Lấy các thông tin
         private async Task<List<string>> LoadCategoryDataAsync()
         {
@@ -251,7 +320,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nhomViTri = await LoadNhomViTriDataAsync();
             var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccNews = await LoadNhaCungCapDataAsync();
-            var madons = await LoadMadonAsync(13);
+            var madons = await LoadMadonAsync(14);
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             var vm = new QuoteModel
             {

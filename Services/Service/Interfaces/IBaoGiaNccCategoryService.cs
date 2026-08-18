@@ -23,5 +23,11 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> CheckSupperlier(string codeSupperlier, string catergory);
         // check category exist - returns list of missing supplier/category pairs
         Task<GenericResponse<List<CheckSupplierByCategoryModel>>> CheckSupperlierByCategory(List<CheckSupplierByCategoryModel> request);
+        // Thêm chủng loại nhà cung cấp
+        Task<GenericResponse<bool>> InsertCategoryNccAsync(BaoGia_NCC_CategoryDTO dto);
+        // Xóa chủng loại theo mã nhà cung cấp và chủng loại
+        Task<GenericResponse<bool>> DeleteCategoryNccAsync(List<BaoGia_NCC_CategoryDTO> listDelete);
+        // Xóa Nhà cung cấp
+        Task<GenericResponse<bool>> DeleteSupplierAsync(List<BaoGia_NCC_CategoryDTO> listDelete);
     }
 }

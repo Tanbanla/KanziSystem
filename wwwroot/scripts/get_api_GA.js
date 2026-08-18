@@ -207,10 +207,10 @@ async function loadToCombo_GA(position, comboId) {
     });
 
     const result = await response.json();
-    if (result.Data.Data.length == 0) {
-        //loadToCombo_TBP_GA("Section Manager", "thamtra");
-        loadToCombo_TBP_GA("General Manager", "pheduyet");
-    }
+    //if (result.Data.Data.length == 0) {
+    //    //loadToCombo_TBP_GA("Section Manager", "thamtra");
+    //    loadToCombo_TBP_GA("General Manager", "pheduyet");
+    //}
     try {
         document.getElementById("GA_ten_" + comboId).innerHTML = "";
         for (var i = 0; i < result.Data.Data.length; i++) {
@@ -363,6 +363,12 @@ async function loadToCombo_TBP_GA(position, comboId) {
         body: JSON.stringify(createSearchData_TBP_GA(position))
     });
     const result = await response.json();
+    if (result.Data.Data.length == 0) {
+
+        //alert("Cost phòng ban chưa được đăng ký hoặc bị hủy !");
+        loadToCombo_GD_GA("Director", "pheduyet");
+        //loadToCombo_TBP("Section Manager", "thamtra");
+    }
     document.getElementById("GA_ten_" + comboId).innerHTML = "";
     for (var i = 0; i < result.Data.Data.length; i++) {
         document.getElementById("GA_ten_" + comboId).innerHTML += `<option value="${result.Data.Data[i].CHR_EMPLOYEE_ADID}">${result.Data.Data[i].CHR_EMPLOYEE_NAME}</option>`;

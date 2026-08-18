@@ -81,78 +81,97 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (listBaoGiaNccCategory == null || !listBaoGiaNccCategory.Any())
                 return false;
 
-            var existingEntities = await _context.BaoGia_NCC_Categories
-                .Where(c => listBaoGiaNccCategory.Select(x => x.CHR_MaNCC).Contains(c.CHR_MaNCC))
-                .ToListAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            var existingDict = existingEntities
-                .ToDictionary(e => (e.CHR_MaNCC, e.NVCHR_ChungLoai));
-
-            var toAdd = new List<BaoGia_NCC_Category>();
-
-            foreach (var item in listBaoGiaNccCategory)
+            try
             {
-                var key = (item.CHR_MaNCC, item.NVCHR_ChungLoai);
+                var maNccs = listBaoGiaNccCategory
+                    .Select(x => x.CHR_MaNCC)
+                    .Distinct()
+                    .ToList();
 
-                if (existingDict.TryGetValue(key, out var existingEntity))
+                var existingEntities = await _context.BaoGia_NCC_Categories
+                    .Where(x => maNccs.Contains(x.CHR_MaNCC))
+                    .ToListAsync();
+
+                var existingDict = existingEntities
+                    .GroupBy(x => new { x.CHR_MaNCC, x.NVCHR_ChungLoai })
+                    .ToDictionary(
+                        g => (g.Key.CHR_MaNCC, g.Key.NVCHR_ChungLoai),
+                        g => g.First());
+
+                var toAdd = new List<BaoGia_NCC_Category>();
+
+                foreach (var item in listBaoGiaNccCategory)
                 {
-                    existingEntity.CHR_PIC = item.CHR_PIC;
-                    existingEntity.CHR_Mail = item.CHR_Mail;
+                    var key = (item.CHR_MaNCC, item.NVCHR_ChungLoai);
+
+                    if (existingDict.TryGetValue(key, out var existing))
+                    {
+                        existing.CHR_PIC = item.CHR_PIC;
+                        existing.CHR_Mail = item.CHR_Mail;
+                    }
+                    else
+                    {
+                        toAdd.Add(item);
+                    }
                 }
-                else
+
+                if (toAdd.Any())
+                    await _context.BaoGia_NCC_Categories.AddRangeAsync(toAdd);
+
+                // Update ShortName NCC
+                var shortNameDict = listBaoGiaNccCategory
+                    .Where(x => !string.IsNullOrWhiteSpace(x.NVCHR_SanXuat))
+                    .GroupBy(x => x.CHR_MaNCC)
+                    .ToDictionary(g => g.Key, g => g.First().NVCHR_SanXuat);
+
+                var nccs = await _context.IM_NCC_NEWs
+                    .Where(x => shortNameDict.Keys.Contains(x.Ma))
+                    .ToListAsync();
+
+                foreach (var ncc in nccs)
                 {
-                    toAdd.Add(item);
+                    ncc.ShortName = shortNameDict[ncc.Ma];
                 }
-            }
 
-            if (toAdd.Any())
+                // Add Category mới
+                var categoryKeys = listBaoGiaNccCategory
+                    .Where(x => !string.IsNullOrWhiteSpace(x.NVCHR_ChungLoai))
+                    .Select(x => x.NVCHR_ChungLoai.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var existingCategories = await _context.TM_Categories
+                    .Where(x => categoryKeys.Contains(x.NVCHR_Category))
+                    .Select(x => x.NVCHR_Category)
+                    .ToListAsync();
+
+                var existingSet = new HashSet<string>(
+                    existingCategories,
+                    StringComparer.OrdinalIgnoreCase);
+
+                var newCategories = categoryKeys
+                    .Where(x => !existingSet.Contains(x))
+                    .Select(x => new TM_Category
+                    {
+                        NVCHR_Category = x
+                    })
+                    .ToList();
+
+                if (newCategories.Any())
+                    await _context.TM_Categories.AddRangeAsync(newCategories);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch
             {
-                await _context.BaoGia_NCC_Categories.AddRangeAsync(toAdd);
+                await transaction.RollbackAsync();
+                throw;
             }
-            // update short name
-            var shortNameDict = listBaoGiaNccCategory
-                .Where(x => !string.IsNullOrEmpty(x.NVCHR_SanXuat))
-                .GroupBy(x => x.CHR_MaNCC)
-                .ToDictionary(g => g.Key, g => g.First().NVCHR_SanXuat);
-
-            var listUpdate = await _context.IM_NCC_NEWs
-                .Where(c => shortNameDict.Keys.Contains(c.Ma))
-                .ToListAsync();
-
-            foreach (var item in listUpdate)
-            {
-                if (shortNameDict.TryGetValue(item.Ma, out var shortName))
-                {
-                    item.ShortName = shortName;
-                }
-            }
-            // update Catergory
-            var categoryKeys = listBaoGiaNccCategory
-                .Where(x => !string.IsNullOrWhiteSpace(x.NVCHR_ChungLoai))
-                .Select(x => x.NVCHR_ChungLoai!.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            var existingCategoryNames = await _context.TM_Categories
-                .Where(c => categoryKeys.Contains(c.NVCHR_Category))
-                .Select(c => c.NVCHR_Category)
-                .ToListAsync();
-            // Thêm mới 
-            var existingSet = new HashSet<string>(existingCategoryNames, StringComparer.OrdinalIgnoreCase);
-
-            var newCategories = categoryKeys
-                .Where(key => !existingSet.Contains(key))
-                .Select(key => new TM_Category
-                {
-                    NVCHR_Category = key
-                })
-                .ToList();
-
-            if (newCategories.Any())
-            {
-                await _context.TM_Categories.AddRangeAsync(newCategories);
-            }
-            return await _context.SaveChangesAsync() > 0;
         }
         // update thong tin
         public async Task<bool> UpdateBaoGiaNccCategory(BaoGia_NCC_Category baoGiaNccCategory)
@@ -211,6 +230,118 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .ToList();
 
             return missing;
+        }
+
+        // Thêm chủng loại nhà cung cấp
+        public async Task<bool> InsertCategoryNccAsync(BaoGia_NCC_Category dto)
+        {
+            // Lấy (MaNCC, ChungLoai) đã tồn tại trong database
+            var existingKeys = await _context.BaoGia_NCC_Categories
+                .Where(c => c.NVCHR_ChungLoai == dto.NVCHR_ChungLoai && c.CHR_MaNCC == dto.CHR_MaNCC)
+                .ToListAsync();
+
+            if (existingKeys.Any())
+            {
+                throw new Exception("Đã tồn tại, không thêm");
+            }
+
+            // Kiểm tra xem nhà cung cấp có tồn tại trong bảng IM_NCC_NEW hay không
+
+            var infor = await _context.IM_NCC_NEWs.FirstOrDefaultAsync(x => x.Ma == dto.CHR_MaNCC);
+            if (infor == null)
+            {
+                throw new Exception("Không tìm thấy thông tin nhà cung cấp");
+            }
+
+            // Kiểm tra xem chủng loại có tồn tại trong bảng TM_Category hay không
+            var category = await _context.TM_Categories.FirstOrDefaultAsync(x => x.NVCHR_Category == dto.NVCHR_ChungLoai);
+            if (category == null)
+            {
+                var newCategory = new TM_Category
+                {
+                    NVCHR_Category = dto.NVCHR_ChungLoai ?? "",
+                    DTM_CreateBy = DateTime.Now,
+                    CHR_CreateBy = dto.CHR_CreateBy
+                };
+                await _context.TM_Categories.AddAsync(newCategory);
+            }
+
+            await _context.BaoGia_NCC_Categories.AddAsync(dto);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        // Xóa chủng loại theo mã nhà cung cấp và chủng loại
+        public async Task<bool> DeleteCategoryNccAsync(List<BaoGia_NCC_Category> listDelete)
+        {
+            if (listDelete == null || !listDelete.Any())
+                throw new Exception("Không có dữ liệu để xóa");
+
+            var keys = listDelete
+                .Select(x => $"{x.CHR_MaNCC}|{x.NVCHR_ChungLoai}")
+                .ToHashSet();
+
+            var entitiesToDelete = await _context.BaoGia_NCC_Categories
+                .Where(c => keys.Contains(
+                    c.CHR_MaNCC + "|" + c.NVCHR_ChungLoai))
+                .ToListAsync();
+
+            if (!entitiesToDelete.Any())
+                return false;
+
+            _context.BaoGia_NCC_Categories.RemoveRange(entitiesToDelete);
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+        // Xóa Nhà cung cấp
+        public async Task<bool> DeleteSupplierAsync(List<BaoGia_NCC_Category> listDelete)
+        {
+            if (listDelete == null || !listDelete.Any())
+                throw new Exception("Không có dữ liệu để xóa");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var maNCCs = listDelete
+                    .Select(x => x.CHR_MaNCC)
+                    .Distinct()
+                    .ToList();
+
+                // Lấy dữ liệu Category cần xóa
+                var entitiesToDelete = await _context.BaoGia_NCC_Categories
+                    .Where(x => maNCCs.Contains(x.CHR_MaNCC))
+                    .ToListAsync();
+
+                if (!entitiesToDelete.Any())
+                    return false;
+
+                // Lấy thông tin NCC
+                var nccToUpdate = await _context.IM_NCC_NEWs
+                    .Where(x => maNCCs.Contains(x.Ma))
+                    .ToListAsync();
+
+                // Soft delete NCC
+                foreach (var ncc in nccToUpdate)
+                {
+                    ncc.Xoa = true;
+                }
+
+                _context.IM_NCC_NEWs.UpdateRange(nccToUpdate);
+
+                // Xóa Category
+                _context.BaoGia_NCC_Categories.RemoveRange(entitiesToDelete);
+
+                var result = await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return result > 0;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }

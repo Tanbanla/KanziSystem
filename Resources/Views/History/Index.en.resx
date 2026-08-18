@@ -666,4 +666,13 @@
   <data name="SupplierName" xml:space="preserve">
     <value>Supplier Name</value>
   </data>
+  <data name="StatusPUR" xml:space="preserve">
+    <value>Awaiting confirmation of PUR's name.</value>
+  </data>
+  <data name="StatusACC" xml:space="preserve">
+    <value>Awaiting confirmation of the department name.</value>
+  </data>
+  <data name="StatusShip" xml:space="preserve">
+    <value>Awaiting confirmation of the Ship's name.</value>
+  </data>
 </root>

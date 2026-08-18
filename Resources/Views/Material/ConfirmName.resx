@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -467,5 +467,11 @@
   </data>
   <data name="CodeLocalExport" xml:space="preserve">
     <value>Xuất file mã đã xác nhận</value>
+  </data>
+  <data name="SelectInternalMaterialCode" xml:space="preserve">
+    <value>Chọn mã hàng nội bộ</value>
+  </data>
+  <data name="SelectOrderCode" xml:space="preserve">
+    <value>Chọn mã đơn</value>
   </data>
 </root>

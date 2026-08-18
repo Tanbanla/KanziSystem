@@ -1094,7 +1094,74 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     return null;
                 }
+                static string BuildStatusText(
+                    string lang,
+                    int step,
+                    bool isAllRefuse,
+                    string defaultVi,
+                    string defaultEn,
+                    string defaultJa,
+                    string purStatus,
+                    string accStatus,
+                    string shipStatus)
+                {
+                    if (step == 12)
+                    {
+                        if (string.Equals(purStatus, "Confirming", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return lang switch
+                            {
+                                "en" => "Waiting for PUR name confirmation",
+                                "ja" => "PURによる品名確認待ち",
+                                _ => "Chờ xác nhận tên của PUR"
+                            };
+                        }
 
+                        if (string.Equals(accStatus, "Confirming", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return lang switch
+                            {
+                                "en" => "Waiting for Department confirmation",
+                                "ja" => "部門による品名確認待ち",
+                                _ => "Chờ xác nhận tên của phòng ban"
+                            };
+                        }
+
+                        if (string.Equals(shipStatus, "Confirming", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return lang switch
+                            {
+                                "en" => "Waiting for Ship confirmation",
+                                "ja" => "Shipによる品名確認待ち",
+                                _ => "Chờ xác nhận tên của Ship"
+                            };
+                        }
+
+                        return lang switch
+                        {
+                            "en" => defaultEn,
+                            "ja" => defaultJa,
+                            _ => defaultVi
+                        };
+                    }
+
+                    if (isAllRefuse)
+                    {
+                        return lang switch
+                        {
+                            "en" => "All suppliers refused to provide a quote.",
+                            "ja" => "すべてのサプライヤーが見積もり提供を拒否した。",
+                            _ => "Toàn bộ các NCC đã từ chối báo giá"
+                        };
+                    }
+
+                    return lang switch
+                    {
+                        "en" => defaultEn,
+                        "ja" => defaultJa,
+                        _ => defaultVi
+                    };
+                }
                 static bool? GetBool(IDictionary<string, object?> item, params string[] keys)
                 {
                     foreach (var key in keys)
@@ -1342,13 +1409,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(excelRow, 12).Value = GetString(item, "NVCHR_ReasonPick");
 
                     var price = GetString(item, "FL_USD");
-                    if(price == "" || step < 11)
+
+                    if (string.IsNullOrWhiteSpace(price) || step < 11)
                     {
                         ws.Cell(excelRow, 13).Value = "";
                     }
-                    else
+                    else if (decimal.TryParse(price, out decimal value))
                     {
-                        ws.Cell(excelRow, 13).Value = price + " USD";
+                        ws.Cell(excelRow, 13).Value = $"{value:0.####} USD";
                     }
 
                     if (deadline.HasValue)
@@ -1396,13 +1464,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             ws.Cell(excelRow, col).Style.Fill.BackgroundColor = group3Color;
                         }
                     }
-
-                    var statusText = currentLang switch
-                    {
-                        "en" => isAllRefuse ? "All suppliers refused to provide a quote." : GetString(item, "CHR_StepNameEN", "CHR_StepName"),
-                        "ja" => isAllRefuse ? "すべてのサプライヤーが見積もり提供を拒否した。" : GetString(item, "CHR_StepNameJP", "CHR_StepName"),
-                        _ => isAllRefuse ? "Toàn bộ các NCC đã từ chối báo giá" : GetString(item, "CHR_StepName")
-                    };
+                    var statusText = BuildStatusText(
+                        currentLang,
+                        step,
+                        isAllRefuse,
+                        GetString(item, "CHR_StepName"),
+                        GetString(item, "CHR_StepNameEN", "CHR_StepName"),
+                        GetString(item, "CHR_StepNameJP", "CHR_StepName"),
+                        GetString(item, "CHR_Status"),
+                        GetString(item, "CHR_StatusACC"),
+                        GetString(item, "CHR_StatusShip")
+                    );
                     ws.Cell(excelRow, 24).Value = statusText;
                     ws.Cell(excelRow, 24).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFF9CC");
                 }
@@ -1630,9 +1702,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var mainRows = new List<object[]>(historyData.Count);
                 int stt = 1;
 
+                var allowShowFileGroups = historyData
+                    .GroupBy(x => new
+                    {
+                        x.CHR_MaDon,
+                        x.CHR_MaHangNoiBo
+                    })
+                    .Where(g => g.All(x => x.ID_StepBaoGia > 12))
+                    .Select(g => $"{g.Key.CHR_MaDon}|{g.Key.CHR_MaHangNoiBo}")
+                    .ToHashSet();
+
                 foreach (var rq in historyData)
                 {
                     if (rq == null) continue;
+
+                    var groupKey = $"{rq.CHR_MaDon}|{rq.CHR_MaHangNoiBo}";
+                    var canShowFile = allowShowFileGroups.Contains(groupKey);
 
                     var selectMark = GetSelectMark(rq.BIT_Select, rq.ID_StepBaoGia);
 
@@ -1678,7 +1763,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         GetReason(rq.ID, rq.ID_Status),
                         rq.ID_StepBaoGia > stepByRole ? selectMark : string.Empty,
                         rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
-                        rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_File ?? string.Empty : string.Empty
+                        canShowFile ? rq.NVCHR_File ?? string.Empty : string.Empty
                     });
                 }
 

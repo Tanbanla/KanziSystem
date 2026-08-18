@@ -1,5 +1,7 @@
 using Dapper;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 
@@ -12,6 +14,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -253,7 +256,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             existingEntity.NVCHR_COCQ = baogia.NVCHR_COCQ;
             existingEntity.NVCHR_MSDS = baogia.NVCHR_MSDS;
             existingEntity.NVCHR_AnToan = baogia.NVCHR_AnToan;
-            existingEntity.NVCHR_FileThietKe = baogia.NVCHR_FileThietKe;
             existingEntity.NVCHR_NhaSanXuat = baogia.NVCHR_NhaSanXuat;
             existingEntity.CHR_MaNCC = baogia.CHR_MaNCC;
             existingEntity.NVCHR_TenNCC = baogia.NVCHR_TenNCC;
@@ -270,6 +272,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             existingEntity.DTM_UpdateLater = baogia.DTM_UpdateLater;
             existingEntity.DTM_Deadline = baogia.DTM_Deadline;
             existingEntity.BIT_IsTemplate = baogia.BIT_IsTemplate;
+            existingEntity.NVCHR_FileThietKe = baogia.NVCHR_FileThietKe;
 
             // Đánh dấu entity đã bị thay đổi
             _context.Entry(existingEntity).State = EntityState.Modified;
@@ -1184,6 +1187,131 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Search thông tin đơn báo giá đã hoàn thành lựa chọn nhà cung cấp
         public async Task<ListRequest<dynamic>> SearchRequestDone(string? maDon, string? section, string? maHang, string? maNCC, string user, int pageIndex, int pageSize)
         {
+            var parameters = new DynamicParameters();
+            var whereConditions = new List<string>
+            {
+                "r.BIT_LayBaoGia = 1"
+            };
+
+            if (!string.IsNullOrEmpty(user))
+            {
+                whereConditions.Add("EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @User)");
+                parameters.Add("User", user);
+            }
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                whereConditions.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", maDon);
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                whereConditions.Add("r.CHR_MaHangNoiBo = @MaHang");
+                parameters.Add("MaHang", maHang);
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                whereConditions.Add("r.CHR_SectionCode = @Section");
+                parameters.Add("Section", section);
+            }
+            if (!string.IsNullOrEmpty(maNCC))
+            {
+                whereConditions.Add("r.CHR_MaNCC = @MaNCC");
+                parameters.Add("MaNCC", maNCC);
+            }
+
+            var whereClause = string.Join(" AND ", whereConditions);
+
+            var sql = new StringBuilder(@"
+            WITH RequestCompleted AS
+            (
+                SELECT
+                    CHR_MaDon,
+                    CHR_MaHangNoiBo
+                FROM BaoGia_Request_of_Quotation
+                WHERE BIT_LayBaoGia = 1
+                GROUP BY
+                    CHR_MaDon,
+                    CHR_MaHangNoiBo
+                HAVING MIN(ID_StepBaoGia) > 12
+            )
+            SELECT
+                r.CHR_MaDon,
+                r.CHR_SectionName AS PhongYeuCau,
+                r.CHR_MaHangNoiBo,
+                MAX(r.NVCHR_NameVN) AS TenHang,
+                MAX(r.CHR_NameEN) AS TenHangEN,
+                MAX(r.NVCHR_DonVi) AS DonVi,
+                MAX(r.NVCHR_UserRequest) AS NguoiYeuCau,
+                MAX(r.DTM_NgayMuonNhan) AS DTM_NgayMuonNhan,
+                N'Done' AS TrangThai
+            FROM BaoGia_Request_of_Quotation r
+            INNER JOIN RequestCompleted rc
+                ON rc.CHR_MaDon = r.CHR_MaDon
+                AND rc.CHR_MaHangNoiBo = r.CHR_MaHangNoiBo
+            LEFT JOIN BaoGia_Detail_of_Quotation d
+                ON d.ID_RequestQuote = r.id
+                AND d.BIT_Select = 1
+            WHERE " + whereClause + @"
+            GROUP BY
+                r.CHR_MaDon,
+                r.CHR_SectionName,
+                r.CHR_MaHangNoiBo
+            ORDER BY
+                MAX(r.DTM_CreateDate) DESC");
+
+            if (pageSize > 0 && pageIndex > 0)
+            {
+                sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                parameters.Add("Offset", (pageIndex - 1) * pageSize);
+                parameters.Add("PageSize", pageSize);
+            }
+
+            var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+
+            var countSql = @"
+                WITH RequestCompleted AS
+                (
+                    SELECT
+                        CHR_MaDon,
+                        CHR_MaHangNoiBo
+                    FROM BaoGia_Request_of_Quotation
+                    WHERE BIT_LayBaoGia = 1
+                    GROUP BY
+                        CHR_MaDon,
+                        CHR_MaHangNoiBo
+                    HAVING MIN(ID_StepBaoGia) > 12
+                )
+                SELECT COUNT(*)
+                FROM
+                (
+                    SELECT
+                        r.CHR_MaDon,
+                        r.CHR_SectionName,
+                        r.CHR_MaHangNoiBo
+                    FROM BaoGia_Request_of_Quotation r
+                    INNER JOIN RequestCompleted rc
+                        ON rc.CHR_MaDon = r.CHR_MaDon
+                        AND rc.CHR_MaHangNoiBo = r.CHR_MaHangNoiBo
+                    LEFT JOIN BaoGia_Detail_of_Quotation d
+                        ON d.ID_RequestQuote = r.id
+                        AND d.BIT_Select = 1
+                    WHERE " + whereClause + @"
+                    GROUP BY
+                        r.CHR_MaDon,
+                        r.CHR_SectionName,
+                        r.CHR_MaHangNoiBo
+                ) t;";
+
+            var totalCount = await _conn.ExecuteScalarAsync<int>(countSql, parameters);
+
+            return new ListRequest<dynamic>
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
+        }
+        public async Task<List<dynamic>> SearchRequestDoneDetail(string? maDon, string? maHang, string? user)
+        {
             var sql = new StringBuilder(@"
             WITH StatusCheck AS (
                 SELECT
@@ -1198,8 +1326,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     MAX(CASE WHEN h.CHR_ActionType = 'QLSC_PICK_NCC' THEN h.NVCHR_LyDo END) AS LyDoQlsc,
                     MAX(CASE WHEN h.CHR_ActionType = 'QLTC_PICK_NCC' THEN h.NVCHR_LyDo END) AS LyDoQltc
                 FROM BaoGia_Request_of_Quotation r
-                LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
                 LEFT JOIN BaoGia_History_Request_of_Quotation AS h ON h.ID_RequestQuote = r.id 
                     AND h.CHR_ActionType IN ('DEFT_PICK_NCC','QLSC_PICK_NCC','QLTC_PICK_NCC')
                 WHERE r.ID_StepBaoGia > 12 AND r.BIT_LayBaoGia = 1");
@@ -1209,7 +1335,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             // Thêm điều kiện lọc vào CTE StatusCheck
             if (!string.IsNullOrEmpty(user))
             {
-                sql.Append(" AND s.CHR_UserAdid = @User");
+                sql.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @User)");
                 parameters.Add("User", user);
             }
             if (!string.IsNullOrEmpty(maDon))
@@ -1221,16 +1347,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
                 parameters.Add("MaHang", maHang);
-            }
-            if (!string.IsNullOrEmpty(section))
-            {
-                sql.Append(" AND r.CHR_SectionCode = @Section");
-                parameters.Add("Section", section);
-            }
-            if (!string.IsNullOrEmpty(maNCC))
-            {
-                sql.Append(" AND r.CHR_MaNCC = @MaNCC");
-                parameters.Add("MaNCC", maNCC);
             }
 
             sql.Append(@"
@@ -1312,57 +1428,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon, r.CHR_MaThietBi, r.CHR_MaNCC, r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
 
-            if (pageSize > 0 && pageIndex > 0)
-            {
-                sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
-                parameters.Add("Offset", (pageIndex - 1) * pageSize);
-                parameters.Add("PageSize", pageSize);
-            }
-
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
 
-            // Count query 
-            var countSql = new StringBuilder(@"
-            SELECT COUNT(DISTINCT r.id)
-            FROM BaoGia_Request_of_Quotation r
-            LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
-            WHERE r.ID_StepBaoGia > 12 AND r.BIT_LayBaoGia = 1");
-
-            var countParams = new DynamicParameters();
-
-            if (!string.IsNullOrEmpty(user))
-            {
-                countSql.Append(" AND s.CHR_UserAdid = @User");
-                countParams.Add("User", user);
-            }
-            if (!string.IsNullOrEmpty(maDon))
-            {
-                countSql.Append(" AND r.CHR_MaDon = @MaDon");
-                countParams.Add("MaDon", maDon);
-            }
-            if (!string.IsNullOrEmpty(maHang))
-            {
-                countSql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
-                countParams.Add("MaHang", maHang);
-            }
-            if (!string.IsNullOrEmpty(section))
-            {
-                countSql.Append(" AND r.CHR_SectionCode = @Section");
-                countParams.Add("Section", section);
-            }
-            if (!string.IsNullOrEmpty(maNCC))
-            {
-                countSql.Append(" AND r.CHR_MaNCC = @MaNCC");
-                countParams.Add("MaNCC", maNCC);
-            }
-
-            var totalCount = await _conn.ExecuteScalarAsync<int>(countSql.ToString(), countParams);
-
-            return new ListRequest<dynamic>
-            {
-                Data = data,
-                TotalCount = totalCount
-            };
+            return data;
         }
         // update người phê duyệt cho đơn
         public async Task<List<BaoGia_Request_of_Quotation>> UpdateUserApprovalHistory(UpdateHistoryResult update)
@@ -1907,6 +1975,215 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .ToListAsync();
 
             return result;
+        }
+        // Export Excel báo giá Done
+        public async Task<List<dynamic>> ExportExcelBaoGiaDoneAsync(string? maDon, string? section, string? maHang, string? maNCC, string user)
+        {
+            var sql = new StringBuilder(@"
+            WITH StatusCheck AS (
+                SELECT
+                    r.id,
+                    r.CHR_MaDon,
+                    r.CHR_MaHangNoiBo,
+                    -- Lấy từng action type thành các cột riêng
+                    MAX(CASE WHEN h.CHR_ActionType = 'DEFT_PICK_NCC' THEN h.CHR_UpdateBy END) AS UserDeft,
+                    MAX(CASE WHEN h.CHR_ActionType = 'QLSC_PICK_NCC' THEN h.CHR_UpdateBy END) AS UserQlsc,
+                    MAX(CASE WHEN h.CHR_ActionType = 'QLTC_PICK_NCC' THEN h.CHR_UpdateBy END) AS UserQltc,
+                    MAX(CASE WHEN h.CHR_ActionType = 'DEFT_PICK_NCC' THEN h.NVCHR_LyDo END) AS LyDoDeft,
+                    MAX(CASE WHEN h.CHR_ActionType = 'QLSC_PICK_NCC' THEN h.NVCHR_LyDo END) AS LyDoQlsc,
+                    MAX(CASE WHEN h.CHR_ActionType = 'QLTC_PICK_NCC' THEN h.NVCHR_LyDo END) AS LyDoQltc
+                FROM BaoGia_Request_of_Quotation r
+                LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+                LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
+                LEFT JOIN BaoGia_History_Request_of_Quotation AS h ON h.ID_RequestQuote = r.id 
+                    AND h.CHR_ActionType IN ('DEFT_PICK_NCC','QLSC_PICK_NCC','QLTC_PICK_NCC')
+                WHERE r.ID_StepBaoGia > 12 AND r.BIT_LayBaoGia = 1");
+
+            var parameters = new DynamicParameters();
+
+            // Thêm điều kiện lọc vào CTE StatusCheck
+            if (!string.IsNullOrEmpty(user))
+            {
+                sql.Append(" AND s.CHR_UserAdid = @User");
+                parameters.Add("User", user);
+            }
+            if (!string.IsNullOrEmpty(maDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", maDon);
+            }
+            if (!string.IsNullOrEmpty(maHang))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
+                parameters.Add("MaHang", maHang);
+            }
+            if (!string.IsNullOrEmpty(section))
+            {
+                sql.Append(" AND r.CHR_SectionCode = @Section");
+                parameters.Add("Section", section);
+            }
+            if (!string.IsNullOrEmpty(maNCC))
+            {
+                sql.Append(" AND r.CHR_MaNCC = @MaNCC");
+                parameters.Add("MaNCC", maNCC);
+            }
+
+            sql.Append(@"
+            GROUP BY r.id, r.CHR_MaDon, r.CHR_MaHangNoiBo
+            )
+            SELECT 
+                r.*,
+                d.[CHR_CodeNCC],
+                d.[NVCHR_NameNCC],
+                d.[CHR_MaHangNCC] AS CodeEquipmentNCC,
+                d.[NVCHR_TenHangHQ],
+                d.[NVCHR_PaymentTerm],
+                d.[NVCHR_Warranty],
+                d.[NVCHR_DeliveryTerm],
+                d.[VCHR_Rohs],
+                d.[VCHR_COCQ],
+                d.[VCHR_MSDS],
+                d.[VCHR_AnToan],
+                d.[VCHR_CamKet],
+                d.[CHR_NameEN] AS NameENByNCC,
+                d.[INT_SoLuong] AS soluong,
+                d.[NVCHR_DonVi] AS donvi,
+                d.[NVCHR_NhaSanXuat],
+                d.[DTM_EffectiveDate],
+                d.[DTM_ExpiryDate],
+                d.[NVCHR_Note],
+                d.[NVCHR_File],
+                d.[NVCHR_MOQ],
+                d.[DTM_LeadTime],
+                d.[DTM_ShipTime],
+                d.[NVCHR_Packing],
+                d.BIT_Select,
+                d.NVCHR_ReasonPick,
+                d.FL_USD,
+                d.FL_VND,
+                CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
+                CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
+                CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
+                CAST(CASE WHEN (r.INT_SoLuong = d.INT_SoLuong OR d.INT_SoLuong = 0) THEN 1 ELSE 0 END AS BIT) AS IsMatch_SoLuong,
+                CAST(CASE WHEN (r.NVCHR_DonVi = d.NVCHR_DonVi OR d.NVCHR_DonVi IS NULL) THEN 1 ELSE 0 END AS BIT) AS IsMatch_DonVi,
+                CAST(CASE
+                    WHEN r.NVCHR_Rohs = N'Need' AND (d.VCHR_Rohs = N'NG' OR d.VCHR_Rohs = N'No need') THEN 0
+                    WHEN (r.NVCHR_Rohs = d.VCHR_Rohs OR d.VCHR_Rohs = N'OK' OR d.VCHR_Rohs = N'') THEN 1
+                    WHEN (r.NVCHR_Rohs = '') THEN 1
+                    ELSE 0
+                END AS BIT) AS IsMatch_Rohs,
+                CAST(CASE
+                    WHEN r.NVCHR_COCQ = N'Need' AND (d.VCHR_COCQ = N'NG' OR d.VCHR_COCQ = N'No need') THEN 0
+                    WHEN (r.NVCHR_COCQ = d.VCHR_COCQ OR d.VCHR_COCQ = N'OK' OR d.VCHR_COCQ = N'') THEN 1
+                    WHEN (r.NVCHR_COCQ = '') THEN 1
+                    ELSE 0
+                END AS BIT) AS IsMatch_COCQ,
+                CAST(CASE
+                    WHEN r.NVCHR_MSDS = N'Need' AND (d.VCHR_MSDS = N'NG' OR d.VCHR_MSDS = N'No need') THEN 0
+                    WHEN (r.NVCHR_MSDS = d.VCHR_MSDS OR d.VCHR_MSDS = N'OK' OR d.VCHR_MSDS = N'') THEN 1
+                    WHEN (r.NVCHR_MSDS = '') THEN 1
+                    ELSE 0
+                END AS BIT) AS IsMatch_MSDS,
+                CAST(CASE
+                    WHEN r.NVCHR_AnToan = N'Need' AND (d.VCHR_AnToan = N'NG' OR d.VCHR_AnToan = N'No need') THEN 0
+                    WHEN (r.NVCHR_AnToan = d.VCHR_AnToan OR d.VCHR_AnToan = N'OK' OR d.VCHR_AnToan = N'') THEN 1
+                    WHEN (r.NVCHR_AnToan = '') THEN 1
+                    ELSE 0
+                END AS BIT) AS IsMatch_AnToan,
+                CAST(CASE WHEN (CAST(r.DTM_NgayMuonNhan AS DATE) = CAST(d.DTM_ShipTime AS DATE) OR d.DTM_ShipTime IS NULL) THEN 1 ELSE 0 END AS BIT) AS IsMatch_Ngay,
+                CAST(CASE WHEN d.VCHR_CamKet != N'Đồng ý (accept)' THEN 0 ELSE 1 END AS BIT) AS IsMatchCamKet,
+        
+                -- Lấy từ CTE đã gộp
+                sc.UserDeft,
+                sc.UserQlsc,
+                sc.UserQltc,
+                sc.LyDoDeft,
+                sc.LyDoQlsc,
+                sc.LyDoQltc
+            FROM BaoGia_Request_of_Quotation r
+            LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
+            INNER JOIN StatusCheck sc ON r.id = sc.id
+            WHERE r.ID_StepBaoGia > 12");
+
+            sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon, r.CHR_MaThietBi, r.CHR_MaNCC, r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
+
+        
+
+            var a = sql.ToString();
+            var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+
+            return data;
+        }
+        // Search báo giá còn hiệu lực
+        public async Task<ListRequest<dynamic>> SearchBaoGiaConHieuLucAsync(SearchQuotationResultsModel search, string? user)
+        {
+            var sql = new StringBuilder(@"
+                SELECT r.NVCHR_NameVN as TenHang, r.CHR_NameEN as TenHangEN, r.CHR_MaDon, r.CHR_MaHangNoiBo, n.ShortName,d.*
+                  FROM BaoGia_Detail_of_Quotation as d 
+                  left join BaoGia_Request_of_Quotation as r
+                  on d.ID_RequestQuote = r.id
+                  left join IM_NCC_NEW as n 
+                  on d.CHR_CodeNCC = n.Ma
+                  where r.ID_StepBaoGia = 13 
+                  and DTM_ExpiryDate > GETDATE()
+                  and BIT_Select = 1
+            ");
+            var parameters = new DynamicParameters();
+            if (!string.IsNullOrEmpty(search.MaDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", search.MaDon);
+            }
+            if (!string.IsNullOrEmpty(search.MaNcc))
+            {
+                sql.Append(" AND r.CHR_MaNCC LIKE @MaNcc");
+                parameters.Add("MaNcc", "%" + search.MaNcc + "%");
+            }
+            if (!string.IsNullOrEmpty(search.MaVatTu))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo LIKE @MaVatTu");
+                parameters.Add("MaVatTu", "%" + search.MaVatTu + "%");
+            }
+            if (!string.IsNullOrEmpty(search.Section))
+            {
+                sql.Append(" AND r.CHR_SectionCode LIKE @Section");
+                parameters.Add("Section", "%" + search.Section + "%");
+            }
+            if (!string.IsNullOrEmpty(search.Status))
+            {
+                sql.Append(" AND r.ID_Status LIKE @Status");
+                parameters.Add("Status", "%" + search.Status + "%");
+            }
+            if (!string.IsNullOrEmpty(user))
+            {
+                sql.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @User)");
+                parameters.Add("User", user);
+            }
+
+            // count query
+            var baseSql = sql.ToString();
+
+            var totalCount = await _conn.ExecuteScalarAsync<int>(
+                $"SELECT COUNT(*) FROM ({baseSql}) AS CountQuery",
+                parameters);
+
+            // pagination
+            sql.Append("ORDER BY r.DTM_CreateDate desc, r.CHR_MaDon, r.CHR_MaThietBi, r.CHR_MaNCC, r.CHR_MaHangNoiBo, r.NVCHR_NameVN desc");
+
+            if (search.PageSize > 0 && search.PageIndex > 0)
+            {
+                sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                parameters.Add("Offset", (search.PageIndex - 1) * search.PageSize);
+                parameters.Add("PageSize", search.PageSize);
+            }
+
+            var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+
+            return new ListRequest<dynamic>
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
         }
     }
 }

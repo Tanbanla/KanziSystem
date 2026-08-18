@@ -68,6 +68,13 @@
                         <button type="button" class="btn btn-outline-success" style="border-radius: 10px;" id="btnDownload">
                             <i class="fas fa-file-download"> @Localizer["DownloadData"]</i>
                         </button>
+                        <button type="button" class="btn btn-outline-danger" id="btnImportExcelMaterial" style="border-radius: 6px; padding: 8px 6px; font-weight: 500;">
+                            <i class="fas fa-upload me-1"></i> @Localizer["UploadExcelMaterial"]
+                        </button>
+                        <input type="file" id="itemsExcelFileInputMaterial" accept=".xlsx,.xls" style="display:none" />
+                        <button type="button" class="btn btn-primary" id="btnTemplateImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; background: linear-gradient(135deg, #0d6efd, #0b5ed7); border: none; box-shadow: 0 2px 6px rgba(13,110,253,0.2);">
+                            <i class="fas fa-download me-1"></i> @Localizer["TemplateImportExcel"]
+                        </button>
                     </div>
                 </div>
             </div>
@@ -205,7 +212,18 @@
         </div>
     </div>
 </div>
-
+<!-- Dialogs reused from Quote -->
+<div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true" style="display:none">
+    <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
+        <div class="cm-dialog-header">
+            <h6 id="cmDialogTitle" class="cm-dialog-title">@Localizer["Notification"]</h6>
+            <button type="button" class="cm-btn cm-btn-outline" data-cm-action="close" aria-label="@Localizer["Close"]">✕</button>
+        </div>
+        <div id="cmDialogBody" class="cm-dialog-body"></div>
+        <div id="cmDialogFooter" class="cm-dialog-footer"></div>
+    </div>
+    <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
+</div>
 <script>
     window.i18nMaterial = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new
     {

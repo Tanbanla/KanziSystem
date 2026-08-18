@@ -23,5 +23,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> CheckSupperlier(string codeSupperlier, string catergory);
         // check category exist - returns list of supplier/category pairs that are NOT present in the database
         Task<List<CheckSupplierByCategoryModel>> CheckSupperlierByCategory(List<CheckSupplierByCategoryModel> request);
+        // Thêm chủng loại nhà cung cấp
+        Task<bool> InsertCategoryNccAsync(BaoGia_NCC_Category dto);
+        // Xóa chủng loại theo mã nhà cung cấp và chủng loại
+        Task<bool> DeleteCategoryNccAsync(List<BaoGia_NCC_Category> listDelete);
+        // Xóa Nhà cung cấp
+        Task<bool> DeleteSupplierAsync(List<BaoGia_NCC_Category> listDelete);
     }
 }

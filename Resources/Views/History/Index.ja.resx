@@ -666,4 +666,13 @@
   <data name="SupplierName" xml:space="preserve">
     <value>サプライヤー名</value>
   </data>
+  <data name="StatusPUR" xml:space="preserve">
+    <value>PURの名称の確認待ちです。</value>
+  </data>
+  <data name="StatusACC" xml:space="preserve">
+    <value>部署名の確認待ちです。</value>
+  </data>
+  <data name="StatusShip" xml:space="preserve">
+    <value>Shipの名称の確認待ちです。</value>
+  </data>
 </root>

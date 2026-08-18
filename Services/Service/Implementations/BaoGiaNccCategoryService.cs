@@ -152,5 +152,57 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+
+        // Thêm chủng loại nhà cung cấp
+        public async Task<GenericResponse<bool>> InsertCategoryNccAsync(BaoGia_NCC_CategoryDTO dto)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var map = _mapper.Map<BaoGia_NCC_Category>(dto);
+                result.Data = await _repo.InsertCategoryNccAsync(map);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Xóa chủng loại theo mã nhà cung cấp và chủng loại
+        public async Task<GenericResponse<bool>> DeleteCategoryNccAsync(List<BaoGia_NCC_CategoryDTO> listDelete)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var entities = _mapper.Map<List<BaoGia_NCC_Category>>(listDelete);
+                result.Data = await _repo.DeleteCategoryNccAsync(entities);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Xóa Nhà cung cấp
+        public async Task<GenericResponse<bool>> DeleteSupplierAsync(List<BaoGia_NCC_CategoryDTO> listDelete)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var entities = _mapper.Map<List<BaoGia_NCC_Category>>(listDelete);
+                result.Data = await _repo.DeleteSupplierAsync(entities);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

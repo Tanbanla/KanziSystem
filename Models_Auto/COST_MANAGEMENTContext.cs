@@ -45,6 +45,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<BaoGia_Confirm_Name_Quotation> BaoGia_Confirm_Name_Quotations { get; set; }
 
+    public virtual DbSet<BaoGia_Confirm_Name_Quotation_History> BaoGia_Confirm_Name_Quotation_Histories { get; set; }
+
     public virtual DbSet<BaoGia_Detail_of_Quotation> BaoGia_Detail_of_Quotations { get; set; }
 
     public virtual DbSet<BaoGia_History_Approver_of_Quotation> BaoGia_History_Approver_of_Quotations { get; set; }
@@ -600,7 +602,30 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(650)
                 .IsUnicode(false);
         });
+        modelBuilder.Entity<BaoGia_Confirm_Name_Quotation_History>(entity =>
+        {
+            entity.HasKey(e => e.ID)
+                .HasName("PK__BaoGia_C__3214EC2737B8B0F5");
 
+            entity.ToTable("BaoGia_Confirm_Name_Quotation_History");
+
+            entity.Property(e => e.ID)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.OldValue)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.NewValue)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.ActionBy)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.Property(e => e.ActionDate)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+        });
         modelBuilder.Entity<BaoGia_Detail_of_Quotation>(entity =>
         {
             entity.HasKey(e => e.ID).HasName("PK__BaoGia_D__3214EC2759F0B3DF");
