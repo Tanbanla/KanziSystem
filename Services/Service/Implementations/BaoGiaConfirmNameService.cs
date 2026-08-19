@@ -169,13 +169,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
-        // Rejects Acc
-        public async Task<GenericResponse<bool>> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        // Rejects Ship
+        public async Task<GenericResponse<bool>> RejectShipConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
         {
             var result = new GenericResponse<bool>();
             try
             {
-                result.Data = await _repo.RejectAccConfirmNameListAsync(saveConfirms, user, Role);
+                result.Data = await _repo.RejectShipConfirmNameListAsync(saveConfirms, user, Role);
                 result.Success = true;
             }
             catch(Exception ex)
@@ -352,6 +352,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = false;
             }
 
+            return result;
+        }
+        // Count ConfirName
+        public async Task<GenericResponse<CountCofirmName>> GetCountCofirmNames(ConfirmNameSearchRequest req, string user, string? role)
+        {
+            var result = new GenericResponse<CountCofirmName>();
+            try
+            {
+                result.Data = await _repo.GetCountCofirmNames(req, user, role);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
             return result;
         }
     }

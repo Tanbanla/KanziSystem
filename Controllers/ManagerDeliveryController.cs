@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using PRJ_WAREHOUSE_BIVN.Models;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Data.SqlClient;
@@ -135,6 +136,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     }
     public class ManagerDeliveryController : Controller
     {
+
+        public void pullin_pullout()
+        {
+            SQL_Connect_DB20 sql = new SQL_Connect_DB20();
+            var mahang = sql.GET_DATA_FROM_SQL_TEST(@$"SELECT distinct(Mahang), Ngaygiaohangdukien from PO  WHERE Ngaygiaohangdukien >= '{DateTime.Now.ToString("yyyy-07-dd")}' and Danhmuc = 'IN' ORDER BY Ngaygiaohangdukien DESC;");
+
+
+        }
         public IActionResult ManageDelivery(int page = 1, string searchTerm = "", string reqMonth = "", string tab = "ngoai")
         {
             
@@ -163,6 +172,36 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     JOIN [COST_MANAGEMENT].[dbo].[PO] a ON a.PO_Detail_Id = b.Id_Detail_PO
                                     WHERE a.Ngaygiaohangdukien IS NOT NULL;");
 
+            //// tính toán đưa ra cảnh báo pullin pullout
+            //// lấy ra số lượng mã hàng theo ngày giao PO
+            //string ngaytinhsoluongpo = po.Ngayycgiao;
+            //if (po.Ngay_GHchinhthuc != "")
+            //{
+            //    ngaytinhsoluongpo = po.Ngay_GHchinhthuc;
+            //}
+            //else if (po.ngaynccxngiao != "")
+            //{
+            //    ngaytinhsoluongpo = po.ngaynccxngiao;
+            //}
+            //// theo lần lượt Ngay_GHchinhthuc, b.Ngay_NCC_xacnhanGH,a.a.Ngaygiaohangdukien
+            //var soluongpo_ngayhientai = sql.ReturnString($@"SELECT sum(a.Soluong) AS TongSoLuong FROM [COST_MANAGEMENT].[dbo].[PO] AS a 
+            //                    LEFT JOIN PE_THEODOITIENDO AS b ON a.PO_Detail_Id = b.Id_Detail_PO 
+            //                    WHERE COALESCE( b.Ngay_GHchinhthuc, b.Ngay_NCC_xacnhanGH,a.a.Ngaygiaohangdukien) = '{ngaytinhsoluongpo}' 
+            //                    AND a.Mahang = '{po.Mahang}' and Danhmuc = 'IN'");
+
+            //var stockhientai = sql.ReturnString($"select sum(Hientai) from KHO where MaNguyenLieu = '{po.Mahang}'");
+            //var soluongusingtheongay = sql.ReturnString($"select (Soluong/22) from PE_Using where Thang = '{Convert.ToDateTime(po.Ngayycgiao).Month}' and Nam ='{Convert.ToDateTime(po.Ngayycgiao).Year}' and MaVatTu = '{po.Mahang}'");
+
+            //double usingday = 0;
+            //if (soluongusingtheongay == "")
+            //{
+            //    usingday = 0;
+            //}
+            //double stocknew = double.Parse(stockhientai);
+            //usingday = double.Parse(soluongusingtheongay);
+
+            //var canhbao = "-";
+
             var us = User.FindFirst("UserId")?.Value;
             var checkus = sql.ReturnString($"select [Group_Code] from [GROUP_MEMBER] where CHR_USERID = '{us}'");
             var khoi = "";
@@ -176,7 +215,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             List<PoDetailViewModel> listPo = new List<PoDetailViewModel>();
 
            for (int i = 0; i < lst.Rows.Count; i++)
-            {
+           {
                 PoDetailViewModel po = new PoDetailViewModel();
                 po.PO_Detail_Id = int.Parse(lst.Rows[i]["PO_Detail_Id"].ToString()!);
                 po.Ngayyc = lst.Rows[i]["Ngaytao"].ToString()!.Split(' ')[0];
@@ -213,43 +252,29 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.So_DNTT = lst.Rows[i]["So_DNTT"].ToString();
                 po.So_hoadon = lst.Rows[i]["So_hoadon"].ToString();
 
-                var stockhientai = sql.ReturnString($"select sum(Hientai) from KHO where MaNguyenLieu = '{po.Mahang}'");
-                var soluongusingtheongay = sql.ReturnString($"select (Soluong/22) from PE_Using where Thang = '{Convert.ToDateTime(po.Ngayycgiao).Month}' and Nam ='{Convert.ToDateTime(po.Ngayycgiao).Year}' and MaVatTu = '{po.Mahang}'");
-                double usingday = 0;
-                if (soluongusingtheongay == "")
-                {
-                    usingday = 0;
-                }
-                double stocknew = double.Parse(stockhientai);
-                usingday = double.Parse(soluongusingtheongay);
-
-                //var canhbao = "";
-                //if()
-
-                    listPo.Add(po);
+              
+                listPo.Add(po);
             }
 
-            // 1. Lọc theo Tab (Danh mục)
-            // Lưu ý: Thay đổi chuỗi "Trong danh mục" khớp với dữ liệu thực tế của bạn
             if (tab == "trong")
-                    {
-                        listPo = listPo.Where(x => !string.IsNullOrEmpty(x.Danhmuc) && x.Danhmuc == "IN").ToList();
-                    }
-                    else // Mặc định là 'ngoai'
-                    {
-                        listPo = listPo.Where(x => string.IsNullOrEmpty(x.Danhmuc) || x.Danhmuc == "OUT").ToList();
-                    }
+            {
+                listPo = listPo.Where(x => !string.IsNullOrEmpty(x.Danhmuc) && x.Danhmuc == "IN").ToList();
+            }
+            else // Mặc định là 'ngoai'
+            {
+                listPo = listPo.Where(x => string.IsNullOrEmpty(x.Danhmuc) || x.Danhmuc == "OUT").ToList();
+            }
 
-                    if (!string.IsNullOrEmpty(searchTerm))
-                    {
-                        string searchLower = searchTerm.ToLower();
-                        listPo = listPo.Where(x =>
-                            (x.SoPO?.ToLower().Contains(searchLower) ?? false) ||
-                            (x.Tentiengviet?.ToLower().Contains(searchLower) ?? false) ||
-                            (x.Nhacungcap?.ToLower().Contains(searchLower) ?? false) ||
-                            (x.Mahang?.ToLower().Contains(searchLower) ?? false)
-                        ).ToList();
-                    }
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                string searchLower = searchTerm.ToLower();
+                listPo = listPo.Where(x =>
+                    (x.SoPO?.ToLower().Contains(searchLower) ?? false) ||
+                    (x.Tentiengviet?.ToLower().Contains(searchLower) ?? false) ||
+                    (x.Nhacungcap?.ToLower().Contains(searchLower) ?? false) ||
+                    (x.Mahang?.ToLower().Contains(searchLower) ?? false)
+                ).ToList();
+            }
             if (!string.IsNullOrEmpty(reqMonth))
             {
                 listPo = listPo.Where(x => {
@@ -274,7 +299,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                   .Take(pageSize)
                                   .ToList();
 
-            // 4. Truyền dữ liệu sang View
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalRecords = totalRecords;

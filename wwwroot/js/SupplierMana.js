@@ -293,6 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('hinhthucmotk').value = r.hinhthucmotk ?? '';
         document.getElementById('dieukienthanhtoan').value = r.dieukienthanhtoan ?? '';
         document.getElementById('thuTucMoHaiQuan').value = r.canphaixacnhanlamthutuchaiquan ?? '';
+        document.getElementById('shortName').value = r.shortName ?? '';
         showEditModal('supplierModal');
     }
     async function saveSupplier() {
@@ -312,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
             hinhthucmotk: document.getElementById('hinhthucmotk').value.trim(),
             dieukienthanhtoan: document.getElementById('dieukienthanhtoan').value.trim(),
             Canphaixacnhanlamthutuchaiquan: document.getElementById('thuTucMoHaiQuan').value.trim(),
+            ShortName: document.getElementById('shortName').value.trim(),
         };
         const isEdit = !!payload.ncc_Id;
         const res = await fetch(isEdit ? api.supplierUpdate : api.supplierCreate, {
@@ -326,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         hideEditModal('supplierModal');
-        showDialog({ title: 'Thành công', message: 'Gửi yêu cầu thành công', type: 'success' });
+        showDialog({ title: 'Thành công', message: 'Cập nhật thành công', type: 'success' });
         loadSuppliers();
     }
 

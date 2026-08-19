@@ -26,8 +26,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<bool> SaveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Approvers
         public Task<bool> ApproveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
-        // Rejects Acc
-        public Task<bool> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
+        // Rejects Ship
+        public Task<bool> RejectShipConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Export Code Cofirmed
         public Task<List<dynamic>> ExportCodeConfirmedAsync();
         // Từ chối xác nhận tên hàng
@@ -46,9 +46,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<ResultCheckCofirmName>> DoneConfirmNameAsync(List<int> listDone);
         // Check đơn đã hoàn thành hay chưa
         Task<List<int>> CheckConfirmNameDoneAsync(List<int> listCheck);
-
         // Lấy lịch sử thay đổi xác nhận tên
         Task<List<ConfirmNameHistoryDTO>> GetConfirmNameHistoryAsync(int confirmId);
+        // Count ConfirName
+        Task<CountCofirmName> GetCountCofirmNames(ConfirmNameSearchRequest req, string user, string? role);
 
     }
 }

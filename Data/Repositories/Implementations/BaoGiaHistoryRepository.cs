@@ -718,16 +718,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.CHR_MaHangNCC,
                     r.CHR_MaHangNoiBo,
                     r.CHR_NameEN,
-					REPLACE(
-						REPLACE(
+					CASE
+						WHEN NULLIF(LTRIM(RTRIM(r.CHR_MaHangNoiBo)), '') IS NOT NULL
+							THEN LTRIM(RTRIM(r.CHR_MaHangNoiBo))
+						ELSE
+							ISNULL(LTRIM(RTRIM(r.CHR_MaHangNCC)), '') +
 							REPLACE(
 								REPLACE(
-									REPLACE(LTRIM(RTRIM(r.CHR_NameEN)),
-										' ', ''),
-									CHAR(9), ''),
-								CHAR(10), ''),
-							CHAR(13), ''),
-						CHAR(160), '') as GroupKey,
+									REPLACE(
+										REPLACE(
+											REPLACE(LTRIM(RTRIM(r.CHR_NameEN)),
+												' ', ''),
+											CHAR(9), ''),
+										CHAR(10), ''),
+									CHAR(13), ''),
+								CHAR(160), '')
+					END AS GroupKey,
                     r.DTM_KyHan,
                     r.CHR_CreateBy,
                     r.ID_StepBaoGia,

@@ -25,8 +25,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> SaveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Approvers
         public Task<GenericResponse<bool>> ApproveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
-        // Rejects Acc
-        public Task<GenericResponse<bool>> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
+        // Rejects Ship
+        public Task<GenericResponse<bool>> RejectShipConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role);
         // Export Code Cofirmed
         public Task<GenericResponse<List<dynamic>>> ExportCodeConfirmedAsync();
         // Từ chối xác nhận tên hàng
@@ -48,6 +48,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
 
         // Lấy lịch sử thay đổi xác nhận tên
         Task<GenericResponse<List<ConfirmNameHistoryDTO>>> GetConfirmNameHistoryAsync(int confirmId);
+        // Count ConfirName
+        Task<GenericResponse<CountCofirmName>> GetCountCofirmNames(ConfirmNameSearchRequest req, string user, string? role);
 
     }
 }

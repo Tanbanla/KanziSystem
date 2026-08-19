@@ -1589,7 +1589,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return updatedEntities;
         }
         // Xóa đơn xin báo giá
-        public async Task<bool> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate)
+        public async Task<bool> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate,string role)
         {
             if (string.IsNullOrEmpty(maDon))  throw new Exception("No valid data to update");
 
@@ -1597,7 +1597,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (!data.Any()) throw new Exception("No valid data to update");
             // kiểm tra nếu đơn đã được phê duyệt thì không cho xóa
             var isApproved = data.Any(d => d.ID_StepBaoGia > 5);
-            if (isApproved)
+            if (isApproved && role != "UserPUR")
             {
                 throw new Exception("Đơn đã được phê duyệt, không thể xóa. Vui lòng liên hệ PIC PUR để được hỗ trợ");
             }

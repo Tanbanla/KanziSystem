@@ -99,6 +99,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             result.Xoa = nccNew.Xoa;
             result.nhom = nccNew.nhom;
             result.nguoi_cap_nhat = nccNew.nguoi_cap_nhat;
+            result.ShortName = nccNew.ShortName;
             await _context.SaveChangesAsync();
             return true;
         }

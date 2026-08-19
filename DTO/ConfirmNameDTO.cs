@@ -9,4 +9,11 @@ namespace PRJ_WAREHOUSE_BIVN.DTO
         public bool? pheDuyet { get; set; }
         public string? PicShip { get; set; }
     }
+    public class CountCofirmName
+    {
+        public int? countCofirmed { get; set; }
+        public int? countConfirming { get; set; }
+        public int? countRejected { get; set; }
+        public int? sum { get; set; }
+    }
 }

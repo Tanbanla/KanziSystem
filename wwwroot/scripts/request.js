@@ -172,8 +172,13 @@ function _insert_request() {
                 Note: mucdichkhac
             }),
             success: function (response) {
-                alert(response);
-                location.reload();
+                if (response === "OK") {
+                    alert("Gửi yêu cầu thành công!");
+                    window.location.reload(); // CHỈ reload khi thành công
+                } else {
+                    // Nếu trả về câu cảnh báo hết tiền -> chỉ hiển thị, không reload
+                    alert(response);
+                }
                 document.querySelectorAll('.close').forEach(button => button.click());
                 _load_confirm();
             }
@@ -305,8 +310,13 @@ function _insert_request_GA() {
                 Note: mucdichkhac
             }),
             success: function (response) {
-                alert(response);
-                location.reload();
+                if (response === "OK") {
+                    alert("Gửi yêu cầu thành công!");
+                    window.location.reload(); // CHỈ reload khi thành công
+                } else {
+                    // Nếu trả về câu cảnh báo hết tiền -> chỉ hiển thị, không reload
+                    alert(response);
+                }
                 document.querySelectorAll('.close').forEach(button => button.click());
                 _load_confirm();
             }

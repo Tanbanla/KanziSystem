@@ -392,12 +392,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Xóa đơn xin báo giá
-        public async Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate)
+        public async Task<GenericResponse<bool>> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate, string role)
         {
             var result = new GenericResponse<bool>();
             try
             {
-                result.Data = await _repo.DeleteDonXinBaoGiaAsync(maDon,reason, userUpdate);
+                result.Data = await _repo.DeleteDonXinBaoGiaAsync(maDon,reason, userUpdate, role);
                 result.Success = true;
             }
             catch(Exception ex)

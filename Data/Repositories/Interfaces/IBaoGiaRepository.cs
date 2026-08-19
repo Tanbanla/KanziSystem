@@ -52,7 +52,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Phê duyệt list lựa chọn nhà cung cấp
         public Task<List<BaoGia_Request_of_Quotation>> UpdateApprover(List<ApproverDTO> dataApprovers, string userNext, string userUpdate);
         // Xóa đơn xin báo giá
-        public Task<bool> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate);
+        public Task<bool> DeleteDonXinBaoGiaAsync(string maDon, string reason, string userUpdate, string role);
         // Xóa từng đơn
         public Task<bool> DeleteDonBaoGiaAsync(int id, string reason, string userUpdate);
         // Trả lại đơn báo giá

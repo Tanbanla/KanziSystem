@@ -233,6 +233,20 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Ok(result);
         }
 
+        // Count confirm name by role
+        [HttpPost]
+        public async Task<IActionResult> CountConfirmNameByRole([FromBody] ConfirmNameSearchRequest req)
+        {
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            var user = (string.IsNullOrEmpty(role.Data)) ? GetCurrentUserId() : "";
+            var result = await _confirmNameService.GetCountCofirmNames(req, user, role.Data);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Data);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetConfirmNameHistory(int confirmId)
         {
@@ -422,12 +436,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Reject in select row (User ACC)
         [HttpPost]
-        public async Task<IActionResult> RejectAccSelectedConfirmName([FromBody] List<ConfirmNameDTO> reqs)
+        public async Task<IActionResult> RejectShipSelectedConfirmName([FromBody] List<ConfirmNameDTO> reqs)
         {
             var user = GetCurrentUserId();
             var reject = reqs.Select(d => d.LyDo).FirstOrDefault();
             var role = await _tmUserService.GetRoleAsync(user);
-            var result = await _confirmNameService.RejectAccConfirmNameListAsync(reqs, user, role.Data);
+            var result = await _confirmNameService.RejectShipConfirmNameListAsync(reqs, user, role.Data);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

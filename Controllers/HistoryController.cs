@@ -646,7 +646,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> DeleteDanhSachBaoGiaByMaDon([FromBody] DeleteQuotationByMaDonModel deleteQuotation)
         {
             var userRequest = GetCurrentUserId() ?? "";
-            var result = await _baoGiaService.DeleteDonXinBaoGiaAsync(deleteQuotation.maDon, deleteQuotation.reason, userRequest);
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            var result = await _baoGiaService.DeleteDonXinBaoGiaAsync(deleteQuotation.maDon, deleteQuotation.reason, userRequest, role.Data);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

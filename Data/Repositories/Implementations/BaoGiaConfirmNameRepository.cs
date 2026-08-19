@@ -31,13 +31,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         //search thông tin xác nhận tên hàng
         public async Task<ListRequest<dynamic>> SearchAsync(ConfirmNameSearchRequest req, string user, string? role)
         {
-            // Tách phần FROM/WHERE để dùng chung cho truy vấn dữ liệu và truy vấn đếm
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r 
                     ON c.ID_RequestQuote = r.ID
-                    AND r.ID_Status NOT LIKE '%RETURN%'
-                    AND r.ID_StepBaoGia >= 6
+                    AND r.ID_StepBaoGia >= 12
                     AND r.BIT_LayBaoGia = 1
                 INNER JOIN BaoGia_Detail_of_Quotation d 
                     ON c.ID_RequestQuote = d.ID_RequestQuote
@@ -107,7 +105,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             selectSql.Append(" r.NVCHR_DonVi, r.NVCHR_ChungLoai, r.NVCHR_HinhDang,r.NVCHR_ChatLieu, r.NVCHR_ThanhPhan,r.NVCHR_KichThuoc,r.NVCHR_DongMay, r.NVCHR_TinhNang,n.ShortName, d.CHR_CodeNCC, d.NVCHR_File ");
             selectSql.Append(baseFrom);
             selectSql.Append(whereBuilder.ToString());
-            selectSql.Append(@" ORDER BY c.DTM_CreateDate ASC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+            selectSql.Append(@" ORDER BY c.DTM_CreateDate DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
 
             parameters.Add("@Offset", (PageIndex - 1) * PageSize);
             parameters.Add("@PageSize", PageSize);
@@ -127,7 +125,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<bool> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User)
         {
 
-            var role = string.IsNullOrWhiteSpace(Role) ? "UserPUR" : Role.Trim();
+            var role = string.IsNullOrWhiteSpace(Role) ? "User" : Role.Trim();
             var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == Id);
             if (row == null) return false;
 
@@ -147,12 +145,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 row.CHR_StatusShip = "Confirmed";
                 foreach (var r in rq)
                 {
-                    // Update request: map TenHaiQuan -> NVCHR_NameVN, and MaHangNoiBo -> CHR_MaHangNoiBo
                     if (!string.IsNullOrWhiteSpace(row.VCHR_TenHaiQuan))
                         r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
                 }
             }
-            else if (role.Equals("UserAcc", StringComparison.OrdinalIgnoreCase))
+            else if (role.Equals("UserPUR", StringComparison.OrdinalIgnoreCase)) // UserPUR
+            {
+                if (TenHaiQuan != null) row.VCHR_TenHaiQuan = TenHaiQuan;
+                if (MaHangNoiBo != null) row.VCHR_MaHangNoiBo = MaHangNoiBo;
+                row.VCHR_UserPUR = user;
+                row.DTM_UserPUR = now;
+            }
+            else // User
             {
                 row.VCHR_MaHangNoiBo = MaHangNoiBo ?? row.VCHR_MaHangNoiBo;
                 row.VCHR_UserAcc = user;
@@ -164,13 +168,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     if (!string.IsNullOrWhiteSpace(row.VCHR_MaHangNoiBo))
                         r.CHR_MaHangNoiBo = row.VCHR_MaHangNoiBo;
                 }
-            }
-            else // UserPUR
-            {
-                if (TenHaiQuan != null) row.VCHR_TenHaiQuan = TenHaiQuan;
-                if (MaHangNoiBo != null) row.VCHR_MaHangNoiBo = MaHangNoiBo;
-                row.VCHR_UserPUR = user;
-                row.DTM_UserPUR = now;
             }
 
             //if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
@@ -386,7 +383,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<bool> SaveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
         {
 
-            var role = string.IsNullOrWhiteSpace(Role) ? "UserPUR" : Role.Trim();
+            var role = string.IsNullOrWhiteSpace(Role) ? "User" : Role.Trim();
             if (saveConfirms == null || !saveConfirms.Any()) return false;
 
             foreach (var item in saveConfirms)
@@ -478,23 +475,38 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
-        // Rejects Acc
-        public async Task<bool> RejectAccConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
+        // Rejects Ship
+        public async Task<bool> RejectShipConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
         {
             if (saveConfirms == null || !saveConfirms.Any()) return false;
-            if (Role != "UserAcc") return false;
+            if (Role != "UserShip") return false;
+
+            //List lưu lịch sử xác nhận tên
+            var historyS = new List<BaoGia_Confirm_Name_Quotation_History>();
             foreach (var item in saveConfirms)
             {
                 var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
                 if (row == null) return false;
-                row.CHR_Status = "RejectedAcc";
                 row.NVCHR_LyDo = item.LyDo;
-                row.VCHR_UserAcc = user;
-                row.DTM_UserAcc = DateTime.Now;
+                row.VCHR_UserShip = user;
+                row.DTM_UserShip = DateTime.Now;
                 row.VCHR_UpdateBy = user;
                 row.DTM_UpdateDate = DateTime.Now;
-                row.CHR_StatusACC = "RejectedAcc";
+                row.CHR_StatusShip = "Rejected";
+
+                // lưu lịch sử
+                historyS.Add(new BaoGia_Confirm_Name_Quotation_History
+                {
+                    QuotationID = row.ID_RequestQuote,
+                    ConfirmID = row.ID,
+                    OldValue = "",
+                    NewValue = item.LyDo,
+                    ActionBy = user,
+                    ActionDate = DateTime.Now
+                });
             }
+            if(historyS.Any())
+                await _context.BaoGia_Confirm_Name_Quotation_Histories.AddRangeAsync(historyS);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -1345,6 +1357,101 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             return data;
+        }
+        // Count ConfirName
+        public async Task<CountCofirmName> GetCountCofirmNames(
+            ConfirmNameSearchRequest req,
+            string user,
+            string? role)
+        {
+            var sql = new StringBuilder(@"
+            WITH Data AS
+            (
+                SELECT DISTINCT
+                    c.ID,
+                    c.CHR_Status,
+                    c.CHR_StatusShip,
+                    c.CHR_StatusACC
+                FROM BaoGia_Confirm_Name_Quotation c
+                INNER JOIN BaoGia_Request_of_Quotation r
+                    ON c.ID_RequestQuote = r.ID
+                    AND r.ID_StepBaoGia >= 12
+                    AND r.BIT_LayBaoGia = 1
+                INNER JOIN BaoGia_Detail_of_Quotation d
+                    ON c.ID_RequestQuote = d.ID_RequestQuote
+                INNER JOIN IM_NCC_NEW n
+                    ON n.Ma = r.CHR_MaNCC
+                WHERE 1 = 1
+            ");
+
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrWhiteSpace(user))
+            {
+                sql.Append(@"
+                    AND EXISTS (
+                        SELECT 1
+                        FROM BaoGia_Master_Approver_Send_Mail m
+                        WHERE m.CHR_CodeSection = r.CHR_SectionCode
+                        AND m.CHR_UserAdid LIKE @User
+                )");
+
+                parameters.Add("@User", $"%{user.Trim()}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.TenHang))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo = @TenHang");
+                parameters.Add("@TenHang", req.TenHang.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.SoDon))
+            {
+                sql.Append(" AND r.CHR_MaDon = @SoDon");
+                parameters.Add("@SoDon", req.SoDon.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.Section))
+            {
+                sql.Append(" AND ISNULL(r.CHR_SectionCode,'') LIKE @Section");
+                parameters.Add("@Section", $"%{req.Section.Trim()}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.TrangThai))
+            {
+                if (string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase))
+                {
+                    sql.Append(" AND c.CHR_StatusShip = @TrangThai");
+                }
+                else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
+                {
+                    sql.Append(" AND c.CHR_Status = @TrangThai");
+                }
+                else
+                {
+                    sql.Append(" AND c.CHR_StatusACC = @TrangThai");
+                }
+
+                parameters.Add("@TrangThai", req.TrangThai.Trim());
+            }
+            string statusColumn = string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase)? "CHR_StatusShip":
+                string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase)? "CHR_Status": "CHR_StatusACC";
+            sql.Append($@"
+                    )
+                    SELECT
+                        COUNT(CASE WHEN {statusColumn} = 'Confirmed' THEN 1 END) AS countCofirmed,
+                        COUNT(CASE WHEN {statusColumn} = 'Confirming' THEN 1 END) AS countConfirming,
+                        COUNT(CASE WHEN {statusColumn} = 'Rejected' THEN 1 END) AS countRejected,
+                        COUNT(*) AS [sum]
+                    FROM Data
+                ");
+
+            var a = sql.ToString();
+            var result = await _conn.QueryFirstOrDefaultAsync<CountCofirmName>(
+                sql.ToString(),
+                parameters);
+
+            return result ?? new CountCofirmName();
         }
     }
 }

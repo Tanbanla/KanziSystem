@@ -19,7 +19,6 @@ const API_ROUTES = {
     }
 };
 
-
 let phongban_GA = "";
 let centercode_GA = "";
 let cost_GA = "";

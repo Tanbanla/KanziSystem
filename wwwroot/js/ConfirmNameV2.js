@@ -22,7 +22,7 @@
         itemsExcelFileInput: document.getElementById('itemsExcelFileInput'),
 
         btnSaveSelected: document.getElementById('btnSaveSelected'),
-        btnRejectAccSelected: document.getElementById('btnRejectAccSelected'),
+        btnRejectShipSelected: document.getElementById('btnRejectShipSelected'),
         chkSelectAll: document.getElementById('chkSelectAll'),
         headerCheckAll: document.getElementById('_row_check_all'),
         selectedCount: document.getElementById('selectedCount'),
@@ -59,7 +59,8 @@
         pageSize: 20,
         total: 0,
         listData: [],
-        selectedIds: new Set()
+        selectedIds: new Set(),
+        serverPaging: false
     };
 
     const T = window.i18nConfirmName || {};
@@ -165,6 +166,12 @@
 
     function getCurrentPageRows() {
         const rows = applyClientFilters(state.listData);
+        if (state.serverPaging) {
+            const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+            if (state.pageIndex > totalPages) state.pageIndex = totalPages;
+            return { rows, totalPages };
+        }
+
         state.total = rows.length;
         const totalPages = Math.max(1, Math.ceil(rows.length / state.pageSize));
         if (state.pageIndex > totalPages) state.pageIndex = totalPages;
@@ -310,8 +317,8 @@
             soDon: getFieldValue(els.soDon),
             trangThai: getStatusForSearch(),
             section: getFieldValue(els.vitri),
-            pageIndex: 1,
-            pageSize: 1000
+            pageIndex: state.pageIndex,
+            pageSize: state.pageSize
         };
 
         try {
@@ -325,7 +332,17 @@
             if (!res.ok) throw new Error(T.MsgSearchFailed || 'Search failed');
 
             const json = await res.json();
-            state.listData = (json.data && json.data.data) || [];
+            const payload = json.data || {};
+            state.listData = payload.data || [];
+
+            const totalCount = Number(payload.totalCount);
+            if (Number.isFinite(totalCount) && totalCount >= 0) {
+                state.total = totalCount;
+                state.serverPaging = totalCount > state.listData.length || state.pageIndex > 1;
+            } else {
+                state.total = state.listData.length;
+                state.serverPaging = false;
+            }
 
             if (state.activeTab === 'pending') renderPendingTable();
             else renderConfirmedCards();
@@ -358,7 +375,7 @@
         }
     }
 
-    async function rejectAccSelected() {
+    async function rejectShipSelected() {
         const items = await collectSelected();
         if (!items.length) return showDialog({ message: 'Chưa chọn bản ghi nào' });
         const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do', T.ReasonMessage || 'Vui lòng nhập lý do từ chối');
@@ -367,7 +384,7 @@
 
         try {
             showLoading(T.Processing || 'Đang xử lý...');
-            const res = await fetch((window.apiBaseUrl || '') + '/Material/RejectAccSelectedConfirmName?role=' + encodeURIComponent(role), {
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/RejectShipSelectedConfirmName?role=' + encodeURIComponent(role), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(items)
@@ -383,7 +400,6 @@
     }
 
     async function loadKpi() {
-        const statuses = ['Confirming', 'Confirmed', 'Rejected'];
         const reqBase = {
             tenHang: getFieldValue(els.tenHang),
             soDon: getFieldValue(els.soDon),
@@ -393,28 +409,45 @@
         };
 
         try {
-            const calls = statuses.map(async s => {
-                const res = await fetch((window.apiBaseUrl || '') + '/Material/SearchConfirmName', {
+            const res = await fetch(
+                (window.apiBaseUrl || '') + '/Material/CountConfirmNameByRole',
+                {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...reqBase, trangThai: s })
-                });
-                if (!res.ok) return { status: s, count: 0 };
-                const json = await res.json();
-                const count = (json.data && json.data.totalCount) || 0;
-                return { status: s, count };
-            });
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(reqBase)
+                }
+            );
 
-            const rs = await Promise.all(calls);
-            const map = Object.fromEntries(rs.map(x => [x.status, x.count]));
-            if (els.kpiConfirming) els.kpiConfirming.textContent = map.Confirming || 0;
-            if (els.kpiConfirmed) els.kpiConfirmed.textContent = map.Confirmed || 0;
-            if (els.kpiRejected) els.kpiRejected.textContent = map.Rejected || 0;
-            if (els.kpiTotal) els.kpiTotal.textContent = (map.Confirming || 0) + (map.Confirmed || 0) + (map.Rejected || 0);
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            const json = await res.json();
+
+            if (els.kpiConfirming)
+                els.kpiConfirming.textContent = json.countConfirming ?? 0;
+
+            if (els.kpiConfirmed)
+                els.kpiConfirmed.textContent = json.countCofirmed ?? 0;
+
+            if (els.kpiRejected)
+                els.kpiRejected.textContent = json.countRejected ?? 0;
+
+            if (els.kpiTotal)
+                els.kpiTotal.textContent = json.sum ?? 0;
+
         } catch (e) {
             console.warn('KPI load failed', e);
+
+            if (els.kpiConfirming) els.kpiConfirming.textContent = 0;
+            if (els.kpiConfirmed) els.kpiConfirmed.textContent = 0;
+            if (els.kpiRejected) els.kpiRejected.textContent = 0;
+            if (els.kpiTotal) els.kpiTotal.textContent = 0;
         }
     }
+
 
     async function saveInline(id, payload) {
         try {
@@ -670,8 +703,8 @@
                 soDon: getFieldValue(els.soDon),
                 trangThai: getStatusForSearch(),
                 section: getFieldValue(els.vitri),
-                pageIndex: 1,
-                pageSize: 1000
+                pageIndex: state.pageIndex,
+                pageSize: state.pageSize
             };
             const res = await fetch((window.apiBaseUrl || '') + '/Material/ExportToExcel', {
                 method: 'POST',
@@ -739,19 +772,22 @@
         els.prev?.addEventListener('click', () => {
             if (state.pageIndex <= 1) return;
             state.pageIndex--;
-            if (state.activeTab === 'pending') renderPendingTable(); else renderConfirmedCards();
+            if (state.serverPaging) search(false);
+            else if (state.activeTab === 'pending') renderPendingTable(); else renderConfirmedCards();
         });
         els.next?.addEventListener('click', () => {
             const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
             if (state.pageIndex >= totalPages) return;
             state.pageIndex++;
-            if (state.activeTab === 'pending') renderPendingTable(); else renderConfirmedCards();
+            if (state.serverPaging) search(false);
+            else if (state.activeTab === 'pending') renderPendingTable(); else renderConfirmedCards();
         });
 
         els.pageSizeSelect?.addEventListener('change', () => {
             state.pageSize = parseInt(els.pageSizeSelect.value) || 20;
             state.pageIndex = 1;
-            if (state.activeTab === 'pending') renderPendingTable(); else renderConfirmedCards();
+            if (state.serverPaging) search(false);
+            else if (state.activeTab === 'pending') renderPendingTable(); else renderConfirmedCards();
         });
 
         els.tabPending?.addEventListener('click', () => {
@@ -809,7 +845,7 @@
         });
 
         els.btnSaveSelected?.addEventListener('click', saveSelected);
-        els.btnRejectAccSelected?.addEventListener('click', rejectAccSelected);
+        els.btnRejectShipSelected?.addEventListener('click', rejectShipSelected);
 
         els.btnExportTemplate?.addEventListener('click', exportTemplate);
         els.btnExportTable?.addEventListener('click', exportTable);
@@ -822,6 +858,10 @@
         if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
             try { window.KanziSearchableDropdown.init(root); } catch { }
         }
+    }
+
+    if (els.pageSizeSelect && parseInt(els.pageSizeSelect.value)) {
+        state.pageSize = parseInt(els.pageSizeSelect.value) || state.pageSize;
     }
 
     if (els.trangThai && !els.trangThai.value) {

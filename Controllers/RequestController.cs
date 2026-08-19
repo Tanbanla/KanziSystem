@@ -262,7 +262,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 subject = "[Gấp] Xin phê duyệt đơn yêu cầu xuất kho /[緊急] 出庫依頼承認のお願い";
             }
-            if (model.mailnguoitao == model.mail_dt)
+            if (model.adidnguoitao == model.adid_dt)
             {
                 REQUEST_PROCESS._sendmail(body, model.mailnguoitao, subject);
             }
