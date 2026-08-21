@@ -163,7 +163,7 @@
     <value>Confirmed</value>
   </data>
   <data name="StatusRejected" xml:space="preserve">
-    <value>Rejected</value>
+    <value>Send to the department</value>
   </data>
   <data name="Reset" xml:space="preserve">
     <value>Reset</value>

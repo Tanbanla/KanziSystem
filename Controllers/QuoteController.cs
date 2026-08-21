@@ -493,7 +493,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var items = new List<BaoGia_Request_of_QuotationDTO>();
 
             // Case 1: Có mã hàng nội bộ
-            if (!string.IsNullOrEmpty(rowData.MaHangNoiBo))
+            if (!string.IsNullOrEmpty(rowData.MaHangNoiBo?.Trim()))
             {
                 var processedItems = await ProcessRowWithExistingMaterial(rowData);
                 items.AddRange(processedItems);

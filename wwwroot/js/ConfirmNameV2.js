@@ -65,8 +65,10 @@
 
     const T = window.i18nConfirmName || {};
 
-    function canEditTenHQ() { return role === 'UserShip' || role === 'UserPUR'; }
+    function canEditTenHQ() { return role === 'UserShip'; }
+    function canEditTenRecomment() { return role === 'UserPUR'; }
     function canReject() { return role === 'UserShip'; }
+    function canReason() { return (role != 'UserShip' && role != 'UserPUR'); }
 
     function getDisplayStatus(r) {
         if (role === 'UserShip') return r.CHR_StatusShip || r.CHR_Status;
@@ -81,6 +83,23 @@
         if (v === 'confirming') return `<span class="status-badge status-confirming">${T.StatusConfirming || 'Confirming'}</span>`;
         if (v === 'rejected') return `<span class="status-badge status-rejected">${T.StatusRejected || 'Rejected'}</span>`;
         return `<span class="status-badge status-unknown">${txt || '-'}</span>`;
+    }
+    function statusBadgeDrawer(statusPur, statusShip, statusSection) {
+        const sPur = (statusPur || '').toString().toLowerCase();
+        const sShip = (statusShip || '').toString().toLowerCase();
+        const sSection = (statusSection || '').toString().toLowerCase();
+
+        if (sPur === 'confirming') {
+            return `<span class="status-badge status-pur-pending">Đợi PUR xác nhận</span>`;
+        }
+        if (sShip === 'confirming') {
+            return `<span class="status-badge status-ship-pending">Đợi Ship xác nhận</span>`;
+        }
+        if (sSection === 'confirming') {
+            return `<span class="status-badge status-section-pending">Đợi phòng ban bổ sung thông tin</span>`;
+        }
+
+        return `<span class="status-badge status-completed">Hoàn thành</span>`;
     }
 
     function formatDate(value) {
@@ -105,6 +124,21 @@
         return state.activeTab === 'confirmed' ? 'Confirmed' : 'Confirming';
     }
 
+    function getSearchPayload() {
+        return {
+            tenHang: getFieldValue(els.tenHang),
+            soDon: getFieldValue(els.soDon),
+            trangThai: getStatusForSearch(),
+            section: getFieldValue(els.vitri),
+            createdBy: getFieldValue(els.createdByFilter),
+            fromDate: getFieldValue(els.fromDateFilter) || null,
+            toDate: getFieldValue(els.toDateFilter) || null,
+            quickSearch: getFieldValue(els.quickSearch),
+            pageIndex: state.pageIndex,
+            pageSize: state.pageSize
+        };
+    }
+
     function updateTabUi() {
         const pending = state.activeTab === 'pending';
         els.tabPending?.classList.toggle('active', pending);
@@ -115,42 +149,7 @@
     }
 
     function applyClientFilters(data) {
-        let rows = Array.isArray(data) ? data.slice() : [];
-
-        const creator = getFieldValue(els.createdByFilter).toLowerCase();
-        const quick = getFieldValue(els.quickSearch).toLowerCase();
-        const fromDate = parseDateOnly(getFieldValue(els.fromDateFilter));
-        const toDate = parseDateOnly(getFieldValue(els.toDateFilter));
-
-        if (creator) {
-            rows = rows.filter(r => ((r.VCHR_CreateBy || '').toLowerCase().includes(creator)));
-        }
-
-        if (fromDate || toDate) {
-            rows = rows.filter(r => {
-                const dt = r.DTM_CreateDate ? new Date(r.DTM_CreateDate) : null;
-                if (!dt || isNaN(dt.getTime())) return false;
-                const day = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
-                if (fromDate && day < fromDate) return false;
-                if (toDate && day > toDate) return false;
-                return true;
-            });
-        }
-
-        if (quick) {
-            rows = rows.filter(r => {
-                const stack = [
-                    r.NVCHR_Note,
-                    r.VCHR_MaHangNoiBo,
-                    r.VCHR_TenHaiQuan,
-                    r.VCHR_TenRecomment,
-                    r.CHR_NameEN
-                ].map(x => (x || '').toString().toLowerCase()).join(' | ');
-                return stack.includes(quick);
-            });
-        }
-
-        return rows;
+        return Array.isArray(data) ? data.slice() : [];
     }
 
     function updateSelectedCount() {
@@ -201,22 +200,52 @@
             ].filter(Boolean).join(' ');
 
             const tenHQCell = canEditTenHQ()
-                ? `<input class="form-control form-control-sm js-tenhq" data-id="${r.ID}" value="${escapeHtml(r.VCHR_TenHaiQuan || '')}" />`
-                : escapeHtml(r.VCHR_TenHaiQuan || '');
+                ? `
+                <textarea
+                    class="form-control form-control-sm js-tenhq"
+                    data-id="${r.ID}"
+                    rows="2"
+                    style="width:100%; min-width:0; box-sizing:border-box; resize:vertical;"
+                >${escapeHtml(r.VCHR_TenHaiQuan || '')}</textarea>`
+                : `<div style="width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(r.VCHR_TenHaiQuan || '')}</div>`;
 
+            const tenRecommentCell = canEditTenRecomment()
+                ? `
+                <textarea
+                    class="form-control form-control-sm js-tenrecomment"
+                    data-id="${r.ID}"
+                    rows="2"
+                    style="width:100%; min-width:0; box-sizing:border-box; resize:vertical;"
+                >${escapeHtml(r.VCHR_TenRecomment || '')}</textarea>`
+                : `<div style="width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(r.VCHR_TenRecomment || '')}</div>`;
+
+            const tenEnCell = canEditTenRecomment()
+                ? `
+                <textarea
+                    class="form-control form-control-sm js-tenen"
+                    data-id="${r.ID}"
+                    rows="2"
+                    style="width:100%; min-width:0; box-sizing:border-box; resize:vertical;"
+                >${escapeHtml(r.CHR_NameEN || '')}</textarea>`
+                : `<div style="width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(r.CHR_NameEN || '')}</div>`;
+            const lydoCell = canReason() ?
+                `<td style="min-width:220px; vertical-align:top;"><div style="width:100%; white-space:normal;
+                overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(r.NVCHR_LyDo || '')}</div></td>`
+                : ``;
             return `
                 <tr>
-                    <td><input type="checkbox" class="row-select" data-id="${r.ID}" ${checked} /></td>
-                    <td>${escapeHtml(r.CHR_MaDon || '')}</td>
-                    <td>${escapeHtml(r.CHR_MaHangNoiBo || '')}</td>
-                    <td class="text-truncate" style="max-width:240px;" title="${escapeHtml(r.VCHR_TenRecomment || '')}">${escapeHtml(r.VCHR_TenRecomment || '')}</td>
-                    <td class="text-truncate" style="max-width:220px;" title="${escapeHtml(r.VCHR_TenHaiQuan || '')}">${tenHQCell}</td>
-                    <td class="text-truncate" style="max-width:200px;" title="${escapeHtml(r.CHR_NameEN || '')}">${escapeHtml(r.CHR_NameEN || '')}</td>
-                    <td>${escapeHtml(r.VCHR_CreateBy || '')}</td>
-                    <td>${formatDate(r.DTM_CreateDate)}</td>
-                    <td>${escapeHtml(r.VCHR_UpdateBy || r.VCHR_UserPUR || r.VCHR_UserShip || '-')}</td>
-                    <td>${statusBadge(getDisplayStatus(r))}</td>
-                    <td class="text-center"><div class="d-flex gap-1 justify-content-center">${actions}</div></td>
+                    <td style="vertical-align:top;"><input type="checkbox" class="row-select" data-id="${r.ID}" ${checked} /></td>
+                    <td style="vertical-align:top;">${escapeHtml(r.CHR_MaDon || '')}</td>
+                    <td style="vertical-align:top;">${escapeHtml(r.CHR_MaHangNoiBo || '')}</td>
+                    <td style="min-width:240px; vertical-align:top;">${tenRecommentCell}</td>
+                    <td style="min-width:220px; vertical-align:top;">${tenHQCell}</td>
+                    <td style="min-width:200px; vertical-align:top;">${tenEnCell}</td>
+                    <td class="text-center" style="vertical-align:top;">${escapeHtml(r.VCHR_CreateBy || '')}</td>
+                    <td style="vertical-align:top;">${formatDate(r.DTM_CreateDate)}</td>
+                    <td class="text-center" style="vertical-align:top;">${escapeHtml(r.VCHR_UpdateBy || r.VCHR_UserPUR || r.VCHR_UserShip || '-')}</td>
+                    ${lydoCell}
+                    <td style="vertical-align:top;">${statusBadge(getDisplayStatus(r))}</td>
+                    <td class="text-center" style="vertical-align:top;"><div class="d-flex gap-1 justify-content-center">${actions}</div></td>
                 </tr>`;
         }).join('');
 
@@ -312,14 +341,7 @@
     }
 
     async function search(fetchKpi = true) {
-        const body = {
-            tenHang: getFieldValue(els.tenHang),
-            soDon: getFieldValue(els.soDon),
-            trangThai: getStatusForSearch(),
-            section: getFieldValue(els.vitri),
-            pageIndex: state.pageIndex,
-            pageSize: state.pageSize
-        };
+        const body = getSearchPayload();
 
         try {
             showLoading(T.LoadingMessage || 'Đang xử lý...');
@@ -400,13 +422,9 @@
     }
 
     async function loadKpi() {
-        const reqBase = {
-            tenHang: getFieldValue(els.tenHang),
-            soDon: getFieldValue(els.soDon),
-            section: getFieldValue(els.vitri),
-            pageIndex: 1,
-            pageSize: 1
-        };
+        const reqBase = getSearchPayload();
+        reqBase.pageIndex = 1;
+        reqBase.pageSize = 1;
 
         try {
             const res = await fetch(
@@ -506,13 +524,14 @@
     function openDrawer(item, focusHistory) {
         if (!item) return;
 
-        setText('dMaDon', item.NVCHR_Note || '-');
-        setText('dMaVatTu', item.VCHR_MaHangNoiBo || '-');
+        setText('dMaDon', item.CHR_MaDon || '-');
+        setText('dMaVatTu', item.CHR_MaHangNoiBo || '-');
         setText('dTenHaiQuan', item.VCHR_TenHaiQuan || '-');
         setText('dTenEN', item.CHR_NameEN || '-');
         setText('dTenDeXuat', item.VCHR_TenRecomment || '-');
         const statusEl = document.getElementById('dTrangThai');
-        if (statusEl) statusEl.innerHTML = statusBadge(getDisplayStatus(item));
+        /*if (statusEl) statusEl.innerHTML = statusBadge(getDisplayStatus(item));*/
+        if (statusEl) statusEl.innerHTML = statusBadgeDrawer(item.CHR_Status, item.CHR_StatusShip, item.CHR_StatusACC);
 
         setText('dCreateBy', item.VCHR_CreateBy || '-');
         setText('dCreateDate', formatDate(item.DTM_CreateDate) || '-');
@@ -522,6 +541,8 @@
         setText('dUserPurDate', formatDate(item.DTM_UserPUR) || '-');
         setText('dUserShip', item.VCHR_UserShip || '-');
         setText('dUserShipDate', formatDate(item.DTM_UserShip) || '-');
+        setText('dUserSection', item.VCHR_UserAcc || '-');
+        setText('dUserSectionDate', formatDate(item.DTM_UserAcc) || '-');
         setText('dNote', item.NVCHR_Note || '-');
         setText('dRejectReason', item.NVCHR_LyDo || '-');
 
@@ -543,32 +564,109 @@
         els.drawerOverlay?.setAttribute('aria-hidden', 'true');
     }
 
+    const fieldNames = {
+        CHR_Status: 'Trạng thái PUR',
+        CHR_StatusACC: 'Trạng thái phòng ban',
+        CHR_StatusShip: 'Trạng thái Ship',
+        CHR_MaHangNCC: 'Mã hàng NCC',
+        CHR_MaThietBi: 'Mã thiết bị',
+        CHR_NameEN: 'Tên tiếng Anh',
+        NVCHR_HinhDang: 'Hình dạng',
+        NVCHR_ChatLieu: 'Chất liệu',
+        NVCHR_ThanhPhan: 'Thành phần',
+        NVCHR_KichThuoc: 'Kích thước',
+        NVCHR_DongMay: 'Dòng máy',
+        NVCHR_TinhNang: 'Tính năng'
+    };
     async function loadHistory(confirmId) {
         try {
-            const res = await fetch((window.apiBaseUrl || '') + '/Material/GetConfirmNameHistory?confirmId=' + encodeURIComponent(confirmId));
+            const res = await fetch(
+                (window.apiBaseUrl || '') +
+                '/Material/GetConfirmNameHistory?confirmId=' +
+                encodeURIComponent(confirmId)
+            );
+
             if (!res.ok) throw new Error('Lỗi tải lịch sử');
+
             const items = await res.json();
 
             if (!Array.isArray(items) || !items.length) {
-                els.drawerHistoryTimeline.innerHTML = '<div class="text-muted small">Chưa có lịch sử thay đổi</div>';
+                els.drawerHistoryTimeline.innerHTML =
+                    '<div class="text-muted small">Chưa có lịch sử thay đổi</div>';
                 return;
             }
 
             els.drawerHistoryTimeline.innerHTML = items.map(h => {
                 const type = (h.actionType || '').toLowerCase();
-                const icon = type === 'confirm' ? 'fa-check-circle text-success' : type === 'reject' ? 'fa-times-circle text-danger' : 'fa-pen text-primary';
-                return `
-                    <div class="history-item">
-                        <div class="history-icon"><i class="fas ${icon}"></i></div>
-                        <div class="history-content">
-                            <div class="history-meta">${formatDate(h.actionDate)} · <b>${escapeHtml(h.actionBy || '-')}</b></div>
-                            <div class="history-value">Old: ${escapeHtml(h.oldValue || '-')}</div>
-                            <div class="history-value">New: ${escapeHtml(h.newValue || '-')}</div>
+
+                const icon =
+                    type === 'confirm'
+                        ? 'fa-check-circle text-success'
+                        : type === 'reject'
+                            ? 'fa-times-circle text-danger'
+                            : 'fa-pen text-primary';
+
+                let changesHtml = '';
+
+                try {
+                    const oldObj = h.oldValue ? JSON.parse(h.oldValue) : {};
+                    const newObj = h.newValue ? JSON.parse(h.newValue) : {};
+
+                    const keys = [...new Set([
+                        ...Object.keys(oldObj),
+                        ...Object.keys(newObj)
+                    ])];
+
+                    const changes = keys
+                        .filter(key => (oldObj[key] || '') !== (newObj[key] || ''))
+                        .map(key => `
+                        <div class="history-change">
+                            <b>${escapeHtml(fieldNames[key] || key)}</b>:
+                            <span class="text-danger">
+                                ${escapeHtml(oldObj[key] ?? '-')}
+                            </span>
+                            <i class="fas fa-arrow-right mx-1"></i>
+                            <span class="text-success">
+                                ${escapeHtml(newObj[key] ?? '-')}
+                            </span>
                         </div>
-                    </div>`;
+                    `);
+
+                    changesHtml = changes.length
+                        ? changes.join('')
+                        : '<div class="text-muted">Không có thay đổi</div>';
+
+                } catch {
+                    changesHtml = `
+                    <div class="history-change">
+                        <span class="text-danger">${escapeHtml(h.oldValue || '-')}</span>
+                        <i class="fas fa-arrow-right mx-1"></i>
+                        <span class="text-success">${escapeHtml(h.newValue || '-')}</span>
+                    </div>
+                `;
+                }
+
+                return `
+                <div class="history-item">
+                    <div class="history-icon">
+                        <i class="fas ${icon}"></i>
+                    </div>
+
+                    <div class="history-content">
+                        <div class="history-meta">
+                            ${formatDate(h.actionDate)}
+                            · <b>${escapeHtml(h.actionBy || '-')}</b>
+                        </div>
+
+                        ${changesHtml}
+                    </div>
+                </div>
+            `;
             }).join('');
+
         } catch (e) {
-            els.drawerHistoryTimeline.innerHTML = `<div class="text-danger small">${escapeHtml(e.message || 'Lỗi tải lịch sử')}</div>`;
+            els.drawerHistoryTimeline.innerHTML =
+                `<div class="text-danger small">${escapeHtml(e.message || 'Lỗi tải lịch sử')}</div>`;
         }
     }
 
@@ -698,14 +796,7 @@
     async function exportTable() {
         try {
             showLoading(T.Processing || 'Đang xuất...');
-            const body = {
-                tenHang: getFieldValue(els.tenHang),
-                soDon: getFieldValue(els.soDon),
-                trangThai: getStatusForSearch(),
-                section: getFieldValue(els.vitri),
-                pageIndex: state.pageIndex,
-                pageSize: state.pageSize
-            };
+            const body = getSearchPayload();
             const res = await fetch((window.apiBaseUrl || '') + '/Material/ExportToExcel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -12,6 +12,7 @@ using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using static PRJ_WAREHOUSE_BIVN.View_Models.Material.MaterialVM;
@@ -22,15 +23,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
     {
         private readonly COST_MANAGEMENTContext _context;
         private readonly IFileImportService _fileImportService;
+        public readonly string _connectionString;
         public BaoGiaConfirmNameRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration, IFileImportService fileImportService
         ) : base(context, options, configuration)
         {
             _context = context;
+            _connectionString = options.Value.CostManagerConnection;
             _fileImportService = fileImportService;
         }
         //search thông tin xác nhận tên hàng
         public async Task<ListRequest<dynamic>> SearchAsync(ConfirmNameSearchRequest req, string user, string? role)
         {
+            req ??= new ConfirmNameSearchRequest();
+
             var baseFrom = @"
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r 
@@ -74,6 +79,39 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 whereBuilder.Append(" AND ISNULL(r.CHR_SectionCode, '') LIKE @Section");
                 parameters.Add("@Section", $"%{se}%");
             }
+
+            if (!string.IsNullOrWhiteSpace(req.CreatedBy))
+            {
+                var createdBy = req.CreatedBy.Trim();
+                whereBuilder.Append(" AND ISNULL(c.VCHR_CreateBy, '') LIKE @CreatedBy");
+                parameters.Add("@CreatedBy", $"%{createdBy}%");
+            }
+
+            if (req.FromDate.HasValue)
+            {
+                whereBuilder.Append(" AND c.DTM_CreateDate >= @FromDate");
+                parameters.Add("@FromDate", req.FromDate.Value.Date);
+            }
+
+            if (req.ToDate.HasValue)
+            {
+                whereBuilder.Append(" AND c.DTM_CreateDate < @ToDate");
+                parameters.Add("@ToDate", req.ToDate.Value.Date.AddDays(1));
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.QuickSearch))
+            {
+                var quick = req.QuickSearch.Trim();
+                whereBuilder.Append(@" AND (
+                    ISNULL(c.NVCHR_Note, '') LIKE @QuickSearch OR
+                    ISNULL(c.VCHR_MaHangNoiBo, '') LIKE @QuickSearch OR
+                    ISNULL(c.VCHR_TenHaiQuan, '') LIKE @QuickSearch OR
+                    ISNULL(c.VCHR_TenRecomment, '') LIKE @QuickSearch OR
+                    ISNULL(c.CHR_NameEN, '') LIKE @QuickSearch
+                )");
+                parameters.Add("@QuickSearch", $"%{quick}%");
+            }
+
             if (!string.IsNullOrWhiteSpace(req.TrangThai))
             {
                 if (string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase))
@@ -422,11 +460,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     row.DTM_UserPUR = now;
                 }
 
-                //if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
-                //    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
-                //{
-                //    row.CHR_Status = "Confirming"; // đang xác nhận
-                //}
                 row.DTM_UpdateDate = now;
                 row.VCHR_UpdateBy = user;
             }
@@ -578,7 +611,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     {
                         QuotationID = row.ID_RequestQuote,
                         ConfirmID = row.ID,
-                        OldValue = $"CHR_Status:{oldStatus};ID_StepBaoGia:{oldStep};ID_Status:{oldRqStatus}; ReasonOld:{oldReason}",
+                        OldValue = $"Bổ sung: ",
                         NewValue = item.LyDo,
                         ActionBy = user,
                         ActionDate = now
@@ -607,15 +640,24 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 throw new Exception("Invalid list of IDs.");
 
             string sql = @"
-               SELECT DISTINCT r.CHR_MaDon as MaDon, r.CHR_SectionCode as Section, r.CHR_CreateBy as UserCreate, r.ID as ID
-               FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] as r
-               LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] as c 
-                   ON r.ID = c.ID_RequestQuote
-               WHERE c.ID IN @ListCheck";
+                SELECT DISTINCT
+                    r.CHR_MaDon AS MaDon,
+                    r.CHR_SectionCode AS Section,
+                    r.CHR_CreateBy AS UserCreate,
+                    r.ID AS ID
+                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] r
+                LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] c
+                    ON r.ID = c.ID_RequestQuote
+                WHERE c.ID IN @ListCheck";
 
-            using (var connection = _conn)
+            using (var connection = new SqlConnection(_connectionString))
             {
-                var result = await connection.QueryAsync<ResultCheckCofirmName>(sql, new { ListCheck = listCheck });
+                await connection.OpenAsync();
+
+                var result = await connection.QueryAsync<ResultCheckCofirmName>(
+                    sql,
+                    new { ListCheck = listCheck });
+
                 return result.ToList();
             }
         }
@@ -1364,6 +1406,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             string user,
             string? role)
         {
+            req ??= new ConfirmNameSearchRequest();
+
             var sql = new StringBuilder(@"
             WITH Data AS
             (
@@ -1415,6 +1459,36 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 sql.Append(" AND ISNULL(r.CHR_SectionCode,'') LIKE @Section");
                 parameters.Add("@Section", $"%{req.Section.Trim()}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.CreatedBy))
+            {
+                sql.Append(" AND ISNULL(c.VCHR_CreateBy,'') LIKE @CreatedBy");
+                parameters.Add("@CreatedBy", $"%{req.CreatedBy.Trim()}%");
+            }
+
+            if (req.FromDate.HasValue)
+            {
+                sql.Append(" AND c.DTM_CreateDate >= @FromDate");
+                parameters.Add("@FromDate", req.FromDate.Value.Date);
+            }
+
+            if (req.ToDate.HasValue)
+            {
+                sql.Append(" AND c.DTM_CreateDate < @ToDate");
+                parameters.Add("@ToDate", req.ToDate.Value.Date.AddDays(1));
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.QuickSearch))
+            {
+                sql.Append(@" AND (
+                    ISNULL(c.NVCHR_Note, '') LIKE @QuickSearch OR
+                    ISNULL(c.VCHR_MaHangNoiBo, '') LIKE @QuickSearch OR
+                    ISNULL(c.VCHR_TenHaiQuan, '') LIKE @QuickSearch OR
+                    ISNULL(c.VCHR_TenRecomment, '') LIKE @QuickSearch OR
+                    ISNULL(c.CHR_NameEN, '') LIKE @QuickSearch
+                )");
+                parameters.Add("@QuickSearch", $"%{req.QuickSearch.Trim()}%");
             }
 
             if (!string.IsNullOrWhiteSpace(req.TrangThai))

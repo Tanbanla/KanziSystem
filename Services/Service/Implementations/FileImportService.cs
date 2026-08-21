@@ -84,7 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             if (found == null) return null;
 
             var extension = Path.GetExtension(found).ToLowerInvariant();
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg",".eml" };
             if (!allowedExtensions.Contains(extension)) return null;
 
             try

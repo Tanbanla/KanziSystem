@@ -285,3 +285,39 @@ button.kpi-card:hover {
         grid-template-columns: 1fr;
     }
 }
+/* Base style chung cho badge */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    display: inline-block;
+}
+
+/* Đợi PUR xác nhận - Màu vàng cam */
+.status-pur-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* Đợi Ship xác nhận - Màu xanh dương */
+.status-ship-pending {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+/* Đợi phòng ban bổ sung - Màu tím */
+.status-section-pending {
+    background-color: #e2e0f8;
+    color: #382bbaa8;
+    border: 1px solid #d6d2f7;
+}
+
+/* Hoàn thành - Màu xanh lá */
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}

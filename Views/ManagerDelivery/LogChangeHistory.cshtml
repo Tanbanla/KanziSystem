@@ -1,0 +1,87 @@
+@model IEnumerable<PRJ_WAREHOUSE_BIVN.Controllers.LogChangeUsingViewModel>
+@{
+    ViewData["Title"] = "Lịch sử chỉnh sửa Using";
+}
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h4 class="text-primary fw-bold mb-0">
+            <i class="fa fa-history me-2"></i> Lịch Sử Chỉnh Sửa Số Lượng
+        </h4>
+        <div>
+            <!-- THÊM NÚT XUẤT EXCEL TẠI ĐÂY -->
+            <a href="@Url.Action("ExportLogChangeExcel", "ManagerDelivery")" class="btn btn-success btn-sm me-2 shadow-sm">
+                <i class="fa fa-file-excel me-1"></i> Xuất Excel
+            </a>
+
+            <a href="@Url.Action("UsingManager", "ManagerDelivery")" class="btn btn-outline-secondary btn-sm shadow-sm">
+                <i class="fa fa-arrow-left me-1"></i> Quay lại Master
+            </a>
+        </div>
+    </div>
+</div>
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 75vh;">
+            <table class="table table-bordered table-hover mb-0 text-center align-middle" style="font-size: 13px;">
+                <thead class="table-primary sticky-top" style="z-index: 2;">
+                    <tr>
+                        <th width="50px">STT</th>
+                        <th>Mã Vật Tư</th>
+                        <th>Tháng/Năm</th>
+                        <th>SL Trước</th>
+                        <th>SL Sau</th>
+                        <th>Chênh Lệch</th>
+                        <th>Người Cập Nhật</th>
+                        <th>Thời Gian Cập Nhật</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        int stt = 1;
+                        foreach (var item in Model)
+                        {
+                            // Logic tô màu cho cột chênh lệch
+                            string colorClass = "text-muted";
+                            string sign = "";
+
+                            if (item.ChenhLech > 0)
+                            {
+                                colorClass = "text-primary fw-bold"; // Màu xanh (Tăng)
+                                sign = "+";
+                            }
+                            else if (item.ChenhLech < 0)
+                            {
+                                colorClass = "text-danger fw-bold"; // Màu đỏ (Giảm)
+                            }
+
+                            <tr>
+                                <td class="text-muted">@(stt++)</td>
+                                <td class="fw-bold text-dark">@item.MaVatTu</td>
+                                <td><span class="badge bg-secondary">@item.Thang / @item.Nam</span></td>
+                                <td class="text-muted">@item.Soluong_Truoc</td>
+                                <td class="fw-semibold text-dark">@item.Soluong_Sau</td>
+                                <td class="@colorClass" style="background-color: #f8f9fa;">
+                                    @sign@item.ChenhLech
+                                </td>
+                                <td>@item.Nguoiupdate</td>
+                                <td class="text-muted">
+                                    @(item.Ngayupdate.HasValue? item.Ngayupdate.Value.ToString("dd/MM/yyyy HH:mm:ss") : "")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="fa fa-folder-open mb-2" style="font-size: 24px;"></i><br />
+                                Chưa có lịch sử chỉnh sửa nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

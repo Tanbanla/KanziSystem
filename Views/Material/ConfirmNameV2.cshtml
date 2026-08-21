@@ -54,12 +54,15 @@
                 <div class="kpi-value" id="kpiConfirmed">0</div>
             </button>
         </div>
-        <div class="col-12 col-sm-6 col-xl-3">
-            <button type="button" class="kpi-card text-start w-100" data-kpi-status="Rejected">
-                <div class="kpi-title">@Localizer["StatusRejected"]</div>
-                <div class="kpi-value" id="kpiRejected">0</div>
-            </button>
-        </div>
+        @if(role == "UserShip")
+        {
+            <div class="col-12 col-sm-6 col-xl-3">
+                <button type="button" class="kpi-card text-start w-100" data-kpi-status="Rejected">
+                    <div class="kpi-title">@Localizer["StatusRejected"]</div>
+                    <div class="kpi-value" id="kpiRejected">0</div>
+                </button>
+            </div>
+        }
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="kpi-card kpi-muted h-100">
                 <div class="kpi-title">@Localizer["Total"]</div>
@@ -88,7 +91,7 @@
         <div class="card-body">
             <form id="searchForm" class="row g-3">
                 <div class="col-12 col-md-3">
-                    <label class="form-label mb-1">@Localizer["ItemName"]</label>
+                    <label class="form-label mb-1">@Localizer["InternalMaterialCode"]</label>
                     <select id="tenHang" name="tenHang" class="form-select searchMaterial searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500" style="min-height:50px;">
                         <option value="" selected>@Localizer["SelectInternalMaterialCode"]</option>
                         @foreach (var m in materials)
@@ -209,6 +212,10 @@
                                 <th>@Localizer["CreatedByPrefix"]</th>
                                 <th>@Localizer["CreatedDate"]</th>
                                 <th>@Localizer["Handler"]</th>
+                                @if(role == "User")
+                                {
+                                    <th>@Localizer["Reason"]</th>
+                                }
                                 <th>@Localizer["Status"]</th>
                                 <th class="text-center">@Localizer["Actions"]</th>
                             </tr>
@@ -271,7 +278,7 @@
                     <div><span>Tên hải quan</span><b id="dTenHaiQuan">-</b></div>
                     <div><span>Tên tiếng Anh</span><b id="dTenEN">-</b></div>
                     <div><span>Tên đề xuất</span><b id="dTenDeXuat">-</b></div>
-                    <div><span>Trạng thái</span><b id="dTrangThai">-</b></div>
+                    <div><span>Bước xác nhận</span><b id="dTrangThai">-</b></div>
                 </div>
             </div>
 
@@ -286,7 +293,9 @@
                     <div><span>Ngày PUR xác nhận</span><b id="dUserPurDate">-</b></div>
                     <div><span>Người SHIP xác nhận</span><b id="dUserShip">-</b></div>
                     <div><span>Ngày SHIP xác nhận</span><b id="dUserShipDate">-</b></div>
-                    <div><span>Ghi chú</span><b id="dNote">-</b></div>
+                     <div><span>Người phòng ban xác nhận</span><b id="dUserSection">-</b></div>
+                    <div><span>Ngày phòng ban xác nhận</span><b id="dUserSectionDate">-</b></div>
+                    <div><span>Mã hàng nhà cung cấp</span><b id="dNote">-</b></div>
                     <div><span>Lý do từ chối</span><b id="dRejectReason">-</b></div>
                 </div>
             </div>

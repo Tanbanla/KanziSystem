@@ -20,6 +20,10 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Material
             public string? SoDon { get; set; }
             public string? TrangThai { get; set; }
             public string? Section { get; set; }
+            public string? CreatedBy { get; set; }
+            public DateTime? FromDate { get; set; }
+            public DateTime? ToDate { get; set; }
+            public string? QuickSearch { get; set; }
             public int pageIndex { get; set; } = 1;
             public int pageSize { get; set; } = 20;
         }

@@ -491,7 +491,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<List<UpdateFile>> GetFilesToTransferAsync()
         {
             var query = await _context.BaoGia_Detail_of_Quotations
-                .Where(r => r.NVCHR_File != null && r.NVCHR_File.Contains("\\apbivnsh15"))
+                .Where(r => r.NVCHR_File != null && r.NVCHR_File.Contains("\\apbivnsh05"))
                 //.Where(r => r.ID_RequestQuote == 11960)
                 .Select(r => new UpdateFile { ID = r.ID, Link = r.NVCHR_File })
                 .ToListAsync();

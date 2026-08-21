@@ -223,6 +223,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchConfirmName([FromBody] ConfirmNameSearchRequest req)
         {
+            req ??= new ConfirmNameSearchRequest();
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
             var user = (string.IsNullOrEmpty(role.Data)) ? GetCurrentUserId() : "";
             var result = await _confirmNameService.SearchAsync(req, user, role.Data);
@@ -239,6 +240,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
             var user = (string.IsNullOrEmpty(role.Data)) ? GetCurrentUserId() : "";
+            req.TrangThai = "";
             var result = await _confirmNameService.GetCountCofirmNames(req, user, role.Data);
             if (!result.Success)
             {

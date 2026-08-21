@@ -163,7 +163,7 @@
     <value>Đã xác nhận</value>
   </data>
   <data name="StatusRejected" xml:space="preserve">
-    <value>Từ chối</value>
+    <value>Gửi về phòng ban</value>
   </data>
   <data name="Reset" xml:space="preserve">
     <value>Reset</value>

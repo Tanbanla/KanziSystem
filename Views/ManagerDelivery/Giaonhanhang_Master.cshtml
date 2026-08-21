@@ -4,7 +4,7 @@
 }
 
 <style>
-    /* --- BỐ CỤC TỔNG THỂ BẢNG --- */
+
     .table-master {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 13px;
@@ -14,41 +14,41 @@
         background-color: #fff;
     }
 
-        .table-master th, .table-master td {
-            border-right: 1px solid #d4d4d4;
-            border-bottom: 1px solid #d4d4d4;
-            padding: 6px 10px;
-            vertical-align: middle;
-        }
+    .table-master th, .table-master td {
+        border-right: 1px solid #d4d4d4;
+        border-bottom: 1px solid #d4d4d4;
+        padding: 6px 10px;
+        vertical-align: middle;
+    }
 
-            .table-master td:first-child, .table-master th:first-child {
-                border-left: 1px solid #d4d4d4;
-            }
+    .table-master td:first-child, .table-master th:first-child {
+        border-left: 1px solid #d4d4d4;
+    }
 
-        /* --- HIỆU ỨNG HEADER --- */
-        .table-master thead th {
-            color: #333;
-            font-weight: 600;
-            text-align: center;
-            position: sticky;
-            z-index: 10;
-            border-top: 1px solid #d4d4d4;
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-        }
+    /* --- HIỆU ỨNG HEADER --- */
+    .table-master thead th {
+        color: #333;
+        font-weight: 600;
+        text-align: center;
+        position: sticky;
+        z-index: 10;
+        border-top: 1px solid #d4d4d4;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    }
 
-        /* Ghim cố định 2 dòng Header */
-        .table-master thead tr:nth-child(1) th {
-            top: 0;
-            z-index: 11;
-            border-bottom: none;
-            height: 35px;
-        }
+    /* Ghim cố định 2 dòng Header */
+    .table-master thead tr:nth-child(1) th {
+        top: 0;
+        z-index: 11;
+        border-bottom: none;
+        height: 35px;
+    }
 
-        .table-master thead tr:nth-child(2) th {
-            top: 35px;
-            z-index: 10;
-            height: 40px;
-        }
+    .table-master thead tr:nth-child(2) th {
+        top: 35px;
+        z-index: 10;
+        height: 40px;
+    }
 
     /* --- MÀU SẮC PHÂN NHÓM HEADER --- */
     .group-info {
@@ -157,6 +157,7 @@
     }
 
     }
+    
 </style>
 
 <div class="container-fluid">
@@ -165,10 +166,17 @@
             <h5 class="mb-0 text-info fw-bold text-uppercase" style="letter-spacing: 0.5px;">
                 <i class="fa-solid fa fa-table-list me-2"></i> THEO DÕI ĐIỂM GỌI HÀNG & MASTER TỒN KHO AN TOÀN
             </h5>
-            <div>
-                <button type="button" class="btn btn-success shadow-sm">
+            <div class="d-flex align-items-center gap-2">
+                <!-- Ô Tìm kiếm -->
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-light"><i class="fa fa-search"></i></span>
+                    <input type="text" id="txtSearch" class="form-control" placeholder="Tìm mã hàng, tên, NCC..." onkeyup="searchTable()">
+                </div>
+
+                <!-- Nút Xuất Excel (Trỏ URL về hàm trong Controller) -->
+                <a href="@Url.Action("ExportGiaonhanhangMaster", "ManagerDelivery")" class="btn btn-success btn-sm shadow-sm text-nowrap">
                     <i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel
-                </button>
+                </a>
             </div>
         </div>
 
@@ -183,7 +191,6 @@
                             <th colspan="3" class="group-standard">III. TIÊU CHUẨN AN TOÀN</th>
                             <th colspan="5" class="group-status">IV. THỰC TẾ & TRẠNG THÁI</th>
                         </tr>
-
                         <!-- DÒNG HEADER 2: CHI TIẾT CỘT -->
                         <tr>
                             <!-- Nhóm I (Xanh lá) -->
@@ -212,7 +219,7 @@
                             <th class="sub-status" style="min-width: 140px;">Điểm gọi hàng</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tableBody">
                         @if (Model != null && Model.Any())
                         {
                             foreach (var item in Model)
@@ -273,3 +280,29 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        // Hàm tìm kiếm Real-time trên lưới
+        function searchTable() {
+            // Lấy từ khóa và chuyển thành chữ thường
+            var input = document.getElementById("txtSearch").value.toLowerCase();
+            // Lấy tất cả các dòng trong tbody
+            var rows = document.querySelectorAll("#tableBody tr");
+
+            rows.forEach(function (row) {
+                // Nếu dòng là dòng "Không có dữ liệu" thì bỏ qua
+                if (row.cells.length === 1) return;
+
+                // Lấy toàn bộ text của dòng
+                var rowText = row.innerText.toLowerCase();
+
+                // Hiển thị nếu có chứa từ khóa, ngược lại ẩn đi
+                if (rowText.includes(input)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+    </script>
+}

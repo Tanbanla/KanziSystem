@@ -89,8 +89,13 @@
 
                     <!-- Cụm Tìm kiếm & Bộ lọc năm -->
                     <div class="d-flex align-items-center gap-2">
+                        <a href="~/ManagerDelivery/LogChangeHistory">
+                            <button type="button" class="btn btn-warning text-white ms-2">
+                                <i class="fa-solid fa fa-laravel me-1"></i> Log Using
+                            </button>
+                        </a>
                         <input type="file" id="fileExcel" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
-                        <button type="button" class="btn btn-info text-white ms-2" onclick="document.getElementById('fileExcel').click()">
+                        <button type="button" class="btn btn-info text-white ms-2 ml-2" onclick="document.getElementById('fileExcel').click()">
                             <i class="fa-solid fa fa-file-excel me-1"></i> Import Excel
                         </button>
                         <!-- Ô TÌM KIẾM THEO MÃ -->

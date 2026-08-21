@@ -21,6 +21,8 @@
         !string.IsNullOrEmpty(x.lichgiao) && x.lichgiao.Trim().ToUpper() == "NG" &&
         (string.IsNullOrEmpty(x.anhuongsx) || x.anhuongsx.Trim().ToUpper() != "NO")
     ).ToList() ?? new List<PoDetailViewModel>();
+
+    string currentImpact = ViewBag.ImpactStatus as string ?? "";
 }
 
 <style>
@@ -174,15 +176,15 @@
                     <label class="form-label fw-semibold">Tháng yêu cầu</label>
                     <input type="month" name="reqMonth" class="form-control" value="@(!string.IsNullOrEmpty(reqMonth) ? reqMonth : DateTime.Now.ToString("yyyy-MM"))">
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
+              <div class="col-md-2">
+                <label class="form-label fw-semibold">Ảnh hưởng sản xuất</label>
                     <select name="impactStatus" class="form-control">
-                        <option value="">-- Tất cả trạng thái --</option>
-                        <option value="Yes">Có (Yes) - Đang cảnh báo</option>
-                        <option value="No">Không (No)</option>
-                        <option value="Wait">Chờ phòng ban xác nhận</option>
+                        <option value="" selected="@(string.IsNullOrEmpty(currentImpact))">-- Tất cả trạng thái --</option>
+                        <option value="NG" selected="@(currentImpact == "NG")">Lịch giao NG</option>
+                        <option value="OK" selected="@(currentImpact == "OK")">Lịch giao OK</option>
+                        <option value="WAIT" selected="@(currentImpact == "WAIT")">Chờ xác nhận</option>
                     </select>
-                </div>
+            </div>
                 <div class="col-md-2 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc</button>                 
                     <a href="@Url.Action("ManageDelivery", new { tab = currentTab })" class="btn btn-secondary ml-1"><i class="fa-solid ion-ios-loop-strong me-1"></i> Refresh</a>
@@ -228,20 +230,21 @@
                             <th class="bg-pur text-white" width="200px">Tên NCC</th>
                             <th class="bg-pur text-white" width="60" title="Người phát hành">ĐN PH PO</th>
                             <th class="bg-white" width="80px">Ngày gửi PO</th>
-                            <th class="bg-pur text-white">ĐN Follow NCC</th>
+                            <th class="bg-pur text-white">ĐN NCC</th>
                             <th class="bg-white" width="80px">Ngày NCC giao</th>
                             <th class="bg-white" width="80px">Ngày thực tế</th>
                             <th class="bg-white" width="80px">Giờ thực tế</th>
                             <th class="bg-white">Lịch giao (OK/NG) </th>
+                                                                       
+                            <th class="bg-white">Ảnh hưởng SX</th>
                             @if (currentTab == "trong")
                             {
-                                <th>Cảnh báo </th>
-                            }                                               
-                            <th class="bg-white">Ảnh hưởng SX</th>
+                                <th style="background-color: white">Cảnh báo </th>
+                            }
                             <th class="bg-white" width="80px">Cửa GH Cổng GH</th>
                             <th class="bg-white">Người nhận</th>
                             <th class="bg-white">Số ĐNTT</th>
-                            <th class="bg-white">Số hóa đơn</th>
+                            <th class="bg-white">Số HĐ</th>
 
                             @* --- LOGIC HEADER DỰA TRÊN USER SECTION --- *@
                             @if (userSection == "3100")
@@ -332,7 +335,7 @@
                                             }
                                         }
                                     </td>
-
+                                   
                                     <td class="text-center fw-bold">
                                         @if (item.anhuongsx == "No")
                                         {
@@ -347,6 +350,32 @@
                                             <span class="text-muted">---</span>
                                         }
                                     </td>
+                                    @if (currentTab == "trong")
+                                    {
+                                        <td class="text-center align-middle">
+                                            @if (!string.IsNullOrEmpty(item.canhbao))
+                                            {
+                                                string bgClass = "";
+                                                string val = item.canhbao.ToUpper();
+
+                                                if (val.Contains("IN"))
+                                                {
+                                                    bgClass = "bg-warning text-white";
+                                                }
+                                                else if (val.Contains("OUT"))
+                                                {
+                                                    bgClass = "bg-info text-white";
+                                                }
+                                                else if (val.Contains("AT"))
+                                                {
+                                                    bgClass = "bg-success text-white";
+                                                }
+                                                <span class="badge @bgClass p-2 w-100">
+                                                    @item.canhbao
+                                                </span>
+                                            }
+                                        </td>
+                                    }
                                     <td>@item.Cua_GH × @item.Cong_Nhanhang</td>
                                     <td>@item.Nguoi_Nhanhang</td>
                                     <td>@item.So_DNTT</td>
@@ -432,14 +461,14 @@
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth })">Trước</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus })">Trước</a>
                         </li>
                         @for (int i = 1; i <= totalPages; i++)
                         {
                             if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
                             {
                                 <li class="page-item @(i == currentPage ? "active" : "")">
-                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth })">@i</a>
+                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus })">@i</a>
                                 </li>
                             }
                             else if (i == currentPage - 3 || i == currentPage + 3)
@@ -448,7 +477,7 @@
                             }
                         }
                         <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth })">Sau</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus })">Sau</a>
                         </li>
                     </ul>
                 </nav>
@@ -808,22 +837,22 @@
 
 @section Scripts {
     <script>
-        function exportDataExcel() {
-            var form = document.getElementById('filterForm');
+             function exportDataExcel() {
+            // 1. Lấy form chứa các điều kiện đang lọc
+            const form = document.getElementById('filterForm');
 
-            // Lưu lại action gốc của form (để sau này filter bình thường không bị lỗi)
-            var originalAction = form.action;
+            // 2. Lấy toàn bộ dữ liệu (như searchTerm, reqMonth, tab, impactStatus)
+            const formData = new FormData(form);
+            const searchParams = new URLSearchParams(formData);
 
-            // Trỏ form sang Action Export
-            form.action = '@Url.Action("ExportExcel", "ManagerDelivery")';
+            // 3. Gọi URL Export kèm theo chuỗi tham số (Ví dụ: /ManagerDelivery/ExportExcel?searchTerm=abc&tab=trong)
+            const url = '@Url.Action("ExportExcel", "ManagerDelivery")?' + searchParams.toString();
 
-            // Chạy form
-            form.submit();
-
-            // Trả lại action gốc cho form ngay sau đó
-            form.action = originalAction;
+            // 4. Chuyển hướng để tải file
+            window.location.href = url;
         }
 
+        // Nếu có nút nào đang gọi exportExcel() thì trỏ nó về exportDataExcel()
         function exportExcel() {
             exportDataExcel();
         }
@@ -1048,10 +1077,55 @@
                 }
             });
 
-            document.getElementById('btnExecuteImport')?.addEventListener('click', function () {
-                alert("Đọc tệp tin thành công!\nHệ thống đang phân tích dữ liệu và cập nhật danh sách PO.");
-                bsImportModal.hide();
-            });
+         // Sự kiện khi click nút "Thực hiện Import"
+        document.getElementById('btnExecuteImport')?.addEventListener('click', async function () {
+            const fileInput = document.getElementById('excelFileInput');
+
+            // 1. Kiểm tra xem người dùng đã chọn file chưa
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Vui lòng chọn hoặc kéo thả tệp tin Excel (.xlsx, .xls) để Import!");
+                return;
+            }
+
+            // 2. Lấy file và đưa vào đối tượng FormData để gửi qua AJAX
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            // 3. Đổi giao diện nút thành trạng thái "Đang loading"
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý dữ liệu...';
+            btn.disabled = true;
+
+            try {
+                // 4. Gửi Request POST chứa file lên Controller (Ví dụ: ManagerDeliveryController, Action ImportExcel)
+                const response = await fetch('/ManagerDelivery/ImportExcel', {
+                    method: 'POST',
+                    body: formData // Không set Content-Type, trình duyệt sẽ tự động set multipart/form-data
+                });
+
+                const result = await response.json();
+
+                // 5. Xử lý kết quả trả về từ Server
+                if (result.success) {
+                    alert(result.message || "Import dữ liệu Excel thành công!");
+                    bsImportModal.hide(); // Đóng modal
+                    window.location.reload(); // Tải lại trang để thấy dữ liệu mới
+                } else {
+                    alert("Lỗi Import: " + (result.message || "Có lỗi xảy ra."));
+                }
+            } catch (error) {
+                console.error("Lỗi AJAX Import:", error);
+                alert("Đã xảy ra lỗi trong quá trình gửi file lên máy chủ.");
+            } finally {
+                // 6. Reset lại nút và file input
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                fileInput.value = "";
+                document.getElementById('dropzoneText').textContent = "Kéo thả file vào đây hoặc click để chọn file";
+            }
+        });
 
             // Toggle ô nhập Số lượng ở Modal Thanh toán
             $('input[name="updateScopePayment"]').on('change', function () {
