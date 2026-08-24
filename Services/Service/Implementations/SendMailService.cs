@@ -1422,8 +1422,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         continue;
                     }
 
-                    var toEmail = await _repo.GetSupplierEmailAsync(vendorCode);
-                    if (string.IsNullOrWhiteSpace(toEmail))
+
+                    var toEmail = await _repo.GetSupplierInfoAsync(vendorCode);
+                    if (toEmail == null || string.IsNullOrWhiteSpace((string?)toEmail.CHR_Mail))
                     {
                         failCount++;
                         continue;
@@ -1503,31 +1504,31 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         string shortName = (string?)firstItem?.ShortName ?? vendorName;
                         string expectedDeadline = DateTime.Now.AddHours(4).ToString("yyyy-MM-dd HH:mm");
 
-                        string body = string.Format(bodyTemplate, shortName, vendorName, expectedDeadline);
+                        string body = string.Format(bodyTemplate, shortName, toEmail.PICName ?? vendorName, expectedDeadline);
                         string titleMail = $"{shortName} - Sửa tên hàng hóa trên báo giá / Please revise the part name on the quotation.";
                         var emailCC = string.IsNullOrEmpty(mailTemplate.CHR_CC) ? mailPICTo : mailTemplate.CHR_CC;
 
-                        //var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
-                        //{
-                        //    mail_from = mailTemplate.CHR_FROM,
-                        //    mail_to = toEmail,
-                        //    mail_cc = emailCC,
-                        //    mail_bcc = mailTemplate.CHR_BCC,
-                        //    title = titleMail,
-                        //    body = body,
-                        //    attachmentPaths = new List<string> { tempFilePath }
-                        //};
-
                         var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                         {
-                            mail_from = "nguyenduy.khanh@brother-bivn.com.vn",
-                            mail_to = "nguyenthilan.huong2@brother-bivn.com.vn",
-                            mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",
-                            mail_bcc = "nguyenduy.khanh@brother-bivn.com.vn",
+                            mail_from = mailTemplate.CHR_FROM,
+                            mail_to = toEmail.CHR_Mail,
+                            mail_cc = emailCC,
+                            mail_bcc = mailTemplate.CHR_BCC,
                             title = titleMail,
                             body = body,
                             attachmentPaths = new List<string> { tempFilePath }
                         };
+
+                        //var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
+                        //{
+                        //    mail_from = "nguyenduy.khanh@brother-bivn.com.vn",
+                        //    mail_to = "nguyenduy.khanh@brother-bivn.com.vn",
+                        //    mail_cc = "nguyenduy.khanh@brother-bivn.com.vn",
+                        //    mail_bcc = "nguyenduy.khanh@brother-bivn.com.vn",
+                        //    title = titleMail,
+                        //    body = body,
+                        //    attachmentPaths = new List<string> { tempFilePath }
+                        //};
 
                         var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
                         if (sendResult.Success)

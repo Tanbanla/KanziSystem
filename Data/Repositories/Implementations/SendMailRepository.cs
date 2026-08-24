@@ -77,6 +77,35 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .FirstOrDefaultAsync();
             return email;
         }
+        // lay thông tin nha cun câps
+        public async Task<dynamic> GetSupplierInfoAsync(string supplierCode)
+        {
+            var sql = @"
+            SELECT CHR_PIC, CHR_Mail
+            FROM BaoGia_NCC_Category
+            WHERE CHR_MaNCC = @SupplierCode";
+
+            var parameter = new { SupplierCode = supplierCode };
+
+            dynamic result = (await _conn.QueryAsync<dynamic>(sql, parameter))
+                .FirstOrDefault();
+
+            if (result != null)
+            {
+                string pic = result.CHR_PIC?.ToString() ?? "";
+
+                string picName = pic
+                    .Split(new[] { "Name:" }, StringSplitOptions.None)
+                    .LastOrDefault()?
+                    .Trim();
+
+                result.PICName = string.IsNullOrWhiteSpace(picName)
+                    ? null
+                    : picName;
+            }
+
+            return result;
+        }
         public async Task<bool> UpdateMailSentStatusAsync(List<int> listRq)
         {
             var requests = await _context.BaoGia_Request_of_Quotations

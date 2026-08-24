@@ -84,7 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             if (found == null) return null;
 
             var extension = Path.GetExtension(found).ToLowerInvariant();
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg",".eml" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
             if (!allowedExtensions.Contains(extension)) return null;
 
             try
@@ -126,7 +126,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 return result;
             }
         }
-
+       
         private static string ReplaceFirstIgnoreCase(string input, string oldValue, string newValue)
         {
             if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(oldValue)) return input;

@@ -188,8 +188,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         NVCHR_PaymentTerm = isRefuse ? null : ws.Cell(r, 24).GetString(),
                         DTM_EffectiveDate = isRefuse ? null : ConvertHelper.ParseDate(ws.Cell(r, 25).GetString()),
                         DTM_ExpiryDate = isRefuse ? null : ConvertHelper.ParseDate(ws.Cell(r, 26).GetString()),
-                        CHR_UpdateBy = isRefuse ? null : GetCurrentUserId(),
-                        NVCHR_File = ws.Cell(r, 30).GetString()?.Trim().Trim('"', '\''),
+                        CHR_UpdateBy =  GetCurrentUserId(),
+                        NVCHR_File = ws.Cell(r, 30).GetString()?.Trim(),
                         CHR_Status = isRefuse ? "Refuse" : null,
                         NVCHR_ReasonUpdate = reason
                     });

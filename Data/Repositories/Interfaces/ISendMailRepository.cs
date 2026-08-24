@@ -17,6 +17,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<string?> GetSupplierEmaiCategorylAsync(string supplierCode, string catergory);
         // Lay email nha cung cap
         public Task<string?> GetSupplierEmailAsync(string supplierCode);
+        // lay thông tin nha cun câps
+        Task<dynamic> GetSupplierInfoAsync(string supplierCode);
+
         // Cập nhật trạng thái đã gửi mail cho đơn hàng
         public Task<bool> UpdateMailSentStatusAsync(List<int> listRq);
 

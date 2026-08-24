@@ -705,10 +705,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     finalStatusClause = "f.Step = 12 AND f.ID_Status NOT LIKE 'DELETE'";
                     break;
                 default:
-                    finalStatusClause = "f.ID_Status NOT LIKE 'DELETE' AND (f.ID_Status NOT LIKE 'RETURN%' or f.Step = 8)";
+                    finalStatusClause = "f.ID_Status NOT LIKE 'DELETE'";
                     break;
             }
-
+            // AND (f.ID_Status NOT LIKE 'RETURN%' or f.Step = 8)
             var sql = $@"
                 IF OBJECT_ID('tempdb..#FILTERED') IS NOT NULL DROP TABLE #FILTERED;
 

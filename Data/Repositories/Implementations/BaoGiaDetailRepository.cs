@@ -232,7 +232,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return a;
         }
         // Update infor input bao gia
-        public async Task<bool> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_Quotation> listDto)
+        public async Task<bool> UpdateListThongTinNhapBaoGiaAsync_BackUp(List<BaoGia_Detail_of_Quotation> listDto)
         {
             if (listDto == null || listDto.Count == 0)
             {
@@ -306,6 +306,138 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_Quotation> listDto)
+        {
+            if (listDto == null || listDto.Count == 0)
+            {
+                return false;
+            }
+
+            var now = DateTime.Now;
+            await using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var detailIds = listDto
+                    .Select(dto => dto.ID)
+                    .Distinct()
+                    .ToList();
+
+                var baoGiaDetails = await _context.BaoGia_Detail_of_Quotations
+                    .Where(d => detailIds.Contains(d.ID))
+                    .ToListAsync();
+
+                if (!baoGiaDetails.Any())
+                {
+                    throw new Exception("Không tìm thấy dữ liệu báo giá");
+                }
+
+                var detailById = baoGiaDetails.ToDictionary(d => d.ID);
+                var requestQuoteIds = baoGiaDetails
+                    .Select(d => d.ID_RequestQuote)
+                    .Distinct()
+                    .ToList();
+
+                var confirmNameBaoGias = await _context.BaoGia_Confirm_Name_Quotations
+                    .Where(r => requestQuoteIds.Contains(r.ID_RequestQuote))
+                    .ToListAsync();
+
+                var baoGiaRequests = await _context.BaoGia_Request_of_Quotations
+                    .Where(r => requestQuoteIds.Contains(r.ID))
+                    .ToListAsync();
+                if (!baoGiaRequests.Any())
+                {
+                    throw new Exception("Không tìm thấy dữ liệu báo giá");
+                }
+
+                var historyList = new List<BaoGia_History_Detail_Request>(listDto.Count);
+
+                // update thông tin detail
+                foreach (var item in listDto)
+                {
+                    if (!detailById.TryGetValue(item.ID, out var detail))
+                    {
+                        continue;
+                    }
+                    // lưu lịch sử thay đổi
+                    var history = new BaoGia_History_Detail_Request
+                    {
+                        ID = 0,
+                        ID_RQ_Detail = detail.ID,
+                        NVCHR_dataOld = System.Text.Json.JsonSerializer.Serialize(detail),
+                        NVCHR_dataNew = System.Text.Json.JsonSerializer.Serialize(item),
+                        CHR_CreateBy = item.CHR_UpdateBy,
+                        DTM_CreateBy = now,
+                        NVCHR_ReasonUpdate = item.NVCHR_ReasonUpdate
+                    };
+                    historyList.Add(history);
+
+                    detail.CHR_MaHangNCC = item.CHR_MaHangNCC;
+                    detail.NVCHR_TenHangHQ = item.NVCHR_TenHangHQ;
+                    detail.FL_USD = item.FL_USD;
+                    detail.FL_VND = item.FL_VND;
+                    detail.DTM_EndDate = item.DTM_EndDate;
+                    detail.NVCHR_MOQ = item.NVCHR_MOQ;
+                    detail.DTM_LeadTime = item.DTM_LeadTime;
+                    detail.DTM_ShipTime = item.DTM_ShipTime;
+                    detail.NVCHR_Packing = item.NVCHR_Packing;
+                    detail.NVCHR_Note = item.NVCHR_Note;
+                    detail.NVCHR_File = item.NVCHR_File;
+                    detail.FL_ExchangeRate = item.FL_ExchangeRate;
+                    detail.FL_TaxRate = item.FL_TaxRate;
+                    detail.FL_TaxAmount = item.FL_TaxAmount;
+                    detail.FL_TotalAfterTax = item.FL_TotalAfterTax;
+                    detail.NVCHR_PaymentTerm = item.NVCHR_PaymentTerm;
+                    detail.NVCHR_Warranty = item.NVCHR_Warranty;
+                    detail.NVCHR_DeliveryTerm = item.NVCHR_DeliveryTerm;
+                    detail.CHR_UpdateBy = item.CHR_UpdateBy;
+                    detail.DTM_UpdateDate = now;
+                    detail.INT_NumberEdit = detail.INT_NumberEdit != null ? detail.INT_NumberEdit + 1 : 1;
+                    detail.INT_SoLuong = item.INT_SoLuong;
+                    detail.FL_Sum = (item.FL_VND != null && item.INT_SoLuong != null) ? item.FL_VND * item.INT_SoLuong : null;
+                    detail.VCHR_Rohs = item.VCHR_Rohs;
+                    detail.VCHR_COCQ = item.VCHR_COCQ;
+                    detail.VCHR_MSDS = item.VCHR_MSDS;
+                    detail.VCHR_AnToan = item.VCHR_AnToan;
+                    detail.VCHR_CamKet = item.VCHR_CamKet;
+                    detail.NVCHR_DonVi = item.NVCHR_DonVi;
+                    detail.DTM_EffectiveDate = item.DTM_EffectiveDate;
+                    detail.DTM_ExpiryDate = item.DTM_ExpiryDate;
+                    detail.BIT_Select = null;
+                    detail.CHR_Status = item.CHR_Status;
+                    detail.NVCHR_dataOld = item.NVCHR_dataOld;
+                    detail.NVCHR_ReasonUpdate = item.NVCHR_ReasonUpdate;
+
+                }
+
+                foreach (var rq in baoGiaRequests)
+                {
+                    rq.ID_StepBaoGia = 7;
+                    rq.ID_Status = "WAIT_PICK_NCC";
+                }
+                foreach(var confirn in confirmNameBaoGias)
+                {
+                    confirn.CHR_Status = "Confirmed";
+                    confirn.CHR_StatusACC = "";
+                    confirn.CHR_StatusShip = "";
+                    confirn.VCHR_UpdateBy = "System";
+                    confirn.DTM_UpdateDate = now;
+                    confirn.NVCHR_LyDo = "PUR cập nhật thông tin báo giá";
+                }
+
+                await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+                await _context.SaveChangesAsync();
+
+                await tran.CommitAsync();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                await tran.RollbackAsync();
+                throw new Exception("Lỗi xảy ra khi cập nhật thông tin báo giá: " + ex.Message);
+            }
+        }
+
         // lấy id của đơn báo giá
         public async Task<int?> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNB, string maNcc, string NameHQ)
         {
