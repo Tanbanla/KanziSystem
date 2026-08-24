@@ -1675,78 +1675,122 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Xóa từng đơn
         public async Task<bool> DeleteDonBaoGiaAsync(int id, string reason, string userUpdate)
         {
-            var data = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(c => c.ID == id);
-            if (data == null) throw new Exception("No valid data to update");
-            // kiểm tra nếu đơn đã được phê duyệt thì không cho xóa
-            if (data.ID_StepBaoGia > 5)
-            {
-               throw new Exception("Đơn đã được phê duyệt, không thể xóa. Vui lòng liên hệ PIC PUR để được hỗ trợ");
-            }
-            // xoa mem
-            data.ID_Status = "DELETE";
-            data.ID_StepBaoGia = 0;
-            // Lưu lịch sử xóa
-            var history = new BaoGia_History_Request_of_Quotation
-            {
-                ID_RequestQuote = data.ID,
-                CHR_MaDon = data.CHR_MaDon ?? string.Empty,
-                CHR_UpdateBy = userUpdate,
-                NVCHR_UpdateName = userUpdate,
-                CHR_Updatedate = DateTime.Now,
-                CHR_NewData = System.Text.Json.JsonSerializer.Serialize(data),
-                NVCHR_LyDo = reason,
-                CHR_ActionType = "DELETE"
-            };
+             await using var tran = await _context.Database.BeginTransactionAsync();
 
-            //update thông tin xác nhận tên
-            var confirmName = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(c => c.ID_RequestQuote == data.ID);
-            if (confirmName != null)
+            try
             {
-                confirmName.CHR_Status = "Confirmed";
-                confirmName.CHR_StatusACC = "Confirmed";
-                confirmName.CHR_StatusShip = "Confirmed";
-                confirmName.DTM_UpdateDate= DateTime.Now;
-                confirmName.VCHR_UpdateBy = "System";
-                confirmName.NVCHR_LyDo = "Cập nhật do đơn bị xóa";
-                _context.BaoGia_Confirm_Name_Quotations.Update(confirmName);
-            }
+                var data = await _context.BaoGia_Request_of_Quotations.FirstOrDefaultAsync(c => c.ID == id);
+                if (data == null) throw new Exception("No valid data to update");
+                // kiểm tra nếu đơn đã được phê duyệt thì không cho xóa
+                if (data.ID_StepBaoGia > 5)
+                {
+                    throw new Exception("Đơn đã được phê duyệt, không thể xóa. Vui lòng liên hệ PIC PUR để được hỗ trợ");
+                }
+                // xoa mem
+                data.ID_Status = "DELETE";
+                data.ID_StepBaoGia = 0;
+                // Lưu lịch sử xóa
+                var history = new BaoGia_History_Request_of_Quotation
+                {
+                    ID_RequestQuote = data.ID,
+                    CHR_MaDon = data.CHR_MaDon ?? string.Empty,
+                    CHR_UpdateBy = userUpdate,
+                    NVCHR_UpdateName = userUpdate,
+                    CHR_Updatedate = DateTime.Now,
+                    CHR_NewData = System.Text.Json.JsonSerializer.Serialize(data),
+                    NVCHR_LyDo = reason,
+                    CHR_ActionType = "DELETE"
+                };
 
-            await _context.BaoGia_History_Request_of_Quotations.AddAsync(history);
-            _context.BaoGia_Request_of_Quotations.Update(data);
-            await _context.SaveChangesAsync();
-            return true;
+                //update thông tin xác nhận tên
+                var confirmName = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(c => c.ID_RequestQuote == data.ID);
+                if (confirmName != null)
+                {
+                    confirmName.CHR_Status = "Confirmed";
+                    confirmName.CHR_StatusACC = "Confirmed";
+                    confirmName.CHR_StatusShip = "Confirmed";
+                    confirmName.DTM_UpdateDate = DateTime.Now;
+                    confirmName.VCHR_UpdateBy = "System";
+                    confirmName.NVCHR_LyDo = "Cập nhật do đơn bị xóa";
+                    _context.BaoGia_Confirm_Name_Quotations.Update(confirmName);
+                }
+
+                await _context.BaoGia_History_Request_of_Quotations.AddAsync(history);
+                _context.BaoGia_Request_of_Quotations.Update(data);
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+
+                return true;
+            }
+            catch(Exception ex)
+            {
+                await tran.RollbackAsync();
+                throw new Exception("An error occurred while deleting the quotation.", ex);
+            }
         }
         // Trả lại đơn báo giá
         public async Task<List<BaoGia_Request_of_Quotation>> TraLaiDonBaoGiaAsync(string maDon, string userUpdate, string reason)
         {
             if (string.IsNullOrEmpty(maDon)) throw new Exception("No valid data to update");
 
-            var data = await _context.BaoGia_Request_of_Quotations.Where(c => c.CHR_MaDon == maDon).ToListAsync();
+            await using var tran = await _context.Database.BeginTransactionAsync();
 
-            if (!data.Any()) throw new Exception("Mã đơn báo giá không hợp lệ");
-
-            foreach (var item in data)
+            try
             {
-                item.ID_StepBaoGia = 1;
-                item.ID_Status = "RETURN_PIC";
-                item.DTM_UpdateLater = DateTime.Now;
+                var data = await _context.BaoGia_Request_of_Quotations.Where(c => c.CHR_MaDon == maDon).ToListAsync();
+
+                if (!data.Any()) throw new Exception("Mã đơn báo giá không hợp lệ");
+
+                foreach (var item in data)
+                {
+                    item.ID_StepBaoGia = 1;
+                    item.ID_Status = "RETURN_PIC";
+                    item.DTM_UpdateLater = DateTime.Now;
+                }
+                // Lưu lịch sử trả lại
+                var historyList = data.Select(item => new BaoGia_History_Request_of_Quotation
+                {
+                    ID_RequestQuote = item.ID,
+                    CHR_MaDon = item.CHR_MaDon ?? string.Empty,
+                    CHR_UpdateBy = userUpdate,
+                    NVCHR_UpdateName = userUpdate,
+                    CHR_Updatedate = DateTime.Now,
+                    NVCHR_LyDo = reason,
+                    CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
+                    CHR_ActionType = "RETURN_PIC"
+                }).ToList();
+
+                // Cập nhật dữ liệu xác  nhận tên
+                var confirmNames = await _context.BaoGia_Confirm_Name_Quotations
+                    .Where(c => data.Select(d => d.ID).Contains(c.ID_RequestQuote))
+                    .ToListAsync();
+
+                if (confirmNames.Any())
+                {
+                    foreach (var confirm in confirmNames)
+                    {
+                        confirm.CHR_Status = "Confirmed";
+                        confirm.CHR_StatusACC = "Confirmed";
+                        confirm.CHR_StatusShip = "Confirmed";
+                        confirm.DTM_UpdateDate = DateTime.Now;
+                        confirm.VCHR_UpdateBy = "System";
+                        confirm.NVCHR_LyDo = "Cập nhật do đơn bị trả lại";
+                    }
+                    _context.BaoGia_Confirm_Name_Quotations.UpdateRange(confirmNames);
+                }
+
+                _context.BaoGia_Request_of_Quotations.UpdateRange(data);
+                await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
+                await _context.SaveChangesAsync();
+
+                await tran.CommitAsync();
+                return data;
             }
-            // Lưu lịch sử trả lại
-            var historyList = data.Select(item => new BaoGia_History_Request_of_Quotation
+            catch(Exception ex)
             {
-                ID_RequestQuote = item.ID,
-                CHR_MaDon = item.CHR_MaDon ?? string.Empty,
-                CHR_UpdateBy = userUpdate,
-                NVCHR_UpdateName = userUpdate,
-                CHR_Updatedate = DateTime.Now,
-                NVCHR_LyDo = reason,
-                CHR_NewData = System.Text.Json.JsonSerializer.Serialize(item),
-                CHR_ActionType = "RETURN_PIC"
-            }).ToList();
-            _context.BaoGia_Request_of_Quotations.UpdateRange(data);
-            await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
-            await _context.SaveChangesAsync();
-            return data;
+                await tran.RollbackAsync();
+                throw new Exception("An error occurred while processing the transaction.", ex);
+            }
         }
         // lấy danh sách đơn yêu cầu hàng hóa
         public async Task<List<string>> GetMaDonYeuCauHangHoaAsync()
