@@ -22,7 +22,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         private readonly ISendMailRepository _repo;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
-        private const string mailPICTo = "bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-gagpur@brother-bivn.com.vn";//
+        private const string mailPICTo = "bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-gagpur@brother-bivn.com.vn";//
         public SendMailService(ISendMailRepository repository, IMapper mapper, IConfiguration configuration) : base(repository, mapper)
         {
             _repo = repository;
@@ -47,7 +47,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
            string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
            string body = string.Format(mail.CHR_BODY, urlMail+url, gapText, section, idRequest,user);
 
-           bool sendResult = EmailSender.sendEmailNotify(
+           bool sendResult = await EmailSender.sendEmailNotifyAsync(
                mail.CHR_SUBJECT,
                mail.CHR_FROM,
                toEmail,
@@ -775,7 +775,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
             string body = string.Format(mailTemplate.CHR_BODY ?? "", urlMail+"ApprovalQuote/Index", gapText, sectionName, requestCode);
             // Gửi mail
-            bool sendResult = EmailSender.sendEmailNotify(
+            bool sendResult = await EmailSender.sendEmailNotifyAsync(
                 mailTemplate.CHR_SUBJECT ?? "",
                 mailTemplate.CHR_FROM ?? "",
                 requesterEmail,
@@ -821,7 +821,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 // Chuẩn bị nội dung mail với các tham số
                 string body = string.Format(mailTemplate.CHR_BODY ?? "", link, gapText, sectionName, sectionCode, user);
                 // Gửi mail
-                bool sendResult = EmailSender.sendEmailNotify(
+                bool sendResult = await EmailSender.sendEmailNotifyAsync(
                     mailTemplate.CHR_SUBJECT ?? "",
                     mailTemplate.CHR_FROM ?? "",
                     requesterEmail,
@@ -1502,7 +1502,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         var firstItem = dataVendor.FirstOrDefault();
                         string vendorName = (string?)firstItem?.NVCHR_NameNCC ?? "Supplier";
                         string shortName = (string?)firstItem?.ShortName ?? vendorName;
-                        string expectedDeadline = DateTime.Now.AddHours(4).ToString("yyyy-MM-dd HH:mm");
+                        string expectedDeadline = DateTime.Now.Date.AddDays(1).AddHours(10).ToString("yyyy-MM-dd HH:mm");
 
                         string body = string.Format(bodyTemplate, shortName, toEmail.PICName ?? vendorName, expectedDeadline);
                         string titleMail = $"{shortName} - Sửa tên hàng hóa trên báo giá / Please revise the part name on the quotation.";
@@ -1570,6 +1570,30 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
-
+        // Tự động cập nhật trang thái đơn
+        public async Task<GenericResponse<bool>> AutoUpdateRequestStatusAsync()
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var updateResult = await _repo.AutoUpdateRequestStatusAsync();
+                if (updateResult)
+                {
+                    result.Success = true;
+                    result.Message = "Request statuses updated successfully.";
+                }
+                else
+                {
+                    result.Success = false;
+                    result.Message = "No request statuses were updated.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = $"Error updating request statuses: {ex.Message}";
+            }
+            return result;
+        }
     }
 }

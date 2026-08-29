@@ -50,6 +50,12 @@
         drawer: document.getElementById('confirmDetailDrawer'),
         drawerOverlay: document.getElementById('confirmDrawerOverlay'),
         btnCloseDrawer: document.getElementById('btnCloseDrawer'),
+        editDrawer: document.getElementById('confirmEditDrawer'),
+        editDrawerOverlay: document.getElementById('confirmEditDrawerOverlay'),
+        btnCloseEditDrawer: document.getElementById('btnCloseEditDrawer'),
+        drawerEditFields: document.getElementById('drawerEditFields'),
+        btnSaveDrawer: document.getElementById('btnSaveDrawer'),
+        btnReturnDrawer: document.getElementById('btnReturnDrawer'),
         drawerHistoryTimeline: document.getElementById('drawerHistoryTimeline')
     };
 
@@ -90,16 +96,16 @@
         const sSection = (statusSection || '').toString().toLowerCase();
 
         if (sPur === 'confirming') {
-            return `<span class="status-badge status-pur-pending">Đợi PUR xác nhận</span>`;
+            return `<span class="status-badge status-pur-pending">${T.PurPending || 'Waiting for PUR confirmation'}</span>`;
         }
         if (sShip === 'confirming') {
-            return `<span class="status-badge status-ship-pending">Đợi Ship xác nhận</span>`;
+            return `<span class="status-badge status-ship-pending">${T.ShipPending || 'Waiting for Ship confirmation'}</span>`;
         }
         if (sSection === 'confirming') {
-            return `<span class="status-badge status-section-pending">Đợi phòng ban bổ sung thông tin</span>`;
+            return `<span class="status-badge status-section-pending">${T.SectionPending || 'Waiting for department information'}</span>`;
         }
 
-        return `<span class="status-badge status-completed">Hoàn thành</span>`;
+        return `<span class="status-badge status-completed">${T.Completed || 'Completed'}</span>`;
     }
 
     function formatDate(value) {
@@ -194,9 +200,9 @@
         els.tbody.innerHTML = rows.map(r => {
             const checked = state.selectedIds.has(r.ID) ? 'checked' : '';
             const actions = [
-                `<button class="btn btn-sm btn-outline-primary js-save" data-id="${r.ID}"><i class="fas fa-save"></i></button>`,
+                canReason() ? `` : `<button class="btn btn-sm btn-outline-primary js-save" data-id="${r.ID}"><i class="fas fa-save"></i></button>`,
                 canReject() ? `<button class="btn btn-sm btn-outline-danger js-reject" data-id="${r.ID}"><i class="fas fa-times"></i></button>` : '',
-                `<button class="btn btn-sm btn-outline-secondary js-detail" data-id="${r.ID}"><i class="fas fa-eye"></i></button>`
+                `<button class="btn btn-sm btn-outline-secondary js-edit" data-id="${r.ID}"><i class="fas fa-edit"></i></button>`
             ].filter(Boolean).join(' ');
 
             const tenHQCell = canEditTenHQ()
@@ -232,13 +238,17 @@
                 `<td style="min-width:220px; vertical-align:top;"><div style="width:100%; white-space:normal;
                 overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(r.NVCHR_LyDo || '')}</div></td>`
                 : ``;
+
+            const TenRCCell = canReason() ?
+                `` : `<td style="min-width:220px; vertical-align:top;">${tenHQCell}</td>`
+
             return `
                 <tr>
                     <td style="vertical-align:top;"><input type="checkbox" class="row-select" data-id="${r.ID}" ${checked} /></td>
                     <td style="vertical-align:top;">${escapeHtml(r.CHR_MaDon || '')}</td>
                     <td style="vertical-align:top;">${escapeHtml(r.CHR_MaHangNoiBo || '')}</td>
                     <td style="min-width:240px; vertical-align:top;">${tenRecommentCell}</td>
-                    <td style="min-width:220px; vertical-align:top;">${tenHQCell}</td>
+                    ${TenRCCell}
                     <td style="min-width:200px; vertical-align:top;">${tenEnCell}</td>
                     <td class="text-center" style="vertical-align:top;">${escapeHtml(r.VCHR_CreateBy || '')}</td>
                     <td style="vertical-align:top;">${formatDate(r.DTM_CreateDate)}</td>
@@ -267,22 +277,22 @@
         els.confirmedCardList.innerHTML = rows.map(r => `
             <article class="confirm-card" data-id="${r.ID}">
                 <div class="confirm-card-main js-card-detail" data-id="${r.ID}">
-                    <div class="confirm-card-row"><span>Mã đơn:</span><b>${escapeHtml(r.CHR_MaDon || '-')}</b></div>
-                    <div class="confirm-card-row"><span>Mã vật tư:</span><b>${escapeHtml(r.CHR_MaHangNoiBo || '-')}</b></div>
-                    <div class="confirm-card-row"><span>Tên xác nhận:</span><b>${escapeHtml(r.VCHR_TenHaiQuan || r.VCHR_TenRecomment || '-')}</b></div>
+                    <div class="confirm-card-row"><span>${T.OrderCodeLabel || 'Order code'}:</span><b>${escapeHtml(r.CHR_MaDon || '-')}</b></div>
+                    <div class="confirm-card-row"><span>${T.MaterialCodeLabel || 'Material code'}:</span><b>${escapeHtml(r.CHR_MaHangNoiBo || '-')}</b></div>
+                    <div class="confirm-card-row"><span>${T.ConfirmedNameLabel || 'Confirmed name'}:</span><b>${escapeHtml(r.VCHR_TenHaiQuan || r.VCHR_TenRecomment || '-')}</b></div>
                     <div class="confirm-card-meta">
                         ${statusBadge(getDisplayStatus(r))}
-                        <span>Người xác nhận: <b>${escapeHtml( r.VCHR_UserShip || '-')}</b></span>
-                        <span>Ngày xác nhận: <b>${formatDate(r.DTM_UserShip || r.DTM_UpdateDate)}</b></span>
+                        <span>${T.ConfirmedBy || 'Confirmed by'}: <b>${escapeHtml( r.VCHR_UserShip || '-')}</b></span>
+                        <span>${T.ConfirmedDate || 'Confirmation date'}: <b>${formatDate(r.DTM_UserShip || r.DTM_UpdateDate)}</b></span>
                     </div>
                 </div>
                 <div class="confirm-card-side">
-                    <div class="small text-muted">Cập nhật cuối</div>
+                    <div class="small text-muted">${T.LastUpdated || 'Last updated'}</div>
                     <div><b>${escapeHtml(r.VCHR_UpdateBy || '-')}</b></div>
                     <div class="small">${formatDate(r.DTM_UpdateDate)}</div>
                     <div class="mt-2 d-flex gap-2 justify-content-end">
-                        <button class="btn btn-sm btn-outline-primary js-detail" data-id="${r.ID}">Chi tiết</button>
-                        <button class="btn btn-sm btn-outline-secondary js-history" data-id="${r.ID}">Lịch sử</button>
+                        <button class="btn btn-sm btn-outline-primary js-detail" data-id="${r.ID}">${T.Detail || 'Detail'}</button>
+                        <button class="btn btn-sm btn-outline-secondary js-history" data-id="${r.ID}">${T.History || 'History'}</button>
                     </div>
                 </div>
             </article>`).join('');
@@ -336,6 +346,15 @@
                 const id = parseInt(btn.getAttribute('data-id'));
                 const item = state.listData.find(x => x.ID === id);
                 openDrawer(item, false);
+            });
+        });
+
+        // edit chi tiết
+        els.tbody.querySelectorAll('.js-edit').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                const item = state.listData.find(x => x.ID === id);
+                openEditDrawer(item);
             });
         });
     }
@@ -399,7 +418,7 @@
 
     async function rejectShipSelected() {
         const items = await collectSelected();
-        if (!items.length) return showDialog({ message: 'Chưa chọn bản ghi nào' });
+        if (!items.length) return showDialog({ message: T.NoSelected || 'No records selected' });
         const lyDo = await showReasonDialog(T.ReasonTitle || 'Nhập lý do', T.ReasonMessage || 'Vui lòng nhập lý do từ chối');
         if (lyDo === null) return;
         for (const i of items) i.lyDo = lyDo;
@@ -503,7 +522,7 @@
 
     async function saveSelected() {
         const items = await collectSelected();
-        if (!items.length) return showDialog({ message: 'Chưa chọn bản ghi nào' });
+        if (!items.length) return showDialog({ message: T.NoSelected || 'No records selected' });
         try {
             showLoading(T.Processing || 'Đang xử lý...');
             const res = await fetch((window.apiBaseUrl || '') + '/Material/SaveSelectedConfirmName?role=' + encodeURIComponent(role), {
@@ -524,13 +543,15 @@
     function openDrawer(item, focusHistory) {
         if (!item) return;
 
+        els.drawer?.setAttribute('data-id', item.ID);
+
         setText('dMaDon', item.CHR_MaDon || '-');
         setText('dMaVatTu', item.CHR_MaHangNoiBo || '-');
         setText('dTenHaiQuan', item.VCHR_TenHaiQuan || '-');
         setText('dTenEN', item.CHR_NameEN || '-');
         setText('dTenDeXuat', item.VCHR_TenRecomment || '-');
         const statusEl = document.getElementById('dTrangThai');
-        /*if (statusEl) statusEl.innerHTML = statusBadge(getDisplayStatus(item));*/
+
         if (statusEl) statusEl.innerHTML = statusBadgeDrawer(item.CHR_Status, item.CHR_StatusShip, item.CHR_StatusACC);
 
         setText('dCreateBy', item.VCHR_CreateBy || '-');
@@ -547,14 +568,144 @@
         setText('dRejectReason', item.NVCHR_LyDo || '-');
 
         if (els.drawerHistoryTimeline) {
-            els.drawerHistoryTimeline.innerHTML = '<div class="text-muted small">Đang tải lịch sử...</div>';
+            els.drawerHistoryTimeline.innerHTML = `<div class="text-muted small">${T.LoadingHistory || 'Loading history...'}</div>`;
         }
+
         loadHistory(item.ID, focusHistory);
 
         els.drawer?.classList.add('show');
         els.drawer?.setAttribute('aria-hidden', 'false');
         els.drawerOverlay?.classList.add('show');
         els.drawerOverlay?.setAttribute('aria-hidden', 'false');
+    }
+
+    const editFields = [
+        ['MaHangNoiBo', 'MaterialCode', 'UserPUR'],
+        ['TenHaiQuan', 'CustomsNameLabel', 'UserShip'],
+        ['TenRecomment', 'ProposedNameLabel', 'UserPUR'],
+        ['NameEN', 'EnglishNameLabel', 'UserPUR'],
+        ['MaThietBi', 'EquipmentCode', 'UserPUR'],
+        ['MaHangNCC', 'SupplierItemCode', 'UserPUR'],
+        ['Phanloai', 'Classification', 'UserPUR'],
+        ['SoLuong', 'Quantity', 'UserPUR'],
+        ['DonVi', 'Unit', 'UserPUR'],
+        ['ChungLoai', 'Category', 'UserPUR'],
+        ['HinhDang', 'Shape', 'User'],
+        ['ChatLieu', 'Material', 'User'],
+        ['ThanhPhan', 'Composition', 'User'],
+        ['KichThuoc', 'Dimensions', 'User'],
+        ['DongMay', 'UsedForMachine', 'User'],
+        ['TinhNang', 'Feature', 'User'],
+        ['Link', 'FileLink', 'UserPUR'],
+        ['LyDo', 'Reason', 'UserShip']
+    ];
+
+    const editValueMap = {
+        MaHangNoiBo: 'CHR_MaHangNoiBo', TenHaiQuan: 'VCHR_TenHaiQuan', TenRecomment: 'VCHR_TenRecomment',
+        NameEN: 'CHR_NameEN', MaThietBi: 'CHR_MaThietBi', MaHangNCC: 'CHR_MaHangNCC',
+        Phanloai: 'CHR_Phanloai', SoLuong: 'INT_SoLuong', DonVi: 'NVCHR_DonVi', ChungLoai: 'NVCHR_ChungLoai',
+        HinhDang: 'NVCHR_HinhDang', ChatLieu: 'NVCHR_ChatLieu', ThanhPhan: 'NVCHR_ThanhPhan',
+        KichThuoc: 'NVCHR_KichThuoc', DongMay: 'NVCHR_DongMay', TinhNang: 'NVCHR_TinhNang', Link: 'NVCHR_File', LyDo: 'NVCHR_LyDo'
+    };
+
+    function renderDrawerEdit(item) {
+        const canEdit = ['UserPUR', 'User', 'UserShip'].includes(role);
+
+        if (!els.drawerEditFields) return;
+
+        els.drawerEditFields.innerHTML = editFields.map(([key, label, permittedRole]) => {
+
+            const disabled =
+                !canEdit ||
+                (
+                    role !== 'UserPUR' &&
+                    permittedRole !== role
+                );
+
+            const value = item[editValueMap[key]] || '';
+
+            return `
+            <div class="col-12 col-md-6">
+                <label class="form-label mb-1">${T[label] || label}</label>
+                <textarea
+                    class="form-control form-control-sm drawer-edit-field"
+                    data-field="${key}"
+                    rows="2"
+                    ${disabled ? 'disabled' : ''}
+                >${escapeHtml(value)}</textarea>
+            </div>`;
+        }).join('');
+    }
+
+
+    function openEditDrawer(item) {
+        if (!item || !els.editDrawer || (role !== 'UserPUR' && role !== 'User' && role !== 'UserShip')) return;
+        els.drawer?.setAttribute('data-id', item.ID);
+        renderDrawerEdit(item);
+        els.editDrawer.classList.add('show');
+        els.editDrawer.setAttribute('aria-hidden', 'false');
+        els.editDrawerOverlay?.classList.add('show');
+        els.editDrawerOverlay?.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeEditDrawer() {
+        els.editDrawer?.classList.remove('show');
+        els.editDrawer?.setAttribute('aria-hidden', 'true');
+        els.editDrawerOverlay?.classList.remove('show');
+        els.editDrawerOverlay?.setAttribute('aria-hidden', 'true');
+    }
+
+    async function saveDrawerEdit() {
+        const item = state.listData.find(x => x.ID === parseInt(els.drawer?.getAttribute('data-id')));
+        if (!item) return;
+        const payload = { id: item.ID };
+        els.drawerEditFields?.querySelectorAll('[data-field]').forEach(field => {
+            payload[field.getAttribute('data-field')] = field.value;
+        });
+        try {
+            showLoading(T.Processing || 'Đang xử lý...');
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/EditConfirmName', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            showDialog({ title: T.Success || 'Thành công', message: T.BtnSave || 'Đã lưu', type: 'success' });
+            closeEditDrawer();
+            await search(false);
+        } catch (e) {
+            showDialog({ title: T.Error || 'Lỗi', message: e.message || 'Lưu thất bại', type: 'error' });
+        } finally { hideLoading(); }
+    }
+    async function returnDrawerEdit() {
+        const item = state.listData.find(x => x.ID === parseInt(els.drawer?.getAttribute('data-id')));
+        if (!item) return;
+        const reasonInput = els.drawerEditFields?.querySelector('[data-field="LyDo"]');
+        const lyDo = (reasonInput?.value || '').trim();
+
+        if (!lyDo) {
+            showDialog({
+                title: T.Error || 'Lỗi',
+                message: T.ReturnReasonRequired || 'Please enter a return reason.',
+                type: 'error'
+            });
+            reasonInput?.focus();
+            return;
+        }
+
+        try {
+            showLoading(T.Processing || 'Đang xử lý...');
+            const res = await fetch((window.apiBaseUrl || '') + '/Material/RejectShipSelectedConfirmName', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify([{ id: item.ID, lyDo }])
+            });
+            if (!res.ok) throw new Error(T.MsgGenericError || 'Thao tác thất bại');
+            closeEditDrawer();
+            await search(true);
+        } catch (e) {
+            showDialog({ title: T.Error || 'Lỗi', message: e.message || (T.MsgGenericError || 'Thao tác thất bại'), type: 'error' });
+        } finally {
+            hideLoading();
+        }
     }
 
     function closeDrawer() {
@@ -565,18 +716,18 @@
     }
 
     const fieldNames = {
-        CHR_Status: 'Trạng thái PUR',
-        CHR_StatusACC: 'Trạng thái phòng ban',
-        CHR_StatusShip: 'Trạng thái Ship',
-        CHR_MaHangNCC: 'Mã hàng NCC',
-        CHR_MaThietBi: 'Mã thiết bị',
-        CHR_NameEN: 'Tên tiếng Anh',
-        NVCHR_HinhDang: 'Hình dạng',
-        NVCHR_ChatLieu: 'Chất liệu',
-        NVCHR_ThanhPhan: 'Thành phần',
-        NVCHR_KichThuoc: 'Kích thước',
-        NVCHR_DongMay: 'Dòng máy',
-        NVCHR_TinhNang: 'Tính năng'
+        CHR_Status: 'ConfirmStatus',
+        CHR_StatusACC: 'DepartmentStatus',
+        CHR_StatusShip: 'ShipStatus',
+        CHR_MaHangNCC: 'SupplierItemCode',
+        CHR_MaThietBi: 'EquipmentCode',
+        CHR_NameEN: 'EnglishNameLabel',
+        NVCHR_HinhDang: 'Shape',
+        NVCHR_ChatLieu: 'Material',
+        NVCHR_ThanhPhan: 'Composition',
+        NVCHR_KichThuoc: 'Dimensions',
+        NVCHR_DongMay: 'UsedForMachine',
+        NVCHR_TinhNang: 'Feature'
     };
     async function loadHistory(confirmId) {
         try {
@@ -586,13 +737,13 @@
                 encodeURIComponent(confirmId)
             );
 
-            if (!res.ok) throw new Error('Lỗi tải lịch sử');
+            if (!res.ok) throw new Error(T.HistoryLoadError || 'Failed to load history');
 
             const items = await res.json();
 
             if (!Array.isArray(items) || !items.length) {
                 els.drawerHistoryTimeline.innerHTML =
-                    '<div class="text-muted small">Chưa có lịch sử thay đổi</div>';
+                    `<div class="text-muted small">${T.NoHistoryChanges || 'No change history'}</div>`;
                 return;
             }
 
@@ -621,7 +772,7 @@
                         .filter(key => (oldObj[key] || '') !== (newObj[key] || ''))
                         .map(key => `
                         <div class="history-change">
-                            <b>${escapeHtml(fieldNames[key] || key)}</b>:
+                            <b>${escapeHtml(T[fieldNames[key]] || fieldNames[key] || key)}</b>:
                             <span class="text-danger">
                                 ${escapeHtml(oldObj[key] ?? '-')}
                             </span>
@@ -634,7 +785,7 @@
 
                     changesHtml = changes.length
                         ? changes.join('')
-                        : '<div class="text-muted">Không có thay đổi</div>';
+                        : `<div class="text-muted">${T.NoChanges || 'No changes'}</div>`;
 
                 } catch {
                     changesHtml = `
@@ -666,7 +817,7 @@
 
         } catch (e) {
             els.drawerHistoryTimeline.innerHTML =
-                `<div class="text-danger small">${escapeHtml(e.message || 'Lỗi tải lịch sử')}</div>`;
+                `<div class="text-danger small">${escapeHtml(e.message || T.HistoryLoadError || 'Failed to load history')}</div>`;
         }
     }
 
@@ -688,7 +839,7 @@
         const el = document.getElementById('globalLoading');
         if (!el) return;
         const msgEl = el.querySelector('.loader-msg');
-        if (msgEl) msgEl.textContent = message || 'Đang xử lý...';
+        if (msgEl) msgEl.textContent = message || T.LoadingMessage || 'Processing...';
         el.style.display = 'flex';
         el.setAttribute('aria-hidden', 'false');
     }
@@ -945,6 +1096,10 @@
 
         els.btnCloseDrawer?.addEventListener('click', closeDrawer);
         els.drawerOverlay?.addEventListener('click', closeDrawer);
+        els.btnCloseEditDrawer?.addEventListener('click', closeEditDrawer);
+        els.editDrawerOverlay?.addEventListener('click', closeEditDrawer);
+        els.btnSaveDrawer?.addEventListener('click', saveDrawerEdit);
+        els.btnReturnDrawer?.addEventListener('click', returnDrawerEdit);
 
         if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
             try { window.KanziSearchableDropdown.init(root); } catch { }

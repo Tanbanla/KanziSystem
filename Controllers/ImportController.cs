@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
 using PRJ_WAREHOUSE_BIVN.Models;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -402,6 +403,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             var key = headers[i];
                             var value = wsFormat.Cells[idx, i + 1].Text;
+                      
                             rowData[key] = value;
                         }
                         var dataOther = MATERIA.material_process(new PARAS()
@@ -412,6 +414,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                         if (dataOther.Count >= 1)
                         {
+  
                             rowData["tenht"] = dataOther.First().Material_Code!.ToString() + ":" + dataOther.First().Material_Name_VN!.ToString();
                             rowData["costKT"] = dataOther.First().Account_Code!.ToString() + ":" + dataOther.First().Account_Name_EN!.ToString();
                             rowData["warehouse"] = dataOther.First().Inventory!.ToString();

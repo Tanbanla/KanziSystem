@@ -477,4 +477,53 @@
   <data name="MaterialCode" xml:space="preserve">
     <value>Mã hàng nội bộ</value>
   </data>
+  <data name="FromDate"><value>Từ ngày</value></data>
+  <data name="ToDate"><value>Đến ngày</value></data>
+  <data name="QuickSearch"><value>Tìm nhanh</value></data>
+  <data name="QuickSearchPlaceholder"><value>Mã đơn / mã vật tư / tên</value></data>
+  <data name="SelectAll"><value>Chọn tất cả</value></data>
+  <data name="Selected"><value>Đã chọn</value></data>
+  <data name="DrawerTitle"><value>Chi tiết xác nhận vật tư</value></data>
+  <data name="OrderInformation"><value>Thông tin đơn</value></data>
+  <data name="BusinessInformation"><value>Thông tin nghiệp vụ</value></data>
+  <data name="OrderCodeLabel"><value>Mã đơn</value></data>
+  <data name="MaterialCodeLabel"><value>Mã vật tư</value></data>
+  <data name="CustomsNameLabel"><value>Tên hải quan</value></data>
+  <data name="EnglishNameLabel"><value>Tên tiếng Anh</value></data>
+  <data name="ProposedNameLabel"><value>Tên đề xuất</value></data>
+  <data name="ConfirmedNameLabel"><value>Tên xác nhận</value></data>
+  <data name="ConfirmationStep"><value>Bước xác nhận</value></data>
+  <data name="CreatedBy"><value>Người tạo</value></data>
+  <data name="LastUpdatedBy"><value>Người sửa cuối</value></data>
+  <data name="LastUpdatedDate"><value>Ngày sửa cuối</value></data>
+  <data name="PurConfirmedBy"><value>Người PUR xác nhận</value></data>
+  <data name="PurConfirmedDate"><value>Ngày PUR xác nhận</value></data>
+  <data name="ShipConfirmedBy"><value>Người SHIP xác nhận</value></data>
+  <data name="ShipConfirmedDate"><value>Ngày SHIP xác nhận</value></data>
+  <data name="SectionConfirmedBy"><value>Người phòng ban xác nhận</value></data>
+  <data name="SectionConfirmedDate"><value>Ngày phòng ban xác nhận</value></data>
+  <data name="SupplierItemCodeLabel"><value>Mã hàng nhà cung cấp</value></data>
+  <data name="RejectionReason"><value>Lý do từ chối</value></data>
+  <data name="ChangeHistory"><value>Lịch sử thay đổi</value></data>
+  <data name="NoHistory"><value>Chưa có dữ liệu</value></data>
+  <data name="EditMaterialInformation"><value>Chỉnh sửa thông tin vật tư</value></data>
+  <data name="Return"><value>Trả lại</value></data>
+  <data name="SaveChanges"><value>Lưu thay đổi</value></data>
+  <data name="History"><value>Lịch sử</value></data>
+  <data name="LoadingHistory"><value>Đang tải lịch sử...</value></data>
+  <data name="NoHistoryChanges"><value>Chưa có lịch sử thay đổi</value></data>
+  <data name="NoChanges"><value>Không có thay đổi</value></data>
+  <data name="HistoryLoadError"><value>Lỗi tải lịch sử</value></data>
+  <data name="PurPending"><value>Đợi PUR xác nhận</value></data>
+  <data name="ShipPending"><value>Đợi Ship xác nhận</value></data>
+  <data name="SectionPending"><value>Đợi phòng ban bổ sung thông tin</value></data>
+  <data name="Completed"><value>Hoàn thành</value></data>
+  <data name="ConfirmedBy"><value>Người xác nhận</value></data>
+  <data name="ConfirmedDate"><value>Ngày xác nhận</value></data>
+  <data name="LastUpdated"><value>Cập nhật cuối</value></data>
+  <data name="NoSelected"><value>Chưa chọn bản ghi nào</value></data>
+  <data name="ReturnReasonRequired"><value>Vui lòng nhập lý do trả lại.</value></data>
+  <data name="FileLink"><value>Link</value></data>
+  <data name="DepartmentStatus"><value>Trạng thái phòng ban</value></data>
+  <data name="ShipStatus"><value>Trạng thái Ship</value></data>
 </root>

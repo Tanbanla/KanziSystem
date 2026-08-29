@@ -160,7 +160,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var vm = new SendApproverVM();
             var sectionsTask = _tmSectionService.GetAllSectionsAsync();
-            var stepsTask = _baoGiaStepService.GetAll();
+            var stepsTask = _baoGiaStepService.GetStepsApproverAsync();
 
             await Task.WhenAll(sectionsTask, stepsTask);
             // Phòng ban

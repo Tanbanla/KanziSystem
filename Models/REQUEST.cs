@@ -476,7 +476,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             List<REQUEST_DETAIL> rq = new List<REQUEST_DETAIL>();
             for (int i = 0; i < get_if.Rows.Count; i++)
             {
-                var material_jp = _db.ReturnString($" select  [Material_Name_JP] from [MATERIAL] where Material_Code = '{get_if.Rows[i]["Material_Code"].ToString()}'");
+                var material_jp = _db.ReturnString($@" select CASE WHEN Material_Name_JP IS NULL OR LTRIM(RTRIM(Material_Name_JP)) = '' THEN Material_Name_EN 
+                                                ELSE Material_Name_JP END as Material_Name from [MATERIAL] where Material_Code = '{get_if.Rows[i]["Material_Code"].ToString()}'");
 
                 var tmp = new REQUEST_DETAIL();
 

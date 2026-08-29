@@ -171,21 +171,10 @@
                                     </a>
                                 </li>
                                 <li>
-                                    @if (User.FindFirst("Roles")?.Value == "UserPUR")
-                                    {
-                                        <a class="dropdown-item py-2" href="~/History/Index">
-                                            <i class="fas fa-history me-2"></i>
-                                            <span class="small">@Localizer["MenuQuoteHistory"]</span>
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <a class="dropdown-item py-2" href="~/History/Index">
-                                            <i class="fas fa-history me-2"></i>
-                                            <span class="small">@Localizer["MenuQuoteHistory"]</span>
-                                        </a>
-                                    }
-                                    }
+                                    <a class="dropdown-item py-2" href="~/History/Index">
+                                        <i class="fas fa-history me-2"></i>
+                                        <span class="small">@Localizer["MenuQuoteHistory"]</span>
+                                    </a>        
                                     
                                 </li>
                             </ul>
@@ -241,7 +230,7 @@
                                 <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/User/QuanlyUyquyen"><i class="fas fa-handshake"></i> @Languages.uyquyen</a></li>
                                 <li><a class="dropdown-item py-2" href="~/ManagerDelivery/UsingManager"><i class="fas fa-asterisk"></i> Using</a></li>
-                                <li><a class="dropdown-item py-2" href="~/ManagerDelivery/Giaonhanhang_Master"><i class="fas fa-book-reader"></i> Master Giao trả hàng</a></li>
+                                <li><a class="dropdown-item py-2" href="~/ManagerDelivery/Giaonhanhang_Master"><i class="fas fa-book-reader"></i> Quản lý điểm gọi hàng </a></li>
                                 @if (User.FindFirst("Roles")?.Value == "UserPUR")
                                 {
                                     <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>

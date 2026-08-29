@@ -373,8 +373,10 @@ async function _load_request_condition_ga() {
         'loaicp' : getValue("loaicp"),
     });
 
-    fetch('/ipcs/Request/get_requestcondition_ga', {
-        //fetch('/Request/get_requestcondition_ga', {
+    fetch('/ipcs/Request/get_requestcondition_ga',
+    //fetch('/Request/get_requestcondition_ga',
+    {
+    
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString()

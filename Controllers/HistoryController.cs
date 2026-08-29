@@ -24,6 +24,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IMasterApproverSendMailService _approverService;
         private readonly IMaterialService _materialService;
+        private readonly IBaoGiaDetailService _baoGiaDetailService;
         private readonly IConfiguration _configuration;
         private readonly IFileImportService _fileImportService;
         private readonly ITmUserService _tmUserService;
@@ -37,7 +38,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<HistoryController> logger, IServiceScopeFactory serviceScopeFactory,
             IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration
             , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService,
-            IStringLocalizer<HistoryController> localizer, IFileImportService fileImportService, ITmUserService tmUserService
+            IStringLocalizer<HistoryController> localizer, IFileImportService fileImportService, ITmUserService tmUserService, IBaoGiaDetailService baoGiaDetail
             )
         {
             _env = env;
@@ -56,6 +57,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _localizer = localizer;
             _fileImportService = fileImportService;
             _tmUserService = tmUserService;
+            _baoGiaDetailService = baoGiaDetail;
         }
         // tìm kiếm đơn báo giá
         [HttpPost]
@@ -1835,6 +1837,35 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 );
             }
             catch (Exception ex)
+            {
+                return BadRequest("Chi tiết: " + ex.Message);
+            }
+        }
+        // Export file excel 
+        [HttpPost]
+        public async Task<IActionResult> ExportExcelResult([FromBody] string keywork)
+        {
+            if(string.IsNullOrEmpty(keywork))
+            {
+                return BadRequest("Thông tin không hợp lệ");
+            }
+            try
+            {
+                var result = await _baoGiaDetailService.GetFilesToImportAsync(keywork);
+                if(!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+
+                var file = result.Data;
+
+                return File(
+                     file.OpenReadStream(),
+                     file.ContentType ?? "application/octet-stream",
+                     file.FileName
+                 );
+            }
+            catch(Exception ex)
             {
                 return BadRequest("Chi tiết: " + ex.Message);
             }

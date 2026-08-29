@@ -9,7 +9,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? Vendor { get; set; }
         public string? Maker { get; set; }
         public string? MOQ { get; set; }
-        public double? Tansuatgiaohang { get; set; }
+        public string? Tansuatgiaohang { get; set; }
         public double? Leadtimegiaohang { get; set; }
 
         public double? TiLeTonKhoAnToan { get; set; }

@@ -1,10 +1,13 @@
 using AutoMapper;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using PRJ_WAREHOUSE_BIVN.View_Models.Master;
+using System;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
@@ -248,6 +251,122 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Success = false;
             }
             return result;
+        }
+        // Lấy file thông tin đã nhập lên hệ thống
+        public async Task<GenericResponse<IFormFile>> GetFilesToImportAsync(string keywork)
+        {
+            var result = new GenericResponse<IFormFile>();
+            try
+            {
+                var data = await _repo.GetFilesToImportAsync(keywork);
+                if (data == null || data.Count == 0)
+               {
+                    throw new Exception("Không tìm thấy dữ liệu");
+               }
+
+                var templatePath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot",
+                    "template",
+                    "TmSendMail_ConfirmName.xlsx");
+                var memoryStream = new MemoryStream();
+
+                using (var workbook = new XLWorkbook(templatePath))
+                {
+                    var worksheet = workbook.Worksheet(1);
+                    worksheet.Column(30).Hide();
+
+                    int rowIndex = 13;
+                    foreach (var item in data)
+                    {
+                        var otherRequestList = new List<string>();
+                        if (!string.IsNullOrEmpty((string?)item.NVCHR_Rohs))
+                            otherRequestList.Add($"ROHS: {item.NVCHR_Rohs}");
+                        if (!string.IsNullOrEmpty((string?)item.NVCHR_COCQ))
+                            otherRequestList.Add($"COCQ: {item.NVCHR_COCQ}");
+                        if (!string.IsNullOrEmpty((string?)item.NVCHR_MSDS))
+                            otherRequestList.Add($"MSDS: {item.NVCHR_MSDS}");
+                        if (!string.IsNullOrEmpty((string?)item.NVCHR_AnToan))
+                            otherRequestList.Add($"An toàn: {item.NVCHR_AnToan}");
+
+                        string otherRequest = string.Join(" & ", otherRequestList);
+
+                        worksheet.Cell(1, 3).Value = (string?)item.NVCHR_NameNCC ?? string.Empty;
+                        worksheet.Cell(2, 3).Value = (string?)item.Diachi ?? string.Empty;
+
+                        worksheet.Cell(rowIndex, 1).Value = (string?)item.CHR_MaDon ?? string.Empty;
+                        worksheet.Cell(rowIndex, 2).Value = (string?)item.CHR_MaThietBi ?? string.Empty;
+                        worksheet.Cell(rowIndex, 3).Value = (string?)item.CHR_MaHangNoiBo ?? string.Empty;
+                        worksheet.Cell(rowIndex, 4).Value = (string?)item.BivnMaHang ?? string.Empty;
+                        worksheet.Cell(rowIndex, 5).Value = (string?)item.VCHR_TenHaiQuan ?? string.Empty;
+                        worksheet.Cell(rowIndex, 6).Value = item.SoluongQ ?? string.Empty;
+                        worksheet.Cell(rowIndex, 7).Value = (string?)item.DonViQ ?? string.Empty;
+                        worksheet.Cell(rowIndex, 8).Value = otherRequest;
+                        worksheet.Cell(rowIndex, 9).Value = string.Empty;
+                        worksheet.Cell(rowIndex, 10).Value = (string?)item.CHR_CodeNCC ?? string.Empty;
+                        worksheet.Cell(rowIndex, 11).Value = (string?)item.VendorMaHang ?? string.Empty;
+                        worksheet.Cell(rowIndex, 12).Value = (string?)item.NVCHR_TenHangHQ ?? string.Empty;
+                        worksheet.Cell(rowIndex, 13).Value = (string?)item.CHR_NameEN ?? string.Empty;
+                        worksheet.Cell(rowIndex, 14).Value = item.SoluongNcc ?? string.Empty;
+                        worksheet.Cell(rowIndex, 15).Value = (string?)item.DonViNcc ?? string.Empty;
+                        worksheet.Cell(rowIndex, 16).Value = item.FL_USD ?? item.CHR_Status ?? string.Empty;
+                        worksheet.Cell(rowIndex, 17).Value = item.FL_VND ?? item.CHR_Status ?? string.Empty;
+                        worksheet.Cell(rowIndex, 18).Value = (string?)item.NVCHR_MOQ ?? string.Empty;
+                        worksheet.Cell(rowIndex, 19).Value = (string?)item.NVCHR_Packing ?? string.Empty;
+                        worksheet.Cell(rowIndex, 20).Value = (string?)item.DTM_LeadTime ?? string.Empty;
+                        worksheet.Cell(rowIndex, 21).Value = item.DTM_ShipTime?.ToString("yyyy-MM-dd") ?? string.Empty; ///
+                        worksheet.Cell(rowIndex, 22).Value = (string?)item.VCHR_CamKet ?? string.Empty;
+                        worksheet.Cell(rowIndex, 23).Value = (string?)item.NVCHR_DeliveryTerm ?? string.Empty;
+                        worksheet.Cell(rowIndex, 24).Value = (string?)item.NVCHR_PaymentTerm ?? string.Empty;
+                        worksheet.Cell(rowIndex, 25).Value = item.DTM_EffectiveDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+                        worksheet.Cell(rowIndex, 26).Value = item.DTM_EffectiveDate?.ToString("yyyy-MM-dd") ?? string.Empty;
+                        worksheet.Cell(rowIndex, 27).Value = (string?)item.NVCHR_FileThietKe ?? string.Empty;
+                        worksheet.Cell(rowIndex, 28).Value = item.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? string.Empty;
+                        worksheet.Cell(rowIndex, 29).Value = item.DTM_Deadline?.ToString("yyyy-MM-dd") ?? string.Empty;
+                        worksheet.Cell(rowIndex, 30).Value = (string?)item.NVCHR_File ?? string.Empty;
+                        worksheet.Cell(rowIndex, 31).Value = (string?)item.NVCHR_UserRequest ?? string.Empty;
+                        worksheet.Cell(rowIndex, 32).Value = item.ID ?? string.Empty;
+
+                        // Tô màu dòng
+                        var rowRange = worksheet.Range(rowIndex, 1, rowIndex, 32);
+
+                        if (item.BIT_Select)
+                        {
+                            rowRange.Style.Fill.BackgroundColor = XLColor.LightGreen;
+                        }
+
+                        if (string.Equals((string?)item.CHR_Status, "Refuse",StringComparison.OrdinalIgnoreCase))
+                        {
+                            rowRange.Style.Fill.BackgroundColor = XLColor.LightPink;
+                            rowRange.Style.Font.FontColor = XLColor.DarkRed;
+                        }
+
+                        rowIndex++;
+                    }
+
+                    workbook.SaveAs(memoryStream);
+                }
+
+                memoryStream.Position = 0;
+
+                var fileName = $"ResultRQ_{DateTime.Now:yyyyMMddHHmmssfff}.xlsx";
+                var localFormFile = new FormFile(memoryStream, 0, memoryStream.Length, "file", fileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                };
+
+                result.Data = localFormFile;
+                result.Success = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+
         }
     }
 }

@@ -19,14 +19,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _sendMailService = sendMailService;
             _baoGiaDetailService = baoGiaDetailService;
         }
+
         [HttpPost("send")]
         [AllowAnonymous]
-        public IActionResult Send([FromBody] EmailRequest req)
+        public async Task<IActionResult> Send([FromBody] EmailRequest req)
         {
             if (req is null) return BadRequest(new { success = false, message = "request body required" });
             if (string.IsNullOrWhiteSpace(req.MailFrom)) return BadRequest(new { success = false, message = "mailFrom required" });
 
-            bool ok = EmailSender.sendEmailNotify(
+            bool ok = await EmailSender.sendEmailNotifyAsync(
                 req.Title ?? string.Empty,
                 req.MailFrom,
                 req.MailTo ?? string.Empty,
@@ -38,6 +39,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (ok) return Ok(new { success = true });
             return StatusCode(500, new { success = false, message = "failed to send email" });
         }
+
         [HttpGet]
         [HttpGet("SendMailSupplier")]
         [AllowAnonymous]
@@ -74,6 +76,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(new { success = true, message = "Email API is running" });
         }
+        [HttpGet]
+        [HttpGet("AutoUpdateRequestStatus")]
+        [AllowAnonymous]
+        public async Task<IActionResult> AutoUpdateRequestStatus()
+        {
+            var res = await _sendMailService.AutoUpdateRequestStatusAsync();
+            if (!res.Success)
+            {
+                return StatusCode(500, new { success = false, message = res.Message });
+            }
+            return Ok(new { success = true, message = "Email API is running" });
+        }
+
         public class EmailRequest
         {
             public string? Title { get; set; }

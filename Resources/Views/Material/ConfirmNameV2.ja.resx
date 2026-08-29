@@ -477,4 +477,53 @@
   <data name="MaterialCode" xml:space="preserve">
     <value>社内品目コード</value>
   </data>
+  <data name="FromDate"><value>開始日</value></data>
+  <data name="ToDate"><value>終了日</value></data>
+  <data name="QuickSearch"><value>クイック検索</value></data>
+  <data name="QuickSearchPlaceholder"><value>依頼番号 / 品目コード / 名前</value></data>
+  <data name="SelectAll"><value>すべて選択</value></data>
+  <data name="Selected"><value>選択済み</value></data>
+  <data name="DrawerTitle"><value>品目確認の詳細</value></data>
+  <data name="OrderInformation"><value>依頼情報</value></data>
+  <data name="BusinessInformation"><value>業務情報</value></data>
+  <data name="OrderCodeLabel"><value>依頼番号</value></data>
+  <data name="MaterialCodeLabel"><value>品目コード</value></data>
+  <data name="CustomsNameLabel"><value>税関名</value></data>
+  <data name="EnglishNameLabel"><value>英語名</value></data>
+  <data name="ProposedNameLabel"><value>提案名</value></data>
+  <data name="ConfirmedNameLabel"><value>確認名</value></data>
+  <data name="ConfirmationStep"><value>確認段階</value></data>
+  <data name="CreatedBy"><value>作成者</value></data>
+  <data name="LastUpdatedBy"><value>最終更新者</value></data>
+  <data name="LastUpdatedDate"><value>最終更新日</value></data>
+  <data name="PurConfirmedBy"><value>PUR確認者</value></data>
+  <data name="PurConfirmedDate"><value>PUR確認日</value></data>
+  <data name="ShipConfirmedBy"><value>SHIP確認者</value></data>
+  <data name="ShipConfirmedDate"><value>SHIP確認日</value></data>
+  <data name="SectionConfirmedBy"><value>部門確認者</value></data>
+  <data name="SectionConfirmedDate"><value>部門確認日</value></data>
+  <data name="SupplierItemCodeLabel"><value>仕入先品目コード</value></data>
+  <data name="RejectionReason"><value>却下理由</value></data>
+  <data name="ChangeHistory"><value>変更履歴</value></data>
+  <data name="NoHistory"><value>データはありません</value></data>
+  <data name="EditMaterialInformation"><value>品目情報を編集</value></data>
+  <data name="Return"><value>差し戻し</value></data>
+  <data name="SaveChanges"><value>変更を保存</value></data>
+  <data name="History"><value>履歴</value></data>
+  <data name="LoadingHistory"><value>履歴を読み込んでいます...</value></data>
+  <data name="NoHistoryChanges"><value>変更履歴はありません</value></data>
+  <data name="NoChanges"><value>変更はありません</value></data>
+  <data name="HistoryLoadError"><value>履歴の読み込みに失敗しました</value></data>
+  <data name="PurPending"><value>PURの確認待ち</value></data>
+  <data name="ShipPending"><value>SHIPの確認待ち</value></data>
+  <data name="SectionPending"><value>部門情報の入力待ち</value></data>
+  <data name="Completed"><value>完了</value></data>
+  <data name="ConfirmedBy"><value>確認者</value></data>
+  <data name="ConfirmedDate"><value>確認日</value></data>
+  <data name="LastUpdated"><value>最終更新</value></data>
+  <data name="NoSelected"><value>レコードが選択されていません</value></data>
+  <data name="ReturnReasonRequired"><value>差し戻し理由を入力してください。</value></data>
+  <data name="FileLink"><value>リンク</value></data>
+  <data name="DepartmentStatus"><value>部門ステータス</value></data>
+  <data name="ShipStatus"><value>SHIPステータス</value></data>
 </root>

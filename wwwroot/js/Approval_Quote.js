@@ -861,7 +861,7 @@
                     group.forEach(it => {
                         it.nvchR_LyDo = reason;
                         it.iD_Status = ReturnCode(it.iD_StepBaoGia);
-                        it.iD_StepBaoGia = 1;
+                        it.iD_StepBaoGia = updateStepBaoGia(it.iD_StepBaoGia);
                         payload.push(it);
                     });
                 });
@@ -1114,7 +1114,7 @@
                 group.forEach(it => {
                     it.nvchR_LyDo = reason;
                     it.iD_Status = ReturnCode(it.iD_StepBaoGia);
-                    it.iD_StepBaoGia = 1;
+                    it.iD_StepBaoGia = updateStepBaoGia(it.iD_StepBaoGia);
                     payload.push(it);
                 });
                 fetch((window.apiBaseUrl || '') + '/ApprovalQuote/UpdateQuotationNG', {
@@ -1135,6 +1135,17 @@
                 });
             });
         });
+    }
+    // cập nhật lại step báo giá
+    function updateStepBaoGia(step) {
+        const s = parseInt(step);
+        switch (s) {
+            case 2: return -2;// Trả về QLSC phong ban
+            case 3: return -3;// Trả về QLTC phong ban
+            case 4: return -1;// Trả về PIC phong mua hang
+            case 5: return -4;// Trả về QLSC phong ban mua hang
+        }
+        return s;
     }
     function hideEditModal(modalName) {
         const modalEl = document.getElementById(modalName);

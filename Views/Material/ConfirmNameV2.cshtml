@@ -18,7 +18,7 @@
     <div id="globalLoading" aria-hidden="true">
         <div class="loader-box">
             <div class="spinner" aria-hidden="true"></div>
-            <div class="loader-msg">Đang xử lý...</div>
+        <div class="loader-msg">@Localizer["LoadingMessage"]</div>
         </div>
     </div>
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -128,18 +128,18 @@
                 </div>
 
                 <div class="col-12 col-sm-6 col-md-3">
-                    <label class="form-label mb-1">Từ ngày</label>
+                    <label class="form-label mb-1">@Localizer["FromDate"]</label>
                     <input type="date" class="form-control" id="fromDateFilter"  />
                 </div>
 
                 <div class="col-12 col-sm-6 col-md-3">
-                    <label class="form-label mb-1">Đến ngày</label>
+                    <label class="form-label mb-1">@Localizer["ToDate"]</label>
                     <input type="date" class="form-control" id="toDateFilter" />
                 </div>
 
                 <div class="col-12 col-sm-6 col-md-3">
-                    <label class="form-label mb-1">Tìm nhanh</label>
-                    <input type="text" class="form-control" id="quickSearch" placeholder="Mã đơn / mã vật tư / tên" />
+                    <label class="form-label mb-1">@Localizer["QuickSearch"]</label>
+                    <input type="text" class="form-control" id="quickSearch" placeholder="@Localizer["QuickSearchPlaceholder"]" />
                 </div>
 
                 <div class="col-12 col-sm-6 col-md-3">
@@ -178,8 +178,8 @@
         <div class="card-header bg-white p-2">
             <div class="action-bar d-flex justify-content-between align-items-center flex-wrap gap-2" id="pendingActionBar">
                 <div class="d-flex align-items-center gap-2">
-                    <input type="checkbox" id="chkSelectAll" title="Chọn tất cả" />
-                    <span class="small text-muted">Đã chọn: <b id="selectedCount">0</b></span>
+                    <input type="checkbox" id="chkSelectAll" title="@Localizer["SelectAll"]" />
+                    <span class="small text-muted">@Localizer["Selected"]: <b id="selectedCount">0</b></span>
                 </div>
                 <div style="margin-right: 6px;"></div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -207,7 +207,10 @@
                                 <th>@Localizer["RequestQuoteNumber"]</th>
                                 <th>@Localizer["ConfirmCode"]</th>
                                 <th>@Localizer["VietnameseItemNameDraft"]</th>
-                                <th>@Localizer["ConfirmName"]</th>
+                                @if(role != "User")
+                                {
+                                   <th>@Localizer["ConfirmName"]</th>
+                                }
                                 <th>@Localizer["EnglishItemName"]</th>
                                 <th>@Localizer["CreatedByPrefix"]</th>
                                 <th>@Localizer["CreatedDate"]</th>
@@ -266,44 +269,63 @@
     <div class="drawer-overlay" id="confirmDrawerOverlay" aria-hidden="true"></div>
     <aside class="detail-drawer" id="confirmDetailDrawer" aria-hidden="true">
         <div class="drawer-header">
-            <h5 class="mb-0">Chi tiết xác nhận vật tư</h5>
+            <h5 class="mb-0">@Localizer["DrawerTitle"]</h5>
             <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCloseDrawer">✕</button>
         </div>
         <div class="drawer-body">
             <div class="drawer-section mb-3">
-                <h6 class="drawer-section-title">Thông tin đơn</h6>
+                <h6 class="drawer-section-title">@Localizer["OrderInformation"]</h6>
                 <div class="detail-grid">
-                    <div><span>Mã đơn</span><b id="dMaDon">-</b></div>
-                    <div><span>Mã vật tư</span><b id="dMaVatTu">-</b></div>
-                    <div><span>Tên hải quan</span><b id="dTenHaiQuan">-</b></div>
-                    <div><span>Tên tiếng Anh</span><b id="dTenEN">-</b></div>
-                    <div><span>Tên đề xuất</span><b id="dTenDeXuat">-</b></div>
-                    <div><span>Bước xác nhận</span><b id="dTrangThai">-</b></div>
+                    <div><span>@Localizer["OrderCodeLabel"]</span><b id="dMaDon">-</b></div>
+                    <div><span>@Localizer["MaterialCodeLabel"]</span><b id="dMaVatTu">-</b></div>
+                    <div><span>@Localizer["CustomsNameLabel"]</span><b id="dTenHaiQuan">-</b></div>
+                    <div><span>@Localizer["EnglishNameLabel"]</span><b id="dTenEN">-</b></div>
+                    <div><span>@Localizer["ProposedNameLabel"]</span><b id="dTenDeXuat">-</b></div>
+                    <div><span>@Localizer["ConfirmationStep"]</span><b id="dTrangThai">-</b></div>
                 </div>
             </div>
 
             <div class="drawer-section mb-3">
-                <h6 class="drawer-section-title">Thông tin nghiệp vụ</h6>
+                <h6 class="drawer-section-title">@Localizer["BusinessInformation"]</h6>
                 <div class="detail-grid">
-                    <div><span>Người tạo</span><b id="dCreateBy">-</b></div>
-                    <div><span>Ngày tạo</span><b id="dCreateDate">-</b></div>
-                    <div><span>Người sửa cuối</span><b id="dUpdateBy">-</b></div>
-                    <div><span>Ngày sửa cuối</span><b id="dUpdateDate">-</b></div>
-                    <div><span>Người PUR xác nhận</span><b id="dUserPur">-</b></div>
-                    <div><span>Ngày PUR xác nhận</span><b id="dUserPurDate">-</b></div>
-                    <div><span>Người SHIP xác nhận</span><b id="dUserShip">-</b></div>
-                    <div><span>Ngày SHIP xác nhận</span><b id="dUserShipDate">-</b></div>
-                     <div><span>Người phòng ban xác nhận</span><b id="dUserSection">-</b></div>
-                    <div><span>Ngày phòng ban xác nhận</span><b id="dUserSectionDate">-</b></div>
-                    <div><span>Mã hàng nhà cung cấp</span><b id="dNote">-</b></div>
-                    <div><span>Lý do từ chối</span><b id="dRejectReason">-</b></div>
+                    <div><span>@Localizer["CreatedBy"]</span><b id="dCreateBy">-</b></div>
+                    <div><span>@Localizer["CreatedDate"]</span><b id="dCreateDate">-</b></div>
+                    <div><span>@Localizer["LastUpdatedBy"]</span><b id="dUpdateBy">-</b></div>
+                    <div><span>@Localizer["LastUpdatedDate"]</span><b id="dUpdateDate">-</b></div>
+                    <div><span>@Localizer["PurConfirmedBy"]</span><b id="dUserPur">-</b></div>
+                    <div><span>@Localizer["PurConfirmedDate"]</span><b id="dUserPurDate">-</b></div>
+                    <div><span>@Localizer["ShipConfirmedBy"]</span><b id="dUserShip">-</b></div>
+                    <div><span>@Localizer["ShipConfirmedDate"]</span><b id="dUserShipDate">-</b></div>
+                    <div><span>@Localizer["SectionConfirmedBy"]</span><b id="dUserSection">-</b></div>
+                    <div><span>@Localizer["SectionConfirmedDate"]</span><b id="dUserSectionDate">-</b></div>
+                    <div><span>@Localizer["SupplierItemCodeLabel"]</span><b id="dNote">-</b></div>
+                    <div><span>@Localizer["RejectionReason"]</span><b id="dRejectReason">-</b></div>
                 </div>
             </div>
 
             <div class="drawer-section">
-                <h6 class="drawer-section-title">Lịch sử thay đổi</h6>
+                <h6 class="drawer-section-title">@Localizer["ChangeHistory"]</h6>
                 <div class="history-timeline" id="drawerHistoryTimeline">
-                    <div class="text-muted small">Chưa có dữ liệu</div>
+                    <div class="text-muted small">@Localizer["NoHistory"]</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <div class="drawer-overlay" id="confirmEditDrawerOverlay" aria-hidden="true"></div>
+    <aside class="detail-drawer" id="confirmEditDrawer" aria-hidden="true">
+        <div class="drawer-header">
+            <h5 class="mb-0">@Localizer["EditMaterialInformation"]</h5>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCloseEditDrawer">✕</button>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section">
+                <div class="row g-2" id="drawerEditFields"></div>
+                <div class="d-flex justify-content-end mt-3">
+                    @if (role == "UserShip")
+                    {
+                        <button type="button" class="btn btn-danger" id="btnReturnDrawer">@Localizer["Return"]</button>
+                    }
+                    <button type="button" class="btn btn-primary" id="btnSaveDrawer">@Localizer["SaveChanges"]</button>
                 </div>
             </div>
         </div>
@@ -372,6 +394,10 @@
             if (panel && panel.parentElement !== document.body) {
                 document.body.appendChild(panel);
             }
+            var editPanel = document.getElementById('confirmEditDrawer');
+            if (editPanel && editPanel.parentElement !== document.body) {
+                document.body.appendChild(editPanel);
+            }
         })();
         window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
         window.i18nConfirmName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
@@ -422,6 +448,56 @@
             Feature = Localizer["Feature"].Value,
             ConfirmName = Localizer["ConfirmName"].Value,
             ConfirmCode = Localizer["ConfirmCode"].Value,
+            FromDate = Localizer["FromDate"].Value,
+            ToDate = Localizer["ToDate"].Value,
+            QuickSearch = Localizer["QuickSearch"].Value,
+            QuickSearchPlaceholder = Localizer["QuickSearchPlaceholder"].Value,
+            SelectAll = Localizer["SelectAll"].Value,
+            Selected = Localizer["Selected"].Value,
+            DrawerTitle = Localizer["DrawerTitle"].Value,
+            OrderInformation = Localizer["OrderInformation"].Value,
+            BusinessInformation = Localizer["BusinessInformation"].Value,
+            OrderCodeLabel = Localizer["OrderCodeLabel"].Value,
+            MaterialCodeLabel = Localizer["MaterialCodeLabel"].Value,
+            CustomsNameLabel = Localizer["CustomsNameLabel"].Value,
+            EnglishNameLabel = Localizer["EnglishNameLabel"].Value,
+            ProposedNameLabel = Localizer["ProposedNameLabel"].Value,
+            ConfirmedNameLabel = Localizer["ConfirmedNameLabel"].Value,
+            ConfirmationStep = Localizer["ConfirmationStep"].Value,
+            CreatedBy = Localizer["CreatedBy"].Value,
+            LastUpdatedBy = Localizer["LastUpdatedBy"].Value,
+            LastUpdatedDate = Localizer["LastUpdatedDate"].Value,
+            PurConfirmedBy = Localizer["PurConfirmedBy"].Value,
+            PurConfirmedDate = Localizer["PurConfirmedDate"].Value,
+            ShipConfirmedBy = Localizer["ShipConfirmedBy"].Value,
+            ShipConfirmedDate = Localizer["ShipConfirmedDate"].Value,
+            SectionConfirmedBy = Localizer["SectionConfirmedBy"].Value,
+            SectionConfirmedDate = Localizer["SectionConfirmedDate"].Value,
+            SupplierItemCodeLabel = Localizer["SupplierItemCodeLabel"].Value,
+            RejectionReason = Localizer["RejectionReason"].Value,
+            ChangeHistory = Localizer["ChangeHistory"].Value,
+            NoHistory = Localizer["NoHistory"].Value,
+            EditMaterialInformation = Localizer["EditMaterialInformation"].Value,
+            Return = Localizer["Return"].Value,
+            SaveChanges = Localizer["SaveChanges"].Value,
+            Detail = Localizer["Detail"].Value,
+            History = Localizer["History"].Value,
+            LoadingHistory = Localizer["LoadingHistory"].Value,
+            NoHistoryChanges = Localizer["NoHistoryChanges"].Value,
+            NoChanges = Localizer["NoChanges"].Value,
+            HistoryLoadError = Localizer["HistoryLoadError"].Value,
+            PurPending = Localizer["PurPending"].Value,
+            ShipPending = Localizer["ShipPending"].Value,
+            SectionPending = Localizer["SectionPending"].Value,
+            Completed = Localizer["Completed"].Value,
+            ConfirmedBy = Localizer["ConfirmedBy"].Value,
+            ConfirmedDate = Localizer["ConfirmedDate"].Value,
+            LastUpdated = Localizer["LastUpdated"].Value,
+            NoSelected = Localizer["NoSelected"].Value,
+            ReturnReasonRequired = Localizer["ReturnReasonRequired"].Value,
+            FileLink = Localizer["FileLink"].Value,
+            DepartmentStatus = Localizer["DepartmentStatus"].Value,
+            ShipStatus = Localizer["ShipStatus"].Value,
             Status = Localizer["Status"].Value,
             CreatedDate = Localizer["CreatedDate"].Value,
             Handler = Localizer["Handler"].Value,

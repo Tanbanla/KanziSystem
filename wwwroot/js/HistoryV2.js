@@ -869,7 +869,7 @@
         }
 
     }
-    function supplierCell(value, bitValue, status, step, isAllRefuse, selectedSupplier, quoteLink) {
+    function supplierCell(value, bitValue, status, step, isAllRefuse, selectedSupplier, quoteLink, keydownload) {
         const raw = String(bitValue ?? '').trim().toLowerCase();
         const isRefuse = String(status ?? '').trim().toLowerCase() === 'refuse';
         const isSelected = bitValue === 1 || bitValue === true || raw === '1' || raw === 'true';
@@ -923,6 +923,7 @@
             ? `<button type="button"
                    class="btn btn-link p-0 btn-download"
                    data-file="${escapeHtml(quoteLink)}"
+                   data-key="${escapeHtml(keydownload)}"
                    title="Download quote"
                    style="color:#0d6efd;text-decoration:underline;white-space:normal;word-break:break-all;overflow-wrap:anywhere;display:block;width:100%;text-align:inherit;line-height:1.2;">
                 ${escapeHtml(value)}
@@ -986,6 +987,8 @@
             const link3 = getValue(row, ['Link_3', 'link_3']);
             const link4 = getValue(row, ['Link_4', 'link_4']);
             const link5 = getValue(row, ['Link_5', 'link_5']);
+
+            const keyDowndload = getValue(row, ['CHR_MaDon'])+getValue(row, ['CHR_MaHangNoiBo']);
             const returnAction = role === 'UserPUR'
                 ? `<button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-undo"></i></button>`
                 : '';
@@ -998,11 +1001,11 @@
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_NameEN']))}</td>
                     <td style="max-width: 120px;" >${escapeHtml(getValue(row, ['NVCHR_ChungLoai']))}</td>
-                    ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), getValue(row, ['Status_1', 'status_1']), step, isAllRefuse, selectedSupplier, link1)}
-                    ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), getValue(row, ['Status_2', 'status_2']), step, isAllRefuse, selectedSupplier, link2)}
-                    ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), getValue(row, ['Status_3', 'status_3']), step, isAllRefuse, selectedSupplier, link3)}
-                    ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), getValue(row, ['Status_4', 'status_4']), step, isAllRefuse, selectedSupplier, link4)}
-                    ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), getValue(row, ['Status_5', 'status_5']), step, isAllRefuse, selectedSupplier, link5)}
+                    ${supplierCell(getValue(row, ['NCC_1']), getValue(row, ['BitNCC_1', 'bitNCC_1']), getValue(row, ['Status_1', 'status_1']), step, isAllRefuse, selectedSupplier, link1, keyDowndload)}
+                    ${supplierCell(getValue(row, ['NCC_2']), getValue(row, ['BitNCC_2', 'bitNCC_2']), getValue(row, ['Status_2', 'status_2']), step, isAllRefuse, selectedSupplier, link2, keyDowndload)}
+                    ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), getValue(row, ['Status_3', 'status_3']), step, isAllRefuse, selectedSupplier, link3, keyDowndload)}
+                    ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), getValue(row, ['Status_4', 'status_4']), step, isAllRefuse, selectedSupplier, link4, keyDowndload)}
+                    ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), getValue(row, ['Status_5', 'status_5']), step, isAllRefuse, selectedSupplier, link5, keyDowndload)}
                     <td>${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
                     ${costCell(getValue(row, ['FL_USD']), step)}
                     <td style="${overdue ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
@@ -1035,39 +1038,64 @@
         if (!btn) return;
 
         const file = btn.dataset.file;
-        if (!file) {
+        const keywork = btn.dataset.key;
+        if (!file && !keywork) {
             alert("Không có file");
             return;
         }
 
         try {
-            const response = await fetch(apiUrl('/History/DownloadQuoteFile'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(file)
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(errText || "Download thất bại");
+            const downloads = [];
+            if (file) {
+                downloads.push({
+                    url: '/History/DownloadQuoteFile',
+                    body: file,
+                    fallbackName: file.split('/').pop() || 'download'
+                });
             }
 
-            const blob = await response.blob();
+            //if (keywork) {
+            //    downloads.push({
+            //        url: '/History/ExportExcelResult',
+            //        body: keywork,
+            //        fallbackName: `${keywork}.xlsx`
+            //    });
+            //}
 
-            // tạo link download
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+            for (const item of downloads) {
+                const response = await fetch(apiUrl(item.url), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(item.body)
+                });
 
-            // lấy tên file từ path
-            a.download = file.split('/').pop() || 'download';
-            document.body.appendChild(a);
-            a.click();
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(errText || "Download thất bại");
+                }
 
-            a.remove();
-            window.URL.revokeObjectURL(url);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                const cd = response.headers.get('content-disposition') || response.headers.get('Content-Disposition');
+                let fileName = item.fallbackName;
+                if (cd) {
+                    const m = /filename\*?=(?:UTF-8''|\")?([^;\"]+)/i.exec(cd);
+                    if (m && m[1]) {
+                        fileName = decodeURIComponent(m[1].replace(/\"/g, '').trim());
+                    }
+                }
+
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            }
 
         } catch (err) {
             console.error(err);

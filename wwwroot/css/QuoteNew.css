@@ -1,0 +1,175 @@
+.quotev2-page {
+    background: #f4f8ff;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.page-titlebar {
+    background: linear-gradient(135deg, #0d6efd, #2b7fff);
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2);
+}
+
+.page-title {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.page-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.btn-business {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+}
+
+.btn-business:hover,
+.btn-business:focus {
+    background-color: #0a58ca;
+    border-color: #0a53be;
+}
+
+.quote-card {
+    border: 1px solid #dbe7ff;
+    border-radius: 12px;
+}
+
+.quote-card-header {
+    border-bottom: 1px solid #e4edff;
+    border-radius: 12px 12px 0 0;
+}
+
+.quote-card-header h6 {
+    color: #0b3f9c;
+    font-weight: 600;
+}
+
+.quote-inner-card {
+    border: 1px solid #e3ebff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.06);
+}
+
+.quote-guide-card {
+    background: #ffffff;
+}
+
+.quote-guide-title {
+    color: #2f6fdb;
+    font-weight: 700;
+}
+
+.quote-guide-desc {
+    color: #6c7a92;
+    font-size: 0.9rem;
+}
+
+.quote-guide-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 0.92rem;
+}
+
+.quote-guide-list i {
+    color: #22c55e;
+    font-size: 0.85rem;
+}
+
+.quote-guide-image {
+    max-height: 120px;
+    object-fit: contain;
+}
+
+#InforCreateForm .form-label {
+    color: #1f3b70;
+    font-weight: 500;
+}
+
+#InforCreateForm .form-select,
+#InforCreateForm .form-control {
+    border: 1px solid #c6dafc;
+    border-radius: 8px;
+}
+
+#InforCreateForm .form-select:focus,
+#InforCreateForm .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.2);
+}
+
+.quote-table {
+    border: 1px solid #e3ebff;
+    border-radius: 10px;
+}
+
+#InforTable {
+    margin-bottom: 0;
+}
+
+#InforTable thead.table-header-custom th {
+    background-color: #eaf2ff;
+    color: #1f3b70;
+    border-color: #d5e4ff;
+    font-weight: 600;
+}
+
+#InforTable tbody tr:hover {
+    background-color: #f1f6ff;
+}
+
+.quote-card-footer {
+    background: #f8fbff;
+    border-top: 1px solid #e4edff;
+}
+
+#paginationInfo .form-select {
+    border-color: #c6dafc;
+}
+
+#paginationControls .page-link {
+    color: #0d6efd;
+    border-color: #cfe2ff;
+}
+
+#paginationControls .page-link:hover {
+    background-color: #eaf2ff;
+}
+
+.footer-actions .btn {
+    min-width: 96px;
+}
+
+@media (max-width: 991.98px) {
+    .page-titlebar {
+        padding: 12px;
+    }
+
+    .form-actions {
+        margin-top: 4px;
+    }
+}
+.custom-select {
+    height: 42px;
+    border: 1px solid #d6d6e0;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #495057;
+    box-shadow: none;
+}
+
+    .custom-select:focus {
+        border-color: #7c4dff;
+        box-shadow: 0 0 0 0.15rem rgba(124, 77, 255, 0.15);
+    }
+
+.form-label {
+    margin-bottom: 6px;
+    color: #343a40;
+    font-size: 14px;
+}

@@ -1,92 +1,99 @@
 @model IEnumerable<PRJ_WAREHOUSE_BIVN.Models.GiaoHangMasterViewModel>
 @{
-    ViewData["Title"] = "Quản lý Master Giao Hàng & Tồn Kho An Toàn";
+    ViewData["Title"] = "Quản lý đặt hàng và điểm gọi hàng";
 }
 
 <style>
-
     .table-master {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         font-size: 13px;
-        border-collapse: separate; /* Dùng separate để viền sticky không bị lỗi */
+        border-collapse: separate;
         border-spacing: 0;
         width: 100%;
         background-color: #fff;
     }
 
-    .table-master th, .table-master td {
-        border-right: 1px solid #d4d4d4;
-        border-bottom: 1px solid #d4d4d4;
-        padding: 6px 10px;
-        vertical-align: middle;
-    }
+        .table-master th, .table-master td {
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 12px; /* Tăng padding một chút cho thoáng */
+            vertical-align: middle;
+        }
 
-    .table-master td:first-child, .table-master th:first-child {
-        border-left: 1px solid #d4d4d4;
-    }
+            .table-master td:first-child, .table-master th:first-child {
+                border-left: 1px solid #e0e0e0;
+            }
 
-    /* --- HIỆU ỨNG HEADER --- */
-    .table-master thead th {
-        color: #333;
-        font-weight: 600;
-        text-align: center;
-        position: sticky;
-        z-index: 10;
-        border-top: 1px solid #d4d4d4;
-        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    }
+        /* --- HIỆU ỨNG HEADER LÀM ĐẸP --- */
+        .table-master thead th {
+            color: #333;
+            font-weight: 700;
+            text-align: center;
+            position: sticky;
+            z-index: 10;
+            box-shadow: 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
 
-    /* Ghim cố định 2 dòng Header */
-    .table-master thead tr:nth-child(1) th {
-        top: 0;
-        z-index: 11;
-        border-bottom: none;
-        height: 35px;
-    }
+        /* Dòng 1: In hoa, gradient mượt mà và viền dưới đậm */
+        .table-master thead tr:nth-child(1) th {
+            top: 0;
+            z-index: 11;
+            height: 40px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #d4d4d4;
+        }
 
-    .table-master thead tr:nth-child(2) th {
-        top: 35px;
-        z-index: 10;
-        height: 40px;
-    }
+        /* Dòng 2: Header chi tiết */
+        .table-master thead tr:nth-child(2) th {
+            top: 40px;
+            z-index: 10;
+            height: 40px;
+            font-weight: 600;
+            font-size: 13px;
+        }
 
-    /* --- MÀU SẮC PHÂN NHÓM HEADER --- */
+    /* --- MÀU SẮC PHÂN NHÓM HEADER (Có Gradient) --- */
     .group-info {
-        background-color: #e2efda !important;
-        color: #385723 !important;
+        background: linear-gradient(180deg, #e2efda 0%, #d4e8c9 100%) !important;
+        color: #2e4a1a !important;
+        border-bottom: 3px solid #385723 !important;
     }
-    /* Xanh lá nhạt */
+
     .group-delivery {
-        background-color: #fff2cc !important;
-        color: #7f6000 !important;
+        background: linear-gradient(180deg, #fff2cc 0%, #ffe699 100%) !important;
+        color: #664d00 !important;
+        border-bottom: 3px solid #7f6000 !important;
     }
-    /* Vàng nhạt */
+
     .group-standard {
-        background-color: #d9e1f2 !important;
-        color: #2f5597 !important;
+        background: linear-gradient(180deg, #d9e1f2 0%, #c4d3eb 100%) !important;
+        color: #1f3864 !important;
+        border-bottom: 3px solid #2f5597 !important;
     }
-    /* Xanh dương nhạt */
+
     .group-status {
-        background-color: #fce4d6 !important;
-        color: #c65911 !important;
+        background: linear-gradient(180deg, #fce4d6 0%, #f8cbad 100%) !important;
+        color: #a64b00 !important;
+        border-bottom: 3px solid #c65911 !important;
     }
-    /* Cam nhạt */
 
     /* Màu sub-header (dòng 2) */
     .sub-info {
-        background-color: #f2f7ec !important;
+        background-color: #f6faf1 !important;
     }
 
     .sub-delivery {
-        background-color: #fffbf0 !important;
+        background-color: #fffdf5 !important;
     }
 
     .sub-standard {
-        background-color: #f0f3fa !important;
+        background-color: #f4f6fb !important;
     }
 
     .sub-status {
-        background-color: #fef0e8 !important;
+        background-color: #fff5f0 !important;
     }
 
     .bg-using-highlight {
@@ -108,7 +115,6 @@
         background-color: #f2f7ff !important;
     }
 
-    /* Dòng xen kẽ (Zebra stripe) */
     .table-master tbody tr:nth-child(even) td {
         background-color: #fafafa;
     }
@@ -149,32 +155,34 @@
         box-shadow: none;
     }
 
-    @@keyframes blink {
-        50%
-
-    {
-        opacity: 0.7;
+    @@keyframes blink  {
+            opacity: 0.7;
+        }
     }
-
-    }
-    
 </style>
 
 <div class="container-fluid">
     <div class="card shadow border-0" style="border-radius: 8px;">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center" style="border-radius: 8px 8px 0 0;">
-            <h5 class="mb-0 text-info fw-bold text-uppercase" style="letter-spacing: 0.5px;">
-                <i class="fa-solid fa fa-table-list me-2"></i> THEO DÕI ĐIỂM GỌI HÀNG & MASTER TỒN KHO AN TOÀN
-            </h5>
-            <div class="d-flex align-items-center gap-2">
-                <!-- Ô Tìm kiếm -->
+        <div class=" bg-white d-flex justify-content-between align-items-center" style="border-radius: 8px 8px 0 0; padding: 15px 20px;">
+             <!-- Ô Tìm kiếm -->
                 <div class="input-group input-group-sm" style="width: 250px;">
                     <span class="input-group-text bg-light"><i class="fa fa-search"></i></span>
                     <input type="text" id="txtSearch" class="form-control" placeholder="Tìm mã hàng, tên, NCC..." onkeyup="searchTable()">
                 </div>
-
-                <!-- Nút Xuất Excel (Trỏ URL về hàm trong Controller) -->
-                <a href="@Url.Action("ExportGiaonhanhangMaster", "ManagerDelivery")" class="btn btn-success btn-sm shadow-sm text-nowrap">
+            <div class="d-flex align-items-center gap-2">
+             
+              <a href="/File/Mau_Nhaphang.xlsx" class="btn btn-info btn-sm shadow-sm text-nowrap ml-2">
+                    <i class="fa fa-link"></i> File mẫu
+                </a>
+                <!-- Form Import Excel -->
+                <form id="frmImportExcel" class="mb-0 ml-2" enctype="multipart/form-data">
+                    <label for="fileImport" class="btn btn-primary btn-sm shadow-sm text-nowrap mb-0" style="cursor: pointer;">
+                        <i class="fa-solid fa fa-file-import me-1"></i> Import Excel
+                    </label>
+                    <input type="file" id="fileImport" name="fileExcel" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
+                </form>
+                <!-- Nút Xuất Excel -->
+                <a href="@Url.Action("ExportGiaonhanhangMaster", "ManagerDelivery")" class="btn btn-success btn-sm shadow-sm text-nowrap ml-2">
                     <i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel
                 </a>
             </div>
@@ -186,10 +194,10 @@
                     <thead>
                         <!-- DÒNG HEADER 1: GỘP NHÓM CỘT -->
                         <tr>
-                            <th colspan="6" class="group-info">I. THÔNG TIN VẬT TƯ & NCC</th>
-                            <th colspan="3" class="group-delivery">II. QUY ĐỊNH GIAO HÀNG</th>
-                            <th colspan="3" class="group-standard">III. TIÊU CHUẨN AN TOÀN</th>
-                            <th colspan="5" class="group-status">IV. THỰC TẾ & TRẠNG THÁI</th>
+                            <th colspan="6" class="group-info">I. Thông tin vật tư & NCC</th>
+                            <th colspan="3" class="group-delivery">II. Quy định giao hàng</th>
+                            <th colspan="3" class="group-standard">III. Tiêu chuẩn an toàn</th>
+                            <th colspan="5" class="group-status">IV. Thực tế & Trạng thái</th>
                         </tr>
                         <!-- DÒNG HEADER 2: CHI TIẾT CỘT -->
                         <tr>
@@ -240,7 +248,7 @@
 
                                     <!-- Nhóm II -->
                                     <td class="text-end">@item.MOQ</td>
-                                    <td class="text-end">@(item.Tansuatgiaohang?.ToString("N0") ?? "-")</td>
+                                    <td class="text-end">@item.Tansuatgiaohang</td>
                                     <td class="text-end">@(item.Leadtimegiaohang?.ToString("N0") ?? "-")</td>
 
                                     <!-- Nhóm III -->
@@ -280,28 +288,60 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
-        // Hàm tìm kiếm Real-time trên lưới
+        // Hàm tìm kiếm Real-time trên lưới hiện tại của bạn
         function searchTable() {
-            // Lấy từ khóa và chuyển thành chữ thường
             var input = document.getElementById("txtSearch").value.toLowerCase();
-            // Lấy tất cả các dòng trong tbody
             var rows = document.querySelectorAll("#tableBody tr");
 
             rows.forEach(function (row) {
-                // Nếu dòng là dòng "Không có dữ liệu" thì bỏ qua
                 if (row.cells.length === 1) return;
-
-                // Lấy toàn bộ text của dòng
                 var rowText = row.innerText.toLowerCase();
-
-                // Hiển thị nếu có chứa từ khóa, ngược lại ẩn đi
                 if (rowText.includes(input)) {
                     row.style.display = "";
                 } else {
                     row.style.display = "none";
                 }
+            });
+        }
+
+        // --- SỰ KIỆN NÚT IMPORT DỮ LIỆU ---
+        function uploadExcel() {
+            const fileInput = document.getElementById('fileImport');
+            if (fileInput.files.length === 0) return;
+
+            // Lấy thông tin file
+            const formData = new FormData();
+            formData.append('fileExcel', fileInput.files[0]);
+
+            // Nếu bạn có lưu user đang đăng nhập ở thẻ html nào đó (vd: <span id="us">Admin</span>)
+            // thì lấy ra, nếu không có tạm thời để 'System'
+            const usElement = document.getElementById("us");
+            formData.append('us', usElement ? usElement.innerHTML.trim() : 'System');
+
+            // Gọi API bằng Fetch
+            fetch('@Url.Action("ImportExcelGiaoHang", "ManagerDelivery")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    // Nếu thành công, thông báo và tải lại trang để thấy dữ liệu mới
+                    alert(" " + res.message);
+                    window.location.reload();
+                } else {
+                    // Báo lỗi và reset lại thẻ input file
+                    alert(" Lỗi: " + res.message);
+                    fileInput.value = '';
+                }
+            })
+            .catch(error => {
+                alert(" Lỗi kết nối đến máy chủ!");
+                console.error(error);
+                fileInput.value = ''; // Reset input để có thể chọn lại file
             });
         }
     </script>

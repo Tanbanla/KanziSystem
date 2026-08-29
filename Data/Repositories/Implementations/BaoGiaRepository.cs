@@ -1675,7 +1675,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Xóa từng đơn
         public async Task<bool> DeleteDonBaoGiaAsync(int id, string reason, string userUpdate)
         {
-             await using var tran = await _context.Database.BeginTransactionAsync();
+            await using var tran = await _context.Database.BeginTransactionAsync();
 
             try
             {
@@ -1712,20 +1712,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     confirmName.DTM_UpdateDate = DateTime.Now;
                     confirmName.VCHR_UpdateBy = "System";
                     confirmName.NVCHR_LyDo = "Cập nhật do đơn bị xóa";
-                    _context.BaoGia_Confirm_Name_Quotations.Update(confirmName);
                 }
 
                 await _context.BaoGia_History_Request_of_Quotations.AddAsync(history);
-                _context.BaoGia_Request_of_Quotations.Update(data);
                 await _context.SaveChangesAsync();
                 await tran.CommitAsync();
 
                 return true;
             }
-            catch(Exception ex)
+            catch
             {
                 await tran.RollbackAsync();
-                throw new Exception("An error occurred while deleting the quotation.", ex);
+                throw;
             }
         }
         // Trả lại đơn báo giá
@@ -1776,20 +1774,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         confirm.VCHR_UpdateBy = "System";
                         confirm.NVCHR_LyDo = "Cập nhật do đơn bị trả lại";
                     }
-                    _context.BaoGia_Confirm_Name_Quotations.UpdateRange(confirmNames);
                 }
 
-                _context.BaoGia_Request_of_Quotations.UpdateRange(data);
                 await _context.BaoGia_History_Request_of_Quotations.AddRangeAsync(historyList);
                 await _context.SaveChangesAsync();
 
                 await tran.CommitAsync();
                 return data;
             }
-            catch(Exception ex)
+            catch
             {
                 await tran.RollbackAsync();
-                throw new Exception("An error occurred while processing the transaction.", ex);
+                throw;
             }
         }
         // lấy danh sách đơn yêu cầu hàng hóa

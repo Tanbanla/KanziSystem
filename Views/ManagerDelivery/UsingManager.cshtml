@@ -1,6 +1,6 @@
 @using PRJ_WAREHOUSE_BIVN.Language
 @{
-    ViewData["Title"] = "Master Giao trả hàng";
+    ViewData["Title"] = "Using_ Sử dụng hàng mã E/A.";
 }
 <style>
     .modal-backdrop {
@@ -72,7 +72,7 @@
                             </select>
 
                             <!-- Nút bấm chọn nhanh -->
-                            <div class="btn-group btn-group-sm" role="group">
+                            <div class="btn-group btn-group-sm" role="group" hidden>
                                 <button type="button" class="btn btn-success fw-bold ml-2" onclick="quickFilterGroup('A')">
                                     <i class="fa-solid me-1"></i>Mã A
                                 </button>
@@ -84,18 +84,14 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
 
                     <!-- Cụm Tìm kiếm & Bộ lọc năm -->
                     <div class="d-flex align-items-center gap-2">
-                        <a href="~/ManagerDelivery/LogChangeHistory">
-                            <button type="button" class="btn btn-warning text-white ms-2">
-                                <i class="fa-solid fa fa-laravel me-1"></i> Log Using
-                            </button>
-                        </a>
-                        <input type="file" id="fileExcel" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
-                        <button type="button" class="btn btn-info text-white ms-2 ml-2" onclick="document.getElementById('fileExcel').click()">
+                    <a href="~/ManagerDelivery/LogChangeHistory" class="btn btn-warning"><i class="fa-solid fa fa-laravel me-1"></i> Log Using </a>
+                       <a href="/File/Mau_Using.xlsx" class="btn btn-info ml-2"> <i class="fa fa-link"></i> File mẫu</a>
+                        <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
+                        <button type="button" class="btn btn-success text-white ms-2 ml-2" onclick="document.getElementById('fileExcel').click()">
                             <i class="fa-solid fa fa-file-excel me-1"></i> Import Excel
                         </button>
                         <!-- Ô TÌM KIẾM THEO MÃ -->
@@ -108,8 +104,8 @@
           
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <span>Danh Sách Chi Tiết</span>
-                    <!-- Hiển thị tổng số dòng đang lọc -->
+                <span>Danh Sách Chi Tiết Niên độ </span>
+                <!-- Hiển thị tổng số dòng đang lọc -->
                     <span class="badge bg-white text-primary fw-normal" id="lblRowCount">0 dòng</span>
                 </div>
                 <div class="card-body p-0">
@@ -119,10 +115,7 @@
                                 <tr>
                                     <!-- Ghim 2 cột đầu không bị trôi khi cuộn ngang -->
                                     <th class="sticky-start bg-primary text-white" style="left: 90px; z-index: 3; min-width: 130px;">Mã VT</th>
-                                    <!-- Các cột tháng theo hàng ngang -->
-                                    <th>Tháng 1</th>
-                                    <th>Tháng 2</th>
-                                    <th>Tháng 3</th>
+                                    <!-- Các cột tháng theo hàng ngang -->                                
                                     <th>Tháng 4</th>
                                     <th>Tháng 5</th>
                                     <th>Tháng 6</th>
@@ -132,7 +125,9 @@
                                     <th>Tháng 10</th>
                                     <th>Tháng 11</th>
                                     <th>Tháng 12</th>
-
+                                    <th>Tháng 1</th>
+                                    <th>Tháng 2</th>
+                                    <th>Tháng 3</th>
                                     <th class="table-warning fw-bold">Tổng Năm</th>
                                 </tr>
                             </thead>
@@ -187,13 +182,12 @@
             loadData(); // Load Vùng 1
         });
 
-        function loadData() {
+      function loadData() {
             const selectedYear = parseInt(document.getElementById('selectYear').value) || 2026;
 
-            // Gọi đồng thời 2 API: Lấy danh sách toàn bộ Mã Vật Tư gốc và Dữ liệu theo tháng
             Promise.all([
-                fetch('/ManagerDelivery/GetMaterialData').then(res => res.json()), // API lấy Master Mã Hàng
-                fetch('/ManagerDelivery/GetData').then(res => res.json())          // API lấy số liệu Using theo tháng
+                fetch('/ManagerDelivery/GetMaterialData').then(res => res.json()), 
+                fetch('/ManagerDelivery/GetData').then(res => res.json())          
             ])
             .then(([materialRes, dataRes]) => {
                 if (!materialRes.success || !dataRes.success) {
@@ -202,9 +196,15 @@
                 }
 
                 const allMaterials = materialRes.data || [];
-                const usingData = (dataRes.data || []).filter(item => item.nam === selectedYear);
+        
+                // 1. ĐIỀU CHỈNH LỌC THEO NIÊN ĐỘ: 
+                // Niên độ 2026 = Tháng 4->12 (Năm 2026) VÀ Tháng 1->3 (Năm 2027)
+                const usingData = (dataRes.data || []).filter(item => {
+                    if (item.nam === selectedYear && item.thang >= 4) return true;
+                    if (item.nam === selectedYear + 1 && item.thang <= 3) return true;
+                    return false;
+                });
 
-                // 1. Khởi tạo danh sách Pivot dựa trên TOÀN BỘ MÃ HÀNG (Master List)
                 const pivotData = {};
 
                 allMaterials.forEach(mat => {
@@ -212,25 +212,31 @@
                     if (maVT) {
                         pivotData[maVT] = {
                             material_Code: maVT,
-                            months: Array(12).fill(0) // Mặc định 12 tháng = 0 (trắng)
+                            months: Array(12).fill(0) 
                         };
                     }
                 });
 
-                // 2. Đổ số liệu của năm đang chọn vào đúng mã hàng và tháng tương ứng
                 usingData.forEach(item => {
-                    // Dùng mã vật tư từ bảng dữ liệu tháng (item.maVatTu hoặc item.material_Code tuỳ db)
                     const maVT = item.material_Code || item.maVatTu;
                     if (maVT) {
                         if (!pivotData[maVT]) {
-                            // Trường hợp mã có trong giao dịch nhưng không còn trong bảng Master
                             pivotData[maVT] = {
                                 material_Code: maVT,
                                 months: Array(12).fill(0)
                             };
                         }
-                        if (item.thang >= 1 && item.thang <= 12) {
-                            pivotData[maVT].months[item.thang - 1] += item.soluong;
+                
+                        // 2. ĐỔI INDEX ĐỂ KHỚP CỘT TRÊN GIAO DIỆN (T4: index 0 -> T3: index 11)
+                        let monthIdx = -1;
+                        if (item.thang >= 4 && item.thang <= 12) {
+                            monthIdx = item.thang - 4; // T4->T12
+                        } else if (item.thang >= 1 && item.thang <= 3) {
+                            monthIdx = item.thang + 8; // T1->T3
+                        }
+
+                        if (monthIdx !== -1) {
+                            pivotData[maVT].months[monthIdx] += item.soluong;
                         }
                     }
                 });
@@ -245,14 +251,13 @@
                                 </td>
                             </tr>`;
                 } else {
-                    // 3. Render toàn bộ danh sách ra bảng
                     rows.forEach((row, index) => {
                         const tongNam = row.months.reduce((sum, val) => sum + val, 0);
-
-                        // Tạo 12 ô input cho 12 tháng (nếu = 0 thì hiện trắng để gõ)
                         let monthsHtml = '';
+                
                         row.months.forEach((qty, monthIdx) => {
-                            const thang = monthIdx + 1;
+                            // 3. TÍNH LẠI SỐ THÁNG HIỂN THỊ ĐỂ GÁN VÀO data-thang
+                            const thang = monthIdx < 9 ? monthIdx + 4 : monthIdx - 8;
                             const displayVal = qty > 0 ? Number(qty).toFixed(2) : '';
 
                             monthsHtml += `
@@ -270,25 +275,17 @@
                                 </td>`;
                         });
 
-                        // Format Tổng năm với 2 số sau dấu chấm + dấu phẩy hàng nghìn
                         const displayTongNam = Number(tongNam).toLocaleString('en-US', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
                         });
 
                         html += `
-                            <!-- Thêm class data-row và data-mavt để phục vụ tìm kiếm Realtime -->
                             <tr id="row-${index}" class="data-row" data-mavt="${row.material_Code.toLowerCase()}">
-
-                                <!-- Cột Mã Vật Tư -->
                                 <td class="sticky-start bg-white fw-bold text-dark" style="left: 90px; z-index: 1;">
                                     ${row.material_Code}
                                 </td>
-
-                                <!-- 12 Cột Tháng -->
                                 ${monthsHtml}
-
-                                <!-- Cột Tổng Năm -->
                                 <td class="fw-bold table-warning text-danger" id="total-${index}">
                                     ${displayTongNam}
                                 </td>
@@ -297,8 +294,6 @@
                 }
 
                 document.getElementById('tableBody').innerHTML = html;
-
-                // Cập nhật lại bộ lọc tìm kiếm trong trường hợp đang có từ khóa cũ trong ô search
                 applyFilter();
             })
             .catch(error => {
@@ -327,51 +322,54 @@
         }
 
         // Hàm lưu dữ liệu (Tự động format lại ô input sau khi người dùng gõ xong)
-        function saveInlineData(inputElement) {
-            const maVatTu = inputElement.getAttribute('data-mavt');
-            const thang = parseInt(inputElement.getAttribute('data-thang'));
-            const nam = parseInt(document.getElementById('selectYear').value) || 2026;
-            const soluong = parseFloat(inputElement.value) || 0;
+     function saveInlineData(inputElement) {
+        const maVatTu = inputElement.getAttribute('data-mavt');
+        const thang = parseInt(inputElement.getAttribute('data-thang'));
+        const selectedYear = parseInt(document.getElementById('selectYear').value) || 2026;
+        const soluong = parseFloat(inputElement.value) || 0;
 
-            if (soluong > 0) {
-                inputElement.value = Number(soluong).toFixed(2);
-            } else {
-                inputElement.value = ''; // Nếu bằng 0 thì về ô trống (hiện placeholder "-")
-            }
+        // TÍNH TOÁN NĂM THỰC TẾ (Nếu tháng 1, 2, 3 thì cộng thêm 1 năm)
+        const actualYear = (thang <= 3) ? selectedYear + 1 : selectedYear;
 
-            inputElement.style.backgroundColor = '#fff3cd';
-
-            const data = {
-                ID: 0,
-                MaVatTu: maVatTu,
-                Thang: thang,
-                Nam: nam,
-                Soluong: soluong,
-                Nguoiupdate: document.getElementById('us') ? document.getElementById('us').innerHTML : 'System'
-            };
-
-            fetch('/ManagerDelivery/SaveData', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.success) {
-                    inputElement.style.backgroundColor = '#d1e7dd';
-                    setTimeout(() => {
-                        inputElement.style.backgroundColor = 'transparent';
-                    }, 800);
-                } else {
-                    alert(`Lỗi khi lưu số lượng tháng ${thang} cho mã ${maVatTu}!`);
-                    inputElement.style.backgroundColor = '#f8d7da';
-                }
-            })
-            .catch(() => {
-                alert("Lỗi kết nối đến máy chủ!");
-                inputElement.style.backgroundColor = '#f8d7da';
-            });
+        if (soluong > 0) {
+            inputElement.value = Number(soluong).toFixed(2);
+        } else {
+            inputElement.value = ''; 
         }
+
+        inputElement.style.backgroundColor = '#fff3cd';
+
+        const data = {
+            ID: 0,
+            MaVatTu: maVatTu,
+            Thang: thang,
+            Nam: actualYear, // Sử dụng năm thực tế đã tính
+            Soluong: soluong,
+            Nguoiupdate: document.getElementById('us') ? document.getElementById('us').innerHTML : 'System'
+        };
+
+        fetch('/ManagerDelivery/SaveData', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                inputElement.style.backgroundColor = '#d1e7dd';
+                setTimeout(() => {
+                    inputElement.style.backgroundColor = 'transparent';
+                }, 800);
+            } else {
+                alert(`Lỗi khi lưu số lượng tháng ${thang}/${actualYear} cho mã ${maVatTu}!`);
+                inputElement.style.backgroundColor = '#f8d7da';
+            }
+        })
+        .catch(() => {
+            alert("Lỗi kết nối đến máy chủ!");
+            inputElement.style.backgroundColor = '#f8d7da';
+        });
+    }
 
         // Xóa dữ liệu của Mã VT trong năm được chọn
         function deleteDataByMaVT(maVatTu, nam) {
@@ -494,10 +492,10 @@
         }
 
         function uploadExcel() {
-            const fileInput = document.getElementById('fileExcel');
+                const fileInput = document.getElementById('excelFileInput');
             if (fileInput.files.length === 0) return;
             const formData = new FormData();
-            formData.append('fileExcel', fileInput.files[0]);
+                formData.append('excelFileInput', fileInput.files[0]);
             const usElement = document.getElementById("us");
             formData.append('us', usElement ? usElement.innerHTML : 'System');
 

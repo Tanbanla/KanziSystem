@@ -176,7 +176,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // Determine role from query or default to UserPUR
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
             var materials = await _materialService.SearchAsync("", "", "", 1, 500);
-            var madons = await LoadMadonAsync(13);
+            var madons = await LoadMadonAsync(14);
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
             if (!role.Success)
             {
@@ -225,7 +225,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             req ??= new ConfirmNameSearchRequest();
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
-            var user = (string.IsNullOrEmpty(role.Data)) ? GetCurrentUserId() : "";
+            var user = GetCurrentUserId();
             var result = await _confirmNameService.SearchAsync(req, user, role.Data);
             if (!result.Success)
             {
@@ -239,7 +239,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> CountConfirmNameByRole([FromBody] ConfirmNameSearchRequest req)
         {
             var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
-            var user = (string.IsNullOrEmpty(role.Data)) ? GetCurrentUserId() : "";
+            var user = GetCurrentUserId();
             req.TrangThai = "";
             var result = await _confirmNameService.GetCountCofirmNames(req, user, role.Data);
             if (!result.Success)
@@ -390,6 +390,92 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result.Message);
             }
             return Ok(result.Success);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditConfirmName([FromBody] ConfirmNameEditRequest req)
+        {
+            if (req == null || req.Id <= 0)
+            {
+                return BadRequest("Thông tin chỉnh sửa không hợp lệ.");
+            }
+
+            var role = await _tmUserService.GetRoleAsync(GetCurrentUserId());
+            if (!role.Success)
+            {
+                return BadRequest(role.Message);
+            }
+
+            if (role.Data == "UserShip")
+            {
+                if (string.IsNullOrWhiteSpace(req.TenHaiQuan))
+                {
+                    return BadRequest("Tên hải quan không được để trống.");
+                }
+                var result = await _confirmNameService.ConfirmNameShipAsync(req, GetCurrentUserId());
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                var sameName = string.Equals(req.TenHaiQuan?.Trim(), req.TenRecomment?.Trim(), StringComparison.OrdinalIgnoreCase);
+                _ = SendConfirmNameResultMailAsync(req.Id, sameName);
+                return Ok(result.Data);
+            }
+            else
+            {
+                var result = await _confirmNameService.EditConfirmNameAsync(req, GetCurrentUserId(), role.Data);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+
+                if (result.Data)
+                {
+                    _ = SendConfirmNameResultMailAsync(req.Id, true);
+                }
+
+                return Ok(result.Data);
+            }
+        }
+
+        private async Task SendConfirmNameResultMailAsync(int confirmId, bool completed)
+        {
+            try
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                if (!completed)
+                {
+                    var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
+                    var approvers = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
+                    if (approvers.Success && approvers.Data != null)
+                    {
+                        var emailList = string.Join("; ", approvers.Data.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
+                        if (!string.IsNullOrWhiteSpace(emailList))
+                        {
+                            await sendMailService.SendMailAsync(emailList, string.Empty, 21,
+                                "Material/ConfirmName", true, string.Empty, string.Empty, string.Empty);
+                        }
+                    }
+                    return;
+                }
+
+                var done = await _confirmNameService.SearchSendMailConfirmNameAsync(new List<int> { confirmId });
+                if (!done.Success || done.Data == null) return;
+
+                foreach (var item in done.Data.GroupBy(x => x.UserCreate).Select(x => x.First()))
+                {
+                    await sendMailService.SendMailAsync(
+                        item.UserCreate + "@brothergroup.net", string.Empty, 18,
+                        "SelectQuote/SelectQuoteSection", true,
+                        item.Section, item.MaDon, item.UserCreate);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi gửi mail sau khi cập nhật xác nhận tên");
+            }
         }
         // Save in select row
         [HttpPost]
@@ -886,7 +972,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 var roleAsync = await _tmUserService.GetRoleAsync(GetCurrentUserId());
                 var role = roleAsync.Success ? roleAsync.Data : string.Empty;
-                var user = (string.IsNullOrEmpty(role)) ? GetCurrentUserId() : "";
+                var user = GetCurrentUserId();
                 var result = await _confirmNameService.ExportConfirmedMaterialNamesAsync(req.TenHang, req.SoDon, req.TrangThai, req.Section, role, user);
                 if (!result.Success)
                 {

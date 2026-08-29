@@ -1,0 +1,221 @@
+@model PRJ_WAREHOUSE_BIVN.View_Models.Quote.QuoteModel
+@using System.Collections.Generic
+@using System.Linq
+@using PRJ_WAREHOUSE_BIVN.DTO
+@{
+    ViewData["Title"] = "Tạo yêu cầu báo giá";
+
+    var suppliers = Model?.DanhSachNhaCungCap ?? new List<IM_NCC_NEWDTO>();
+    var materials = Model?.DanhSachVatTu ?? new List<MATERIALDTO>();
+    var approvers = Model?.ListApprovel ?? new List<BaoGia_Master_Approver_Send_MailDTO>();
+    var requester = Model?.NguoiThaoTac ?? string.Empty;
+    var sections = Model?.DanhSachNhomViTri ?? new List<DEPARTMENTDTO>();
+}
+<head>
+    <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/QuoteNew.css" />
+</head>
+
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h4>Tạo xin báo giá mới</h4>
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+            <div class="d-flex gap-2 mb-2" role="group">
+                <button type="button" class="btn btn-success" id="btnDownloadExcel"><i class="fas fa-file-excel me-1"></i>Tải file mẫu</button>
+                <div style="margin-left: 6px;"></div>
+                <button type="button" class="btn btn-outline-primary" id="btnDownExcelTable"><i class="fas fa-download me-1"></i> Tải dữ liệu bảng</button>
+                <div style="margin-left: 6px;"></div>
+                <button type="button" class="btn btn-warning w-100" id="btnDownMaster"><i class="fas fa-file-download me-1"></i> Tải dữ liệu master</button>
+            </div>
+        </div>
+    </div>
+    <div class ="card shadow-sm quote-card mb-3">
+        <div class="card-header bg-white quote-card-header">
+            <h6 class="mb-0">Thông tin báo giá</h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-xl-8">
+                    <div class="card h-100 quote-inner-card">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label for="selectSection" class="form-label fw-semibold">
+                                        Phòng ban xin báo giá <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="selectSection" name="selectSection" class="form-select searchable-select">
+                                        <option value="">Chọn phòng ban</option>
+                                        <option value="GA">GA - General Affairs</option>
+                                        <option value="PUR">PUR - Purchasing</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label for="selectType" class="form-label fw-semibold">
+                                        Loại hàng <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="selectType" name="selectType" class="form-select searchable-select">
+                                        <option value="">Chọn loại hàng xin báo giá</option>
+                                        <option value="1">Hàng hóa tiêu chuẩn</option>
+                                        <option value="2">Hàng hóa thiết kế</option>
+                                        <option value="3">Dịch vụ</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="searchPhongBan" class="form-label">Mã chi phí</label>
+                                    <select id="searchPhongBan" name="searchPhongBan" class="form-select searchable-select">
+                                        <option value="" selected>Chọn mã chi phí</option>
+                                        @foreach (var s in sections)
+                                        {
+                                            <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 d-flex align-items-end">
+                                    <button type="button" id="btnClearFilters" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-1"></i> Lưu
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-3">
+                    <div class="card h-100 quote-inner-card quote-guide-card">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="quote-guide-title mb-2">Standard Goods</h6>
+                            <p class="quote-guide-desc mb-3">Items that are commercially available and can be purchased directly.</p>
+                            <p class="mb-2 fw-semibold">Fields include:</p>
+                            <ul class="quote-guide-list list-unstyled mb-3">
+                                <li><i class="fas fa-check-circle"></i> Part No</li>
+                                <li><i class="fas fa-check-circle"></i> Item Name</li>
+                                <li><i class="fas fa-check-circle"></i> Maker</li>
+                                <li><i class="fas fa-check-circle"></i> Quantity</li>
+                                <li><i class="fas fa-check-circle"></i> Delivery Date</li>
+                                <li><i class="fas fa-check-circle"></i> Attachment</li>
+                            </ul>
+                            @* <div class="text-center mt-auto">
+                                <img src="~/img/carbox.png" alt="Standard Goods" class="img-fluid quote-guide-image" />
+                            </div> *@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class ="d-flex align-items-center gap-3">
+                    <h6 class="mb-0 me-4" style="color:black">
+                        Danh sách xin báo giá
+                    </h6>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <button type="button" class="btn"
+                            id="btnImportfile"
+                            style="color:cadetblue; background-color:white">
+                        <i class="fas fa-file-excel"></i> Import file Excel
+                    </button>
+
+                    <button type="button" class="btn btn-primary"
+                            id="btnAdd">
+                        Thêm <i class="fas fa-plus-circle ms-1"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive quote-table" id="InforTableContainer">
+                <table class="table table-sm table-hover table-bordered align-middle" id="InforTable">
+                    <thead class="table-header-custom">
+                        <tr class="text-center align-middle">
+                            <th style="min-width: 40px">No.</th>
+                            <th style="min-width: 160px">Mã hàng nội bộ</th>
+                            <th style="min-width: 140px">Chủng loại</th>
+                            <th style="min-width: 140px">Phân loại hàng</th>
+                            <th style="min-width: 180px">Tên tiếng việt</th>
+                            <th style="min-width: 160px">Tên tiếng anh</th>
+                            <th style="min-width: 140px">Mã hàng nhà cung cấp</th>
+                            <th style="min-width: 140px">Số lượng</th>
+                            <th style="min-width: 140px">Đơn vị</th>
+                            <th style="min-width: 140px">Kỳ hạn lựa chọn nhà cung cấp</th>
+                            <th style="min-width: 140px">Ngày mong muốn nhận hàng</th>
+                            <th style="min-width: 40px">Gấp</th>
+                            <th style="min-width: 160px">Nhà cung cấp xin báo giá</th>
+                            <th style="min-width: 180px">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="InforTableBody">
+                        <tr><td colspan="14" class="text-center text-muted py-4">Không có dữ liệu</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer quote-card-footer">
+            <div id="paginationInfo" class="d-flex justify-content-between align-items-center mt-2" style="display:none;">
+                <div class="d-flex align-items-center gap-2">
+                    <label for="rowsPerPageSelect" class="form-label mb-0" style="margin-right: 4px;">Hiển thị </label>
+                    <select id="rowsPerPageSelect" class="form-select form-select-sm" style="width: auto;">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="150">150</option>
+                        <option value="200">200</option>
+                    </select>
+                </div>
+                <div id="pageInfo"></div>
+                <div id="paginationControls" class="d-flex justify-content-center mt-3" style="display:none;">
+                    <nav aria-label="Table pagination">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item" id="prevPage"><a class="page-link" href="#" aria-label="Trang trước"><span aria-hidden="true">&laquo;</span></a></li>
+                            <li>
+                                <div id="pageNumberInfo">1/5</div>
+                            </li>
+                            <li class="page-item" id="nextPage"><a class="page-link" href="#" aria-label="Trang sau"><span aria-hidden="true">&raquo;</span></a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="modal fade" id="addInforModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm mặt hàng báo giá</h5>
+                    <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
+                        <i class="fas fa-times fa-sm"></i>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 75vh; overflow-y: auto">
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveHistoryEdit">Lưu</button>
+                </div>
+            </div>
+        </div>  
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
+    <script src="~/js/QuoteNew.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
+                    window.KanziSearchableDropdown.init(document);
+                }
+            } catch (e) {
+            }
+        });
+    </script>
+}

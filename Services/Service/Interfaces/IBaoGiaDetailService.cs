@@ -26,5 +26,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<bool>> UpdateStatusAsync(List<int> ids);
         // Cập nhật thông tin link báo giá trên hệ thống
         Task<GenericResponse<bool>> UpdateLinkBaoGiaAsync();
+        // Lấy file thông tin đã nhập lên hệ thống
+        Task<GenericResponse<IFormFile>> GetFilesToImportAsync(string keywork);
     }
 }

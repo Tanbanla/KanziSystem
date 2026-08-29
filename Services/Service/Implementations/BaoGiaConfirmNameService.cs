@@ -36,6 +36,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+
+        public async Task<GenericResponse<bool>> EditConfirmNameAsync(ConfirmNameEditRequest request, string user, string? role)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.EditConfirmNameAsync(request, user, role);
+                result.Success = result.Data;
+                if (!result.Success) result.Message = "Không thể cập nhật dữ liệu.";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
         // Luu thong tin
         public async Task<GenericResponse<bool>> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User)
         {
@@ -368,6 +385,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = ex.Message;
                 result.Success = false;
             }
+            return result;
+        }
+        public async Task<GenericResponse<bool>> ConfirmNameShipAsync(ConfirmNameEditRequest request, string user)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.ConfirmNameShipAsync(request, user);
+                result.Success = result.Data;
+                if (!result.Success) result.Message = "Không thể xác nhận tên hải quan.";
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
             return result;
         }
     }

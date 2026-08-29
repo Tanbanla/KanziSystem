@@ -466,8 +466,7 @@ function _modal_chitietxuatkho(code_request) {
                 <td>${i + 1}</td>
                 <td id="mahang_${i}">${item.material_Code}</td>
                 <td>${item.material_Name}</td>                  
-                <td>${item.brand}</td>
-                <td>${item.good_Code}</td>
+                
                 <td>${item.account_Code}</td>
                 <td>${item.account_Name}</td>
                 <td id="hienThiSoLuong_${i}" style="font-weight:bold; color:blue">0</td>
@@ -479,7 +478,8 @@ function _modal_chitietxuatkho(code_request) {
                 <td>${item.vat} %</td>
                 <td id="tongchiphiold_${i}">${item.total_exchange}</td>
                 <td style="background-color:#d0ffd8ab" id="ttthucte_${i}">${item.total_exchange}</td>
-                <td>${item.po}</td>
+                <td>${item.phongchiuchiphi}</td>
+                <td>${item.vitri}</td>
             </tr>`;
             });
 

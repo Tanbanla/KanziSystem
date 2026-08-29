@@ -360,5 +360,27 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var result = await _conn.QueryAsync<dynamic>(sql);
             return result.ToList();
         }
+        // Tự động cập nhật trang thái đơn
+        public async Task<bool> AutoUpdateRequestStatusAsync()
+        {
+
+            var expiredDate = DateTime.Now.AddDays(-7);
+            var requestsToUpdate = await _context.BaoGia_Request_of_Quotations
+                .Where(r => r.ID_StepBaoGia < 0  && r.ID_Status.Contains("RETURN") && r.DTM_UpdateLater < expiredDate)
+                .ToListAsync();
+            if(!requestsToUpdate.Any())
+            {
+                return true;
+            }
+            foreach (var request in requestsToUpdate)
+            {
+                request.ID_Status = "DELETE";
+                request.DTM_UpdateLater = DateTime.Now;
+                request.ID_StepBaoGia = 0;
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

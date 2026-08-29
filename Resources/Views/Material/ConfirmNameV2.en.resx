@@ -477,4 +477,53 @@
   <data name="MaterialCode" xml:space="preserve">
     <value>Internal material code</value>
   </data>
+  <data name="FromDate"><value>From date</value></data>
+  <data name="ToDate"><value>To date</value></data>
+  <data name="QuickSearch"><value>Quick search</value></data>
+  <data name="QuickSearchPlaceholder"><value>Order code / material code / name</value></data>
+  <data name="SelectAll"><value>Select all</value></data>
+  <data name="Selected"><value>Selected</value></data>
+  <data name="DrawerTitle"><value>Material confirmation details</value></data>
+  <data name="OrderInformation"><value>Order information</value></data>
+  <data name="BusinessInformation"><value>Business information</value></data>
+  <data name="OrderCodeLabel"><value>Order code</value></data>
+  <data name="MaterialCodeLabel"><value>Material code</value></data>
+  <data name="CustomsNameLabel"><value>Customs name</value></data>
+  <data name="EnglishNameLabel"><value>English name</value></data>
+  <data name="ProposedNameLabel"><value>Proposed name</value></data>
+  <data name="ConfirmedNameLabel"><value>Confirmed name</value></data>
+  <data name="ConfirmationStep"><value>Confirmation step</value></data>
+  <data name="CreatedBy"><value>Created by</value></data>
+  <data name="LastUpdatedBy"><value>Last updated by</value></data>
+  <data name="LastUpdatedDate"><value>Last updated date</value></data>
+  <data name="PurConfirmedBy"><value>PUR confirmer</value></data>
+  <data name="PurConfirmedDate"><value>PUR confirmation date</value></data>
+  <data name="ShipConfirmedBy"><value>SHIP confirmer</value></data>
+  <data name="ShipConfirmedDate"><value>SHIP confirmation date</value></data>
+  <data name="SectionConfirmedBy"><value>Department confirmer</value></data>
+  <data name="SectionConfirmedDate"><value>Department confirmation date</value></data>
+  <data name="SupplierItemCodeLabel"><value>Supplier item code</value></data>
+  <data name="RejectionReason"><value>Rejection reason</value></data>
+  <data name="ChangeHistory"><value>Change history</value></data>
+  <data name="NoHistory"><value>No data</value></data>
+  <data name="EditMaterialInformation"><value>Edit material information</value></data>
+  <data name="Return"><value>Return</value></data>
+  <data name="SaveChanges"><value>Save changes</value></data>
+  <data name="History"><value>History</value></data>
+  <data name="LoadingHistory"><value>Loading history...</value></data>
+  <data name="NoHistoryChanges"><value>No change history</value></data>
+  <data name="NoChanges"><value>No changes</value></data>
+  <data name="HistoryLoadError"><value>Failed to load history</value></data>
+  <data name="PurPending"><value>Waiting for PUR confirmation</value></data>
+  <data name="ShipPending"><value>Waiting for Ship confirmation</value></data>
+  <data name="SectionPending"><value>Waiting for department information</value></data>
+  <data name="Completed"><value>Completed</value></data>
+  <data name="ConfirmedBy"><value>Confirmed by</value></data>
+  <data name="ConfirmedDate"><value>Confirmation date</value></data>
+  <data name="LastUpdated"><value>Last updated</value></data>
+  <data name="NoSelected"><value>No records selected</value></data>
+  <data name="ReturnReasonRequired"><value>Please enter a return reason.</value></data>
+  <data name="FileLink"><value>Link</value></data>
+  <data name="DepartmentStatus"><value>Department status</value></data>
+  <data name="ShipStatus"><value>Ship status</value></data>
 </root>

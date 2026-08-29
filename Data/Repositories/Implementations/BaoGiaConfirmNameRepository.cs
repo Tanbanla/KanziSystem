@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -208,18 +209,156 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 }
             }
 
-            //if (!string.Equals(row.CHR_Status, "Confirmed", StringComparison.OrdinalIgnoreCase) &&
-            //    !string.Equals(row.CHR_Status, "Rejected", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    row.CHR_Status = "Confirming"; // đang xác nhận
-            //}
             row.DTM_UpdateDate = now;
             row.VCHR_UpdateBy = user;
 
             await _context.SaveChangesAsync();
             return true;
         }
-        // Them thong tin
+        public async Task<bool> EditConfirmNameAsync(ConfirmNameEditRequest request, string user, string? role)
+        {
+            if (request == null || (role != "UserPUR" && role != "User")) return false;
+
+            var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == request.Id);
+            if (row == null) return false;
+            var currentStatus = role == "UserPUR" ? row.CHR_Status : row.CHR_StatusACC;
+            if (!string.Equals(currentStatus, "Confirming", StringComparison.OrdinalIgnoreCase)) return false;
+            var quotation = await _context.BaoGia_Request_of_Quotations
+                .FirstOrDefaultAsync(x => x.ID == row.ID_RequestQuote);
+            if (quotation == null) return false;
+            var detail = await _context.BaoGia_Detail_of_Quotations
+                .FirstOrDefaultAsync(x => x.ID_RequestQuote == row.ID_RequestQuote);
+            if (detail == null) return false;
+
+            var oldValues = new Dictionary<string, string?>();
+            var newValues = new Dictionary<string, string?>();
+            void SetValue(string name, string? oldValue, string? newValue, Action update)
+            {
+                if (oldValue != newValue)
+                {
+                    oldValues[name] = oldValue;
+                    newValues[name] = newValue;
+                    update();
+                }
+            }
+
+            if (role == "UserPUR")
+            {
+                SetValue(nameof(request.MaHangNoiBo), row.VCHR_MaHangNoiBo, request.MaHangNoiBo, () => row.VCHR_MaHangNoiBo = request.MaHangNoiBo);
+                SetValue(nameof(request.TenHaiQuan), row.VCHR_TenHaiQuan, request.TenHaiQuan, () => row.VCHR_TenHaiQuan = request.TenHaiQuan);
+                SetValue(nameof(request.TenRecomment), row.VCHR_TenRecomment, request.TenRecomment, () => row.VCHR_TenRecomment = request.TenRecomment);
+                SetValue(nameof(request.NameEN), row.CHR_NameEN, request.NameEN, () => row.CHR_NameEN = request.NameEN);
+                // cập nhật thông tin cho RequestQuotation
+                SetValue(nameof(request.MaThietBi), quotation.CHR_MaThietBi, request.MaThietBi, () => quotation.CHR_MaThietBi = request.MaThietBi);
+                SetValue(nameof(request.MaHangNCC), quotation.CHR_MaHangNCC, request.MaHangNCC, () => quotation.CHR_MaHangNCC = request.MaHangNCC);
+                SetValue(nameof(request.Phanloai), quotation.CHR_Phanloai, request.Phanloai, () => quotation.CHR_Phanloai = request.Phanloai);
+                if (quotation.INT_SoLuong != request.SoLuong)
+                {
+                    oldValues[nameof(request.SoLuong)] = quotation.INT_SoLuong?.ToString();
+                    newValues[nameof(request.SoLuong)] = request.SoLuong?.ToString();
+                    quotation.INT_SoLuong = request.SoLuong.HasValue ? (int?)Convert.ToInt32(request.SoLuong.Value) : null;
+                }
+                SetValue(nameof(request.DonVi), quotation.NVCHR_DonVi, request.DonVi, () => quotation.NVCHR_DonVi = request.DonVi);
+                SetValue(nameof(request.ChungLoai), quotation.NVCHR_ChungLoai, request.ChungLoai, () => quotation.NVCHR_ChungLoai = request.ChungLoai);
+                quotation.ID_StepBaoGia = 13;
+                quotation.ID_Status = "DONE";
+                quotation.NVCHR_NameVN = request.TenHaiQuan;
+                row.CHR_Status = "Confirmed";
+
+                // Cập nhật detail
+                SetValue(nameof(request.Link), detail.NVCHR_File, request.Link, () => detail.NVCHR_File = request.Link);
+                SetValue(nameof(request.TenRecomment), detail.NVCHR_TenHangHQ, request.TenRecomment, () => detail.NVCHR_TenHangHQ = request.TenRecomment);
+                SetValue(nameof(request.NameEN), detail.CHR_NameEN, request.NameEN, () => detail.CHR_NameEN = request.NameEN);
+            }
+
+            SetValue(nameof(request.HinhDang), quotation.NVCHR_HinhDang, request.HinhDang, () => quotation.NVCHR_HinhDang = request.HinhDang);
+            SetValue(nameof(request.ChatLieu), quotation.NVCHR_ChatLieu, request.ChatLieu, () => quotation.NVCHR_ChatLieu = request.ChatLieu);
+            SetValue(nameof(request.ThanhPhan), quotation.NVCHR_ThanhPhan, request.ThanhPhan, () => quotation.NVCHR_ThanhPhan = request.ThanhPhan);
+            SetValue(nameof(request.KichThuoc), quotation.NVCHR_KichThuoc, request.KichThuoc, () => quotation.NVCHR_KichThuoc = request.KichThuoc);
+            SetValue(nameof(request.DongMay), quotation.NVCHR_DongMay, request.DongMay, () => quotation.NVCHR_DongMay = request.DongMay);
+            SetValue(nameof(request.TinhNang), quotation.NVCHR_TinhNang, request.TinhNang, () => quotation.NVCHR_TinhNang = request.TinhNang);
+            if (role == "User")
+            {
+                row.CHR_StatusACC = "Confirmed";
+                row.CHR_StatusShip = "Confirming";
+            }
+
+            row.VCHR_UpdateBy = user;
+            row.DTM_UpdateDate = DateTime.Now;
+
+            if (oldValues.Any())
+            {
+                await _context.BaoGia_Confirm_Name_Quotation_Histories.AddAsync(new BaoGia_Confirm_Name_Quotation_History
+                {
+                    QuotationID = row.ID_RequestQuote,
+                    ConfirmID = row.ID,
+                    OldValue = System.Text.Json.JsonSerializer.Serialize(oldValues),
+                    NewValue = System.Text.Json.JsonSerializer.Serialize(newValues),
+                    ActionBy = user,
+                    ActionDate = DateTime.Now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> ConfirmNameShipAsync(ConfirmNameEditRequest request, string user)
+        {
+            if (request == null) return false;
+            var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == request.Id);
+            if (row == null) return false;
+            if (!string.Equals(row.CHR_StatusShip, "Confirming", StringComparison.OrdinalIgnoreCase)) return false;
+            var quotation = await _context.BaoGia_Request_of_Quotations
+                .FirstOrDefaultAsync(x => x.ID == row.ID_RequestQuote);
+            if (quotation == null) return false;
+
+            var oldName = row.VCHR_TenHaiQuan;
+            var newName = request.TenHaiQuan?.Trim();
+            var recommendedName = request.TenRecomment?.Trim() ?? row.VCHR_TenRecomment?.Trim();
+            var sameName = !string.IsNullOrWhiteSpace(newName) &&
+                           string.Equals(newName, recommendedName, StringComparison.OrdinalIgnoreCase);
+
+            var confirmHistoryList = new List<BaoGia_Confirm_Name_Quotation_History>();
+            row.VCHR_UserShip = user;
+            row.DTM_UserShip = DateTime.Now;
+            row.CHR_StatusShip = "Confirmed";
+            row.VCHR_TenHaiQuan = newName;
+
+            if (!sameName)
+            {
+                row.CHR_Status = "Confirming";
+                row.NVCHR_LyDo = "Tên xác nhận của Ship và nhà cung cấp khác nhau";
+            }
+            else
+            {
+                row.CHR_Status = "Confirmed";
+                row.CHR_StatusACC = "Confirmed";
+                quotation.NVCHR_NameVN = newName;
+                quotation.ID_StepBaoGia = 13;
+                quotation.ID_Status = "DONE";
+            }
+
+            if (!string.Equals(oldName, newName, StringComparison.OrdinalIgnoreCase))
+            {
+                confirmHistoryList.Add(new BaoGia_Confirm_Name_Quotation_History
+                {
+                    QuotationID = row.ID_RequestQuote,
+                    ConfirmID = row.ID,
+                    OldValue = oldName,
+                    NewValue = newName,
+                    ActionBy = user,
+                    ActionDate = DateTime.Now
+                });
+            }
+
+            row.DTM_UpdateDate = DateTime.Now;
+            row.VCHR_UpdateBy = user;
+
+            await _context.BaoGia_Confirm_Name_Quotation_Histories.AddRangeAsync(confirmHistoryList);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
         public async Task<bool> AddConfirmNameAsync(BaoGia_Confirm_Name_Quotation confirmName)
         {
             await _context.BaoGia_Confirm_Name_Quotations.AddAsync(confirmName);
@@ -263,12 +402,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == id);
             if (row == null) return false;
             var now = DateTime.Now; var user = rejectedBy ?? "SYSTEM";
-            row.CHR_Status = "Rejected";
+            row.CHR_Status = "";
             row.NVCHR_LyDo = reason;
-            row.VCHR_UserPUR = user;
-            row.DTM_UserPUR = now;
+            row.VCHR_UserShip = user;
+            row.DTM_UserShip = now;
             row.VCHR_UpdateBy = user;
             row.DTM_UpdateDate = now;
+            row.CHR_StatusACC = "Confirming";
+            row.CHR_StatusShip = "Rejected";
             await _context.SaveChangesAsync();
             return true;
         }
@@ -300,11 +441,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             // Lấy các Request đã có Confirm Name
-            var existingRequestIds = (await _context.BaoGia_Confirm_Name_Quotations
+            var existingConfirmNames = await _context.BaoGia_Confirm_Name_Quotations
                 .Where(x => requestIds.Contains(x.ID_RequestQuote))
-                .Select(x => x.ID_RequestQuote)
-                .ToListAsync())
-                .ToHashSet();
+                .ToListAsync();
+
+            var existingRequestIds = existingConfirmNames.Select(x => x.ID_RequestQuote).ToHashSet();
 
             // Chỉ insert những Request chưa có
             var newConfirmNames = confirmNames
@@ -314,6 +455,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (newConfirmNames.Any())
             {
                 await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(newConfirmNames);
+            }
+            // Cập nhật các đơn đã có confirm name
+            foreach(var a in existingConfirmNames)
+            {
+                a.CHR_StatusShip = "Confirming";
+                a.CHR_StatusACC = "Confirmed";
+                a.CHR_Status = "Confirmed";
             }
 
             await _context.SaveChangesAsync();
@@ -648,7 +796,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] r
                 LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] c
                     ON r.ID = c.ID_RequestQuote
-                WHERE c.ID IN @ListCheck";
+                WHERE r.ID_StepBaoGia = 13 and c.ID IN @ListCheck";
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -1147,14 +1295,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                                     var saveRes = await _fileImportService
                                         .SaveFileFromPathAsync(newLink);
 
-                                    if (!string.IsNullOrWhiteSpace(saveRes.Data))
+                                    if (saveRes != null)
                                     {
-                                        detail.NVCHR_dataOld = newLink;
-                                        detail.NVCHR_File = saveRes.Data;
+                                        if (!string.IsNullOrWhiteSpace(saveRes.Data))
+                                        {
+                                            detail.NVCHR_dataOld = newLink;
+                                            detail.NVCHR_File = saveRes.Data;
 
-                                        existingLinkMap[newLink] = saveRes.Data;
+                                            existingLinkMap[newLink] = saveRes.Data;
 
-                                        rowChanged = true;
+                                            rowChanged = true;
+                                        }
                                     }
                                 }
                             }

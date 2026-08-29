@@ -692,6 +692,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var itemsOK = new List<BaoGia_Request_of_QuotationDTO>();
             var itemsNG = new List<BaoGia_Request_of_QuotationDTO>();
             var errorRows = new List<dynamic>();
+
+            static int? updateStepBaoGia(int? step)
+            {
+                switch (step)
+                {
+                    case 2: return -2;// Trả về QLSC phong ban
+                    case 3: return -3;// Trả về QLTC phong ban
+                    case 4: return -1;// Trả về PIC phong mua hang
+                    case 5: return -4;// Trả về QLSC phong ban mua hang
+                    default: return -1;
+                }
+            }
+
             try
             {
                 using var stream = vm.fileSend.OpenReadStream();
@@ -781,7 +794,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         var maDon = group.Key;
                         var hasAnyNG = group.Any(x => x.BitSelect);
-                        //var reasonForNG = group.Where(x => x.BitSelect && !string.IsNullOrEmpty(x.Reason)).Select(x => x.Reason).FirstOrDefault();
 
                         if (hasAnyNG)
                         {
@@ -791,7 +803,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var i = item.Dto;
                                 i.ID_Status = GetStatusFromStepReturn(i.ID_StepBaoGia);
                                 i.NVCHR_LyDo = item.Reason;
-                                i.ID_StepBaoGia = 1;
+                                i.ID_StepBaoGia = updateStepBaoGia(i.ID_StepBaoGia);
                                 itemsNG.Add(i);
                             }
                         }

@@ -104,6 +104,39 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return View(vm);
         }
+        public async Task<IActionResult> QuoteV2()
+        {
+            var nhomViTri = await LoadNhomViTriDataAsync();
+            var materials = await _materialService.SearchAsync("", "", "", 1, 500);
+            var nccs = await LoadNhaCungCapDataAsync();
+            var categorys = await LoadCategoryDataAsync();
+
+            ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
+
+            var vm = new QuoteModel
+            {
+                DanhSachNhomViTri = nhomViTri,
+                DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
+                DanhSachNhaCungCap = nccs,
+                DanhSachCategory = categorys,
+                NguoiThaoTac = GetCurrentUserId() ?? ""
+            };
+
+            try
+            {
+                var section = GetCurrentUserSection() ?? string.Empty;
+                var approverResp = await _approverService.GetApproverByStepAndSectionAsync(2, section);
+                if (approverResp != null && approverResp.Success && approverResp.Data != null)
+                {
+                    vm.ListApprovel = approverResp.Data;
+                }
+            }
+            catch
+            {
+            }
+
+            return View(vm);
+        }
         [HttpPost]
         public async Task<IActionResult> GetListApprovel([FromBody] SearchApprovalModel sr)
         {

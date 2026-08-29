@@ -777,8 +777,8 @@
         try {
             try {
                 const pairs = (Array.isArray(payload) ? payload.map(it => ({
-                    MaDon: (it.CHR_MaNCC || it.chR_MaNCC || '').toString().trim(),
-                    ChungLoai: (it.NVCHR_ChungLoai || it.nvchR_ChungLoai || it.CHR_ChungLoai || '').toString().trim()
+                    MaDon:  it.chR_MaNCC.toString().trim(),
+                    ChungLoai: it.nvchR_ChungLoai.toString().trim()
                 })) : [])
                     .filter(p => p.MaDon && p.ChungLoai);
 

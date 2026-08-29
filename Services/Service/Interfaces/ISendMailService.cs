@@ -22,5 +22,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<string>> SendMailToRequesterAsync(string sectionCode, int step);
         // gửi mail xin xác nhận lại tên hàng
         Task<GenericResponse<bool>> SendMailCofirmNaneOfVendor();
+        // Tự động cập nhật trang thái đơn
+        Task<GenericResponse<bool>> AutoUpdateRequestStatusAsync();
     }
 }

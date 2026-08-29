@@ -28,5 +28,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<UpdateFile>> GetFilesToTransferAsync();
         // update thông tin link báo giá trên hệ thống
         Task<bool> UpdateLinkBaoGiaAsync(List<UpdateFile> listDto);
+        // Lấy file thông tin đã nhập lên hệ thống
+        Task<List<dynamic>> GetFilesToImportAsync(string keywork);
     }
 }

@@ -38,5 +38,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<string>> SupplierNeedToSendMailAsync();
         // Lấy thông tin các đơn cần xin lại xác nhận tên hàng
         Task<List<dynamic>> GetRequestNeedToConfirmNameAsync();
+        // Tự động cập nhật trang thái đơn
+        Task<bool> AutoUpdateRequestStatusAsync();
     }
 }

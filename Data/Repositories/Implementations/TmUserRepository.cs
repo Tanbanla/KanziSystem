@@ -48,7 +48,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<string> GetRoleAsync(string adId)
         {
             var result = await _context.TM_AUTHORITY_MENUs.Where(x => x.CHR_USERID == adId && (x.CHR_CODE_MENU == "UserAcc" || x.CHR_CODE_MENU == "UserShip" || x.CHR_CODE_MENU == "UserPUR")).Select(x => x.CHR_CODE_MENU).FirstOrDefaultAsync();
-            return result ?? "";
+            return result ?? "User";
         }
         // Insert thông tin và đăng ký user đăng nhập
         public async Task<bool> InsertListUserAsync(List<TM_USER> users)

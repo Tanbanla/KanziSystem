@@ -11,6 +11,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<ListRequest<dynamic>>> SearchAsync(ConfirmNameSearchRequest req, string user, string? role);
         // Luu thong tin
         public Task<GenericResponse<bool>> SaveConfirmNameAsync(int? Id, string? TenHaiQuan, string? MaHangNoiBo, string? Role, string User);
+        public Task<GenericResponse<bool>> EditConfirmNameAsync(ConfirmNameEditRequest request, string user, string? role);
+        public Task<GenericResponse<bool>> ConfirmNameShipAsync(ConfirmNameEditRequest request, string user);
         // Them thong tin 
         public Task<GenericResponse<bool>> AddConfirmNameAsync(BaoGia_Confirm_Name_QuotationDTO confirmName);
         // Approve ConfirmName

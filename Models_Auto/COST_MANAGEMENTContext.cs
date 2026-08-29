@@ -347,8 +347,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        //=> optionsBuilder.UseSqlServer("Server=apbivnap19;Database=COST_MANAGERMENT;User Id=COST_MANAGEMENT;Password=COST_MANAGEMENT;TrustServerCertificate=true;");
-        => optionsBuilder.UseSqlServer("Server=APBIVNDB14;Database=COST_MANAGEMENT;User Id=COST_MANAGEMENT;Password=COST_MANAGEMENT;TrustServerCertificate=true;MultipleActiveResultSets=true;Connection Timeout=300;Max Pool Size=200;Min Pool Size=10;");
+        => optionsBuilder.UseSqlServer("Server=apbivnap19;Database=COST_MANAGEMENT;User Id=COST_MANAGEMENT;Password=COST_MANAGEMENT;TrustServerCertificate=true;");
+        //=> optionsBuilder.UseSqlServer("Server=APBIVNDB14;Database=COST_MANAGEMENT;User Id=COST_MANAGEMENT;Password=COST_MANAGEMENT;TrustServerCertificate=true;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

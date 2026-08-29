@@ -431,10 +431,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 await tran.CommitAsync();
                 return true;
             }
-            catch(Exception ex)
+            catch
             {
                 await tran.RollbackAsync();
-                throw new Exception("Lỗi xảy ra khi cập nhật thông tin báo giá: " + ex.Message);
+                throw;
             }
         }
 
@@ -658,6 +658,71 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             await _context.SaveChangesAsync();
             return true;
+        }
+        // Lấy file thông tin đã nhập lên hệ thống
+        public async Task<List<dynamic>> GetFilesToImportAsync(string keywork)
+        {
+            if(string.IsNullOrEmpty(keywork)) throw new Exception("Keywork không hợp lệ");
+
+            var sql = new StringBuilder(@"
+                SELECT r.CHR_MaDon,
+                       r.CHR_MaHangNoiBo,
+                       r.CHR_MaThietBi,
+                       r.CHR_MaHangNCC as BivnMaHang,
+                       d.CHR_MaHangNCC as VendorMaHang,
+                       c.VCHR_TenHaiQuan,   
+					   ---Part Other 
+					   r.NVCHR_Rohs,
+					   r.NVCHR_COCQ,
+					   r.NVCHR_MSDS,
+					   r.NVCHR_AnToan,
+					   ----
+                       r.INT_SoLuong as SoluongQ,
+                       r.NVCHR_DonVi as DonViQ,
+                       d.NVCHR_NameNCC,
+                       d.CHR_CodeNCC,
+                       d.NVCHR_TenHangHQ,
+                       r.CHR_NameEN,
+                       d.INT_SoLuong as SoluongNcc,
+                       d.NVCHR_DonVi as DonViNcc,
+                       d.FL_USD,
+                       d.FL_VND,
+                       d.NVCHR_MOQ,
+                       d.NVCHR_Packing,
+                       d.DTM_LeadTime,
+					   d.DTM_ShipTime,
+                       d.VCHR_CamKet,
+					   d.NVCHR_DeliveryTerm,
+                       d.NVCHR_PaymentTerm,
+                       d.DTM_EffectiveDate,
+                       d.DTM_ExpiryDate,
+                       r.NVCHR_FileThietKe,
+                       r.DTM_NgayMuonNhan,
+                       r.DTM_Deadline,
+                       d.NVCHR_File,
+                       r.NVCHR_UserRequest,
+                       r.ID,
+					   n.ShortName,
+					   n.Diachi,
+                       d.BIT_Select,
+					   d.CHR_Status
+                FROM  BaoGia_Request_of_Quotation r
+                LEFT JOIN BaoGia_Confirm_Name_Quotation c
+                    ON c.ID_RequestQuote = r.ID
+                LEFT JOIN BaoGia_Detail_of_Quotation d
+                    ON d.ID_RequestQuote = r.ID
+                LEFT JOIN IM_NCC_NEW n
+                    ON r.CHR_MaNCC = n.Ma
+                WHERE r.BIT_LayBaoGia = 1 ");
+
+            var whereBuilder = new StringBuilder();
+            var parameters = new DynamicParameters();
+
+            sql.Append(@" AND ISNULL(r.CHR_MaDon,'') + ISNULL(r.CHR_MaHangNoiBo,'') = @Keyword");
+            parameters.Add("Keyword", keywork);
+
+            var result = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
+            return result;
         }
     }
 }
