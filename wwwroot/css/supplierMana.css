@@ -1,6 +1,65 @@
 /* =========================================================
    Custom Dialogs
 ========================================================= */
+.supplier-page-toolbar {
+    justify-content: flex-end;
+}
+
+.supplier-list-hint {
+    text-align: right;
+}
+
+.supplier-filter-actions .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.supplier-filter-actions {
+    column-gap: 0.75rem !important;
+    row-gap: 0.75rem !important;
+}
+
+.supplier-page-toolbar .btn {
+    min-width: 0;
+    white-space: normal;
+}
+
+@media (max-width: 768px) {
+    .supplier-page-toolbar {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .supplier-page-toolbar .btn-group {
+        flex: 1 1 100%;
+    }
+
+    .supplier-page-toolbar .btn {
+        flex: 1 1 auto;
+    }
+
+    .supplier-list-hint {
+        width: 100%;
+        margin-top: 0.25rem;
+        text-align: left;
+    }
+
+    .supplier-filter-actions {
+        align-items: stretch !important;
+    }
+
+    .supplier-filter-actions .btn {
+        flex: 1 1 calc(50% - 0.5rem);
+    }
+}
+
+@media (max-width: 576px) {
+    .supplier-filter-actions .btn {
+        flex-basis: 100%;
+    }
+}
+
 #cmConfirmDialog,
 #cmReasonDialog {
     position: fixed !important;

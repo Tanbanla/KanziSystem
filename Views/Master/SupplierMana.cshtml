@@ -24,27 +24,31 @@
         <div>
             <h5 class="mb-3">@Localizer["HeaderTitle"]</h5>
         </div>
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
-        <div class="btn-group me-2 mb-2 flex-wrap gap-2" role="group" style="gap: 8px;">
-            <button type="button" class="btn btn-success" id="btnExportExcel" style="border-radius: 6px; padding: 8px 8px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">
-                <i class="fas fa-file-excel me-1"></i> @Localizer["DownloadExcel"]
-            </button>
-            <button type="button" class="btn btn-outline-secondary" id="btnImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; transition: all 0.2s ease;">
-                <i class="fas fa-upload me-1"></i> @Localizer["UploadExcel"]
-            </button>
-            <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst" style="border-radius: 6px; padding: 8px 6px; font-weight: 500;">
-                <i class="fas fa-upload me-1"></i> @Localizer["UploadExcelVendor"]
-            </button>
-            <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
-        
-            <button type="button" class="btn btn-primary" id="btnTemplateImportExcel" style="border-radius: 6px; padding: 8px 6px; font-weight: 500; background: linear-gradient(135deg, #0d6efd, #0b5ed7); border: none; box-shadow: 0 2px 6px rgba(13,110,253,0.2);">
-                <i class="fas fa-download me-1"></i> @Localizer["TemplateImportExcel"]
-            </button>
+        <div class="btn-toolbar supplier-page-toolbar gap-2" role="toolbar" aria-label="@Localizer["SupplierDataToolsTitle"]">
+            <div class="btn-group flex-wrap gap-2" role="group" aria-label="@Localizer["SupplierDataToolsTitle"]">
+                <button type="button" class="btn btn-success" id="btnExportExcel" hidden>
+                    <i class="fas fa-file-excel me-1"></i> @Localizer["ExportSupplierList"]
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnImportExcel" hidden>
+                    <i class="fas fa-upload me-1"></i> @Localizer["ImportSupplierList"]
+                </button>
+                <button type="button" class="btn btn-primary" id="btnTemplateImportExcel">
+                    <i class="fas fa-download me-1"></i> @Localizer["DownloadSupplierTemplate"]
+                </button>
+            </div>
+            <div style="width: 6px"></div>
+            <div class="btn-group flex-wrap gap-2" role="group" aria-label="@Localizer["SupplierItemToolsTitle"]">
+                <button type="button" class="btn btn-outline-danger" id="btnImportExcelFirst">
+                    <i class="fas fa-upload me-1"></i> @Localizer["ImportSupplierItems"]
+                </button>
+                <input type="file" id="itemsExcelFileInputFirst" accept=".xlsx,.xls" style="display:none" />
+            </div>
         </div>
-</div>
     </div>
     <!-- Search Bar -->
-    <form id="supplier-search-form" class="row g-2 align-items-end mb-3">
+    <section class="card shadow-sm mb-3">
+        <div class="card-header bg-light fw-semibold">@Localizer["SearchFiltersTitle"]</div>
+        <form id="supplier-search-form" class="card-body row g-2 align-items-end">
         <div class="col-md-3">
             <label for="searchMa" class="form-label">@Localizer["SupplierCode"]</label>
             <input type="text" id="searchMa" name="ma" class="form-control" placeholder="@Localizer["EnterSupplierCode"]">
@@ -53,7 +57,7 @@
             <label for="searchTen" class="form-label">@Localizer["SupplierName"]</label>
             <input type="text" id="searchTen" name="ten" class="form-control" placeholder="@Localizer["EnterSupplierName"]">
         </div>
-        <div class="col-md-5 d-flex gap-3 align-items-center">
+        <div class="col-md-5 d-flex flex-wrap gap-2 align-items-center supplier-filter-actions">
             <button type="button" id="btnReset" class="btn btn-secondary"><i class="fas fa-undo"></i> @Localizer["Refresh"]</button>
             <div style="width: 6px"></div>
             <button type="button" id="btnSearch" class="btn btn-primary"><i class="fas fa-search"></i> @Localizer["Search"]</button>
@@ -62,9 +66,14 @@
             <div style="width: 6px"></div>
             <button type="button" id="btnExportMaster" class="btn btn-danger"><i class="fas fa-download"></i> @Localizer["ExportMaster"]</button>
         </div>
-    </form>
+        </form>
+    </section>
 
     <!-- Suppliers Grid -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">@Localizer["SupplierListTitle"]</h6>
+        <span class="text-muted small supplier-list-hint">@Localizer["SupplierListHint"]</span>
+    </div>
     <div class="table-responsive border rounded" style="max-height:550px;height:550px;overflow:auto;">
         <table class="table table-sm table-hover table-bordered align-middle" id="suppliersTable">
             <thead class="table-light">
@@ -175,7 +184,7 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Short name</label>
+                            <label class="form-label">@Localizer["ShortName"]</label>
                             <input id="shortName" class="form-control" />
                         </div>
                     </div>
@@ -207,7 +216,8 @@
             </div>
             <div class="modal-body">
                 <div style="margin-bottom: 12px;">
-                    <button type="button" class="btn btn-outline-success btn-sm" id="btnImportItemsExcel"><i class="fas fa-file-excel"></i> @Localizer["ImportExcel"]</button>
+                    <span class="fw-semibold me-2">@Localizer["SupplierItemToolsTitle"]</span>
+                    <button type="button" class="btn btn-outline-success btn-sm" id="btnImportItemsExcel"><i class="fas fa-file-excel"></i> @Localizer["ImportSupplierItems"]</button>
                     <input type="file" id="itemsExcelFileInput" accept=".xlsx,.xls" style="display:none" />
                     <button type="button" class="btn btn-outline-primary btn-sm" id="btnExportTemplateExcel"><i class="fas fa-download"></i> @Localizer["TemplateFile"]</button>
 

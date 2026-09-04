@@ -254,6 +254,41 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             return result ?? string.Empty;
         }
+
+        public async Task<string> CheckMaterialCodeByGoodCode(string codeNcc)
+        {
+            return await _context.MATERIALs
+                .Where(m => m.Material_Code != null && m.Code_Suppiler == codeNcc)
+                .OrderByDescending(m => m.Material_Code)
+                .Select(m => m.Material_Code)
+                .FirstOrDefaultAsync() ?? string.Empty;
+        }
+
+        public async Task<string> CheckMaterialCodeByName(string category, string name)
+        {
+            var normalizedName = NormalizeMaterialName(name);
+
+            return await _context.MATERIALs
+                .Where(m =>
+                    m.Material_Code != null &&
+                    m.Category_VN != null &&
+                    m.Category_VN.Contains(category) &&
+                    (m.Material_Name_VN.Replace("\r", "").Replace("\n", "").Replace("\t", "").Trim() == normalizedName ||
+                     m.Material_Name_EN.Replace("\r", "").Replace("\n", "").Replace("\t", "").Trim() == normalizedName ||
+                     m.Material_Name_JP.Replace("\r", "").Replace("\n", "").Replace("\t", "").Trim() == normalizedName))
+                .OrderByDescending(m => m.Material_Code)
+                .Select(m => m.Material_Code)
+                .FirstOrDefaultAsync() ?? string.Empty;
+        }
+
+        private static string NormalizeMaterialName(string? name)
+        {
+            return (name ?? string.Empty)
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("\t", string.Empty)
+                .Trim();
+        }
         // Search date by Material View
         public async Task<ListRequest<MATERIAL>> SearchDateByMaterialViewAsync(SearchMaterialVM search)
         {

@@ -208,6 +208,37 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        public async Task<GenericResponse<string>> CheckMaterialCodeByGoodCode(string codeNcc)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                result.Data = await _repo.CheckMaterialCodeByGoodCode(codeNcc);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+
+        public async Task<GenericResponse<string>> CheckMaterialCodeByName(string category, string NameEN)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                result.Data = await _repo.CheckMaterialCodeByName(category, NameEN);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
         // Search date by Material View
         public async Task<GenericResponse<ListRequest<MATERIAL>>> SearchDateByMaterialViewAsync(SearchMaterialVM search)
         {

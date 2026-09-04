@@ -727,7 +727,9 @@
         NVCHR_ThanhPhan: 'Composition',
         NVCHR_KichThuoc: 'Dimensions',
         NVCHR_DongMay: 'UsedForMachine',
-        NVCHR_TinhNang: 'Feature'
+        NVCHR_TinhNang: 'Feature',
+        VCHR_TenRecomment: 'ProposedNameLabel',
+        ConfirmStatus: 'ConfirmStatus'
     };
     async function loadHistory(confirmId) {
         try {

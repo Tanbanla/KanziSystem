@@ -168,9 +168,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == Id);
             if (row == null) return false;
 
-            var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
+            var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.ID == row.ID_RequestQuote)
             .ToListAsync();
-            if (rq == null) return false;
+            if (!rq.Any()) return false;
 
             var now = DateTime.Now;
             var user = User ?? "SYSTEM";
@@ -372,9 +372,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == id);
             if (row == null) return false;
 
-            var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.CHR_MaHangNCC == row.NVCHR_Note)
+            var rq = await _context.BaoGia_Request_of_Quotations.Where(x => x.ID == row.ID_RequestQuote)
                 .ToListAsync();
-            if (rq == null) return false;
+            if (!rq.Any()) return false;
 
             var now = DateTime.Now; var user = approvedBy ?? "SYSTEM";
             row.CHR_Status = "Confirmed";
@@ -457,7 +457,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(newConfirmNames);
             }
             // Cập nhật các đơn đã có confirm name
-            foreach(var a in existingConfirmNames)
+            foreach (var a in existingConfirmNames)
             {
                 a.CHR_StatusShip = "Confirming";
                 a.CHR_StatusACC = "Confirmed";
@@ -686,7 +686,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     ActionDate = DateTime.Now
                 });
             }
-            if(historyS.Any())
+            if (historyS.Any())
                 await _context.BaoGia_Confirm_Name_Quotation_Histories.AddRangeAsync(historyS);
             await _context.SaveChangesAsync();
             return true;
@@ -1002,7 +1002,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
         }
         // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
-        public async Task<bool> UpdateRequestForPICPURAsync(
+        public async Task<bool> UpdateRequestForPICPURAsyncOld(
             List<ConfirmNameInputExcel> baoGia,
             string user)
         {
@@ -1052,6 +1052,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 confirmName.VCHR_UserShip = user;
                 confirmName.NVCHR_LyDo = "Tên xác nhận của Ship và nhà cung cấp khác nhau";
                 confirmName.CHR_StatusShip = "Confirmed";
+                confirmName.CHR_StatusACC = "Confirmed";
                 confirmName.VCHR_TenHaiQuan = item.VCHR_TenHaiQuan;
                 confirmName.DTM_UpdateDate = now;
                 confirmName.VCHR_UpdateBy = user;
@@ -1066,6 +1067,149 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
 
             return true;
+        }
+        // Cập nhật thông tin yêu cầu PIC PUR cần xác nhận lại báo giá
+        public async Task<bool> UpdateRequestForPICPURAsync(
+            List<ConfirmNameInputExcel> baoGia,
+            string user)
+        {
+            if (baoGia == null || !baoGia.Any())
+                return false;
+
+            var now = DateTime.Now;
+            var ids = baoGia
+                .Select(x => x.ID)
+                .Distinct()
+                .ToList();
+
+            if (ids.Count == 0)
+                return false;
+
+            await using var tran = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var confirmNames = await _context.BaoGia_Confirm_Name_Quotations
+                    .Where(x => ids.Contains(x.ID))
+                    .ToListAsync();
+                if (!confirmNames.Any())
+                    return false;
+
+                var requestQuotes = await _context.BaoGia_Request_of_Quotations
+                    .Where(x => confirmNames.Select(c => c.ID_RequestQuote).Contains(x.ID))
+                    .ToListAsync();
+                if (!requestQuotes.Any()) return false;
+                var confirmDict = confirmNames.ToDictionary(x => x.ID);
+
+                var requestDict = requestQuotes.ToDictionary(x => x.ID);
+
+                var vendorCodes = requestQuotes
+                    .Select(x => x.CHR_MaNCC)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct()
+                    .ToList();
+                var vendors = await _context.IM_NCC_NEWs
+                    .Where(x => vendorCodes.Contains(x.Ma))
+                    .ToListAsync();
+                var vendorRegionByCode = vendors
+                    .GroupBy(x => x.Ma)
+                    .ToDictionary(x => x.Key, x => x.First().Khuvuc,
+                        StringComparer.OrdinalIgnoreCase);
+                var histories = new List<BaoGia_Confirm_Name_Quotation_History>();
+
+                foreach (var item in baoGia)
+                {
+                    if (!confirmDict.TryGetValue(item.ID, out var confirmName))
+                        continue;
+
+                    if (!requestDict.TryGetValue(confirmName.ID_RequestQuote, out var request))
+                        continue;
+                    if (!vendorRegionByCode.TryGetValue(request.CHR_MaNCC ?? string.Empty, out var region))
+                        continue;
+                    var checkDomestic = string.Equals(region?.Trim(), "Domestic",StringComparison.OrdinalIgnoreCase);
+                    if (checkDomestic)
+                    {
+                        var oldValue = confirmName.VCHR_TenHaiQuan;
+
+                        if (!string.Equals(
+                                oldValue?.Trim(),
+                                item.VCHR_TenHaiQuan?.Trim(),
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            histories.Add(new BaoGia_Confirm_Name_Quotation_History
+                            {
+                                QuotationID = confirmName.ID_RequestQuote,
+                                ConfirmID = confirmName.ID,
+                                OldValue = oldValue,
+                                NewValue = item.VCHR_TenHaiQuan,
+                                ActionBy = user,
+                                ActionDate = now
+                            });
+                        }
+
+                        confirmName.CHR_Status = "Confirming";
+                        confirmName.DTM_UserShip = now;
+                        confirmName.VCHR_UserShip = user;
+                        confirmName.NVCHR_LyDo = "Tên xác nhận của Ship và nhà cung cấp khác nhau";
+                        confirmName.CHR_StatusShip = "Confirmed";
+                        confirmName.CHR_StatusACC = "Confirmed";
+                        confirmName.VCHR_TenHaiQuan = item.VCHR_TenHaiQuan;
+                        confirmName.DTM_UpdateDate = now;
+                        confirmName.VCHR_UpdateBy = user;
+                    }
+                    else
+                    {
+                        var oldValue = confirmName.VCHR_TenHaiQuan;
+
+                        if (!string.Equals(
+                                oldValue?.Trim(),
+                                item.VCHR_TenHaiQuan?.Trim(),
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            histories.Add(new BaoGia_Confirm_Name_Quotation_History
+                            {
+                                QuotationID = confirmName.ID_RequestQuote,
+                                ConfirmID = confirmName.ID,
+                                OldValue = oldValue,
+                                NewValue = item.VCHR_TenHaiQuan,
+                                ActionBy = user,
+                                ActionDate = now
+                            });
+                        }
+
+                        confirmName.CHR_Status = "Confirmed";
+                        confirmName.DTM_UserShip = now;
+                        confirmName.VCHR_UserShip = user;
+                        confirmName.NVCHR_LyDo = "";
+                        confirmName.CHR_StatusShip = "Confirmed";
+                        confirmName.CHR_StatusACC = "Confirmed";
+                        confirmName.DTM_UpdateDate = now;
+                        confirmName.VCHR_UpdateBy = user;
+
+                        // update thông tin đơn báo giá
+                        request.NVCHR_NameVN = item.VCHR_TenHaiQuan;
+                        request.ID_Status = "DONE";
+                        request.ID_StepBaoGia = 13;
+                    }
+                }
+
+                if (histories.Any())
+                {
+                    await _context.BaoGia_Confirm_Name_Quotation_Histories
+                        .AddRangeAsync(histories);
+                }
+
+                await _context.SaveChangesAsync();
+
+                await tran.CommitAsync();
+
+                return true;
+            }
+            catch
+            {
+                await tran.RollbackAsync();
+                throw;
+            }
         }
         //Export file ten hanh xac nhan
         public async Task<List<dynamic>> ExportConfirmedMaterialNamesAsync(string? TenHang, string? SoDon, string? TrangThai, string? section, string? role, string user)
@@ -1659,8 +1803,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                 parameters.Add("@TrangThai", req.TrangThai.Trim());
             }
-            string statusColumn = string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase)? "CHR_StatusShip":
-                string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase)? "CHR_Status": "CHR_StatusACC";
+            string statusColumn = string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase) ? "CHR_StatusShip" :
+                string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase) ? "CHR_Status" : "CHR_StatusACC";
             sql.Append($@"
                     )
                     SELECT

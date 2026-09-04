@@ -333,7 +333,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 // Insert xác nhận tên và gửi mail trong background
                 var MaterialsNew = insertedList
-                    .Where(l => string.IsNullOrEmpty(l.CHR_MaHangNoiBo) && l.ID_StepBaoGia >= 6 && l.BIT_LayBaoGia == true)
+                    .Where(l => string.IsNullOrEmpty(l.CHR_MaHangNoiBo?.Trim()) && l.ID_StepBaoGia >= 6 && l.BIT_LayBaoGia == true)
                     .ToList();
 
                 // Insert xác nhận tên và gửi mail trong background
@@ -376,7 +376,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var materialsBySupplier = materialsInGroup
                                         .GroupBy(m => (
                                             CHR_MaHangNCC: (m.CHR_MaHangNCC ?? "").Trim(),
-                                            CHR_NameEN: (m.CHR_NameEN ?? "").Trim()
+                                            CHR_NameEN: string.IsNullOrWhiteSpace(m.CHR_MaHangNCC)
+                                                ? (m.CHR_NameEN ?? "").Trim()
+                                                : string.Empty
                                         ))
                                         .ToDictionary(
                                             g => g.Key,
@@ -390,11 +392,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         var supplierCode = supplierKey.CHR_MaHangNCC;
                                         var supplierName = supplierKey.CHR_NameEN;
 
-                                        var checkCode = await materialService.CheckMaterialCode(
-                                            supplierCode,
-                                            materials.First().NVCHR_ChungLoai ?? "",
-                                            supplierName
-                                        );
+                                        var checkCode = string.IsNullOrWhiteSpace(supplierCode)
+                                            ? await materialService.CheckMaterialCodeByName(
+                                                materials.First().NVCHR_ChungLoai ?? "", supplierName)
+                                            : await materialService.CheckMaterialCodeByGoodCode(supplierCode);
 
                                         if (!checkCode.Success)
                                         {

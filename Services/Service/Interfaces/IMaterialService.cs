@@ -29,6 +29,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<string>> MaterialCodeLater(string type);
         // check ma hang
         public Task<GenericResponse<string>> CheckMaterialCode(string codeNcc, string category, string NameEN);
+        public Task<GenericResponse<string>> CheckMaterialCodeByGoodCode(string codeNcc);
+        public Task<GenericResponse<string>> CheckMaterialCodeByName(string category, string NameEN);
         // Search date by Material View
         Task<GenericResponse<ListRequest<MATERIAL>>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
         // Export danh sách linh kiện

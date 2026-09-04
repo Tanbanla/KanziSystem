@@ -231,7 +231,7 @@
             </div>
 
             <div id="confirmedTabPane" class="tab-pane-area d-none">
-                <div class="card-list" id="confirmedCardList">
+                <div class="card-list" id="confirmedCardList" style="max-height:68vh; overflow-y:auto;">
                     <div class="text-center text-muted py-4">@Localizer["NoData"]</div>
                 </div>
             </div>
@@ -505,7 +505,9 @@
             Actions = Localizer["Actions"].Value,
             Record = Localizer["Record"].Value,
             Datafield = Localizer["Datafield"].Value,
-            Reason = Localizer["Reason"].Value
+            Reason = Localizer["Reason"].Value,
+            MaterialCode = Localizer["MaterialCode"].Value,
+            ConfirmStatus = Localizer["ConfirmStatus"].Value
         }));
     </script>
     <script src="~/js/ConfirmNameV2.js" asp-append-version="true"></script>

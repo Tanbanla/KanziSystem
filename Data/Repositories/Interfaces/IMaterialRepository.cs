@@ -28,6 +28,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<string> MaterialCodeLater(string type);
         // check ma hang
         public Task<string> CheckMaterialCode(string codeNcc, string category, string NameEN);
+        public Task<string> CheckMaterialCodeByGoodCode(string codeNcc);
+        public Task<string> CheckMaterialCodeByName(string category, string NameEN);
         // Search date by Material View
         Task<ListRequest<MATERIAL>> SearchDateByMaterialViewAsync(SearchMaterialVM search);
         // Delete Material

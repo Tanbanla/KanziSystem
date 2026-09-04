@@ -27,7 +27,6 @@ builder.Services.AddControllersWithViews()
 var costManagerConnection = builder.Configuration.GetConnectionString("CostManagerConnection");
 var workingControlConnection = builder.Configuration.GetConnectionString("WorkingControlConnection");
 var agentConnection = builder.Configuration.GetConnectionString("AgentConnection");
-var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "";
 // Add services to the container and require authentication globally by default.
 
 builder.Services.AddControllersWithViews(options =>
@@ -51,9 +50,9 @@ builder.Services.AddSession(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/" + baseUrl + "Account/Login"; // Đường dẫn đến trang login
-        options.LogoutPath = "/" + baseUrl + "Account/Logout"; // Đường dẫn logout
-        options.AccessDeniedPath = "/" + baseUrl + "Account/AccessDenied"; // Đường dẫn khi bị từ chối truy cập
+        options.LoginPath = "/Account/Login"; // Đường dẫn đến trang login
+        options.LogoutPath = "/Account/Logout"; // Đường dẫn logout
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Đường dẫn khi bị từ chối truy cập
         options.ExpireTimeSpan = TimeSpan.FromHours(10); // Thời gian hết hạn cookie 3 tiếng
         options.SlidingExpiration = true; // Gia hạn cookie khi user hoạt động
         options.Cookie.Name = ".PRJ_WAREHOUSE_BIVN.Auth";
@@ -128,7 +127,7 @@ app.Use(async (context, next) =>
             await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             // Đưa người dùng về trang đăng nhập
-            var loginUrl = $"{baseUrl}/Account/Login";
+            var loginUrl = $"{context.Request.PathBase}/Account/Login";
             context.Response.Redirect(loginUrl);
             return;
         }

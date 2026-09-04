@@ -276,14 +276,34 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (listDelete == null || !listDelete.Any())
                 throw new Exception("Không có dữ liệu để xóa");
 
+            static string NormalizeText(string? value)
+            {
+                return (value ?? string.Empty).Trim().Normalize(NormalizationForm.FormC);
+            }
+
             var keys = listDelete
-                .Select(x => $"{x.CHR_MaNCC}|{x.NVCHR_ChungLoai}")
-                .ToHashSet();
+                .Select(x => $"{NormalizeText(x.CHR_MaNCC)}|{NormalizeText(x.NVCHR_ChungLoai)}")
+                .Where(x => !x.StartsWith("|", StringComparison.Ordinal))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (keys.Count == 0)
+                return false;
+
+            var maNccList = listDelete
+                .Select(x => NormalizeText(x.CHR_MaNCC))
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var entitiesToDelete = await _context.BaoGia_NCC_Categories
-                .Where(c => keys.Contains(
-                    c.CHR_MaNCC + "|" + c.NVCHR_ChungLoai))
+                .Where(c => c.CHR_MaNCC != null
+                    && maNccList.Contains(c.CHR_MaNCC.Trim()))
                 .ToListAsync();
+
+            entitiesToDelete = entitiesToDelete
+                .Where(c => keys.Contains(
+                    $"{NormalizeText(c.CHR_MaNCC)}|{NormalizeText(c.NVCHR_ChungLoai)}"))
+                .ToList();
 
             if (!entitiesToDelete.Any())
                 return false;

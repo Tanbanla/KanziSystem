@@ -130,7 +130,7 @@
     <value>Excel thêm nhà cung cấp</value>
   </data>
   <data name="SupplierCode" xml:space="preserve">
-    <value>Mã</value>
+    <value>Mã nhà cung cấp</value>
   </data>
   <data name="EnterSupplierCode" xml:space="preserve">
     <value>Nhập mã nhà cung cấp</value>
@@ -154,13 +154,13 @@
     <value>Địa chỉ</value>
   </data>
   <data name="Phone" xml:space="preserve">
-    <value>SĐT</value>
+    <value>Số điện thoại</value>
   </data>
   <data name="Region" xml:space="preserve">
     <value>Khu vực</value>
   </data>
   <data name="Group" xml:space="preserve">
-    <value>Nhóm</value>
+    <value>Nhóm nhà cung cấp</value>
   </data>
   <data name="Actions" xml:space="preserve">
     <value>Thao tác</value>
@@ -178,7 +178,7 @@
     <value>Trang {0}</value>
   </data>
   <data name="SupplierModalTitle" xml:space="preserve">
-    <value>Nhà cung cấp</value>
+    <value>Thông tin nhà cung cấp</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Đóng</value>
@@ -205,25 +205,25 @@
     <value>Điều kiện thanh toán</value>
   </data>
   <data name="CustomsProcedure" xml:space="preserve">
-    <value>Thủ tục mở hải quan</value>
+    <value>Yêu cầu xác nhận thủ tục hải quan</value>
   </data>
   <data name="NoNeed" xml:space="preserve">
-    <value>Không cần</value>
+    <value>Không yêu cầu</value>
   </data>
   <data name="Need" xml:space="preserve">
-    <value>Cần</value>
+    <value>Yêu cầu</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>Xác nhận</value>
+    <value>Đã xác nhận</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Lưu</value>
   </data>
   <data name="SupplierItemsTitle" xml:space="preserve">
-    <value>Mặt hàng nhà cung cấp</value>
+    <value>Danh mục hàng hóa của nhà cung cấp</value>
   </data>
   <data name="SupplierShort" xml:space="preserve">
-    <value>NCC</value>
+    <value>Nhà cung cấp</value>
   </data>
   <data name="ImportExcel" xml:space="preserve">
     <value>Nhập Excel</value>
@@ -235,16 +235,16 @@
     <value>Chủng loại</value>
   </data>
   <data name="MadeIn" xml:space="preserve">
-    <value>Made In</value>
+    <value>Nước sản xuất</value>
   </data>
   <data name="Status" xml:space="preserve">
-    <value>Status</value>
+    <value>Trạng thái</value>
   </data>
   <data name="PIC" xml:space="preserve">
     <value>PIC</value>
   </data>
   <data name="Mail" xml:space="preserve">
-    <value>Mail</value>
+    <value>Email</value>
   </data>
   <data name="ItemModalHint" xml:space="preserve">
     <value>Chỉ cần nhập dữ liệu ở ô đầu tiên (Mã hàng). Các ô khác có thể bỏ trống.</value>
@@ -319,7 +319,7 @@
     <value>Chi tiết</value>
   </data>
   <data name="ExportMaster" xml:space="preserve">
-    <value>Xuất dữ liệu master</value>
+    <value>Xuất DS nhà cung cấp</value>
   </data>
   <data name="UploadExcelVendor" xml:space="preserve">
     <value>Tải lên Excel Vendor</value>
@@ -334,10 +334,10 @@
     <value>Xuất dữ liệu bảng</value>
   </data>
   <data name="SearchCategoryLabel" xml:space="preserve">
-    <value>Tìm chủng loại</value>
+    <value>Tìm theo tên danh mục hàng hóa</value>
   </data>
   <data name="SearchCategoryPlaceholder" xml:space="preserve">
-    <value>Nhập tên chủng loại...</value>
+    <value>Nhập tên danh mục hàng hóa...</value>
   </data>
   <data name="SearchCategoryButton" xml:space="preserve">
     <value>Tìm</value>
@@ -346,7 +346,7 @@
     <value>Thêm chủng loại cho nhà cung cấp</value>
   </data>
   <data name="CategoryPlaceholder" xml:space="preserve">
-    <value>Chủng loại</value>
+    <value>Danh mục hàng hóa</value>
   </data>
   <data name="MadeInPlaceholder" xml:space="preserve">
     <value>Sản xuất</value>
@@ -358,7 +358,7 @@
     <value>Mail</value>
   </data>
   <data name="AddCategoryButton" xml:space="preserve">
-    <value>Thêm chủng loại</value>
+    <value>Thêm danh mục hàng hóa</value>
   </data>
   <data name="StatusActive" xml:space="preserve">
     <value>Hoạt động</value>
@@ -380,5 +380,35 @@
   </data>
   <data name="UnexpectedErrorMessage" xml:space="preserve">
     <value>Có lỗi xảy ra</value>
+  </data>
+  <data name="SupplierDataToolsTitle" xml:space="preserve">
+    <value>Thao tác dữ liệu nhà cung cấp</value>
+  </data>
+  <data name="SupplierItemToolsTitle" xml:space="preserve">
+    <value>Thao tác danh mục hàng hóa</value>
+  </data>
+  <data name="SearchFiltersTitle" xml:space="preserve">
+    <value>Bộ lọc tìm kiếm</value>
+  </data>
+  <data name="SupplierListTitle" xml:space="preserve">
+    <value>Danh sách nhà cung cấp</value>
+  </data>
+  <data name="SupplierListHint" xml:space="preserve">
+    <value>Chọn Chi tiết để xem danh mục hàng hóa của từng nhà cung cấp</value>
+  </data>
+  <data name="ExportSupplierList" xml:space="preserve">
+    <value>Xuất danh sách nhà cung cấp</value>
+  </data>
+  <data name="ImportSupplierList" xml:space="preserve">
+    <value>Nhập danh sách nhà cung cấp</value>
+  </data>
+  <data name="ImportSupplierItems" xml:space="preserve">
+    <value>Nhập danh mục hàng hóa</value>
+  </data>
+  <data name="DownloadSupplierTemplate" xml:space="preserve">
+    <value>Tải file mẫu nhập danh mục hàng hóa</value>
+  </data>
+  <data name="ShortName" xml:space="preserve">
+    <value>Tên viết tắt</value>
   </data>
 </root>

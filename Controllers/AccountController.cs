@@ -156,8 +156,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                 new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
             );
-             var ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
-            return LocalRedirect(returnUrl ?? ApiBaseUrl+"/Account/Login");
+            return LocalRedirect(returnUrl ?? $"{HttpContext.Request.PathBase}/Account/Login");
         }
     }
 }

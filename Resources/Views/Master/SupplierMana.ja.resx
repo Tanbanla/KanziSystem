@@ -123,6 +123,16 @@
   <data name="HeaderTitle" xml:space="preserve">
     <value>仕入先管理</value>
   </data>
+  <data name="SupplierDataToolsTitle" xml:space="preserve"><value>仕入先データ操作</value></data>
+  <data name="SupplierItemToolsTitle" xml:space="preserve"><value>仕入先品目操作</value></data>
+  <data name="SearchFiltersTitle" xml:space="preserve"><value>検索条件</value></data>
+  <data name="SupplierListTitle" xml:space="preserve"><value>仕入先一覧</value></data>
+  <data name="SupplierListHint" xml:space="preserve"><value>「詳細」を選択すると仕入先ごとの品目を確認できます</value></data>
+  <data name="ExportSupplierList" xml:space="preserve"><value>仕入先一覧をエクスポート</value></data>
+  <data name="ImportSupplierList" xml:space="preserve"><value>仕入先一覧をインポート</value></data>
+  <data name="ImportSupplierItems" xml:space="preserve"><value>仕入先品目をインポート</value></data>
+  <data name="DownloadSupplierTemplate" xml:space="preserve"><value>仕入先テンプレートをダウンロード</value></data>
+  <data name="ShortName" xml:space="preserve"><value>略称</value></data>
   <data name="DownloadExcel" xml:space="preserve">
     <value>Excel ダウンロード</value>
   </data>
@@ -130,7 +140,7 @@
     <value>Excel アップロード</value>
   </data>
   <data name="SupplierCode" xml:space="preserve">
-    <value>コード</value>
+    <value>仕入先コード</value>
   </data>
   <data name="EnterSupplierCode" xml:space="preserve">
     <value>仕入先コードを入力</value>
@@ -160,7 +170,7 @@
     <value>地域</value>
   </data>
   <data name="Group" xml:space="preserve">
-    <value>グループ</value>
+    <value>仕入先グループ</value>
   </data>
   <data name="Actions" xml:space="preserve">
     <value>操作</value>
@@ -178,7 +188,7 @@
     <value>{0} ページ</value>
   </data>
   <data name="SupplierModalTitle" xml:space="preserve">
-    <value>仕入先</value>
+    <value>仕入先情報</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>閉じる</value>
@@ -205,22 +215,22 @@
     <value>支払い条件</value>
   </data>
   <data name="CustomsProcedure" xml:space="preserve">
-    <value>税関手続き</value>
+    <value>税関手続きの確認</value>
   </data>
   <data name="NoNeed" xml:space="preserve">
-    <value>不要</value>
+    <value>不要（要求なし）</value>
   </data>
   <data name="Need" xml:space="preserve">
-    <value>必要</value>
+    <value>必要（要求あり）</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>確認</value>
+    <value>確認済み</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>保存</value>
   </data>
   <data name="SupplierItemsTitle" xml:space="preserve">
-    <value>仕入先の品目</value>
+    <value>仕入先品目一覧</value>
   </data>
   <data name="SupplierShort" xml:space="preserve">
     <value>仕入先</value>
@@ -244,10 +254,10 @@
     <value>PIC</value>
   </data>
   <data name="Mail" xml:space="preserve">
-    <value>メール</value>
+    <value>メールアドレス</value>
   </data>
   <data name="ItemModalHint" xml:space="preserve">
-    <value>最初のフィールド（品目コード）だけ必須です。他は空でも構いません。</value>
+    <value>仕入先の品目カテゴリと連絡先を入力し、「仕入先品目カテゴリを追加」を選択してください。</value>
   </data>
   <data name="Notification" xml:space="preserve">
     <value>通知</value>
@@ -337,7 +347,7 @@
     <value>カテゴリ検索</value>
   </data>
   <data name="SearchCategoryPlaceholder" xml:space="preserve">
-    <value>カテゴリ名を入力...</value>
+    <value>品目カテゴリを入力...</value>
   </data>
   <data name="SearchCategoryButton" xml:space="preserve">
     <value>検索</value>
@@ -346,7 +356,7 @@
     <value>仕入先にカテゴリを追加</value>
   </data>
   <data name="CategoryPlaceholder" xml:space="preserve">
-    <value>カテゴリ</value>
+    <value>仕入先品目カテゴリ</value>
   </data>
   <data name="MadeInPlaceholder" xml:space="preserve">
     <value>生産国</value>

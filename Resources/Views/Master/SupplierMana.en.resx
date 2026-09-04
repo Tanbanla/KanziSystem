@@ -123,6 +123,16 @@
   <data name="HeaderTitle" xml:space="preserve">
     <value>Supplier management</value>
   </data>
+  <data name="SupplierDataToolsTitle" xml:space="preserve"><value>Supplier data actions</value></data>
+  <data name="SupplierItemToolsTitle" xml:space="preserve"><value>Supplier item actions</value></data>
+  <data name="SearchFiltersTitle" xml:space="preserve"><value>Search filters</value></data>
+  <data name="SupplierListTitle" xml:space="preserve"><value>Supplier list</value></data>
+  <data name="SupplierListHint" xml:space="preserve"><value>Select Details to view items supplied by each supplier</value></data>
+  <data name="ExportSupplierList" xml:space="preserve"><value>Export supplier list</value></data>
+  <data name="ImportSupplierList" xml:space="preserve"><value>Import supplier list</value></data>
+  <data name="ImportSupplierItems" xml:space="preserve"><value>Import supplier items</value></data>
+  <data name="DownloadSupplierTemplate" xml:space="preserve"><value>Download supplier template</value></data>
+  <data name="ShortName" xml:space="preserve"><value>Short name</value></data>
   <data name="DownloadExcel" xml:space="preserve">
     <value>Download Excel</value>
   </data>
@@ -130,7 +140,7 @@
     <value>Upload Add Vendor</value>
   </data>
   <data name="SupplierCode" xml:space="preserve">
-    <value>Code</value>
+    <value>Supplier code</value>
   </data>
   <data name="EnterSupplierCode" xml:space="preserve">
     <value>Enter supplier code</value>
@@ -160,7 +170,7 @@
     <value>Region</value>
   </data>
   <data name="Group" xml:space="preserve">
-    <value>Group</value>
+    <value>Supplier group</value>
   </data>
   <data name="Actions" xml:space="preserve">
     <value>Actions</value>
@@ -178,7 +188,7 @@
     <value>Page {0}</value>
   </data>
   <data name="SupplierModalTitle" xml:space="preserve">
-    <value>Supplier</value>
+    <value>Supplier information</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
@@ -205,22 +215,22 @@
     <value>Payment terms</value>
   </data>
   <data name="CustomsProcedure" xml:space="preserve">
-    <value>Customs procedure</value>
+    <value>Customs procedure confirmation</value>
   </data>
   <data name="NoNeed" xml:space="preserve">
-    <value>No need</value>
+    <value>Not required</value>
   </data>
   <data name="Need" xml:space="preserve">
-    <value>Need</value>
+    <value>Required</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>Confirm</value>
+    <value>Confirmed</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
   <data name="SupplierItemsTitle" xml:space="preserve">
-    <value>Supplier items</value>
+    <value>Supplier item catalogue</value>
   </data>
   <data name="SupplierShort" xml:space="preserve">
     <value>Supplier</value>
@@ -235,7 +245,7 @@
     <value>Category</value>
   </data>
   <data name="MadeIn" xml:space="preserve">
-    <value>Made In</value>
+    <value>Country of origin</value>
   </data>
   <data name="Status" xml:space="preserve">
     <value>Status</value>
@@ -244,7 +254,7 @@
     <value>PIC</value>
   </data>
   <data name="Mail" xml:space="preserve">
-    <value>Mail</value>
+    <value>Email</value>
   </data>
   <data name="ItemModalHint" xml:space="preserve">
     <value>Only the first field (Item code) is required. Others can be left blank.</value>
@@ -319,7 +329,7 @@
     <value>Detail</value>
   </data>
   <data name="ExportMaster" xml:space="preserve">
-    <value>Export master data</value>
+    <value>Export all suppliers</value>
   </data>
   <data name="UploadExcelVendor" xml:space="preserve">
     <value>Upload Excel Vendor</value>
@@ -334,10 +344,10 @@
     <value>Export table data</value>
   </data>
   <data name="SearchCategoryLabel" xml:space="preserve">
-    <value>Search category</value>
+    <value>Search by item category</value>
   </data>
   <data name="SearchCategoryPlaceholder" xml:space="preserve">
-    <value>Enter category name...</value>
+    <value>Enter item category...</value>
   </data>
   <data name="SearchCategoryButton" xml:space="preserve">
     <value>Search</value>
@@ -346,7 +356,7 @@
     <value>Add category for supplier</value>
   </data>
   <data name="CategoryPlaceholder" xml:space="preserve">
-    <value>Category</value>
+    <value>Supplier item category</value>
   </data>
   <data name="MadeInPlaceholder" xml:space="preserve">
     <value>Made in</value>
@@ -358,7 +368,7 @@
     <value>Mail</value>
   </data>
   <data name="AddCategoryButton" xml:space="preserve">
-    <value>Add category</value>
+    <value>Add supplier item category</value>
   </data>
   <data name="StatusActive" xml:space="preserve">
     <value>Active</value>

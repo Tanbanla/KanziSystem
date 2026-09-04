@@ -46,6 +46,16 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 }
             }
 
+            var uncMatches = System.Text.RegularExpressions.Regex.Matches(sourcePath, @"\\\\[^""]+");
+            foreach (System.Text.RegularExpressions.Match match in uncMatches)
+            {
+                var value = match.Value.Trim().Trim('"', '\'');
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    candidates.Add((value, true));
+                }
+            }
+
             var raw = sourcePath.Trim().Trim('"', '\'');
             if (!string.IsNullOrWhiteSpace(raw))
             {
@@ -62,9 +72,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 }
             }
 
-            string? found = null;
-            string? matchedInputPath = null;
-            var matchedFromQuoted = false;
+            var savedFiles = new List<(string InputPath, string FileUrl)>();
+            var processedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
+
             foreach (var candidate in candidates)
             {
                 var p = candidate.Value.Replace("/", "\\").Trim();
@@ -72,59 +83,61 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     p = "\\" + p;
                 }
-                if (File.Exists(p))
+
+                if (!File.Exists(p) || !processedPaths.Add(p))
                 {
-                    found = p;
-                    matchedInputPath = candidate.Value;
-                    matchedFromQuoted = candidate.IsQuoted;
-                    break;
+                    continue;
+                }
+
+                var extension = Path.GetExtension(p).ToLowerInvariant();
+                if (!allowedExtensions.Contains(extension)) continue;
+
+                try
+                {
+                    var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
+                    if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
+
+                    var fileName = Path.GetFileName(p) ?? (Guid.NewGuid().ToString() + ".dat");
+                    var uniqueName = $"{DateTime.Now:yyyyMMdd}_{Guid.NewGuid():N}_{fileName}";
+                    var dest = Path.Combine(uploadFolder, uniqueName);
+
+                    using (var sourceStream = File.OpenRead(p))
+                    using (var destStream = new FileStream(dest, FileMode.Create))
+                    {
+                        await sourceStream.CopyToAsync(destStream);
+                    }
+
+                    var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
+                    var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
+                    savedFiles.Add((candidate.Value, fileUrl));
+                }
+                catch (Exception ex)
+                {
+                    result.Success = false;
+                    result.Message = ex.Message;
+                    return result;
                 }
             }
 
-            if (found == null) return null;
+            if (savedFiles.Count == 0) return null;
 
-            var extension = Path.GetExtension(found).ToLowerInvariant();
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
-            if (!allowedExtensions.Contains(extension)) return null;
-
-            try
+            var onlyQuotedPath = quoteMatches.Count == 1 &&
+                System.Text.RegularExpressions.Regex.IsMatch(sourcePath, "^\\s*([\"']).*\\1\\s*$");
+            if (onlyQuotedPath && savedFiles.Count == 1)
             {
-                var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
-                if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
-
-                var fileName = Path.GetFileName(found) ?? (Guid.NewGuid().ToString() + ".dat");
-                var uniqueName = $"{DateTime.Now:yyyyMMdd}_{Guid.NewGuid():N}_{fileName}";
-                var dest = Path.Combine(uploadFolder, uniqueName);
-
-                // Use asynchronous copy if possible, but for local files, synchronous is fine wrapped in Task
-                using (var sourceStream = File.OpenRead(found))
-                using (var destStream = new FileStream(dest, FileMode.Create))
-                {
-                    await sourceStream.CopyToAsync(destStream);
-                }
-
-                var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
-                var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
-
-                var onlyQuotedPath = System.Text.RegularExpressions.Regex.IsMatch(sourcePath, "^\\s*([\"']).*\\1\\s*$");
-                if (matchedFromQuoted && !string.IsNullOrWhiteSpace(matchedInputPath) && !onlyQuotedPath)
-                {
-                    result.Data = ReplaceFirstIgnoreCase(sourcePath, matchedInputPath, fileUrl);
-                }
-                else
-                {
-                    result.Data = fileUrl;
-                }
-
-                result.Success = true;
-                return result;
+                result.Data = savedFiles[0].FileUrl;
             }
-            catch (Exception ex)
+            else
             {
-                result.Success = false;
-                result.Message = ex.Message;
-                return result;
+                result.Data = sourcePath;
+                foreach (var savedFile in savedFiles)
+                {
+                    result.Data = ReplaceAllIgnoreCase(result.Data, savedFile.InputPath, savedFile.FileUrl);
+                }
             }
+
+            result.Success = true;
+            return result;
         }
        
         private static string ReplaceFirstIgnoreCase(string input, string oldValue, string newValue)
@@ -135,6 +148,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             if (index < 0) return input;
 
             return string.Concat(input.AsSpan(0, index), newValue, input.AsSpan(index + oldValue.Length));
+        }
+
+        private static string ReplaceAllIgnoreCase(string input, string oldValue, string newValue)
+        {
+            var result = input;
+            var startIndex = 0;
+
+            while (startIndex < result.Length)
+            {
+                var index = result.IndexOf(oldValue, startIndex, StringComparison.OrdinalIgnoreCase);
+                if (index < 0) break;
+
+                result = string.Concat(result.AsSpan(0, index), newValue, result.AsSpan(index + oldValue.Length));
+                startIndex = index + newValue.Length;
+            }
+
+            return result;
         }
         // Lấy file từ link 
         public async Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath)
@@ -150,51 +180,110 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             try
             {
-                var raw = filePath.Trim().Trim('"', '\'');
-                string fileNameOnly = Path.GetFileName(raw);
                 string uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/', '\\');
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
+                var inputPaths = new List<string>();
 
-                string physicalPath = raw;
-
-                if (raw.StartsWith("\\\\") || raw.StartsWith("//"))
+                var quoteMatches = System.Text.RegularExpressions.Regex.Matches(filePath, "\"([^\"]+)\"|'([^']+)'");
+                foreach (System.Text.RegularExpressions.Match match in quoteMatches)
                 {
-                    physicalPath = raw.Replace('/', Path.DirectorySeparatorChar);
-                }
-                else if (raw.StartsWith("/"))
-                {
-                    if (!string.IsNullOrWhiteSpace(uploadFolder))
-                    {
-                        physicalPath = Path.Combine(uploadFolder, fileNameOnly);
-                    }
-                    else
-                    {
-                        var webRoot = _env.WebRootPath ?? string.Empty;
-                        var trimmed = raw.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-                        physicalPath = Path.Combine(webRoot, trimmed);
-                    }
+                    var value = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value;
+                    if (!string.IsNullOrWhiteSpace(value)) inputPaths.Add(value.Trim());
                 }
 
-                physicalPath = physicalPath.Replace('/', Path.DirectorySeparatorChar);
+                var uncMatches = System.Text.RegularExpressions.Regex.Matches(filePath, @"\\\\[^""]+");
+                foreach (System.Text.RegularExpressions.Match match in uncMatches)
+                {
+                    var value = match.Value.Trim().Trim('"', '\'');
+                    if (!string.IsNullOrWhiteSpace(value)) inputPaths.Add(value);
+                }
 
-                if (!File.Exists(physicalPath))
+                if (inputPaths.Count == 0)
+                {
+                    inputPaths.Add(filePath.Trim().Trim('"', '\''));
+                }
+
+                var files = new List<(string PhysicalPath, string FileName)>();
+                var processedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var inputPath in inputPaths)
+                {
+                    var raw = inputPath.Trim().Trim('"', '\'');
+                    var fileNameOnly = Path.GetFileName(raw);
+                    string physicalPath = raw;
+
+                    if (raw.StartsWith("\\\\") || raw.StartsWith("//"))
+                    {
+                        physicalPath = raw.Replace('/', Path.DirectorySeparatorChar);
+                    }
+                    else if (raw.StartsWith("/"))
+                    {
+                        if (!string.IsNullOrWhiteSpace(uploadFolder))
+                        {
+                            physicalPath = Path.Combine(uploadFolder, fileNameOnly);
+                        }
+                        else
+                        {
+                            var webRoot = _env.WebRootPath ?? string.Empty;
+                            var trimmed = raw.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                            physicalPath = Path.Combine(webRoot, trimmed);
+                        }
+                    }
+
+                    physicalPath = physicalPath.Replace('/', Path.DirectorySeparatorChar);
+
+                    if (!File.Exists(physicalPath) || !processedPaths.Add(physicalPath)) continue;
+
+                    var extension = Path.GetExtension(physicalPath).ToLowerInvariant();
+                    if (allowedExtensions.Contains(extension))
+                    {
+                        files.Add((physicalPath, Path.GetFileName(physicalPath)));
+                    }
+                }
+
+                if (files.Count == 0)
                 {
                     result.Success = false;
-                    result.Message = "File not found.";
+                    result.Message = "File not found or file type is not supported.";
                     return result;
                 }
 
                 var ms = new MemoryStream();
-                using (var fs = File.OpenRead(physicalPath))
-                {
-                    await fs.CopyToAsync(ms);
-                }
-                ms.Position = 0;
+                string localFileName;
+                string contentType;
 
-                var localFileName = Path.GetFileName(physicalPath);
+                if (files.Count == 1)
+                {
+                    using (var fs = File.OpenRead(files[0].PhysicalPath))
+                    {
+                        await fs.CopyToAsync(ms);
+                    }
+
+                    localFileName = files[0].FileName;
+                    contentType = "application/octet-stream";
+                }
+                else
+                {
+                    using (var archive = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Create, true))
+                    {
+                        foreach (var file in files)
+                        {
+                            var entry = archive.CreateEntry(file.FileName, System.IO.Compression.CompressionLevel.Fastest);
+                            await using var entryStream = entry.Open();
+                            await using var fileStream = File.OpenRead(file.PhysicalPath);
+                            await fileStream.CopyToAsync(entryStream);
+                        }
+                    }
+
+                    localFileName = "quotation_files.zip";
+                    contentType = "application/zip";
+                }
+
+                ms.Position = 0;
                 var localFormFile = new FormFile(ms, 0, ms.Length, "file", localFileName)
                 {
                     Headers = new HeaderDictionary(),
-                    ContentType = "application/octet-stream"
+                    ContentType = contentType
                 };
 
                 result.Data = localFormFile;
@@ -208,8 +297,5 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 return result;
             }
         }
-
-
-
     }
 }

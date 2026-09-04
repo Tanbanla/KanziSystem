@@ -1741,7 +1741,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                 foreach (var item in data)
                 {
-                    item.ID_StepBaoGia = 1;
+                    item.ID_StepBaoGia = -1;
                     item.ID_Status = "RETURN_PIC";
                     item.DTM_UpdateLater = DateTime.Now;
                 }
