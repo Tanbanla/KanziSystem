@@ -35,7 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         protected string GetRolesUser()
         {
-            return User.FindFirst("Roles")?.Value ?? "";
+            return User.FindFirst("Roles")?.Value ?? "User";
         }
 
         protected int GetCurrentUserPermission()

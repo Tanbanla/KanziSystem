@@ -48,11 +48,9 @@
 </style>
 
 @*Hiển thị giống file excel*@
-
     <div class="row">
         <div class="col-md-12">
-            <!-- Card Control -->
-          
+            <!-- Card Control -->          
             <div class="card-body pt-0 pl-0">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="d-flex gap-2 flex-fill">
@@ -88,7 +86,11 @@
 
                     <!-- Cụm Tìm kiếm & Bộ lọc năm -->
                     <div class="d-flex align-items-center gap-2">
-                    <a href="~/ManagerDelivery/LogChangeHistory" class="btn btn-warning"><i class="fa-solid fa fa-laravel me-1"></i> Log Using </a>
+                    <!-- Nút bấm trên HTML -->
+                    <button type="button" class="btn btn-outline-success" id="btnExportWarning" onclick="exportWarningPullInOut()">
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Xuất PullIn/Out
+                    </button>
+                    <a href="~/ManagerDelivery/LogChangeHistory" class="btn btn-warning ml-2"><i class="fa-solid fa fa-laravel me-1 "></i> Log Using </a>
                        <a href="/File/Mau_Using.xlsx" class="btn btn-info ml-2"> <i class="fa fa-link"></i> File mẫu</a>
                         <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
                         <button type="button" class="btn btn-success text-white ms-2 ml-2" onclick="document.getElementById('fileExcel').click()">
@@ -96,8 +98,13 @@
                         </button>
                         <!-- Ô TÌM KIẾM THEO MÃ -->
                         <select id="selectYear" class="form-control form-select form-select-sm ml-2" style="width: 100px;" onchange="loadData()">
-                            <option value="2026">2026</option>
-                        </select>
+                            <option>@DateTime.Now.Year</option>
+                            <option></option>
+                        @for(int i = (DateTime.Now.Year - 1); i < (DateTime.Now.Year + 3); i++)
+                        {
+                            <option>@i</option>
+                        }
+                    </select>
                     </div>
                 </div>
             </div>
@@ -181,7 +188,11 @@
         document.addEventListener("DOMContentLoaded", function () {
             loadData(); // Load Vùng 1
         });
-
+                // Mã JavaScript
+    function exportWarningPullInOut() {
+            // Chuyển hướng trình duyệt đến Action ExportWarningPullInOut
+            window.location.href = '/ManagerDelivery/ExportWarningPullInOut';
+        }
       function loadData() {
             const selectedYear = parseInt(document.getElementById('selectYear').value) || 2026;
 

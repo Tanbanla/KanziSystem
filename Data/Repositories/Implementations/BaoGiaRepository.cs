@@ -2069,8 +2069,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var result = await _context.BaoGia_Request_of_Quotations
                 .Where(x =>
                     (string.IsNullOrEmpty(maDon) || x.CHR_MaDon == maDon) &&
-                    (string.IsNullOrEmpty(maHangNB) || x.CHR_MaHangNoiBo == maHangNB) &&
-                    (string.IsNullOrEmpty(NameEn) || x.CHR_NameEN == NameEn))
+                    (
+                        !string.IsNullOrEmpty(maHangNB)
+                            ? x.CHR_MaHangNoiBo == maHangNB
+                            : (string.IsNullOrEmpty(NameEn) || x.CHR_NameEN == NameEn) &&
+                              (string.IsNullOrEmpty(maHangNCC) || x.CHR_MaHangNCC == maHangNCC)
+                    )
+                )
                 .OrderBy(x => x.CHR_MaNCC)
                 .ThenBy(x => x.ID)
                 .AsNoTracking()

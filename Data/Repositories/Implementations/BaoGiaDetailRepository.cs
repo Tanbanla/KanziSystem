@@ -12,6 +12,7 @@ using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.QuoteResult;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
@@ -723,6 +724,92 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var result = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
             return result;
+        }
+        // Lấy thông tin  cho màn hình master báo giá
+        public async Task<List<dynamic>> SearchMasterQuoteInfoAsync(SearchQuoteResultViewModel vm)
+        {
+            if (vm == null)
+            {
+                throw new ArgumentNullException(nameof(vm));
+            }
+
+            var sql = new StringBuilder(@"
+                SELECT DISTINCT d.*
+                FROM BaoGia_Detail_of_Quotation AS d
+                LEFT JOIN BaoGia_Request_of_Quotation AS r
+                    ON d.ID_RequestQuote = r.ID
+                LEFT JOIN BaoGia_History_Detail_Request AS hd
+                    ON hd.ID_RQ_Detail = d.ID
+                WHERE 1 = 1");
+
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrWhiteSpace(vm.MaDon))
+            {
+                sql.Append(" AND r.CHR_MaDon LIKE '%' + @MaDon + '%'");
+                parameters.Add("MaDon", vm.MaDon.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaNcc))
+            {
+                sql.Append(" AND (r.CHR_MaNCC LIKE '%' + @MaNcc + '%' OR d.CHR_CodeNCC LIKE '%' + @MaNcc + '%')");
+                parameters.Add("MaNcc", vm.MaNcc.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaThietBi))
+            {
+                sql.Append(" AND r.CHR_MaThietBi LIKE '%' + @MaThietBi + '%'");
+                parameters.Add("MaThietBi", vm.MaThietBi.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaHangNoiBo))
+            {
+                sql.Append(" AND r.CHR_MaHangNoiBo LIKE '%' + @MaHangNoiBo + '%'");
+                parameters.Add("MaHangNoiBo", vm.MaHangNoiBo.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaHangNcc))
+            {
+                sql.Append(" AND d.CHR_MaHangNCC LIKE '%' + @MaHangNcc + '%'");
+                parameters.Add("MaHangNcc", vm.MaHangNcc.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.TrangThai))
+            {
+                sql.Append(" AND r.ID_Status LIKE '%' + @TrangThai + '%'");
+                parameters.Add("TrangThai", vm.TrangThai.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.ChungLoai))
+            {
+                sql.Append(" AND r.NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%'");
+                parameters.Add("ChungLoai", vm.ChungLoai.Trim());
+            }
+
+            // Thời gian khởi tạo của detail báo giá, không phải thời gian khởi tạo request.
+            if (vm.from.HasValue)
+            {
+                sql.Append(" AND d.DTM_CreateDate >= @From");
+                parameters.Add("From", vm.from.Value.Date);
+            }
+
+            if (vm.to.HasValue)
+            {
+                sql.Append(" AND d.DTM_CreateDate < DATEADD(DAY, 1, @To)");
+                parameters.Add("To", vm.to.Value.Date);
+            }
+
+            sql.Append(" ORDER BY d.ID DESC");
+
+            if (vm.PageSize > 0 && vm.PageIndex > 0)
+            {
+                sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
+                parameters.Add("Offset", (vm.PageIndex - 1) * vm.PageSize);
+                parameters.Add("PageSize", vm.PageSize);
+            }
+
+            var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
+            return result.ToList();
         }
     }
 }

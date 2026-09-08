@@ -596,8 +596,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false);
             entity.Property(e => e.VCHR_UserShip)
-                .HasMaxLength(20)
-                .IsUnicode(false);
+                .HasMaxLength(50);
             entity.Property(e => e.CHR_NameEN)
                 .HasMaxLength(650)
                 .IsUnicode(false);

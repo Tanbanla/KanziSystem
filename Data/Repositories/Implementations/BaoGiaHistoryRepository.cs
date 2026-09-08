@@ -1,13 +1,18 @@
 using Dapper;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
@@ -1229,7 +1234,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     h.*
                 FROM BaoGia_History_Request_of_Quotation as h
                 LEFT JOIN BaoGia_Request_of_Quotation as r ON h.ID_RequestQuote = r.ID
-                WHERE 1=1 ";
+                WHERE CHR_ActionType IN ('UPDATE', 'INSERT') ";
 
             var whereClauses = new List<string>();
             var parameters = new Dapper.DynamicParameters();
@@ -1258,6 +1263,39 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var result = (await _conn.QueryAsync<BaoGia_History_Request_of_Quotation>(sql, parameters)).ToList();
             return result;
         }
+        // Lấy thông tin phòng ban nhập lên
+        public async Task<List<dynamic>> GetExportOriginHistoryExcel(SearchHistoryInfoByMaDonModel vsm)
+        {
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
 
+            if (!string.IsNullOrEmpty(vsm.MaDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", vsm.MaDon);
+            }
+            if (!string.IsNullOrEmpty(vsm.MaHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo = @MaHang");
+                parameters.Add("MaHang", vsm.MaHang);
+            }
+            if (!string.IsNullOrEmpty(vsm.MaHangNCC))
+            {
+                whereClauses.Add("r.CHR_MaHangNCC = @MaHangNCC");
+                parameters.Add("MaHangNCC", vsm.MaHangNCC);
+            }
+
+            var whereSql = whereClauses.Any()
+                ? " WHERE h.CHR_ActionType = 'INSERT' AND " + string.Join(" AND ", whereClauses)
+                : string.Empty;
+            var sql = $@"SELECT h.*
+              FROM BaoGia_History_Request_of_Quotation as h 
+              left join BaoGia_Request_of_Quotation as r
+              on h.ID_RequestQuote = r.ID
+              {whereSql}
+             ";
+            var result = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
+            return result;
+        }
     }
 }

@@ -675,4 +675,75 @@
   <data name="StatusShip" xml:space="preserve">
     <value>Awaiting confirmation of the Ship's name.</value>
   </data>
-</root>
+  <data name="Toolbar" xml:space="preserve">
+    <value>Toolbar</value>
+  </data>
+  <data name="ExportOrigin" xml:space="preserve">
+    <value>Export original data</value>
+  </data>
+  <data name="OldValue" xml:space="preserve">
+    <value>Old value</value>
+  </data>
+  <data name="NewValue" xml:space="preserve">
+    <value>New value</value>
+  </data>
+  <data name="NoChanges" xml:space="preserve">
+    <value>Unable to determine the changed fields.</value>
+  </data>
+  <data name="InsertAction" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="UpdateAction" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="RequestNoPrefix" xml:space="preserve">
+    <value>No:</value>
+  </data>
+  <data name="DownloadQuote" xml:space="preserve">
+    <value>Download quote</value>
+  </data>
+  <data name="NoFile" xml:space="preserve">
+    <value>No file</value>
+  </data>
+  <data name="DownloadFailed" xml:space="preserve">
+    <value>Download failed</value>
+  </data>
+  <data name="DownloadDetails" xml:space="preserve">
+    <value>Details: </value>
+  </data>
+  <data name="MsgCannotExport" xml:space="preserve">
+    <value>Unable to export file</value>
+  </data>
+  <data name="MustSelectApprover" xml:space="preserve">
+    <value>You must select an approver before closing</value>
+  </data>
+  <data name="InvalidApprover" xml:space="preserve">
+    <value>Invalid approver</value>
+  </data>
+  <data name="EditTooltip" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="EnglishItemName" xml:space="preserve">
+    <value>English item name</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>Created by</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>Processing step</value>
+  </data>
+  <data name="ChangeHistory" xml:space="preserve">
+    <value>Change History</value>
+  </data>
+  <data name="OrderInformation" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value>Order Information</value>
+  </data>
+  <data name="RecordId" xml:space="preserve"><value>Record ID</value></data>
+  <data name="IsTemplate" xml:space="preserve"><value>Is template</value></data>
+  <data name="Deadline" xml:space="preserve"><value>Processing deadline</value></data>
+  <data name="UpdateLater" xml:space="preserve"><value>Next update date</value></data>
+  <data name="UpdateCount" xml:space="preserve"><value>Update count</value></data>
+  <data name="NextApprover" xml:space="preserve"><value>Approver</value></data>
+  <data name="QuotationReason" xml:space="preserve"><value>Quotation reason</value></data>
+  <data name="FileLink" xml:space="preserve"><value>File link</value></data>
+ </root>

@@ -8,6 +8,7 @@
     const pageSizeSelect = document.getElementById('historyPageSize');
     const btnExportHistory = document.getElementById('btnExportHistory');
     const btnImportHistory = document.getElementById('btnImportHistory');
+    const btnExpOrigin = document.getElementById('btnExpOrigin');
     const btnExportManaHistory = document.getElementById('btnExportManaHistory');
     let currentPage = 1;
     let pageSize = Number(pageSizeSelect?.value) || 50;
@@ -89,6 +90,76 @@
             showDialog({ title: window.i18nHistoryQuote?.Notification || 'Thông báo', message: err?.message || String(err), type: 'error' });
         } finally {
             hideLoading();
+            if (btnExportManaHistory) btnExportManaHistory.disabled = false;
+            if (btnExportHistory) btnExportHistory.disabled = false;
+        }
+    }
+
+    btnExpOrigin?.addEventListener('click', handleExpOriginClick);
+    async function handleExpOriginClick(ev) {
+        ev && ev.preventDefault();
+
+        if ((btnExpOrigin && btnExpOrigin.disabled) ||
+            (btnExportManaHistory && btnExportManaHistory.disabled) ||
+            (btnExportHistory && btnExportHistory.disabled)) return;
+
+        if (btnExpOrigin) btnExpOrigin.disabled = true;
+        if (btnExportManaHistory) btnExportManaHistory.disabled = true;
+        if (btnExportHistory) btnExportHistory.disabled = true;
+        showLoading(window.i18nHistoryQuote?.Exporting || 'Đang xuất...');
+
+        try {
+            const getDrawerValue = (id) =>
+                (document.getElementById(id)?.textContent || '').trim();
+
+            const maDon = getDrawerValue('historyDrawerOrder');
+            const maHang = getDrawerValue('historyDrawerMaterial');
+            const maHangNcc = getDrawerValue('historyDrawerSupplier');
+
+            if (!maDon || maDon === '-') {
+                throw new Error(window.i18nHistoryQuote?.MsgSelectGroupFailed || 'Vui lòng chọn đơn hàng');
+            }
+
+            const payload = {
+                MaDon: maDon,
+                MaHang: maHang,
+                MaHangNCC: maHangNcc,
+                NameEn: ''
+            };
+            const res = await fetch(apiUrl('/History/ExportOriginHistoryExcel'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const txt = await res.text().catch(() => null);
+                throw new Error(txt || (window.i18nHistoryQuote?.MsgCannotExport || 'Không thể xuất file'));
+            }
+
+            const blob = await res.blob();
+            let fileName = `HistoryQuote_${new Date().toISOString().replace(/[:.]/g, '')}.xlsx`;
+            try {
+                const cd = res.headers.get('content-disposition') || res.headers.get('Content-Disposition');
+                if (cd) {
+                    const m = /filename[^;=\\n]*=((['"]).*?\\2|[^;\\n]*)/.exec(cd);
+                    if (m && m[1]) fileName = m[1].replace(/['"]/g, '').trim();
+                }
+            } catch (e) { }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch(err) {
+            showDialog({ title: window.i18nHistoryQuote?.Notification || 'Thông báo', message: err?.message || String(err), type: 'error' });
+        } finally {
+            hideLoading();
+            if (btnExpOrigin) btnExpOrigin.disabled = false;
             if (btnExportManaHistory) btnExportManaHistory.disabled = false;
             if (btnExportHistory) btnExportHistory.disabled = false;
         }
@@ -251,7 +322,8 @@
                 sel.innerHTML = '';
                 const placeholderOpt = document.createElement('option');
                 placeholderOpt.value = '';
-                placeholderOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.SelectPlaceholder) || '-- Chọn --';
+                const T = window.i18nHistoryQuote || {};
+                placeholderOpt.textContent = T.SelectPlaceholder || '-- Chọn --';
                 sel.appendChild(placeholderOpt);
 
                 const body = { Step: stepNumber, SectionCost: sectionCode };
@@ -271,7 +343,7 @@
                 if (!list || !list.length) {
                     const emptyOpt = document.createElement('option');
                     emptyOpt.value = '';
-                    emptyOpt.textContent = (window.i18nQuotationResults && window.i18nQuotationResults.NoResults) || 'Không có kết quả';
+                    emptyOpt.textContent = T.NoResults || 'Không có kết quả';
                     sel.appendChild(emptyOpt);
                 } else {
                     list.forEach(item => {
@@ -597,46 +669,179 @@
         return found?.DisplayName || code;
     }
 
+    function parseHistoryJson(value) {
+        if (value === null || value === undefined || value === '') return {};
+        if (typeof value === 'object') return value;
+        try {
+            const parsed = JSON.parse(value);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch {
+            return {};
+        }
+    }
+
+    function getHistoryChangedFields(value, oldData, newData) {
+        const parsed = parseHistoryJson(value);
+        let fields = [];
+        if (Array.isArray(parsed)) {
+            fields = parsed.flatMap(item => typeof item === 'string' ? [item] : Object.keys(item || {}));
+        } else if (parsed && typeof parsed === 'object' && Object.keys(parsed).length) {
+            fields = Object.keys(parsed);
+        } else if (typeof value === 'string' && value.trim()) {
+            fields = value.split(',').map(item => item.trim());
+        }
+        if (!fields.length) fields = [...new Set([...Object.keys(oldData), ...Object.keys(newData)])];
+        return fields.filter((field, index, list) => field && list.indexOf(field) === index);
+    }
+
+    function historyFieldLabel(field, T) {
+        const labels = {
+            ID: T.RecordId || 'ID',
+            BIT_IsTemplate: T.IsTemplate || 'Là mẫu',
+            BIT_LayBaoGia: T.GetQuotation || 'Lấy báo giá',
+            CHR_CreateBy: T.CreatedBy || 'Người tạo',
+            CHR_Gap: T.Urgent || 'Gấp',
+            CHR_MaDon: T.OrderCode || 'Mã đơn',
+            CHR_MaHangNoiBo: T.MaterialCode || 'Mã vật tư nội bộ',
+            CHR_MaHangNCC: T.SupplierItemCode || 'Mã hàng nhà cung cấp',
+            CHR_MaNCC: T.SupplierCode || 'Mã nhà cung cấp',
+            CHR_MaThietBi: T.EquipmentCode || 'Mã thiết bị',
+            CHR_NameEN: T.EnglishItemName || 'Tên tiếng Anh',
+            CHR_Phanloai: T.Classification || 'Phân loại',
+            CHR_SectionCode: T.DepartmentCode || 'Mã bộ phận',
+            CHR_SectionName: T.Department || 'Bộ phận',
+            DTM_CreateDate: T.CreatedDate || 'Ngày tạo',
+            DTM_Deadline: T.Deadline || 'Hạn xử lý',
+            DTM_KyHan: T.SupplierSelectionDeadline || 'Hạn chọn nhà cung cấp',
+            DTM_NgayMuonNhan: T.DesiredReceiveDate || 'Ngày muốn nhận',
+            DTM_UpdateLater: T.UpdateLater || 'Ngày cập nhật tiếp theo',
+            ID_Status: T.Status || 'Trạng thái',
+            INT_SoLanUpdate: T.UpdateCount || 'Số lần cập nhật',
+            NVCHR_AnToan: T.SafetyStandard || 'Tiêu chuẩn an toàn',
+            NVCHR_COCQ: T.COCQ || 'CO/CQ',
+            NVCHR_ChatLieu: T.Material || 'Chất liệu',
+            NVCHR_ChungLoai: T.Category || 'Chủng loại',
+            NVCHR_DonVi: T.Unit || 'Đơn vị',
+            NVCHR_DongMay: T.UsedForMachine || 'Dùng cho máy',
+            NVCHR_FileThietKe: T.DesignFile || 'File thiết kế',
+            NVCHR_HinhDang: T.Shape || 'Hình dáng',
+            NVCHR_KichThuoc: T.Dimensions || 'Kích thước',
+            NVCHR_LyDo: T.Reason || 'Lý do',
+            NVCHR_MSDS: T.MSDS || 'MSDS',
+            NVCHR_NameVN: T.ItemNameVN || 'Tên tiếng Việt',
+            NVCHR_NhaSanXuat: T.Manufacturer || 'Nhà sản xuất',
+            NVCHR_Rohs: T.Rohs || 'ROHS',
+            NVCHR_TenNCC: T.SupplierName || 'Tên nhà cung cấp',
+            NVCHR_ThanhPhan: T.Composition || 'Thành phần',
+            NVCHR_TinhNang: T.Feature || 'Tính năng',
+            CHR_UserApproval: T.NextApprover || 'Người phê duyệt',
+            NVCHR_UserRequest: T.Requester || 'Người yêu cầu',
+            INT_SoLuong: T.Quantity || 'Số lượng',
+            ID_StepBaoGia: T.Step || 'Bước xử lý',
+            NVCHR_ReasonQuotation: T.QuotationReason || 'Lý do báo giá',
+            CHR_LinkFile: T.FileLink || 'Đường dẫn tệp'
+
+        };
+        if (labels[field]) return labels[field];
+        return String(field).replace(/^CHR_|^NVCHR_|^DTM_|^INT_|^BIT_|^ID_/, '')
+            .replace(/([a-z])([A-Z])/g, '$1 $2').replaceAll('_', ' ');
+    }
+
+    function historyValue(value) {
+        if (value === null || value === undefined || value === '') return '-';
+        if (typeof value === 'object') return JSON.stringify(value, null, 2);
+        return String(value);
+    }
+
+    function historyValueEqual(oldValue, newValue) {
+        return JSON.stringify(oldValue ?? null) === JSON.stringify(newValue ?? null);
+    }
+
+    function historyDataValue(data, field) {
+        if (Object.prototype.hasOwnProperty.call(data, field)) return data[field];
+        const key = Object.keys(data).find(item => item.toLowerCase() === String(field).toLowerCase());
+        return key ? data[key] : undefined;
+    }
+
     function buildHistoryHtml(result) {
         const data = Array.isArray(result) ? result : (result?.data || result?.Data || []);
         const T = window.i18nHistoryQuote || {};
         if (!Array.isArray(data) || data.length === 0) {
-            return `<div>${escapeHtml(T.MsgNoHistory || 'Không có lịch sử.')}</div>`;
+            return `<div class="text-muted small">${escapeHtml(T.MsgNoHistory || 'Không có lịch sử.')}</div>`;
         }
 
         const rows = data.map((h, index) => {
             const dateText = formatDateTime(getValue(h, ['CHR_Updatedate', 'chR_Updatedate']));
             const requestId = getValue(h, ['ID_RequestQuote', 'iD_RequestQuote']);
-            const action = mapActionText(getValue(h, ['CHR_ActionType', 'chR_ActionType']));
+            const actionCode = getValue(h, ['CHR_ActionType', 'chR_ActionType']);
+            const isInsert = String(actionCode || '').trim().toUpperCase() === 'INSERT';
             const updateBy = getValue(h, ['CHR_UpdateBy', 'chR_UpdateBy']);
             const updateName = getValue(h, ['NVCHR_UpdateName', 'nvchR_UpdateName']);
             const reason = getValue(h, ['NVCHR_LyDo', 'nvchR_LyDo']);
+            const oldData = parseHistoryJson(getValue(h, ['CHR_OldData', 'chR_OldData']));
+            const newData = parseHistoryJson(getValue(h, ['CHR_NewData', 'chR_NewData']));
+            const fields = getHistoryChangedFields(getValue(h, ['CHR_ChangedColumns', 'chR_ChangedColumns']), oldData, newData)
+                .filter(field => actionCode === 'INSERT' || !historyValueEqual(historyDataValue(oldData, field), historyDataValue(newData, field)));
+            const changes = fields.length ? fields.map(field => `
+                <div class="history-field-change">
+                    <div class="history-field-name">${escapeHtml(historyFieldLabel(field, T))}</div>
+                    <div class="history-old-new${isInsert ? ' history-insert-value' : ''}">
+                        ${isInsert ? '' : `<div class="history-old-value"><span>${escapeHtml(T.OldValue || 'Giá trị cũ')}</span><pre>${escapeHtml(historyValue(historyDataValue(oldData, field)))}</pre></div>
+                        <div class="history-change-arrow" aria-hidden="true">→</div>`}
+                        <div class="history-new-value"><span>${escapeHtml(T.NewValue || 'Giá trị mới')}</span><pre>${escapeHtml(historyValue(historyDataValue(newData, field)))}</pre></div>
+                    </div>
+                </div>`).join('') : `<div class="text-muted small">${escapeHtml(T.NoChanges || 'Không xác định được trường dữ liệu thay đổi.')}</div>`;
 
-            return `<tr>
-                <td class="text-center">${index + 1}</td>
-                <td>${escapeHtml(dateText)}</td>
-                <td>${escapeHtml(requestId)}</td>
-                <td>${escapeHtml(action)}</td>
-                <td>${escapeHtml(updateBy)}${updateName ? ` - ${escapeHtml(updateName)}` : ''}</td>
-                <td>${escapeHtml(reason)}</td>
-            </tr>`;
+            return `<div class="history-change-item">
+                <div class="history-change-header">
+                    <span class="history-change-icon"><i class="fas ${actionCode === 'INSERT' ? 'fa-plus' : 'fa-pen'}" aria-hidden="true"></i></span>
+                    <span class="history-change-action">${escapeHtml(actionCode === 'INSERT' ? (T.InsertAction || 'Thêm mới') : (T.UpdateAction || 'Cập nhật'))}</span>
+                    <span class="history-change-value">${escapeHtml(updateBy)}${updateName ? ` - ${escapeHtml(updateName)}` : ''}</span>
+                    <span class="history-change-meta">${escapeHtml(dateText)}${requestId ? ` · ${escapeHtml(T.RequestNoPrefix || 'No:')} ${escapeHtml(requestId)}` : ''}</span>
+                </div>
+                ${reason ? `<div class="history-change-reason">${escapeHtml(T.Reason || 'Lý do')}: ${escapeHtml(reason)}</div>` : ''}
+                <div class="history-fields-changed">${changes}</div>
+            </div>`;
         }).join('');
 
-        return `
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered">
-                    <thead class="table-light"><tr>
-                        <th style="width:60px">#</th>
-                        <th>${escapeHtml(T.HistoryTime || 'Thời gian')}</th>
-                        <th>${escapeHtml(T.RequestNo || 'Số Request')}</th>
-                        <th>${escapeHtml(T.Action || 'Hành động')}</th>
-                        <th>${escapeHtml(T.UpdatedBy || 'Người cập nhật')}</th>
-                        <th>${escapeHtml(T.Reason || 'Lý do')}</th>
-                    </tr></thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            </div>`;
+        return rows;
     }
+
+    const historyDrawer = document.getElementById('historyDetailDrawer');
+    const historyDrawerOverlay = document.getElementById('historyDrawerOverlay');
+
+
+    if (historyDrawer && historyDrawer.parentElement !== document.body) {
+        document.body.appendChild(historyDrawer);
+    }
+    if (historyDrawerOverlay && historyDrawerOverlay.parentElement !== document.body) {
+        document.body.appendChild(historyDrawerOverlay);
+    }
+
+    function closeHistoryDrawer() {
+        historyDrawer?.classList.remove('show');
+        historyDrawer?.setAttribute('aria-hidden', 'true');
+        historyDrawerOverlay?.classList.remove('show');
+        historyDrawerOverlay?.setAttribute('aria-hidden', 'true');
+    }
+
+    function openHistoryDrawer(button, content) {
+        document.getElementById('historyDrawerOrder').textContent = button.dataset.madon || '-';
+        document.getElementById('historyDrawerMaterial').textContent = button.dataset.mahang || '-';
+        document.getElementById('historyDrawerSupplier').textContent = button.dataset.mahangncc || '-';
+        const timeline = document.getElementById('historyChangeTimeline');
+        if (timeline) timeline.innerHTML = content;
+        historyDrawer?.classList.add('show');
+        historyDrawer?.setAttribute('aria-hidden', 'false');
+        historyDrawerOverlay?.classList.add('show');
+        historyDrawerOverlay?.setAttribute('aria-hidden', 'false');
+    }
+
+    document.getElementById('btnCloseHistoryDrawer')?.addEventListener('click', closeHistoryDrawer);
+    historyDrawerOverlay?.addEventListener('click', closeHistoryDrawer);
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && historyDrawer?.classList.contains('show')) closeHistoryDrawer();
+    });
 
     function showReasonModal({ modalId, textareaId, noticeId, confirmButtonId }) {
         return new Promise((resolve) => {
@@ -738,7 +943,7 @@
                 maHang,
                 maHangNCC: maHangNcc
             });
-            showDialog(T.PageTitleHistory || 'Lịch sử đơn', buildHistoryHtml(histories));
+            openHistoryDrawer(button, buildHistoryHtml(histories));
         } catch (error) {
             showDialog({
                 title: T.Notification || 'Thông báo',
@@ -924,7 +1129,7 @@
                    class="btn btn-link p-0 btn-download"
                    data-file="${escapeHtml(quoteLink)}"
                    data-key="${escapeHtml(keydownload)}"
-                   title="Download quote"
+                   title="${escapeHtml(window.i18nHistoryQuote?.DownloadQuote || 'Download quote')}"
                    style="color:#0d6efd;text-decoration:underline;white-space:normal;word-break:break-all;overflow-wrap:anywhere;display:block;width:100%;text-align:inherit;line-height:1.2;">
                 ${escapeHtml(value)}
            </button>`
@@ -957,7 +1162,7 @@
             const editAction = `
                 <button type="button"
                         class="btn btn-edit-history bg-transparent border-0 shadow-none p-0"
-                        title="Edit"
+                        title="${escapeHtml(window.i18nHistoryQuote?.EditTooltip || 'Edit')}"
                         data-mahangncc="${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}"
                         data-mahangnb="${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}"
                         data-name="${escapeHtml(getValue(row, ['CHR_NameEN']))}"
@@ -1040,7 +1245,7 @@
         const file = btn.dataset.file;
         const keywork = btn.dataset.key;
         if (!file && !keywork) {
-            alert("Không có file");
+            alert(window.i18nHistoryQuote?.NoFile || 'Không có file');
             return;
         }
 
@@ -1073,7 +1278,7 @@
 
                 if (!response.ok) {
                     const errText = await response.text();
-                    throw new Error(errText || "Download thất bại");
+                    throw new Error(errText || (window.i18nHistoryQuote?.DownloadFailed || 'Download thất bại'));
                 }
 
                 const blob = await response.blob();
@@ -1084,9 +1289,22 @@
                 const cd = response.headers.get('content-disposition') || response.headers.get('Content-Disposition');
                 let fileName = item.fallbackName;
                 if (cd) {
-                    const m = /filename\*?=(?:UTF-8''|\")?([^;\"]+)/i.exec(cd);
-                    if (m && m[1]) {
-                        fileName = decodeURIComponent(m[1].replace(/\"/g, '').trim());
+                    const encodedMatch = /filename\*=(?:UTF-8''|utf-8'')([^;]+)/i.exec(cd);
+                    const plainMatch = /filename=([^;]+)/i.exec(cd);
+                    let headerFileName = encodedMatch?.[1] || plainMatch?.[1];
+
+                    if (headerFileName) {
+                        headerFileName = headerFileName.replace(/^"|"$/g, '').trim();
+                        if (encodedMatch) {
+                            try {
+                                headerFileName = decodeURIComponent(headerFileName);
+                            } catch {
+                                headerFileName = '';
+                            }
+                        }
+
+                        headerFileName = headerFileName.split(/[\\/]/).pop()?.trim();
+                        if (headerFileName) fileName = headerFileName;
                     }
                 }
 
@@ -1099,7 +1317,7 @@
 
         } catch (err) {
             console.error(err);
-            alert("Chi tiết: " + err.message);
+            alert((window.i18nHistoryQuote?.DownloadDetails || 'Chi tiết: ') + err.message);
         }
     });
     function renderSummaryCountQuotation(result) {

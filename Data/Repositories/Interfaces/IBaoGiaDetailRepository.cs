@@ -1,6 +1,7 @@
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.QuoteResult;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -30,5 +31,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<bool> UpdateLinkBaoGiaAsync(List<UpdateFile> listDto);
         // Lấy file thông tin đã nhập lên hệ thống
         Task<List<dynamic>> GetFilesToImportAsync(string keywork);
+        // Lấy thông tin  cho màn hình master báo giá
+        Task<List<dynamic>> SearchMasterQuoteInfoAsync(SearchQuoteResultViewModel vm);
     }
 }

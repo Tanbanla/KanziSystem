@@ -675,4 +675,75 @@
   <data name="StatusShip" xml:space="preserve">
     <value>Chờ xác nhận tên của Ship</value>
   </data>
+  <data name="Toolbar" xml:space="preserve">
+    <value>Thanh công cụ</value>
+  </data>
+  <data name="ExportOrigin" xml:space="preserve">
+    <value>Xuất dữ liệu gốc</value>
+  </data>
+  <data name="OldValue" xml:space="preserve">
+    <value>Giá trị cũ</value>
+  </data>
+  <data name="NewValue" xml:space="preserve">
+    <value>Giá trị mới</value>
+  </data>
+  <data name="NoChanges" xml:space="preserve">
+    <value>Không xác định được trường dữ liệu thay đổi.</value>
+  </data>
+  <data name="InsertAction" xml:space="preserve">
+    <value>Thêm mới</value>
+  </data>
+  <data name="UpdateAction" xml:space="preserve">
+    <value>Cập nhật</value>
+  </data>
+  <data name="RequestNoPrefix" xml:space="preserve">
+    <value>Số:</value>
+  </data>
+  <data name="DownloadQuote" xml:space="preserve">
+    <value>Tải báo giá</value>
+  </data>
+  <data name="NoFile" xml:space="preserve">
+    <value>Không có file</value>
+  </data>
+  <data name="DownloadFailed" xml:space="preserve">
+    <value>Tải file thất bại</value>
+  </data>
+  <data name="DownloadDetails" xml:space="preserve">
+    <value>Chi tiết: </value>
+  </data>
+  <data name="MsgCannotExport" xml:space="preserve">
+    <value>Không thể xuất file</value>
+  </data>
+  <data name="MustSelectApprover" xml:space="preserve">
+    <value>Bạn phải chọn người phê duyệt trước khi thoát</value>
+  </data>
+  <data name="InvalidApprover" xml:space="preserve">
+    <value>Người phê duyệt không hợp lệ</value>
+  </data>
+  <data name="EditTooltip" xml:space="preserve">
+    <value>Chỉnh sửa</value>
+  </data>
+  <data name="EnglishItemName" xml:space="preserve">
+    <value>Tên tiếng Anh</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>Người tạo</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>Bước xử lý</value>
+  </data>
+  <data name="ChangeHistory" xml:space="preserve">
+    <value>Lịch sử thay đổi</value>
+  </data>
+  <data name="OrderInformation" xml:space="preserve">
+      <value>Thông tin đặt hàng</value>
+  </data>
+  <data name="RecordId" xml:space="preserve"><value>ID bản ghi</value></data>
+  <data name="IsTemplate" xml:space="preserve"><value>Là mẫu</value></data>
+  <data name="Deadline" xml:space="preserve"><value>Hạn xử lý</value></data>
+  <data name="UpdateLater" xml:space="preserve"><value>Ngày cập nhật tiếp theo</value></data>
+  <data name="UpdateCount" xml:space="preserve"><value>Số lần cập nhật</value></data>
+  <data name="NextApprover" xml:space="preserve"><value>Người phê duyệt</value></data>
+  <data name="QuotationReason" xml:space="preserve"><value>Lý do báo giá</value></data>
+  <data name="FileLink" xml:space="preserve"><value>Đường dẫn tệp</value></data>
 </root>

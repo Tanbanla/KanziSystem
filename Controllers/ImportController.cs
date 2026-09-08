@@ -497,7 +497,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cells["E5"].Value = firstLoad.Place;
                     ws.Cells["F5"].Value = firstLoad.Create_Date;
                     ws.Cells["G5"].Value = firstLoad.Dealine?.Split(' ')[0];
-
+                 
                     int startRow = 9; // Dòng bắt đầu điền dữ liệu (ứng với idx=1 là 8+1)
                     int totalItems = list.Count;
                     int kiten = 24;
@@ -524,7 +524,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         ws.Cells["K" + currentRow].Value = firstLoad.Group_Code!.Contains("GA") ? "VND" : "USD";
                         ws.Cells["L" + currentRow].Formula = (item.Amount * item.Price).ToString();
                         ws.Cells["M" + currentRow].Value = item.Aim;
-                        ws.Cells["O" + kiten].Value = item.Poisition ;
+                        ws.Cells["O" + currentRow].Value = item.Poisition;
                     }
                     if(totalItems > 12)
                     {

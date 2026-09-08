@@ -11,7 +11,7 @@
     var currentTab = ViewBag.CurrentTab ?? "ngoai";
     var reqMonth = ViewBag.ReqMonth as string;
     int stt = (currentPage - 1) * pageSize + 1;
-
+    var div_layout = "col-md-6";
     // Lấy thông tin quyền hạn của User
     var userSection = User.FindFirst("Section")?.Value;
 
@@ -197,14 +197,18 @@
                         <option value="WAIT" selected="@(currentImpact == "WAIT")">Chờ xác nhận</option>
                     </select>
             </div>
-                <div class="col-md-1">
-                    <label class="form-label fw-semibold">PullIn/PullOut</label>
-                    <select name="pullStatus" class="form-control">
-                        <option value="" selected="@(string.IsNullOrEmpty(ViewBag.PullStatus as string))">-- Tất cả --</option>
-                        <option value="in" selected="@((ViewBag.PullStatus as string) == "in")">PullIn</option>
-                        <option value="out" selected="@((ViewBag.PullStatus as string) == "out")">PullOut</option>
-                    </select>
-                </div>
+            @if (currentTab == "trong")
+                {
+                    div_layout = "col-md-5";
+                    <div class="col-md-1">
+                        <label class="form-label fw-semibold">PullIn/PullOut</label>
+                        <select name="pullStatus" class="form-control">
+                            <option value="" selected="@(string.IsNullOrEmpty(ViewBag.PullStatus as string))">-- Tất cả --</option>
+                            <option value="in" selected="@((ViewBag.PullStatus as string) == "in")">PullIn</option>
+                            <option value="out" selected="@((ViewBag.PullStatus as string) == "out")">PullOut</option>
+                        </select>
+                    </div>
+                }             
                 <div class="col-md-2 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc</button>                 
                     <a href="@Url.Action("ManageDelivery", new { tab = currentTab })" class="btn btn-secondary ml-1"><i class="fa-solid ion-ios-loop-strong me-1"></i> Refresh</a>
@@ -212,21 +216,21 @@
                         <i class="fa-solid fa fa-file-excel me-1"></i> Export
                     </button>
                 </div>
-
-                <div class="col-md-5 d-flex align-items-end gap-2 justify-content-end">
-                 
+               
+                <div class="@div_layout d-flex align-items-end gap-2 justify-content-end">
+               
                     <button type="button" class="btn btn-outline-success ml-1" id="btnOpenImportExcel">
-                        <i class="fa-solid fa fa-file-excel me-1"></i> Import dữ liệu Excel
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Import Excel
                     </button>
                     @if (userSection == "3100")
                     {
                         <button type="button" class="btn btn-outline-primary ml-1" id="btnOpenSupplierNg">
                             <i class="fa-solid fa fa-envelope-open-text me-1"></i> List (NG)                           
-                            <span class="badge bg-danger rounded-pill ms-1" id="demncc"></span>                          
+                            <span class="badge bg-danger rounded-pill ms-1 text-white" id="demncc"></span>                          
                         </button>
                         <button type="button" class="btn btn-outline-info ml-1" id="btnOpenGateRegistration">
                             <i class="fa-solid fa fa-car-side me-1"></i> Đăng ký ra vào cổng
-                            <span class="badge bg-danger rounded-pill ms-1" id="demgate" style="display:none;"></span>
+                            <span class="badge bg-danger rounded-pill ms-1 text-white" id="demgate" style="display:none;"></span>
                         </button>
                     }
                 </div>
@@ -251,8 +255,8 @@
                             <th class="bg-pur text-white" width="60" title="Người phát hành">ĐN PH PO</th>
                             <th class="bg-white" width="80px">Ngày gửi PO</th>
                             <th class="bg-pur text-white">Pic Pur</th>
-                            <th class="bg-white" width="80px">Ngày NCC giao</th>
-                            <th class="bg-white" width="80px">Ngày thực tế</th>
+                            <th class="bg-white" width="80px">Ngày GH dự kiến</th>
+                            <th class="bg-white" width="80px">Ngày GH thực tế</th>
                             <th class="bg-white" width="80px">Giờ thực tế</th>
                             <th class="bg-white">Lịch giao (OK/NG) </th>
                                                                        
@@ -863,8 +867,6 @@
 
 @section Scripts {
     <script>
-        // --- 1. CÁC HÀM TOÀN CỤC (GLOBAL FUNCTIONS) ---
-
         // Hàm xuất Excel
         function exportDataExcel() {
             const form = document.getElementById('filterForm');

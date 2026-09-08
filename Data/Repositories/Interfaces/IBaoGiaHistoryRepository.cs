@@ -1,6 +1,7 @@
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Threading.Tasks;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
@@ -47,5 +48,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<dynamic>> GetWaitingForSupplier(string? MaDon, string? MaNcc, string? Section, string? nguoiYeuCau, string? MaHang, string? user);
         // Lấy lịch sử của đơn hành
         Task<List<BaoGia_History_Request_of_Quotation>> GetOrderHistoryAsync(string? maDon, string? maHang, string? maHangNCC);
+        // Lấy thông tin phòng ban nhập lên
+        Task<List<dynamic>> GetExportOriginHistoryExcel(SearchHistoryInfoByMaDonModel vsm);
     }
 }

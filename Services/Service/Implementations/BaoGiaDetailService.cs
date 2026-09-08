@@ -7,6 +7,7 @@ using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Master;
+using PRJ_WAREHOUSE_BIVN.View_Models.QuoteResult;
 using System;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
@@ -367,6 +368,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
 
+        }
+        // Lấy thông tin  cho màn hình master báo giá
+        public async Task<GenericResponse<List<dynamic>>> SearchMasterQuoteInfoAsync(SearchQuoteResultViewModel vm)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                var data = await _repo.SearchMasterQuoteInfoAsync(vm);
+                result.Data = data;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
         }
     }
 }

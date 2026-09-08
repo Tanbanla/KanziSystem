@@ -7,6 +7,7 @@ using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
+using PRJ_WAREHOUSE_BIVN.View_Models.QuoteResult;
 using System.Globalization;
 using Path = System.IO.Path;
 
@@ -73,6 +74,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result);
 
+        }
+        // Search Infor table tab Master Quote Info
+        [HttpPost]
+        public async Task<IActionResult> SearchMasterQuoteInfo([FromBody] SearchQuoteResultViewModel search)
+        {
+            var result = await _baoGiaDetailService.SearchMasterQuoteInfoAsync(search);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
         }
         // Save pick supplier
         [HttpPost]
@@ -1100,10 +1112,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> ExportFileExcelApproverResult([FromBody] List<string> model)
         {
-            //if (model == null || model.Count == 0)
-            //{
-            //    return BadRequest(_localizer["PleaseSelectQuoteRequest"]);
-            //}
             try
             {
                 var result = await _baoGiaService.GetExportApprovalInfoAsync(model, GetCurrentUserId());

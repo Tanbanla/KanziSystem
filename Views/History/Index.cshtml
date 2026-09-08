@@ -16,7 +16,7 @@
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
-    <link rel="stylesheet" href="~/css/HistoryQuote.css" />
+    <link rel="stylesheet" href="~/css/HistoryQuote.css" asp-append-version="true" />
 </head>
 
 <div class="container-fluid" id="quote-history">
@@ -106,7 +106,7 @@
             <h4 class="mb-0 fw-bold text-primary">@Localizer["PageTitle"]</h4>
             <small class="text-muted">@Localizer["PageSubtitle"]</small>
         </div>
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+        <div class="btn-toolbar" role="toolbar" aria-label="@Localizer["Toolbar"]">
             <div class="btn-group me-2 mb-2" role="group">
                 <button type="button" class="btn btn-outline-success" id="btnImportHistory"><i class="fas fa-file-import"></i> @Localizer["ImportFileExcel"]</button>
             </div>
@@ -401,11 +401,11 @@
 </div>
 <!-- Edit modal for uncompleted orders -->
 <div class="modal fade" id="editHistoryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered history-edit-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">@Localizer["EditModalTitle"]</h5>
-                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
+                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="@Localizer["Close"]" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="@Localizer["Close"]" aria-controls="editHistoryModal">
                     <i class="fas fa-times fa-sm"></i>
                 </button>
             </div>
@@ -511,11 +511,11 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["ItemNameVN"]</label>
-                        <input type="text" class="form-control" id="editTenHangVN" />
+                        <textarea class="form-control history-edit-textarea" id="editTenHangVN" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["ItemNameEN"]</label>
-                        <input type="text" class="form-control" id="editTenHangEN" />
+                        <textarea class="form-control history-edit-textarea" id="editTenHangEN" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-3">
                         <label class="form-label">@Localizer["Quantity"]</label>
@@ -539,27 +539,27 @@
 
                     <div class="col-12 col-md-4">
                         <label class="form-label">@Localizer["Shape"]</label>
-                        <input type="text" class="form-control" id="editHinhDang" />
+                        <textarea class="form-control history-edit-textarea" id="editHinhDang" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">@Localizer["Material"]</label>
-                        <input type="text" class="form-control" id="editChatLieu" />
+                        <textarea class="form-control history-edit-textarea" id="editChatLieu" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">@Localizer["Composition"]</label>
-                        <input type="text" class="form-control" id="editThanhPhan" />
+                        <textarea class="form-control history-edit-textarea" id="editThanhPhan" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">@Localizer["Dimensions"]</label>
-                        <input type="text" class="form-control" id="editKichThuoc" />
+                        <textarea class="form-control history-edit-textarea" id="editKichThuoc" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">@Localizer["UsedForMachine"]</label>
-                        <input type="text" class="form-control" id="editDongMay" />
+                        <textarea class="form-control history-edit-textarea" id="editDongMay" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label">@Localizer["Feature"]</label>
-                        <input type="text" class="form-control" id="editTinhNang" />
+                        <textarea class="form-control history-edit-textarea" id="editTinhNang" rows="2"></textarea>
                     </div>
 
                     <div class="col-12 col-md-4">
@@ -595,15 +595,15 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["DesignFile"]</label>
-                        <input type="text" class="form-control" id="editFileThietKe" />
+                        <textarea class="form-control history-edit-textarea" id="editFileThietKe" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["Manufacturer"]</label>
-                        <input type="text" class="form-control" id="editNhaSanXuat" />
+                        <textarea class="form-control history-edit-textarea" id="editNhaSanXuat" rows="2"></textarea>
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label">@Localizer["Reason"]</label>
-                        <input type="text" class="form-control lydoTb" id="editLyDo"/>
+                        <textarea class="form-control history-edit-textarea lydoTb" id="editLyDo" rows="2"></textarea>
                     </div>
                 </form>
             </div>
@@ -627,6 +627,36 @@
     </div>
     <div class="cm-dialog-backdrop" data-cm-action="overlay"></div>
 </div>
+
+<div class="history-drawer-overlay" id="historyDrawerOverlay" aria-hidden="true"></div>
+<aside class="history-detail-drawer" id="historyDetailDrawer" aria-hidden="true">
+    <div class="history-drawer-header">
+        <h5 class="mb-0">@Localizer["PageTitleHistory"]</h5>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCloseHistoryDrawer" aria-label="@Localizer["Close"]">✕</button>
+    </div>
+    <div class="history-drawer-body">
+        <div class="history-drawer-section mb-3">
+            <h6 class="history-drawer-section-title">@Localizer["OrderInformation"]</h6>
+            <div class="history-detail-grid">
+                <div><span>@Localizer["OrderCodeGroup"]</span><b id="historyDrawerOrder">-</b></div>
+                <div><span>@Localizer["MaterialCode"]</span><b id="historyDrawerMaterial">-</b></div>
+                <div><span>@Localizer["SupplierCode"]</span><b id="historyDrawerSupplier">-</b></div>
+            </div>
+            @if(role == "UserPUR")
+            {
+                <div class="btn-group me-2 mb-2 pt-2" role="group" >
+                    <button type="button" class="btn btn-outline-success" id="btnExpOrigin"><i class="fas fa-file-excel"></i> @Localizer["ExportOrigin"] </button>
+                </div>
+            }
+        </div>
+        <div class="history-drawer-section">
+            <h6 class="history-drawer-section-title">@Localizer["ChangeHistory"]</h6>
+            <div class="history-change-timeline" id="historyChangeTimeline">
+                <div class="text-muted small">@Localizer["LoadingData"]</div>
+            </div>
+        </div>
+    </div>
+</aside>
 <script>
     window.HistoryData = {
         role : @Html.Raw(System.Text.Json.JsonSerializer.Serialize(role))
@@ -664,6 +694,22 @@
         ViewHistory = Localizer["ViewHistory"].Value,
         Approval = Localizer["Approval"].Value,
         Material = Localizer["Material"].Value,
+        DepartmentCode = Localizer["DepartmentCode"].Value,
+        SupplierCode = Localizer["SupplierCode"].Value,
+        SupplierItemCode = Localizer["SupplierItemCode"].Value,
+        ItemNameVN = Localizer["ItemNameVN"].Value,
+        EnglishItemName = Localizer["EnglishItemName"].Value,
+        Category = Localizer["Category"].Value,
+        Unit = Localizer["Unit"].Value,
+        SupplierSelectionDeadline = Localizer["SupplierSelectionDeadline"].Value,
+        RecordId = Localizer["RecordId"].Value,
+        IsTemplate = Localizer["IsTemplate"].Value,
+        Deadline = Localizer["Deadline"].Value,
+        UpdateLater = Localizer["UpdateLater"].Value,
+        UpdateCount = Localizer["UpdateCount"].Value,
+        NextApprover = Localizer["NextApprover"].Value,
+        QuotationReason = Localizer["QuotationReason"].Value,
+        FileLink = Localizer["FileLink"].Value,
         Quantity = Localizer["Quantity"].Value,
         Status = Localizer["Status"].Value,
         UpdatedDate = Localizer["UpdatedDate"].Value,
@@ -688,6 +734,25 @@
         HistoryTime= Localizer["HistoryTime"].Value,
         RequestNo= Localizer["RequestNo"].Value,
         Action =Localizer["Action"].Value,
+        OldValue = Localizer["OldValue"].Value,
+        NewValue = Localizer["NewValue"].Value,
+        NoChanges = Localizer["NoChanges"].Value,
+        InsertAction = Localizer["InsertAction"].Value,
+        UpdateAction = Localizer["UpdateAction"].Value,
+        RequestNoPrefix = Localizer["RequestNoPrefix"].Value,
+        DownloadQuote = Localizer["DownloadQuote"].Value,
+        NoFile = Localizer["NoFile"].Value,
+        DownloadFailed = Localizer["DownloadFailed"].Value,
+        DownloadDetails = Localizer["DownloadDetails"].Value,
+        MsgCannotExport = Localizer["MsgCannotExport"].Value,
+        MustSelectApprover = Localizer["MustSelectApprover"].Value,
+        InvalidApprover = Localizer["InvalidApprover"].Value,
+        ErrorPrefix = Localizer["ErrorPrefix"].Value,
+        InvalidFileType = Localizer["InvalidFileType"].Value,
+        DataUpdatedSuccessfully = Localizer["DataUpdatedSuccessfully"].Value,
+        Deleting = Localizer["Deleting"].Value,
+        DeleteFailed = Localizer["DeleteFailed"].Value,
+        DeleteSuccess = Localizer["DeleteSuccess"].Value,
         UpdatedBy=Localizer["UpdatedBy"].Value,
         Reason = Localizer["Reason"].Value,
         PageTitleHistory = Localizer["PageTitleHistory"].Value,
@@ -702,12 +767,29 @@
         ViewHistoryTooltip = Localizer["ViewHistoryTooltip"].Value,
         ReturnTooltip = Localizer["ReturnTooltip"].Value,
         DeleteTooltip = Localizer["DeleteTooltip"].Value,
+        EditTooltip = Localizer["EditTooltip"].Value,
         Hide = Localizer["Hide"].Value,
         Show = Localizer["Show"].Value,
         AllRefuse = Localizer["AllRefuse"].Value,
         StatusShip = Localizer["StatusShip"].Value,
         StatusACC = Localizer["StatusACC"].Value,
-        StatusPUR = Localizer["StatusPUR"].Value
+        StatusPUR = Localizer["StatusPUR"].Value,
+        CreatedBy = Localizer["CreatedBy"].Value,
+        Step = Localizer["Step"].Value,
+        Classification = Localizer["Classification"].Value,
+        EquipmentCode = Localizer["EquipmentCode"].Value,
+        Shape = Localizer["Shape"].Value,
+        Composition = Localizer["Composition"].Value,
+        Dimensions =  Localizer["Dimensions"].Value,
+        UsedForMachine = Localizer["UsedForMachine"].Value,
+        Feature = Localizer["Feature"].Value,
+        SafetyStandard = Localizer["SafetyStandard"].Value,
+        DesignFile = Localizer["DesignFile"].Value,
+        Manufacturer = Localizer["Manufacturer"].Value,
+        SupplierName = Localizer["SupplierName"].Value,
+        GetQuotation = Localizer["GetQuotation"].Value,
+        DesiredReceiveDate = Localizer["DesiredReceiveDate"].Value,
+        Urgent = Localizer["Urgent"].Value
     }));
 </script>
 @section Scripts {
@@ -715,10 +797,13 @@
     <script src="~/js/HistoryV2.js"  asp-append-version="true"></script>
     <script>
         (function() {
-            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
             var panel = document.getElementById('editHistoryModal');
             if (panel && panel.parentElement !== document.body) {
                 document.body.appendChild(panel);
+            }
+            var drawerHistory = document.getElementById('historyDetailDrawer');
+            if (drawerHistory && drawerHistory.parentElement !== document.body) {
+                document.body.appendChild(drawerHistory);
             }
         })();
     </script>

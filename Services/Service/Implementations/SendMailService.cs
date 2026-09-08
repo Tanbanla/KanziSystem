@@ -1505,7 +1505,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         string expectedDeadline = DateTime.Now.Date.AddDays(1).AddHours(10).ToString("yyyy-MM-dd HH:mm");
 
                         string body = string.Format(bodyTemplate, shortName, toEmail.PICName ?? vendorName, expectedDeadline);
-                        string titleMail = $"{shortName} - Sửa tên hàng hóa trên báo giá / Please revise the part name on the quotation.";
+                        string titleMail = $"{expectedDeadline} - {shortName} - Sửa tên hàng hóa trên báo giá / Please revise the part name on the quotation.";
                         var emailCC = string.IsNullOrEmpty(mailTemplate.CHR_CC) ? mailPICTo : mailTemplate.CHR_CC;
 
                         var emailForm = new EmailFormNetMailCustomSendMultiAttachFile

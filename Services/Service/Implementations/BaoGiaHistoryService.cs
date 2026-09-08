@@ -4,6 +4,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
@@ -296,6 +297,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 var histories = await _repo.GetOrderHistoryAsync(maDon, maHang, maHangNCC);
                 result.Data = histories;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
+        // Lấy thông tin phòng ban nhập lên
+        public async Task<GenericResponse<List<dynamic>>> GetExportOriginHistoryExcel(SearchHistoryInfoByMaDonModel vsm)
+        {
+            var result = new GenericResponse<List<dynamic>>();
+            try
+            {
+                result.Data = await _repo.GetExportOriginHistoryExcel(vsm);
                 result.Success = true;
             }
             catch (Exception ex)

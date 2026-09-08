@@ -675,4 +675,75 @@
   <data name="StatusShip" xml:space="preserve">
     <value>Shipの名称の確認待ちです。</value>
   </data>
-</root>
+  <data name="Toolbar" xml:space="preserve">
+    <value>ツールバー</value>
+  </data>
+  <data name="ExportOrigin" xml:space="preserve">
+    <value>元データをエクスポート</value>
+  </data>
+  <data name="OldValue" xml:space="preserve">
+    <value>変更前の値</value>
+  </data>
+  <data name="NewValue" xml:space="preserve">
+    <value>変更後の値</value>
+  </data>
+  <data name="NoChanges" xml:space="preserve">
+    <value>変更された項目を特定できません。</value>
+  </data>
+  <data name="InsertAction" xml:space="preserve">
+    <value>新規作成</value>
+  </data>
+  <data name="UpdateAction" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="RequestNoPrefix" xml:space="preserve">
+    <value>番号:</value>
+  </data>
+  <data name="DownloadQuote" xml:space="preserve">
+    <value>見積書をダウンロード</value>
+  </data>
+  <data name="NoFile" xml:space="preserve">
+    <value>ファイルがありません</value>
+  </data>
+  <data name="DownloadFailed" xml:space="preserve">
+    <value>ダウンロードに失敗しました</value>
+  </data>
+  <data name="DownloadDetails" xml:space="preserve">
+    <value>詳細: </value>
+  </data>
+  <data name="MsgCannotExport" xml:space="preserve">
+    <value>ファイルをエクスポートできません</value>
+  </data>
+  <data name="MustSelectApprover" xml:space="preserve">
+    <value>終了する前に承認者を選択してください</value>
+  </data>
+  <data name="InvalidApprover" xml:space="preserve">
+    <value>無効な承認者です</value>
+  </data>
+  <data name="EditTooltip" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="EnglishItemName" xml:space="preserve">
+    <value>英語品名</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>作成者</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>処理ステップ</value>
+  </data>
+  <data name="ChangeHistory" xml:space="preserve">
+    <value>変更履歴</value>
+  </data>
+  <data name="OrderInformation" type="System.Resources.ResXNullRef, System.Windows.Forms">
+      <value>ご注文情報</value>
+  </data>
+  <data name="RecordId" xml:space="preserve"><value>レコードID</value></data>
+  <data name="IsTemplate" xml:space="preserve"><value>テンプレート</value></data>
+  <data name="Deadline" xml:space="preserve"><value>処理期限</value></data>
+  <data name="UpdateLater" xml:space="preserve"><value>次回更新日</value></data>
+  <data name="UpdateCount" xml:space="preserve"><value>更新回数</value></data>
+  <data name="NextApprover" xml:space="preserve"><value>承認者</value></data>
+  <data name="QuotationReason" xml:space="preserve"><value>見積理由</value></data>
+  <data name="FileLink" xml:space="preserve"><value>ファイルリンク</value></data>
+ </root>

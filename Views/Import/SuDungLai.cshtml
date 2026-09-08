@@ -194,7 +194,7 @@
                                                 <option>@item.Account_Code</option>
                                             </select>
                                         </td>
-                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_@index" min="0"></td>
+                                        <td><input type="number" class="form-control sl" value="@item.Amount" id="sl_@index" min="0" oninput="caculator(this.id)"></td>
                                         <td><input type="text" class="form-control dv" id="dv_@index" value="@item.Unit" readonly></td>
                                         <td><input type="number" class="form-control dg" id="dg_@index" value="@item.Price" readonly> </td>
                                         <td><input type="text" class="form-control nt" id="nt_@index" value="@item.Currency" readonly></td>

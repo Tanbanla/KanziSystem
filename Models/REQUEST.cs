@@ -1003,6 +1003,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     User_Update = row["User_Update"]?.ToString() ?? "",
                     Status = row["Status"]?.ToString() ?? "",
                     MaHangTem = row["MaHangTem"]?.ToString() ?? "",
+                    Poisition = row["Poisition"]?.ToString() ?? "",
                     slk = sl
                 });
             }

@@ -253,6 +253,9 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="supplier-input-tab" data-bs-toggle="tab" data-bs-target="#supplier-input" type="button" role="tab" aria-controls="supplier-input" aria-selected="false">@Localizer["SupplierSelectionTabTitle"]</button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="input-quotation-tab" data-bs-toggle="tab" data-bs-target="#input-quotation" type="button" role="tab" aria-controls="input-quotation" aria-selected="false">Master giá</button>
+        </li>
     </ul>
     <div class="tab-content" id="quotationResultsTabsContent" style="background-color: #ffffff; padding: 16px; border: 1px solid #dee2e6; border-top: 0; border-radius: 0 0 .25rem .25rem;">
         <!-- Tab 1: Danh sách yêu cầu -->
@@ -369,7 +372,8 @@
             <!-- Search Form -->
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white py-2">
-                    <h6 class="mb-0 text-secondary" style="color:black !important; margin-bottom: 0.5rem; padding: 0.25rem 0; font-weight: 600;">@Localizer["SupplierSearchTitle"]</h6>
+                    <h6 class="mb-0 text-secondary" style="color:black !important; margin-bottom: 0.5rem; padding: 0.25rem 0; font-weight: 600;">
+                        @Localizer["SupplierSearchTitle"]</h6>
                     <div style="margin-left: 6px;"></div>
                     <button type="button" class="btn btn-outline-success" id="btnDownloadTem"><i class="fas fa-download"></i> @Localizer["ExportExcel"]</button>
                 </div>
@@ -458,21 +462,21 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive fixed-header" style="max-height: 600px;">
+                    <div class="table-responsive fixed-header" style="max-height: 700px;">
                         <table class="table table-sm table-hover table-bordered table-striped align-middle mb-0" id="supplierQuoteTable" style="font-size:11px;">
-                            <thead class="table-header-custom" style="position: sticky; top: 0; background-color: white; z-index: 10;">
-                                <tr class="text-center" style="background-color: #f8f9fa; font-size: 10px;">
-                                    <th colspan="4" style="background-color: #ffff; border: 1px solid #dee2e6;">@Localizer["Status"].Value</th>
-                                    <th colspan="24" style="background-color: #d1ecf1; border: 1px solid #dee2e6; color: black">@Localizer["BivnInput"]</th>
-                                    <th colspan="22" style="background-color: #f8d7da; border: 1px solid #dee2e6;color: black">@Localizer["VendorInput"]</th>
-                                    <th colspan="1" style="background-color: #E1FAFD; border: 1px solid #dee2e6;color: black">@Localizer["SystemCalculated"]</th>
-                                    <th colspan="3" style="background-color: #E1FAFD; border: 1px solid #dee2e6;color: black">@Localizer["BivnPur"]</th>
+                            <thead class="table-header-custom">
+                                <tr class="text-center supplier-header-groups">
+                                    <th colspan="4" class="header-group header-group-status">@Localizer["Status"].Value</th>
+                                    <th colspan="24" class="header-group header-group-bivn">@Localizer["BivnInput"].Value</th>
+                                    <th colspan="22" class="header-group header-group-vendor">@Localizer["VendorInput"].Value</th>
+                                    <th colspan="1" class="header-group header-group-approval">@Localizer["SystemCalculated"].Value</th>
+                                    <th colspan="3" class="header-group header-group-approval">@Localizer["BivnPur"].Value</th>
                                 </tr>
-                                <tr class="text-center align-middle" style="font-size: 10px;text-align: center;">
+                                <tr class="text-center align-middle supplier-header-columns">
                                     <th rowspan="2"  style="min-width: 35px;background-color: #FFEDE8;">@Localizer["STT"]</th>
                                     <th  rowspan="2" style="min-width: 45px;background-color: #FFEDE8;">@Localizer["OrderNumber"]</th>
-                                    <th  rowspan="2" style="min-width: 45px;background-color: #FFEDE8;">@Localizer["Status"]</th>
-                                    <th rowspan="2" style="min-width: 120px; background-color: #FFEDE8;">@Localizer["EquipmentCode"]</th>
+                                    <th  rowspan="2" style="min-width: 68px;background-color: #FFEDE8;">@Localizer["Status"]</th>
+                                    <th rowspan="2" style="min-width: 100px; background-color: #FFEDE8;">@Localizer["EquipmentCode"]</th>
                                     @* Phần thêm của BIVN *@
                                     <th rowspan="2" style="min-width: 120px; background-color: #dee2e6;" class="additional-column">@Localizer["InternalMaterialCode"]</th>
                                     <th rowspan="2" style="min-width: 100px;background-color: #dee2e6;" class="additional-column">@Localizer["SupplierItemCode"]</th>
@@ -494,9 +498,9 @@
                                     <th rowspan="2" style="min-width: 50px; background-color: #dee2e6;" class="additional-column">@Localizer["GetQuotation"]</th>
                                     <th rowspan="2" style="min-width: 50px; background-color: #dee2e6;" class="additional-column">@Localizer["Reason"]</th>
                                    @*  Phần thêm của NCC  *@
-                                    <th  rowspan="2" style="min-width: 80px;background-color: #FDFFE9;">@Localizer["Supplier"]</th>
-                                    <th rowspan="2" style="min-width: 150px;background-color: #FDFFE9;">@Localizer["SupplierName"]</th>
-                                    <th rowspan="2" style="min-width: 100px;background-color: #FDFFE9;">@Localizer["SupplierItemCode"]</th>
+                                    <th  rowspan="2" style="min-width: 80px;background-color: #fff3df;">@Localizer["Supplier"]</th>
+                                    <th rowspan="2" style="min-width: 150px;background-color: #fff3df;">@Localizer["SupplierName"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #fff3df;">@Localizer["SupplierItemCode"]</th>
                                     <th rowspan="2" style="min-width: 120px;background-color: #FDFFE9;">@Localizer["CustomsItemName"]</th>
                                     <th rowspan="2" style="min-width: 80px; background-color: #FDFFE9;">@Localizer["EnglishName"]</th>
                                     <th rowspan="2" style="min-width: 60px;background-color: #FDFFE9;">@Localizer["Quantity"]</th>
@@ -517,12 +521,12 @@
                                     <th rowspan="2" style="min-width: 70px;background-color: #FDFFE9;">@Localizer["ApplyDay"]</th>
                                     <th rowspan="2" style="min-width: 70px;background-color: #FDFFE9;">@Localizer["DueDay"]</th>
                                     @*  Phần phê duyệt  *@
-                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SystemCalculatedTotal"]</th>
-                                    <th rowspan="2" style="min-width: 70px;background-color: #E1FAFD;">@Localizer["SupplierSelection"]</th>
-                                    <th rowspan="2" style="min-width: 220px;background-color: #E1FAFD;">@Localizer["SelectionReason"]</th>
-                                    <th rowspan="2" style="min-width: 100px;background-color: #E1FAFD;">@Localizer["PriceIncreaseReason"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #e5f2ff !important;">@Localizer["SystemCalculatedTotal"]</th>
+                                    <th rowspan="2" style="min-width: 70px;background-color: #e5f2ff !important;">@Localizer["SupplierSelection"]</th>
+                                    <th rowspan="2" style="min-width: 220px;background-color: #e5f2ff !important;">@Localizer["SelectionReason"]</th>
+                                    <th rowspan="2" style="min-width: 100px;background-color: #e5f2ff !important;">@Localizer["PriceIncreaseReason"]</th>
                                 </tr>
-                                <tr class="text-center align-middle" style="background-color: #dee2e6; font-size: 9px;text-align: center;top: 0;">
+                                <tr class="text-center align-middle supplier-header-subcolumns">
                                     <th style="min-width: 60px;" class="additional-column">@Localizer["Shape"]</th>
                                     <th style="min-width: 60px;"class="additional-column">@Localizer["Material"]</th>
                                     <th style="min-width: 80px;"class="additional-column">@Localizer["Composition"]</th>
@@ -559,6 +563,106 @@
                     <div id="supplierPaginationControls" class="btn-group" role="group"></div>
                     <div style="margin-right: 4px;"></div>
                     <small class="text-muted" id="supplierPagingInfo">&nbsp;</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Master giá -->
+        <div class="tab-pane fade" id="input-quotation" role="tabpanel" aria-labelledby="input-quotation-tab">
+            <div class="card shadow-sm mb-3 master-quote-filter-card">
+                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-secondary master-quote-section-title">Tìm kiếm thông tin</h6>
+                    <span class="badge bg-light text-primary border">Master giá</span>
+                </div>
+                <div class="card-body pt-3 pb-2">
+                    <form id="masterQuoteFilterForm" class="row g-3 align-items-end">
+                        <div class="col-12 col-md-3 col-xl-2">
+                            <label for="masterQuoteUploadDate" class="form-label small fw-semibold">Ngày upload</label>
+                            <input type="date" id="masterQuoteUploadDate" class="form-control form-control-sm" />
+                        </div>
+                        <div class="col-12 col-md-3 col-xl-2">
+                            <label for="masterQuotePic" class="form-label small fw-semibold">PIC upload</label>
+                            <input type="text" id="masterQuotePic" class="form-control form-control-sm" placeholder="Nhập PIC upload" />
+                        </div>
+                        <div class="col-12 col-md-3 col-xl-2">
+                            <label for="masterQuoteNumber" class="form-label small fw-semibold">Số đơn yêu cầu báo giá</label>
+                            <input type="text" id="masterQuoteNumber" class="form-control form-control-sm" placeholder="Nhập số đơn" />
+                        </div>
+                        <div class="col-12 col-md-3 col-xl-2">
+                            <label for="masterQuoteRequestNumber" class="form-label small fw-semibold">Quotation Request Number</label>
+                            <input type="text" id="masterQuoteRequestNumber" class="form-control form-control-sm" placeholder="Nhập mã yêu cầu" />
+                        </div>
+                        <div class="col-12 col-md-3 col-xl-2">
+                            <label for="masterQuoteVendorCode" class="form-label small fw-semibold">Vendor code</label>
+                            <input type="text" id="masterQuoteVendorCode" class="form-control form-control-sm" placeholder="Nhập vendor code" />
+                        </div>
+                        <div class="col-12 col-md-3 col-xl-2">
+                            <label for="masterQuoteVendorName" class="form-label small fw-semibold">Vendor name</label>
+                            <input type="text" id="masterQuoteVendorName" class="form-control form-control-sm" placeholder="Nhập vendor name" />
+                        </div>
+                        <div class="col-12 d-flex gap-2 mt-2">
+                            <button type="button" id="masterQuoteSearchBtn" class="btn btn-primary btn-sm">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                            <button type="reset" id="masterQuoteClearBtn" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-eraser"></i> Xóa bộ lọc
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm master-quote-table-card">
+                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-secondary master-quote-section-title">Danh sách master giá</h6>
+                    <small class="text-muted" id="masterQuoteSummaryText">Số chi tiết đơn yêu cầu báo giá: 0</small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive master-quote-table-wrapper">
+                        <table class="table table-sm table-bordered table-hover align-middle mb-0" id="masterQuoteTable">
+                            <thead>
+                                <tr class="text-center align-middle">
+                                    <th>Ngày upload</th>
+                                    <th>PIC upload</th>
+                                    <th>Số đơn yêu cầu báo giá</th>
+                                    <th>Quotation Request Number</th>
+                                    <th>Mã thiết bị<br><span>Equipment code</span></th>
+                                    <th>Vendor code</th>
+                                    <th>Mã nhà cung cấp</th>
+                                    <th>Vendor's good code</th>
+                                    <th>Tên hàng tiếng Việt<br><span>Part name (Vietnamese)</span></th>
+                                    <th>Tên hàng tiếng Anh<br><span>Part name (English)</span></th>
+                                    <th>Số lượng<br><span>Quantity</span></th>
+                                    <th>Đơn vị<br><span>Unit</span></th>
+                                    <th>Other requirement</th>
+                                    <th>Yêu cầu khác</th>
+                                    <th>Nhà Sản xuất/Xuất xứ<br><span>Maker/Origin</span></th>
+                                    <th>Đơn giá (nhà cung cấp)<br><span>Unit price</span></th>
+                                    <th>Đơn vị tiền<br><span>Currency</span></th>
+                                    <th>Đơn giá (USD)<br><span>Unit price</span></th>
+                                    <th>Thời gian giao hàng<br><span>Lead time (day/ngày)</span></th>
+                                    <th>MOQ</th>
+                                    <th>Delivery term</th>
+                                    <th>Phương thức giao hàng<br><span>Payment term</span></th>
+                                    <th>Phương thức thanh toán</th>
+                                    <th>Price effective date</th>
+                                    <th>Hiệu lực báo giá</th>
+                                    <th>Ngày hết hạn báo giá</th>
+                                    <th>Fix vendor</th>
+                                    <th>Quyết định NCC</th>
+                                    <th>Lý do điều chỉnh</th>
+                                </tr>
+                            </thead>
+                            <tbody id="masterQuoteTableBody">
+                                <tr>
+                                    <td colspan="29" class="text-center text-muted py-5">
+                                        <i class="fas fa-table fa-2x mb-2 d-block"></i>
+                                        Chưa có dữ liệu
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

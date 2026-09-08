@@ -485,11 +485,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return new ExcelRowData
             {
-                SectionCode = ws.Cell(row, 2).GetString(),
+                SectionCode = ws.Cell(row, 2).GetString().Trim(),
                 SectionName = ws.Cell(row, 3).GetString(),
                 Phanloai = ws.Cell(row, 4).GetString(),
                 MaThietBi = ws.Cell(row, 5).GetString(),
-                MaHangNoiBo = ws.Cell(row, 6).GetString(),
+                MaHangNoiBo = ws.Cell(row, 6).GetString().Trim(),
                 MaHangNCC = ws.Cell(row, 7).GetString(),
                 NameVN = ws.Cell(row, 8).GetString(),
                 NameEN = ws.Cell(row, 9).GetString(),

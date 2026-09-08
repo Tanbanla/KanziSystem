@@ -41,83 +41,150 @@ let centercode = "";
 let cost = "";
 
 // lấy thông tin người dùng
-async function getEmployeeData() {
+//async function getEmployeeData() {
 
-     // lấy thông tin phòng ban
-     var ph = document.getElementById("name_dept").value;
-   
-     if (ph == "") {
-         alert("Chưa chọn phòng");
+//     // lấy thông tin phòng ban
+//     var ph = document.getElementById("name_dept").value;
+
+//     if (ph == "") {
+//         alert("Chưa chọn phòng");
+//    }
+//    if (!kiemTraViTriKhopNhau()) {
+
+//    }
+//    const formData = new URLSearchParams();
+//    formData.append('ph', ph);
+//     fetch(CONFIG.ROUTES.layPhongBan, {
+//        method: 'POST',
+//        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+//        body: formData.toString()
+//    })
+//        .then(response => response.ok ? response.json() : Promise.reject(response))
+//        .then(data => {
+//            // tìm cost phòng theo like
+//            cost = data + "%";
+
+//        })
+//        .catch(err => console.error('Fetch error:', err));
+
+//       // lấy thông tin quản lý API
+//    let us = document.getElementById("us").innerHTML;
+
+//    const employeeId = us.trim();
+//    const url = CONFIG.ROUTES.employeeByAdid(employeeId);
+
+//    try {
+//        const response = await fetch(url);
+//        if (!response.ok) {
+//            throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
+//        }
+//        const data = await response.json();
+//        phongban = data.Data[0].CHR_DEPT;
+//        //costphongban = document.getElementById("name_dept").value;
+//        //cost = cost + " : " + phongban.split(':')[1];
+
+//        centercode = data.Data[0].CHR_COST_CENTER_CODE;
+
+//        // lấy người phê duyệt theo quy trình
+//        let giatien = parseFloat(document.getElementById("thanhtien").value);
+//        document.getElementById("tongtienpheduyet").innerHTML = giatien;
+//        if (giatien < 3000) {
+
+//            document.getElementById("ten_duthao").innerHTML = `<option>${data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
+//            document.getElementById("cv_duthao").value = data.Data[0].CHR_EMPLOYEE_ADID;
+//            document.getElementById("mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
+
+//            loadToCombo("Section Manager", "thamtra");
+//            loadToCombo_PTBP("10 : Deputy General Manager", "pheduyet");
+
+//        }
+//        if (giatien >= 3000 && giatien < 10000) {
+//            document.getElementById("ten_duthao").innerHTML = `<option>${data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
+//            document.getElementById("cv_duthao").value = data.Data[0].CHR_EMPLOYEE_ADID;
+//            document.getElementById("mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
+
+//            loadToCombo("Section Manager", "thamtra");
+//            loadToCombo_TBP("General Manager", "pheduyet");
+//        }
+//        if (giatien >= 10000) {
+
+//            loadToCombo("Section Manager", "duthao");
+//            loadToCombo_TBP("General Manager", "thamtra");
+//            loadToCombo_GD("Director", "pheduyet");
+//        }
+
+//        get_block();
+//        return data;
+
+//    }
+//    catch (error) {
+//        console.error("Không thể lấy dữ liệu:", error);
+//    }
+//}
+async function getEmployeeData() {
+    var ph = document.getElementById("name_dept").value;
+    if (ph == "") {
+        alert("Chưa chọn phòng");
+        return; // Dừng luôn nếu chưa chọn phòng
     }
-    if (!kiemTraViTriKhopNhau()) {
-     
-    }
+
+    // 1. DÙNG AWAIT ĐỂ CHỜ LẤY COST XONG MỚI CHẠY TIẾP
     const formData = new URLSearchParams();
     formData.append('ph', ph);
-     fetch(CONFIG.ROUTES.layPhongBan, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
-    })
-        .then(response => response.ok ? response.json() : Promise.reject(response))
-        .then(data => {
-            // tìm cost phòng theo like
-            cost = data + "%";
-
-        })
-        .catch(err => console.error('Fetch error:', err));
-
-       // lấy thông tin quản lý API
-    let us = document.getElementById("us").innerHTML;
-
-    const employeeId = us.trim();
-    const url = CONFIG.ROUTES.employeeByAdid(employeeId);
 
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
-        }
-        const data = await response.json();
-        phongban = data.Data[0].CHR_DEPT;
-        //costphongban = document.getElementById("name_dept").value;
-        //cost = cost + " : " + phongban.split(':')[1];
+        const responsePhong = await fetch(CONFIG.ROUTES.layPhongBan, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
 
+        if (responsePhong.ok) {
+            const dataPhong = await responsePhong.json();
+            cost = dataPhong + "%"; // Đã lấy được cost chắc chắn
+        }
+    } catch (err) {
+        console.error('Lỗi lấy phòng ban:', err);
+        return;
+    }
+
+    // 2. LẤY THÔNG TIN NGƯỜI DÙNG
+    let us = document.getElementById("us").innerHTML.trim();
+    const url = CONFIG.ROUTES.employeeByAdid(us);
+
+    try {
+        const responseUs = await fetch(url);
+        if (!responseUs.ok) throw new Error(`Lỗi HTTP! Trạng thái: ${responseUs.status}`);
+
+        const data = await responseUs.json();
+        phongban = data.Data[0].CHR_DEPT;
         centercode = data.Data[0].CHR_COST_CENTER_CODE;
 
-        // lấy người phê duyệt theo quy trình
         let giatien = parseFloat(document.getElementById("thanhtien").value);
         document.getElementById("tongtienpheduyet").innerHTML = giatien;
+
+        // Cập nhật người dự thảo chung
+        if (giatien < 10000) {
+            document.getElementById("ten_duthao").innerHTML = `<option>${data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
+            document.getElementById("cv_duthao").value = data.Data[0].CHR_EMPLOYEE_ADID;
+            document.getElementById("mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
+        }
         if (giatien < 3000) {
-
-            document.getElementById("ten_duthao").innerHTML = `<option>${data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
-            document.getElementById("cv_duthao").value = data.Data[0].CHR_EMPLOYEE_ADID;
-            document.getElementById("mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
-
-            loadToCombo("Section Manager", "thamtra");            
-            loadToCombo_PTBP("10 : Deputy General Manager", "pheduyet");
-           
-        }
-        if (giatien >= 3000 && giatien < 10000) {
-            document.getElementById("ten_duthao").innerHTML = `<option>${data.Data[0].CHR_EMPLOYEE_NAME}</option>`;
-            document.getElementById("cv_duthao").value = data.Data[0].CHR_EMPLOYEE_ADID;
-            document.getElementById("mail_duthao").value = data.Data[0].CHR_EMPLOYEE_MAIL;
-
-            loadToCombo("Section Manager", "thamtra");
-            loadToCombo_TBP("General Manager", "pheduyet");
-        }
-        if (giatien >= 10000) {
-
-            loadToCombo("Section Manager", "duthao");
-            loadToCombo_TBP("General Manager", "thamtra");
-            loadToCombo_GD("Director", "pheduyet");
+            await loadToCombo("Section Manager", "thamtra");
+            await loadToCombo_PTBP("10 : Deputy General Manager", "pheduyet");
+        } else if (giatien >= 3000 && giatien < 10000) {
+            await loadToCombo("Section Manager", "thamtra");
+            await loadToCombo_TBP("General Manager", "pheduyet");
+        } else if (giatien >= 10000) {
+            await loadToCombo("Section Manager", "duthao");
+            await loadToCombo_TBP("General Manager", "thamtra");
+            await loadToCombo_GD("Director", "pheduyet");
         }
 
         get_block();
         return data;
 
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Không thể lấy dữ liệu:", error);
     }
 }

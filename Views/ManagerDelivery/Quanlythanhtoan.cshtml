@@ -1,0 +1,132 @@
+@* Đổi Model thành class Quanlythanhtoan vừa tạo *@
+@model IEnumerable<PRJ_WAREHOUSE_BIVN.Models.Quanlythanhtoan>
+
+<div class="container-fluid mt-3">
+    <!-- Filter and Action Bar -->
+    <div class="row mb-3 align-items-end">
+        <div class="col-md-7">
+            <form asp-action="Quanlythanhtoan" method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Thuộc khối:</label>
+                    <select class="form-control" name="cmbKhoi">
+                        <option value="">PUR</option>
+                        <option value="">GA</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Số PO:</label>
+                    <input type="text" class="form-control" name="txtPO" value="@ViewBag.txtPO">
+                </div>
+                <!-- Đã xóa input userr hidden vì lấy từ Controller -->
+                <div class="col-md-3">
+                    <label class="form-label">Tình trạng:</label>
+                    <select class="form-control" name="cmbTinhTrang">
+                        <option value="">-- Chọn --</option>
+                    </select>
+                </div>
+                <div class="col-md-3"></div> <!-- Spacer -->
+
+                <div class="col-md-3">
+                    <label class="form-label">Ngày phát hành:</label>
+                    <input type="date" class="form-control" name="txtPhathanh1" value="@ViewBag.txtPhathanh1">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày:</label>
+                    <input type="date" class="form-control" name="txtPhathanh2" value="@ViewBag.txtPhathanh2">
+                </div>
+                <div class="col-md-6 mt-3">
+                    <button type="submit" class="btn btn-outline-danger fw-bold"><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <a href="/QuanLyPO/Create" class="btn btn-outline-primary fw-bold text-decoration-none"> <i class="fa fa-envelope"></i> Phát hành</a>
+                    <a href="/QuanLyPO/Index" class="btn btn-light border fw-bold text-dark text-decoration-none"> <i class="fa fa-refresh"></i>Refresh</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Legend -->
+        <div class="col-md-5">
+            <ul class="list-unstyled mb-0" style="font-size: 0.85rem;">
+                <li><span class="d-inline-block bg-danger" style="width: 15px; height: 15px;"></span> Đang chờ xác nhận (Need, No Need)</li>
+                <li><span class="d-inline-block bg-primary" style="width: 15px; height: 15px;"></span> Hoàn thành xác nhận (Need, No Need và có thể in được đơn hàng)</li>
+                <li><span class="d-inline-block bg-warning" style="width: 15px; height: 15px;"></span> Đang xử lý (về 1 phần)</li>
+                <li><span class="d-inline-block bg-dark" style="width: 15px; height: 15px;"></span> Hoàn thành (Đã về hết)</li>
+                <li><span class="d-inline-block bg-secondary" style="width: 15px; height: 15px;"></span> Bị hủy, từ chối, hoặc bị hệ thống hủy vì quá 5 ngày</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Data Grid -->
+    <!-- Data Grid -->
+    <div class="table-responsive border" style="max-height: calc(100vh - 260px); overflow-y: auto; overflow-x: auto;">
+        <table class="table table-bordered table-hover text-nowrap align-middle mb-0" style="font-size: 11px;">
+            <thead class="bg-primary text-white" style="position: sticky; top: 0; z-index: 10;">
+                <tr>
+                    <th>Chi tiết</th>
+                    <th>Số PO</th>
+                    <th>Tình trạng</th>
+                    <th>Loại chi phí</th>
+                    <th>Ngày phát hành</th>
+                    <th>Mã phòng ban</th>
+                    <th>Tên phòng ban</th>
+                    <th>Danh mục</th>
+                    <th>Mục đích</th>
+                    <th>Mã NCC</th>
+                    <th>Tên NCC</th>
+                    <th>Khu vực NCC</th>
+                    <th>Địa chỉ NCC</th>
+                    <th>Số điện thoại NCC</th>
+                    <th>Số Fax NCC</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        string colorClass = item.TinhtrangPO switch
+                        {
+                            "DANGCHOXACNHAN" => "text-danger fw-bold",
+                            "HOANTHANHXACNHAN" => "text-primary fw-bold",
+                            "VE1PHAN" => "text-warning fw-bold",
+                            "HOANTHANH" => "text-dark fw-bold",
+                            "HUY" => "text-secondary fw-bold",
+                            _ => ""
+                        };
+
+                        bool canExcel = (item.TinhtranghaiquanPO == "NEED" || item.TinhtranghaiquanPO == "NONEED");
+
+                        <tr>
+                            <td><a href="/QuanLyPO/Details/@item.SoPO" class="text-decoration-none">Chi tiết</a></td>
+                            <td class="@colorClass">@item.SoPO</td>
+                            <td class="@colorClass">@item.TinhtrangPO</td>
+                            <td class="@colorClass">@item.Loaichiphi</td>
+                            <td class="@colorClass">@(item.Ngayphathanh?.ToString("dd/MM/yyyy") ?? "")</td>
+                            <td>@item.Maphongban</td>
+                            <td>@item.Tenphongban</td>
+                            <td>@item.Danhmuc</td>
+                            <td>@item.Mucdich</td>
+                            <td>@item.MaNCC</td>
+                            <td>@item.TenNCC</td>
+                            <td>@item.KhuvucNCC</td>
+                            <td>@item.DiachiNCC</td>
+                            <td>@item.SodienthoaiNCC</td>
+                            <td>@item.SofaxNCC</td>
+                            <td>
+                                @if (canExcel)
+                                {
+                                    <a href="/QuanLyPO/ExportExcel/@item.SoPO" class="btn btn-sm btn-outline-secondary">In Excel</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="16" class="text-center text-muted py-3">Không có dữ liệu hiển thị.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

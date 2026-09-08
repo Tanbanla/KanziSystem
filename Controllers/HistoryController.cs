@@ -1532,6 +1532,131 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest($"Lỗi xuất file: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ExportOriginHistoryExcel([FromBody] SearchHistoryInfoByMaDonModel searchModel)
+        {
+            if (searchModel == null) return BadRequest("Không nhận được dữ liệu");
+            try
+            {
+                searchModel ??= new SearchHistoryInfoByMaDonModel();
+                var result = await _baoGiaHistoryService.GetExportOriginHistoryExcel(searchModel);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
+                if(result.Data == null || !result.Data.Any())
+                {
+                    return BadRequest("Không có dữ liệu để xuất");
+                }
+
+                var root = _env.WebRootPath ?? _env.ContentRootPath;
+                var templatePath = Path.Combine(root, "template", "TemplateExportHistoryNew.xlsx");
+                if (!System.IO.File.Exists(templatePath))
+                {
+                    return BadRequest("Không tìm thấy file template: TemplateExportHistoryNew.xlsx");
+                }
+
+                using var fs = System.IO.File.OpenRead(templatePath);
+                using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                {
+                    return BadRequest("Không tìm thấy worksheet trong template");
+                }
+                int startRow = 4;
+                var rows = new List<object[]>();
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                static string ToDateString(DateTime? date)
+                    => date?.ToString("dd/MM/yyyy") ?? string.Empty;
+
+                foreach (var item in result.Data)
+                {
+                    var data = item.CHR_NewData;
+                    if (string.IsNullOrWhiteSpace(data)) continue;
+
+                    BaoGia_Request_of_QuotationDTO? quotation;
+                    try
+                    {
+                        quotation = System.Text.Json.JsonSerializer.Deserialize<BaoGia_Request_of_QuotationDTO>(data, jsonOptions);
+                    }
+                    catch (System.Text.Json.JsonException)
+                    {
+                        continue;
+                    }
+
+                    if (quotation == null) continue;
+
+                    rows.Add(new object[]
+                    {
+                        rows.Count + 1,
+                        quotation.CHR_MaDon ?? string.Empty,
+                        quotation.ID,
+                        quotation.CHR_SectionCode ?? string.Empty,
+                        quotation.CHR_SectionName ?? string.Empty,
+                        quotation.CHR_Phanloai ?? string.Empty,
+                        quotation.CHR_MaThietBi ?? string.Empty,
+                        quotation.CHR_MaHangNoiBo ?? string.Empty,
+                        quotation.CHR_MaHangNCC ?? string.Empty,
+                        quotation.NVCHR_NameVN ?? string.Empty,
+                        quotation.CHR_NameEN ?? string.Empty,
+                        quotation.INT_SoLuong ?? 0,
+                        quotation.NVCHR_DonVi ?? string.Empty,
+                        quotation.NVCHR_ChungLoai ?? string.Empty,
+                        quotation.NVCHR_HinhDang ?? string.Empty,
+                        quotation.NVCHR_ChatLieu ?? string.Empty,
+                        quotation.NVCHR_ThanhPhan ?? string.Empty,
+                        quotation.NVCHR_KichThuoc ?? string.Empty,
+                        quotation.NVCHR_DongMay ?? string.Empty,
+                        quotation.NVCHR_TinhNang ?? string.Empty,
+                        quotation.NVCHR_Rohs ?? string.Empty,
+                        quotation.NVCHR_COCQ ?? string.Empty,
+                        quotation.NVCHR_MSDS ?? string.Empty,
+                        quotation.NVCHR_AnToan ?? string.Empty,
+                        quotation.NVCHR_FileThietKe ?? string.Empty,
+                        quotation.NVCHR_NhaSanXuat ?? string.Empty,
+                        quotation.CHR_MaNCC ?? string.Empty,
+                        quotation.NVCHR_TenNCC ?? string.Empty,
+                        quotation.BIT_LayBaoGia == false ? "X" : "O",
+                        quotation.NVCHR_LyDo ?? string.Empty,
+                        ToDateString(quotation.DTM_NgayMuonNhan),
+                        ToDateString(quotation.DTM_KyHan),
+                        quotation.CHR_Gap == "false" ? "X" : "O",
+                        quotation.NVCHR_UserRequest ?? string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    });
+                }
+
+                if (rows.Count == 0)
+                {
+                    return BadRequest("Không có dữ liệu JSON hợp lệ để xuất");
+                }
+
+                ws.Cell(startRow, 1).InsertData(rows);
+
+                using var outStream = new MemoryStream();
+                workbook.SaveAs(outStream);
+                var bytes = outStream.ToArray();
+                var fileName = $"OriginHistory_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                return File(bytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi xuất file: {ex.Message}");
+            }
+
+        }
+
         // Xuất file quản lý màn hình Index bằng MiniExcel
         [HttpPost]
         public async Task<IActionResult> ExportManagerHistoryIndex([FromBody] SearchBaoGiaViewModel searchModel)
