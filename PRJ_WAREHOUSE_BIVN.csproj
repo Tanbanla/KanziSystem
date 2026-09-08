@@ -23,6 +23,13 @@
     <None Remove="Data\Log_WH.xlsx" />
     <None Remove="Data\Nhaptiendo.xlsx" />
     <None Remove="Data\Template_HangTrongDanhMuc.xlsm" />
+    <None Remove="Data\Warning_PullInOut.xlsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\Warning_PullInOut.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
