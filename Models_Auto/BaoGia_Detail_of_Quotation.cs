@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -13,7 +13,7 @@ public partial class BaoGia_Detail_of_Quotation
 
     public string NVCHR_NameNCC { get; set; } = null!;
 
-    public string? CHR_MaHangNCC { get; set; }
+    public string CHR_MaHangNCC { get; set; } = null!;
 
     public string? NVCHR_TenHangHQ { get; set; }
 

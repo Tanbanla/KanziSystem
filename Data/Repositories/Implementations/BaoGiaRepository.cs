@@ -1614,7 +1614,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 // Kiểm tra nếu đơn đã được phê duyệt thì không cho xóa
                 var isApproved = data.Any(d => d.ID_StepBaoGia > 5);
 
-                if (isApproved && role != "UserPUR")
+                if (isApproved && role != "PUR")
                 {
                     throw new Exception(
                         "Đơn đã được phê duyệt, không thể xóa. Vui lòng liên hệ PIC PUR để được hỗ trợ");

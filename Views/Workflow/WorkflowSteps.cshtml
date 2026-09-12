@@ -1,0 +1,11 @@
+
+@{
+    ViewData["Title"] = "Bước nhỏ workflow";
+}
+<link rel="stylesheet" href="~/css/workflow.css" asp-append-version="true" />
+<div class="container-fluid py-3 workflow-page"><div class="d-flex justify-content-between align-items-center mb-4"><div><h4 class="page-title mb-1">Danh mục bước nhỏ</h4><div class="subtitle">Các bước được tái sử dụng trong nhiều workflow.</div></div><button class="btn btn-primary"><i class="fas fa-plus me-2"></i>Thêm bước nhỏ</button></div>
+<div class="card"><div class="card-header toolbar d-flex gap-2"><input class="form-control" placeholder="Tìm mã hoặc tên bước..." /><select class="form-select" style="max-width:220px"><option>Tất cả bước lớn</option><option>Xin khảo sát</option><option>Yêu cầu báo giá</option><option>Xác nhận tên hải quan</option></select><button class="btn btn-outline-primary"><i class="fas fa-search"></i></button></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Mã bước</th><th>Bước lớn</th><th>Tên bước</th><th>SLA</th><th>Sử dụng</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+<tr><td><code>SURVEY_RECEIVE</code></td><td>Xin khảo sát</td><td><strong>Tiếp nhận yêu cầu khảo sát</strong><div class="small text-muted">Receive survey request</div></td><td>8 giờ</td><td>8 workflow</td><td><span class="badge bg-light text-success">Active</span></td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr>
+<tr><td><code>QUOTATION_COMPARE</code></td><td>Yêu cầu báo giá</td><td><strong>So sánh báo giá</strong><div class="small text-muted">Compare quotations</div></td><td>8 giờ</td><td>8 workflow</td><td><span class="badge bg-light text-success">Active</span></td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr>
+<tr><td><code>CUSTOMS_CONFIRM</code></td><td>Xác nhận tên hải quan</td><td><strong>Xác nhận tên hải quan</strong><div class="small text-muted">Confirm customs name</div></td><td>24 giờ</td><td>8 workflow</td><td><span class="badge bg-light text-success">Active</span></td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr>
+</tbody></table></div></div></div>

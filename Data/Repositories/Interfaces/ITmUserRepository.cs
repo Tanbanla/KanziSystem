@@ -1,4 +1,5 @@
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.Login;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -12,6 +13,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<string> GetRoleAsync(string adId);
         // Insert thông tin và đăng ký user đăng nhập
         public Task<bool> InsertListUserAsync(List<TM_USER> users);
+        // Search thông tin user
+        Task<List<TM_USER>> SearchUserAsync(UserSearchModel searchModel);
+
+        // Đăng ký user mới
+        Task<bool> RegisterUserAsync(UserInsertModel userInsert);
+        // Update thông tin user
+        Task<bool> UpdateUserAsync(UserInsertModel userUpdate);
+        Task<bool> DeleteUserAsync(string userId);
 
     }
 }

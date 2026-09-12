@@ -7,6 +7,8 @@
     List<IM_NCC_NEWDTO> listNCC = Model.DanhSachNhaCungCap;
     List<BaoGia_StatusDTO> listStatus = Model.DanhSachStatus;
     List<string> madons = Model.DanhSachMaDon;
+    List<string> masterCategories = Model.DanhSachCategory ?? new List<string>();
+    List<string> masterMaterials = Model.listMaterial ?? new List<string>();
     //List<dynamic> data = Model.DanhSachBaoGiaGomNhom;
 }
 <head>
@@ -570,42 +572,97 @@
         <!-- Tab 3: Master giá -->
         <div class="tab-pane fade" id="input-quotation" role="tabpanel" aria-labelledby="input-quotation-tab">
             <div class="card shadow-sm mb-3 master-quote-filter-card">
-                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 text-secondary master-quote-section-title">Tìm kiếm thông tin</h6>
-                    <span class="badge bg-light text-primary border">Master giá</span>
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 text-secondary master-quote-section-title">Tìm kiếm master giá</h6>
+                        <small class="text-muted">Lọc theo thông tin đơn hàng, hàng hóa và trạng thái</small>
+                    </div>
+                    <span class="badge bg-light text-primary border px-3 py-2">Master giá</span>
                 </div>
-                <div class="card-body pt-3 pb-2">
+                <div class="card-body p-3">
                     <form id="masterQuoteFilterForm" class="row g-3 align-items-end">
-                        <div class="col-12 col-md-3 col-xl-2">
-                            <label for="masterQuoteUploadDate" class="form-label small fw-semibold">Ngày upload</label>
-                            <input type="date" id="masterQuoteUploadDate" class="form-control form-control-sm" />
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteMaDon" class="form-label">Mã đơn</label>
+                            <select id="masterQuoteMaDon" class="form-select searchable-select">
+                                <option value="">Chọn mã đơn</option>
+                                @foreach (var item in madons.Distinct())
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
                         </div>
-                        <div class="col-12 col-md-3 col-xl-2">
-                            <label for="masterQuotePic" class="form-label small fw-semibold">PIC upload</label>
-                            <input type="text" id="masterQuotePic" class="form-control form-control-sm" placeholder="Nhập PIC upload" />
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteMaNcc" class="form-label">Mã nhà cung cấp</label>
+                            <select id="masterQuoteMaNcc" class="form-select searchable-select">
+                                <option value="">Chọn nhà cung cấp</option>
+                                @foreach (var item in listNCC)
+                                {
+                                    <option value="@item.Ma">@item.Ma - @item.Ten</option>
+                                }
+                            </select>
                         </div>
-                        <div class="col-12 col-md-3 col-xl-2">
-                            <label for="masterQuoteNumber" class="form-label small fw-semibold">Số đơn yêu cầu báo giá</label>
-                            <input type="text" id="masterQuoteNumber" class="form-control form-control-sm" placeholder="Nhập số đơn" />
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteMaThietBi" class="form-label">Mã thiết bị</label>
+                            <input type="text" id="masterQuoteMaThietBi" class="form-control" placeholder="Nhập mã thiết bị" />
                         </div>
-                        <div class="col-12 col-md-3 col-xl-2">
-                            <label for="masterQuoteRequestNumber" class="form-label small fw-semibold">Quotation Request Number</label>
-                            <input type="text" id="masterQuoteRequestNumber" class="form-control form-control-sm" placeholder="Nhập mã yêu cầu" />
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteChungLoai" class="form-label">Chủng loại</label>
+                            <select id="masterQuoteChungLoai" class="form-select searchable-select">
+                                <option value="">Chọn chủng loại</option>
+                                @foreach (var item in masterCategories.Distinct())
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
                         </div>
-                        <div class="col-12 col-md-3 col-xl-2">
-                            <label for="masterQuoteVendorCode" class="form-label small fw-semibold">Vendor code</label>
-                            <input type="text" id="masterQuoteVendorCode" class="form-control form-control-sm" placeholder="Nhập vendor code" />
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteMaHangNoiBo" class="form-label">Mã hàng nội bộ</label>
+                            <select id="masterQuoteMaHangNoiBo" class="form-select searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
+                                <option value="">Chọn mã hàng nội bộ</option>
+                                @foreach (var item in masterMaterials.Distinct())
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
                         </div>
-                        <div class="col-12 col-md-3 col-xl-2">
-                            <label for="masterQuoteVendorName" class="form-label small fw-semibold">Vendor name</label>
-                            <input type="text" id="masterQuoteVendorName" class="form-control form-control-sm" placeholder="Nhập vendor name" />
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteMaHangNcc" class="form-label">Mã hàng NCC</label>
+                            <input type="text" id="masterQuoteMaHangNcc" class="form-control" placeholder="Nhập mã hàng NCC" />
                         </div>
-                        <div class="col-12 d-flex gap-2 mt-2">
-                            <button type="button" id="masterQuoteSearchBtn" class="btn btn-primary btn-sm">
-                                <i class="fas fa-search"></i> Tìm kiếm
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteFrom" class="form-label">Từ ngày</label>
+                            <input type="date" id="masterQuoteFrom" class="form-control" />
+                        </div>
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="masterQuoteTo" class="form-label">Đến ngày</label>
+                            <input type="date" id="masterQuoteTo" class="form-control" />
+                        </div>
+                        <div class="col-12 col-md-6 col-xl-3" style="margin-top: 4px;">
+                            <label for="masterQuoteTrangThai" class="form-label">Trạng thái</label>
+                            <select id="masterQuoteTrangThai" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option value="1">Còn hiệu lực</option>
+                                <option value="2">Hết hiệu lực</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6 col-xl-3" style="margin-top: 4px;">
+                            <label for="masterQuoteNhomHang" class="form-label">Nhóm hàng</label>
+                            <select id="masterQuoteNhomHang" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option value="PROD">PROD</option>
+                                <option value="GA">GA</option>
+                                <option value="IT">IT</option>
+                                <option value="PUR">PUR</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-xl-6 d-flex gap-2 master-quote-filter-actions">
+                            <button type="submit" id="masterQuoteSearchBtn" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i> Tìm kiếm
                             </button>
-                            <button type="reset" id="masterQuoteClearBtn" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-eraser"></i> Xóa bộ lọc
+                            <div style="margin-left: 6px;"></div>
+                            <button type="reset" id="masterQuoteClearBtn" class="btn btn-outline-secondary">
+                                <i class="fas fa-eraser me-1"></i> Xóa bộ lọc
                             </button>
                         </div>
                     </form>
@@ -614,7 +671,20 @@
 
             <div class="card shadow-sm master-quote-table-card">
                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 text-secondary master-quote-section-title">Danh sách master giá</h6>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                         <h6 class="mb-0 text-secondary master-quote-section-title">Danh sách master giá</h6>
+                        <div class="d-flex align-items-center gap-1">
+                            <button type="button" class="btn"
+                                    id="btnImportfile"
+                                    style="color:cadetblue; background-color:white">
+                                <i class="fas fa-file-excel"></i> Import file Excel
+                            </button>
+                            <button type="button" class="btn"
+                                    id="btnExportfile"  style="color:burlywood; background-color:white">
+                                Xuất dữ liệu <i class="fas fa-file-download"></i>
+                            </button>
+                        </div>
+                    </div>
                     <small class="text-muted" id="masterQuoteSummaryText">Số chi tiết đơn yêu cầu báo giá: 0</small>
                 </div>
                 <div class="card-body p-0">
@@ -622,40 +692,38 @@
                         <table class="table table-sm table-bordered table-hover align-middle mb-0" id="masterQuoteTable">
                             <thead>
                                 <tr class="text-center align-middle">
+                                    <th style="max-width:20px !important;">No</th>
+                                    <th>Hành động</th>
                                     <th>Ngày upload</th>
                                     <th>PIC upload</th>
                                     <th>Số đơn yêu cầu báo giá</th>
-                                    <th>Quotation Request Number</th>
-                                    <th>Mã thiết bị<br><span>Equipment code</span></th>
-                                    <th>Vendor code</th>
+                                    <th>Mã thiết bị</th>          
                                     <th>Mã nhà cung cấp</th>
-                                    <th>Vendor's good code</th>
-                                    <th>Tên hàng tiếng Việt<br><span>Part name (Vietnamese)</span></th>
-                                    <th>Tên hàng tiếng Anh<br><span>Part name (English)</span></th>
-                                    <th>Số lượng<br><span>Quantity</span></th>
-                                    <th>Đơn vị<br><span>Unit</span></th>
-                                    <th>Other requirement</th>
+                                    <th>Tên nhà cung cấp</th>
+                                    <th>Mã hàng nội bộ</th>
+                                    <th>Mã hàng nhà cung cấp</th>
+                                    <th>Tên hàng tiếng Việt</th>
+                                    <th>Tên hàng tiếng Anh</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn vị</th>
                                     <th>Yêu cầu khác</th>
-                                    <th>Nhà Sản xuất/Xuất xứ<br><span>Maker/Origin</span></th>
-                                    <th>Đơn giá (nhà cung cấp)<br><span>Unit price</span></th>
-                                    <th>Đơn vị tiền<br><span>Currency</span></th>
-                                    <th>Đơn giá (USD)<br><span>Unit price</span></th>
-                                    <th>Thời gian giao hàng<br><span>Lead time (day/ngày)</span></th>
+                                    <th>Nhà Sản xuất/Xuất xứ</th>
+                                    <th>Đơn giá (nhà cung cấp)</th>
+                                    <th>Đơn vị tiền</th>
+                                    <th>Đơn giá (USD)</th>
+                                    <th>Thời gian giao hàng</th>
                                     <th>MOQ</th>
-                                    <th>Delivery term</th>
-                                    <th>Phương thức giao hàng<br><span>Payment term</span></th>
+                                    <th>Phương thức giao hàng</th>
                                     <th>Phương thức thanh toán</th>
-                                    <th>Price effective date</th>
                                     <th>Hiệu lực báo giá</th>
                                     <th>Ngày hết hạn báo giá</th>
-                                    <th>Fix vendor</th>
                                     <th>Quyết định NCC</th>
                                     <th>Lý do điều chỉnh</th>
                                 </tr>
                             </thead>
                             <tbody id="masterQuoteTableBody">
                                 <tr>
-                                    <td colspan="29" class="text-center text-muted py-5">
+                                    <td colspan="27" class="text-center text-muted py-5">
                                         <i class="fas fa-table fa-2x mb-2 d-block"></i>
                                         Chưa có dữ liệu
                                     </td>
@@ -663,6 +731,22 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+            <div class="master-quote-pagination p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label for="masterQuotePageSize" class="small text-muted mb-0">Số dòng/trang</label>
+                    <select id="masterQuotePageSize" class="form-select form-select-sm">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div id="masterQuotePaginationControls" class="btn-group" role="group"></div>
+                    <div style="margin-right: 4px;"></div>
+                    <small class="text-muted" id="masterQuotePagingInfo">&nbsp;</small>
                 </div>
             </div>
         </div>

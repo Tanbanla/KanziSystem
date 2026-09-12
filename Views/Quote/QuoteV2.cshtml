@@ -10,6 +10,7 @@
     var approvers = Model?.ListApprovel ?? new List<BaoGia_Master_Approver_Send_MailDTO>();
     var requester = Model?.NguoiThaoTac ?? string.Empty;
     var sections = Model?.DanhSachNhomViTri ?? new List<DEPARTMENTDTO>();
+    var categories = Model?.DanhSachCategory ?? new List<string>();
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
@@ -23,8 +24,6 @@
             <div class="d-flex gap-2 mb-2" role="group">
                 <button type="button" class="btn btn-success" id="btnDownloadExcel"><i class="fas fa-file-excel me-1"></i>Tải file mẫu</button>
                 <div style="margin-left: 6px;"></div>
-                <button type="button" class="btn btn-outline-primary" id="btnDownExcelTable"><i class="fas fa-download me-1"></i> Tải dữ liệu bảng</button>
-                <div style="margin-left: 6px;"></div>
                 <button type="button" class="btn btn-warning w-100" id="btnDownMaster"><i class="fas fa-file-download me-1"></i> Tải dữ liệu master</button>
             </div>
         </div>
@@ -34,72 +33,46 @@
             <h6 class="mb-0">Thông tin báo giá</h6>
         </div>
         <div class="card-body">
-            <div class="row g-3">
-                <div class="col-12 col-xl-8">
-                    <div class="card h-100 quote-inner-card">
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-12 col-md-6">
-                                    <label for="selectSection" class="form-label fw-semibold">
-                                        Phòng ban xin báo giá <span class="text-danger">*</span>
-                                    </label>
-                                    <select id="selectSection" name="selectSection" class="form-select searchable-select">
-                                        <option value="">Chọn phòng ban</option>
-                                        <option value="GA">GA - General Affairs</option>
-                                        <option value="PUR">PUR - Purchasing</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-12 col-md-6">
-                                    <label for="selectType" class="form-label fw-semibold">
-                                        Loại hàng <span class="text-danger">*</span>
-                                    </label>
-                                    <select id="selectType" name="selectType" class="form-select searchable-select">
-                                        <option value="">Chọn loại hàng xin báo giá</option>
-                                        <option value="1">Hàng hóa tiêu chuẩn</option>
-                                        <option value="2">Hàng hóa thiết kế</option>
-                                        <option value="3">Dịch vụ</option>
-                                    </select>
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <label for="searchPhongBan" class="form-label">Mã chi phí</label>
-                                    <select id="searchPhongBan" name="searchPhongBan" class="form-select searchable-select">
-                                        <option value="" selected>Chọn mã chi phí</option>
-                                        @foreach (var s in sections)
-                                        {
-                                            <option value="@s.Cost_Center">@s.Cost_Center - @s.Name</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-12 col-md-6 d-flex align-items-end">
-                                    <button type="button" id="btnClearFilters" class="btn btn-primary w-100">
-                                        <i class="fas fa-save me-1"></i> Lưu
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label for="selectSection" class="form-label fw-semibold">
+                        Phòng ban xin báo giá <span class="text-danger">*</span>
+                    </label>
+                    <select id="selectSection" name="selectSection" class="form-select searchable-select">
+                        <option value="">Chọn phòng ban</option>
+                        <option value="GA">GA - General Affairs</option>
+                        <option value="PUR">PUR - Purchasing</option>
+                    </select>
                 </div>
-
-                <div class="col-12 col-xl-3">
-                    <div class="card h-100 quote-inner-card quote-guide-card">
-                        <div class="card-body d-flex flex-column">
-                            <h6 class="quote-guide-title mb-2">Standard Goods</h6>
-                            <p class="quote-guide-desc mb-3">Items that are commercially available and can be purchased directly.</p>
-                            <p class="mb-2 fw-semibold">Fields include:</p>
-                            <ul class="quote-guide-list list-unstyled mb-3">
-                                <li><i class="fas fa-check-circle"></i> Part No</li>
-                                <li><i class="fas fa-check-circle"></i> Item Name</li>
-                                <li><i class="fas fa-check-circle"></i> Maker</li>
-                                <li><i class="fas fa-check-circle"></i> Quantity</li>
-                                <li><i class="fas fa-check-circle"></i> Delivery Date</li>
-                                <li><i class="fas fa-check-circle"></i> Attachment</li>
-                            </ul>
-                            @* <div class="text-center mt-auto">
-                                <img src="~/img/carbox.png" alt="Standard Goods" class="img-fluid quote-guide-image" />
-                            </div> *@
-                        </div>
-                    </div>
+                <div class="col-12 col-md-3">
+                    <label for="selectType" class="form-label fw-semibold">
+                        Loại hàng <span class="text-danger">*</span>
+                    </label>
+                    <select id="selectType" name="selectType" class="form-select searchable-select">
+                        <option value="">Chọn loại hàng xin báo giá</option>
+                        <option value="1">Hàng hóa tiêu chuẩn</option>
+                        <option value="2">Hàng hóa thiết kế</option>
+                        <option value="3">Dịch vụ</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label for="searchPhongBan" class="form-label">
+                        Mã chi phí <span class="text-danger">*</span>
+                    </label>
+                    <select id="searchPhongBan" name="searchPhongBan" class="form-select searchable-select">
+                        <option value="" selected>Chọn mã chi phí</option>
+                        @foreach (var s in sections)
+                        {
+                            <option value="@s.Cost_Center">
+                                @s.Cost_Center - @s.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <button type="button" id="btnClearFilters" class="btn btn-primary w-100">
+                        <i class="fas fa-paper-plane me-1"></i> Gửi
+                    </button>
                 </div>
             </div>
         </div>
@@ -115,10 +88,14 @@
                 <div class="d-flex align-items-center gap-1">
                     <button type="button" class="btn"
                             id="btnImportfile"
-                            style="color:cadetblue; background-color:white">
+                            style="color:darkgreen; background-color:white">
                         <i class="fas fa-file-excel"></i> Import file Excel
                     </button>
-
+                    <button type="button" class="btn"
+                            id="btnImportfile"
+                            style="color:goldenrod; background-color:white">
+                        <i class="fas fa-download me-1"></i> Tải dữ liệu bảng
+                    </button>
                     <button type="button" class="btn btn-primary"
                             id="btnAdd">
                         Thêm <i class="fas fa-plus-circle ms-1"></i>
@@ -184,25 +161,256 @@
 
         </div>
     </div>
-    <div class="modal fade" id="addInforModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade quote-entry-modal" id="addInforModal" tabindex="-1" aria-labelledby="addInforModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Thêm mặt hàng báo giá</h5>
-                    <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Đóng" id="btnCloseEdit_1" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">
-                        <i class="fas fa-times fa-sm"></i>
+                <div class="modal-header quote-modal-header">
+                    <div>
+                        <div class="quote-modal-kicker"><i class="fas fa-file-invoice me-1"></i> Yêu cầu báo giá</div>
+                        <h5 class="modal-title" id="addInforModalLabel">Thêm mặt hàng báo giá</h5>
+                        <div class="quote-modal-caption">Nhập đầy đủ thông tin để gửi yêu cầu đến nhà cung cấp</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="addInforForm">
+                        <div class="quote-form-section">
+                            <div class="card-body">
+                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-info-circle"></i></span><div><h6>Thông tin cơ bản</h6><small>Thông tin nhận diện mặt hàng và nhu cầu</small></div></div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-4">
+                                        <label for="searchMahangNB" class="form-label fw-semibold">Mã hàng nội bộ <span class="text-danger">*</span></label>
+                                        <select id="searchMahangNB" name="searchMahangNB" class="form-select searchable-select">
+                                            <option value="" selected>Chọn mã hàng nội bộ</option>
+                                            @foreach (var s in materials)
+                                            {
+                                                <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="selectPhanLoai" class="form-label fw-semibold">Phòng ban xin báo giá <span class="text-danger">*</span></label>
+                                        <select id="selectPhanLoai" name="selectPhanLoai" class="form-select searchable-select">
+                                            <option value="" selected>Chọn phân loại</option>
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="E">E</option>
+                                            <option value="I">I</option>
+                                            <option value="NO LIST">NO LIST</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="selectChungLoai" class="form-label fw-semibold">Chủng loại hàng <span class="text-danger">*</span></label>
+                                        <select id="selectChungLoai" name="selectChungLoai" class="form-select searchable-select">
+                                            <option value="" selected>Chọn chủng loại</option>
+                                            @foreach (var s in categories)
+                                            {
+                                                <option value="@s">@s</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="selectTenVN" class="form-label fw-semibold">Tên hàng tiếng Việt <span class="text-danger">*</span></label>
+                                        <input type="text" id="selectTenVN" name="selectTenVN" class="form-control" placeholder="Nhập tên tiếng Việt" />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="selectTenEN" class="form-label fw-semibold">Tên hàng tiếng Anh <span class="text-danger">*</span></label>
+                                        <input type="text" id="selectTenEN" name="selectTenEN" class="form-control" placeholder="Nhập tên tiếng Anh" />
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="selectMaThietBi" class="form-label fw-semibold">Mã thiết bị</label>
+                                        <input type="text" id="selectMaThietBi" name="selectMaThietBi" class="form-control" />
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="selectMaHangNCC" class="form-label fw-semibold">Mã hàng NCC</label>
+                                        <input type="text" id="selectMaHangNCC" name="selectMaHangNCC" class="form-control" />
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="selectSoLuong" class="form-label fw-semibold">Số lượng <span class="text-danger">*</span></label>
+                                        <input type="number" min="1" id="selectSoLuong" name="selectSoLuong" class="form-control" />
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="selectDonVi" class="form-label fw-semibold">Đơn vị <span class="text-danger">*</span></label>
+                                        <input type="text" id="selectDonVi" name="selectDonVi" class="form-control" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="LyDoXinBaoGia" class="form-label fw-semibold">Lý do xin báo giá</label>
+                                        <textarea class="form-control" id="LyDoXinBaoGia" name="LyDoXinBaoGia" rows="2" placeholder="Nhập lý do chi tiết..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-lg-6">
+                                <div class="quote-form-section h-100">
+                                    <div class="card-body">
+                                        <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-boxes"></i></span><div><h6>Mô tả hàng hóa</h6><small>Thông số kỹ thuật và mục đích sử dụng</small></div></div>
+                                        <div class="row g-3">
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectHinhDang" class="form-label fw-semibold">Hình dáng</label>
+                                                <input type="text" id="selectHinhDang" name="selectHinhDang" class="form-control" />
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectChatLieu" class="form-label fw-semibold">Chất liệu / Màu sắc</label>
+                                                <input type="text" id="selectChatLieu" name="selectChatLieu" class="form-control" />
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectThanhPhan" class="form-label fw-semibold">Thành phần, hàm lượng</label>
+                                                <input type="text" id="selectThanhPhan" name="selectThanhPhan" class="form-control" />
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectKichThuoc" class="form-label fw-semibold">Kích thước</label>
+                                                <input type="text" id="selectKichThuoc" name="selectKichThuoc" class="form-control" />
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectDungcho" class="form-label fw-semibold">Dùng cho máy/vị trí</label>
+                                                <input type="text" id="selectDungcho" name="selectDungcho" class="form-control" />
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectDungde" class="form-label fw-semibold">Dùng để làm gì</label>
+                                                <input type="text" id="selectDungde" name="selectDungde" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6">
+                                <div class="quote-form-section h-100">
+                                    <div class="card-body">
+                                        <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-shield-alt"></i></span><div><h6>Yêu cầu an toàn & tiêu chuẩn</h6><small>Chứng từ và tiêu chuẩn bắt buộc</small></div></div>
+                                        <div class="row g-3">
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectROHS" class="form-label fw-semibold">ROHS</label>
+                                                <select id="selectROHS" name="selectROHS" class="form-select">
+                                                    <option value="" selected>Chọn tiêu chuẩn ROHS</option>
+                                                    <option value="NEED">Need (Cần)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectCOCQ" class="form-label fw-semibold">CO / CQ</label>
+                                                <select id="selectCOCQ" name="selectCOCQ" class="form-select">
+                                                    <option value="" selected>Chọn tiêu chuẩn CO/CQ</option>
+                                                    <option value="CO">CO</option>
+                                                    <option value="CQ">CQ</option>
+                                                    <option value="CO&CQ">CO & CQ</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectMSDS" class="form-label fw-semibold">MSDS & CAS No</label>
+                                                <input type="text" id="selectMSDS" name="selectMSDS" class="form-control" />
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label for="selectAnToan" class="form-label fw-semibold">Tiêu chuẩn an toàn</label>
+                                                <input type="text" id="selectAnToan" name="selectAnToan" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quote-form-section mb-3">
+                            <div class="card-body">
+                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-truck"></i></span><div><h6>Thời gian & địa điểm giao hàng</h6><small>Kế hoạch nhận hàng và thông tin liên hệ</small></div></div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="NgayMuonNhan" class="form-label fw-semibold">Ngày muốn nhận hàng <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="NgayMuonNhan" name="NgayMuonNhan" />
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="LuaChonNcc" class="form-label fw-semibold">Hạn chọn nhà cung cấp <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="LuaChonNcc" name="LuaChonNcc" />
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="selectGap" class="form-label fw-semibold">Đơn hàng gấp</label>
+                                        <select id="selectGap" name="selectGap" class="form-select fw-bold text-danger  searchable-select">
+                                            <option value="false" selected class="text-dark">Không</option>
+                                            <option value="true" class="text-danger">Có</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="NguoiNhanHang" class="form-label fw-semibold">Người nhận hàng</label>
+                                        <input type="text" class="form-control" id="NguoiNhanHang" name="NguoiNhanHang" />
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="SDTNguoiNhanHang" class="form-label fw-semibold">SĐT người nhận</label>
+                                        <input type="tel" class="form-control" id="SDTNguoiNhanHang" name="SDTNguoiNhanHang" />
+                                    </div>
+                                    <div class="col-12 col-md-8">
+                                        <label for="DiaDiemGiaoHang" class="form-label fw-semibold">Địa điểm giao hàng</label>
+                                        <input type="text" class="form-control" id="DiaDiemGiaoHang" name="DiaDiemGiaoHang" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quote-form-section mb-3">
+                            <div class="card-body">
+                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-paperclip"></i></span><div><h6>Tài liệu kèm theo</h6><small>Đính kèm tài liệu hỗ trợ cho yêu cầu</small></div></div>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-4">
+                                        <label for="FileThietKe" class="form-label fw-semibold">File thiết kế</label>
+                                        <input type="file" class="form-control" id="FileThietKe" name="FileThietKe" />
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="LinkHinhAnh" class="form-label fw-semibold">Link/File hình ảnh</label>
+                                        <input type="file" class="form-control" id="LinkHinhAnh" name="LinkHinhAnh" placeholder="" />
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <label for="LinkBox" class="form-label fw-semibold">Link Box/Drive</label>
+                                        <input type="text" class="form-control" id="LinkBox" name="LinkBox" placeholder="Link + Password" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quote-form-section">
+                            <div class="card-body">
+                                <div class="quote-section-heading justify-content-between">
+                                    <div class="d-flex align-items-center gap-2"><span class="quote-section-icon" style="margin-right: 8px;" ><i class="fas fa-building"></i></span><div><h6>Danh sách nhà cung cấp</h6><small>Chọn các nhà cung cấp cần gửi báo giá</small></div></div>
+                                    <span class="badge bg-warning text-dark fs-7">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Tối đa 5 NCC
+                                    </span>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover table-bordered bg-white align-middle" id="supplierTable">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width: 50px">STT</th>
+                                                <th style="min-width: 140px">Mã NCC</th>
+                                                <th style="min-width: 200px">Tên NCC</th>
+                                                <th style="min-width: 140px">Nhà sản xuất</th>
+                                                <th style="min-width: 120px">Lấy báo giá</th>
+                                                <th style="min-width: 180px">Lý do không xin BG</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="supplierTableBody">
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted py-4">Chưa có thông tin nhà cung cấp</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer quote-modal-footer">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Đóng
+                    </button>
+                    <button type="button" class="btn btn-primary px-4 fw-semibold" id="btnSaveHistoryEdit">
+                        <i class="fas fa-save me-1"></i> Lưu thông tin
                     </button>
                 </div>
-                <div class="modal-body" style="max-height: 75vh; overflow-y: auto">
-
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btnCloseEdit_2" role="button" data-bs-dismiss="modal" aria-label="Đóng" aria-controls="editHistoryModal">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="btnSaveHistoryEdit">Lưu</button>
-                </div>
             </div>
-        </div>  
+        </div>
     </div>
 </div>
 @section Scripts {
@@ -217,5 +425,12 @@
             } catch (e) {
             }
         });
+        (function() {
+            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
+            var panel = document.getElementById('addInforModal');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        })();
     </script>
 }

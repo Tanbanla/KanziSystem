@@ -312,7 +312,7 @@
                 <table class="approval-table">
                     <thead>
                         <tr class="legend-row">
-                             <th colspan="6"></th>
+                             <th colspan="7"></th>
                              <th colspan="5" class="legend-cell">
                                  <div class="legend compact mb-0">
                                      <div class="item"><span class="swatch yellow" aria-hidden="true"></span><span>@Localizer["LegendRejectedQuote"]</span></div>
@@ -335,11 +335,12 @@
                                      <div class="item"><span class="swatch white" aria-hidden="true"></span><span>@Localizer["WaitingApprover"]</span></div>
                                  </div>
                              </th>
-                             <th colspan="2"></th>
+                             <th colspan="1"></th>
                         </tr>
                         <tr>
                             <th rowspan="2">@Localizer["No"]</th>
                             <th rowspan="2">@Localizer["OrderNo"]</th>
+                            <th rowspan="2">@Localizer["Status"]</th> @* class="group4" *@
                             <th rowspan="2">@Localizer["InternalCode"]</th>
                             <th rowspan="2">@Localizer["VendorGoodCode"]</th>
                             <th rowspan="2">@Localizer["PartNameEnglish"]</th>
@@ -355,7 +356,6 @@
                             <th rowspan="2">@Localizer["RequesterUser"]</th>
                             <th class="group1" colspan="4">@Localizer["ApprovalOrderGroup"]</th>
                             <th class="group2" colspan="4">@Localizer["ApprovalSupplierGroup"]</th>
-                            <th class="group4" rowspan="2">@Localizer["Status"]</th>
                             <th class="group4" rowspan="2">@Localizer["Action"]</th>
                         </tr>
                         <tr>
@@ -642,7 +642,7 @@
                 <div><span>@Localizer["MaterialCode"]</span><b id="historyDrawerMaterial">-</b></div>
                 <div><span>@Localizer["SupplierCode"]</span><b id="historyDrawerSupplier">-</b></div>
             </div>
-            @if(role == "UserPUR")
+            @if(role == "PUR")
             {
                 <div class="btn-group me-2 mb-2 pt-2" role="group" >
                     <button type="button" class="btn btn-outline-success" id="btnExpOrigin"><i class="fas fa-file-excel"></i> @Localizer["ExportOrigin"] </button>

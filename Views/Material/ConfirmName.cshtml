@@ -84,7 +84,7 @@
 
                     <label class="form-label mb-1 d-block">@Localizer["ConfirmStatus"]</label>
                     <select id="trangThai" name="trangThai" class="form-select trangThai searchable-select" style="min-height:50px;">
-                        @if (role == "User"|| role == "UserPUR")
+                        @if (role == "User"|| role == "PUR")
                         {
                             <option value="">@Localizer["All"]</option>
                             <option value="Confirming" selected>@Localizer["StatusConfirming"]</option>
@@ -122,14 +122,14 @@
                     <i class="fas fa-save me-1"></i> @Localizer["SaveSelected"]
                 </button>
                 <div style="min-width: 6px;"></div>
-                @if (role == "UserPUR")
+                @if (role == "PUR")
                 {
                     <button type="button" class="btn btn-sm btn-outline-success" id="btnApproveSelected">
                         <i class="fas fa-check me-1"></i> @Localizer["ApproveSelected"]
                     </button>
                     <div style="min-width: 6px;"></div>
                 }
-                @if (role == "UserShip")
+                @if (role == "SHIP")
                 {
                     <button type="button" class="btn btn-sm btn-outline-danger" id="btnRejectAccSelected">
                         <i class="fas fa-check me-1"></i> @Localizer["RejectSelected"]

@@ -121,8 +121,8 @@
 <!-- Import Excel input (hidden) -->
 <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" />
 
-<script src="~/js/Category.js" asp-append-version="true"></script>
-    <script>
+<script src="~/js/Master/Category.js" asp-append-version="true"></script>
+<script>
     window.i18nCategory = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
         Search = Localizer["Search"].Value,
         Add = Localizer["Add"].Value,

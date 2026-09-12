@@ -1,22 +1,28 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
-using System.Security.Claims;
-using PRJ_WAREHOUSE_BIVN.View_Models.Login;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
+using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using PRJ_WAREHOUSE_BIVN.View_Models.Login;
+using System.Security.Claims;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
     public class AccountController : Controller
     {
         private readonly ITmUserService _userService;
+        private readonly IBaoGiaWorkflowRoleService _baoGiaWorkflowRoleService;
+        private readonly IEmployeeWorkingService _employeeWorkingService;
         private readonly IConfiguration _configuration;
 
-        public AccountController(ITmUserService userService, IConfiguration configuration)
+        public AccountController(ITmUserService userService, IBaoGiaWorkflowRoleService baoGiaWorkflowRoleService, IEmployeeWorkingService employeeWorkingService, IConfiguration configuration)
         {
             _userService = userService;
+            _baoGiaWorkflowRoleService = baoGiaWorkflowRoleService;
+            _employeeWorkingService = employeeWorkingService;
             _configuration = configuration;
         }
 
@@ -48,7 +54,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 var loginResult = await _userService.Login(model.Username, model.Password);
-                
+
                 if (loginResult.Success && loginResult.Data != null)
                 {
                     // lấy role
@@ -95,7 +101,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         return Redirect(returnUrl);
                     }
-                    
+
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -106,7 +112,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại :"+ ex.Message);
+                ModelState.AddModelError("", "Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại :" + ex.Message);
                 return View(model);
             }
         }
@@ -118,10 +124,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             // Xóa session
             HttpContext.Session.Clear();
-            
+
             // đăng xuất authentication
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            
+
             return RedirectToAction("Login", "Account");
         }
 
@@ -132,11 +138,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var userId = User.FindFirst("UserId")?.Value;
             var fullName = User.FindFirst(ClaimTypes.Name)?.Value;
             var loginTime = HttpContext.Session.GetString("LoginTime");
-            
+
             ViewBag.UserId = userId;
             ViewBag.FullName = fullName;
             ViewBag.LoginTime = loginTime;
-            
+
             return View();
         }
 
@@ -157,6 +163,107 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
             );
             return LocalRedirect(returnUrl ?? $"{HttpContext.Request.PathBase}/Account/Login");
+        }
+
+
+        // MARK: màn hình quản lý user
+        public async Task<IActionResult> UserManagement()
+        {
+            var role = User.FindFirst("Roles")?.Value;
+            if (role != "PUR")
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+            var roles = await _baoGiaWorkflowRoleService.GetAllAsync();
+
+            var vm = new UserManagerModel
+            {
+                Roles = (List<BaoGia_WorkflowRoleDTO>)(roles.Data ?? new List<BaoGia_WorkflowRoleDTO>())
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SearchUser([FromBody] UserSearchModel searchModel)
+        {
+            if (searchModel == null)
+            {
+                return BadRequest("Invalid search parameters.");
+            }
+            var result = await _userService.SearchUserAsync(searchModel);
+            if (result.Success)
+            {
+                return Ok(result.Data);
+            }
+            else
+            {
+                return BadRequest(result.Message ?? "Error occurred while searching for users.");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterUser([FromBody] UserInsertModel userInsert)
+        {
+            if (userInsert == null)
+            {
+                return BadRequest("Invalid user data.");
+            }
+            var result = await _userService.RegisterUserAsync(userInsert);
+            if (result.Success)
+            {
+                return Ok(result.Data);
+            }
+            else
+            {
+                return BadRequest(result.Message ?? "Error occurred while registering the user.");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateUser([FromBody] UserInsertModel userUpdate)
+        {
+            if (userUpdate == null)
+            {
+                return BadRequest("Invalid user data.");
+            }
+            var result = await _userService.UpdateUserAsync(userUpdate);
+            if (result.Success)
+            {
+                return Ok(result.Data);
+            }
+            else
+            {
+                return BadRequest(result.Message ?? "Error occurred while updating the user.");
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser([FromBody] string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("Invalid user ID.");
+            }
+            var result = await _userService.DeleteUserAsync(userId);
+            if (result.Success)
+            {
+                return Ok(result.Data);
+            }
+            else
+            {
+                return BadRequest(result.Message ?? "Error occurred while deleting the user.");
+            }
+        }
+        // Lấy thông tin nhân viên theo ADID or MNV
+        [HttpGet]
+        public async Task<JsonResult> GetEmployeeWorkingByIdAsync(string adidOrMnv)
+        {
+            var resp = await _employeeWorkingService.GetEmployeeWorkingByIdAsync(adidOrMnv);
+            if (resp == null || !resp.Success)
+            {
+                return Json(new { success = false, message = resp?.Message ?? "Error" });
+            }
+            var data = resp.Data ?? new List<dynamic>();
+            return Json(new { success = true, data });
         }
     }
 }

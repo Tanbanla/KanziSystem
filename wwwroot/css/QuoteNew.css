@@ -173,3 +173,151 @@
     color: #343a40;
     font-size: 14px;
 }
+
+.quote-entry-modal .modal-dialog {
+    max-width: 1180px;
+}
+
+.quote-entry-modal .modal-content {
+    border: 1px solid #dbe4f0;
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(15, 42, 74, 0.18);
+    overflow: hidden;
+}
+
+.quote-modal-header {
+    align-items: flex-start;
+    padding: 18px 24px;
+    color: #fff;
+    background: rgb(35, 53, 183);
+    border-bottom: 0;
+}
+
+.quote-modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: .85;
+}
+
+.quote-modal-kicker {
+    margin-bottom: 4px;
+    color: #c9e5ff;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.quote-modal-header .modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.quote-modal-caption {
+    margin-top: 3px;
+    color: #dceeff;
+    font-size: .82rem;
+}
+
+.quote-entry-modal .modal-body {
+    padding: 20px 24px;
+    background: #f5f7fa;
+}
+
+.quote-form-section {
+    border: 1px solid #dfe6ee;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(31, 55, 79, .04);
+}
+
+.quote-form-section .card-body {
+    padding: 18px;
+}
+
+.quote-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e8edf2;
+}
+
+.quote-section-heading h6 {
+    margin: 0;
+    color: #1f3b70;
+    font-size: .95rem;
+    font-weight: 700;
+}
+
+.quote-section-heading small {
+    display: block;
+    margin-top: 2px;
+    color: #718096;
+    font-size: .75rem;
+}
+
+.quote-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border-radius: 7px;
+    color: #1769aa;
+    background: #eaf4fc;
+}
+
+.quote-entry-modal .form-label {
+    color: #334155;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.quote-entry-modal .form-control,
+.quote-entry-modal .form-select {
+    min-height: 38px;
+    border-color: #cbd5e1;
+    border-radius: 6px;
+    font-size: .86rem;
+}
+
+.quote-entry-modal .form-control:focus,
+.quote-entry-modal .form-select:focus {
+    border-color: #1769aa;
+    box-shadow: 0 0 0 .15rem rgba(23, 105, 170, .14);
+}
+
+.quote-entry-modal .table {
+    margin-bottom: 0;
+    font-size: .82rem;
+}
+
+.quote-entry-modal .table th {
+    color: #334e68;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.quote-modal-footer {
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 24px;
+    border-top: 1px solid #dfe6ee;
+    background: #fff;
+}
+
+@media (max-width: 575.98px) {
+    .quote-entry-modal .modal-body,
+    .quote-modal-header,
+    .quote-modal-footer {
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .quote-form-section .card-body {
+        padding: 14px;
+    }
+}

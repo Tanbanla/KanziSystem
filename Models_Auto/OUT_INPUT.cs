@@ -28,6 +28,4 @@ public partial class OUT_INPUT
     public string? UserNhap { get; set; }
 
     public string? ThoigianNhap { get; set; }
-
-    public virtual DEPARTMENT_1? Cost_CenterNavigation { get; set; }
 }

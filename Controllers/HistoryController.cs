@@ -116,7 +116,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(historyByMaterial.Message);
             }
-            var stepByRole = GetRolesUser() == "UserPUR" ? 8 : 12;
+            var stepByRole = GetRolesUser() == "PUR" ? 8 : 12;
 
             try
             {
@@ -756,7 +756,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var roleAsync = await _tmUserService.GetRoleAsync(user);
             var role = roleAsync.Success ? roleAsync.Data : string.Empty;
 
-            if(role != "UserPUR")
+            if(role != "PUR")
             {
                 // Check trạng thái đơn
                 var checkStatus = await _baoGiaService.CheckStepAsync([baogia.ID], [1, 2, 3, 4, 5]);
@@ -1036,7 +1036,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest(result.Message);
                 }
 
-                var stepByRole = GetRolesUser() == "UserPUR" ? 8 : 12;
+                var stepByRole = GetRolesUser() == "PUR" ? 8 : 12;
 
                 var rows = result.Data?.Data?.ToList() ?? new List<dynamic>();
 
@@ -1671,7 +1671,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result.Message);
             }
 
-            var stepByRole = GetRolesUser() == "UserPUR" ? 8 : 12;
+            var stepByRole = GetRolesUser() == "PUR" ? 8 : 12;
             try
             {
                 var historyData = result.Data;

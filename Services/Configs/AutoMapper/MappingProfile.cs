@@ -40,9 +40,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
             CreateMap<BaoGia_Confirm_Name_Quotation, BaoGia_Confirm_Name_QuotationDTO>();
             CreateMap<BaoGia_Confirm_Name_QuotationDTO, BaoGia_Confirm_Name_Quotation>();
 
-            CreateMap<BaoGia_NCC, BaoGia_NCCDTO>();
-            CreateMap<BaoGia_NCCDTO, BaoGia_NCC>();
-
             CreateMap<BaoGia_History_Request_of_Quotation, BaoGia_History_Request_of_QuotationDTO>();
             CreateMap<BaoGia_History_Request_of_QuotationDTO, BaoGia_History_Request_of_Quotation>();
 

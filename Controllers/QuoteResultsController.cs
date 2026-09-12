@@ -79,6 +79,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchMasterQuoteInfo([FromBody] SearchQuoteResultViewModel search)
         {
+            // Search Infor table tab Master Quote Info
             var result = await _baoGiaDetailService.SearchMasterQuoteInfoAsync(search);
             if (!result.Success)
             {
@@ -86,6 +87,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result);
         }
+        // Count In table tab Master Quote Info
+        [HttpPost]
+        public async Task<IActionResult> CountMasterQuoteInfo([FromBody] SearchQuoteResultViewModel search)
+        {
+            // Count In table tab Master Quote Info
+            var result = await _baoGiaDetailService.CountMasterQuoteInfoAsync(search);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
         // Save pick supplier
         [HttpPost]
         public async Task<IActionResult> SavePickSupplier([FromBody] SaveQuotationResultsModel vm)

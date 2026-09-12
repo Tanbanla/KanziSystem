@@ -71,14 +71,14 @@
 
     const T = window.i18nConfirmName || {};
 
-    function canEditTenHQ() { return role === 'UserShip'; }
-    function canEditTenRecomment() { return role === 'UserPUR'; }
-    function canReject() { return role === 'UserShip'; }
-    function canReason() { return (role != 'UserShip' && role != 'UserPUR'); }
+    function canEditTenHQ() { return role === 'SHIP'; }
+    function canEditTenRecomment() { return role === 'PUR'; }
+    function canReject() { return role === 'SHIP'; }
+    function canReason() { return (role != 'SHIP' && role != 'PUR'); }
 
     function getDisplayStatus(r) {
-        if (role === 'UserShip') return r.CHR_StatusShip || r.CHR_Status;
-        if (role === 'UserPUR') return r.CHR_Status;
+        if (role === 'SHIP') return r.CHR_StatusShip || r.CHR_Status;
+        if (role === 'PUR') return r.CHR_Status;
         return r.CHR_StatusACC || r.CHR_Status;
     }
 
@@ -580,24 +580,24 @@
     }
 
     const editFields = [
-        ['MaHangNoiBo', 'MaterialCode', 'UserPUR'],
-        ['TenHaiQuan', 'CustomsNameLabel', 'UserShip'],
-        ['TenRecomment', 'ProposedNameLabel', 'UserPUR'],
-        ['NameEN', 'EnglishNameLabel', 'UserPUR'],
-        ['MaThietBi', 'EquipmentCode', 'UserPUR'],
-        ['MaHangNCC', 'SupplierItemCode', 'UserPUR'],
-        ['Phanloai', 'Classification', 'UserPUR'],
-        ['SoLuong', 'Quantity', 'UserPUR'],
-        ['DonVi', 'Unit', 'UserPUR'],
-        ['ChungLoai', 'Category', 'UserPUR'],
+        ['MaHangNoiBo', 'MaterialCode', 'PUR'],
+        ['TenHaiQuan', 'CustomsNameLabel', 'SHIP'],
+        ['TenRecomment', 'ProposedNameLabel', 'PUR'],
+        ['NameEN', 'EnglishNameLabel', 'PUR'],
+        ['MaThietBi', 'EquipmentCode', 'PUR'],
+        ['MaHangNCC', 'SupplierItemCode', 'PUR'],
+        ['Phanloai', 'Classification', 'PUR'],
+        ['SoLuong', 'Quantity', 'PUR'],
+        ['DonVi', 'Unit', 'PUR'],
+        ['ChungLoai', 'Category', 'PUR'],
         ['HinhDang', 'Shape', 'User'],
         ['ChatLieu', 'Material', 'User'],
         ['ThanhPhan', 'Composition', 'User'],
         ['KichThuoc', 'Dimensions', 'User'],
         ['DongMay', 'UsedForMachine', 'User'],
         ['TinhNang', 'Feature', 'User'],
-        ['Link', 'FileLink', 'UserPUR'],
-        ['LyDo', 'Reason', 'UserShip']
+        ['Link', 'FileLink', 'PUR'],
+        ['LyDo', 'Reason', 'SHIP']
     ];
 
     const editValueMap = {
@@ -609,7 +609,7 @@
     };
 
     function renderDrawerEdit(item) {
-        const canEdit = ['UserPUR', 'User', 'UserShip'].includes(role);
+        const canEdit = ['PUR', 'User', 'SHIP'].includes(role);
 
         if (!els.drawerEditFields) return;
 
@@ -618,7 +618,7 @@
             const disabled =
                 !canEdit ||
                 (
-                    role !== 'UserPUR' &&
+                    role !== 'PUR' &&
                     permittedRole !== role
                 );
 
@@ -639,7 +639,7 @@
 
 
     function openEditDrawer(item) {
-        if (!item || !els.editDrawer || (role !== 'UserPUR' && role !== 'User' && role !== 'UserShip')) return;
+        if (!item || !els.editDrawer || (role !== 'PUR' && role !== 'User' && role !== 'SHIP')) return;
         els.drawer?.setAttribute('data-id', item.ID);
         renderDrawerEdit(item);
         els.editDrawer.classList.add('show');

@@ -31,5 +31,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<IFormFile>> GetFilesToImportAsync(string keywork);
         // Lấy thông tin  cho màn hình master báo giá
         Task<GenericResponse<List<dynamic>>> SearchMasterQuoteInfoAsync(SearchQuoteResultViewModel vm);
+        // count số lượng cho màn hình master báo giá
+        Task<GenericResponse<int>> CountMasterQuoteInfoAsync(SearchQuoteResultViewModel vm);
+
+
     }
 }

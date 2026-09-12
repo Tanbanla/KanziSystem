@@ -4,6 +4,7 @@ using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using PRJ_WAREHOUSE_BIVN.View_Models.Login;
 using System.DirectoryServices.AccountManagement;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
@@ -95,6 +96,74 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = $"Error in InsertMasterApproverSendMailAsync: {ex.Message}";
             }
             return result;
+        }
+        // Search thông tin user
+        public async Task<GenericResponse<List<TM_USERDTO>>> SearchUserAsync(UserSearchModel searchModel)
+        {
+            var result = new GenericResponse<List<TM_USERDTO>>();
+            try
+            {
+                var users = await _repo.SearchUserAsync(searchModel);
+                result.Data = _mapper.Map<List<TM_USERDTO>>(users);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = $"Error in SearchUserAsync: {ex.Message}";
+            }
+            return result;
+        }
+
+        // Đăng ký user mới
+        public async Task<GenericResponse<bool>> RegisterUserAsync(UserInsertModel userInsert)
+        {
+            var response = new GenericResponse<bool>();
+            try
+            {
+                response.Data = await _repo.RegisterUserAsync(userInsert);
+                response.Success = true;
+                response.Message = "User registered successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in RegisterUserAsync: {ex.Message}";
+            }
+            return response;
+        }
+        // Update thông tin user
+        public async Task<GenericResponse<bool>> UpdateUserAsync(UserInsertModel userUpdate)
+        {
+            var response = new GenericResponse<bool>();
+            try
+            {
+                response.Data = await _repo.UpdateUserAsync(userUpdate);
+                response.Success = true;
+                response.Message = "User updated successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in UpdateUserAsync: {ex.Message}";
+            }
+            return response;
+        }
+        public async Task<GenericResponse<bool>> DeleteUserAsync(string userId)
+        {
+            var response = new GenericResponse<bool>();
+            try
+            {
+                response.Data = await _repo.DeleteUserAsync(userId);
+                response.Success = true;
+                response.Message = "User deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in DeleteUserAsync: {ex.Message}";
+            }
+            return response;
         }
     }
 }

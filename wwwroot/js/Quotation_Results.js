@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 listEl.id = supplierReasonDatalistId;
                 document.body.appendChild(listEl);
             }
+
             listEl.innerHTML = supplierPickReasonOptions.map(x => `<option value="${String(x).replace(/"/g, '&quot;')}"></option>`).join('');
         } catch { }
     }
@@ -39,6 +40,14 @@ document.addEventListener('DOMContentLoaded', function () {
         lastPage: false
     };
 
+    const masterQuoteState = {
+        pageIndex: 1,
+        pageSize: 20,
+        totalCount: 0,
+        totalPages: 0,
+        lastPage: false
+    };
+
     // Pagination state for Supplier tab
     const supplierState = {
         pageIndex: 1,
@@ -48,6 +57,10 @@ document.addEventListener('DOMContentLoaded', function () {
         lastPage: false
     };
 
+    // hàm formart
+    const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    const date = value => value ? new Date(value).toLocaleDateString('vi-VN') : '';
+    const cell = value => `<td class ="text-center">${escape(value)}</td>`;
     // Khai báo biến toàn cục cho file
     const quotationApp = {
         init: function () {
@@ -95,6 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.loadSupplierInput();
 
                 this.applyAdditionalColumnsVisibility();
+            } else if (target === '#input-quotation') {
+                this.loadMasterQuoteData();
             }
         },
         initPaginationEvents: function () {
@@ -111,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Supplier page size change
             const supplierPageSize = document.getElementById('supplierPageSizeSelect');
             if (supplierPageSize) {
-                supplierPageSize.value = '20'; // Set default to 50
+                supplierPageSize.value = '20'; 
                 supplierPageSize.addEventListener('change', () => {
                     supplierState.pageSize = parseInt(supplierPageSize.value) || 50;
                     supplierState.pageIndex = 1;
@@ -160,10 +175,192 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Render pagination
                     this.renderSupplierPaginationControls();
 
-                    // after render, reapply additional columns visibility
+                    // after render
                     this.applyAdditionalColumnsVisibility();
                 })
                 .catch(err => console.error('Load supplier data failed', err));
+        },
+        loadMasterQuoteData: async function () {
+            const value = id => document.getElementById(id)?.value?.trim() || '';
+            const payload = {
+                MaDon: value('masterQuoteMaDon'),
+                MaNcc: value('masterQuoteMaNcc'),
+                MaThietBi: value('masterQuoteMaThietBi'),
+                MaHangNoiBo: value('masterQuoteMaHangNoiBo'),
+                MaHangNcc: value('masterQuoteMaHangNcc'),
+                TrangThai: value('masterQuoteTrangThai'),
+                ChungLoai: value('masterQuoteChungLoai'),
+                NhomHang: value('masterQuoteNhomHang'),
+                from: value('masterQuoteFrom') || null,
+                to: value('masterQuoteTo') || null,
+                PageIndex: masterQuoteState.pageIndex,
+                PageSize: masterQuoteState.pageSize
+            };
+
+            const tbody = document.getElementById('masterQuoteTableBody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="27" class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
+
+            try {
+                const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/SearchMasterQuoteInfo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(await response.text() || 'Không thể tải dữ liệu');
+                const result = await response.json();
+                const rows = Array.isArray(result?.data) ? result.data : [];
+                if (!rows.length && masterQuoteState.pageIndex > 1) {
+                    masterQuoteState.pageIndex--;
+                    return this.loadMasterQuoteData();
+                }
+                const count = await this.getMasterQuoteCount(payload);
+                masterQuoteState.totalCount = count;
+                masterQuoteState.totalPages = Math.ceil(count / masterQuoteState.pageSize);
+                masterQuoteState.lastPage = masterQuoteState.pageIndex >= masterQuoteState.totalPages;
+                this.renderMasterQuoteTable(rows);
+                const summary = document.getElementById('masterQuoteSummaryText');
+                if (summary) summary.textContent = `Số dữ liệu: ${count}`;
+                this.renderMasterQuotePaginationControls();
+            } catch (error) {
+                console.error('Load master quote data failed', error);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="27" class="text-center text-danger py-5"><i class="fas fa-exclamation-circle me-2"></i>Không thể tải dữ liệu</td></tr>';
+            }
+        },
+        getMasterQuoteCount: async function (payload) {
+            const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/CountMasterQuoteInfo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(await response.text() || 'Không thể đếm dữ liệu');
+            const result = await response.json();
+            return Number(result?.data || 0);
+        },
+        renderMasterQuotePaginationControls: function () {
+            const container = document.getElementById('masterQuotePaginationControls');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const totalPages = masterQuoteState.totalPages || 1;
+            const previous = document.createElement('button');
+            previous.type = 'button';
+            previous.className = 'btn btn-sm btn-outline-secondary';
+            previous.textContent = '‹';
+            previous.disabled = masterQuoteState.pageIndex <= 1;
+            previous.addEventListener('click', () => {
+                if (masterQuoteState.pageIndex > 1) {
+                    masterQuoteState.pageIndex--;
+                    this.loadMasterQuoteData();
+                }
+            });
+            container.appendChild(previous);
+
+            const range = 2;
+            const start = Math.max(1, Math.min(masterQuoteState.pageIndex - range, Math.max(1, totalPages - (range * 2))));
+            for (let page = start; page <= Math.min(totalPages, start + (range * 2)); page++) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-sm ' + (page === masterQuoteState.pageIndex ? 'btn-primary' : 'btn-outline-secondary');
+                button.textContent = page;
+                button.addEventListener('click', () => {
+                    if (page !== masterQuoteState.pageIndex) {
+                        masterQuoteState.pageIndex = page;
+                        this.loadMasterQuoteData();
+                    }
+                });
+                container.appendChild(button);
+            }
+
+            const next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'btn btn-sm btn-outline-secondary';
+            next.textContent = '›';
+            next.disabled = masterQuoteState.pageIndex >= totalPages || masterQuoteState.totalCount === 0;
+            next.addEventListener('click', () => {
+                if (!next.disabled) {
+                    masterQuoteState.pageIndex++;
+                    this.loadMasterQuoteData();
+                }
+            });
+            container.appendChild(next);
+
+            const pagingInfo = document.getElementById('masterQuotePagingInfo');
+            if (pagingInfo) {
+                const startItem = masterQuoteState.totalCount === 0
+                    ? 0
+                    : ((masterQuoteState.pageIndex - 1) * masterQuoteState.pageSize + 1);
+                const endItem = masterQuoteState.totalCount === 0
+                    ? 0
+                    : Math.min(masterQuoteState.pageIndex * masterQuoteState.pageSize, masterQuoteState.totalCount);
+                pagingInfo.textContent = `${startItem}-${endItem} / ${masterQuoteState.totalCount}`;
+            }
+        },
+        renderMasterQuoteTable: function (rows) {
+            const tbody = document.getElementById('masterQuoteTableBody');
+            if (!tbody) return;
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="27" class="text-center text-muted py-5"><i class="fas fa-table fa-2x mb-2 d-block"></i>Chưa có dữ liệu phù hợp</td></tr>';
+                return;
+            }
+
+            const get = (row, ...names) => {
+                for (const name of names) if (row[name] !== undefined && row[name] !== null) return row[name];
+                return '';
+            };
+            const decimal4 = value => {
+                if (value === null || value === undefined || value === '') return '';
+                const number = Number(value);
+                return Number.isFinite(number) ? Number(number.toFixed(4)).toString() : value;
+            };
+            let stt = 1;
+
+            tbody.innerHTML = rows.map(row => `<tr>
+                <td class ="text-center">${stt++}</td>
+                <td>
+                    <div class="action-buttons" role="group" aria-label="${escape('Actions')}">
+                        <button
+                            type="button"
+                            class="btn btn-view-history"
+                            title="${escape('View history')}"
+                            data-bivncode="${escape(get(row, 'BIVNPartCode'))}">
+                            <i class="fas fa-history"></i>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-edit-history"
+                            title="${escape('Edit')}"
+                            data-bivncode="${escape(get(row, 'BIVNPartCode'))}">
+                            <i class="fas fa-edit text-primary"></i>
+                        </button>
+                    </div>
+                </td>
+                ${cell(date(get(row, 'UploadDate')))}
+                ${cell(get(row, 'PICUpload'))}
+                ${cell(get(row, 'QuotationRequestNumber'))}
+                ${cell(get(row, 'EquipmentCode'))}
+                ${cell(get(row, 'VendorCode'))}
+                ${cell(get(row, 'VendorName'))}
+                ${cell(get(row, 'BIVNPartCode'))}
+                ${cell(get(row, 'VendorGoodCode'))}
+                ${cell(get(row, 'PartNameVN'))}
+                ${cell(get(row, 'PartNameEN'))}
+                ${cell(get(row, 'Quantity'))}
+                ${cell(get(row, 'Unit'))}
+                ${cell(get(row, 'OtherRequirement'))}
+                ${cell(get(row, 'MakerOrigin'))}
+                ${cell(decimal4(get(row, 'UnitPriceSupplier')))}
+                ${cell(get(row, 'Currency'))}
+                ${cell(decimal4(get(row, 'UnitPriceUSD')))}
+                ${cell(get(row, 'LeadTime'))}
+                ${cell(get(row, 'MOQ'))}
+                ${cell(get(row, 'DeliveryTerm'))}
+                ${cell(get(row, 'PaymentTerm'))}
+                ${cell(date(get(row, 'PriceEffectiveDate')))}
+                ${cell(date(get(row, 'ExpiryDate')))}
+                ${cell(get(row, 'VendorCode'))}
+                <td></td>
+            </tr>`).join('');
         },
         renderSupplierTable: function (data) {
             const tbody = document.getElementById('supplierQuoteBody');
@@ -371,6 +568,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 );
             }
+
+            const masterQuoteForm = document.getElementById('masterQuoteFilterForm');
+            if (masterQuoteForm) masterQuoteForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                masterQuoteState.pageIndex = 1;
+                this.loadMasterQuoteData();
+            });
+
+            const masterQuoteClearBtn = document.getElementById('masterQuoteClearBtn');
+            if (masterQuoteClearBtn) masterQuoteClearBtn.addEventListener('click', () => {
+                masterQuoteState.pageIndex = 1;
+                setTimeout(() => this.loadMasterQuoteData(), 0);
+            });
+
+            const masterQuotePageSize = document.getElementById('masterQuotePageSize');
+            if (masterQuotePageSize) masterQuotePageSize.addEventListener('change', () => {
+                masterQuoteState.pageSize = parseInt(masterQuotePageSize.value, 10) || 20;
+                masterQuoteState.pageIndex = 1;
+                this.loadMasterQuoteData();
+            });
+
             // Dowload file templeate tab 2
             const btnDownloadTem = document.getElementById('btnDownloadTem');
             if (btnDownloadTem) {
@@ -410,16 +628,16 @@ document.addEventListener('DOMContentLoaded', function () {
                                     allowCustom: true,
                                 options: supplierPickReasonOptions
                             })
-                                    .then(r => {
-                                        if (!r) {
-                                            cb.checked = false;
-                                            try { reasonEl && reasonEl.focus(); } catch { }
-                                            return;
-                                        }
-                                        try { reasonEl.value = r; } catch { }
-                                        selMatch.value = 'true';
-                                        document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => { if (s !== selMatch) s.value = 'false'; });
-                                    });
+                                .then(r => {
+                                    if (!r) {
+                                        cb.checked = false;
+                                        try { reasonEl && reasonEl.focus(); } catch { }
+                                        return;
+                                    }
+                                    try { reasonEl.value = r; } catch { }
+                                    selMatch.value = 'true';
+                                    document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => { if (s !== selMatch) s.value = 'false'; });
+                                });
                                 return;
                             }
                             selMatch.value = 'true';
@@ -2391,7 +2609,7 @@ function ToDateTimeLocal(date) {
 function hideEditModal() {
     const modalEl = document.getElementById('detailModal');
     if (!modalEl) return;
-    // Accessibility: if focus is inside modal, blur and move focus before hiding (to avoid aria-hidden ancestor with focused descendant)
+
     try {
         const active = document.activeElement;
         if (active && modalEl.contains(active)) {

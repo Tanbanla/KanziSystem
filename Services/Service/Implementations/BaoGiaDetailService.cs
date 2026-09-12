@@ -386,5 +386,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // count số lượng cho màn hình master báo giá
+        public async Task<GenericResponse<int>> CountMasterQuoteInfoAsync(SearchQuoteResultViewModel vm)
+        {
+            var result = new GenericResponse<int>();
+            try
+            {
+                var data = await _repo.CountMasterQuoteInfoAsync(vm);
+                result.Data = data;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

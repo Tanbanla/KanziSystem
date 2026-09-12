@@ -414,6 +414,14 @@
         max-width: 120px;
     }
 
+    .approval-table td.selected-supplier-reason {
+        width: 180px;
+        max-width: 180px;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
     .approval-table .status {
         width: 90px;
     }

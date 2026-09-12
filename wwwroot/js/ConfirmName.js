@@ -273,9 +273,9 @@
                 } else
                 
                 if (field.key === 'status') {
-                    if (role === "UserShip") {
+                    if (role === "SHIP") {
                         td.innerHTML = statusBadge(r.CHR_StatusShip);
-                    } else if (role === "UserPUR") {
+                    } else if (role === "PUR") {
                         td.innerHTML = statusBadge(r.CHR_Status);
                     } else {
                         td.innerHTML = statusBadge(r.CHR_StatusACC);

@@ -1,0 +1,46 @@
+.workflow-page { color: #29324d; }
+.workflow-page .page-title { font-weight: 700; color: #1f2a56; }
+.workflow-page .subtitle { color: #78819b; }
+.workflow-page .card { border: 1px solid #e8ebf3; border-radius: 12px; box-shadow: 0 3px 14px rgba(35, 53, 115, .06); }
+.workflow-page .card-header { background: #fff; border-bottom: 1px solid #eef0f6; padding: 1rem 1.25rem; }
+.workflow-page .flow-tabs .btn { border-radius: 8px; min-width: 110px; font-weight: 600; }
+.workflow-page .flow-tabs .btn.active { background: #2335b7; color: #fff; box-shadow: 0 4px 10px rgba(35, 53, 183, .2); }
+.workflow-page .type-card { cursor: pointer; border: 1px solid #e3e7f0; border-radius: 10px; padding: .9rem; transition: .15s ease; height: 100%; }
+.workflow-page .type-card:hover { border-color: #9ca9e9; transform: translateY(-1px); }
+.workflow-page .type-card.active { border: 2px solid #2335b7; background: #f5f7ff; padding: calc(.9rem - 1px); }
+.workflow-page .type-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; color: #fff; background: #5164d8; }
+.workflow-page .step-list { max-height: 510px; overflow-y: auto; }
+.workflow-page .step-row { display: flex; align-items: center; gap: .8rem; padding: .8rem .2rem; border-bottom: 1px solid #f0f1f6; }
+.workflow-page .step-row:last-child { border-bottom: 0; }
+.workflow-page .step-number { flex: 0 0 31px; height: 31px; display: grid; place-items: center; border-radius: 50%; background: #eef1ff; color: #3448bd; font-weight: 700; font-size: .85rem; }
+.workflow-page .step-row.disabled { opacity: .55; }
+.workflow-page .step-row .form-check-input { width: 2.25em; height: 1.15em; cursor: pointer; }
+.workflow-page .step-row .form-check-input:checked { background-color: #2335b7; border-color: #2335b7; }
+.workflow-page .summary-table th { white-space: nowrap; font-size: .78rem; color: #68728d; }
+.workflow-page .summary-table td { min-width: 145px; vertical-align: middle; }
+.workflow-page .summary-table .badge { font-weight: 500; }
+.workflow-page .legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.workflow-page .empty-state { color: #929ab0; padding: 2rem; text-align: center; }
+.workflow-page .stat-card { border: 0; border-radius: 14px; color: #fff; overflow: hidden; position: relative; }
+.workflow-page .stat-card:after { content: ''; position: absolute; width: 90px; height: 90px; border: 12px solid rgba(255,255,255,.12); border-radius: 50%; right: -25px; bottom: -35px; }
+.workflow-page .stat-blue { background: linear-gradient(135deg,#3448bd,#6678e4); }
+.workflow-page .stat-green { background: linear-gradient(135deg,#159a76,#4ec9a4); }
+.workflow-page .stat-orange { background: linear-gradient(135deg,#df812d,#f3b15c); }
+.workflow-page .stat-purple { background: linear-gradient(135deg,#7350ad,#a27bdd); }
+.workflow-page .stat-value { font-size: 1.8rem; font-weight: 700; }
+.workflow-page .table thead th { background: #f7f8fc; color: #68728d; border-bottom: 0; font-size: .78rem; text-transform: uppercase; letter-spacing: .02em; }
+.workflow-page .table td { vertical-align: middle; color: #3d4661; }
+.workflow-page .nav-pills .nav-link { color: #67718b; border-radius: 8px; font-weight: 600; }
+.workflow-page .nav-pills .nav-link.active { background: #2335b7; color: #fff; }
+.workflow-page .section-title { color: #1f2a56; font-weight: 700; }
+.workflow-page .toolbar { background: #fff; border: 1px solid #e8ebf3; border-radius: 12px; padding: .75rem; }
+.workflow-page .timeline { position: relative; padding-left: 2rem; }
+.workflow-page .timeline:before { content: ''; position: absolute; left: 9px; top: 8px; bottom: 8px; width: 2px; background: #e4e7f1; }
+.workflow-page .timeline-item { position: relative; padding-bottom: 1.25rem; }
+.workflow-page .timeline-dot { position: absolute; left: -2rem; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 5px solid #cbd1e6; z-index: 1; }
+.workflow-page .timeline-item.done .timeline-dot { border-color: #28a981; }
+.workflow-page .timeline-item.current .timeline-dot { border-color: #2335b7; box-shadow: 0 0 0 4px #e9edff; }
+.workflow-page .permission-cell { min-width: 112px; text-align: center; }
+.workflow-page .permission-cell .form-check { display: inline-block; margin: 0 .2rem; }
+.workflow-page .permission-cell input { cursor: pointer; }
+@media (max-width: 768px) { .workflow-page .step-list { max-height: none; } .workflow-page .summary-table { min-width: 720px; } }

@@ -18,7 +18,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaService _baoGiaService;
         private readonly IMaterialService _materialService;
         private readonly ITmSectionService _tmSectionService;
-        private readonly IBaoGiaNCCService _baoGiaNCCService;
         private readonly IBaoGiaHistoryService _baoGiaHistoryService;
         private readonly IBaoGiaStatusService _baoGiaStatusService;
         private readonly IBaoGiaDetailService _baoGiaDetailService;
@@ -38,7 +37,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService, IConfiguration configuration,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService, IExchangeRateService exchangeRateService,
-           IDepartmentService deparmentService, IBaoGiaNCCService baoGiaNCCService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStepService baoGiaStepService,
+           IDepartmentService deparmentService,  IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStepService baoGiaStepService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
             IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService,
@@ -51,7 +50,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaService = baoGiaService;
             _materialService = materialService;
             _tmSectionService = tmSectionService;
-            _baoGiaNCCService = baoGiaNCCService;
             _baoGiaHistoryService = baoGiaHistoryService;
             _baoGiaStatusService = baoGiaStatusService;
             _baoGiaDetailService = baoGiaDetailService;

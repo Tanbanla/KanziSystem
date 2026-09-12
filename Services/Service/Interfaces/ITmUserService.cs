@@ -1,6 +1,7 @@
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.View_Models.Login;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
 {
@@ -12,5 +13,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<string>> GetRoleAsync(string adId);
         // Inser thông tin và đăng ký user đăng nhập
         public Task<GenericResponse<bool>> InsertListUserAsync(List<TM_USER> users);
+        // Search thông tin user
+        Task<GenericResponse<List<TM_USERDTO>>> SearchUserAsync(UserSearchModel searchModel);
+
+        // Đăng ký user mới
+        Task<GenericResponse<bool>> RegisterUserAsync(UserInsertModel userInsert);
+        // Update thông tin user
+        Task<GenericResponse<bool>> UpdateUserAsync(UserInsertModel userUpdate);
+        Task<GenericResponse<bool>> DeleteUserAsync(string userId);
     }
 }

@@ -12,6 +12,4 @@ public partial class USER_DEPT
     public string Cost_Center { get; set; } = null!;
 
     public virtual TM_USER CHR_USER { get; set; } = null!;
-
-    public virtual DEPARTMENT_1 Cost_CenterNavigation { get; set; } = null!;
 }

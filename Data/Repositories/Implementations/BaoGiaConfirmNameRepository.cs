@@ -115,11 +115,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             if (!string.IsNullOrWhiteSpace(req.TrangThai))
             {
-                if (string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(role, "SHIP", StringComparison.OrdinalIgnoreCase))
                 {
                     whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
                 }
-                else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(role, "PUR", StringComparison.OrdinalIgnoreCase))
                 {
                     whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
                 }
@@ -176,7 +176,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var user = User ?? "SYSTEM";
 
             // Role enforcement
-            if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
+            if (role.Equals("SHIP", StringComparison.OrdinalIgnoreCase))
             {
                 row.VCHR_TenHaiQuan = TenHaiQuan ?? row.VCHR_TenHaiQuan;
                 row.VCHR_UserShip = user;
@@ -188,7 +188,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         r.NVCHR_NameVN = row.VCHR_TenHaiQuan;
                 }
             }
-            else if (role.Equals("UserPUR", StringComparison.OrdinalIgnoreCase)) // UserPUR
+            else if (role.Equals("PUR", StringComparison.OrdinalIgnoreCase)) // UserPUR
             {
                 if (TenHaiQuan != null) row.VCHR_TenHaiQuan = TenHaiQuan;
                 if (MaHangNoiBo != null) row.VCHR_MaHangNoiBo = MaHangNoiBo;
@@ -217,11 +217,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
         public async Task<bool> EditConfirmNameAsync(ConfirmNameEditRequest request, string user, string? role)
         {
-            if (request == null || (role != "UserPUR" && role != "User")) return false;
+            if (request == null || (role != "PUR" && role != "User")) return false;
 
             var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == request.Id);
             if (row == null) return false;
-            var currentStatus = role == "UserPUR" ? row.CHR_Status : row.CHR_StatusACC;
+            var currentStatus = role == "PUR" ? row.CHR_Status : row.CHR_StatusACC;
             if (!string.Equals(currentStatus, "Confirming", StringComparison.OrdinalIgnoreCase)) return false;
             var quotation = await _context.BaoGia_Request_of_Quotations
                 .FirstOrDefaultAsync(x => x.ID == row.ID_RequestQuote);
@@ -242,7 +242,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 }
             }
 
-            if (role == "UserPUR")
+            if (role == "PUR")
             {
                 SetValue(nameof(request.MaHangNoiBo), row.VCHR_MaHangNoiBo, request.MaHangNoiBo, () => row.VCHR_MaHangNoiBo = request.MaHangNoiBo);
                 SetValue(nameof(request.TenHaiQuan), row.VCHR_TenHaiQuan, request.TenHaiQuan, () => row.VCHR_TenHaiQuan = request.TenHaiQuan);
@@ -584,7 +584,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var now = DateTime.Now;
 
                 // Role enforcement
-                if (role.Equals("UserShip", StringComparison.OrdinalIgnoreCase))
+                if (role.Equals("SHIP", StringComparison.OrdinalIgnoreCase))
                 {
                     row.VCHR_TenHaiQuan = item.TenHaiQuan ?? row.VCHR_TenHaiQuan;
                     row.VCHR_UserShip = user;
@@ -618,7 +618,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<bool> ApproveConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
         {
             if (saveConfirms == null || !saveConfirms.Any()) return false;
-            if (Role != "UserPUR") return false;
+            if (Role != "PUR") return false;
             foreach (var item in saveConfirms)
             {
                 var row = await _context.BaoGia_Confirm_Name_Quotations.FirstOrDefaultAsync(x => x.ID == item.Id);
@@ -660,7 +660,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         public async Task<bool> RejectShipConfirmNameListAsync(List<ConfirmNameDTO> saveConfirms, string user, string? Role)
         {
             if (saveConfirms == null || !saveConfirms.Any()) return false;
-            if (Role != "UserShip") return false;
+            if (Role != "SHIP") return false;
 
             //List lưu lịch sử xác nhận tên
             var historyS = new List<BaoGia_Confirm_Name_Quotation_History>();
@@ -709,7 +709,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (saveConfirms == null || !saveConfirms.Any())
                 return false;
 
-            if (role != "UserShip")
+            if (role != "SHIP")
                 return false;
 
             var now = DateTime.Now;
@@ -1260,7 +1260,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
             if (!string.IsNullOrWhiteSpace(TrangThai))
             {
-                if (string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(role, "SHIP", StringComparison.OrdinalIgnoreCase))
                 {
                     whereBuilder.Append(" AND c.CHR_StatusShip = @TrangThai");
                 }
@@ -1268,7 +1268,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 {
                     whereBuilder.Append(" AND c.CHR_StatusAcc = @TrangThai");
                 }
-                else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(role, "PUR", StringComparison.OrdinalIgnoreCase))
                 {
                     whereBuilder.Append(" AND c.CHR_Status = @TrangThai");
                 }
@@ -1788,11 +1788,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             if (!string.IsNullOrWhiteSpace(req.TrangThai))
             {
-                if (string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(role, "SHIP", StringComparison.OrdinalIgnoreCase))
                 {
                     sql.Append(" AND c.CHR_StatusShip = @TrangThai");
                 }
-                else if (string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(role, "PUR", StringComparison.OrdinalIgnoreCase))
                 {
                     sql.Append(" AND c.CHR_Status = @TrangThai");
                 }
@@ -1803,8 +1803,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                 parameters.Add("@TrangThai", req.TrangThai.Trim());
             }
-            string statusColumn = string.Equals(role, "UserShip", StringComparison.OrdinalIgnoreCase) ? "CHR_StatusShip" :
-                string.Equals(role, "UserPUR", StringComparison.OrdinalIgnoreCase) ? "CHR_Status" : "CHR_StatusACC";
+            string statusColumn = string.Equals(role, "SHIP", StringComparison.OrdinalIgnoreCase) ? "CHR_StatusShip" :
+                string.Equals(role, "PUR", StringComparison.OrdinalIgnoreCase) ? "CHR_Status" : "CHR_StatusACC";
             sql.Append($@"
                     )
                     SELECT

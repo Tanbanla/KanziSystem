@@ -44,9 +44,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBaoGiaConfirmNameRepository, BaoGiaConfirmNameRepository>();
         services.AddScoped<IBaoGiaConfirmNameService, BaoGiaConfirmNameService>();
 
-        services.AddScoped<IBaoGiaNCCRepository, BaoGiaNCCRepository>();
-        services.AddScoped<IBaoGiaNCCService, BaoGiaNCCService>();
-
         services.AddScoped<IBaoGiaHistoryRepository, BaoGiaHistoryRepository>();
         services.AddScoped<IBaoGiaHistoryService, BaoGiaHistoryService>();
 
@@ -73,6 +70,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
         services.AddScoped<IExchangeRateService, ExchangeRateService>();
+
+        services.AddScoped<IBaoGiaWorkflowRoleRepository, BaoGiaWorkflowRoleRepository>();
+        services.AddScoped<IBaoGiaWorkflowRoleService, BaoGiaWorkflowRoleService>();
 
         services.AddScoped<IFileImportService, FileImportService>();
         return services;

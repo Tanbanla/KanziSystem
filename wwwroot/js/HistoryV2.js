@@ -1202,6 +1202,7 @@
                 <tr>
                     <td>${startNo + i}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_MaDon']))}</td>
+                    ${StatusRow}
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNoiBo']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_MaHangNCC']))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_NameEN']))}</td>
@@ -1211,7 +1212,7 @@
                     ${supplierCell(getValue(row, ['NCC_3']), getValue(row, ['BitNCC_3', 'bitNCC_3']), getValue(row, ['Status_3', 'status_3']), step, isAllRefuse, selectedSupplier, link3, keyDowndload)}
                     ${supplierCell(getValue(row, ['NCC_4']), getValue(row, ['BitNCC_4', 'bitNCC_4']), getValue(row, ['Status_4', 'status_4']), step, isAllRefuse, selectedSupplier, link4, keyDowndload)}
                     ${supplierCell(getValue(row, ['NCC_5']), getValue(row, ['BitNCC_5', 'bitNCC_5']), getValue(row, ['Status_5', 'status_5']), step, isAllRefuse, selectedSupplier, link5, keyDowndload)}
-                    <td>${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
+                    <td class="selected-supplier-reason">${escapeHtml(getValue(row, ['NVCHR_ReasonPick']))}</td>
                     ${costCell(getValue(row, ['FL_USD']), step)}
                     <td style="${overdue ? 'background:red;color:#fff;' : ''}">${escapeHtml(formatDate(deadline))}</td>
                     <td>${escapeHtml(getValue(row, ['CHR_CreateBy']))}</td>
@@ -1223,7 +1224,6 @@
                     ${approvalCell(getValue(row, ['QLSC_PickNCC']), getValue(row, ['QLSC_PickNCC_Time']), getValue(row, ['UserNext']), 9, step)}
                     ${approvalCell(getValue(row, ['QLTC_PickNCC']), getValue(row, ['QLTC_PickNCC_Time']), getValue(row, ['UserNext']), 10, step)}
                     ${approvalCell(getValue(row, ['DEFT_PickNCC']), getValue(row, ['DEFT_PickNCC_Time']), getValue(row, ['UserNext']), 11, step)}
-                    ${StatusRow}
                     <td>
                         <div class="action-buttons" role="group" aria-label="${escapeHtml(window.i18nHistoryQuote?.Actions || 'Actions')}">
                             ${editAction}

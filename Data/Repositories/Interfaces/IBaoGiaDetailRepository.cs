@@ -33,5 +33,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<List<dynamic>> GetFilesToImportAsync(string keywork);
         // Lấy thông tin  cho màn hình master báo giá
         Task<List<dynamic>> SearchMasterQuoteInfoAsync(SearchQuoteResultViewModel vm);
+        // count số lượng cho màn hình master báo giá
+        Task<int> CountMasterQuoteInfoAsync(SearchQuoteResultViewModel vm);
+        // History master báo giá
+        Task<List<dynamic>> HistoryMasterQuoteInfoAsync(string materialCode);
     }
 }

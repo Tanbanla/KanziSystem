@@ -734,72 +734,148 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             var sql = new StringBuilder(@"
-                SELECT DISTINCT d.*
-                FROM BaoGia_Detail_of_Quotation AS d
-                LEFT JOIN BaoGia_Request_of_Quotation AS r
-                    ON d.ID_RequestQuote = r.ID
-                LEFT JOIN BaoGia_History_Detail_Request AS hd
-                    ON hd.ID_RQ_Detail = d.ID
-                WHERE 1 = 1");
+                ;WITH LatestQuotation AS
+                (
+                    SELECT
+                        m.Material_Code,
+                        rq.ID AS RequestID,
+                        rq.DTM_CreateDate AS UploadDate,
+                        dq.CHR_UpdateBy AS PICUpload,
+                        rq.CHR_MaDon AS QuotationRequestNumber,
+                        rq.CHR_MaThietBi AS EquipmentCode,
+                        dq.CHR_CodeNCC AS VendorCode,
+                        rq.NVCHR_TenNCC AS VendorName,
+                        ISNULL(rq.CHR_MaHangNoiBo, m.Material_Code) AS BIVNPartCode,
+                        dq.CHR_MaHangNCC AS VendorGoodCode,
+                        ISNULL(rq.NVCHR_NameVN, m.Material_Name_VN) AS PartNameVN,
+                        ISNULL(dq.CHR_NameEN, m.Material_Name_EN) AS PartNameEN,
+                        dq.INT_SoLuong AS Quantity,
+                        ISNULL(dq.NVCHR_DonVi, m.Unit) AS Unit,
+                        rq.NVCHR_LyDo AS OtherRequirement,
+                        dq.NVCHR_NhaSanXuat AS MakerOrigin,
+                        dq.FL_USD AS UnitPriceSupplier,
+                        ISNULL(m.Currency, 'USD') AS Currency,
+                        ISNULL(dq.FL_USD, m.Price) AS UnitPriceUSD,
+                        dq.DTM_LeadTime AS LeadTime,
+                        dq.NVCHR_MOQ AS MOQ,
+                        dq.NVCHR_DeliveryTerm AS DeliveryTerm,
+                        dq.NVCHR_PaymentTerm AS PaymentTerm,
+                        dq.DTM_EffectiveDate AS PriceEffectiveDate,
+                        m.Group_Code as GroupCode,
+                        dq.DTM_ExpiryDate AS ExpiryDate,
+                        rq.NVCHR_ChungLoai AS FilterCategory,
+                        ROW_NUMBER() OVER
+                        (
+                            PARTITION BY m.Material_Code
+                            ORDER BY
+                                CASE WHEN dq.ID IS NULL THEN 1 ELSE 0 END,
+                                ISNULL(dq.DTM_EffectiveDate, dq.DTM_CreateDate) DESC,
+                                dq.ID DESC
+                        ) AS RN
+                    FROM MATERIAL AS m
+                    LEFT JOIN BaoGia_Request_of_Quotation AS rq
+                        ON m.Material_Code = rq.CHR_MaHangNoiBo
+                    LEFT JOIN BaoGia_Detail_of_Quotation AS dq
+                        ON rq.ID = dq.ID_RequestQuote
+                )
+                SELECT
+                    UploadDate,
+                    PICUpload,
+                    QuotationRequestNumber,
+                    EquipmentCode,
+                    VendorCode,
+                    VendorName,
+                    BIVNPartCode,
+                    VendorGoodCode,
+                    PartNameVN,
+                    PartNameEN,
+                    Quantity,
+                    Unit,
+                    OtherRequirement,
+                    MakerOrigin,
+                    UnitPriceSupplier,
+                    Currency,
+                    UnitPriceUSD,
+                    LeadTime,
+                    MOQ,
+                    DeliveryTerm,
+                    PaymentTerm,
+                    PriceEffectiveDate,
+                    ExpiryDate
+                FROM LatestQuotation
+                WHERE RN = 1");
 
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrWhiteSpace(vm.MaDon))
             {
-                sql.Append(" AND r.CHR_MaDon LIKE '%' + @MaDon + '%'");
+                sql.Append(" AND QuotationRequestNumber = @MaDon");
                 parameters.Add("MaDon", vm.MaDon.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(vm.MaNcc))
             {
-                sql.Append(" AND (r.CHR_MaNCC LIKE '%' + @MaNcc + '%' OR d.CHR_CodeNCC LIKE '%' + @MaNcc + '%')");
+                sql.Append(" AND VendorCode = @MaNcc");
                 parameters.Add("MaNcc", vm.MaNcc.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(vm.MaThietBi))
             {
-                sql.Append(" AND r.CHR_MaThietBi LIKE '%' + @MaThietBi + '%'");
+                sql.Append(" AND EquipmentCode LIKE '%' + @MaThietBi + '%'");
                 parameters.Add("MaThietBi", vm.MaThietBi.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(vm.MaHangNoiBo))
             {
-                sql.Append(" AND r.CHR_MaHangNoiBo LIKE '%' + @MaHangNoiBo + '%'");
+                sql.Append(" AND BIVNPartCode = @MaHangNoiBo");
                 parameters.Add("MaHangNoiBo", vm.MaHangNoiBo.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(vm.MaHangNcc))
             {
-                sql.Append(" AND d.CHR_MaHangNCC LIKE '%' + @MaHangNcc + '%'");
+                sql.Append(" AND VendorGoodCode LIKE '%' + @MaHangNcc + '%'");
                 parameters.Add("MaHangNcc", vm.MaHangNcc.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.NhomHang))
+            {
+                sql.Append(" AND GroupCode = @NhomHang");
+                parameters.Add("NhomHang", vm.NhomHang.Trim());
             }
 
             if (!string.IsNullOrWhiteSpace(vm.TrangThai))
             {
-                sql.Append(" AND r.ID_Status LIKE '%' + @TrangThai + '%'");
-                parameters.Add("TrangThai", vm.TrangThai.Trim());
+                switch (vm.TrangThai.Trim())
+                {
+                    case "1": // Còn hiệu lực
+                        sql.Append(" AND ExpiryDate > GETDATE()");
+                        break;
+
+                    case "2": // Hết hiệu lực
+                        sql.Append(" AND ExpiryDate <= GETDATE()");
+                        break;
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(vm.ChungLoai))
             {
-                sql.Append(" AND r.NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%'");
+                sql.Append(" AND FilterCategory LIKE '%' + @ChungLoai + '%'");
                 parameters.Add("ChungLoai", vm.ChungLoai.Trim());
             }
 
-            // Thời gian khởi tạo của detail báo giá, không phải thời gian khởi tạo request.
             if (vm.from.HasValue)
             {
-                sql.Append(" AND d.DTM_CreateDate >= @From");
+                sql.Append(" AND UploadDate >= @From");
                 parameters.Add("From", vm.from.Value.Date);
             }
 
             if (vm.to.HasValue)
             {
-                sql.Append(" AND d.DTM_CreateDate < DATEADD(DAY, 1, @To)");
+                sql.Append(" AND UploadDate < DATEADD(DAY, 1, @To)");
                 parameters.Add("To", vm.to.Value.Date);
             }
 
-            sql.Append(" ORDER BY d.ID DESC");
+            sql.Append(" ORDER BY Material_Code");
 
             if (vm.PageSize > 0 && vm.PageIndex > 0)
             {
@@ -810,6 +886,127 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
             return result.ToList();
+        }
+        // count số lượng cho màn hình master báo giá
+        public async Task<int> CountMasterQuoteInfoAsync(SearchQuoteResultViewModel vm)
+        {
+            if (vm == null)
+            {
+                throw new ArgumentNullException(nameof(vm));
+            }
+            var sql = new StringBuilder(@"
+                ;WITH LatestQuotation AS
+                (
+                    SELECT
+                        m.Material_Code,
+                        rq.ID AS RequestID,
+                        rq.DTM_CreateDate AS UploadDate,
+                        rq.CHR_MaDon AS QuotationRequestNumber,
+                        rq.CHR_MaThietBi AS EquipmentCode,
+                        dq.CHR_CodeNCC AS VendorCode,
+                        ISNULL(rq.CHR_MaHangNoiBo, m.Material_Code) AS BIVNPartCode,
+                        dq.CHR_MaHangNCC AS VendorGoodCode,
+                        m.Group_Code AS GroupCode,
+                        rq.NVCHR_ChungLoai AS FilterCategory,
+                        dq.DTM_ExpiryDate AS ExpiryDate,
+                        ROW_NUMBER() OVER
+                        (
+                            PARTITION BY m.Material_Code
+                            ORDER BY
+                                CASE WHEN dq.ID IS NULL THEN 1 ELSE 0 END,
+                                ISNULL(dq.DTM_EffectiveDate, dq.DTM_CreateDate) DESC,
+                                dq.ID DESC
+                        ) AS RN
+                    FROM MATERIAL AS m
+                    LEFT JOIN BaoGia_Request_of_Quotation AS rq
+                        ON m.Material_Code = rq.CHR_MaHangNoiBo
+                    LEFT JOIN BaoGia_Detail_of_Quotation AS dq
+                        ON rq.ID = dq.ID_RequestQuote
+                )
+                SELECT COUNT(*) AS TotalCount
+                FROM LatestQuotation
+                WHERE RN = 1");
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrWhiteSpace(vm.MaDon))
+            {
+                sql.Append(" AND QuotationRequestNumber = @MaDon");
+                parameters.Add("MaDon", vm.MaDon.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaNcc))
+            {
+                sql.Append(" AND VendorCode = @MaNcc");
+                parameters.Add("MaNcc", vm.MaNcc.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaThietBi))
+            {
+                sql.Append(" AND EquipmentCode LIKE '%' + @MaThietBi + '%'");
+                parameters.Add("MaThietBi", vm.MaThietBi.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaHangNoiBo))
+            {
+                sql.Append(" AND BIVNPartCode = @MaHangNoiBo");
+                parameters.Add("MaHangNoiBo", vm.MaHangNoiBo.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.MaHangNcc))
+            {
+                sql.Append(" AND VendorGoodCode LIKE '%' + @MaHangNcc + '%'");
+                parameters.Add("MaHangNcc", vm.MaHangNcc.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.NhomHang))
+            {
+                sql.Append(" AND GroupCode = @NhomHang");
+                parameters.Add("NhomHang", vm.NhomHang.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.TrangThai))
+            {
+                switch (vm.TrangThai.Trim())
+                {
+                    case "1": // Còn hiệu lực
+                        sql.Append(" AND ExpiryDate > GETDATE()");
+                        break;
+
+                    case "2": // Hết hiệu lực
+                        sql.Append(" AND ExpiryDate <= GETDATE()");
+                        break;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(vm.ChungLoai))
+            {
+                sql.Append(" AND FilterCategory LIKE '%' + @ChungLoai + '%'");
+                parameters.Add("ChungLoai", vm.ChungLoai.Trim());
+            }
+
+            if (vm.from.HasValue)
+            {
+                sql.Append(" AND UploadDate >= @From");
+                parameters.Add("From", vm.from.Value.Date);
+            }
+
+            if (vm.to.HasValue)
+            {
+                sql.Append(" AND UploadDate < DATEADD(DAY, 1, @To)");
+                parameters.Add("To", vm.to.Value.Date);
+            }
+
+            var result = await _conn.QueryAsync<int>(sql.ToString(), parameters);
+            return result.FirstOrDefault();
+        }
+        // History master báo giá
+        public Task<List<dynamic>> HistoryMasterQuoteInfoAsync(string materialCode)
+        {
+            if(string.IsNullOrWhiteSpace(materialCode))
+                return Task.FromResult<List<dynamic>>(null);
+
+
+            return null;
         }
     }
 }

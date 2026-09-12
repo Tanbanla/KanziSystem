@@ -29,7 +29,9 @@ public partial class MATERIAL_ACOUNTCODE
 
     public string? Currency { get; set; }
 
-    public string Group_Code { get; set; } = null!;
+    public string? Group_Code { get; set; }
 
     public string? GoodKind { get; set; }
+
+    public string? CHR_MaterialOutSide { get; set; }
 }

@@ -18,6 +18,4 @@ public partial class ESTIMATE
     public double? Money_ACC { get; set; }
 
     public string Kind { get; set; } = null!;
-
-    public virtual DEPARTMENT_1 Cost_CenterNavigation { get; set; } = null!;
 }

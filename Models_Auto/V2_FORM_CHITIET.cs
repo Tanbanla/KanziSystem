@@ -55,5 +55,7 @@ public partial class V2_FORM_CHITIET
 
     public string? Phongchiuchiphi { get; set; }
 
+    public string? Hoadon_Taichinh { get; set; }
+
     public virtual V2_FORM MaDonNavigation { get; set; } = null!;
 }

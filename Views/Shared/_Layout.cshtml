@@ -125,12 +125,15 @@
                                 <li><a href="~/Home/Index" class="nav-link"><i class="fa fa-home"></i> <span>@Localizer["MenuDashboard"]</span></a></li>
                             </ul>
                         </li>
-                        <li hidden class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")" >
-                            <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-people"></i> <span>@Localizer["MenuUser"]</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="~/User/Index" class="nav-link"><i class="far fa-user"></i> <span>@Localizer["MenuUser"]</span></a></li>
-                            </ul>
-                        </li>
+                        @if (User.FindFirst("Roles")?.Value == "PUR")
+                        {
+                            <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Account" ? "active" : "")">
+                                <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-people"></i> <span>@Localizer["MenuUser"]</span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="~/Account/UserManagement" class="nav-link"><i class="far fa-user"></i> <span>@Localizer["MenuUser"]</span></a></li>
+                                </ul>
+                            </li>
+                        }
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Quote" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown">
                                 <i class="fas fa-file-invoice-dollar"></i> <span>@Localizer["MenuQuote"]</span>
@@ -148,7 +151,7 @@
                                         <span class="small">@Localizer["MenuQuoteApprove"]</span>
                                     </a>
                                 </li>
-                                @if (User.FindFirst("Roles")?.Value == "UserPUR")
+                                @if (User.FindFirst("Roles")?.Value == "PUR")
                                 {
                                     <li>
                                         <a class="dropdown-item py-2" href="~/InputQuotation/InputQuote">
@@ -231,7 +234,7 @@
                                 <li><a class="dropdown-item py-2" href="~/User/QuanlyUyquyen"><i class="fas fa-handshake"></i> @Languages.uyquyen</a></li>
                                 <li><a class="dropdown-item py-2" href="~/ManagerDelivery/UsingManager"><i class="fas fa-asterisk"></i> Using</a></li>
                                 <li><a class="dropdown-item py-2" href="~/ManagerDelivery/Giaonhanhang_Master"><i class="fas fa-book-reader"></i> Quản lý điểm gọi hàng </a></li>
-                                @if (User.FindFirst("Roles")?.Value == "UserPUR")
+                                @if (User.FindFirst("Roles")?.Value == "PUR")
                                 {
                                     <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> @Localizer["MenuMasterSendMail"]</a></li>

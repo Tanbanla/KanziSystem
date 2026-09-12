@@ -152,7 +152,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(role.Message);
             }
-            if (role.Data == null || (role.Data != "UserPUR" && role.Data != "UserShip" && role.Data != "UserAcc"))
+            if (role.Data == null || (role.Data != "PUR" && role.Data != "SHIP" && role.Data != "UserAcc"))
             {
                 ViewBag.Role = "User";
             }
@@ -182,7 +182,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(role.Message);
             }
-            if (role.Data == null || (role.Data != "UserPUR" && role.Data != "UserShip" && role.Data != "UserAcc"))
+            if (role.Data == null || (role.Data != "PUR" && role.Data != "SHIP" && role.Data != "UserAcc"))
             {
                 ViewBag.Role = "User";
             }
@@ -406,7 +406,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(role.Message);
             }
 
-            if (role.Data == "UserShip")
+            if (role.Data == "SHIP")
             {
                 if (string.IsNullOrWhiteSpace(req.TenHaiQuan))
                 {
@@ -485,7 +485,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // kiểm tra điều kiện  
             foreach (var req in reqs)
             {
-                if (role.Data == "UserShip" && string.IsNullOrWhiteSpace(req.TenHaiQuan))
+                if (role.Data == "SHIP" && string.IsNullOrWhiteSpace(req.TenHaiQuan))
                 {
                     return BadRequest("Tên hải quan không được để trống");
                 }
@@ -634,7 +634,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     listCheck.Add(int.Parse(ws.Cell(r, 3).GetString()));
                     switch (role)
                     {
-                        case "UserShip":
+                        case "SHIP":
                             var tenHaiQuan = ws.Cell(r, 25).GetString();
                             var tenRecomment = ws.Cell(r, 13).GetString();
                             bool bitReturn = ws.Cell(r, 27).GetString().Trim().ToUpper() == "O";
@@ -686,7 +686,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 }
                             }
                             break;
-                        case "UserPUR":
+                        case "PUR":
                             var itemRequestPur = new ConfirmNameInputExcel
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
@@ -741,7 +741,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         return BadRequest($"Các ID sau đã được xác nhận, vui lòng kiểm tra lại các số đơn: {duplicateIds}");
                     }
                 }
-                if (role == "UserShip")
+                if (role == "SHIP")
                 {
                     // gửi mail thông báo đã hoàn thành xác nhận tên đến PIC PUR
                     if (itemOK.Any())
@@ -894,7 +894,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 // Lưu thông tin cập nhật vào request với role UserPUR và User
-                if(role == "UserPUR" )
+                if(role == "PUR" )
                 {
                     if (listUpdateUserPur.Any())
                     {
@@ -988,10 +988,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return role switch
                     {
-                        "UserPUR" => CHR_StatusShip == "Confirming" ? "Chờ xác nhận tên - Ship" :
+                        "PUR" => CHR_StatusShip == "Confirming" ? "Chờ xác nhận tên - Ship" :
                             CHR_StatusAcc == "Confirming" ? "Chờ xác nhận tên - Phòng yêu cầu" :
                             CHR_Status == "Confirming" ? "Chờ xác nhận tên - Pur " : CHR_Status == "Confirmed" ? "Hoàn thành" : "Không xác định",
-                        "UserShip" => CHR_StatusShip == "Confirming" ? "Chờ xác nhận tên - Ship" : CHR_StatusShip == "Confirmed" ? "Hoàn thành" : "Trả lại",
+                        "SHIP" => CHR_StatusShip == "Confirming" ? "Chờ xác nhận tên - Ship" : CHR_StatusShip == "Confirmed" ? "Hoàn thành" : "Trả lại",
                         _=> CHR_StatusAcc == "Confirming" ? "Chờ bổ sung thông tin - phòng ban" : CHR_StatusAcc == "Confirmed" ? "Hoàn thành" : "",
                     };
                 }
@@ -1044,7 +1044,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 23).SetValue(rq.NVCHR_TinhNang ?? "");
                     ws.Cell(row, 24).SetValue(rq.NVCHR_File ?? "");
                     ws.Cell(row, 25).SetValue(rq.VCHR_TenHaiQuan ?? "");
-                    if (role == "UserPUR")
+                    if (role == "PUR")
                     {
                         if (rq.VCHR_TenHaiQuan != rq.VCHR_TenRecomment)
                         {
