@@ -1,11 +1,155 @@
-
 @{
     ViewData["Title"] = "Bước nhỏ workflow";
 }
-<link rel="stylesheet" href="~/css/workflow.css" asp-append-version="true" />
-<div class="container-fluid py-3 workflow-page"><div class="d-flex justify-content-between align-items-center mb-4"><div><h4 class="page-title mb-1">Danh mục bước nhỏ</h4><div class="subtitle">Các bước được tái sử dụng trong nhiều workflow.</div></div><button class="btn btn-primary"><i class="fas fa-plus me-2"></i>Thêm bước nhỏ</button></div>
-<div class="card"><div class="card-header toolbar d-flex gap-2"><input class="form-control" placeholder="Tìm mã hoặc tên bước..." /><select class="form-select" style="max-width:220px"><option>Tất cả bước lớn</option><option>Xin khảo sát</option><option>Yêu cầu báo giá</option><option>Xác nhận tên hải quan</option></select><button class="btn btn-outline-primary"><i class="fas fa-search"></i></button></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Mã bước</th><th>Bước lớn</th><th>Tên bước</th><th>SLA</th><th>Sử dụng</th><th>Trạng thái</th><th></th></tr></thead><tbody>
-<tr><td><code>SURVEY_RECEIVE</code></td><td>Xin khảo sát</td><td><strong>Tiếp nhận yêu cầu khảo sát</strong><div class="small text-muted">Receive survey request</div></td><td>8 giờ</td><td>8 workflow</td><td><span class="badge bg-light text-success">Active</span></td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr>
-<tr><td><code>QUOTATION_COMPARE</code></td><td>Yêu cầu báo giá</td><td><strong>So sánh báo giá</strong><div class="small text-muted">Compare quotations</div></td><td>8 giờ</td><td>8 workflow</td><td><span class="badge bg-light text-success">Active</span></td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr>
-<tr><td><code>CUSTOMS_CONFIRM</code></td><td>Xác nhận tên hải quan</td><td><strong>Xác nhận tên hải quan</strong><div class="small text-muted">Confirm customs name</div></td><td>24 giờ</td><td>8 workflow</td><td><span class="badge bg-light text-success">Active</span></td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr>
-</tbody></table></div></div></div>
+<link rel="stylesheet" href="~/css/workflow/workflow.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/workflow/WFSteps.css" asp-append-version="true" />
+
+<div class="workflow-page wf-steps-page">
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">
+                <i class="fas fa-list-check me-2"></i>Thiết lập quy trình
+            </div>
+            <h1 class="page-title">Danh mục bước nhỏ</h1>
+            <p class="page-subtitle">Các bước được tái sử dụng trong nhiều workflow.</p>
+        </div>
+        <button id="btnAddStep" type="button" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Thêm bước nhỏ
+        </button>
+    </header>
+
+    <section class="card workflow-card filter-card">
+        <div class="card-body">
+            <div class="filter-heading">
+                <div>
+                    <h2 class="section-title">Tra cứu bước nhỏ</h2>
+                    <p class="section-hint">Lọc theo mã, tên, bước lớn hoặc trạng thái.</p>
+                </div>
+                <span class="filter-icon"><i class="fas fa-filter"></i></span>
+            </div>
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input id="stepSearch" type="search" placeholder="Tìm mã hoặc tên bước..." autocomplete="off" />
+                </div>
+                <select id="stepStage" class="form-select">
+                    <option value="">Tất cả bước lớn</option>
+                </select>
+                <select id="stepStatus" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="true">Hoạt động</option>
+                    <option value="false">Không hoạt động</option>
+                </select>
+                <button id="btnSearchStep" type="button" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-1"></i>Tìm kiếm
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="card workflow-card table-card">
+        <div class="card-header table-header">
+            <div>
+                <h2 class="section-title mb-1">Danh sách bước nhỏ</h2>
+                <p class="section-hint mb-0">Cấu hình bước xử lý dùng trong các workflow.</p>
+            </div>
+            <span id="stepCount" class="record-count">0 bản ghi</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table workflow-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center">Thứ tự</th>
+                        <th class="text-center">Mã bước</th>
+                        <th class="text-center">Bước lớn</th>
+                        <th>Tên bước</th>
+                        <th class="text-center">Thời gian</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="stepTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="stepModal" tabindex="-1" aria-labelledby="stepModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form id="stepForm" class="modal-content" novalidate>
+            <div class="modal-header">
+                <div>
+                    <h5 id="stepModalTitle" class="modal-title">Thêm bước nhỏ</h5>
+                    <div class="modal-subtitle">Nhập thông tin bước xử lý dùng chung</div>
+                </div>
+                <button type="button" class="stage-modal-close" data-dismiss="modal" aria-label="Đóng">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="stepId" type="hidden" />
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="stepCode">Mã bước <span class="text-danger">*</span></label>
+                        <input id="stepCode" class="form-control" maxlength="50" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="stepStageId">Bước lớn <span class="text-danger">*</span></label>
+                        <select id="stepStageId" class="form-select" required>
+                            <option value="">Chọn bước lớn</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="stepName">Tên bước <span class="text-danger">*</span></label>
+                        <input id="stepName" class="form-control" maxlength="200" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="stepNameEn">Tên tiếng Anh</label>
+                        <input id="stepNameEn" class="form-control" maxlength="200" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="stepOrder">Thứ tự hiển thị <span class="text-danger">*</span></label>
+                        <input id="stepOrder" class="form-control" type="number" min="1" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="stepDuration">Thời gian (giờ)</label>
+                        <input id="stepDuration" class="form-control" type="number" min="0" max="8760" />
+                    </div>
+                    <div class="col-md-6 mb-3 step-active-setting" style="margin-left: 24px;">
+                        <input id="stepIsActive" class="form-check-input" type="checkbox" checked />
+                        <label class="form-check-label ms-2" for="stepIsActive">Đang hoạt động</label>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label" for="stepDescription">Mô tả</label>
+                    <textarea id="stepDescription" class="form-control" rows="3" maxlength="500"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-dismiss="modal">Hủy</button>
+                <button id="btnSaveStep" type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Lưu dữ liệu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="stepAlert" class="alert d-none" role="alert" aria-live="polite"></div>
+<script>window.workflowStepCatalogUrl='@Url.Action("GetWorkflowStepCatalog", "Workflow")';window.workflowStagesUrl='@Url.Action("GetWorkflowStages", "Workflow")';</script>
+@section Scripts {
+    <script src="~/js/workflow/wfSteps.js" asp-append-version="true"></script>
+    <script>
+        (function() {
+            var panel = document.getElementById('stepModal');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        })();
+    </script>
+}

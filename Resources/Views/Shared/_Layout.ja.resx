@@ -45,4 +45,12 @@
 	<data name="BreadcrumbHome" xml:space="preserve"><value>間接部品管理システム</value></data>
 	<data name="FooterCopyright" xml:space="preserve"><value>ブラザー工業(ベトナム)株式会社 著作権所有</value></data>
 	<data name="MenuMasterCategory" xml:space="preserve"><value>商品カテゴリ</value></data>
+    <data name="Workflow" xml:space="preserve"><value>ワークフロー</value></data>
+    <data name="WorkflowDashboard" xml:space="preserve"><value>ワークフロー概要</value></data>
+	<data name="WorkflowConfiguration" xml:space="preserve"><value>ワークフロー設定</value></data>
+	<data name="WorkflowStages" xml:space="preserve"><value>大ステップ管理</value></data>
+	<data name="WorkflowSteps" xml:space="preserve"><value>ワークフローステップ管理</value></data>
+	<data name="WorkflowRolePermissions" xml:space="preserve"><value>ロール別権限</value></data>
+	<data name="WorkflowUserPermissions" xml:space="preserve"><value>ユーザー別権限</value></data>
+	<data name="WorkflowTasks" xml:space="preserve"><value>自分のタスク</value></data>
 </root>

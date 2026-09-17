@@ -21,7 +21,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaHistoryService _baoGiaHistoryService;
         private readonly IBaoGiaStatusService _baoGiaStatusService;
         private readonly IBaoGiaDetailService _baoGiaDetailService;
-        private readonly IBaoGiaConfirmNameService _baoGiaConfirmNameService;
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IBaoGiaNccCategoryService _baoGiaNccCategoryService;
         private readonly IWebHostEnvironment _env;
@@ -33,12 +32,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IExchangeRateService _exchangeRateService;
         private readonly IFileImportService _fileImportService;
         private readonly IBaoGiaStepService _baoGiaStepService;
+        private readonly IBaoGiaRequestTypeService _baoGiaRequestTypeService;
         private readonly IStringLocalizer<QuoteController> _localizer;
 
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService, IConfiguration configuration,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService, IExchangeRateService exchangeRateService,
            IDepartmentService deparmentService,  IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStepService baoGiaStepService,
-            IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaConfirmNameService baoGiaConfirmNameService,
+            IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaRequestTypeService baoGiaRequestTypeService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
             IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService,
             IStringLocalizer<QuoteController> localizer,
@@ -54,7 +54,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaStatusService = baoGiaStatusService;
             _baoGiaDetailService = baoGiaDetailService;
             _tmCategoryService = tmCategoryService;
-            _baoGiaConfirmNameService = baoGiaConfirmNameService;
             _baoGiaNccCategoryService = baoGiaNccCategoryService;
             _tmEmployeeAgentService = tmEmployeeAgentService;
             _sendMailService = sendMailService;
@@ -66,6 +65,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaStepService = baoGiaStepService;
             _localizer = localizer;
             _fileImportService = fileImportService;
+            _baoGiaRequestTypeService = baoGiaRequestTypeService;
         }
         // MARK: - Quote
         public async Task<IActionResult> Index()
@@ -86,7 +86,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachCategory = categorys,
                 NguoiThaoTac = GetCurrentUserId() ?? ""
             };
-            // Load approver list for current user's section if available
+
             try
             {
                 var section = GetCurrentUserSection() ?? string.Empty;
@@ -108,6 +108,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var materials = await _materialService.SearchAsync("", "", "", 1, 500);
             var nccs = await LoadNhaCungCapDataAsync();
             var categorys = await LoadCategoryDataAsync();
+            var requestTypesResp = await _baoGiaRequestTypeService.GetAllAsync();
 
             ViewBag.ApiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "";
 
@@ -117,9 +118,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 DanhSachVatTu = materials.Data ?? new List<MATERIALDTO>(),
                 DanhSachNhaCungCap = nccs,
                 DanhSachCategory = categorys,
-                NguoiThaoTac = GetCurrentUserId() ?? ""
+                NguoiThaoTac = GetCurrentUserId() ?? "",
+                RequestTypes = (List<BaoGia_RequestTypeDTO>)(requestTypesResp.Data ?? new List<BaoGia_RequestTypeDTO>())
             };
-
             try
             {
                 var section = GetCurrentUserSection() ?? string.Empty;
@@ -146,14 +147,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Ok(result.Data);
         }
 
-        //private string GetApprovalStatus(int currentStep, int requiredStep, string? reason)
-        //{
-        //    if (currentStep <= requiredStep) return "";
-        //    return string.IsNullOrEmpty(reason) ? "OK" : "NG";
-        //}
-
-
-
         // MARK: Lấy các thông tin
         private async Task<List<TM_SECTIONDTO>> LoadSectionDataAsync()
         {
@@ -167,7 +160,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<DEPARTMENTDTO>> LoadNhomViTriDataAsync()
         {
-            //var nhomViTri = await _nhomViTriService.GetAllNhomViTriAsync();
             var nhomViTri = await _deparmentService.GetNhomViTriByDepartmentIdAsync(GetCurrentUserId() ?? "");
             return nhomViTri.Data ?? new List<DEPARTMENTDTO>();
         }
@@ -315,7 +307,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                 var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
                                 foreach (var item in SectionApporve)
                                 {
-                                    //await sendMailService.SendMailToRequesterAsync(item.CHR_MaDon ?? "", item.CHR_SectionCode ?? "", item.CHR_SectionName ?? "", item.CHR_Gap == "false" ? false : true, item.ID_StepBaoGia ?? 2);
                                     await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", currentUserId + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
                                 }
                             }
@@ -600,7 +591,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CHR_Phanloai = material.LoaiHang,
                 CHR_MaThietBi = rowData.MaThietBi,
                 CHR_MaHangNoiBo = material.Material_Code,
-                CHR_MaHangNCC = string.IsNullOrEmpty(rowData.MaHangNCC) ? material.Code_Suppiler : rowData.MaHangNCC,
+                CHR_MaHangNCC = material.Code_Suppiler,//string.IsNullOrEmpty(rowData.MaHangNCC) ? material.Code_Suppiler : rowData.MaHangNCC,
                 NVCHR_NameVN = (rowData.NameVN == "" || rowData.NameVN == null) ? material.Material_Name_VN : rowData.NameVN,
                 CHR_NameEN = (rowData.NameEN == "" || rowData.NameEN == null) ? material.Material_Name_EN : rowData.NameEN,
                 INT_SoLuong = ConvertHelper.ParseDouble(rowData.SoLuong),

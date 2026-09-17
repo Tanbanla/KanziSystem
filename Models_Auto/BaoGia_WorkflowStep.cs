@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -18,6 +18,8 @@ public partial class BaoGia_WorkflowStep
     public string? Description { get; set; }
 
     public int? DefaultDurationHours { get; set; }
+
+    public int? StepOrder { get; set; }
 
     public bool IsActive { get; set; }
 

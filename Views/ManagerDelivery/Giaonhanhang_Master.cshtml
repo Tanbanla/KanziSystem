@@ -1,6 +1,6 @@
 @model IEnumerable<PRJ_WAREHOUSE_BIVN.Models.GiaoHangMasterViewModel>
 @{
-    ViewData["Title"] = "Quản lý đặt hàng và điểm gọi hàng";
+    ViewData["Title"] = "Cảnh báo tồn kho";
 }
 
 <style>
@@ -233,9 +233,9 @@
                             foreach (var item in Model)
                             {
                                 string statusClass = "status-ok";
-                                if (item.DiemGoiHang == "ĐỐI ỨNG GẤP") { statusClass = "status-doi-ung"; }
-                                else if (item.DiemGoiHang == "GỌI HÀNG") { statusClass = "status-goi-hang"; }
-                                else if (item.DiemGoiHang == "CHƯA DÙNG") { statusClass = "status-chua-dung"; }
+                                if (item.DiemGoiHang == "NG") { statusClass = "status-doi-ung"; }
+                                else if (item.DiemGoiHang == "Cần gọi hàng") { statusClass = "status-goi-hang"; }
+                                else if (item.DiemGoiHang == "Chưa có kế hoạch sử dụng") { statusClass = "status-chua-dung"; }
 
                                 <tr>
                                     <!-- Nhóm I -->

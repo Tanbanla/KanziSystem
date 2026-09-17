@@ -11,6 +11,7 @@
     var requester = Model?.NguoiThaoTac ?? string.Empty;
     var sections = Model?.DanhSachNhomViTri ?? new List<DEPARTMENTDTO>();
     var categories = Model?.DanhSachCategory ?? new List<string>();
+    var requestTypes = Model?.RequestTypes ?? new List<BaoGia_RequestTypeDTO>();
 }
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
@@ -18,6 +19,12 @@
 </head>
 
 <div>
+    <div id="globalLoading" class="quote-global-loading" aria-hidden="true">
+        <div class="quote-loading-box" role="status" aria-live="polite">
+            <div class="quote-loading-spinner" aria-hidden="true"></div>
+            <div class="quote-loading-message">Đang xử lý...</div>
+        </div>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h4>Tạo xin báo giá mới</h4>
         <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
@@ -50,9 +57,12 @@
                     </label>
                     <select id="selectType" name="selectType" class="form-select searchable-select">
                         <option value="">Chọn loại hàng xin báo giá</option>
-                        <option value="1">Hàng hóa tiêu chuẩn</option>
-                        <option value="2">Hàng hóa thiết kế</option>
-                        <option value="3">Dịch vụ</option>
+                        @foreach (var t in requestTypes)
+                        {
+                            <option value="@t.CHR_Code">
+                                @t.CHR_Code - @t.NVCHR_Name
+                            </option>
+                        }
                     </select>
                 </div>
                 <div class="col-12 col-md-3">
@@ -92,7 +102,7 @@
                         <i class="fas fa-file-excel"></i> Import file Excel
                     </button>
                     <button type="button" class="btn"
-                            id="btnImportfile"
+                            id="btnExportTablefile"
                             style="color:goldenrod; background-color:white">
                         <i class="fas fa-download me-1"></i> Tải dữ liệu bảng
                     </button>
@@ -112,17 +122,17 @@
                             <th style="min-width: 40px">No.</th>
                             <th style="min-width: 160px">Mã hàng nội bộ</th>
                             <th style="min-width: 140px">Chủng loại</th>
-                            <th style="min-width: 140px">Phân loại hàng</th>
-                            <th style="min-width: 180px">Tên tiếng việt</th>
-                            <th style="min-width: 160px">Tên tiếng anh</th>
+                            <th style="min-width: 100px">Phân loại hàng</th>
+                            <th style="min-width: 270px">Tên tiếng việt</th>
+                            <th style="min-width: 240px">Tên tiếng anh</th>
                             <th style="min-width: 140px">Mã hàng nhà cung cấp</th>
-                            <th style="min-width: 140px">Số lượng</th>
-                            <th style="min-width: 140px">Đơn vị</th>
+                            <th style="min-width: 80px">Số lượng</th>
+                            <th style="min-width: 80px">Đơn vị</th>
                             <th style="min-width: 140px">Kỳ hạn lựa chọn nhà cung cấp</th>
                             <th style="min-width: 140px">Ngày mong muốn nhận hàng</th>
-                            <th style="min-width: 40px">Gấp</th>
+                            <th style="min-width: 60px">Gấp</th>
                             <th style="min-width: 160px">Nhà cung cấp xin báo giá</th>
-                            <th style="min-width: 180px">Hành động</th>
+                            <th style="min-width: 80px">Hành động</th>
                         </tr>
                     </thead>
                     <tbody id="InforTableBody">
@@ -170,7 +180,9 @@
                         <h5 class="modal-title" id="addInforModalLabel">Thêm mặt hàng báo giá</h5>
                         <div class="quote-modal-caption">Nhập đầy đủ thông tin để gửi yêu cầu đến nhà cung cấp</div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="quote-modal-close" id="btnCloseAddInforModal" aria-label="Đóng cửa sổ">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
                 </div>
 
                 <div class="modal-body">
@@ -181,7 +193,8 @@
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
                                         <label for="searchMahangNB" class="form-label fw-semibold">Mã hàng nội bộ <span class="text-danger">*</span></label>
-                                        <select id="searchMahangNB" name="searchMahangNB" class="form-select searchable-select">
+                                        <select id="searchMahangNB" name="searchMahangNB" class="form-select searchMahangNB searchable-select"
+                                                data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="200">
                                             <option value="" selected>Chọn mã hàng nội bộ</option>
                                             @foreach (var s in materials)
                                             {
@@ -190,7 +203,7 @@
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="selectPhanLoai" class="form-label fw-semibold">Phòng ban xin báo giá <span class="text-danger">*</span></label>
+                                        <label for="selectPhanLoai" class="form-label fw-semibold">Phân loại hàng <span class="text-danger">*</span></label>
                                         <select id="selectPhanLoai" name="selectPhanLoai" class="form-select searchable-select">
                                             <option value="" selected>Chọn phân loại</option>
                                             <option value="A">A</option>
@@ -251,27 +264,27 @@
                                         <div class="row g-3">
                                             <div class="col-12 col-md-6">
                                                 <label for="selectHinhDang" class="form-label fw-semibold">Hình dáng</label>
-                                                <input type="text" id="selectHinhDang" name="selectHinhDang" class="form-control" />
+                                                <textarea type="text" id="selectHinhDang" name="selectHinhDang" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectChatLieu" class="form-label fw-semibold">Chất liệu / Màu sắc</label>
-                                                <input type="text" id="selectChatLieu" name="selectChatLieu" class="form-control" />
+                                                <textarea type="text" id="selectChatLieu" name="selectChatLieu" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectThanhPhan" class="form-label fw-semibold">Thành phần, hàm lượng</label>
-                                                <input type="text" id="selectThanhPhan" name="selectThanhPhan" class="form-control" />
+                                                <textarea type="text" id="selectThanhPhan" name="selectThanhPhan" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectKichThuoc" class="form-label fw-semibold">Kích thước</label>
-                                                <input type="text" id="selectKichThuoc" name="selectKichThuoc" class="form-control" />
+                                                <textarea type="text" id="selectKichThuoc" name="selectKichThuoc" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectDungcho" class="form-label fw-semibold">Dùng cho máy/vị trí</label>
-                                                <input type="text" id="selectDungcho" name="selectDungcho" class="form-control" />
+                                                <textarea type="text" id="selectDungcho" name="selectDungcho" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectDungde" class="form-label fw-semibold">Dùng để làm gì</label>
-                                                <input type="text" id="selectDungde" name="selectDungde" class="form-control" />
+                                                <textarea type="text" id="selectDungde" name="selectDungde" class="form-control" ></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -301,11 +314,11 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectMSDS" class="form-label fw-semibold">MSDS & CAS No</label>
-                                                <input type="text" id="selectMSDS" name="selectMSDS" class="form-control" />
+                                                <textarea type="text" id="selectMSDS" name="selectMSDS" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectAnToan" class="form-label fw-semibold">Tiêu chuẩn an toàn</label>
-                                                <input type="text" id="selectAnToan" name="selectAnToan" class="form-control" />
+                                                <textarea type="text" id="selectAnToan" name="selectAnToan" class="form-control" ></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -376,7 +389,7 @@
                                         <i class="fas fa-exclamation-circle me-1"></i> Tối đa 5 NCC
                                     </span>
                                 </div>
-                                <div class="table-responsive">
+                                <div class="table-responsive supplier-table-container">
                                     <table class="table table-sm table-hover table-bordered bg-white align-middle" id="supplierTable">
                                         <thead class="table-light text-center">
                                             <tr>
@@ -402,7 +415,10 @@
                 </div>
 
                 <div class="modal-footer quote-modal-footer">
-                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-warning px-4" id="btnClearAddInforModal">
+                        <i class="fas fa-eraser me-1"></i> Xóa dữ liệu
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary px-4 quote-modal-close-action" id="btnCancelAddInforModal">
                         <i class="fas fa-times me-1"></i> Đóng
                     </button>
                     <button type="button" class="btn btn-primary px-4 fw-semibold" id="btnSaveHistoryEdit">
@@ -412,25 +428,30 @@
             </div>
         </div>
     </div>
+    <div class="modal fade quote-validation-modal" id="quoteValidationModal" tabindex="-1" aria-labelledby="quoteValidationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <div class="quote-validation-kicker"><i class="fas fa-exclamation-triangle me-1"></i> Kiểm tra thông tin</div>
+                        <h5 class="modal-title" id="quoteValidationModalLabel">Chưa thể lưu thông tin</h5>
+                    </div>
+                    <button type="button" class="quote-validation-close" data-bs-dismiss="modal" aria-label="Đóng">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Vui lòng bổ sung các thông tin sau:</p>
+                    <ul id="quoteValidationErrors" class="quote-validation-errors mb-0"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @section Scripts {
     <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
-    <script src="~/js/QuoteNew.js" asp-append-version="true"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            try {
-                if (window.KanziSearchableDropdown && typeof window.KanziSearchableDropdown.init === 'function') {
-                    window.KanziSearchableDropdown.init(document);
-                }
-            } catch (e) {
-            }
-        });
-        (function() {
-            // Ensure panel and overlay are appended to body to avoid being under navbar stacking contexts
-            var panel = document.getElementById('addInforModal');
-            if (panel && panel.parentElement !== document.body) {
-                document.body.appendChild(panel);
-            }
-        })();
-    </script>
+    <script src="~/js/CreateQuotation/QuoteNew.js" asp-append-version="true"></script>
 }

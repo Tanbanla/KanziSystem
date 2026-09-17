@@ -936,6 +936,8 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_Rohs).HasMaxLength(450);
             entity.Property(e => e.NVCHR_TenNCC).HasMaxLength(550);
             entity.Property(e => e.NVCHR_UserRequest).HasMaxLength(200);
+            entity.Property(e => e.NVCHR_ReasonQuotation).HasMaxLength(350);
+            entity.Property(e => e.CHR_LinkFile).HasMaxLength(1500);
         });
 
         modelBuilder.Entity<BaoGia_Status>(entity =>
@@ -1119,6 +1121,7 @@ public partial class COST_MANAGEMENTContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.StepName).HasMaxLength(300);
             entity.Property(e => e.StepNameEN).HasMaxLength(300);
+            entity.Property(e => e.StepOrder);
 
             entity.HasOne(d => d.Stage).WithMany(p => p.BaoGia_WorkflowSteps)
                 .HasForeignKey(d => d.StageID)

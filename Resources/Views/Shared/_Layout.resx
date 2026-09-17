@@ -45,4 +45,12 @@
 	<data name="BreadcrumbHome" xml:space="preserve"><value>Quản lý hàng gián tiếp</value></data>
 	<data name="FooterCopyright" xml:space="preserve"><value>Công ty TNHH Brother Industries (Việt Nam). Bảo lưu mọi quyền.</value></data>
 	<data name="MenuMasterCategory" xml:space="preserve"><value>Danh mục hàng hóa</value></data>
+    <data name="Workflow" xml:space="preserve"><value>Phân luồng</value></data>
+    <data name="WorkflowDashboard" xml:space="preserve"><value>Tổng quan workflow</value></data>
+	<data name="WorkflowConfiguration" xml:space="preserve"><value>Cấu hình workflow</value></data>
+	<data name="WorkflowStages" xml:space="preserve"><value>Quản lý bước lớn</value></data>
+	<data name="WorkflowSteps" xml:space="preserve"><value>Quản lý bước nhỏ</value></data>
+	<data name="WorkflowRolePermissions" xml:space="preserve"><value>Phân quyền theo role</value></data>
+	<data name="WorkflowUserPermissions" xml:space="preserve"><value>Phân quyền theo người dùng</value></data>
+	<data name="WorkflowTasks" xml:space="preserve"><value>Việc của tôi</value></data>
 </root>

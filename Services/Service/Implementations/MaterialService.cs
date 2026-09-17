@@ -193,12 +193,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // check ma hang
-        public async Task<GenericResponse<string>> CheckMaterialCode(string codeNcc, string category, string NameEN)
+        public async Task<GenericResponse<string>> CheckMaterialCode(string codeNcc, string category)
         {
             var result = new GenericResponse<string>();
             try
             {
-                result.Data = await _repo.CheckMaterialCode(codeNcc, category, NameEN);
+                result.Data = await _repo.CheckMaterialCode(codeNcc, category);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -293,8 +293,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     ws.Cell(startRow, 1).Value = GetLoaiHang(m.Material_Code);
                     ws.Cell(startRow, 2).Value = m.Material_Code;
                     ws.Cell(startRow, 3).Value = m.Code_Suppiler;
-                    ws.Cell(startRow, 4).Value = m.Material_Name_VN;
-                    ws.Cell(startRow, 5).Value = m.Material_Name_EN;
+                    ws.Cell(startRow, 4).Value = m.Material_Name_EN;
+                    ws.Cell(startRow, 5).Value = m.Material_Name_VN;
                     ws.Cell(startRow, 6).Value = m.Category_VN;
                     ws.Cell(startRow, 7).Value = m.Group_Code;
                     ws.Cell(startRow, 8).Value = m.Shape;

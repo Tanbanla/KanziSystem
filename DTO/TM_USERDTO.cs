@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +10,7 @@ public partial class TM_USERDTO
 
     public string CHR_USERID { get; set; } = null!;
 
-    public string? VCHR_PASSWORD { get; set; }
+    //public string? VCHR_PASSWORD { get; set; }
 
     public string? FULLNAME { get; set; }
 

@@ -1,0 +1,105 @@
+/* Layout and controls specific to the workflow steps page */
+.wf-steps-page .page-header {
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.wf-steps-page .filter-card,
+.wf-steps-page .table-card {
+    margin-bottom: 1rem;
+}
+
+.wf-steps-page .toolbar {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 240px 190px auto;
+    gap: .75rem;
+    align-items: center;
+    border: 0;
+    padding: 0;
+}
+
+.wf-steps-page .search-box > i {
+    left: .9rem;
+}
+
+.wf-steps-page .search-box input {
+    border-radius: 6px;
+    padding: .55rem .75rem .55rem 2.35rem;
+}
+
+.wf-steps-page .workflow-table th {
+    white-space: nowrap;
+}
+
+.wf-steps-page .status-badge {
+    border-radius: 20px;
+    padding: .35rem .65rem;
+    font-size: .78rem;
+}
+
+.wf-steps-page .status-active {
+    color: #16835d;
+    background: #e7f7f0;
+}
+
+.wf-steps-page .status-inactive {
+    color: #7b8498;
+    background: #f0f1f5;
+}
+
+.wf-steps-page .action-group {
+    gap: .35rem;
+}
+
+.wf-steps-page .btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    background: #f2f4fa;
+    color: #5164d8;
+}
+
+.wf-steps-page .btn-icon:hover {
+    background: #e4e8ff;
+}
+
+.wf-steps-page .btn-delete {
+    color: #d9534f;
+}
+
+.wf-steps-page .step-active-setting {
+    display: flex;
+    align-items: center;
+    padding-top: 1.9rem;
+}
+
+.wf-steps-page .form-select,
+#stepModal .form-select {
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+#stepModal textarea.form-control {
+    min-height: 96px;
+    resize: vertical;
+}
+
+@media (max-width: 900px) {
+    .wf-steps-page .toolbar {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .wf-steps-page {
+        padding: 1rem .5rem;
+    }
+
+    .wf-steps-page .page-header {
+        flex-direction: column;
+    }
+
+    .wf-steps-page .toolbar {
+        grid-template-columns: 1fr;
+    }
+}

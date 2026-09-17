@@ -74,6 +74,30 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBaoGiaWorkflowRoleRepository, BaoGiaWorkflowRoleRepository>();
         services.AddScoped<IBaoGiaWorkflowRoleService, BaoGiaWorkflowRoleService>();
 
+        services.AddScoped<IBaoGiaWorkflowStageRepository, BaoGiaWorkflowStageRepository>();
+        services.AddScoped<IBaoGiaWorkflowStageService, BaoGiaWorkflowStageService>();
+
+        services.AddScoped<IBaoGiaWorkflowStepService, BaoGiaWorkflowStepService>();
+        services.AddScoped<IBaoGiaWorkflowStepRepository, BaoGiaWorkflowStepRepository>();
+
+        services.AddScoped<IBaoGiaWFStepRoleRepository, BaoGiaWFStepRoleRepository>();
+        services.AddScoped<IBaoGiaWFStepRoleService, BaoGiaWFStepRoleService>();
+
+        services.AddScoped<IBaoGiaWFDefinitionStepRepostitory, BaoGiaWFDefinitionStepRepostitory>();
+        services.AddScoped<IBaoGiaWFDefinitionStepService, BaoGiaWFDefinitionStepService>();
+
+        services.AddScoped<IBaoGiaWFStepUserRepositrory, BaoGiaWFStepUserRepositrory>();
+        services.AddScoped<IBaoGiaWFStepUserService, BaoGiaWFStepUserService>();
+
+        services.AddScoped<IBaoGiaWFAuditRepository, BaoGiaWFAuditRepository>();
+        services.AddScoped<IBaoGiaWFAuditService, BaoGiaWFAuditService>();
+
+        services.AddScoped<IBaoGiaWFDefinitionRepository, BaoGiaWFDefinitionRepository>();
+        services.AddScoped<IBaoGiaWFDefinitionService, BaoGiaWFDefinitionService>();
+
+        services.AddScoped<IBaoGiaRequestTypeRepository, BaoGiaRequestTypeRepository>();
+        services.AddScoped<IBaoGiaRequestTypeService, BaoGiaRequestTypeService>();
+
         services.AddScoped<IFileImportService, FileImportService>();
         return services;
     }

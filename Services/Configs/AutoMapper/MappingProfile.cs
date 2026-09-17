@@ -69,6 +69,33 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
 
             CreateMap<BaoGia_Vender_NotConfirm, BaoGia_Vender_NotConfirmDTO>();
             CreateMap<BaoGia_Vender_NotConfirmDTO, BaoGia_Vender_NotConfirm>();
+
+            CreateMap<BaoGia_WorkflowRole, BaoGia_WorkflowRoleDTO>();
+            CreateMap<BaoGia_WorkflowRoleDTO, BaoGia_WorkflowRole>();
+
+            CreateMap<BaoGia_WorkflowStage, BaoGia_WorkflowStageDTO>();
+            CreateMap<BaoGia_WorkflowStageDTO, BaoGia_WorkflowStage>();
+
+            CreateMap<BaoGia_WorkflowStep, BaoGia_WorkflowStepDTO>();
+            CreateMap<BaoGia_WorkflowStepDTO, BaoGia_WorkflowStep>();
+            //
+            CreateMap<BaoGia_WorkflowDefinitionStep, BaoGia_WorkflowDefinitionStepDTO>();
+            CreateMap<BaoGia_WorkflowDefinitionStepDTO, BaoGia_WorkflowDefinitionStep>();
+            //
+            CreateMap<BaoGia_WorkflowStepUser, BaoGia_WorkflowStepUserDTO>();
+            CreateMap<BaoGia_WorkflowStepUserDTO, BaoGia_WorkflowStepUser>();
+
+            CreateMap<BaoGia_WorkflowAudit, BaoGia_WorkflowAuditDTO>();
+            CreateMap<BaoGia_WorkflowAuditDTO, BaoGia_WorkflowAudit>();
+            //
+            CreateMap<BaoGia_WorkflowDefinition, BaoGia_WorkflowDefinitionDTO>();
+            CreateMap<BaoGia_WorkflowDefinitionDTO, BaoGia_WorkflowDefinition>();
+            //
+            CreateMap<BaoGia_WorkflowStepRole, BaoGia_WorkflowStepRoleDTO>();
+            CreateMap<BaoGia_WorkflowStepRoleDTO, BaoGia_WorkflowStepRole>();
+
+            CreateMap<BaoGia_RequestType, BaoGia_RequestTypeDTO>();
+            CreateMap<BaoGia_RequestTypeDTO, BaoGia_RequestType>();
         }
     }
 }

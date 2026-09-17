@@ -31,7 +31,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             _context = context;
         }
-
+        // update lấy dc thông tin quá giới hạn ở trường nào SaveChangesWithDetailsAsync
         // Lấy thông tin báo giá theo mã báo giá
         public async Task<List<BaoGia_Request_of_Quotation>> GetByMaBaoGiaAsync(string maBaoGia)
         {

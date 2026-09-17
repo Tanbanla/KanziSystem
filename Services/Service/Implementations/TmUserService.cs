@@ -98,13 +98,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Search thông tin user
-        public async Task<GenericResponse<List<TM_USERDTO>>> SearchUserAsync(UserSearchModel searchModel)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchUserAsync(UserSearchModel searchModel)
         {
-            var result = new GenericResponse<List<TM_USERDTO>>();
+            var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                var users = await _repo.SearchUserAsync(searchModel);
-                result.Data = _mapper.Map<List<TM_USERDTO>>(users);
+                result.Data =  await _repo.SearchUserAsync(searchModel);
                 result.Success = true;
             }
             catch (Exception ex)

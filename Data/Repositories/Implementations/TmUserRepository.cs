@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -74,64 +75,130 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return true;
         }
         // Search thông tin user
-        public async Task<List<TM_USER>> SearchUserAsync(UserSearchModel searchModel)
+        public async Task<ListRequest<dynamic>> SearchUserAsync(UserSearchModel searchModel)
         {
-            if (searchModel == null) return new List<TM_USER>();
+            var sql = new StringBuilder();
+            var where = new List<string>();
+            var parameters = new DynamicParameters();
 
-            var sql = new StringBuilder(@"SELECT
-                   u.[ID]
-                  ,[CHR_USERID]
-                  ,[VCHR_PASSWORD]
-                  ,[FULLNAME]
-                  ,[CHR_CRT_USERID]
-                  ,[DTM_CREATE]
-                  ,[Lancuoicungdangnhap]
-                  ,[CHR_EMPLOYEE_ID]
-                  ,[CHR_ADID_GROUPUSER]
-                  ,[DTM_LAST_LOGIN]
-                  ,[INT_LOCK]
-                  ,[INT_LOCK_DAY]
-                  ,[CHR_SECTION]
-                  ,[INT_USERID_COMMON]
-                  ,[dia_chi_mail]
-                  ,[phan_quyen]
-                  ,[phong_ban]
-                  ,[thoi_gian_cap_nhat]
-                  ,[cho_phep_hoat_dong]
-              FROM TM_USER as u 
-              left join BaoGia_RoleUser as br
-              on u.CHR_CRT_USERID = br.UserAdid
-            WHERE 1=1");
+            sql.Append(@"
+                SELECT
+                    u.ID
+                    ,u.CHR_USERID
+                    ,u.VCHR_PASSWORD
+                    ,u.FULLNAME
+                    ,u.CHR_CRT_USERID
+                    ,u.DTM_CREATE
+                    ,u.Lancuoicungdangnhap
+                    ,u.CHR_EMPLOYEE_ID
+                    ,u.CHR_ADID_GROUPUSER
+                    ,u.DTM_LAST_LOGIN
+                    ,u.INT_LOCK
+                    ,u.INT_LOCK_DAY
+                    ,u.CHR_SECTION
+                    ,u.INT_USERID_COMMON
+                    ,u.dia_chi_mail
+                    ,u.phan_quyen
+                    ,u.phong_ban
+                    ,u.thoi_gian_cap_nhat
+                    ,u.cho_phep_hoat_dong
+                    ,br.Role
+                FROM TM_USER u
+                LEFT JOIN BaoGia_RoleUser br
+                    ON u.CHR_USERID = br.UserAdid
+            ");
 
-            if (!string.IsNullOrEmpty(searchModel.adid))
+            #region Filter
+
+            if (!string.IsNullOrWhiteSpace(searchModel.adid))
             {
-                sql.Append($" AND u.CHR_USERID LIKE '%{searchModel.adid}%'");
+                where.Add("u.CHR_USERID LIKE '%' + @Adid + '%'");
+                parameters.Add("Adid", searchModel.adid);
             }
-            if (!string.IsNullOrEmpty(searchModel.fullname))
+
+            if (!string.IsNullOrWhiteSpace(searchModel.fullname))
             {
-                sql.Append($" AND u.FULLNAME LIKE '%{searchModel.fullname}%'");
+                where.Add("u.FULLNAME LIKE '%' + @FullName + '%'");
+                parameters.Add("FullName", searchModel.fullname);
             }
-            if (!string.IsNullOrEmpty(searchModel.section))
+
+            if (!string.IsNullOrWhiteSpace(searchModel.section))
             {
-                sql.Append($" AND u.CHR_SECTION LIKE '%{searchModel.section}%'");
+                where.Add("u.CHR_SECTION LIKE '%' + @Section + '%'");
+                parameters.Add("Section", searchModel.section);
             }
-            if (!string.IsNullOrEmpty(searchModel.role))
+
+            if (!string.IsNullOrWhiteSpace(searchModel.role))
             {
-                sql.Append($" AND br.Role = '{searchModel.role}'");
+                where.Add("br.Role = @Role");
+                parameters.Add("Role", searchModel.role);
             }
+
             if (searchModel.status.HasValue)
             {
-                sql.Append($" AND u.INT_LOCK = {searchModel.status.Value}");
+                where.Add("u.INT_LOCK = @Status");
+                parameters.Add("Status", searchModel.status.Value);
             }
 
-            if (searchModel.pageIndex.HasValue && searchModel.pageSize.HasValue)
+            if (where.Any())
             {
-                int offset = (searchModel.pageIndex.Value - 1) * searchModel.pageSize.Value;
-                sql.Append($" ORDER BY u.CHR_USERID OFFSET {offset} ROWS FETCH NEXT {searchModel.pageSize.Value} ROWS ONLY");
+                sql.Append(" WHERE ");
+                sql.Append(string.Join(" AND ", where));
             }
 
-            var users = await _context.TM_USERs.FromSqlRaw(sql.ToString()).ToListAsync();
-            return users;
+            #endregion
+
+            #region Count
+
+            var countSql = $@"
+                SELECT COUNT(1)
+                FROM TM_USER u
+                LEFT JOIN BaoGia_RoleUser br
+                    ON u.CHR_USERID = br.UserAdid
+                {(where.Any() ? "WHERE " + string.Join(" AND ", where) : "")}
+            ";
+
+            var totalCount = await _conn.ExecuteScalarAsync<int>(
+                countSql,
+                parameters);
+
+            #endregion
+
+            #region Paging
+
+            if (searchModel.pageSize.HasValue && searchModel.pageSize.Value > 0)
+            {
+                var page = searchModel.pageIndex.GetValueOrDefault(1);
+
+                var offset = (page - 1) * searchModel.pageSize.Value;
+
+                sql.Append(@"
+                    ORDER BY u.CHR_USERID
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @PageSize ROWS ONLY
+                ");
+
+                parameters.Add("Offset", offset);
+                parameters.Add("PageSize", searchModel.pageSize.Value);
+            }
+            else
+            {
+                sql.Append(" ORDER BY u.CHR_USERID");
+            }
+
+            #endregion
+
+            var data = (
+                await _conn.QueryAsync<dynamic>(
+                    sql.ToString(),
+                    parameters))
+                .ToList();
+
+            return new ListRequest<dynamic>
+            {
+                Data = data,
+                TotalCount = totalCount
+            };
         }
         // Đăng ký user mới
         public async Task<bool> RegisterUserAsync(UserInsertModel userInsert)
@@ -142,8 +209,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .FirstOrDefaultAsync(u => u.CHR_USERID == userInsert.infor.CHR_USERID);
             if (existingUser != null)
                 return false;
+            userInsert.infor.CHR_CRT_USERID = userInsert.infor.CHR_EMPLOYEE_ID;
+            userInsert.infor.CHR_ADID_GROUPUSER = userInsert.infor.CHR_USERID;
+            userInsert.infor.INT_LOCK_DAY = 30;
+            userInsert.infor.DTM_CREATE = DateTime.Now;
 
-            var roleUser = new BaoGia_RoleUser
+           var roleUser = new BaoGia_RoleUser
             {
                 UserAdid = userInsert.infor.CHR_USERID,
                 Role = userInsert.role ?? "User",

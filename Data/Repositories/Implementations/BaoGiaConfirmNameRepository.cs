@@ -504,6 +504,17 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 var requestDict = requests.ToDictionary(x => x.ID);
                 var confirmDict = confirmRows.ToDictionary(x => x.ID);
 
+
+                // Cập nhật thông tin vào Material
+                var materialCodes = requests
+                    .Select(x => x.CHR_MaHangNoiBo)
+                    .Distinct()
+                    .ToList();
+
+                var materialUpdates = await _context.MATERIALs
+                    .Where(m => materialCodes.Contains(m.Material_Code))
+                    .ToListAsync();
+
                 var histories = new List<BaoGia_Confirm_Name_Quotation_History>();
 
                 foreach (var item in confirmNames)
@@ -537,6 +548,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     rq.ID_StepBaoGia = 13;
                     rq.ID_Status = "DONE";
                     rq.NVCHR_NameVN = item.VCHR_TenHaiQuan;
+
+                    // update Material
+                    var material = materialUpdates
+                        .FirstOrDefault(m => m.Material_Code == rq.CHR_MaHangNoiBo);
+
+                    if (material != null)
+                    {
+                        material.Material_Name_VN = item.VCHR_TenHaiQuan;
+                    }
 
                     // Update ConfirmNameQuotation
                     row.VCHR_TenHaiQuan = item.VCHR_TenHaiQuan;
@@ -868,8 +888,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         rq.NVCHR_KichThuoc,
                         rq.NVCHR_DongMay,
                         rq.NVCHR_TinhNang,
-                        rq.CHR_MaThietBi,
-                        rq.CHR_MaHangNCC,
+                        //rq.CHR_MaThietBi,
+                        //rq.CHR_MaHangNCC,
                         confirmName.CHR_Status,
                         confirmName.CHR_StatusACC,
                         confirmName.CHR_StatusShip
@@ -911,12 +931,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         rq.NVCHR_TinhNang = item.NVCHR_TinhNang;
                         rowChanged = true;
                     }
-
-                    if (!string.Equals(rq.CHR_MaThietBi, item.CHR_MaThietBi))
-                    {
-                        rq.CHR_MaThietBi = item.CHR_MaThietBi;
-                        rowChanged = true;
-                    }
+                    //không update CHR_MaThietBi
+                    //if (!string.Equals(rq.CHR_MaThietBi, item.CHR_MaThietBi))
+                    //{
+                    //    rq.CHR_MaThietBi = item.CHR_MaThietBi;
+                    //    rowChanged = true;
+                    //}
 
                     // không update CHR_MaHangNCC
                     //if (!string.Equals(rq.CHR_MaHangNCC, item.CHR_MaHangNCC))
@@ -959,8 +979,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                             rq.NVCHR_KichThuoc,
                             rq.NVCHR_DongMay,
                             rq.NVCHR_TinhNang,
-                            rq.CHR_MaThietBi,
-                            rq.CHR_MaHangNCC,
+                            //rq.CHR_MaThietBi,
+                            //rq.CHR_MaHangNCC,
                             confirmName.CHR_Status,
                             confirmName.CHR_StatusACC,
                             confirmName.CHR_StatusShip
@@ -1103,6 +1123,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                 var requestDict = requestQuotes.ToDictionary(x => x.ID);
 
+                var materialCodes = requestQuotes
+                    .Select(x => x.CHR_MaHangNoiBo)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x!.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var materialDict = (await _context.MATERIALs
+                        .Where(x => x.Material_Code != null && materialCodes.Contains(x.Material_Code))
+                        .ToListAsync())
+                    .GroupBy(x => x.Material_Code!, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(x => x.Key, x => x.First(), StringComparer.OrdinalIgnoreCase);
+
                 var vendorCodes = requestQuotes
                     .Select(x => x.CHR_MaNCC)
                     .Where(x => !string.IsNullOrWhiteSpace(x))
@@ -1162,9 +1195,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         var oldValue = confirmName.VCHR_TenHaiQuan;
 
                         if (!string.Equals(
-                                oldValue?.Trim(),
-                                item.VCHR_TenHaiQuan?.Trim(),
-                                StringComparison.OrdinalIgnoreCase))
+                            oldValue?.Trim(),
+                            item.VCHR_TenHaiQuan?.Trim(),
+                            StringComparison.OrdinalIgnoreCase))
                         {
                             histories.Add(new BaoGia_Confirm_Name_Quotation_History
                             {
@@ -1190,6 +1223,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         request.NVCHR_NameVN = item.VCHR_TenHaiQuan;
                         request.ID_Status = "DONE";
                         request.ID_StepBaoGia = 13;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(item.VCHR_TenHaiQuan) &&
+                        !string.IsNullOrWhiteSpace(request.CHR_MaHangNoiBo) &&
+                        materialDict.TryGetValue(request.CHR_MaHangNoiBo.Trim(), out var material))
+                    {
+                        material.Material_Name_VN = item.VCHR_TenHaiQuan;
                     }
                 }
 
@@ -1335,6 +1375,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     .GroupBy(x => x.ID)
                     .ToDictionary(x => x.Key, x => x.First());
 
+                // Load Material theo mã hàng nội bộ
+                var materialCodes = requestQuotes
+                    .Select(x => x.CHR_MaHangNoiBo)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct()
+                    .ToList();
+
+                var materials = await _context.MATERIALs
+                    .Where(x => materialCodes.Contains(x.Material_Code))
+                    .ToListAsync();
+
+                var materialDict = materials
+                    .GroupBy(x => x.Material_Code, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(x => x.Key, x => x.First(), StringComparer.OrdinalIgnoreCase);
+
                 // Load Detail
                 var details = await _context.BaoGia_Detail_of_Quotations
                     .Where(x => requestQuoteIds.Contains(x.ID_RequestQuote))
@@ -1454,6 +1509,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                                 }
                             }
                         }
+                    }
+
+                    #endregion
+
+                    #region Material
+
+                    if (requestDict.TryGetValue(confirmName.ID_RequestQuote, out var materialRequest) &&
+                        !string.IsNullOrWhiteSpace(materialRequest.CHR_MaHangNoiBo) &&
+                        materialDict.TryGetValue(materialRequest.CHR_MaHangNoiBo, out var material) &&
+                        !string.Equals(
+                            material.Material_Name_VN,
+                            item.VCHR_TenRecomment,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        material.Material_Name_VN = item.VCHR_TenRecomment;
+                        rowChanged = true;
                     }
 
                     #endregion

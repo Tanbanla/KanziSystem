@@ -679,7 +679,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     {
                                         ID = int.Parse(ws.Cell(r, 3).GetString()),
                                         VCHR_TenHaiQuan = tenHaiQuan,
-                                        //VCHR_UserShip = GetCurrentUserId(),
                                         DTM_UserShip = DateTime.Now,
                                         VCHR_UserShip = ws.Cell(r, 26).GetString()
                                     });
@@ -691,6 +690,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
                                 CHR_NameEN = ws.Cell(r, 14).GetString(),
+                                VCHR_TenHaiQuan = ws.Cell(r, 25).GetString(),
                                 VCHR_TenRecomment = ws.Cell(r, 13).GetString(),
                                 LinkQ = ws.Cell(r, 24).GetString(),
                             };
@@ -700,8 +700,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             var itemRequest = new BaoGia_Request_of_QuotationDTO
                             {
                                 ID = int.Parse(ws.Cell(r, 3).GetString()),
-                                CHR_MaThietBi = ws.Cell(r, 9).GetString(),
-                                CHR_MaHangNCC = ws.Cell(r, 11).GetString(),
+                                //CHR_MaThietBi = ws.Cell(r, 9).GetString(),
+                                //CHR_MaHangNCC = ws.Cell(r, 11).GetString(),
                                 NVCHR_HinhDang = ws.Cell(r, 18).GetString(),
                                 NVCHR_ChatLieu = ws.Cell(r, 19).GetString(),
                                 NVCHR_ThanhPhan = ws.Cell(r, 20).GetString(),

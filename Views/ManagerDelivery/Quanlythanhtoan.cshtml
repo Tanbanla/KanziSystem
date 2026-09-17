@@ -1,10 +1,9 @@
-@* Đổi Model thành class Quanlythanhtoan vừa tạo *@
 @model IEnumerable<PRJ_WAREHOUSE_BIVN.Models.Quanlythanhtoan>
 
-<div class="container-fluid mt-3">
+<div class="container-fluid">
     <!-- Filter and Action Bar -->
     <div class="row mb-3 align-items-end">
-        <div class="col-md-7">
+        <div class="col-md-8">
             <form asp-action="Quanlythanhtoan" method="get" class="row g-2 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label">Thuộc khối:</label>
@@ -17,15 +16,19 @@
                     <label class="form-label">Số PO:</label>
                     <input type="text" class="form-control" name="txtPO" value="@ViewBag.txtPO">
                 </div>
-                <!-- Đã xóa input userr hidden vì lấy từ Controller -->
+               
                 <div class="col-md-3">
                     <label class="form-label">Tình trạng:</label>
                     <select class="form-control" name="cmbTinhTrang">
                         <option value="">-- Chọn --</option>
+                        <option>Đang chờ xác nhận</option>
+                        <option>Hoàn thành xác nhận</option>
+                        <option>Đang xử lý</option>
+                        <option>Hoàn thành</option>
+                        <option>Bị hủy, từ chối</option>
                     </select>
                 </div>
-                <div class="col-md-3"></div> <!-- Spacer -->
-
+                <div class="col-md-3"></div>
                 <div class="col-md-3">
                     <label class="form-label">Ngày phát hành:</label>
                     <input type="date" class="form-control" name="txtPhathanh1" value="@ViewBag.txtPhathanh1">
@@ -36,14 +39,19 @@
                 </div>
                 <div class="col-md-6 mt-3">
                     <button type="submit" class="btn btn-outline-danger fw-bold"><i class="fa fa-search"></i> Tìm kiếm</button>
-                    <a href="/QuanLyPO/Create" class="btn btn-outline-primary fw-bold text-decoration-none"> <i class="fa fa-envelope"></i> Phát hành</a>
-                    <a href="/QuanLyPO/Index" class="btn btn-light border fw-bold text-dark text-decoration-none"> <i class="fa fa-refresh"></i>Refresh</a>
+                 @*    <a href="/QuanLyPO/Create" class="btn btn-outline-primary fw-bold text-decoration-none"> <i class="fa fa-envelope"></i> Phát hành</a> *@
+                    <a href="/ManagerDelivery/Quanlythanhtoan" class="btn btn-light border fw-bold text-dark text-decoration-none ml-2"> <i class="fa-solid ion-ios-loop-strong me-1"></i> Refresh</a>
+
+                    <!-- NÚT GỌI POPUP CẬP NHẬT THANH TOÁN -->
+                    <button type="button" class="btn btn-success fw-bold ms-2 ml-2" onclick="openUpdateModal()">
+                        <i class="fa fa-edit"></i> Cập nhật số liệu TT
+                    </button>
                 </div>
             </form>
         </div>
 
         <!-- Legend -->
-        <div class="col-md-5">
+        <div class="col-md-4">
             <ul class="list-unstyled mb-0" style="font-size: 0.85rem;">
                 <li><span class="d-inline-block bg-danger" style="width: 15px; height: 15px;"></span> Đang chờ xác nhận (Need, No Need)</li>
                 <li><span class="d-inline-block bg-primary" style="width: 15px; height: 15px;"></span> Hoàn thành xác nhận (Need, No Need và có thể in được đơn hàng)</li>
@@ -55,27 +63,36 @@
     </div>
 
     <!-- Data Grid -->
-    <!-- Data Grid -->
-    <div class="table-responsive border" style="max-height: calc(100vh - 260px); overflow-y: auto; overflow-x: auto;">
-        <table class="table table-bordered table-hover text-nowrap align-middle mb-0" style="font-size: 11px;">
+    <div class="table-responsive border" style="max-height: calc(100vh - 280px); overflow-y: auto; overflow-x: auto;">
+        <table class="table table-bordered table-hover text-wrap align-middle mb-0" style="font-size: 11px;">
             <thead class="bg-primary text-white" style="position: sticky; top: 0; z-index: 10;">
                 <tr>
-                    <th>Chi tiết</th>
+                    <th style="width:40px; text-align:center;">
+                        <input type="checkbox" id="chkAll" />
+                    </th>
+                    <th style="min-width:60px">Chi tiết</th>
                     <th>Số PO</th>
                     <th>Tình trạng</th>
                     <th>Loại chi phí</th>
                     <th>Ngày phát hành</th>
                     <th>Mã phòng ban</th>
-                    <th>Tên phòng ban</th>
+                    <th style="min-width:100px">Tên phòng ban</th>
                     <th>Danh mục</th>
                     <th>Mục đích</th>
                     <th>Mã NCC</th>
-                    <th>Tên NCC</th>
+                    <th style="min-width:300px">Tên NCC</th>
                     <th>Khu vực NCC</th>
-                    <th>Địa chỉ NCC</th>
-                    <th>Số điện thoại NCC</th>
-                    <th>Số Fax NCC</th>
-                    <th>Thao tác</th>
+                    <th style="min-width:300px">Địa chỉ NCC</th>
+                    <th style="min-width:120px">Số điện thoại NCC</th>
+                    <th style="min-width:120px">Số Fax NCC</th>
+                    <th>Người làm đơn</th>
+                    <th style="min-width:120px">Ngày tạo</th>
+                    <th>Hình thức</th>
+                    <th>Nhóm phát hành</th>
+                    <th>Thủ tục hải quan</th>
+                    <th>Người xác nhận cuối cùng</th>
+                    <th style="min-width:120px">Thời gian xác nhận</th>
+                
                 </tr>
             </thead>
             <tbody>
@@ -92,15 +109,42 @@
                             "HUY" => "text-secondary fw-bold",
                             _ => ""
                         };
-
                         bool canExcel = (item.TinhtranghaiquanPO == "NEED" || item.TinhtranghaiquanPO == "NONEED");
-
-                        <tr>
+                        <tr class="@colorClass">
+                            <td class="text-center">
+                                <input type="checkbox" class="chk-item" value="@item.SoPO" />
+                            </td>
                             <td><a href="/QuanLyPO/Details/@item.SoPO" class="text-decoration-none">Chi tiết</a></td>
-                            <td class="@colorClass">@item.SoPO</td>
-                            <td class="@colorClass">@item.TinhtrangPO</td>
-                            <td class="@colorClass">@item.Loaichiphi</td>
-                            <td class="@colorClass">@(item.Ngayphathanh?.ToString("dd/MM/yyyy") ?? "")</td>
+                            <td>
+                                <!-- Dán đè lên thẻ <a> cũ ở cột Số PO -->
+                                <a href="javascript:void(0)"
+                                   onclick="viewPoDetails(this, '@item.SoPO')"
+                                   data-danhmuc="@item.Danhmuc"
+                                   data-loaichiphi="@item.Loaichiphi"
+                                   data-ngayphathanh="@(item.Ngayphathanh?.ToString("dd/MM/yyyy") ?? "")"
+                                   data-maphong="@item.Maphongban"
+                                   data-tenphong="@item.Tenphongban"
+                                   data-mucdich="@item.Mucdich"
+                                   data-hinhthuc="@item.Hinhthuc"
+                                   data-mancc="@item.MaNCC"
+                                   data-tenncc="@item.TenNCC"
+                                   data-khuvuc="@item.KhuvucNCC"
+                                   data-diachi="@item.DiachiNCC"
+                                   data-sdt="@item.SodienthoaiNCC"
+                                   data-fax="@item.SofaxNCC"
+                                   data-tinhtrang="@item.TinhtrangPO"
+                                   data-nguoitao="@item.Nguoilamdon"
+                                   data-ngaytao="@(item.Ngaytao?.ToString("dd/MM/yyyy HH:mm") ?? "")"
+                                   data-nguoixacnhan="@item.Nguoixacnhan"
+                                   data-ngayxacnhan="@(item.Thoigianxacnhan?.ToString("dd/MM/yyyy HH:mm") ?? "")"
+                                   data-haiquan="@item.TinhtranghaiquanPO"
+                                   class="text-primary fw-bold text-decoration-underline" title="Xem chi tiết">
+                                    @item.SoPO
+                                </a>
+                            </td>
+                            <td>@item.TinhtrangPO</td>
+                            <td>@item.Loaichiphi</td>
+                            <td>@(item.Ngayphathanh?.ToString("dd/MM/yyyy") ?? "")</td>
                             <td>@item.Maphongban</td>
                             <td>@item.Tenphongban</td>
                             <td>@item.Danhmuc</td>
@@ -111,22 +155,458 @@
                             <td>@item.DiachiNCC</td>
                             <td>@item.SodienthoaiNCC</td>
                             <td>@item.SofaxNCC</td>
-                            <td>
-                                @if (canExcel)
-                                {
-                                    <a href="/QuanLyPO/ExportExcel/@item.SoPO" class="btn btn-sm btn-outline-secondary">In Excel</a>
-                                }
-                            </td>
+                            <td>@item.Nguoilamdon</td>
+                            <td>@(item.Ngaytao?.ToString("dd/MM/yyyy HH:mm") ?? "")</td>
+                            <td>@item.Hinhthuc</td>
+                            <td>@item.Group_Code</td>
+                            <td>@item.TinhtranghaiquanPO</td>
+                            <td>@item.Nguoixacnhan</td>
+                            <td>@(item.Thoigianxacnhan?.ToString("dd/MM/yyyy HH:mm") ?? "")</td>
+                         
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="16" class="text-center text-muted py-3">Không có dữ liệu hiển thị.</td>
+                        <td colspan="24" class="text-center text-muted py-3">Không có dữ liệu hiển thị.</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+<div class="modal fade" id="updateThanhToanModal" tabindex="-1" aria-hidden="true"
+     style="z-index: 99999; background: rgba(0,0,0,0.5);"
+     data-backdrop="false" data-bs-backdrop="false">
+
+    <!-- Thêm class modal-dialog-centered để popup luôn nằm giữa màn hình cho đẹp -->
+    <div class="modal-dialog modal-dialog-centered" style="max-width:98%">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa fa-edit"></i> Nhập số liệu thanh toán</h5>
+            
+            </div>
+            <div class="modal-body">
+                <div class="text-dark">
+                    Bạn đang chọn <strong id="lblCountPo" class="text-danger">0</strong> PO để cập nhật.
+                </div>
+                <div class="mb-3 mt-3">
+                    <label class="form-label fw-bold">Số Đề nghị thanh toán (DNTT):</label>
+                    <input type="text" class="form-control" id="txtSoDntt" placeholder="Nhập số DNTT...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Số Hóa Đơn:</label>
+                    <input type="text" class="form-control" id="txtSoHoaDon" placeholder="Nhập số hóa đơn...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeUpdateModal()">Hủy bỏ</button>
+                <button type="button" class="btn btn-success" onclick="submitUpdate()">Lưu cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="poDetailsModal" tabindex="-1" aria-hidden="true"
+     style="z-index: 99999; background: rgba(0,0,0,0.5);"
+     data-backdrop="false" data-bs-backdrop="false">
+    <!-- Giữ nguyên max-width 98% để form rộng rãi chiều ngang -->
+    <div class="modal-dialog modal-dialog-scrollable" style="  max-width: 95%;margin: 1.75rem auto;">
+        <div class="modal-content shadow" style="height: 96vh;">
+            <!-- Ép chiều cao modal để tận dụng màn hình -->
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title mb-0"><i class="fa fa-list"></i> Chi tiết Số PO: <span id="detailPoTitle" class="text-warning"></span></h6>
+                <a data-bs-dismiss="modal" onclick="closeDetailsModal()" aria-label="Close" style="cursor:pointer; font-size:1.2rem; text-decoration:none;" class="text-white">x</a>
+            </div>
+            <div class="modal-body p-2 d-flex flex-column">
+                <!-- Nhúng 1 đoạn CSS nhỏ để ép form gọn lại -->
+                <style>
+                    #poDetailsModal .table-compact td {
+                        padding: 2px 5px !important;
+                        vertical-align: middle;
+                    }
+
+                    #poDetailsModal .input-compact {
+                        height: 22px;
+                        min-height: 22px;
+                        padding: 2px 5px;
+                        font-size: 11px;
+                    }
+
+                    #poDetailsModal .btn-compact {
+                        height: 22px;
+                        padding: 0 8px;
+                        font-size: 11px;
+                        line-height: 1;
+                        display: inline-flex;
+                        align-items: center;
+                    }
+
+                    #poDetailsModal .legend-compact {
+                        font-size: 12px;
+                        font-weight: bold;
+                        margin-bottom: 0;
+                        padding: 0 5px;
+                        width: auto;
+                        float: none;
+                    }
+                </style>
+                <div class="row mb-2" style="font-size: 11px;">
+                    <!-- PANEL 1: THÔNG TIN PO -->
+                    <div class="col-md-7">
+                        <fieldset class="border p-1 rounded h-100 d-flex flex-column">
+                            <legend class="legend-compact text-primary">Thông tin PO</legend>
+
+                            <div class="table-responsive mt-1">
+                                <table class="table table-borderless table-compact mb-0" style="font-size: 11px;">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-nowrap" style="width: 15%;">Danh mục hàng:</td>
+                                            <td style="width: 35%;"><input type="text" class="form-control input-compact" id="dtDanhMucHang" readonly></td>
+                                            <td class="text-nowrap ps-3" style="width: 15%;">Mã NCC:</td>
+                                            <td style="width: 35%;"><input type="text" class="form-control input-compact" id="dtMaNcc" readonly></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap">Loại chi phí:</td>
+                                            <td><input type="text" class="form-control input-compact" id="dtLoaiChiPhi" readonly></td>
+                                            <td class="text-nowrap ps-3">Tên NCC:</td>
+                                            <td><input type="text" class="form-control input-compact" id="dtTenNcc" readonly></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap">Ngày phát hành:</td>
+                                            <td>
+                                                <div class="d-flex">
+                                                    <input type="text" class="form-control input-compact me-1" id="dtNgayPhatHanh" readonly>
+                                                    <button class="btn btn-light border fw-bold btn-compact">Sửa</button>
+                                                </div>
+                                            </td>
+                                            <td class="text-nowrap ps-3">Khu vực:</td>
+                                            <td><input type="text" class="form-control input-compact" id="dtKhuVuc" readonly></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap">Phòng phát hành:</td>
+                                            <td><input type="text" class="form-control input-compact bg-light" id="dtPhongPhatHanh" readonly></td>
+                                            <td class="text-nowrap ps-3">Địa chỉ:</td>
+                                            <td><input type="text" class="form-control input-compact" id="dtDiaChi" readonly></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap">Tên phòng:</td>
+                                            <td><input type="text" class="form-control input-compact bg-light" id="dtTenPhong" readonly></td>
+                                            <td class="text-nowrap ps-3">Số điện thoại:</td>
+                                            <td><input type="text" class="form-control input-compact" id="dtSoDienThoai" readonly></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap">Mục đích:</td>
+                                            <td><input type="text" class="form-control input-compact" id="dtMucDich" readonly></td>
+                                            <td class="text-nowrap ps-3">Số Fax:</td>
+                                            <td><input type="text" class="form-control input-compact" id="dtSoFax" readonly></td>
+                                        </tr>
+                                        <!-- Đã GỘP Loại tiền và Hình thức vào chung 1 dòng để tiết kiệm 1 hàng -->
+                                        <tr>
+                                            <td class="text-nowrap">Loại tiền:</td>
+                                            <td><input type="text" class="form-control input-compact w-50" id="dtLoaiTien" readonly></td>
+                                            <td class="text-nowrap ps-3">Hình thức:</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="form-check me-3 mb-0">
+                                                        <input class="form-check-input mt-0" type="radio" name="hinhthuc" id="rdHangHoa" checked disabled style="transform: scale(0.85);">
+                                                        <label class="form-check-label" for="rdHangHoa">Hàng hóa</label>
+                                                    </div>
+                                                    <div class="form-check mb-0">
+                                                        <input class="form-check-input mt-0" type="radio" name="hinhthuc" id="rdDichVu" disabled style="transform: scale(0.85);">
+                                                        <label class="form-check-label" for="rdDichVu">Dịch vụ</label>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Hàng nút bấm dưới form (Căn sát mép) -->
+                            <div class="text-end mt-auto pt-1 border-top">
+                                <button class="btn btn-light border fw-bold btn-compact">Sử dụng lại</button>
+                                <button class="btn btn-light border fw-bold btn-compact">Sửa</button>
+                                <button class="btn btn-light border fw-bold text-danger btn-compact">Hủy</button>
+                                <button class="btn btn-light border fw-bold btn-compact">In Excel</button>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- PANEL 2: CHI TIẾT KHÁC -->
+                    <div class="col-md-5">
+                        <fieldset class="border p-1 rounded h-100 d-flex flex-column">
+                            <legend class="legend-compact text-primary">Chi tiết khác</legend>
+
+                            <div class="table-responsive mt-1">
+                                <table class="table table-borderless table-compact mb-0" style="font-size: 11px;">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-nowrap text-dark" style="width: 20%;">Mã PO:</td>
+                                            <td style="width: 30%;"><strong class="text-primary" style="font-size: 13px;" id="infoMaPo"></strong></td>
+                                            <td class="text-nowrap text-dark ps-2" style="width: 25%;">Tình trạng:</td>
+                                            <td style="width: 25%;"><span id="infoTinhTrang"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap text-dark">Người tạo:</td>
+                                            <td><span class="text-primary" id="infoNguoiTao"></span></td>
+                                            <td class="text-nowrap text-dark ps-2">Người xác nhận:</td>
+                                            <td><span id="infoNguoiXacNhan"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap text-dark">Tạo lúc:</td>
+                                            <td><span class="text-primary" id="infoTaoLuc"></span></td>
+                                            <td class="text-nowrap text-dark ps-2">Xác nhận lúc:</td>
+                                            <td><span id="infoXacNhanLuc"></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-nowrap text-dark">Thủ tục HQ:</td>
+                                            <td><span id="infoHaiQuan"></span></td>
+                                            <td class="text-nowrap text-dark ps-2">Lý do:</td>
+                                            <td class="text-break"><span id="infoLyDo"></span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Nút bấm dưới góc Panel 2 -->
+                            <div class="mt-auto pt-1 border-top text-start">
+                                <button class="btn btn-light border btn-compact">Sửa tên hàng (Đối ứng HQ)</button>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <!-- KHU VỰC BẢNG DỮ LIỆU: Chiếm toàn bộ phần không gian còn lại (flex-grow-1) -->
+                <div class="table-responsive flex-grow-1 border" style="min-height: 250px;">
+                    <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 11px;">
+                        <thead class="table table-bordered bg-primary text-nowrap" style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th>Mã hệ thống</th>
+                                <th>Được tách từ</th>
+                                <th style="min-width: 200px;">Tên hàng TV</th>
+                                <th style="min-width: 200px;">Tên hàng EN</th>
+                                <th>Mã hàng hóa</th>
+                                <th>Mã hàng</th>
+                                <th class="text-end">Số lượng</th>
+                                <th class="text-end">Lượng về kho</th>
+                                <th>Ngày nhập kho</th>
+                                <th>Đơn vị</th>
+                                <th class="text-end">Đơn giá ước tính</th>
+                                <th>Điều kiện giao hàng</th>
+                                <th>Địa điểm giao hàng</th>
+                                <th>Phương thức vận chuyển</th>
+                                <th class="text-end">Số tiền</th>
+                                <th>VAT(%)</th>
+                                <th>Phòng ban yêu cầu</th>
+                                <th style="min-width: 150px;">Tên phòng yêu cầu</th>
+                                <th>Ngày giao hàng dự kiến</th>
+                                <th>Nơi giao hàng dự kiến</th>
+                                <th style="min-width: 200px;">Thời hạn thanh toán</th>
+                                <th>Loại tiền</th>
+                                <th class="text-end">Tỷ giá</th>
+                            </tr>
+                        </thead>
+                        <tbody id="poDetailsBody">
+                            <!-- Dữ liệu sẽ được load tự động qua JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeDetailsModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        // Đẩy modal ra body để chống lỗi chìm nền khi trang vừa load xong
+        $(document).ready(function () {
+            $('#poDetailsModal').appendTo("body");
+            $('#updateThanhToanModal').appendTo("body");
+        });
+
+        // 2. Mở Popup Modal
+        function openUpdateModal() {
+            let selected = $('.chk-item:checked');
+            if (selected.length === 0) {
+                alert('Vui lòng check chọn ít nhất 1 PO trong bảng để cập nhật!');
+                return;
+            }
+
+            // Đếm số PO đang chọn và reset form
+            $('#lblCountPo').text(selected.length);
+            $('#txtSoDntt').val('');
+            $('#txtSoHoaDon').val('');
+
+            // Mở modal bằng cú pháp của Bootstrap 4
+            $('#updateThanhToanModal').modal('show');
+        }
+
+        // 3. Hàm chủ động đóng Modal
+        function closeUpdateModal() {
+            $('#updateThanhToanModal').modal('hide');
+        }
+
+        // 4. Xử lý Lưu (Gọi API)
+        async function submitUpdate() {
+            let selected = $('.chk-item:checked');
+            let soDntt = $('#txtSoDntt').val().trim();
+            let soHoaDon = $('#txtSoHoaDon').val().trim();
+
+            if (!soDntt && !soHoaDon) {
+                alert('Vui lòng nhập ít nhất Số DNTT hoặc Số Hóa Đơn!');
+                return;
+            }
+
+            // Tạm thời vô hiệu hóa nút lưu
+            let btnSubmit = $('#updateThanhToanModal .btn-success');
+            let originalText = btnSubmit.html();
+            btnSubmit.html('<i class="fa fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+            let successCount = 0;
+            let failCount = 0;
+
+            // Vòng lặp gửi yêu cầu cho từng PO
+            for (let i = 0; i < selected.length; i++) {
+                let data = {
+                    PoNumber: $(selected[i]).val(),
+                    SoDntt: soDntt,
+                    SoHoaDon: soHoaDon,
+                    Scope: 'full',
+                    PoDetailId: 0,
+                    SlThucTe: 0
+                };
+
+                try {
+                    let response = await fetch('/ManagerDelivery/UpdateThanhToan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    let result = await response.json();
+                    if (result.success) successCount++;
+                    else failCount++;
+                } catch (e) {
+                    failCount++;
+                }
+            }
+
+            btnSubmit.html(originalText).prop('disabled', false);
+
+            // Ẩn modal và tải lại trang
+            closeUpdateModal();
+            alert(`Đã thực hiện xong!\n- Thành công: ${successCount} PO\n- Thất bại: ${failCount} PO`);
+            location.reload();
+        }
+
+        // ================= CHỨC NĂNG XEM CHI TIẾT PO =================
+
+        // Hàm đóng modal
+        function closeDetailsModal() {
+            $('#poDetailsModal').modal('hide');
+        }
+
+             // Hàm gọi API và load dữ liệu
+        async function viewPoDetails(element, soPo) {
+            // 1. Đổ dữ liệu vào phần Header (Thông tin PO & Chi tiết khác) từ thẻ <a> được click
+            let $el = $(element);
+
+            $('#dtDanhMucHang').val($el.data('danhmuc'));
+            $('#dtLoaiChiPhi').val($el.data('loaichiphi'));
+            $('#dtNgayPhatHanh').val($el.data('ngayphathanh'));
+            $('#dtPhongPhatHanh').val($el.data('maphong'));
+            $('#dtTenPhong').val($el.data('tenphong'));
+            $('#dtMucDich').val($el.data('mucdich'));
+            $('#dtMaNcc').val($el.data('mancc'));
+            $('#dtTenNcc').val($el.data('tenncc'));
+            $('#dtKhuVuc').val($el.data('khuvuc'));
+            $('#dtDiaChi').val($el.data('diachi'));
+            $('#dtSoDienThoai').val($el.data('sdt'));
+            $('#dtSoFax').val($el.data('fax'));
+
+            // Xử lý nút radio Hình thức (Tự động check Hàng hóa/Dịch vụ)
+            let hinhThuc = $el.data('hinhthuc') || '';
+            if (hinhThuc.toLowerCase().includes('dịch vụ') || hinhThuc.toLowerCase().includes('service')) {
+                $('#rdDichVu').prop('checked', true);
+            } else {
+                $('#rdHangHoa').prop('checked', true);
+            }
+
+            // Đổ dữ liệu sang panel Chi tiết khác
+            $('#infoMaPo').text(soPo);
+            $('#infoTinhTrang').text($el.data('tinhtrang'));
+            $('#infoNguoiTao').text($el.data('nguoitao'));
+            $('#infoNguoiXacNhan').text($el.data('nguoixacnhan'));
+            $('#infoTaoLuc').text($el.data('ngaytao'));
+            $('#infoXacNhanLuc').text($el.data('ngayxacnhan'));
+            $('#infoHaiQuan').text($el.data('haiquan'));
+
+            // Tạm thời làm trống Loại tiền để chờ API trả về
+            $('#dtLoaiTien').val('');
+
+
+            // 2. Tải dữ liệu Grid Chi tiết
+            $('#detailPoTitle').text(soPo);
+            $('#poDetailsBody').html('<tr><td colspan="23" class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x"></i><br/>Đang tải dữ liệu...</td></tr>');
+            $('#poDetailsModal').modal('show');
+
+            try {
+                let response = await fetch(`/ManagerDelivery/GetPoDetails?soPo=${encodeURIComponent(soPo)}`);
+                let result = await response.json();
+
+                if (result.success) {
+                    let html = '';
+                    if (result.data.length === 0) {
+                        html = '<tr><td colspan="23" class="text-center text-danger py-3">Không tìm thấy dữ liệu chi tiết cho PO này.</td></tr>';
+                    }
+                    else {
+                        // Lấy loại tiền từ mặt hàng đầu tiên trong danh sách đổ lên Header
+                        $('#dtLoaiTien').val(result.data[0].loaiTien || '');
+
+                        result.data.forEach(item => {
+                            let slFormat = item.soLuong ? item.soLuong.toLocaleString('en-US') : '';
+                            let luongKhoFormat = item.luongVeKho ? item.luongVeKho.toLocaleString('en-US') : '';
+                            let giaFormat = item.donGiaUocTinh ? item.donGiaUocTinh.toLocaleString('en-US') : '0';
+                            let tienFormat = item.soTien ? item.soTien.toLocaleString('en-US') : '0';
+                            let tyGiaFormat = item.tyGia ? item.tyGia.toLocaleString('en-US') : '';
+
+                            html += `<tr>
+                                <td class="text-bg-primary">${item.maHeThong || ''}</td>
+                                <td>${item.duocTachTu || ''}</td>
+                                <td>${item.tenTiengViet || ''}</td>
+                                <td>${item.tenTiengAnh || ''}</td>
+                                <td>${item.maHangHoa || ''}</td>
+                                <td>${item.maHang || ''}</td>
+                                <td class="text-end fw-bold">${slFormat}</td>
+                                <td class="text-end">${luongKhoFormat}</td>
+                                <td>${item.ngayNhapKho || ''}</td>
+                                <td>${item.donVi || ''}</td>
+                                <td class="text-end">${giaFormat}</td>
+                                <td>${item.dieuKienGiaoHang || ''}</td>
+                                <td>${item.diaDiemGiaoHang || ''}</td>
+                                <td>${item.phuongThucVanChuyen || ''}</td>
+                                <td class="text-end fw-bold text-success">${tienFormat}</td>
+                                <td>${item.vat || ''}</td>
+                                <td>${item.phongBanYeuCau || ''}</td>
+                                <td>${item.tenPhongYeuCau || ''}</td>
+                                <td>${item.ngayGiaoHangDuKien || ''}</td>
+                                <td>${item.noiGiaoDuKien || ''}</td>
+                                <td>${item.thoiHanThanhToan || ''}</td>
+                                <td class="text-center">${item.loaiTien || ''}</td>
+                                <td class="text-end">${tyGiaFormat}</td>
+                            </tr>`;
+                        });
+                    }
+                    $('#poDetailsBody').html(html);
+                }
+                else {
+                    $('#poDetailsBody').html(`<tr><td colspan="23" class="text-center text-danger">Lỗi: ${result.message}</td></tr>`);
+                }
+            } catch (e) {
+                $('#poDetailsBody').html('<tr><td colspan="23" class="text-center text-danger">Lỗi kết nối máy chủ. Vui lòng thử lại.</td></tr>');
+            }
+        }
+    </script>
+}

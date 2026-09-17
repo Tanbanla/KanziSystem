@@ -1,4 +1,5 @@
 using PRJ_WAREHOUSE_BIVN.DTO;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
 {
@@ -30,6 +31,9 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public List<string> listMaterial { get; set; }
         // Role của người dùng
         public string Role { get; set; } = string.Empty;
+        // Phân loại yêu cầu đơn
+        public List<BaoGia_RequestTypeDTO> RequestTypes { get; set; } = new List<BaoGia_RequestTypeDTO>();
+
 
         // Người thao tác 
         public string? NguoiThaoTac { get; set; }

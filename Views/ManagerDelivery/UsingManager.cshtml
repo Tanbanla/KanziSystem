@@ -93,9 +93,9 @@
                     <a href="~/ManagerDelivery/LogChangeHistory" class="btn btn-warning ml-2"><i class="fa-solid fa fa-laravel me-1 "></i> Log Using </a>
                        <a href="/File/Mau_Using.xlsx" class="btn btn-info ml-2"> <i class="fa fa-link"></i> File mẫu</a>
                         <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
-                        <button type="button" class="btn btn-success text-white ms-2 ml-2" onclick="document.getElementById('fileExcel').click()">
-                            <i class="fa-solid fa fa-file-excel me-1"></i> Import Excel
-                        </button>
+                    <button type="button" class="btn btn-success text-white ms-2 ml-2" onclick="document.getElementById('excelFileInput').click()">
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Import Excel
+                    </button>
                         <!-- Ô TÌM KIẾM THEO MÃ -->
                         <select id="selectYear" class="form-control form-select form-select-sm ml-2" style="width: 100px;" onchange="loadData()">
                             <option>@DateTime.Now.Year</option>

@@ -44,5 +44,13 @@
   <data name="MenuMasterSupplierManage" xml:space="preserve"><value>Supplier management</value></data>
   <data name="BreadcrumbHome" xml:space="preserve"><value>Indirect part control </value></data>
   <data name="FooterCopyright" xml:space="preserve"><value>Brother Industries (Vietnam) Ltd. All Rights Reserved</value></data>
-	<data name="MenuMasterCategory" xml:space="preserve"><value>Product Categories</value></data>
+  <data name="MenuMasterCategory" xml:space="preserve"><value>Product Categories</value></data>
+  <data name="Workflow" xml:space="preserve"><value>Workflow</value></data>
+  <data name="WorkflowDashboard" xml:space="preserve"><value>Workflow dashboard</value></data>
+  <data name="WorkflowConfiguration" xml:space="preserve"><value>Workflow configuration</value></data>
+  <data name="WorkflowStages" xml:space="preserve"><value>Manage major stages</value></data>
+  <data name="WorkflowSteps" xml:space="preserve"><value>Manage workflow steps</value></data>
+  <data name="WorkflowRolePermissions" xml:space="preserve"><value>Permissions by role</value></data>
+  <data name="WorkflowUserPermissions" xml:space="preserve"><value>Permissions by user</value></data>
+  <data name="WorkflowTasks" xml:space="preserve"><value>My tasks</value></data>
 </root>

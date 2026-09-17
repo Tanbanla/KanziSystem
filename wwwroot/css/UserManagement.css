@@ -1,0 +1,434 @@
+/* ==========================================
+   USER MANAGEMENT - MODERN UI 2025
+========================================== */
+
+.user-management {
+    padding: 6px;
+}
+
+/* ==========================================
+   CARD
+========================================== */
+
+.user-management .card {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 24px rgba(15, 23, 42, .08);
+    transition: all .25s ease;
+}
+
+.user-management .card:hover {
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .12);
+}
+
+/* ==========================================
+   PAGE HEADER
+========================================== */
+
+.user-management .page-header {
+    background: linear-gradient(135deg,#2335b7 0%,#3b82f6 50%,#60a5fa 100%);
+    color: #fff;
+    border-radius: 22px;
+    padding: 28px !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(35,53,183,.25);
+}
+
+.user-management .page-header::before {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    top: -100px;
+    right: -80px;
+    background: rgba(255,255,255,.08);
+}
+
+.user-management .page-header::after {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: 20px;
+    right: 120px;
+    background: rgba(255,255,255,.05);
+}
+
+.user-management .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+.user-management .page-header p {
+    position: relative;
+    z-index: 2;
+    font-size: .95rem;
+}
+
+/* ==========================================
+   FORM
+========================================== */
+
+.user-management label {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.user-management .form-control,
+.user-management select.form-control {
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid #dbe3ee;
+    background: #fff;
+    transition: all .25s ease;
+}
+
+.user-management .form-control:focus,
+.user-management select.form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59,130,246,.15);
+}
+
+.user-management textarea.form-control {
+    height: auto;
+}
+
+/* ==========================================
+   SEARCH BOX
+========================================== */
+
+/* .user-management #searchForm {
+    background: #f8fafc;
+    padding: 22px;
+    border-radius: 16px;
+    border: 1px solid #edf2f7;
+} */
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+.user-management .btn {
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all .25s ease;
+}
+
+.user-management .btn-primary {
+    border: none;
+    background: linear-gradient(135deg,#2335b7,#2563eb);
+    box-shadow: 0 4px 12px rgba(37,99,235,.25);
+}
+
+.user-management .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(37,99,235,.35);
+}
+
+.user-management .btn-light {
+    border: 1px solid #dbe3ee;
+    background: #fff;
+}
+
+.user-management .btn-light:hover {
+    background: #f8fafc;
+}
+
+.user-management #addUserButton {
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+/* ==========================================
+   TABLE
+========================================== */
+
+.user-management .table {
+    margin-bottom: 0;
+}
+
+.user-management .table-responsive {
+    min-height: 280px;
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.user-management .table thead th {
+    background: #2335b7 !important;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    font-size: .88rem;
+    padding: 14px;
+    vertical-align: middle;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.user-management .table td,
+.user-management .table th {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.user-management .table td {
+    padding: 14px;
+    border-color: #edf2f7;
+}
+
+.user-management .table-hover tbody tr {
+    transition: .2s;
+}
+
+.user-management .table-hover tbody tr:hover {
+    background: #f8fbff;
+}
+
+/* ==========================================
+   CARD HEADER
+========================================== */
+
+.user-management .card-header {
+    border-bottom: 1px solid #edf2f7;
+    background: #fff !important;
+    padding: 18px 24px;
+}
+
+.user-management .card-header h5 {
+    font-weight: 700;
+    margin: 0;
+}
+
+.user-management .card-footer {
+    background: #fff !important;
+    border-top: 1px solid #edf2f7;
+    padding: 16px 24px;
+}
+
+/* ==========================================
+   ROLE BADGE
+========================================== */
+
+.user-management .badge-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-weight: 600;
+    font-size: .8rem;
+}
+
+/* ==========================================
+   STATUS
+========================================== */
+
+.user-management .status-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.user-management .status-active {
+    background: #16a34a;
+    box-shadow: 0 0 10px rgba(22,163,74,.45);
+}
+
+.user-management .status-locked {
+    background: #d8ce18;
+    box-shadow: 0 0 10px rgba(220,38,38,.35);
+}
+
+.user-management .status-deleted {
+    background: #dc2626;
+    box-shadow: 0 0 10px rgba(220,38,38,.35);
+}
+
+.user-management .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: .82rem;
+}
+
+.user-management .status-badge.active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.user-management .status-badge.locked {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* ==========================================
+   PAGINATION
+========================================== */
+
+.user-management .pagination {
+    gap: 4px;
+}
+
+.user-management .pagination .page-link {
+    border: none;
+    border-radius: 10px;
+    color: #475569;
+    min-width: 36px;
+    text-align: center;
+}
+
+.user-management .pagination .page-link:hover {
+    background: #eef2ff;
+    color: #2335b7;
+}
+
+.user-management .pagination .active .page-link {
+    background: #2335b7;
+    color: #fff;
+}
+
+/* ==========================================
+   MODAL
+========================================== */
+
+.user-management .modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(15,23,42,.2);
+}
+
+.user-management .modal-header {
+    background: linear-gradient(135deg,#2335b7,#3b82f6);
+    color: #fff;
+    border-bottom: none;
+    padding: 18px 24px;
+}
+
+.user-management .modal-header .close {
+    color: #fff;
+    opacity: 1;
+    text-shadow: none;
+}
+
+.user-management .modal-title {
+    font-weight: 700;
+}
+
+.user-management .modal-body {
+    padding: 24px;
+}
+
+.user-management .modal-footer {
+    border-top: 1px solid #edf2f7;
+    padding: 18px 24px;
+}
+
+/* ==========================================
+   REQUIRED
+========================================== */
+
+.user-management .required::after {
+    content: " *";
+    color: #dc2626;
+}
+
+/* ==========================================
+   ALERT
+========================================== */
+
+.user-management .alert {
+    border: none;
+    border-radius: 14px;
+}
+
+/* ==========================================
+   EMPTY STATE
+========================================== */
+
+.user-management .empty-state {
+    padding: 5rem 1rem;
+    color: #94a3b8;
+}
+
+.user-management .empty-state i {
+    color: #3b82f6;
+}
+
+/* ==========================================
+   SCROLLBAR
+========================================== */
+
+.user-management .table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.user-management .table-responsive::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.user-management .table-responsive::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 20px;
+}
+
+/* ==========================================
+   ANIMATION
+========================================== */
+
+.user-management .card,
+.user-management .page-header {
+    animation: fadeInUp .35s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 768px) {
+
+    .user-management .page-header {
+        padding: 20px !important;
+    }
+
+    .user-management .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .user-management .card-header,
+    .user-management .card-footer {
+        padding: 15px;
+    }
+
+    .user-management #searchForm {
+        padding: 15px;
+    }
+}

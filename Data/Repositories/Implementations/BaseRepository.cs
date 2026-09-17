@@ -96,7 +96,34 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             //}
             return await _conn.QuerySingleAsync<long>(sql);
         }
+        public virtual async Task SaveChangesWithDetailsAsync()
+        {
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                var invalidColumns = _context.ChangeTracker.Entries()
+                    .SelectMany(entry => entry.Properties
+                        .Where(property => property.Metadata.ClrType == typeof(string)
+                            && property.Metadata.GetMaxLength() is int maxLength
+                            && property.CurrentValue is string value
+                            && value.Length > maxLength)
+                        .Select(property =>
+                            $"{entry.Metadata.ClrType.Name}.{property.Metadata.Name} " +
+                            $"(dài {((string)property.CurrentValue!).Length}, tối đa {property.Metadata.GetMaxLength()})"))
+                    .ToList();
 
+                var detail = invalidColumns.Count > 0
+                    ? " Cột vượt độ dài: " + string.Join(", ", invalidColumns) + "."
+                    : string.Empty;
+
+                throw new InvalidOperationException(
+                    "Không thể lưu dữ liệu." + detail +
+                    $" Chi tiết SQL: {ex.GetBaseException().Message}", ex);
+            }
+        }
         public virtual async Task<long> GetCountByConditionAsync(SearchOptions options)
         {
             using var connection = new SqlConnection(_connectionString);

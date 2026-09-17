@@ -14,7 +14,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // Inser thông tin và đăng ký user đăng nhập
         public Task<GenericResponse<bool>> InsertListUserAsync(List<TM_USER> users);
         // Search thông tin user
-        Task<GenericResponse<List<TM_USERDTO>>> SearchUserAsync(UserSearchModel searchModel);
+        Task<GenericResponse<ListRequest<dynamic>>> SearchUserAsync(UserSearchModel searchModel);
 
         // Đăng ký user mới
         Task<GenericResponse<bool>> RegisterUserAsync(UserInsertModel userInsert);

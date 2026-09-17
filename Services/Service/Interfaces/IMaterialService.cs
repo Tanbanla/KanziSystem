@@ -28,7 +28,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         // lay ma hang hien tai
         public Task<GenericResponse<string>> MaterialCodeLater(string type);
         // check ma hang
-        public Task<GenericResponse<string>> CheckMaterialCode(string codeNcc, string category, string NameEN);
+        public Task<GenericResponse<string>> CheckMaterialCode(string codeNcc, string category);
         public Task<GenericResponse<string>> CheckMaterialCodeByGoodCode(string codeNcc);
         public Task<GenericResponse<string>> CheckMaterialCodeByName(string category, string NameEN);
         // Search date by Material View

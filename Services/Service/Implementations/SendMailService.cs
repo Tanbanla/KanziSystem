@@ -230,7 +230,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 // Tiêu đề mail mới: Tên ngắn NCC + Ngày yêu cầu báo giá
                 string shortName = listRq.FirstOrDefault()?.ShortName ?? listRq.FirstOrDefault()?.Ten ?? "NCC";
-                string titleMail = $"{shortName} - {requestDate}";
+                string titleMail = $"Yêu cầu báo giá (Quotation requesting) - {shortName} - {requestDate}";
 
                 var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                 var body = string.Format(bodyTable, dearMail, mailTk);

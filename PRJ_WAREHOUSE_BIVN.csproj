@@ -21,12 +21,16 @@
     <None Remove="Data\File_import_ex.xlsx" />
     <None Remove="Data\Form_Export_WH.xlsx" />
     <None Remove="Data\Log_WH.xlsx" />
+    <None Remove="Data\Mau_Using.xlsx" />
     <None Remove="Data\Nhaptiendo.xlsx" />
     <None Remove="Data\Template_HangTrongDanhMuc.xlsm" />
     <None Remove="Data\Warning_PullInOut.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Data\Mau_Using.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\Warning_PullInOut.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -55,7 +59,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="AutoMapper" Version="12.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="Dapper" Version="2.1.66" />
@@ -215,12 +219,13 @@
     <None Update="Data\Mau_Nhaphang.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Data\Mau_Using.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\Invoice\" />
+    <Folder Include="Data\DNTT\" />
+    <Folder Include="Data\BBGH\" />
+    <Folder Include="Data\HD\" />
     <Folder Include="wwwroot\File\" />
   </ItemGroup>
 

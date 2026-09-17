@@ -237,17 +237,14 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return result ?? string.Empty;
         }
         // check ma hang
-        public async Task<string> CheckMaterialCode(string codeNcc, string category, string name)
+        public async Task<string> CheckMaterialCode(string codeNcc, string category)
         {
             var result = await _context.MATERIALs
                 .Where(m =>
                     m.Material_Code != null &&
                     m.Code_Suppiler == codeNcc &&
                     m.Category_VN != null &&
-                    m.Category_VN.Contains(category) &&
-                    (m.Material_Name_VN == name ||
-                     m.Material_Name_EN == name ||
-                     m.Material_Name_JP == name))
+                    m.Category_VN.Contains(category))
                 .OrderByDescending(m => m.Material_Code)
                 .Select(m => m.Material_Code)
                 .FirstOrDefaultAsync();

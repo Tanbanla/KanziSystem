@@ -1,0 +1,255 @@
+@{
+    ViewData["Title"] = "Nhập Invoice, Đề nghị thanh toán";
+}
+<style>
+    .table-responsive {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 1;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        font-size: 0.85rem;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container-fluid py-3">
+    <!-- Header Controls -->
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <div class="row d-flex justify-content-between align-items-center">
+
+                <!-- Cụm bên trái: Tìm kiếm -->
+                <div class="col-md-7 d-flex align-items-start gap-2">
+                    <div class="d-flex flex-column">
+                        <div class="input-group">
+                            <span class="input-group-text">Số PO:</span>
+                            <input type="text" id="txtPO" class="form-control" placeholder="(1604-0001,1604-0002,...)">
+                        </div>
+                      
+                    </div>
+                    <button class="btn btn-success ml-3" id="btnTimkiem"><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button class="btn btn-secondary ml-2" id="btnReset">Reset</button>
+                </div>
+
+                <!-- Cụm bên phải: Cập nhật -->
+                <div class="col-md-5 d-flex justify-content-end align-items-start gap-2">
+                    <div class="input-group" style="width: auto;">
+                        <select id="cmbLoainhap" class="form-control">
+                            <option value="Số Invoice">Số Invoice</option>
+                            <option value="Đề nghị thanh toán">Đề nghị thanh toán</option>
+                        </select>
+                    </div>
+                    <input type="text" id="txtDulieu" class="form-control" style="width: 150px;">
+                    <button class="btn btn-primary px-4" id="btnNhapkho"><i class="fa fa-save"></i> Nhập</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Grid (Table) -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-bordered table-hover mb-0" id="dataGridList">
+                <thead class="bg-primary text-white">
+                    <!-- Thêm text-white để nổi bật chữ trên nền xanh -->
+                    <tr>
+                        <th> <input type="checkbox" id="ckChonAll"></th>
+                        <th>Mã hệ thống</th>
+                        <th>Được tách từ</th>
+                        <th>Bên xác nhận trước</th>
+                        <th>Số PO</th>
+                        <th>Mã hàng</th>
+                        <th>Mã sản phẩm</th>
+                        <th>Tên hàng (Anh/Nhật)</th>
+                        <th>Tên hàng (Việt)</th>
+                        <th>Số lượng Order</th>
+                        <th>Lượng HQ</th>
+                        <th>Lượng thực tế</th>
+                        <th>Ngày nhập kho</th>
+                        <th>Invoice Phòng ban nhập</th>
+                        <th>Đề nghị thanh toán</th>
+                        <th>Ngày nhập</th>
+                        <th>Người nhập</th>
+                        <th>Đơn vị</th>
+                        <th>Đơn giá ước tính</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Dữ liệu sẽ được render vào đây qua JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+            // 1. Xử lý khi click vào nút Check All trên Table Header
+        $('#ckChonAll').change(function() {
+            var isChecked = $(this).prop('checked');
+            // Tìm tất cả các checkbox có class row-checkbox và gán trạng thái
+            $('.row-checkbox').prop('checked', isChecked);
+        });
+
+        // 2. Xử lý khi click vào từng Checkbox của từng dòng (Dùng event delegation vì dữ liệu sinh động)
+        $(document).on('change', '.row-checkbox', function() {
+            // Đếm tổng số checkbox trên lưới
+            var totalCheckboxes = $('.row-checkbox').length;
+            // Đếm số checkbox đang được check
+            var checkedCheckboxes = $('.row-checkbox:checked').length;
+
+            // Nếu số lượng checked bằng tổng số (và tổng số > 0) thì tự động check nút Check All, ngược lại bỏ check
+            if(totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0) {
+                $('#ckChonAll').prop('checked', true);
+            } else {
+                $('#ckChonAll').prop('checked', false);
+            }
+        });
+        // Nút Tìm kiếm
+        $('#btnTimkiem').click(function() {
+            let poText = $('#txtPO').val();
+
+            if (!poText) {
+                alert("Vui lòng nhập Số PO để tìm kiếm.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("SearchPO_Thanhtoan", "ManagerDelivery")',
+                type: 'POST',
+                data: { SoPO: poText },
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                   console.log(data);
+                    renderTable(data);
+                },
+                error: function (err) {
+                    // Xử lý báo lỗi nếu POST bị block (VD: 400 Bad Request, 404 Not Found)
+                    alert("Lỗi khi tải dữ liệu! Mã lỗi: " + err.status);
+                    console.log(err);
+                }
+            });
+        });
+
+        // Hàm render dữ liệu ra bảng
+        function renderTable(data) {
+            let tbody = $('#tableBody');
+            tbody.empty(); // Xóa dữ liệu cũ
+
+            if (data && data.length > 0) {
+                data.forEach(function (item) {
+                    // Dữ liệu JSON Serialize trả về tự động chuyển key thành camelCase
+                    let id = item.PO_Detail_Id || item.pO_Detail_Id || '';
+
+                    let tr = `
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="row-checkbox" value="${id}">
+                            </td>
+                            <td>${item.maHeThong}</td>
+                            <td>${item.duocTachTu}</td>
+                            <td>${item.benxacnhantruoc}</td>
+                            <td>${item.soPO}</td>
+                            <td>${item.maHang }</td>
+                            <td>${item.maSanPham}</td>
+                            <td>${item.tenTiengAnh }</td>
+                            <td>${item.tenTiengViet}</td>
+                            <td>${item.soLuong}</td>
+                            <td>${item.luongVeKho}</td>
+                            <td>${item.luongvethucte}</td>
+                            <td>${item.ngayNhapKho}</td>
+                            <td>${item.InvoicePO || item.invoicePO || ''}</td>
+                            <td>${item.InvoicePODenghithanhtoan || item.invoicePODenghithanhtoan || ''}</td>
+                            <td>${formatDate(item.InvoicePONgaynhap || item.invoicePONgaynhap)}</td>
+                            <td>${item.InvoicePONguoinhap || item.invoicePONguoinhap || ''}</td>
+                            <td>${item.Dovi || item.dovi || ''}</td>
+                            <td>${item.Dongia || item.dongia || 0}</td>
+                        </tr>
+                    `;
+                    tbody.append(tr);
+                });
+            } else {
+                tbody.append('<tr><td colspan="19" class="text-center">Không tìm thấy dữ liệu</td></tr>');
+            }
+
+            // Bỏ chọn nút check all khi render lại
+            $('#ckChonAll').prop('checked', false);
+        }
+
+        // Format ngày tháng (DD/MM/YYYY)
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            let date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+
+            let d = date.getDate().toString().padStart(2, '0');
+            let m = (date.getMonth() + 1).toString().padStart(2, '0');
+            let y = date.getFullYear();
+            return `${d}/${m}/${y}`;
+        }
+
+                // Sự kiện nút Nhập
+        $('#btnNhapkho').click(function () {
+            let loaiNhap = $('#cmbLoainhap').val();
+            let duLieu = $('#txtDulieu').val().trim();
+
+            // Khai báo mảng chứa các PO_Detail_Id được chọn
+            let selectedIds = [];
+            $('.row-checkbox:checked').each(function () {
+                selectedIds.push($(this).val());
+            });
+
+            // Validate
+            if (selectedIds.length === 0) {
+                alert("Vui lòng chọn ít nhất một dòng PO để nhập dữ liệu!");
+                return;
+            }
+            if (!duLieu) {
+                alert("Vui lòng điền dữ liệu cần nhập!");
+                return;
+            }
+
+            // Xác nhận trước khi cập nhật
+            if (!confirm(`Bạn có chắc muốn cập nhật [${loaiNhap}] cho ${selectedIds.length} dòng đã chọn?`)) {
+                return;
+            }
+
+            // Gửi AJAX xuống Controller
+            $.ajax({
+                url: '@Url.Action("UpdateInvoice", "ManagerDelivery")',
+                type: 'POST',
+                data: {
+                    ids: selectedIds,
+                    loaiNhap: loaiNhap,
+                    duLieu: duLieu
+                },
+                success: function (res) {
+                    if (res.success) {
+                        alert("Cập nhật dữ liệu thành công!");
+                        $('#txtDulieu').val(''); // Xóa trắng ô dữ liệu sau khi nhập xong
+                        $('#btnTimkiem').click(); // Tự động load lại lưới bằng cách gọi click Tìm kiếm
+                    } else {
+                        alert("Lỗi: " + res.error);
+                    }
+                },
+                error: function (err) {
+                    alert("Lỗi kết nối khi cập nhật! " + err.statusText);
+                    console.log(err);
+                }
+            });
+        });
+    </script>
+}

@@ -46,6 +46,7 @@
             var T = window.i18nInputQuote || {};
             search.innerHTML = '<input type="text" placeholder="' + (T.SearchEllipsis || 'Tìm...') + '" />';
             var list = document.createElement('div'); list.className = 'ms-list';
+            var dropdownHost = select.closest('.modal') || document.body;
 
             function rebuildOptionsFromSelect() {
                 options = Array.from(select.options).map(function (opt) {
@@ -224,12 +225,11 @@
                 }
 
                 var rect = btn.getBoundingClientRect();
-                var top = rect.top + window.scrollY + btn.offsetHeight;
-                var left = rect.left + window.scrollX;
-                document.body.appendChild(dropdown);
-                dropdown.style.position = 'absolute';
-                dropdown.style.top = top + 'px';
-                dropdown.style.left = left + 'px';
+                var isInsideModal = dropdownHost !== document.body;
+                dropdownHost.appendChild(dropdown);
+                dropdown.style.position = isInsideModal ? 'fixed' : 'absolute';
+                dropdown.style.top = (isInsideModal ? rect.bottom : rect.top + window.scrollY + btn.offsetHeight) + 'px';
+                dropdown.style.left = (isInsideModal ? rect.left : rect.left + window.scrollX) + 'px';
                 dropdown.style.width = btn.offsetWidth + 'px';
                 dropdown.style.zIndex = 3000;
                 dropdown.classList.add('open');

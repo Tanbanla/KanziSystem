@@ -1,29 +1,20 @@
 @model PRJ_WAREHOUSE_BIVN.View_Models.Login.UserManagerModel
 @using System.Text.Json
-
+@using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Quản lý người dùng";
-    var roles = Model?.Roles?.Where(x => x.IsActive).ToList() ?? new List<PRJ_WAREHOUSE_BIVN.DTO.BaoGia_WorkflowRoleDTO>();
+    ViewData["Title"] = @Localizer["Title"];
+    var roles = Model?.Roles?.Where(x => x.IsActive).ToList() ?? new List<BaoGia_WorkflowRoleDTO>();
 }
-
-<style>
-    .user-management .card { border: 0; box-shadow: 0 3px 15px rgba(35, 45, 65, .08); }
-    .user-management .page-header { background: linear-gradient(135deg, #4f46e5, #2563eb); color: #fff; border-radius: .4rem; }
-    .user-management .table td, .user-management .table th { vertical-align: middle; white-space: nowrap; }
-    .user-management .table-responsive { min-height: 280px; }
-    .user-management .badge-role { background: #eef2ff; color: #4338ca; font-weight: 600; }
-    .user-management .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
-    .user-management .status-active { background: #16a34a; }
-    .user-management .status-locked { background: #dc2626; }
-    .user-management .required::after { content: " *"; color: #dc2626; }
-    .user-management .empty-state { padding: 4rem 1rem; color: #8792a3; }
-</style>
+<head>
+    <link rel="stylesheet" href="~/css/UserManagement.css" asp-append-version="true" />
+</head>
 
 <div class="section user-management">
     <div class="section-header page-header p-4 mb-4">
         <div>
-            <h1 class="mb-1 text-white"><i class="fas fa-users-cog mr-2"></i>Quản lý người dùng</h1>
-            <p class="mb-0 text-white-50">Tìm kiếm, cập nhật tài khoản và phân quyền truy cập hệ thống</p>
+            <h1 class="mb-1 text-white"><i class="fas fa-users-cog mr-2"></i>@Localizer["Title"]</h1>
+            <p class="mb-0 text-white-50">@Localizer["Subtitle"]</p>
         </div>
     </div>
 
@@ -31,77 +22,125 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-                <h5 class="mb-2 mb-md-0"><i class="fas fa-filter text-primary mr-2"></i>Bộ lọc tìm kiếm</h5>
-                <button type="button" class="btn btn-primary" id="addUserButton"><i class="fas fa-user-plus mr-1"></i>Thêm người dùng</button>
+                <h5 class="mb-2 mb-md-0"><i class="fas fa-filter text-primary mr-2"></i>@Localizer["SearchFilters"]</h5>
+                <button type="button" class="btn btn-primary" id="addUserButton"><i class="fas fa-user-plus mr-1"></i>@Localizer["AddUser"]</button>
             </div>
             <form id="searchForm" class="row">
-                <div class="form-group col-lg-3 col-md-6"><label for="searchAdid">ADID</label><input id="searchAdid" class="form-control" placeholder="Nhập ADID"></div>
-                <div class="form-group col-lg-3 col-md-6"><label for="searchName">Họ và tên</label><input id="searchName" class="form-control" placeholder="Nhập họ tên"></div>
-                <div class="form-group col-lg-2 col-md-6"><label for="searchSection">Bộ phận</label><input id="searchSection" class="form-control" placeholder="Nhập bộ phận"></div>
-                <div class="form-group col-lg-2 col-md-6"><label for="searchRole">Role</label><select id="searchRole" class="form-control"><option value="">Tất cả role</option>@foreach (var role in roles) {<option value="@role.RoleCode">@role.RoleName</option>}</select></div>
-                <div class="form-group col-lg-2 col-md-6"><label for="searchStatus">Trạng thái</label><select id="searchStatus" class="form-control"><option value="">Tất cả</option><option value="0">Đang hoạt động</option><option value="2">Đã khóa</option></select></div>
+                <div class="form-group col-lg-3 col-md-6"><label for="searchAdid">ADID</label><input id="searchAdid" class="form-control" placeholder="@Localizer["EnterAdid"]"></div>
+                <div class="form-group col-lg-3 col-md-6"><label for="searchName">@Localizer["FullName"]</label><input id="searchName" class="form-control" placeholder="@Localizer["EnterFullName"]"></div>
+                <div class="form-group col-lg-2 col-md-6"><label for="searchSection">@Localizer["Department"]</label><input id="searchSection" class="form-control" placeholder="@Localizer["EnterDepartment"]"></div>
+                <div class="form-group col-lg-2 col-md-6"><label for="searchRole">@Localizer["Role"]</label><select id="searchRole" class="form-control"><option value="">@Localizer["AllRoles"]</option>@foreach (var role in roles) {<option value="@role.RoleCode">@role.RoleCode-@role.RoleName</option>}</select></div>
+                <div class="form-group col-lg-2 col-md-6"><label for="searchStatus">@Localizer["Status"]</label><select id="searchStatus" class="form-control"><option value="">@Localizer["All"]</option><option value="0">@Localizer["Active"]</option><option value="1">@Localizer["Locked"]</option><option value="2">@Localizer["Deleted"]</option></select></div>
                 <div class="col-12 d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search mr-1"></i>Tìm kiếm</button>
-                    <button type="button" class="btn btn-light" id="resetSearch"><i class="fas fa-undo mr-1"></i>Đặt lại</button>
+                    <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search mr-1"></i>@Localizer["Search"]</button>
+                    <button type="button" class="btn btn-light" id="resetSearch"><i class="fas fa-undo mr-1"></i>@Localizer["Reset"]</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center"><h5 class="mb-0">Danh sách người dùng</h5><span class="text-muted small" id="userCount">0 người dùng</span></div>
+        <div class="card-header bg-white d-flex justify-content-between align-items-center"><h5 class="mb-0">@Localizer["UserList"]</h5><span class="text-muted small" id="userCount">0 @Localizer["Users"]</span></div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="thead-light"><tr><th>ADID</th><th>Họ và tên</th><th>Mã nhân viên</th><th>Bộ phận</th><th>Email</th><th>Role</th><th>Trạng thái</th><th class="text-right">Thao tác</th></tr></thead>
-                <tbody id="userTable"><tr><td colspan="8" class="text-center empty-state"><i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>Đang tải dữ liệu...</td></tr></tbody>
+                <thead class="thead-light">
+                    <tr>
+                        <th class="text-center" style="background-color: #2335b7 !important;">ADID</th>
+                        <th class="text-center" style="background-color: #2335b7 !important;">@Localizer["FullName"]</th>
+                        <th class="text-center" style="background-color: #2335b7 !important;">@Localizer["EmployeeId"]</th>
+                        <th class="text-center" style="background-color: #2335b7 !important;">@Localizer["Department"]</th>
+                        <th class="text-center" style="background-color: #2335b7 !important;">Email</th>
+                        <th class="text-center" style="background-color: #2335b7 !important;">@Localizer["Role"]</th>
+                        <th class="text-center" style="background-color: #2335b7 !important;">@Localizer["Status"]</th>
+                        <th class="text-center" style="background-color: #2335b7 !important;">@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable"><tr><td colspan="8" class="text-center empty-state"><i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>@Localizer["Loading"]</td></tr></tbody>
             </table>
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap">
+            <div class="small text-muted mb-2 mb-md-0" id="pageSummary">@Localizer["Showing", 0, 0, 0, Localizer["Users"]]</div>
+            <div class="d-flex align-items-center">
+                <label for="pageSize" class="small text-muted mr-2 mb-0">@Localizer["Rows"]:</label>
+                <select id="pageSize" class="form-control form-control-sm mr-3" style="width: 75px;">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+                <nav aria-label="@Localizer["UserPagination"]"><ul class="pagination pagination-sm mb-0" id="userPagination"></ul></nav>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title"><i class="fas fa-user-edit text-primary mr-2"></i><span id="modalTitle">Thêm người dùng</span></h5><button type="button" class="close" data-dismiss="modal" aria-label="Đóng"><span aria-hidden="true">&times;</span></button></div>
+        <div class="modal-header"><h5 class="modal-title"><i class="fas fa-user-edit text-primary mr-2"></i><span id="modalTitle">@Localizer["AddUser"]</span></h5><button type="button" class="close" data-dismiss="modal" aria-label="@Localizer["Close"]"><span aria-hidden="true">&times;</span></button></div>
         <form id="userForm"><div class="modal-body"><div id="formError" class="alert alert-danger d-none"></div><input type="hidden" id="isEdit">
             <div class="row">
-                <div class="form-group col-md-6"><label class="required" for="userId">ADID</label><input id="userId" class="form-control" required maxlength="50"><small class="form-text text-muted">Định danh dùng để đăng nhập.</small></div>
-                <div class="form-group col-md-6"><label class="required" for="fullName">Họ và tên</label><input id="fullName" class="form-control" required maxlength="150"></div>
-                <div class="form-group col-md-6"><label for="employeeId">Mã nhân viên</label><input id="employeeId" class="form-control" maxlength="50"></div>
+                <div class="form-group col-md-6"><label class="required" for="userId">ADID</label><input id="userId" class="form-control" required maxlength="50"><small class="form-text text-muted">@Localizer["UsedLoggin"]</small></div>
+                <div class="form-group col-md-6"><label class="required" for="fullName">@Localizer["FullName"]</label><input id="fullName" class="form-control" required maxlength="150"></div>
+                <div class="form-group col-md-6"><label for="employeeId">@Localizer["EmployeeId"]</label><input id="employeeId" class="form-control" maxlength="50"></div>
                 <div class="form-group col-md-6"><label for="email">Email</label><input id="email" type="email" class="form-control" maxlength="150"></div>
-                <div class="form-group col-md-6"><label for="section">Bộ phận / Section</label><input id="section" class="form-control" maxlength="100"></div>
-                <div class="form-group col-md-6"><label for="department">Phòng ban</label><input id="department" class="form-control" maxlength="100"></div>
-                <div class="form-group col-md-6"><label class="required" for="role">Role phân quyền</label><select id="role" class="form-control" required><option value="">Chọn role</option>@foreach (var role in roles) {<option value="@role.RoleCode">@role.RoleName (@role.RoleCode)</option>}</select></div>
-                <div class="form-group col-md-6"><label for="password">Mật khẩu</label><input id="password" type="password" class="form-control" autocomplete="new-password"><small class="form-text text-muted">Để trống khi cập nhật nếu không đổi mật khẩu.</small></div>
-                <div class="form-group col-md-6"><label for="active">Trạng thái</label><select id="active" class="form-control"><option value="true">Đang hoạt động</option><option value="false">Tạm khóa</option></select></div>
+                <div class="form-group col-md-6"><label for="section">@Localizer["DepartmentSection"]</label><input id="section" class="form-control" maxlength="100"></div>
+@*                 <div class="form-group col-md-6"><label for="department">Phòng ban</label><input id="department" class="form-control" maxlength="100"></div> *@
+                <div class="form-group col-md-6"><label class="required" for="role">@Localizer["PermissionRole"]</label><select id="role" class="form-control" required><option value="">@Localizer["SelectRole"]</option>@foreach (var role in roles) {<option value="@role.RoleCode">@role.RoleName (@role.RoleCode)</option>}</select></div>
+                <div class="form-group col-md-6"><label for="password">@Localizer["Password"]</label><input id="password" type="password" class="form-control" autocomplete="new-password"><small class="form-text text-muted">@Localizer["PasswordHint"]</small></div>
+                <div class="form-group col-md-6"><label for="active">@Localizer["Status"]</label>
+                    <select id="active" class="form-control">
+                        <option value="0">@Localizer["Active"]</option>
+                        <option value="1">@Localizer["TemporarilyLocked"]</option>
+                                <option value="2">@Localizer["TemporarilyDeleted"]</option>
+                    </select>
+                </div>
             </div>
-        </div><div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary" id="saveUser"><i class="fas fa-save mr-1"></i>Lưu thông tin</button></div></form>
+        </div><div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal">@Localizer["Cancel"]</button><button type="submit" class="btn btn-primary" id="saveUser"><i class="fas fa-save mr-1"></i>@Localizer["Save"]</button></div></form>
     </div></div>
 </div>
 
 @section Scripts {
-<script>
-(() => {
-    const roles = @Html.Raw(JsonSerializer.Serialize(roles.Select(x => new { code = x.RoleCode, name = x.RoleName })));
-    const table = document.getElementById('userTable');
-    const endpoint = action => `@Url.Action("", "Account")/${action}`;
-    let users = [];
-    const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-    const roleName = code => (roles.find(x => x.code === code)?.name || code || 'User');
-    const notify = (message, success = true) => { const el = document.getElementById('userAlert'); el.className = `alert alert-${success ? 'success' : 'danger'}`; el.textContent = message; setTimeout(() => el.classList.add('d-none'), 4000); };
-    const value = id => document.getElementById(id).value.trim();
-
-    async function loadUsers() {
-        table.innerHTML = '<tr><td colspan="8" class="text-center empty-state"><i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>Đang tải dữ liệu...</td></tr>';
-        const body = { adid: value('searchAdid'), fullname: value('searchName'), section: value('searchSection'), role: value('searchRole'), status: value('searchStatus') ? Number(value('searchStatus')) : null, pageIndex: 1, pageSize: 500 };
-        try { const response = await fetch(endpoint('SearchUser'), { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Không thể tải danh sách người dùng.'); users = result || []; render(); } catch (error) { table.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-5"><i class="fas fa-exclamation-circle mr-1"></i>${esc(error.message)}</td></tr>`; }
-    }
-    function render() { document.getElementById('userCount').textContent = `${users.length} người dùng`; if (!users.length) { table.innerHTML = '<tr><td colspan="8" class="text-center empty-state"><i class="fas fa-users fa-2x mb-3"></i><br>Không tìm thấy người dùng phù hợp.</td></tr>'; return; } table.innerHTML = users.map((u, i) => { const locked = Number(u.int_LOCK ?? u.INT_LOCK) === 2 || u.cho_phep_hoat_dong === false; return `<tr><td><strong>${esc(u.chr_USERID ?? u.CHR_USERID)}</strong></td><td>${esc(u.fullname ?? u.FULLNAME)}</td><td>${esc(u.chr_EMPLOYEE_ID ?? u.CHR_EMPLOYEE_ID)}</td><td>${esc(u.chr_SECTION ?? u.CHR_SECTION)}</td><td>${esc(u.dia_chi_mail ?? u.dia_chi_mail)}</td><td><span class="badge badge-role">${esc(roleName(u.role || u.Role))}</span></td><td><span class="status-dot ${locked ? 'status-locked' : 'status-active'}"></span>${locked ? 'Đã khóa' : 'Hoạt động'}</td><td class="text-right"><button class="btn btn-sm btn-outline-primary mr-1 edit-user" data-index="${i}" title="Sửa"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-outline-danger delete-user" data-id="${esc(u.chr_USERID ?? u.CHR_USERID)}" title="Khóa người dùng"><i class="fas fa-user-slash"></i></button></td></tr>`; }).join(''); }
-    function openForm(user = null) { document.getElementById('userForm').reset(); document.getElementById('formError').classList.add('d-none'); document.getElementById('isEdit').value = user ? 'true' : 'false'; document.getElementById('modalTitle').textContent = user ? 'Cập nhật người dùng' : 'Thêm người dùng'; if (user) { const get = key => user[key] ?? user[key.toUpperCase()] ?? ''; document.getElementById('userId').value = get('chr_USERID'); document.getElementById('userId').readOnly = true; document.getElementById('fullName').value = get('fullname'); document.getElementById('employeeId').value = get('chr_EMPLOYEE_ID'); document.getElementById('email').value = get('dia_chi_mail'); document.getElementById('section').value = get('chr_SECTION'); document.getElementById('department').value = get('phong_ban'); document.getElementById('active').value = (get('cho_phep_hoat_dong') !== false && Number(get('int_LOCK')) !== 2) ? 'true' : 'false'; document.getElementById('role').value = user.role || user.Role || 'User'; } else { document.getElementById('userId').readOnly = false; document.getElementById('active').value = 'true'; } $('#userModal').modal('show'); }
-    document.getElementById('searchForm').addEventListener('submit', e => { e.preventDefault(); loadUsers(); }); document.getElementById('resetSearch').addEventListener('click', () => { document.getElementById('searchForm').reset(); loadUsers(); }); document.getElementById('addUserButton').addEventListener('click', () => openForm());
-    table.addEventListener('click', e => { const edit = e.target.closest('.edit-user'); if (edit) openForm(users[Number(edit.dataset.index)]); const del = e.target.closest('.delete-user'); if (del) deleteUser(del.dataset.id); });
-    async function deleteUser(id) { if (!confirm(`Bạn có chắc muốn khóa người dùng "${id}" không?`)) return; try { const response = await fetch(endpoint('DeleteUser'), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(id) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Không thể khóa người dùng.'); notify('Đã khóa người dùng.'); loadUsers(); } catch (error) { notify(error.message, false); } }
-    document.getElementById('userForm').addEventListener('submit', async e => { e.preventDefault(); const error = document.getElementById('formError'); if (!e.target.checkValidity()) { e.target.classList.add('was-validated'); return; } const edit = document.getElementById('isEdit').value === 'true'; const info = { CHR_USERID:value('userId'), FULLNAME:value('fullName'), CHR_EMPLOYEE_ID:value('employeeId'), dia_chi_mail:value('email'), CHR_SECTION:value('section'), phong_ban:value('department'), VCHR_PASSWORD:value('password') || null, INT_LOCK:document.getElementById('active').value === 'true' ? 0 : 2, cho_phep_hoat_dong:document.getElementById('active').value === 'true', phan_quyen:0 }; try { const response = await fetch(endpoint(edit ? 'UpdateUser' : 'RegisterUser'), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ infor:info, role:value('role') }) }); const result = await response.json(); if (!response.ok) throw new Error(result.message || 'Không thể lưu thông tin.'); $('#userModal').modal('hide'); notify(edit ? 'Đã cập nhật người dùng.' : 'Đã thêm người dùng.'); loadUsers(); } catch (ex) { error.textContent = ex.message; error.classList.remove('d-none'); } });
-    loadUsers();
-})();
-</script>
+    <script>
+        (() => {
+            var panel = document.getElementById('userModal');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        })();
+        window.userManagementConfig = {
+            roles: @Html.Raw(JsonSerializer.Serialize(roles.Select(x => new { code = x.RoleCode, name = x.RoleName }))),
+            texts: @Html.Raw(JsonSerializer.Serialize(new {
+                user = Localizer["User"].Value,
+                users = Localizer["Users"].Value,
+                addUser = Localizer["AddUser"].Value,
+                active = Localizer["Active"].Value,
+                locked = Localizer["Locked"].Value,
+                deleted = Localizer["Deleted"].Value,
+                loading = Localizer["Loading"].Value,
+                loadError = Localizer["LoadError"].Value,
+                noUsers = Localizer["NoUsers"].Value,
+                previousPage = Localizer["PreviousPage"].Value,
+                nextPage = Localizer["NextPage"].Value,
+                edit = Localizer["Edit"].Value,
+                lockUser = Localizer["LockUser"].Value,
+                updateUser = Localizer["UpdateUser"].Value,
+                employeeError = Localizer["EmployeeError"].Value,
+                employeeNotFound = Localizer["EmployeeNotFound"].Value,
+                confirmLock = Localizer["ConfirmLock"].Value,
+                lockError = Localizer["LockError"].Value,
+                lockedUser = Localizer["LockedUser"].Value,
+                saveError = Localizer["SaveError"].Value,
+                updated = Localizer["Updated"].Value,
+                added = Localizer["Added"].Value,
+                showing = Localizer["Showing"].Value
+            })),
+            endpoints: {
+                search: '@Url.Action("SearchUser", "Account")',
+                register: '@Url.Action("RegisterUser", "Account")',
+                update: '@Url.Action("UpdateUser", "Account")',
+                delete: '@Url.Action("DeleteUser", "Account")',
+                searchEmployee: '@Url.Action("GetEmployeeWorkingById", "Account")'
+            }
+        };
+    </script>
+    <script src="~/js/Account/UserManagement.js" asp-append-version="true"></script>
 }
