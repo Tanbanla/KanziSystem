@@ -938,6 +938,23 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.NVCHR_UserRequest).HasMaxLength(200);
             entity.Property(e => e.NVCHR_ReasonQuotation).HasMaxLength(350);
             entity.Property(e => e.CHR_LinkFile).HasMaxLength(1500);
+
+            entity.Property(e => e.WorkflowID);
+
+            entity.Property(e => e.CurrentWorkflowStepID);
+
+            entity.Property(e => e.CHR_LinkImage)
+                .HasMaxLength(1500);
+
+            entity.Property(e => e.NVCHR_DiaDiemNH)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.NVCHR_NguoiNhan)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.CHR_SDT)
+                .HasMaxLength(12)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<BaoGia_Status>(entity =>

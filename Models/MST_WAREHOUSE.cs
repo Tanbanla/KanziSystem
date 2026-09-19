@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace PRJ_WAREHOUSE_BIVN.Models
@@ -12,11 +13,12 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public required string? DTM_UPDATE { get; set; }
         public required string? CHR_USER { get; set; }
         public required string? CHR_NOTE { get; set; }
-        public static List<MST_WAREHOUSE> warehouse_process()
+        public static List<MST_WAREHOUSE> warehouse_process(string us)
         {
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
 
-            var _cmd = _context.GET_DATA_FROM_SQL("[dbo].[PE_MST_WAREHOUSE_GetData]");
+            var group = _context.ReturnString($"SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] where CHR_USERID = '{us}'");
+            var _cmd = _context.GET_DATA_FROM_SQL($"select * from [MST_WAREHOUSE] where [CHR_NOTE] = '{group}'");
             List<MST_WAREHOUSE> _wh = new List<MST_WAREHOUSE>();
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace PRJ_WAREHOUSE_BIVN.Models_Auto;
@@ -92,4 +92,16 @@ public partial class BaoGia_Request_of_Quotation
     public string? NVCHR_ReasonQuotation { get; set; }
 
     public string? CHR_LinkFile { get; set; }
+
+
+    // cac truong du lieu them
+    public string? CHR_LinkImage { get; set; }
+    public string? NVCHR_DiaDiemNH { get; set; }
+    public string? NVCHR_NguoiNhan { get; set; }
+    public string? CHR_SDT { get; set; }
+
+    // cac truong wf
+    public int? WorkflowID { get; set; }
+    public int? CurrentWorkflowStepID { get; set; }
+
 }

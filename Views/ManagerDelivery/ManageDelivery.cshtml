@@ -64,7 +64,7 @@
     }
 
     body {
-            zoom: 93%;
+        zoom: 90%;
         background-color: #f8f9fa;
         font-size: 14px;
     }
@@ -210,8 +210,7 @@
                     <select name="impactStatus" class="form-control">
                         <option value="" selected="@(string.IsNullOrEmpty(currentImpact))">-- Tất cả --</option>
                         <option value="NG" selected="@(currentImpact == "NG")">Lịch giao NG</option>
-                        <option value="OK" selected="@(currentImpact == "OK")">Lịch giao OK</option>
-                        <option value="WAIT" selected="@(currentImpact == "WAIT")">Chờ xác nhận</option>
+                        <option value="OK" selected="@(currentImpact == "OK")">Lịch giao OK</option>                      
                     </select>
                 </div>
             @if (currentTab == "trong")
@@ -229,7 +228,7 @@
                 }
                 <div class="col-md-1">
                     <label class="form-label fw-semibold">Pic PUR</label>
-                    <input type="text" name="picpur" class="form-control">
+                    <input type="text" name="picpur" class="form-control" value="@ViewBag.PicPur">
                 </div>
                 <div class="col-md-2 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc</button>                 
@@ -265,10 +264,15 @@
                 <table class="table table-bordered table-hover mb-0 align-middle" style="font-size:12px">
                     <thead>
                         <tr class="text-center text-uppercase fs-7">
+                            @if (userSection == "3100" || userSection == "1100")
+                            {
+                                <th class="bg-pur"></th>
+                            }
                             <th class="bg-white text-dark" hidden>ID</th>
                             <!-- DÙNG HÀM TẠO HEADER CÓ SẮP XẾP -->
-                            @RenderSortHeader("Ngayyc", "Ngày YC", "bg-pur text-white")
+                            @RenderSortHeader("Ngayyc", "Ngày YC", "bg-pur text-white")                        
                             @RenderSortHeader("Ngayycgiao", "Ngày YC giao", "bg-pur text-white")
+                            @RenderSortHeader("Dieuchinhlichgiao", "Điều chỉnh", "bg-pur text-white")
                             @RenderSortHeader("SoPO", "Số PO", "bg-pur text-white", "80px")
                             @RenderSortHeader("Tentiengviet", "Tên hàng", "bg-pur text-white", "230px")
                             @RenderSortHeader("Mahang", "Mã hàng", "bg-pur text-white")
@@ -277,15 +281,16 @@
                             @RenderSortHeader("Nhacungcap", "Tên NCC", "bg-pur text-white", "200px")
                             @RenderSortHeader("ngayguiPO", "Ngày gửi PO", "bg-white", "80px")
                             @RenderSortHeader("PicPur", "Pic Pur", "bg-pur text-white")
-                            @RenderSortHeader("ngaynccxngiao", "Ngày GH dự kiến", "bg-white", "80px")
-                            @RenderSortHeader("Ngay_GHchinhthuc", "Ngày GH Chính thức", "bg-white", "80px")
+                            @RenderSortHeader("ngaynccxngiao", "Ngày GH dự kiến", "bg-white", "80px")                          
+                            <th class="bg-white" width="100px">Ngày GH Chính thức</th>
                             <th class="bg-white" width="80px">Giờ chính thức</th>
                             @RenderSortHeader("lichgiao", "Lịch giao (OK/NG)", "bg-white")
-                            @RenderSortHeader("anhuongsx", "Ảnh hưởng SX", "bg-white")
+                            <th class="bg-white" width="80px">Ảnh hưởng SX</th>
                             @if (currentTab == "trong")
                             {
                                 <th style="background-color: white ; color:red">Cảnh báo </th>
                             }                         
+
                             @if (userSection == "3100" || userSection == "1100")
                             {
                                 <th class="bg-white" width="80px">Cửa GH Cổng GH</th>
@@ -298,6 +303,8 @@
                             {
                                 <th class="bg-white" width="130px">ẢNH HƯỞNG SX</th>
                             }
+
+                            <th class="bg-white">Note</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -330,10 +337,33 @@
                                     data-sl-thucte="@(string.IsNullOrEmpty(item.SL_Thucte) ? "---" : item.SL_Thucte)"
                                     data-so-dntt="@(string.IsNullOrEmpty(item.So_DNTT) ? "---" : item.So_DNTT)"
                                     data-so-hoadon="@(string.IsNullOrEmpty(item.So_hoadon) ? "---" : item.So_hoadon)">
+                                    @if (userSection == "3100" || userSection == "1100")
+                                    {
+                                        @if (item.Soluong > 1 )
+                                        {
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-outline-danger w-100 btn-split-po"
+                                                        data-po="@item.SoPO"
+                                                        data-item-name="@item.Tentiengviet"
+                                                        data-item-code="@item.Mahang"
+                                                        data-order-qty="@item.Soluong"
+                                                        data-po-detail-id="@item.PO_Detail_Id"
+                                                        title="Tách dòng PO">
+                                                    <i class="fa-solid fa fa-code-branch"></i>
+                                                </button>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td></td>
+                                        }
+                                    }
+                                   
 
                                     <td class="text-center fw-bold" hidden>@(item.PO_Detail_Id)</td>
-                                    <td class="text-center">@CheckDate(item.Ngayyc!)</td>
+                                    <td class="text-center">@CheckDate(item.Ngayyc!)</td>                                  
                                     <td class="text-center">@CheckDate(item.Ngayycgiao!)</td>
+                                    <td class="text-center">@CheckDate(item.Dieuchinhlichgiao!)</td>
                                     <td class="text-center fw-bold text-primary">@item.SoPO</td>
                                     <td>@item.Tentiengviet</td>
                                     <td class="text-center fw-bold">@item.Mahang</td>
@@ -349,9 +379,7 @@
                                     {
                                         <td class="text-center fw-bold text-danger">@item.picpur</td>
                                     }
-                                  
-                                    
-                                    
+                 
                                     <td>@CheckDate(item.ngaynccxngiao!)</td>
                                     <td>@CheckDate(item.Ngay_GHchinhthuc!)</td>
                                     <td>@item.Gio_GH</td>
@@ -369,7 +397,6 @@
                                                 else if (val.Contains("put in")) badgeClass = "badge-info";
                                                 else if (val.Contains("put out")) badgeClass = "bg-pur text-white";
                                                 else badgeClass = "badge-ng";
-
                                                 <span class="badge @badgeClass p-2 w-100">
                                                     @item.lichgiao <i class="fa-solid fa fa-caret-down ms-1"></i>
                                                 </span>
@@ -556,6 +583,17 @@
                                         }
 
                                     }
+
+                                    <td class="text-center align-middle">
+                                        @if (!string.IsNullOrEmpty(item.Note))
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary btn-view-note"
+                                                    data-note="@item.Note"
+                                                    title="Xem chi tiết ghi chú">
+                                                <i class="fa-solid fa-note-sticky"></i> Xem
+                                            </button>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         }
@@ -579,17 +617,18 @@
             {
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
-                        <!-- Nút Trước -->
+                       <!-- Nút Trước -->
                         <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection })">Trước</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Trước</a>
                         </li>
+
                         <!-- Các nút số trang -->
                         @for (int i = 1; i <= totalPages; i++)
                         {
                             if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
                             {
                                 <li class="page-item @(i == currentPage ? "active" : "")">
-                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection })">@i</a>
+                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">@i</a>
                                 </li>
                             }
                             else if (i == currentPage - 3 || i == currentPage + 3)
@@ -597,9 +636,10 @@
                                 <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
                             }
                         }
+
                         <!-- Nút Sau -->
                         <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection })">Sau</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Sau</a>
                         </li>
                     </ul>
                 </nav>
@@ -876,8 +916,7 @@
                     <label class="form-label fw-bold text-dark">Lịch giao NG có ảnh hưởng SX không?</label>
                     <select id="selectImpactStatus" class="form-control form-select border-danger fw-bold">
                         <option value="Yes" class="text-danger">Có (Yes) - Bị ảnh hưởng</option>
-                        <option value="No" class="text-success">Không (No) - An toàn</option>
-                        <option value="Wait" class="text-warning">Chờ xác nhận (Wait)</option>
+                        <option value="No" class="text-success">Không (No) - An toàn</option>                     
                     </select>
                 </div>
             </div>
@@ -929,7 +968,7 @@
         <div class="modal-content border-info">
             <div class="modal-header bg-info text-white py-2">
                 <h6 class="modal-title fw-bold"><i class="fa-solid fa fa-car-side me-1"></i> Danh sách Đăng ký ra vào cổng</h6>
-                <button type="button" class="btn-close btn-close-white" onclick="closeMyModal('gateRegistrationModal')"></button>
+                <button type="button" class="btn-close btn btn-secondary" onclick="closeMyModal('gateRegistrationModal')">x</button>
             </div>
             <div class="modal-body p-0 bg-light">
                 <div class="table-responsive">
@@ -952,6 +991,58 @@
                 <button type="button" class="btn btn-info text-white fw-bold">
                     <i class="fa-solid fa fa-print me-1"></i> Đăng ký vào cổng
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 8. Modal Tách Số Lượng PO -->
+<div class="modal fade" id="splitPoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-warning">
+            <div class="modal-header bg-warning text-dark py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa fa-code-branch me-1"></i> Tách Số Lượng PO: <span id="splitPoNumber"></span></h6>
+                <button type="button" class="btn btn-secondary btn-close" onclick="closeMyModal('splitPoModal')">x</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning py-2 mb-3 fs-7">
+                    <strong>Mặt hàng:</strong> <span id="splitItemName"></span> (<span id="splitItemCode"></span>) <br>
+                    <strong>Số lượng hiện tại:</strong> <span class="fw-bold text-danger text-l" id="splitCurrentQty"></span>
+                    <span id="splitPoDetailId" style="display:none;"></span>
+                </div>
+                <form id="splitForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">Nhập số lượng muốn tách ra dòng mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-warning text-warning"><i class="fa-solid fa fa-calculator"></i></span>
+                            <input type="number" step="any" id="modalSplitQty" class="form-control border-warning" placeholder="Ví dụ: 100" required>
+                        </div>
+                        <small class="text-danger mt-1 d-block fst-italic">* Hệ thống sẽ tạo 1 dòng PO mới với số lượng này và tự động trừ đi ở dòng PO gốc.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeMyModal('splitPoModal')">Đóng</button>
+                <button type="button" id="btnExecuteSplit" class="btn btn-warning btn-sm fw-bold text-dark"><i class="fa-solid fa-floppy-disk me-1"></i> Thực hiện tách</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 9. Modal Xem Ghi chú (Note) -->
+<div class="modal fade" id="noteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-secondary">
+            <div class="modal-header bg-secondary text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-note-sticky me-1"></i> Nội dung Ghi chú</h6>
+                <button type="button" class="btn-close btn-close-white" onclick="closeMyModal('noteModal')"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <!-- Thuộc tính white-space giúp giữ nguyên định dạng xuống dòng của Note -->
+                <p id="modalNoteContent" class="mb-0 text-dark" style="white-space: pre-wrap; word-wrap: break-word;"></p>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeMyModal('noteModal')">Đóng</button>
             </div>
         </div>
     </div>
@@ -985,7 +1076,7 @@
         }
 
         // Các biến lưu trữ instance của Modal
-        let bsEstModal, bsOffModal, bsPayModal, bsImportModal, bsImpactModal, bsSupplierModal, bsGateModal;
+        let bsEstModal, bsOffModal, bsPayModal, bsImportModal, bsImpactModal, bsSupplierModal, bsGateModal, bsSplitModal, bsNoteModal;
 
         // Hàm đóng Modal
         function closeMyModal(modalName) {
@@ -996,6 +1087,8 @@
             if (modalName === 'impactModal' && bsImpactModal) bsImpactModal.hide();
             if (modalName === 'supplierNgModal' && bsSupplierModal) bsSupplierModal.hide();
             if (modalName === 'gateRegistrationModal' && bsGateModal) bsGateModal.hide();
+            if (modalName === 'splitPoModal' && bsSplitModal) bsSplitModal.hide();
+            if (modalName === 'noteModal' && bsNoteModal) bsNoteModal.hide();
         }
 
         // Hàm ẩn/hiện chi tiết (Phải nằm ngoài DOMContentLoaded để onclick gọi được)
@@ -1021,9 +1114,17 @@
             bsImpactModal = new bootstrap.Modal(document.getElementById('impactModal'), { backdrop: false });
             bsSupplierModal = new bootstrap.Modal(document.getElementById('supplierNgModal'), { backdrop: false });
             bsGateModal = new bootstrap.Modal(document.getElementById('gateRegistrationModal'), { backdrop: false });
+            bsSplitModal = new bootstrap.Modal(document.getElementById('splitPoModal'), { backdrop: false });
+            bsNoteModal = new bootstrap.Modal(document.getElementById('noteModal'), { backdrop: false });
 
             document.getElementById('btnOpenSupplierNg')?.addEventListener('click', () => bsSupplierModal.show());
 
+            $(document).on('click', '.btn-view-note', function(e) { // <--- Thêm chữ 'e' vào đây
+                e.preventDefault();
+                const noteContent = $(this).attr('data-note');
+                $('#modalNoteContent').text(noteContent);
+                bsNoteModal.show();
+            });
             // EVENT DELEGATION cho toàn bộ bảng chính
             const tableBody = document.querySelector('.table tbody');
             if (tableBody) {
@@ -1183,6 +1284,25 @@
                         }
 
                         bsImpactModal.show();
+                        return;
+                    }
+
+                            // --- F. XỬ LÝ CLICK NÚT TÁCH PO ---
+                    const btnSplit = e.target.closest('.btn-split-po');
+                    if (btnSplit) {
+                        e.preventDefault();
+                        document.getElementById('splitPoNumber').textContent = btnSplit.getAttribute('data-po');
+                        document.getElementById('splitItemName').textContent = btnSplit.getAttribute('data-item-name');
+                        document.getElementById('splitItemCode').textContent = btnSplit.getAttribute('data-item-code');
+
+                        // Format số lượng cho đẹp
+                        const qty = parseFloat(btnSplit.getAttribute('data-order-qty')).toLocaleString();
+                        document.getElementById('splitCurrentQty').textContent = qty;
+
+                        document.getElementById('splitPoDetailId').textContent = btnSplit.getAttribute('data-po-detail-id');
+                        document.getElementById('modalSplitQty').value = '';
+
+                        bsSplitModal.show();
                         return;
                     }
                 });
@@ -1362,6 +1482,60 @@
                     }
                 });
             });
+
+
+             // --- THỰC HIỆN TÁCH PO (AJAX) ---
+            $('#btnExecuteSplit').off('click').on('click', function (e) {
+                e.preventDefault();
+
+                var poDetailId = parseInt($('#splitPoDetailId').text().trim()) || 0;
+                var newQty = parseFloat($('#modalSplitQty').val()) || 0;
+                var currentQty = parseFloat($('#splitCurrentQty').text().replace(/,/g, '')) || 0;
+
+                if (newQty <= 0) {
+                    alert('Vui lòng nhập số lượng hợp lệ lớn hơn 0!');
+                    $('#modalSplitQty').focus();
+                    return;
+                }
+                if (newQty >= currentQty) {
+                    alert('Số lượng tách phải nhỏ hơn số lượng hiện tại của PO!');
+                    $('#modalSplitQty').focus();
+                    return;
+                }
+
+                var formData = {
+                    PoDetailId: poDetailId,
+                    Soluongmoi: newQty
+                };
+
+                var $btn = $(this);
+                var originalText = $btn.html();
+                $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
+
+                $.ajax({
+                    url: '/ManagerDelivery/SplitPO', // Backend API của bạn
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message || 'Tách PO thành công!');
+                            bsSplitModal.hide();
+                            window.location.reload(); // Reload lại bảng để hiển thị dòng PO mới
+                        } else {
+                            alert('Thất bại: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Có lỗi xảy ra trong quá trình gửi dữ liệu lên máy chủ.');
+                        console.error(error);
+                    },
+                    complete: function () {
+                        $btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+
 
             // --- LƯU DỰ KIẾN (FETCH API) ---
             document.getElementById('btnSaveInfo')?.addEventListener('click', async () => {
@@ -1634,6 +1808,7 @@
                     tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4 fw-bold"><i class="fa-solid fa-circle-xmark me-1"></i> Lỗi kết nối. Không thể tải dữ liệu.</td></tr>`;
                 }
             });
+
 
             // Khởi chạy đếm số lượng
             getDemNccCount();

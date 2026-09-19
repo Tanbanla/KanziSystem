@@ -73,6 +73,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? canhbao { get; set; }
         public string? picpur { get; set; }
         public string? khoi { get; set; }
+        public string? Dieuchinhlichgiao { get; set; }
+        public string? Note { get; set; }
     }
     public class UpdateDuKienModel
     {
@@ -160,11 +162,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // Thuộc tính để hứng giá trị tính toán chênh lệch từ SQL
         public double ChenhLech { get; set; }
     }
+    public class SplitPoRequest
+    {
+        public int PoDetailId { get; set; }
+        public double Soluongmoi { get; set; }
+    }
+    public class UpdateInvoiceRequest
+    {
+        public List<string> ids { get; set; }
+        public string loaiNhap { get; set; }
+        public string duLieu { get; set; }
+    }
     public class ManagerDeliveryController : Controller
     {
         [HttpPost]
         public async Task<IActionResult> ImportExcelTiendo(IFormFile excelFileInput)
         {
+           
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             if (excelFileInput == null || excelFileInput.Length == 0)
             {
@@ -222,11 +236,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             // Tối ưu: Dùng Value?.ToString() thay vì Text sẽ xử lý nhanh hơn trong EPPlus
                             string idDetailPo = worksheet.Cells[row, 1].Text?.ToString()?.Trim() ?? "";
-                            string soPO = worksheet.Cells[row, 4].Text?.ToString()?.Trim() ?? "";
+                            string soPO = worksheet.Cells[row, 5].Text?.ToString()?.Trim() ?? "";
 
+                            string rawNgaydieuchinh = worksheet.Cells[row, 4].Text?.ToString()?.Trim() ?? "";
                             string rawNgayGuiPo = worksheet.Cells[row, 11].Text?.ToString()?.Trim() ?? "";
                             string rawNgayNccXacnhanGh = worksheet.Cells[row, 13].Text?.ToString()?.Trim() ?? "";
                             string rawNgayGhChinhThuc = worksheet.Cells[row, 14].Text?.ToString()?.Trim() ?? "";
+                          
 
                             if (!IsValidDate(rawNgayGuiPo) || !IsValidDate(rawNgayNccXacnhanGh) || !IsValidDate(rawNgayGhChinhThuc))
                             {
@@ -236,6 +252,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                             // Format SQL an toàn
                             string ngayGuiPo = FormatSqlDate(rawNgayGuiPo);
+                            string ngayDieuchinh = FormatSqlDate(rawNgaydieuchinh);
                             string ngayNccXacnhanGh = FormatSqlDate(rawNgayNccXacnhanGh);
                             string ngayGhChinhThuc = FormatSqlDate(rawNgayGhChinhThuc);
 
@@ -243,13 +260,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             if (ngayGuiPo == "NULL") continue;
 
                             string giogh = SafeString(worksheet.Cells[row, 15].Text?.ToString()!);
-                            string lichGiao = SafeString(worksheet.Cells[row, 16].Text?.ToString()!);
-                            string anhHuongSx = SafeString(worksheet.Cells[row, 17].Text?.ToString()!);
+                            string lichGiao = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 16].Text) ? null : worksheet.Cells[row, 16].Text.Trim());
+                            string anhHuongSx = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 17].Text) ? null : worksheet.Cells[row, 17].Text.Trim());
                             string cuaGh = SafeString(worksheet.Cells[row, 18].Text?.ToString()!);
                             string congNhanHang = SafeString(worksheet.Cells[row, 19].Text?.ToString()!);
                             string nguoiNhanHang = worksheet.Cells[row, 20].Text?.ToString()!;
                             string soDntt = SafeString(worksheet.Cells[row, 21].Text?.ToString()!);
                             string soHoaDon = SafeString(worksheet.Cells[row, 22].Text?.ToString()!);
+                            string Note = SafeString(worksheet.Cells[row, 23].Text?.ToString()!);
 
                             // Đưa câu lệnh vào bộ đệm (Không gọi DB ngay)
                             sqlBatch.AppendLine($@"
@@ -268,7 +286,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                             Cong_Nhanhang = {congNhanHang},
                                             Nguoi_Nhanhang = N'{nguoiNhanHang}',
                                             So_DNTT = {soDntt},
-                                            So_hoadon = {soHoaDon}
+                                            So_hoadon = {soHoaDon},
+                                            Dieuchinhlichgiao = {ngayDieuchinh},
+                                            Note = {Note}
                                         WHERE Id_Detail_PO = '{idDetailPo}';
                                     END 
                                     ELSE 
@@ -276,12 +296,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         INSERT INTO [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] 
                                         (
                                             SoPO, Id_Detail_PO, Ngay_gui_PO, Ngay_NCC_xacnhanGH, Ngay_GHchinhthuc, Gio_GH, 
-                                            Lichgiao, Anh_huong_SX, Cua_GH, Cong_Nhanhang, Nguoi_Nhanhang, So_DNTT, So_hoadon
+                                            Lichgiao, Anh_huong_SX, Cua_GH, Cong_Nhanhang, Nguoi_Nhanhang, So_DNTT, So_hoadon, Dieuchinhlichgiao, Note
                                         )
                                         VALUES  
                                         (
                                             '{soPO}', '{idDetailPo}', {ngayGuiPo}, {ngayNccXacnhanGh}, {ngayGhChinhThuc}, {giogh},
-                                            {lichGiao}, {anhHuongSx}, {cuaGh}, {congNhanHang}, N'{nguoiNhanHang}', {soDntt}, {soHoaDon}
+                                            {lichGiao}, {anhHuongSx}, {cuaGh}, {congNhanHang}, N'{nguoiNhanHang}', {soDntt}, {soHoaDon}, {ngayDieuchinh}, {Note}
                                         );
                                     END;
                                 ");
@@ -302,7 +322,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             db.GET_DATA_FROM_SQL(sqlBatch.ToString());
                             sqlBatch.Clear();
                         }
-
                         // TRẢ VỀ THÔNG BÁO
                         if (errorRows.Count > 0)
                         {
@@ -317,15 +336,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             }
                             return Json(new { success = true, message = warningMsg });
                         }
-
+                        tinhtoanlichgiao();
                         return Json(new { success = true, message = "Cập nhật thành công toàn bộ dữ liệu!" });
                     }
                 }
+              
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi hệ thống khi đọc file: " + ex.Message });
             }
+          
         }
 
         public string pullin_pullout(string manguyenlieu, string ngayyc)
@@ -386,52 +407,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return "";
         }
-        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc")
+        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc")
         {
+           
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
-
-            // 1. Cập nhật lịch giao và ảnh hưởng SX
-            sql.GET_DATA_FROM_SQL(@"UPDATE b SET 
-                          b.Lichgiao = 
-                          CASE 
-                          -- 1. Ưu tiên cao nhất: Ngày xác nhận khác ngày giao chính thức -> NG
-                          WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL 
-                                  AND b.Ngay_GHchinhthuc IS NOT NULL 
-                                  AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) <> TRY_CAST(b.Ngay_GHchinhthuc AS DATE)
-                          THEN 'NG'
-
-                          -- 2. THÊM MỚI (Dành riêng cho IN): Giao sớm (Ngay_NCC < Dự kiến) nhưng LỆCH THÁNG -> NG
-                          WHEN a.Danhmuc = 'IN' 
-                                  AND b.Ngay_NCC_xacnhanGH IS NOT NULL
-                                  AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) < TRY_CAST(a.Ngaygiaohangdukien AS DATE)
-                                  AND (MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) 
-                                      OR YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
-                          THEN 'NG'
-
-                          -- 3. Trường hợp OUT (hoặc các trường hợp IN không bị rớt vào điều kiện trên): Cùng tháng/năm -> OK
-                          WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL
-                                  AND MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                                  AND YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                          THEN 'OK'
-                  
-                          -- 4. Còn lại -> NG
-                          ELSE 'NG'
-                          END,        
-
-                          b.Anh_huong_SX = 
-                          CASE 
-                          -- Đồng bộ ảnh hưởng sản xuất: Nếu cùng tháng/năm (thỏa mãn OK) -> No
-                          WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL
-                                  AND MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                                  AND YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                          THEN 'No'
-                      
-                          ELSE b.Anh_huong_SX 
-                          END
-                          FROM PE_THEODOITIENDO b
-                          JOIN [COST_MANAGEMENT].[dbo].[PO] a ON a.PO_Detail_Id = b.Id_Detail_PO
-                          WHERE a.Ngaygiaohangdukien IS NOT NULL;");
-
+            tinhtoanlichgiao();
             var us = User.FindFirst("UserId")?.Value;
             var checkus = sql.ReturnString($"select [Group_Code] from [GROUP_MEMBER] where CHR_USERID = '{us}'");
 
@@ -442,15 +422,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var hientheophongban = "";
             if (get_sec == "3100" || get_sec == "1100") { }
             else { hientheophongban = @$" AND a.Phongchiuchiphi IN ( SELECT Cost_Center FROM [COST_MANAGEMENT].[dbo].[USER_DEPT] WHERE CHR_USERID = '{us}')"; }
-            string tabCondition = tab == "trong" ? "AND (a.Danhmuc = 'IN' OR a.Danhmuc is null)" : "";
+            string tabCondition = "";
+            if (string.IsNullOrEmpty(tab))
+            {
+                tab = "ngoai";
+            }
+            if (tab == "trong") { tabCondition = "AND a.Danhmuc = 'IN'"; };
+            if (tab == "ngoai") { tabCondition = "AND a.Danhmuc = 'OUT'"; };
+
+            if (tab == "trong") {
+                hientheophongban = "";
+            };
 
             // --- LOGIC XỬ LÝ ĐIỀU KIỆN TÌM KIẾM VÀ THÁNG ---
-            string mainCondition = "1=1"; // Điều kiện an toàn mặc định
+            string mainCondition = "1=1"; 
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 reqMonth = ""; // Ép rỗng reqMonth để giao diện tự động clear ô Tháng
-                string s = searchTerm.Replace("'", "''"); // Chống lỗi nháy đơn
+                string s = searchTerm.Replace("'", "''"); 
                 mainCondition = $"(a.SoPO LIKE '%{s}%' OR a.Mahang LIKE '%{s}%' OR a.Tentiengviet LIKE N'%{s}%' OR a.TenNCC LIKE N'%{s}%')";
             }
             else
@@ -464,16 +454,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     mainCondition = $"Ngayphathanh >= '{reqMonth}-01'";
                 }
             }
-
             string query = $@"SELECT a.*, b.*, c.Damnhiem FROM [COST_MANAGEMENT].[dbo].[PO] as a 
                 OUTER APPLY (
                     SELECT TOP 1 * FROM PE_THEODOITIENDO WHERE Id_Detail_PO = a.PO_Detail_Id 
-                    ORDER BY Ngay_NCC_xacnhanGH DESC -- (Hoặc thay bằng cột ngày tạo để lấy dòng mới nhất)
+                    ORDER BY Ngay_NCC_xacnhanGH DESC 
                 ) as b
                 OUTER APPLY (
                     SELECT TOP 1 Damnhiem FROM PE_DamnhiemNCC WHERE MaNCC = a.MaNCC
                 ) as c
-                WHERE {mainCondition} {khoi} {tabCondition} 
+                WHERE {mainCondition} {khoi} {tabCondition}
+                AND Ngayphathanh >= '2024-01-01'
                 AND TinhtrangPO <> 'HOANTHANH' AND TinhtrangPO <> 'HUY' AND Luongvekho is null
                 {hientheophongban} ORDER BY a.Ngaytao DESC";
                 var lst = sql.GET_DATA_FROM_SQL(query);
@@ -595,6 +585,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.trangthai = "";
                 po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
                 po.Danhmuc = lst.Rows[i]["Danhmuc"].ToString();
+                po.Dieuchinhlichgiao = lst.Rows[i]["Dieuchinhlichgiao"].ToString();
+                po.Note = lst.Rows[i]["Note"].ToString();
 
                 object valNgayGH = lst.Rows[i]["Ngay_GHchinhthuc"];
                 po.Ngay_GHchinhthuc = (valNgayGH != null && valNgayGH != DBNull.Value) ? Convert.ToDateTime(valNgayGH).ToString("yyyy-MM-dd") : "";
@@ -610,8 +602,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.canhbao = ""; // Khởi tạo mặc định
                 listPo.Add(po);
             }
-
-      
 
             // Lọc theo Search Text (Lọc thêm cho chắc chắn dù đã lấy từ SQL)
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -699,7 +689,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         break;
                 }
             }
-            // ==========================================================
+
             // Lọc theo Pic Pur
             if (!string.IsNullOrWhiteSpace(picpur))
             {
@@ -726,7 +716,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             ViewBag.ReqMonth = reqMonth;
             ViewBag.ImpactStatus = impactStatus;
             ViewBag.PullStatus = pullStatus;
-
+            ViewBag.PicPur = picpur;
             // Đẩy thông tin sort ra View để icon hiển thị đúng trạng thái
             ViewBag.SortColumn = sortColumn;
             ViewBag.SortDirection = sortDirection;
@@ -747,11 +737,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 string sqlQuery = "";
 
-                // Nếu ngày để trống -> giữ nguyên giá trị cột cũ (cho UPDATE)
-                string updateSendDate = string.IsNullOrEmpty(model.SendDate) ? "[Ngay_gui_PO]" : $"'{model.SendDate}'";
-                string updateConfirmDate = string.IsNullOrEmpty(model.ConfirmDate) ? "[Ngay_NCC_xacnhanGH]" : $"'{model.ConfirmDate}'";
+                // THAY ĐỔI Ở ĐÂY: Nếu ngày để trống -> Ép hẳn thành từ khóa SQL 'NULL' để update xuống DB
+                string updateSendDate = string.IsNullOrEmpty(model.SendDate) ? "NULL" : $"'{model.SendDate}'";
+                string updateConfirmDate = string.IsNullOrEmpty(model.ConfirmDate) ? "NULL" : $"'{model.ConfirmDate}'";
 
-                // Nếu ngày để trống -> truyền giá trị NULL (cho INSERT)
+                // Biến dùng cho INSERT (giữ nguyên logic truyền NULL nếu trống)
                 string insertSendDate = string.IsNullOrEmpty(model.SendDate) ? "NULL" : $"'{model.SendDate}'";
                 string insertConfirmDate = string.IsNullOrEmpty(model.ConfirmDate) ? "NULL" : $"'{model.ConfirmDate}'";
 
@@ -772,11 +762,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         VALUES 
                             ('{model.PoNumber}', {model.PoDetailId}, {insertSendDate}, {insertConfirmDate})
                     END";
-                }
-                else
-                {
-                    sqlQuery = $@"
-                    -- 1. Cập nhật thông tin ngày tháng cho những dòng đã tồn tại
+                        }
+                        else
+                        {
+                            sqlQuery = $@"
+                    -- 1. Cập nhật thông tin ngày tháng cho những dòng đã tồn tại (nếu trống sẽ thành NULL)
                     UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO]
                     SET [Ngay_gui_PO] = {updateSendDate},
                         [Ngay_NCC_xacnhanGH] = {updateConfirmDate}
@@ -800,13 +790,93 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 SQL_Connect_DB20 sql = new SQL_Connect_DB20();
                 sql.GET_DATA_FROM_SQL(sqlQuery);
-
+                tinhtoanlichgiao();
                 return Json(new { success = true, message = "Cập nhật tiến độ thành công!" });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
+        }
+        public void tinhtoanlichgiao()
+        {
+            SQL_Connect_DB20 sql = new SQL_Connect_DB20();
+            sql.GET_DATA_FROM_SQL(@"UPDATE b SET 
+                b.Lichgiao = 
+                CASE 
+                    -- 0. NẾU CHƯA CÓ NGÀY XÁC NHẬN TỪ NCC -> BẮT BUỘC LÀ NULL
+                    WHEN b.Ngay_NCC_xacnhanGH IS NULL OR LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) = '' THEN NULL
+
+                    -- 1. XÉT ƯU TIÊN NGÀY GIAO CHÍNH THỨC TRƯỚC (NẾU CÓ)
+                    WHEN b.Ngay_GHchinhthuc IS NOT NULL AND LTRIM(RTRIM(b.Ngay_GHchinhthuc)) <> '' THEN
+                        CASE 
+                            -- 1.1 Hàng IN: Ngày chính thức phải BẰNG CHÍNH XÁC ngày dự kiến
+                            WHEN a.Danhmuc = 'IN' 
+                                 AND TRY_CAST(b.Ngay_GHchinhthuc AS DATE) = TRY_CAST(a.Ngaygiaohangdukien AS DATE)
+                            THEN 'OK'
+                
+                            -- 1.2 Hàng OUT (hoặc các loại khác): Ngày chính thức chỉ cần CÙNG THÁNG/NĂM
+                            WHEN Danhmuc = 'OUT'
+                                 AND MONTH(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
+                                 AND YEAR(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
+                            THEN 'OK'
+                
+                            -- Còn lại của ngày chính thức -> NG
+                            ELSE 'NG'
+                        END
+
+                    -- 2. NẾU KHÔNG CÓ NGÀY CHÍNH THỨC -> XÉT THEO NGÀY NCC XÁC NHẬN
+                    -- 2.1 Dành riêng cho IN: Giao sớm (Ngay_NCC < Dự kiến) nhưng LỆCH THÁNG -> NG
+                    WHEN a.Danhmuc = 'IN' 
+                         AND DAY(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) < DAY(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
+                         AND (MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) 
+                         AND YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
+                    THEN 'NG'
+
+		            WHEN a.Danhmuc = 'IN' 
+                        AND DAY(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = DAY(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
+                         AND (MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) 
+                         AND YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))  
+                    THEN 'OK'
+
+
+                    -- 2.2 Trường hợp cùng tháng/năm -> OK
+                    WHEN a.Danhmuc = 'OUT' 		
+			            AND MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
+                        AND YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
+                    THEN 'OK'
+		
+                    -- 2.3 Còn lại -> NG
+                    ELSE 'NG'
+                END,        
+
+                b.Anh_huong_SX = 
+                CASE 
+                    -- Nếu chưa có ngày xác nhận từ NCC -> Giữ nguyên trạng thái cũ
+                    WHEN b.Ngay_NCC_xacnhanGH IS NULL OR LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) = '' THEN b.Anh_huong_SX
+
+                    -- Nếu có Ngày chính thức và thỏa mãn điều kiện OK -> 'No'
+                    WHEN b.Ngay_GHchinhthuc IS NOT NULL AND LTRIM(RTRIM(b.Ngay_GHchinhthuc)) <> '' THEN
+                        CASE 
+                            WHEN (a.Danhmuc = 'IN' AND TRY_CAST(b.Ngay_GHchinhthuc AS DATE) = TRY_CAST(a.Ngaygiaohangdukien AS DATE))
+                                 OR (a.Danhmuc = 'OUT' AND MONTH(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) AND YEAR(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
+                            THEN 'No'
+                            ELSE b.Anh_huong_SX
+                        END
+
+                    WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL AND LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) <> '' THEN
+                        CASE 
+                            WHEN (a.Danhmuc = 'IN' AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) = TRY_CAST(a.Ngaygiaohangdukien AS DATE))
+                                 OR (a.Danhmuc = 'OUT' AND MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) AND YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
+                            THEN 'No'
+                            ELSE b.Anh_huong_SX
+                        END        
+
+                    ELSE b.Anh_huong_SX 
+                END
+            FROM PE_THEODOITIENDO b
+            JOIN [COST_MANAGEMENT].[dbo].[PO] a ON a.PO_Detail_Id = b.Id_Detail_PO
+            WHERE a.Ngaygiaohangdukien IS NOT NULL;");
         }
         [HttpPost]
         public IActionResult UpdateChinhThuc([FromBody] UpdateChinhThucModel model)
@@ -884,13 +954,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 SQL_Connect_DB20 sql = new SQL_Connect_DB20();
                 sql.GET_DATA_FROM_SQL(sqlQuery);
-
+                tinhtoanlichgiao();
                 return Json(new { success = true, message = "Cập nhật dữ liệu nhận hàng thực tế thành công!" });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
+           
         }
         // Tạo Model để nhận dữ liệu JSON gửi lên
         public class UpdateThanhToanModel
@@ -902,7 +973,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             public string SoHoaDon { get; set; }
             public string Scope { get; set; } // "full" hoặc "single"
         }
-
         // Action xử lý thanh toán
         [HttpPost]
         public IActionResult UpdateThanhToan([FromBody] UpdateThanhToanModel model)
@@ -970,7 +1040,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 // Thực thi SQL
                 SQL_Connect_DB20 sql = new SQL_Connect_DB20();
                 sql.GET_DATA_FROM_SQL(sqlQuery);
-
+        
                 return Json(new { success = true, message = "Cập nhật dữ liệu thanh toán thành công!" });
             }
             catch (Exception ex)
@@ -982,50 +1052,33 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public IActionResult ExportExcel(string searchTerm = "", string picpur = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "")
         {
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
-
-            // 1. CHẠY UPDATE LỊCH GIAO TRƯỚC KHI LẤY DỮ LIỆU (Đồng bộ với ManageDelivery)
-            sql.GET_DATA_FROM_SQL(@"UPDATE b SET 
-                        b.Lichgiao = 
-                        CASE 
-                        WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL 
-                                AND b.Ngay_GHchinhthuc IS NOT NULL 
-                                AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) <> TRY_CAST(b.Ngay_GHchinhthuc AS DATE)
-                        THEN 'NG'
-                        WHEN a.Danhmuc = 'IN' 
-                                AND b.Ngay_NCC_xacnhanGH IS NOT NULL
-                                AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) < TRY_CAST(a.Ngaygiaohangdukien AS DATE)
-                                AND (MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) 
-                                    OR YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
-                        THEN 'NG'
-                        WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL
-                                AND MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                                AND YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                        THEN 'OK'
-                        ELSE 'NG'
-                        END,        
-                        b.Anh_huong_SX = 
-                        CASE 
-                        WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL
-                                AND MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                                AND YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                        THEN 'No'
-                        ELSE b.Anh_huong_SX 
-                        END
-                        FROM PE_THEODOITIENDO b
-                        JOIN [COST_MANAGEMENT].[dbo].[PO] a ON a.PO_Detail_Id = b.Id_Detail_PO
-                        WHERE a.Ngaygiaohangdukien IS NOT NULL;");
-
+            tinhtoanlichgiao();
             // 2. PHÂN QUYỀN VÀ ĐIỀU KIỆN LỌC
             var us = User.FindFirst("UserId")?.Value;
             var checkus = sql.ReturnString($"select [Group_Code] from [GROUP_MEMBER] where CHR_USERID = '{us}'");
             var khoi = "";
-            if (checkus == "PUR") { khoi = "AND (Group_Code = 'PUR' OR Group_Code = 'PROD') "; }
+          
+            if (checkus == "PUR") { khoi = "AND (Group_Code = 'PUR' OR Group_Code = 'PROD')"; }
             if (checkus == "GA") { khoi = "AND Group_Code = 'GA'"; }
             var get_sec = sql.ReturnString($"SELECT CHR_SECTION  FROM [TM_USER] where CHR_USERID = '{us}'");
             var hientheophongban = "";
             if (get_sec == "3100" || get_sec == "1100") { }
             else { hientheophongban = @$" AND a.Phongchiuchiphi IN ( SELECT Cost_Center FROM [COST_MANAGEMENT].[dbo].[USER_DEPT] WHERE CHR_USERID = '{us}')"; }
-            string tabCondition = tab == "trong" ? "AND a.Danhmuc = 'IN'" : "AND (a.Danhmuc IS NULL OR a.Danhmuc = 'OUT')";
+            string tabCondition = "";
+            if (string.IsNullOrEmpty(tab))
+            {
+                tab = "ngoai";
+            }
+            if (tab == "trong") { tabCondition = "AND a.Danhmuc = 'IN'"; }
+            ;
+            if (tab == "ngoai") { tabCondition = "AND a.Danhmuc = 'OUT'"; }
+            ;
+
+            if (tab == "trong")
+            {
+                hientheophongban = "";
+            }
+            ;
             string mainCondition = "1=1";
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -1035,10 +1088,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 mainCondition = $"(a.SoPO LIKE '%{s}%' OR a.Mahang LIKE '%{s}%' OR a.Tentiengviet LIKE N'%{s}%' OR a.TenNCC LIKE N'%{s}%')";
             }
             else
-            {
-                if (reqMonth == "")
-                    mainCondition = $"Ngayphathanh >= '2024-01-01'";
-                else
+            {             
+                    if (reqMonth == "")
+                    {
+                        mainCondition = $"Ngayphathanh >= '2024-01-01'";
+                    }
+                    else
                     mainCondition = $"Ngayphathanh >= '{reqMonth}-01'";
             }
 
@@ -1054,7 +1109,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         SELECT TOP 1 Damnhiem FROM PE_DamnhiemNCC 
                         WHERE MaNCC = a.MaNCC
                     ) as c
-                    WHERE {mainCondition} {khoi} {tabCondition} 
+                    WHERE {mainCondition} {khoi} {tabCondition}
+                    AND Ngayphathanh >= '2024-01-01'
                     AND TinhtrangPO <> 'HOANTHANH' AND TinhtrangPO <> 'HUY' AND Luongvekho is null
                     {hientheophongban} ORDER BY Ngayphathanh DESC";
 
@@ -1066,7 +1122,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             List<PoDetailViewModel> listPo = new List<PoDetailViewModel>();
 
-            // 3. MAP DỮ LIỆU TỪ SQL SANG MODEL
             for (int i = 0; i < lst.Rows.Count; i++)
             {
                 PoDetailViewModel po = new PoDetailViewModel();
@@ -1089,13 +1144,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 object valNgayNcc = lst.Rows[i]["Ngay_NCC_xacnhanGH"];
                 po.ngaynccxngiao = (valNgayNcc != null && valNgayNcc != DBNull.Value) ? Convert.ToDateTime(valNgayNcc).ToString("yyyy-MM-dd") : "";
 
-                // Lấy trạng thái trực tiếp từ DB (đã được update bên trên)
                 po.anhuongsx = lst.Rows[i]["Anh_huong_SX"].ToString();
                 po.lichgiao = lst.Rows[i]["Lichgiao"].ToString();
-
                 po.trangthai = "";
                 po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
                 po.Danhmuc = lst.Rows[i]["Danhmuc"].ToString();
+                po.Dieuchinhlichgiao = lst.Rows[i]["Dieuchinhlichgiao"].ToString();
+                po.Note = lst.Rows[i]["Note"].ToString();
 
                 object valNgayGH = lst.Rows[i]["Ngay_GHchinhthuc"];
                 po.Ngay_GHchinhthuc = (valNgayGH != null && valNgayGH != DBNull.Value) ? Convert.ToDateTime(valNgayGH).ToString("yyyy-MM-dd") : "";
@@ -1107,7 +1162,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.SL_Thucte = lst.Rows[i]["SL_Thucte"].ToString();
                 po.So_DNTT = lst.Rows[i]["So_DNTT"].ToString();
                 po.So_hoadon = lst.Rows[i]["So_hoadon"].ToString();
-                po.canhbao = "";
+                po.khoi = lst.Rows[i]["Group_Code"].ToString();
+                po.canhbao = ""; // Khởi tạo mặc định
                 listPo.Add(po);
             }
 
@@ -1253,15 +1309,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     x.PO_Detail_Id,
                     x.Ngayyc,
                     x.Ngayycgiao,
+                    x.Dieuchinhlichgiao,
                     x.SoPO,
                     x.Tentiengviet,
                     x.Mahang,
                     x.Soluong,
                     x.Donvi,
                     x.Nhacungcap,
-                    x.DNphathanhpo,
                     x.ngayguiPO,
-                    x.Danhmuc,
+                    x.picpur,
                     x.ngaynccxngiao,
                     x.Ngay_GHchinhthuc,
                     x.Gio_GH,
@@ -1271,7 +1327,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     x.Cong_Nhanhang,
                     x.Nguoi_Nhanhang,
                     x.So_DNTT,
-                    x.So_hoadon
+                    x.So_hoadon,
+                    x.Note
                 }).ToList();
 
                 worksheet.Cells["A2"].LoadFromCollection(exportData, false);
@@ -1284,12 +1341,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
         }
-
         public IActionResult UsingManager()
         {
             return View();
         }
-
         [HttpGet]
         public IActionResult GetData()
         {
@@ -1324,7 +1379,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
         [HttpPost]
         public IActionResult SaveData([FromBody] PE_Using item)
         {
@@ -1390,7 +1444,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
         [HttpPost]
         public IActionResult DeleteData(int id)
         {
@@ -1399,7 +1452,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             bool result = db.EXECUTE_SQL(query, new { Id = id });
             return Json(new { success = result });
         }
-
         [HttpPost]
         public IActionResult ImportExcel(IFormFile excelFileInput, string us)
         {
@@ -1495,11 +1547,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     }
                 }
                 return Json(new { success = true, message = "Import dữ liệu Excel thành công!" });
+              
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi Import: " + ex.Message });
             }
+           
         }
 
         [HttpGet]
@@ -2839,7 +2893,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 txtPhathanh2 = DateTime.Now;
 
             // 1. Tạo câu SQL cơ bản (lọc theo ngày và quyền user)
-            string query = @"SELECT SoPO, TinhtrangPO, Loaichiphi, Ngayphathanh, Maphongban, Tenphongban, Danhmuc, Mucdich, MaNCC, TenNCC, KhuvucNCC, DiachiNCC, SodienthoaiNCC, SofaxNCC, Nguoilamdon, Ngaytao, Hinhthuc, Group_Code, TinhtranghaiquanPO, Nguoixacnhan, Thoigianxacnhan 
+            string query = @"SELECT PO_Detail_Id,Id_Goc,[Benxacnhantruoc],SoPO,Mahang,   [Good_Code] as MaSanPham,Tentienganh,Tentiengviet,Soluong,Luongvethucte,Luongvekho,Luongvekho as Luongvekhocu,LuongvekhoNgaynhap,[InvoicePO],[InvoicePODenghithanhtoan],[InvoicePONgaynhap],[InvoicePONguoinhap],Dovi,Dongia,Dieukiengiaohang,Diadiemgiaohang,Phuongthucvanchuyen,Sotien,Vat,Maphongyeucau,Tenphongyeucau,Ngaygiaohangdukien,Noigiaodukien,Thoigianthanhtoan,Id_RequestDetail,Loaitien,Tygia,DoisangUSD,Danhmuc,Code_Request,[TinhtrangPO],[Tinhtrangtokhai]
                      FROM [IM_PO] 
                      WHERE [Ngayphathanh] >= '" + txtPhathanh1.Value.ToString("MM/dd/yyyy") + @"' 
                      AND [Ngayphathanh] <= '" + txtPhathanh2.Value.ToString("MM/dd/yyyy") + @"'  
@@ -2879,27 +2933,45 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var row = lst.Rows[i];
                 data.Add(new Quanlythanhtoan
                 {
-                    SoPO = row["SoPO"].ToString(),
-                    TinhtrangPO = row["TinhtrangPO"].ToString(),
-                    Loaichiphi = row["Loaichiphi"].ToString(),
-                    Ngayphathanh = row["Ngayphathanh"] != DBNull.Value ? Convert.ToDateTime(row["Ngayphathanh"]) : (DateTime?)null,
-                    Maphongban = row["Maphongban"].ToString(),
-                    Tenphongban = row["Tenphongban"].ToString(),
-                    Danhmuc = row["Danhmuc"].ToString(),
-                    Mucdich = row["Mucdich"].ToString(),
-                    MaNCC = row["MaNCC"].ToString(),
-                    TenNCC = row["TenNCC"].ToString(),
-                    KhuvucNCC = row["KhuvucNCC"].ToString(),
-                    DiachiNCC = row["DiachiNCC"].ToString(),
-                    SodienthoaiNCC = row["SodienthoaiNCC"].ToString(),
-                    SofaxNCC = row["SofaxNCC"].ToString(),
-                    Nguoilamdon = row["Nguoilamdon"].ToString(),
-                    Ngaytao = row["Ngaytao"] != DBNull.Value ? Convert.ToDateTime(row["Ngaytao"]) : (DateTime?)null,
-                    Hinhthuc = row["Hinhthuc"].ToString(),
-                    Group_Code = row["Group_Code"].ToString(),
-                    TinhtranghaiquanPO = row["TinhtranghaiquanPO"].ToString(),
-                    Nguoixacnhan = row["Nguoixacnhan"].ToString(),
-                    Thoigianxacnhan = row["Thoigianxacnhan"] != DBNull.Value ? Convert.ToDateTime(row["Thoigianxacnhan"]) : (DateTime?)null
+                    PO_Detail_Id = row["PO_Detail_Id"] != DBNull.Value ? Convert.ToInt64(row["PO_Detail_Id"]) : 0,
+                    Id_Goc = row["Id_Goc"]?.ToString(),
+                    Benxacnhantruoc = row["Benxacnhantruoc"]?.ToString(),
+                    SoPO = row["SoPO"]?.ToString(),
+                    Mahang = row["Mahang"]?.ToString(),
+                    MaSanPham = row["MaSanPham"]?.ToString(), // Từ [Good_Code] as MaSanPham
+                    Tentienganh = row["Tentienganh"]?.ToString(),
+                    Tentiengviet = row["Tentiengviet"]?.ToString(),
+                    Soluong = row["Soluong"] != DBNull.Value ? Convert.ToDecimal(row["Soluong"]) : 0,
+                    Luongvethucte = row["Luongvethucte"] != DBNull.Value ? Convert.ToDecimal(row["Luongvethucte"]) : 0,
+                    Luongvekho = row["Luongvekho"] != DBNull.Value ? Convert.ToDecimal(row["Luongvekho"]) : 0,
+                    Luongvekhocu = row["Luongvekhocu"] != DBNull.Value ? Convert.ToDecimal(row["Luongvekhocu"]) : 0, // Từ Luongvekho as Luongvekhocu
+                    LuongvekhoNgaynhap = row["LuongvekhoNgaynhap"] != DBNull.Value ? Convert.ToDateTime(row["LuongvekhoNgaynhap"]) : (DateTime?)null,
+
+                    InvoicePO = row["InvoicePO"]?.ToString(),
+                    InvoicePODenghithanhtoan = row["InvoicePODenghithanhtoan"]?.ToString(),
+                    InvoicePONgaynhap = row["InvoicePONgaynhap"] != DBNull.Value ? Convert.ToDateTime(row["InvoicePONgaynhap"]) : (DateTime?)null,
+                    InvoicePONguoinhap = row["InvoicePONguoinhap"]?.ToString(),
+
+                    Dovi = row["Dovi"]?.ToString(),
+                    Dongia = row["Dongia"] != DBNull.Value ? Convert.ToDecimal(row["Dongia"]) : 0,
+                    Dieukiengiaohang = row["Dieukiengiaohang"]?.ToString(),
+                    Diadiemgiaohang = row["Diadiemgiaohang"]?.ToString(),
+                    Phuongthucvanchuyen = row["Phuongthucvanchuyen"]?.ToString(),
+                    Sotien = row["Sotien"] != DBNull.Value ? Convert.ToDecimal(row["Sotien"]) : 0,
+                    Vat = row["Vat"] != DBNull.Value ? Convert.ToDecimal(row["Vat"]) : 0,
+                    Maphongyeucau = row["Maphongyeucau"]?.ToString(),
+                    Tenphongyeucau = row["Tenphongyeucau"]?.ToString(),
+                    Ngaygiaohangdukien = row["Ngaygiaohangdukien"] != DBNull.Value ? Convert.ToDateTime(row["Ngaygiaohangdukien"]) : (DateTime?)null,
+                    Noigiaodukien = row["Noigiaodukien"]?.ToString(),
+                    Thoigianthanhtoan = row["Thoigianthanhtoan"]?.ToString(),
+                    Id_RequestDetail = row["Id_RequestDetail"]?.ToString(),
+                    Loaitien = row["Loaitien"]?.ToString(),
+                    Tygia = row["Tygia"] != DBNull.Value ? Convert.ToDecimal(row["Tygia"]) : 0,
+                    DoisangUSD = row["DoisangUSD"] != DBNull.Value ? Convert.ToDecimal(row["DoisangUSD"]) : 0,
+                    Danhmuc = row["Danhmuc"]?.ToString(),
+                    Code_Request = row["Code_Request"]?.ToString(),
+                    TinhtrangPO = row["TinhtrangPO"]?.ToString(),
+                    Tinhtrangtokhai = row["Tinhtrangtokhai"]?.ToString()
                 });
             }
 
@@ -3027,8 +3099,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                      
                     ORDER BY [SoPO] DESC, Hienthi ASC";
 
-            var lst_Po = db.GET_DATA_FROM_SQL_TEST(sql);
-            System.Data.DataTable dt = db.GET_DATA_FROM_SQL_TEST(sql);
+            var lst_Po = db.GET_DATA_FROM_SQL(sql);
+            System.Data.DataTable dt = db.GET_DATA_FROM_SQL(sql);
             var detailList = new List<object>();
 
             if (dt != null && dt.Rows.Count > 0)
@@ -3039,46 +3111,45 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         detailList.Add(new
                         {
-                            // Cập nhật các trường khớp với phía JavaScript
-                            PO_Detail_Id = row["PO_Detail_Id"].ToString(),
-                            MaHeThong = row["PO_Detail_Id"].ToString(),
-                            DuocTachTu = row["Id_Goc"].ToString(),
-                            Benxacnhantruoc = row["Benxacnhantruoc"].ToString(),
-                            SoPO = row["SoPO"].ToString(),
-                            MaHang = row["Mahang"].ToString(),
-                            MaSanPham = row["MaSanPham"].ToString(),
-                            TenTiengAnh = row["Tentienganh"].ToString(),
-                            TenTiengViet = row["Tentiengviet"].ToString(),
-                            SoLuong = row["Soluong"] != DBNull.Value ? Convert.ToDecimal(row["Soluong"]) : 0,
+                            PO_Detail_Id = row["PO_Detail_Id"] != DBNull.Value ? Convert.ToInt64(row["PO_Detail_Id"]) : 0,
+                            Id_Goc = row["Id_Goc"]?.ToString(),
+                            Benxacnhantruoc = row["Benxacnhantruoc"]?.ToString(),
+                            SoPO = row["SoPO"]?.ToString(),
+                            Mahang = row["Mahang"]?.ToString(),
+                            MaSanPham = row["MaSanPham"]?.ToString(), // Từ [Good_Code] as MaSanPham
+                            Tentienganh = row["Tentienganh"]?.ToString(),
+                            Tentiengviet = row["Tentiengviet"]?.ToString(),
+                            Soluong = row["Soluong"] != DBNull.Value ? Convert.ToDecimal(row["Soluong"]) : 0,
                             Luongvethucte = row["Luongvethucte"] != DBNull.Value ? Convert.ToDecimal(row["Luongvethucte"]) : 0,
-                            LuongVeKho = row["Luongvekho"] != DBNull.Value ? Convert.ToDecimal(row["Luongvekho"]) : 0,
-                            NgayNhapKho = row["LuongvekhoNgaynhap"] != DBNull.Value ? Convert.ToDateTime(row["LuongvekhoNgaynhap"]).ToString("dd/MM/yyyy") : "",
+                            Luongvekho = row["Luongvekho"] != DBNull.Value ? Convert.ToDecimal(row["Luongvekho"]) : 0,
+                            Luongvekhocu = row["Luongvekhocu"] != DBNull.Value ? Convert.ToDecimal(row["Luongvekhocu"]) : 0, // Từ Luongvekho as Luongvekhocu
+                            LuongvekhoNgaynhap = row["LuongvekhoNgaynhap"] != DBNull.Value ? Convert.ToDateTime(row["LuongvekhoNgaynhap"]) : (DateTime?)null,
 
-                            // BỔ SUNG CÁC TRƯỜNG CÒN THIẾU CHO INVOICE & THANH TOÁN
-                            InvoicePO = row["InvoicePO"].ToString(),
-                            InvoicePODenghithanhtoan = row["InvoicePODenghithanhtoan"].ToString(),
+                            InvoicePO = row["InvoicePO"]?.ToString(),
+                            InvoicePODenghithanhtoan = row["InvoicePODenghithanhtoan"]?.ToString(),
+                            InvoicePONgaynhap = row["InvoicePONgaynhap"] != DBNull.Value ? Convert.ToDateTime(row["InvoicePONgaynhap"]) : (DateTime?)null,
+                            InvoicePONguoinhap = row["InvoicePONguoinhap"]?.ToString(),
 
-                            // Định dạng ISO yyyy-MM-dd để hàm formatDate của JavaScript parse chuẩn xác
-                            InvoicePONgaynhap = row["InvoicePONgaynhap"] != DBNull.Value ? Convert.ToDateTime(row["InvoicePONgaynhap"]).ToString("yyyy-MM-dd") : "",
-                            InvoicePONguoinhap = row["InvoicePONguoinhap"].ToString(),
-
-                            // ĐỔI TÊN BIẾN CHO KHỚP VỚI JAVASCRIPT GỌI (Dovi, Dongia)
-                            Dovi = row["Dovi"].ToString(),
+                            Dovi = row["Dovi"]?.ToString(),
                             Dongia = row["Dongia"] != DBNull.Value ? Convert.ToDecimal(row["Dongia"]) : 0,
-
-                            // Các trường dư phòng hờ
-                            DieuKienGiaoHang = row["Dieukiengiaohang"].ToString(),
-                            DiaDiemGiaoHang = row["Diadiemgiaohang"].ToString(),
-                            PhuongThucVanChuyen = row["Phuongthucvanchuyen"].ToString(),
-                            SoTien = row["Sotien"] != DBNull.Value ? Convert.ToDecimal(row["Sotien"]) : 0,
-                            Vat = row["Vat"].ToString(),
-                            PhongBanYeuCau = row["Maphongyeucau"].ToString(),
-                            TenPhongYeuCau = row["Tenphongyeucau"].ToString(),
-                            NgayGiaoHangDuKien = row["Ngaygiaohangdukien"] != DBNull.Value ? Convert.ToDateTime(row["Ngaygiaohangdukien"]).ToString("dd/MM/yyyy") : "",
-                            NoiGiaoDuKien = row["Noigiaodukien"].ToString(),
-                            ThoiHanThanhToan = row["Thoigianthanhtoan"].ToString(),
-                            LoaiTien = row["Loaitien"].ToString(),
-                            TyGia = row["Tygia"] != DBNull.Value ? Convert.ToDecimal(row["Tygia"]) : 0
+                            Dieukiengiaohang = row["Dieukiengiaohang"]?.ToString(),
+                            Diadiemgiaohang = row["Diadiemgiaohang"]?.ToString(),
+                            Phuongthucvanchuyen = row["Phuongthucvanchuyen"]?.ToString(),
+                            Sotien = row["Sotien"] != DBNull.Value ? Convert.ToDecimal(row["Sotien"]) : 0,
+                            Vat = row["Vat"] != DBNull.Value ? Convert.ToDecimal(row["Vat"]) : 0,
+                            Maphongyeucau = row["Maphongyeucau"]?.ToString(),
+                            Tenphongyeucau = row["Tenphongyeucau"]?.ToString(),
+                            Ngaygiaohangdukien = row["Ngaygiaohangdukien"] != DBNull.Value ? Convert.ToDateTime(row["Ngaygiaohangdukien"]) : (DateTime?)null,
+                            Noigiaodukien = row["Noigiaodukien"]?.ToString(),
+                            Thoigianthanhtoan = row["Thoigianthanhtoan"]?.ToString(),
+                            Id_RequestDetail = row["Id_RequestDetail"]?.ToString(),
+                            Loaitien = row["Loaitien"]?.ToString(),
+                            Tygia = row["Tygia"] != DBNull.Value ? Convert.ToDecimal(row["Tygia"]) : 0,
+                            DoisangUSD = row["DoisangUSD"] != DBNull.Value ? Convert.ToDecimal(row["DoisangUSD"]) : 0,
+                            Danhmuc = row["Danhmuc"]?.ToString(),
+                            Code_Request = row["Code_Request"]?.ToString(),
+                            TinhtrangPO = row["TinhtrangPO"]?.ToString(),
+                            Tinhtrangtokhai = row["Tinhtrangtokhai"]?.ToString()
                         });
                     }
                 }
@@ -3086,32 +3157,32 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                       // Trả về JSON cho Ajax gọi tới
             return Json(detailList);
         }
+ 
         [HttpPost]
-        public JsonResult UpdateInvoice(List<string> ids, string loaiNhap, string duLieu, string model)
+        public JsonResult UpdateInvoice([FromBody] UpdateInvoiceRequest request) // <--- SỬA DÒNG NÀY
         {
             try
             {
+                // Gán lại ra biến cho giống code cũ của bạn
+                var ids = request.ids;
+                var loaiNhap = request.loaiNhap;
+                var duLieu = request.duLieu;
+
                 if (ids == null || ids.Count == 0)
                 {
                     return Json(new { success = false, error = "Không có mã hệ thống nào được chọn." });
                 }
-                if (string.IsNullOrEmpty(duLieu))
-                {
-                    return Json(new { success = false, error = "Dữ liệu cập nhật không được để trống." });
-                }
 
                 SQL_Connect_DB20 db = new SQL_Connect_DB20();
-                var us = User.FindFirst("UserId")?.Value; // Lấy User từ token/session
+                var us = User.FindFirst("UserId")?.Value;
 
                 if (string.IsNullOrEmpty(us))
                 {
                     return Json(new { success = false, error = "Không lấy được thông tin User đăng nhập." });
                 }
 
-                // Xử lý chống Injection cơ bản cho text
-                string safeDuLieu = duLieu.Replace("'", "''");
+                if (duLieu == null) { duLieu = ""; }
 
-                // Lặp qua danh sách ID được check từ giao diện
                 foreach (var id in ids)
                 {
                     string safeId = id.Replace("'", "''");
@@ -3120,18 +3191,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (loaiNhap == "Số Invoice")
                     {
-                        sqlUpdate = $@"UPDATE [IM_PO_DETAIL] SET [InvoicePO] = N'{safeDuLieu}',[InvoicePONgaynhap] = GETDATE(),[InvoicePONguoinhap] = '{us}' WHERE [PO_Detail_Id] = '{safeId}'";
+                        sqlUpdate = $@"UPDATE [IM_PO_DETAIL] SET [InvoicePO] = N'{duLieu}',[InvoicePONgaynhap] = GETDATE(),[InvoicePONguoinhap] = '{us}' WHERE [PO_Detail_Id] = '{safeId}'";
 
-                        sqlQuery = $@" UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] SET [So_hoadon] = N'{safeDuLieu}' WHERE [Id_Detail_PO] = {safeId}";
-                       
+                        // LƯU Ý: Ở ĐÂY BẠN VẪN ĐANG THIẾU DẤU NHÁY ĐƠN BAO QUANH '{safeId}'
+                        sqlQuery = $@" UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] SET [So_hoadon] = N'{duLieu}' WHERE [Id_Detail_PO] = '{safeId}'";
                     }
                     else // "Đề nghị thanh toán"
                     {
-                        sqlUpdate = $@"UPDATE [IM_PO_DETAIL] SET [InvoicePODenghithanhtoan] = N'{safeDuLieu}',[InvoicePONgaynhap] = GETDATE(),[InvoicePONguoinhap] = '{us}' WHERE [PO_Detail_Id] = '{safeId}'";
-                        sqlQuery = $@" UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] SET [So_DNTT] = N'{safeDuLieu}' WHERE [Id_Detail_PO] = {safeId}";
+                        sqlUpdate = $@"UPDATE [IM_PO_DETAIL] SET [InvoicePODenghithanhtoan] = N'{duLieu}',[InvoicePONgaynhap] = GETDATE(),[InvoicePONguoinhap] = '{us}' WHERE [PO_Detail_Id] = '{safeId}'";
+
+                        // LƯU Ý: TƯƠNG TỰ, THÊM DẤU NHÁY ĐƠN '{safeId}' VÀO ĐÂY
+                        sqlQuery = $@" UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] SET [So_DNTT] = N'{duLieu}' WHERE [Id_Detail_PO] = '{safeId}'";
                     }
-                    db.GET_DATA_FROM_SQL_TEST(sqlUpdate);
-                    db.GET_DATA_FROM_SQL_TEST(sqlQuery);
+
+                    // XIN NHẮC LẠI: Hàm thực thi lệnh UPDATE không nên dùng hàm GET_DATA... (vì nó trả về bảng). 
+                    // Bạn nên đổi thành hàm ExecuteNonQuery của bạn.
+                    db.GET_DATA_FROM_SQL(sqlUpdate);
+                    db.GET_DATA_FROM_SQL(sqlQuery);
                 }
 
                 return Json(new { success = true });
@@ -3169,7 +3245,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             WHERE [PO_Detail_Id] = '{id.Trim()}'";
 
                     // Gọi hàm thực thi SQL của bạn
-                    db.GET_DATA_FROM_SQL_TEST(sql);
+                    db.GET_DATA_FROM_SQL(sql);
                 }
 
                 return Json(new { success = true });
@@ -3177,6 +3253,98 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, error = ex.Message });
+            }
+        }
+        [HttpPost]
+        public IActionResult SplitPO([FromBody] SplitPoRequest request)
+        {
+            try
+            {
+                // 1. Validate dữ liệu đầu vào
+                if (request == null || request.PoDetailId <= 0 || request.Soluongmoi <= 0)
+                {
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ (PO Detail ID hoặc Số lượng tách <= 0)." });
+                }
+
+                SQL_Connect_DB20 sQL_Connect = new SQL_Connect_DB20();
+
+                // 2. Xây dựng câu lệnh SQL chạy Transaction (Bảo toàn dữ liệu)
+                // Lưu ý: Tính toán số tiền (Sotien) và Đổi sang USD (DoisangUSD) sẽ được tính tự động bằng [Soluongmoi] * [Dongia] ngay trong SQL
+                string sqlQuery = $@"
+                    BEGIN TRY
+                            BEGIN TRANSACTION;
+
+                            -- A. INSERT DÒNG MỚI (Số lượng = {request.Soluongmoi})
+                            INSERT INTO IM_PO_DETAIL(
+                                [SoPO],[Tentienganh],[Tentiengviet],[Mahang],[Soluong],[Dovi],[Dongia],[Dieukiengiaohang],
+                                [Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien],[Vat],[Maphongyeucau],[Tenphongyeucau],
+                                [Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],
+                                [Loaitien],[Tygia],[DoisangUSD],[Danhmuc],[Id_Goc],[Hienthi],[Benxacnhantruoc],[Good_Code]
+                            )
+                            SELECT 
+                                [SoPO], [Tentienganh], [Tentiengviet], [Mahang], 
+                                {request.Soluongmoi}, 
+                                [Dovi], [Dongia], [Dieukiengiaohang],
+                                [Diadiemgiaohang], [Phuongthucvanchuyen],
+                                (ISNULL([Dongia], 0) * {request.Soluongmoi}),
+                                [Vat], [Maphongyeucau], [Tenphongyeucau],
+                                [Ngaygiaohangdukien], [Noigiaodukien], [Thoigianthanhtoan],
+                                [Code_Request], [Id_RequestDetail], [Loaitien], [Tygia],
+                                CASE 
+                                    WHEN ISNULL([Tygia], 0) > 0 THEN ((ISNULL([Dongia], 0) * {request.Soluongmoi}) / [Tygia]) 
+                                    ELSE 0 
+                                END,
+                                [Danhmuc], 
+                                [PO_Detail_Id], 
+                                ISNULL([Hienthi], 0) + 1, 
+                                'STOCK', 
+                                [Good_Code]
+                            FROM IM_PO_DETAIL 
+                            WHERE PO_Detail_Id = {request.PoDetailId};
+
+                            -- B. UPDATE LẠI DÒNG GỐC (Trừ đi số lượng đã tách)
+                            UPDATE IM_PO_DETAIL
+                            SET 
+                                -- Đưa tính toán Sotien và DoisangUSD lên trước
+                                Sotien = (Soluong - {request.Soluongmoi}) * ISNULL(Dongia, 0),
+                                DoisangUSD = CASE 
+                                                 WHEN ISNULL(Tygia, 0) > 0 THEN ((Soluong - {request.Soluongmoi}) * ISNULL(Dongia, 0)) / Tygia 
+                                                 ELSE 0 
+                                             END,
+                                -- Cập nhật Soluong để ở cuối cùng
+                                Soluong = Soluong - {request.Soluongmoi}
+                            WHERE PO_Detail_Id = {request.PoDetailId};
+
+                            -- Xác nhận lưu dữ liệu
+                            COMMIT TRANSACTION;
+
+                        -- SỬA LỖI TẠI ĐÂY: Phải là END TRY và thêm khối CATCH
+                        END TRY
+                        BEGIN CATCH
+                            -- Nếu có lỗi, huỷ bỏ toàn bộ các thay đổi chưa được commit
+                            IF @@TRANCOUNT > 0
+                                ROLLBACK TRANSACTION;
+
+                            -- Quăng lỗi ra ngoài cho code (ví dụ C#) bắt được exception
+                            DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+                            RAISERROR(@ErrorMessage, 16, 1);
+                        END CATCH;
+                ";
+
+                bool isSuccess = sQL_Connect.EXECUTE_SQL(sqlQuery);
+
+                if (isSuccess)
+                {
+                    return Json(new { success = true, message = "Tách PO thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Lỗi! Không thể thực thi câu lệnh SQL." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
     }

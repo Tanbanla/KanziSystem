@@ -1,0 +1,43 @@
+.quote-notifications {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2000;
+    width: min(420px, calc(100vw - 2rem));
+}
+
+.quote-notification {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .85rem 1rem;
+    margin-bottom: .75rem;
+    color: #842029;
+    background-color: #f8d7da;
+    border: 1px solid #f1aeb5;
+    border-radius: .375rem;
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .15);
+    animation: quote-notification-in .2s ease-out;
+}
+
+.quote-notification-success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #a3cfbb;
+}
+
+.quote-notification-close {
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+@keyframes quote-notification-in {
+    from { opacity: 0; transform: translateY(-.5rem); }
+    to { opacity: 1; transform: translateY(0); }
+}

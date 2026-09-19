@@ -5,6 +5,7 @@ namespace PRJ_WAREHOUSE_BIVN.DTO
         public string SectionCode { get; set; }
         public string SectionName { get; set; }
         public string Phanloai { get; set; }
+        public string TypeQuation { get; set; }
         public string MaThietBi { get; set; }
         public string MaHangNoiBo { get; set; }
         public string MaHangNCC { get; set; }
@@ -35,5 +36,10 @@ namespace PRJ_WAREHOUSE_BIVN.DTO
         public string UserRequest { get; set; }
         public string ReasonQuote { get; set; }
         public string? CHR_LinkFile { get; set; }
+
+        public string? CHR_LinkImage { get; set; }
+        public string? NVCHR_DiaDiemNH { get; set; }
+        public string? NVCHR_NguoiNhan { get; set; }
+        public string? CHR_SDT { get; set; }
     }
 }

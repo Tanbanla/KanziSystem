@@ -83,20 +83,23 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public JsonResult load_warehouse()
         {
-            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
+            var us = User.FindFirst("UserId")?.Value;
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process(us);
             return Json(dt);
         }
         [HttpPost]
         public JsonResult load_fac()
         {
-            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
+            var us = User.FindFirst("UserId")?.Value;
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process(us);
             var dup = dt.Select(x => x.CHR_FACTORY).Distinct();
             return Json(dup);
         }
         [HttpPost]
         public JsonResult load_sec(string fac)
         {
-            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
+            var us = User.FindFirst("UserId")?.Value;
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process(us);
             dt = dt.Where(x => x.CHR_FACTORY == fac).ToList();
             var dup = dt.Select(x => x.CHR_DEPT_USE).Distinct();
             return Json(dup);
@@ -104,7 +107,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public JsonResult load_wh(string fac, string sec)
         {
-            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process();
+            var us = User.FindFirst("UserId")?.Value;
+            List<Models.MST_WAREHOUSE> dt = Models.MST_WAREHOUSE.warehouse_process(us);
             dt = dt.Where(x => x.CHR_FACTORY == fac && x.CHR_DEPT_USE == sec).ToList();
             return Json(dt);
         }

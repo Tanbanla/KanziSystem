@@ -87,7 +87,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         {
             try
             {
-                using (SqlConnection cn = new SqlConnection(connectString_Test))
+                using (SqlConnection cn = new SqlConnection(connectString))
                 {
                     int rowsAffected = cn.Execute(query, parameters);
                     return rowsAffected > 0;

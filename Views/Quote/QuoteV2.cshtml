@@ -16,9 +16,11 @@
 <head>
     <link rel="stylesheet" href="~/css/Quote.css" />
     <link rel="stylesheet" href="~/css/QuoteNew.css" />
+    <link rel="stylesheet" href="~/css/QuoteNotification.css" />
 </head>
 
 <div>
+    <div id="quoteNotifications" class="quote-notifications" aria-live="polite" aria-atomic="true"></div>
     <div id="globalLoading" class="quote-global-loading" aria-hidden="true">
         <div class="quote-loading-box" role="status" aria-live="polite">
             <div class="quote-loading-spinner" aria-hidden="true"></div>
@@ -80,7 +82,7 @@
                     </select>
                 </div>
                 <div class="col-12 col-md-3">
-                    <button type="button" id="btnClearFilters" class="btn btn-primary w-100">
+                    <button type="button" id="btnSendQuotation" class="btn btn-primary w-100">
                         <i class="fas fa-paper-plane me-1"></i> Gửi
                     </button>
                 </div>
@@ -115,6 +117,40 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="quote-table-search mb-3" aria-label="Tìm kiếm mặt hàng trong bảng">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <div>
+                        <div class="quote-table-search-title"><i class="fas fa-search me-2"></i>Tìm kiếm trong bảng</div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnClearTableSearch">
+                        <i class="fas fa-eraser me-1"></i>
+                    </button>
+                </div>
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <label for="tableSearchInternalCode" class="visually-hidden">Mã hàng nội bộ</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                            <input type="search" class="form-control" id="tableSearchInternalCode" placeholder="Mã hàng nội bộ" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="tableSearchCategory" class="visually-hidden">Chủng loại</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                            <input type="search" class="form-control" id="tableSearchCategory" placeholder="Chủng loại" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="tableSearchSupplierCode" class="visually-hidden">Mã hàng nhà cung cấp</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-truck"></i></span>
+                            <input type="search" class="form-control" id="tableSearchSupplierCode" placeholder="Mã hàng nhà cung cấp" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                <div id="tableSearchResult" class="small text-muted mt-2" aria-live="polite"></div>
+            </div>
             <div class="table-responsive quote-table" id="InforTableContainer">
                 <table class="table table-sm table-hover table-bordered align-middle" id="InforTable">
                     <thead class="table-header-custom">
@@ -168,7 +204,6 @@
                     </nav>
                 </div>
             </div>
-
         </div>
     </div>
     <div class="modal fade quote-entry-modal" id="addInforModal" tabindex="-1" aria-labelledby="addInforModalLabel" aria-hidden="true">
@@ -245,8 +280,8 @@
                                         <input type="number" min="1" id="selectSoLuong" name="selectSoLuong" class="form-control" />
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="selectDonVi" class="form-label fw-semibold">Đơn vị <span class="text-danger">*</span></label>
-                                        <input type="text" id="selectDonVi" name="selectDonVi" class="form-control" />
+                                        <label for="editDonVi" class="form-label fw-semibold">Đơn vị <span class="text-danger">*</span></label>
+                                        <input type="text" id="editDonVi" name="editDonVi" class="form-control" />
                                     </div>
                                     <div class="col-12">
                                         <label for="LyDoXinBaoGia" class="form-label fw-semibold">Lý do xin báo giá</label>
@@ -381,7 +416,7 @@
                             </div>
                         </div>
 
-                        <div class="quote-form-section">
+                        <div class="quote-form-section" id="supplierTableContainer">
                             <div class="card-body">
                                 <div class="quote-section-heading justify-content-between">
                                     <div class="d-flex align-items-center gap-2"><span class="quote-section-icon" style="margin-right: 8px;" ><i class="fas fa-building"></i></span><div><h6>Danh sách nhà cung cấp</h6><small>Chọn các nhà cung cấp cần gửi báo giá</small></div></div>
@@ -450,8 +485,31 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="quoteApproverModal" tabindex="-1" aria-labelledby="quoteApproverModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quoteApproverModalLabel">Chọn người phê duyệt</h5>
+                    <button type="button" class="quote-validation-close" id="btnCloseQuoteApproverModal" aria-label="Đóng">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="quoteApproverSelect" class="form-label">Người phê duyệt <span class="text-danger">*</span></label>
+                    <select id="quoteApproverSelect" class="form-select">
+                        <option value="">Đang tải danh sách...</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="btnCancelQuoteApproverModal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmSendQuotation">Gửi yêu cầu</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @section Scripts {
     <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
+    <script src="~/js/shared/QuoteNotification.js" asp-append-version="true"></script>
     <script src="~/js/CreateQuotation/QuoteNew.js" asp-append-version="true"></script>
 }

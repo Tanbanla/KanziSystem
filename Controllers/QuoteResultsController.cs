@@ -940,7 +940,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         var duplicatePrice = allRowsData
                             .Where(x => x.MaHangNoiBo == maHangNB &&
                                    ((!string.IsNullOrEmpty(x.MaHangNCC_Vendor) && x.MaHangNCC_Vendor == maHangNCC) ||
-                                    (!string.IsNullOrEmpty(x.MaHangNCC_BIVN) && x.MaHangNCC_BIVN == maHangNCC)) && x.CodeVender == codeVender)
+                                    (!string.IsNullOrEmpty(x.MaHangNCC_BIVN) && x.MaHangNCC_BIVN == maHangNCC)) && x.CodeVender == codeVender && x.MaThietBi == maThietBi)
                             .Select(x => new { x.DonGiaUSD, x.DonGiaVND })
                             .Distinct()
                             .Count();
@@ -1254,7 +1254,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var duplicatePrice = allRowsData
                         .Where(x => x.MaHangNoiBo == maHangNB &&
                                ((!string.IsNullOrEmpty(x.MaHangNCC_Vendor) && x.MaHangNCC_Vendor == maHangNCC) ||
-                                (!string.IsNullOrEmpty(x.MaHangNCC_BIVN) && x.MaHangNCC_BIVN == maHangNCC)) && x.CodeVender == codeVender)
+                                (!string.IsNullOrEmpty(x.MaHangNCC_BIVN) && x.MaHangNCC_BIVN == maHangNCC)) && x.CodeVender == codeVender && x.MaThietBi == maThietBi)
                         .Select(x => new { x.DonGiaUSD, x.DonGiaVND })
                         .Distinct()
                         .Count();

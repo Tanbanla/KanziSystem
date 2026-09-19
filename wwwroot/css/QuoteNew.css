@@ -106,10 +106,47 @@
 .quote-table {
     border: 1px solid #e3ebff;
     border-radius: 10px;
+    max-height: 480px;
+    overflow: auto;
+}
+
+.quote-table-search {
+    padding: 14px 16px;
+    background: #f8fbff;
+    border: 1px solid #dbe7ff;
+    border-radius: 10px;
+}
+
+.quote-table-search-title {
+    color: #1f3b70;
+    font-weight: 600;
+}
+
+.quote-table-search .input-group-text {
+    color: #0d6efd;
+    background-color: #ffffff;
+    border-color: #c6dafc;
+}
+
+.quote-table-search .form-control {
+    border-color: #c6dafc;
+}
+
+.quote-table-search .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.2);
 }
 
 #InforTable {
     margin-bottom: 0;
+    min-width: 1500px;
+}
+
+#InforTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    white-space: nowrap;
 }
 
 .supplier-table-container {
@@ -503,3 +540,20 @@
         padding: 14px;
     }
 }
+
+.supplier-table-error {
+    border: 2px solid #dc3545 !important;
+    border-radius: 6px;
+}
+
+    .supplier-table-error table {
+        border-color: #dc3545 !important;
+    }
+
+    .supplier-table-error::after {
+        content: "Vui lòng kiểm tra danh sách nhà cung cấp";
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 4px;
+    }

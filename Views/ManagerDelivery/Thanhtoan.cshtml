@@ -14,6 +14,19 @@
         z-index: 1;
         font-size: 0.85rem;
         white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .table thead th:hover:not(:first-child) {
+        background-color: #e2e6ea;
+    }
+
+    /* Định dạng icon sắp xếp */
+    .table thead th .sort-icon {
+        margin-left: 5px;
+        font-size: 0.75rem;
+        color: #6c757d;
     }
 
     .table tbody td {
@@ -35,7 +48,6 @@
                             <span class="input-group-text">Số PO:</span>
                             <input type="text" id="txtPO" class="form-control" placeholder="(1604-0001,1604-0002,...)">
                         </div>
-                      
                     </div>
                     <button class="btn btn-success ml-3" id="btnTimkiem"><i class="fa fa-search"></i> Tìm kiếm</button>
                     <button class="btn btn-secondary ml-2" id="btnReset">Reset</button>
@@ -60,61 +72,123 @@
     <div class="card shadow-sm">
         <div class="card-body p-0 table-responsive">
             <table class="table table-bordered table-hover mb-0" id="dataGridList">
-                <thead class="bg-primary text-white">
-                    <!-- Thêm text-white để nổi bật chữ trên nền xanh -->
+                <thead class="bg-primary text-dark">
                     <tr>
-                        <th> <input type="checkbox" id="ckChonAll"></th>
-                        <th>Mã hệ thống</th>
-                        <th>Được tách từ</th>
-                        <th>Bên xác nhận trước</th>
-                        <th>Số PO</th>
-                        <th>Mã hàng</th>
-                        <th>Mã sản phẩm</th>
-                        <th>Tên hàng (Anh/Nhật)</th>
-                        <th>Tên hàng (Việt)</th>
-                        <th>Số lượng Order</th>
-                        <th>Lượng HQ</th>
-                        <th>Lượng thực tế</th>
-                        <th>Ngày nhập kho</th>
-                        <th>Invoice Phòng ban nhập</th>
-                        <th>Đề nghị thanh toán</th>
-                        <th>Ngày nhập</th>
-                        <th>Người nhập</th>
-                        <th>Đơn vị</th>
-                        <th>Đơn giá ước tính</th>
+                        <th class="text-center" style="cursor: default;"><input type="checkbox" id="ckChonAll"></th>
+                        <th>PO Detail ID <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Id Gốc <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Bên xác nhận trước <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Số PO <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Mã hàng <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Mã sản phẩm <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Tên tiếng Anh <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Tên tiếng Việt <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Số lượng <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Lượng thực tế <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Lượng về kho <i class="fa fa-sort sort-icon"></i></th>
+                       @*  <th>Lượng về kho cũ <i class="fa fa-sort sort-icon"></i></th> *@
+                        <th>Ngày nhập kho (Lượng về) <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Invoice PO <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Invoice Đề nghị thanh toán <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Invoice Ngày nhập <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Invoice Người nhập <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Đơn vị <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Đơn giá <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Điều kiện giao hàng <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Địa điểm giao hàng <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Phương thức vận chuyển <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Số tiền <i class="fa fa-sort sort-icon"></i></th>
+                        <th>VAT <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Mã phòng yêu cầu <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Tên phòng yêu cầu <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Ngày giao hàng dự kiến <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Nơi giao dự kiến <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Thời gian thanh toán <i class="fa fa-sort sort-icon"></i></th>
+                        <th>ID Request Detail <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Loại tiền <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Tỷ giá <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Đổi sang USD <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Danh mục <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Code Request <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Tình trạng PO <i class="fa fa-sort sort-icon"></i></th>
+                        <th>Tình trạng tờ khai <i class="fa fa-sort sort-icon"></i></th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Dữ liệu sẽ được render vào đây qua JavaScript -->
+                    <!-- Dữ liệu render qua JavaScript -->
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
 @section Scripts {
     <script>
-            // 1. Xử lý khi click vào nút Check All trên Table Header
+        // 1. Xử lý khi click vào nút Check All trên Table Header
         $('#ckChonAll').change(function() {
             var isChecked = $(this).prop('checked');
-            // Tìm tất cả các checkbox có class row-checkbox và gán trạng thái
             $('.row-checkbox').prop('checked', isChecked);
         });
 
-        // 2. Xử lý khi click vào từng Checkbox của từng dòng (Dùng event delegation vì dữ liệu sinh động)
+        // 2. Xử lý khi click vào từng Checkbox của từng dòng
         $(document).on('change', '.row-checkbox', function() {
-            // Đếm tổng số checkbox trên lưới
             var totalCheckboxes = $('.row-checkbox').length;
-            // Đếm số checkbox đang được check
             var checkedCheckboxes = $('.row-checkbox:checked').length;
 
-            // Nếu số lượng checked bằng tổng số (và tổng số > 0) thì tự động check nút Check All, ngược lại bỏ check
             if(totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0) {
                 $('#ckChonAll').prop('checked', true);
             } else {
                 $('#ckChonAll').prop('checked', false);
             }
         });
+
+        // 3. Tính năng Sort cho Header của Bảng kèm đổi icon FontAwesome
+        $(document).on('click', '#dataGridList th', function () {
+            let thIndex = $(this).index();
+            if (thIndex === 0) return; // Bỏ qua cột checkbox
+
+            let table = $(this).parents('table').eq(0);
+            let rows = table.find('tbody tr:has(td)').toArray();
+            let asc = $(this).hasClass('sorted-asc');
+
+            // Reset tất cả icon và class sort về mặc định
+            $('#dataGridList th').removeClass('sorted-asc sorted-desc');
+            $('#dataGridList th .sort-icon').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
+
+            // Xác định chiều sắp xếp mới
+            let icon = $(this).find('.sort-icon');
+            if (asc) {
+                $(this).addClass('sorted-desc');
+                icon.removeClass('fa-sort fa-sort-up').addClass('fa-sort-down');
+                asc = false;
+            } else {
+                $(this).addClass('sorted-asc');
+                icon.removeClass('fa-sort fa-sort-down').addClass('fa-sort-up');
+                asc = true;
+            }
+
+            rows.sort(function (a, b) {
+                let valA = getCellValue(a, thIndex);
+                let valB = getCellValue(b, thIndex);
+
+                let numA = parseFloat(valA.replace(/,/g, ''));
+                let numB = parseFloat(valB.replace(/,/g, ''));
+
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return asc ? numA - numB : numB - numA;
+                }
+
+                return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            });
+
+            $.each(rows, function (index, row) {
+                table.children('tbody').append(row);
+            });
+        });
+
+        function getCellValue(row, index) {
+            return $(row).children('td').eq(index).text().trim();
+        }
+
         // Nút Tìm kiếm
         $('#btnTimkiem').click(function() {
             let poText = $('#txtPO').val();
@@ -133,11 +207,10 @@
                         alert(data.error);
                         return;
                     }
-                   console.log(data);
+                    console.log(data);
                     renderTable(data);
                 },
                 error: function (err) {
-                    // Xử lý báo lỗi nếu POST bị block (VD: 400 Bad Request, 404 Not Found)
                     alert("Lỗi khi tải dữ liệu! Mã lỗi: " + err.status);
                     console.log(err);
                 }
@@ -151,41 +224,57 @@
 
             if (data && data.length > 0) {
                 data.forEach(function (item) {
-                    // Dữ liệu JSON Serialize trả về tự động chuyển key thành camelCase
-                    let id = item.PO_Detail_Id || item.pO_Detail_Id || '';
+                    let id = item.p_Detail_Id || item.po_Detail_Id || item.PO_Detail_Id || '';
 
                     let tr = `
                         <tr>
-                            <td>
-                                <input type="checkbox" class="row-checkbox" value="${id}">
+                            <td class="text-center">
+                                <input type="checkbox" class="row-checkbox" value="${item.pO_Detail_Id}">
                             </td>
-                            <td>${item.maHeThong}</td>
-                            <td>${item.duocTachTu}</td>
-                            <td>${item.benxacnhantruoc}</td>
-                            <td>${item.soPO}</td>
-                            <td>${item.maHang }</td>
-                            <td>${item.maSanPham}</td>
-                            <td>${item.tenTiengAnh }</td>
-                            <td>${item.tenTiengViet}</td>
-                            <td>${item.soLuong}</td>
-                            <td>${item.luongVeKho}</td>
-                            <td>${item.luongvethucte}</td>
-                            <td>${item.ngayNhapKho}</td>
-                            <td>${item.InvoicePO || item.invoicePO || ''}</td>
-                            <td>${item.InvoicePODenghithanhtoan || item.invoicePODenghithanhtoan || ''}</td>
-                            <td>${formatDate(item.InvoicePONgaynhap || item.invoicePONgaynhap)}</td>
-                            <td>${item.InvoicePONguoinhap || item.invoicePONguoinhap || ''}</td>
-                            <td>${item.Dovi || item.dovi || ''}</td>
-                            <td>${item.Dongia || item.dongia || 0}</td>
+                            <td>${item.pO_Detail_Id || item.PO_Detail_Id || ''}</td>
+                            <td>${item.id_Goc || item.Id_Goc || ''}</td>
+                            <td>${item.benxacnhantruoc || item.Benxacnhantruoc || ''}</td>
+                            <td>${item.soPO || item.SoPO || ''}</td>
+                            <td>${item.mahang || item.Mahang || ''}</td>
+                            <td>${item.maSanPham || item.MaSanPham || ''}</td>
+                            <td>${item.tentienganh || item.Tentienganh || ''}</td>
+                            <td>${item.tentiengviet || item.Tentiengviet || ''}</td>
+                            <td>${item.soluong || item.Soluong || 0}</td>
+                            <td>${item.luongvethucte || item.Luongvethucte || 0}</td>
+                            <td>${item.luongvekho || item.Luongvekho || 0}</td>                        
+                            <td>${formatDate(item.luongvekhoNgaynhap || item.LuongvekhoNgaynhap)}</td>
+                            <td>${item.invoicePO || item.InvoicePO || ''}</td>
+                            <td>${item.invoicePODenghithanhtoan || item.InvoicePODenghithanhtoan || ''}</td>
+                            <td>${formatDate(item.invoicePONgaynhap || item.InvoicePONgaynhap)}</td>
+                            <td>${item.invoicePONguoinhap || item.InvoicePONguoinhap || ''}</td>
+                            <td>${item.dovi || item.Dovi || ''}</td>
+                            <td>${item.dongia || item.Dongia || 0}</td>
+                            <td>${item.dieukiengiaohang || item.Dieukiengiaohang || ''}</td>
+                            <td>${item.diadiemgiaohang || item.Diadiemgiaohang || ''}</td>
+                            <td>${item.phuongthucvanchuyen || item.Phuongthucvanchuyen || ''}</td>
+                            <td>${item.sotien || item.Sotien || 0}</td>
+                            <td>${item.vat || item.Vat || 0}</td>
+                            <td>${item.maphongyeucau || item.Maphongyeucau || ''}</td>
+                            <td>${item.tenphongyeucau || item.Tenphongyeucau || ''}</td>
+                            <td>${formatDate(item.ngaygiaohangdukien || item.Ngaygiaohangdukien)}</td>
+                            <td>${item.noigiaodukien || item.Noigiaodukien || ''}</td>
+                            <td>${item.thoigianthanhtoan || item.Thoigianthanhtoan || ''}</td>
+                            <td>${item.id_RequestDetail || item.Id_RequestDetail || ''}</td>
+                            <td>${item.loaitien || item.Loaitien || ''}</td>
+                            <td>${item.tygia || item.Tygia || 0}</td>
+                            <td>${item.doisangUSD || item.DoisangUSD || 0}</td>
+                            <td>${item.danhmuc || item.Danhmuc || ''}</td>
+                            <td>${item.code_Request || item.Code_Request || ''}</td>
+                            <td>${item.tinhtrangPO || item.TinhtrangPO || ''}</td>
+                            <td>${item.tinhtrangtokhai || item.Tinhtrangtokhai || ''}</td>
                         </tr>
                     `;
                     tbody.append(tr);
                 });
             } else {
-                tbody.append('<tr><td colspan="19" class="text-center">Không tìm thấy dữ liệu</td></tr>');
+                tbody.append('<tr><td colspan="38" class="text-center">Không tìm thấy dữ liệu</td></tr>');
             }
 
-            // Bỏ chọn nút check all khi render lại
             $('#ckChonAll').prop('checked', false);
         }
 
@@ -201,55 +290,46 @@
             return `${d}/${m}/${y}`;
         }
 
-                // Sự kiện nút Nhập
+        // Sự kiện nút Nhập
         $('#btnNhapkho').click(function () {
             let loaiNhap = $('#cmbLoainhap').val();
             let duLieu = $('#txtDulieu').val().trim();
 
-            // Khai báo mảng chứa các PO_Detail_Id được chọn
             let selectedIds = [];
             $('.row-checkbox:checked').each(function () {
                 selectedIds.push($(this).val());
             });
 
-            // Validate
             if (selectedIds.length === 0) {
                 alert("Vui lòng chọn ít nhất một dòng PO để nhập dữ liệu!");
                 return;
             }
-            if (!duLieu) {
-                alert("Vui lòng điền dữ liệu cần nhập!");
-                return;
-            }
 
-            // Xác nhận trước khi cập nhật
-            if (!confirm(`Bạn có chắc muốn cập nhật [${loaiNhap}] cho ${selectedIds.length} dòng đã chọn?`)) {
-                return;
-            }
-
-            // Gửi AJAX xuống Controller
             $.ajax({
-                url: '@Url.Action("UpdateInvoice", "ManagerDelivery")',
-                type: 'POST',
-                data: {
-                    ids: selectedIds,
-                    loaiNhap: loaiNhap,
-                    duLieu: duLieu
-                },
-                success: function (res) {
-                    if (res.success) {
-                        alert("Cập nhật dữ liệu thành công!");
-                        $('#txtDulieu').val(''); // Xóa trắng ô dữ liệu sau khi nhập xong
-                        $('#btnTimkiem').click(); // Tự động load lại lưới bằng cách gọi click Tìm kiếm
-                    } else {
-                        alert("Lỗi: " + res.error);
-                    }
-                },
-                error: function (err) {
-                    alert("Lỗi kết nối khi cập nhật! " + err.statusText);
-                    console.log(err);
+            url: '@Url.Action("UpdateInvoice", "ManagerDelivery")',
+            type: 'POST',
+            // 1. Thêm contentType này để báo cho Backend biết đang gửi JSON
+            contentType: 'application/json; charset=utf-8',
+            // 2. Dùng JSON.stringify để nén toàn bộ object thành chuỗi
+            data: JSON.stringify({
+                ids: selectedIds,
+                loaiNhap: loaiNhap,
+                duLieu: duLieu
+            }),
+            success: function (res) {
+                if (res.success) {
+                    alert("Cập nhật dữ liệu thành công!");
+                    $('#txtDulieu').val('');
+                    $('#btnTimkiem').click();
+                } else {
+                    alert("Lỗi: " + res.error);
                 }
-            });
+            },
+            error: function (err) {
+                alert("Lỗi kết nối khi cập nhật! " + err.statusText);
+                console.log(err);
+            }
+        });
         });
     </script>
 }

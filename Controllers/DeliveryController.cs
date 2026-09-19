@@ -103,7 +103,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public JsonResult GetWareHouse()
         {
-            var data = Models.MST_WAREHOUSE.warehouse_process();
+            string userr = User.FindFirst("UserId")?.Value;
+            var data = Models.MST_WAREHOUSE.warehouse_process(userr);
             return Json(data.Select(n => n.CHR_WAREHOUSE).ToArray());
         }
 
