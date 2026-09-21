@@ -1282,8 +1282,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             if (!string.IsNullOrWhiteSpace(TenHang))
             {
                 var kw = TenHang.Trim();
-                whereBuilder.Append(" AND (ISNULL(c.VCHR_TenHaiQuan, '') LIKE @TenHang OR ISNULL(r.NVCHR_NameVN, '') LIKE @TenHang)");
-                parameters.Add("@TenHang", $"%{kw}%");
+                whereBuilder.Append(" AND r.CHR_MaHangNoiBo = @TenHang");
+                parameters.Add("@TenHang", $"{kw}");
             }
 
             if (!string.IsNullOrWhiteSpace(SoDon))
@@ -1325,6 +1325,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             selectSql.Append(baseFrom);
             selectSql.Append(whereBuilder.ToString());
 
+            var a = selectSql.ToString();
             var data = await _conn.QueryAsync<dynamic>(selectSql.ToString(), parameters);
             if (data == null) return new List<dynamic>();
 

@@ -1,7 +1,7 @@
 (() => {
     'use strict';
 
-    const state = { workflows: [], roles: [], rows: [], workflowId: null, dirty: false };
+    const state = { workflows: [], roles: [], stages: [], rows: [], workflowId: null, dirty: false };
     const permissionTypes = [
         { key: 'canView', label: 'Xem', short: 'X', className: 'view' },
         { key: 'canProcess', label: 'Xử lý', short: 'XL', className: 'process' },
@@ -11,6 +11,7 @@
 
     const elements = {
         workflow: document.getElementById('workflowSelect'), role: document.getElementById('roleFilter'),
+        stage: document.getElementById('stageFilter'),
         search: document.getElementById('permissionSearch'), save: document.getElementById('btnSavePermissions'),
         reset: document.getElementById('btnResetPermissions'), head: document.getElementById('permissionTableHead'),
         body: document.getElementById('permissionTableBody'), table: document.getElementById('permissionTableWrap'),
@@ -54,12 +55,14 @@
             : '<option value="">Không có workflow</option>';
         elements.workflow.value = state.workflowId || '';
         elements.role.innerHTML = '<option value="">Tất cả role</option>' + state.roles.map(role => `<option value="${role.code}">${role.code} · ${role.name}</option>`).join('');
+        elements.stage.innerHTML = '<option value="">Tất cả bước lớn</option>' + state.stages.map(stage => `<option value="${stage.id}">${stage.code} · ${stage.name}</option>`).join('');
     };
 
     const renderTable = () => {
         const query = elements.search.value.trim().toLowerCase();
         const roles = state.roles.filter(role => !elements.role.value || role.code === elements.role.value);
-        const rows = state.rows.filter(row => !query || `${row.code} ${row.name} ${row.description || ''}`.toLowerCase().includes(query));
+        const rows = state.rows.filter(row => (!elements.stage.value || String(row.stageId) === elements.stage.value)
+            && (!query || `${row.code} ${row.name} ${row.description || ''} ${row.stageCode || ''} ${row.stageName || ''}`.toLowerCase().includes(query)));
         const selectedWorkflow = state.workflows.find(item => item.id === state.workflowId);
         elements.hint.textContent = selectedWorkflow ? `${selectedWorkflow.code} · ${selectedWorkflow.name} · ${state.rows.length} bước` : 'Chưa chọn workflow';
         const totalPermissions = state.rows.reduce((total, row) => total + Object.values(row.permissions).reduce((value, permission) => value + permissionTypes.filter(type => permission[type.key]).length, 0), 0);
@@ -72,7 +75,7 @@
         }
         setState('permissionEmpty', false); setState('permissionTableWrap', true);
         elements.head.innerHTML = `<tr><th class="permission-step-heading">Bước xử lý</th>${roles.map(role => `<th class="permission-role-heading"><strong>${role.code}</strong><small>${role.name}</small></th>`).join('')}</tr>`;
-        elements.body.innerHTML = rows.map(row => `<tr><td class="permission-step"><span class="step-order">${row.order}</span><div><strong>${row.name}</strong><small>${row.code}${row.description ? ` · ${row.description}` : ''}</small></div></td>${roles.map(role => {
+        elements.body.innerHTML = rows.map(row => `<tr><td class="permission-step"><span class="step-order">${row.order}</span><div><strong>${row.name}</strong><small>${row.stageCode} · ${row.stageName}${row.description ? ` · ${row.description}` : ''}</small></div></td>${roles.map(role => {
             const permission = row.permissions[role.code] || { canView: false, canProcess: false, canApprove: false, canReject: false };
             row.permissions[role.code] = permission;
             return `<td class="permission-role-cell"><div class="permission-checks">${permissionTypes.map(type => `<label class="permission-check ${type.className}" title="${type.label}"><input type="checkbox" data-step="${row.id}" data-role="${role.code}" data-permission="${type.key}" ${permission[type.key] ? 'checked' : ''}><span>${type.short}</span></label>`).join('')}</div></td>`;
@@ -84,7 +87,7 @@
         try {
             const suffix = workflowId ? `?workflowId=${encodeURIComponent(workflowId)}` : '';
             const payload = await jsonRequest(`${window.workflowRolePermissionsUrl}${suffix}`);
-            state.workflows = payload.workflows || []; state.roles = payload.roles || []; state.rows = normalizeRows(payload.data); state.workflowId = payload.workflowId;
+            state.workflows = payload.workflows || []; state.roles = payload.roles || []; state.stages = payload.stages || []; state.rows = normalizeRows(payload.data); state.workflowId = payload.workflowId;
             renderFilters(); renderTable(); markDirty(false);
         } catch (error) { elements.error.textContent = error.message; setState('permissionError', true); }
         finally { setState('permissionLoading', false); }
@@ -105,7 +108,7 @@
     };
 
     elements.workflow.addEventListener('change', () => load(elements.workflow.value));
-    elements.role.addEventListener('change', renderTable); elements.search.addEventListener('input', renderTable);
+    elements.role.addEventListener('change', renderTable); elements.stage.addEventListener('change', renderTable); elements.search.addEventListener('input', renderTable);
     elements.reset.addEventListener('click', () => load(state.workflowId)); elements.save.addEventListener('click', save);
     elements.body.addEventListener('change', event => {
         const input = event.target.closest('input[data-step]'); if (!input) return;

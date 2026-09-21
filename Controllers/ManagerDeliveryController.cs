@@ -75,6 +75,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? khoi { get; set; }
         public string? Dieuchinhlichgiao { get; set; }
         public string? Note { get; set; }
+        public string? Code_Request { get; set; }
+        public string? Good_Code { get; set; }
     }
     public class UpdateDuKienModel
     {
@@ -122,6 +124,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
     {
         public int PoDetailId { get; set; }
         public string? ImpactStatus { get; set; } // Nhận các giá trị: "Yes", "No", "Wait"
+    }
+    public class UpdateDieuChinhLichGiaoModel
+    {
+        public string PoNumber { get; set; }
+        public int PoDetailId { get; set; }
+        public string DieuChinhDate { get; set; }
+        public string Scope { get; set; }
     }
     public class NCC_NG
     {
@@ -172,6 +181,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public List<string> ids { get; set; }
         public string loaiNhap { get; set; }
         public string duLieu { get; set; }
+    }
+    public class UpdateNoteRequest
+    {
+        public int PoDetailId { get; set; }
+        public string Note { get; set; }
     }
     public class ManagerDeliveryController : Controller
     {
@@ -407,9 +421,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return "";
         }
-        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc")
-        {
-           
+        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc", string mahang = "")
+        {          
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             tinhtoanlichgiao();
             var us = User.FindFirst("UserId")?.Value;
@@ -429,7 +442,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             if (tab == "trong") { tabCondition = "AND a.Danhmuc = 'IN'"; };
             if (tab == "ngoai") { tabCondition = "AND a.Danhmuc = 'OUT'"; };
-
             if (tab == "trong") {
                 hientheophongban = "";
             };
@@ -451,7 +463,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 else
                 {
-                    mainCondition = $"Ngayphathanh >= '{reqMonth}-01'";
+                    mainCondition = $"MONTH(Ngayphathanh) = '{reqMonth.Split('-')[1]}' AND YEAR(Ngayphathanh) = '{reqMonth.Split('-')[0]}' ";
                 }
             }
             string query = $@"SELECT a.*, b.*, c.Damnhiem FROM [COST_MANAGEMENT].[dbo].[PO] as a 
@@ -562,8 +574,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 PoDetailViewModel po = new PoDetailViewModel();
                 po.PO_Detail_Id = int.Parse(lst.Rows[i]["PO_Detail_Id"].ToString()!);
-                po.Ngayyc = lst.Rows[i]["Ngaytao"].ToString()!.Split(' ')[0];
-                po.Ngayycgiao = lst.Rows[i]["Ngaygiaohangdukien"].ToString()!.Split(' ')[0];
+                object valNgaytao = lst.Rows[i]["Ngaytao"];
+                po.Ngayyc = (valNgaytao != null && valNgaytao != DBNull.Value) ? Convert.ToDateTime(valNgaytao).ToString("yyyy-MM-dd") : "";
+       
+                object valNgayyc = lst.Rows[i]["Ngaygiaohangdukien"];
+                po.Ngayycgiao = (valNgayyc != null && valNgayyc != DBNull.Value) ? Convert.ToDateTime(valNgayyc).ToString("yyyy-MM-dd") : "";
+
                 po.SoPO = lst.Rows[i]["SoPO"].ToString();
                 po.Tentiengviet = lst.Rows[i]["Tentiengviet"].ToString();
                 po.Mahang = lst.Rows[i]["Mahang"].ToString();
@@ -586,7 +602,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
                 po.Danhmuc = lst.Rows[i]["Danhmuc"].ToString();
                 po.Dieuchinhlichgiao = lst.Rows[i]["Dieuchinhlichgiao"].ToString();
+
+                object valNgaydieuchinh = lst.Rows[i]["Dieuchinhlichgiao"];
+                po.Dieuchinhlichgiao = (valNgaydieuchinh != null && valNgaydieuchinh != DBNull.Value) ? Convert.ToDateTime(valNgaydieuchinh).ToString("yyyy-MM-dd") : "";
+                
                 po.Note = lst.Rows[i]["Note"].ToString();
+                po.Good_Code = lst.Rows[i]["Good_Code"].ToString();
+                po.Code_Request = lst.Rows[i]["Code_Request"].ToString();
 
                 object valNgayGH = lst.Rows[i]["Ngay_GHchinhthuc"];
                 po.Ngay_GHchinhthuc = (valNgayGH != null && valNgayGH != DBNull.Value) ? Convert.ToDateTime(valNgayGH).ToString("yyyy-MM-dd") : "";
@@ -696,7 +718,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 // Chỉ lọc theo tháng khi ô tháng có giá trị
                 listPo = listPo.Where(x => x.picpur!.Contains(picpur)).ToList();
             }
-
+  
+            if (!string.IsNullOrEmpty(mahang))
+            {
+                // Lọc những mã hàng bắt đầu bằng kí tự A hoặc E
+                listPo = listPo.Where(x => !string.IsNullOrEmpty(x.Mahang) && x.Mahang.ToUpper().StartsWith(mahang.ToUpper())).ToList();
+            }
             // Phân trang
             int pageSize = 100;
             int totalRecords = listPo.Count;
@@ -720,7 +747,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // Đẩy thông tin sort ra View để icon hiển thị đúng trạng thái
             ViewBag.SortColumn = sortColumn;
             ViewBag.SortDirection = sortDirection;
-
+            ViewBag.Mahang = mahang;
             TempData["Tongsoluong"] = totalRecords;
 
             return View(pagedList);
@@ -798,85 +825,101 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
-        public void tinhtoanlichgiao()
+        // Đặt giá trị mặc định sopo = "" để có thể gọi hàm cập nhật cho toàn bộ bảng nếu cần
+        public void tinhtoanlichgiao(string sopo = "")
         {
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
-            sql.GET_DATA_FROM_SQL(@"UPDATE b SET 
-                b.Lichgiao = 
-                CASE 
-                    -- 0. NẾU CHƯA CÓ NGÀY XÁC NHẬN TỪ NCC -> BẮT BUỘC LÀ NULL
-                    WHEN b.Ngay_NCC_xacnhanGH IS NULL OR LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) = '' THEN NULL
 
-                    -- 1. XÉT ƯU TIÊN NGÀY GIAO CHÍNH THỨC TRƯỚC (NẾU CÓ)
-                    WHEN b.Ngay_GHchinhthuc IS NOT NULL AND LTRIM(RTRIM(b.Ngay_GHchinhthuc)) <> '' THEN
+            // Điều kiện WHERE động: Nếu truyền vào SoPO thì chỉ tính cho PO đó, nếu không thì tính hết
+            string whereClause = string.IsNullOrEmpty(sopo)
+                                 ? ""
+                                 : $"WHERE a.SoPO = '{sopo}'";
+            string query = $@"
+                    UPDATE b SET 
+                        b.Lichgiao = 
                         CASE 
-                            -- 1.1 Hàng IN: Ngày chính thức phải BẰNG CHÍNH XÁC ngày dự kiến
-                            WHEN a.Danhmuc = 'IN' 
-                                 AND TRY_CAST(b.Ngay_GHchinhthuc AS DATE) = TRY_CAST(a.Ngaygiaohangdukien AS DATE)
-                            THEN 'OK'
-                
-                            -- 1.2 Hàng OUT (hoặc các loại khác): Ngày chính thức chỉ cần CÙNG THÁNG/NĂM
-                            WHEN Danhmuc = 'OUT'
-                                 AND MONTH(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
-                                 AND YEAR(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
-                            THEN 'OK'
-                
-                            -- Còn lại của ngày chính thức -> NG
-                            ELSE 'NG'
+                            -- 0. NẾU CHƯA CÓ NGÀY XÁC NHẬN TỪ NCC -> BẮT BUỘC LÀ NULL
+                            WHEN b.Ngay_NCC_xacnhanGH IS NULL OR LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) = '' THEN NULL
+
+                            -- 1. XÉT ƯU TIÊN NGÀY GIAO CHÍNH THỨC TRƯỚC (NẾU CÓ)
+                            WHEN b.Ngay_GHchinhthuc IS NOT NULL AND LTRIM(RTRIM(b.Ngay_GHchinhthuc)) <> '' THEN
+                                CASE 
+                                    -- 1.1 Hàng IN: Ngày chính thức phải BẰNG CHÍNH XÁC Ngày Đích (TargetDate)
+                                    WHEN a.Danhmuc = 'IN' 
+                                         AND TRY_CAST(b.Ngay_GHchinhthuc AS DATE) = v.TargetDate
+                                    THEN 'OK'
+            
+                                    -- 1.2 Hàng OUT (hoặc các loại khác): Ngày chính thức chỉ cần CÙNG THÁNG/NĂM với Ngày Đích
+                                    WHEN a.Danhmuc = 'OUT'
+                                         AND MONTH(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = MONTH(v.TargetDate)
+                                         AND YEAR(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = YEAR(v.TargetDate)
+                                    THEN 'OK'
+            
+                                    -- Còn lại của ngày chính thức -> NG
+                                    ELSE 'NG'
+                                END
+
+                            -- 2. NẾU KHÔNG CÓ NGÀY CHÍNH THỨC -> XÉT THEO NGÀY NCC XÁC NHẬN
+                            WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL AND LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) <> '' THEN
+                                CASE
+                                    -- 2.1 Hàng IN: Bằng chính xác Ngày Đích -> OK
+                                    WHEN a.Danhmuc = 'IN' 
+                                         AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) = v.TargetDate 
+                                    THEN 'OK'
+
+                                    -- 2.2 Hàng OUT: Trường hợp cùng tháng/năm -> OK
+                                    WHEN a.Danhmuc = 'OUT' 		
+                                         AND MONTH(v.TargetDate) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
+                                         AND YEAR(v.TargetDate) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
+                                    THEN 'OK'
+            
+                                    -- 2.3 Còn lại -> NG
+                                    ELSE 'NG'
+                                END
+
+                            ELSE b.Lichgiao -- Giữ nguyên nếu không lọt vào case nào
+                        END,        
+
+                        b.Anh_huong_SX = 
+                        CASE 
+                            -- Nếu chưa có ngày xác nhận từ NCC -> Giữ nguyên trạng thái cũ
+                            WHEN b.Ngay_NCC_xacnhanGH IS NULL OR LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) = '' THEN b.Anh_huong_SX
+
+                            -- Nếu có Ngày chính thức và thỏa mãn điều kiện OK -> 'No'
+                            WHEN b.Ngay_GHchinhthuc IS NOT NULL AND LTRIM(RTRIM(b.Ngay_GHchinhthuc)) <> '' THEN
+                                CASE 
+                                    WHEN (a.Danhmuc = 'IN' AND TRY_CAST(b.Ngay_GHchinhthuc AS DATE) = v.TargetDate)
+                                         OR (a.Danhmuc = 'OUT' AND MONTH(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = MONTH(v.TargetDate) AND YEAR(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = YEAR(v.TargetDate))
+                                    THEN 'No'
+                                    ELSE b.Anh_huong_SX
+                                END
+
+                            -- Nếu có ngày xác nhận NCC và thỏa mãn điều kiện OK -> 'No'
+                            WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL AND LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) <> '' THEN
+                                CASE 
+                                    WHEN (a.Danhmuc = 'IN' AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) = v.TargetDate)
+                                         OR (a.Danhmuc = 'OUT' AND MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = MONTH(v.TargetDate) AND YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = YEAR(v.TargetDate))
+                                    THEN 'No'
+                                    ELSE b.Anh_huong_SX
+                                END        
+
+                            ELSE b.Anh_huong_SX 
                         END
+                    FROM PE_THEODOITIENDO b
+                    JOIN [COST_MANAGEMENT].[dbo].[PO] a ON a.PO_Detail_Id = b.Id_Detail_PO
+        
+                    -- CROSS APPLY tự động tạo v.TargetDate: 
+                    -- Hàm COALESCE sẽ lấy Điều Chỉnh, nếu Điều Chỉnh rỗng thì nó lấy Dự Kiến.
+                    CROSS APPLY (
+                        SELECT TRY_CAST(COALESCE(
+                            NULLIF(LTRIM(RTRIM(b.Dieuchinhlichgiao)), ''), 
+                            NULLIF(LTRIM(RTRIM(a.Ngaygiaohangdukien)), '')
+                        ) AS DATE) AS TargetDate
+                    ) v
+                    {whereClause};
+                ";
 
-                    -- 2. NẾU KHÔNG CÓ NGÀY CHÍNH THỨC -> XÉT THEO NGÀY NCC XÁC NHẬN
-                    -- 2.1 Dành riêng cho IN: Giao sớm (Ngay_NCC < Dự kiến) nhưng LỆCH THÁNG -> NG
-                    WHEN a.Danhmuc = 'IN' 
-                         AND DAY(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) < DAY(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
-                         AND (MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) 
-                         AND YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) <> YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
-                    THEN 'NG'
-
-		            WHEN a.Danhmuc = 'IN' 
-                        AND DAY(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = DAY(TRY_CAST(a.Ngaygiaohangdukien AS DATE))
-                         AND (MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) 
-                         AND YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))  
-                    THEN 'OK'
-
-
-                    -- 2.2 Trường hợp cùng tháng/năm -> OK
-                    WHEN a.Danhmuc = 'OUT' 		
-			            AND MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                        AND YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) = YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE))
-                    THEN 'OK'
-		
-                    -- 2.3 Còn lại -> NG
-                    ELSE 'NG'
-                END,        
-
-                b.Anh_huong_SX = 
-                CASE 
-                    -- Nếu chưa có ngày xác nhận từ NCC -> Giữ nguyên trạng thái cũ
-                    WHEN b.Ngay_NCC_xacnhanGH IS NULL OR LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) = '' THEN b.Anh_huong_SX
-
-                    -- Nếu có Ngày chính thức và thỏa mãn điều kiện OK -> 'No'
-                    WHEN b.Ngay_GHchinhthuc IS NOT NULL AND LTRIM(RTRIM(b.Ngay_GHchinhthuc)) <> '' THEN
-                        CASE 
-                            WHEN (a.Danhmuc = 'IN' AND TRY_CAST(b.Ngay_GHchinhthuc AS DATE) = TRY_CAST(a.Ngaygiaohangdukien AS DATE))
-                                 OR (a.Danhmuc = 'OUT' AND MONTH(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) AND YEAR(TRY_CAST(b.Ngay_GHchinhthuc AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
-                            THEN 'No'
-                            ELSE b.Anh_huong_SX
-                        END
-
-                    WHEN b.Ngay_NCC_xacnhanGH IS NOT NULL AND LTRIM(RTRIM(b.Ngay_NCC_xacnhanGH)) <> '' THEN
-                        CASE 
-                            WHEN (a.Danhmuc = 'IN' AND TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE) = TRY_CAST(a.Ngaygiaohangdukien AS DATE))
-                                 OR (a.Danhmuc = 'OUT' AND MONTH(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = MONTH(TRY_CAST(a.Ngaygiaohangdukien AS DATE)) AND YEAR(TRY_CAST(b.Ngay_NCC_xacnhanGH AS DATE)) = YEAR(TRY_CAST(a.Ngaygiaohangdukien AS DATE)))
-                            THEN 'No'
-                            ELSE b.Anh_huong_SX
-                        END        
-
-                    ELSE b.Anh_huong_SX 
-                END
-            FROM PE_THEODOITIENDO b
-            JOIN [COST_MANAGEMENT].[dbo].[PO] a ON a.PO_Detail_Id = b.Id_Detail_PO
-            WHERE a.Ngaygiaohangdukien IS NOT NULL;");
+            sql.GET_DATA_FROM_SQL(query);
         }
         [HttpPost]
         public IActionResult UpdateChinhThuc([FromBody] UpdateChinhThucModel model)
@@ -964,6 +1007,79 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
            
         }
         // Tạo Model để nhận dữ liệu JSON gửi lên
+        [HttpPost]
+        public IActionResult UpdateDieuChinhLichGiao([FromBody] UpdateDieuChinhLichGiaoModel model)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(model.PoNumber))
+                {
+                    return Json(new { success = false, message = "Số PO không hợp lệ." });
+                }
+                if (string.IsNullOrEmpty(model.DieuChinhDate))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập ngày điều chỉnh lịch giao." });
+                }
+
+                string sqlQuery = "";
+
+                if (model.Scope == "single")
+                {
+                    // 1. Chỉ cập nhật hoặc thêm mới cho duy nhất 1 dòng chi tiết được chọn
+                    sqlQuery = $@"
+                        IF EXISTS (SELECT 1 FROM [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] WHERE [Id_Detail_PO] = {model.PoDetailId})
+                        BEGIN
+                            UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO]
+                            SET [Dieuchinhlichgiao] = '{model.DieuChinhDate}'
+                            WHERE [Id_Detail_PO] = {model.PoDetailId}
+                        END
+                        ELSE
+                        BEGIN
+                            INSERT INTO [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] 
+                                ([SoPO], [Id_Detail_PO], [Dieuchinhlichgiao])
+                            VALUES 
+                                ('{model.PoNumber}', {model.PoDetailId}, '{model.DieuChinhDate}')
+                        END";
+                }
+                else
+                {
+                    // 2. Cập nhật cho tất cả các mã hàng thuộc PO này
+                    sqlQuery = $@"
+                        -- Bước 2.1: Cập nhật ngày điều chỉnh cho những dòng đã tồn tại sẵn
+                        UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO]
+                        SET [Dieuchinhlichgiao] = '{model.DieuChinhDate}'
+                        WHERE [SoPO] = '{model.PoNumber}';
+
+                        -- Bước 2.2: Chèn mới những dòng chi tiết thuộc PO này chưa có trong bảng tiến độ
+                        INSERT INTO [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] 
+                            ([SoPO], [Id_Detail_PO], [Dieuchinhlichgiao])
+                        SELECT 
+                            [SoPO], 
+                            [PO_Detail_Id], 
+                            '{model.DieuChinhDate}'
+                        FROM [COST_MANAGEMENT].[dbo].[PO]
+                        WHERE [SoPO] = '{model.PoNumber}'
+                          AND [PO_Detail_Id] NOT IN (
+                              SELECT [Id_Detail_PO] 
+                              FROM [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] 
+                              WHERE [SoPO] = '{model.PoNumber}'
+                          );";
+                }
+
+                SQL_Connect_DB20 sql = new SQL_Connect_DB20();
+                sql.GET_DATA_FROM_SQL(sqlQuery);
+
+                // Gọi hàm tính toán lại lịch giao OK/NG nếu hệ thống của bạn yêu cầu
+
+                tinhtoanlichgiao();
+                return Json(new { success = true, message = "Cập nhật ngày điều chỉnh lịch giao thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+    
         public class UpdateThanhToanModel
         {
             public string PoNumber { get; set; }
@@ -1049,7 +1165,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
         }
         [HttpGet] // Hoặc [HttpGet] tùy thuộc vào form của bạn ở View đang dùng gì
-        public IActionResult ExportExcel(string searchTerm = "", string picpur = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "")
+        public IActionResult ExportExcel(string searchTerm = "", string picpur = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "", string mahang = "")
         {
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             tinhtoanlichgiao();
@@ -1069,10 +1185,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 tab = "ngoai";
             }
-            if (tab == "trong") { tabCondition = "AND a.Danhmuc = 'IN'"; }
-            ;
-            if (tab == "ngoai") { tabCondition = "AND a.Danhmuc = 'OUT'"; }
-            ;
+            if (tab == "trong") { tabCondition = "AND a.Danhmuc = 'IN'"; };
+            if (tab == "ngoai") { tabCondition = "AND a.Danhmuc = 'OUT'"; };
 
             if (tab == "trong")
             {
@@ -1089,12 +1203,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             else
             {             
-                    if (reqMonth == "")
-                    {
-                        mainCondition = $"Ngayphathanh >= '2024-01-01'";
-                    }
-                    else
-                    mainCondition = $"Ngayphathanh >= '{reqMonth}-01'";
+                if (reqMonth == "")
+                {
+                    mainCondition = $"Ngayphathanh >= '2024-01-01'";
+                }
+                else
+                {
+                    mainCondition = $"MONTH(Ngayphathanh) = '{reqMonth}'";
+                }
+                  
             }
 
             // Đã thêm điều kiện loại bỏ HOANTHANH và HUY giống ManageDelivery
@@ -1126,8 +1243,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 PoDetailViewModel po = new PoDetailViewModel();
                 po.PO_Detail_Id = int.Parse(lst.Rows[i]["PO_Detail_Id"].ToString()!);
-                po.Ngayyc = lst.Rows[i]["Ngaytao"].ToString()!.Split(' ')[0];
-                po.Ngayycgiao = lst.Rows[i]["Ngaygiaohangdukien"].ToString()!.Split(' ')[0];
+                object valNgaytao = lst.Rows[i]["Ngaytao"];
+                po.Ngayyc = (valNgaytao != null && valNgaytao != DBNull.Value) ? Convert.ToDateTime(valNgaytao).ToString("yyyy-MM-dd") : "";
+
+                object valNgayyc = lst.Rows[i]["Ngaygiaohangdukien"];
+                po.Ngayycgiao = (valNgayyc != null && valNgayyc != DBNull.Value) ? Convert.ToDateTime(valNgayyc).ToString("yyyy-MM-dd") : "";
+
                 po.SoPO = lst.Rows[i]["SoPO"].ToString();
                 po.Tentiengviet = lst.Rows[i]["Tentiengviet"].ToString();
                 po.Mahang = lst.Rows[i]["Mahang"].ToString();
@@ -1149,7 +1270,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.trangthai = "";
                 po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
                 po.Danhmuc = lst.Rows[i]["Danhmuc"].ToString();
-                po.Dieuchinhlichgiao = lst.Rows[i]["Dieuchinhlichgiao"].ToString();
+                object valNgaydieuchinh = lst.Rows[i]["Dieuchinhlichgiao"];
+                po.Dieuchinhlichgiao = (valNgaydieuchinh != null && valNgaydieuchinh != DBNull.Value) ? Convert.ToDateTime(valNgaydieuchinh).ToString("yyyy-MM-dd") : "";
+
                 po.Note = lst.Rows[i]["Note"].ToString();
 
                 object valNgayGH = lst.Rows[i]["Ngay_GHchinhthuc"];
@@ -1277,6 +1400,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     listPo = listPo.Where(x => x.lichgiao!.Trim().Equals(impactStatus)).ToList();
                 }
+            }
+            if (!string.IsNullOrEmpty(mahang))
+            {
+                // Lọc những mã hàng bắt đầu bằng kí tự A hoặc E
+                listPo = listPo.Where(x => !string.IsNullOrEmpty(x.Mahang) && x.Mahang.ToUpper().StartsWith(mahang.ToUpper())).ToList();
             }
             if (!string.IsNullOrWhiteSpace(picpur))
             {
@@ -3157,7 +3285,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                       // Trả về JSON cho Ajax gọi tới
             return Json(detailList);
         }
- 
         [HttpPost]
         public JsonResult UpdateInvoice([FromBody] UpdateInvoiceRequest request) // <--- SỬA DÒNG NÀY
         {
@@ -3347,6 +3474,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
+     
+        
     }
 }
 

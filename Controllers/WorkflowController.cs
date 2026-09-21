@@ -1,8 +1,10 @@
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
+using PRJ_WAREHOUSE_BIVN.View_Models.WorkFlowModel;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
@@ -36,156 +38,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         // MARK: - Workflow Role Permissions
         public IActionResult WorkflowRolePermissions() => View();
-
-        [HttpGet]
-        public async Task<IActionResult> GetWorkflowRolePermissions(int? workflowId)
-        {
-            var workflows = await _context.BaoGia_WorkflowDefinitions
-                .AsNoTracking()
-                .Where(workflow => workflow.IsActive)
-                .OrderBy(workflow => workflow.WorkflowName)
-                .Select(workflow => new
-                {
-                    id = workflow.WorkflowID,
-                    code = workflow.FlowCode,
-                    name = workflow.WorkflowName
-                })
-                .ToListAsync();
-
-            var selectedWorkflowId = workflowId ?? workflows.FirstOrDefault()?.id;
-            if (selectedWorkflowId == null)
-            {
-                return Ok(new { success = true, data = Array.Empty<object>(), workflows, roles = Array.Empty<object>(), workflowId = (int?)null });
-            }
-
-            if (!workflows.Any(workflow => workflow.id == selectedWorkflowId))
-            {
-                return BadRequest(new { success = false, message = "Workflow không tồn tại hoặc đã bị ngừng hoạt động." });
-            }
-
-            var roles = await _context.BaoGia_WorkflowRoles
-                .AsNoTracking()
-                .Where(role => role.IsActive)
-                .OrderBy(role => role.RoleCode)
-                .Select(role => new { code = role.RoleCode, name = role.RoleName })
-                .ToListAsync();
-
-            var rows = await _context.BaoGia_WorkflowDefinitionSteps
-                .AsNoTracking()
-                .Where(definitionStep => definitionStep.WorkflowID == selectedWorkflowId && definitionStep.IsEnabled)
-                .OrderBy(definitionStep => definitionStep.StepOrder)
-                .ThenBy(definitionStep => definitionStep.WorkflowStepID)
-                .Select(definitionStep => new
-                {
-                    id = definitionStep.WorkflowStepID,
-                    order = definitionStep.StepOrder,
-                    code = definitionStep.Step.StepCode,
-                    name = definitionStep.Step.StepName,
-                    description = definitionStep.Step.Description,
-                    permissions = definitionStep.BaoGia_WorkflowStepRoles.Select(permission => new
-                    {
-                        roleCode = permission.RoleCode,
-                        canView = permission.CanView,
-                        canProcess = permission.CanProcess,
-                        canApprove = permission.CanApprove,
-                        canReject = permission.CanReject
-                    })
-                })
-                .ToListAsync();
-
-            return Ok(new { success = true, data = rows, workflows, roles, workflowId = selectedWorkflowId });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SaveWorkflowRolePermissions([FromBody] WorkflowRolePermissionsRequest? request)
-        {
-            if (request == null || request.WorkflowId <= 0 || request.Rows == null)
-            {
-                return BadRequest(new { success = false, message = "Dữ liệu phân quyền không hợp lệ." });
-            }
-
-            var workflowExists = await _context.BaoGia_WorkflowDefinitions
-                .AsNoTracking()
-                .AnyAsync(workflow => workflow.WorkflowID == request.WorkflowId && workflow.IsActive);
-            if (!workflowExists)
-            {
-                return BadRequest(new { success = false, message = "Workflow không tồn tại hoặc đã bị ngừng hoạt động." });
-            }
-
-            var definitionStepIds = await _context.BaoGia_WorkflowDefinitionSteps
-                .Where(step => step.WorkflowID == request.WorkflowId && step.IsEnabled)
-                .Select(step => step.WorkflowStepID)
-                .ToListAsync();
-            var roleCodes = await _context.BaoGia_WorkflowRoles
-                .Where(role => role.IsActive)
-                .Select(role => role.RoleCode)
-                .ToListAsync();
-            var roleCodeSet = roleCodes.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            var validRows = request.Rows
-                .Where(row => definitionStepIds.Contains(row.WorkflowStepId) && roleCodeSet.Contains(row.RoleCode))
-                .GroupBy(row => new { row.WorkflowStepId, row.RoleCode })
-                .Select(group => group.Last())
-                .ToList();
-
-            var stepIds = definitionStepIds.ToHashSet();
-            var existingPermissions = await _context.BaoGia_WorkflowStepRoles
-                .Where(permission => stepIds.Contains(permission.WorkflowStepID) && roleCodes.Contains(permission.RoleCode))
-                .ToListAsync();
-
-            foreach (var row in validRows)
-            {
-                var permission = existingPermissions.FirstOrDefault(item => item.WorkflowStepID == row.WorkflowStepId && item.RoleCode == row.RoleCode);
-                var hasPermission = row.CanView || row.CanProcess || row.CanApprove || row.CanReject;
-                if (permission == null)
-                {
-                    if (hasPermission)
-                    {
-                        _context.BaoGia_WorkflowStepRoles.Add(new BaoGia_WorkflowStepRole
-                        {
-                            WorkflowStepID = row.WorkflowStepId,
-                            RoleCode = row.RoleCode,
-                            CanView = row.CanView,
-                            CanProcess = row.CanProcess,
-                            CanApprove = row.CanApprove,
-                            CanReject = row.CanReject
-                        });
-                    }
-                    continue;
-                }
-
-                if (hasPermission)
-                {
-                    permission.CanView = row.CanView;
-                    permission.CanProcess = row.CanProcess;
-                    permission.CanApprove = row.CanApprove;
-                    permission.CanReject = row.CanReject;
-                }
-                else
-                {
-                    _context.BaoGia_WorkflowStepRoles.Remove(permission);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return Ok(new { success = true, message = "Đã lưu ma trận phân quyền." });
-        }
-
-        public sealed class WorkflowRolePermissionsRequest
-        {
-            public int WorkflowId { get; set; }
-            public List<WorkflowRolePermissionRequest> Rows { get; set; } = new();
-        }
-
-        public sealed class WorkflowRolePermissionRequest
-        {
-            public int WorkflowStepId { get; set; }
-            public string RoleCode { get; set; } = string.Empty;
-            public bool CanView { get; set; }
-            public bool CanProcess { get; set; }
-            public bool CanApprove { get; set; }
-            public bool CanReject { get; set; }
-        }
         // MARK: - Workflow User Permissions
         public IActionResult WorkflowUserPermissions() => View();
         // MARK: - Workflow Tasks
@@ -405,6 +257,343 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return response == null || !response.Success
                 ? BadRequest(new { success = false, message = response?.Message ?? "Không thể xóa bước nhỏ." })
                 : Ok(new { success = true });
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkflowRolePermissions(int? workflowId)
+        {
+            var workflows = await _context.BaoGia_WorkflowDefinitions
+                .AsNoTracking()
+                .Where(workflow => workflow.IsActive)
+                .OrderBy(workflow => workflow.WorkflowName)
+                .Select(workflow => new
+                {
+                    id = workflow.WorkflowID,
+                    code = workflow.FlowCode,
+                    name = workflow.WorkflowName
+                })
+                .ToListAsync();
+
+            var selectedWorkflowId = workflowId ?? workflows.FirstOrDefault()?.id;
+            if (selectedWorkflowId == null)
+            {
+                return Ok(new { success = true, data = Array.Empty<object>(), workflows, roles = Array.Empty<object>(), workflowId = (int?)null });
+            }
+
+            if (!workflows.Any(workflow => workflow.id == selectedWorkflowId))
+            {
+                return BadRequest(new { success = false, message = "Workflow không tồn tại hoặc đã bị ngừng hoạt động." });
+            }
+
+            var roles = await _context.BaoGia_WorkflowRoles
+                .AsNoTracking()
+                .Where(role => role.IsActive)
+                .OrderBy(role => role.RoleCode)
+                .Select(role => new { code = role.RoleCode, name = role.RoleName })
+                .ToListAsync();
+
+            var stages = await _context.BaoGia_WorkflowStages
+                .AsNoTracking()
+                .Where(stage => stage.IsActive)
+                .OrderBy(stage => stage.StageOrder)
+                .ThenBy(stage => stage.StageID)
+                .Select(stage => new
+                {
+                    id = stage.StageID,
+                    code = stage.StageCode,
+                    name = stage.StageName,
+                    order = stage.StageOrder
+                })
+                .ToListAsync();
+
+            var rows = await _context.BaoGia_WorkflowDefinitionSteps
+                .AsNoTracking()
+                .Where(definitionStep => definitionStep.WorkflowID == selectedWorkflowId
+                    && definitionStep.IsEnabled
+                    && definitionStep.Step.Stage.IsActive)
+                .OrderBy(definitionStep => definitionStep.Step.Stage.StageOrder)
+                .ThenBy(definitionStep => definitionStep.StepOrder)
+                .ThenBy(definitionStep => definitionStep.WorkflowStepID)
+                .Select(definitionStep => new
+                {
+                    id = definitionStep.WorkflowStepID,
+                    order = definitionStep.StepOrder,
+                    code = definitionStep.Step.StepCode,
+                    name = definitionStep.Step.StepName,
+                    description = definitionStep.Step.Description,
+                    stageId = definitionStep.Step.StageID,
+                    stageCode = definitionStep.Step.Stage.StageCode,
+                    stageName = definitionStep.Step.Stage.StageName,
+                    stageOrder = definitionStep.Step.Stage.StageOrder,
+                    permissions = definitionStep.BaoGia_WorkflowStepRoles.Select(permission => new
+                    {
+                        roleCode = permission.RoleCode,
+                        canView = permission.CanView,
+                        canProcess = permission.CanProcess,
+                        canApprove = permission.CanApprove,
+                        canReject = permission.CanReject
+                    })
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, data = rows, workflows, roles, stages, workflowId = selectedWorkflowId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveWorkflowRolePermissions([FromBody] WorkflowRolePermissionsRequest? request)
+        {
+            if (request == null || request.WorkflowId <= 0 || request.Rows == null)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu phân quyền không hợp lệ." });
+            }
+
+            var workflowExists = await _context.BaoGia_WorkflowDefinitions
+                .AsNoTracking()
+                .AnyAsync(workflow => workflow.WorkflowID == request.WorkflowId && workflow.IsActive);
+            if (!workflowExists)
+            {
+                return BadRequest(new { success = false, message = "Workflow không tồn tại hoặc đã bị ngừng hoạt động." });
+            }
+
+            var definitionStepIds = await _context.BaoGia_WorkflowDefinitionSteps
+                .Where(step => step.WorkflowID == request.WorkflowId && step.IsEnabled)
+                .Select(step => step.WorkflowStepID)
+                .ToListAsync();
+            var roleCodes = await _context.BaoGia_WorkflowRoles
+                .Where(role => role.IsActive)
+                .Select(role => role.RoleCode)
+                .ToListAsync();
+            var roleCodeSet = roleCodes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var validRows = request.Rows
+                .Where(row => definitionStepIds.Contains(row.WorkflowStepId) && roleCodeSet.Contains(row.RoleCode))
+                .GroupBy(row => new { row.WorkflowStepId, row.RoleCode })
+                .Select(group => group.Last())
+                .ToList();
+
+            var stepIds = definitionStepIds.ToHashSet();
+            var existingPermissions = await _context.BaoGia_WorkflowStepRoles
+                .Where(permission => stepIds.Contains(permission.WorkflowStepID) && roleCodes.Contains(permission.RoleCode))
+                .ToListAsync();
+
+            foreach (var row in validRows)
+            {
+                var permission = existingPermissions.FirstOrDefault(item => item.WorkflowStepID == row.WorkflowStepId && item.RoleCode == row.RoleCode);
+                var hasPermission = row.CanView || row.CanProcess || row.CanApprove || row.CanReject;
+                if (permission == null)
+                {
+                    if (hasPermission)
+                    {
+                        _context.BaoGia_WorkflowStepRoles.Add(new BaoGia_WorkflowStepRole
+                        {
+                            WorkflowStepID = row.WorkflowStepId,
+                            RoleCode = row.RoleCode,
+                            CanView = row.CanView,
+                            CanProcess = row.CanProcess,
+                            CanApprove = row.CanApprove,
+                            CanReject = row.CanReject
+                        });
+                    }
+                    continue;
+                }
+
+                if (hasPermission)
+                {
+                    permission.CanView = row.CanView;
+                    permission.CanProcess = row.CanProcess;
+                    permission.CanApprove = row.CanApprove;
+                    permission.CanReject = row.CanReject;
+                }
+                else
+                {
+                    _context.BaoGia_WorkflowStepRoles.Remove(permission);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Đã lưu ma trận phân quyền." });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchWorkflowUsers(string? query)
+        {
+            var normalizedQuery = query?.Trim();
+
+            var userRoleQuery = _context.BaoGia_RoleUsers
+                .AsNoTracking()
+                .Select(permission => permission.UserAdid)
+                .Distinct();
+
+            var usersQuery = _context.TM_USERs
+                .AsNoTracking()
+                .Where(user => userRoleQuery.Contains(user.CHR_USERID));
+
+            if (!string.IsNullOrWhiteSpace(normalizedQuery))
+            {
+                usersQuery = usersQuery.Where(user =>
+                    EF.Functions.Like(user.CHR_USERID, $"%{normalizedQuery}%")
+                    || (user.FULLNAME != null && EF.Functions.Like(user.FULLNAME, $"%{normalizedQuery}%"))
+                    || (user.CHR_SECTION != null && EF.Functions.Like(user.CHR_SECTION, $"%{normalizedQuery}%")));
+            }
+
+            var users = await usersQuery
+                .OrderBy(user => user.CHR_USERID)
+                .Take(30)
+                .Select(user => new
+                {
+                    adid = user.CHR_USERID,
+                    name = user.FULLNAME,
+                    department = user.CHR_SECTION
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, data = users });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkflowUserPermissions(string userADID, int? workflowId)
+        {
+            var normalizedUser = userADID?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedUser))
+            {
+                return BadRequest(new { success = false, message = "Vui lòng chọn người dùng." });
+            }
+
+            var user = await _context.TM_USERs
+                .AsNoTracking()
+                .Where(item => item.CHR_USERID == normalizedUser)
+                .Select(item => new { adid = item.CHR_USERID, name = item.FULLNAME, department = item.CHR_SECTION })
+                .FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return BadRequest(new { success = false, message = "Người dùng không tồn tại hoặc đã bị ngừng hoạt động." });
+            }
+
+            var workflows = await _context.BaoGia_WorkflowDefinitions
+                .AsNoTracking()
+                .Where(workflow => workflow.IsActive)
+                .OrderBy(workflow => workflow.WorkflowName)
+                .Select(workflow => new { id = workflow.WorkflowID, code = workflow.FlowCode, name = workflow.WorkflowName })
+                .ToListAsync();
+            var selectedWorkflowId = workflowId ?? workflows.FirstOrDefault()?.id;
+            if (selectedWorkflowId == null)
+            {
+                return Ok(new { success = true, user, workflows, data = Array.Empty<object>(), workflowId = (int?)null });
+            }
+
+            if (!workflows.Any(workflow => workflow.id == selectedWorkflowId))
+            {
+                return BadRequest(new { success = false, message = "Workflow không tồn tại hoặc đã bị ngừng hoạt động." });
+            }
+
+            var rows = await _context.BaoGia_WorkflowDefinitionSteps
+                .AsNoTracking()
+                .Where(definitionStep => definitionStep.WorkflowID == selectedWorkflowId
+                    && definitionStep.IsEnabled
+                    && definitionStep.Step.IsActive
+                    && definitionStep.Step.Stage.IsActive)
+                .OrderBy(definitionStep => definitionStep.Step.Stage.StageOrder)
+                .ThenBy(definitionStep => definitionStep.StepOrder)
+                .ThenBy(definitionStep => definitionStep.WorkflowStepID)
+                .Select(definitionStep => new
+                {
+                    id = definitionStep.WorkflowStepID,
+                    order = definitionStep.StepOrder,
+                    code = definitionStep.Step.StepCode,
+                    name = definitionStep.Step.StepName,
+                    description = definitionStep.Step.Description,
+                    stageCode = definitionStep.Step.Stage.StageCode,
+                    stageName = definitionStep.Step.Stage.StageName,
+                    permissions = definitionStep.BaoGia_WorkflowStepUsers
+                        .Where(permission => permission.UserADID == normalizedUser && permission.IsActive)
+                        .Select(permission => new
+                        {
+                            canView = permission.CanView,
+                            canProcess = permission.CanProcess,
+                            canApprove = permission.CanApprove,
+                            canReject = permission.CanReject
+                        })
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, user, workflows, data = rows, workflowId = selectedWorkflowId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveWorkflowUserPermissions([FromBody] WorkflowUserPermissionsRequest? request)
+        {
+            if (request == null || request.WorkflowId <= 0 || string.IsNullOrWhiteSpace(request.UserADID) || request.Rows == null)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu phân quyền theo user không hợp lệ." });
+            }
+
+            var normalizedUser = request.UserADID.Trim();
+            var userExists = await _context.TM_USERs
+                .AsNoTracking()
+                .AnyAsync(user => user.CHR_USERID == normalizedUser);
+            var workflowExists = await _context.BaoGia_WorkflowDefinitions
+                .AsNoTracking()
+                .AnyAsync(workflow => workflow.WorkflowID == request.WorkflowId && workflow.IsActive);
+            if (!userExists || !workflowExists)
+            {
+                return BadRequest(new { success = false, message = "User hoặc workflow không tồn tại hoặc đã bị ngừng hoạt động." });
+            }
+
+            var stepIds = await _context.BaoGia_WorkflowDefinitionSteps
+                .Where(step => step.WorkflowID == request.WorkflowId && step.IsEnabled)
+                .Select(step => step.WorkflowStepID)
+                .ToListAsync();
+            var stepIdSet = stepIds.ToHashSet();
+            var validRows = request.Rows
+                .Where(row => stepIdSet.Contains(row.WorkflowStepId))
+                .GroupBy(row => row.WorkflowStepId)
+                .Select(group => group.Last())
+                .ToList();
+            var existingPermissions = await _context.BaoGia_WorkflowStepUsers
+                .Where(permission => stepIdSet.Contains(permission.WorkflowStepID) && permission.UserADID == normalizedUser)
+                .ToListAsync();
+
+            foreach (var row in validRows)
+            {
+                var permission = existingPermissions.FirstOrDefault(item => item.WorkflowStepID == row.WorkflowStepId);
+                var hasPermission = row.CanView || row.CanProcess || row.CanApprove || row.CanReject;
+                if (permission == null)
+                {
+                    if (hasPermission)
+                    {
+                        _context.BaoGia_WorkflowStepUsers.Add(new BaoGia_WorkflowStepUser
+                        {
+                            WorkflowStepID = row.WorkflowStepId,
+                            UserADID = normalizedUser,
+                            CanView = row.CanView,
+                            CanProcess = row.CanProcess,
+                            CanApprove = row.CanApprove,
+                            CanReject = row.CanReject,
+                            IsActive = true
+                        });
+                    }
+                    continue;
+                }
+
+                if (hasPermission)
+                {
+                    permission.CanView = row.CanView;
+                    permission.CanProcess = row.CanProcess;
+                    permission.CanApprove = row.CanApprove;
+                    permission.CanReject = row.CanReject;
+                    permission.IsActive = true;
+                }
+                else
+                {
+                    _context.BaoGia_WorkflowStepUsers.Remove(permission);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Đã lưu quyền riêng theo user." });
         }
     }
 }

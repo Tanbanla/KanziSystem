@@ -1,0 +1,46 @@
+.wf-user-permissions-page .user-filter-card { position: relative; z-index: 30; overflow: visible; margin-bottom: 1.25rem; }
+.wf-user-permissions-page .user-permission-table-card { position: relative; z-index: 1; }
+.wf-user-permissions-page .user-filter-card .card-body { padding: 22px 24px 24px; }
+.wf-user-permissions-page .user-filter-grid { display: grid; grid-template-columns: minmax(260px, 1.2fr) minmax(220px, 1fr) minmax(220px, 1fr) auto; align-items: end; gap: 16px; }
+.wf-user-permissions-page .user-picker { position: relative; }
+.wf-user-permissions-page .search-box { position: relative; }
+.wf-user-permissions-page .search-box input { padding-right: 48px; }
+.wf-user-permissions-page .search-submit { position: absolute; top: 5px; right: 5px; width: 36px; height: 36px; border: 0; border-radius: 9px; color: #fff; background: var(--workflow-primary); }
+.wf-user-permissions-page .user-suggestions { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; overflow: hidden; border: 1px solid #dbe2ea; border-radius: 12px; background: #fff; box-shadow: 0 14px 32px rgba(15, 23, 42, .14); }
+.wf-user-permissions-page .user-suggestion { display: flex; width: 100%; gap: 10px; align-items: center; padding: 11px 13px; border: 0; border-bottom: 1px solid #f1f5f9; background: #fff; text-align: left; }
+.wf-user-permissions-page .user-suggestion:hover { background: #f8fbff; }
+.wf-user-permissions-page .user-suggestion strong, .wf-user-permissions-page .user-suggestion small { display: block; }
+.wf-user-permissions-page .user-suggestion small, .wf-user-permissions-page .selected-user small, .wf-user-permissions-page .user-step small { color: var(--workflow-gray-500); font-size: 12px; }
+.wf-user-permissions-page .suggestion-avatar, .wf-user-permissions-page .selected-user-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--workflow-primary); background: #eff6ff; font-weight: 700; }
+.wf-user-permissions-page .suggestion-empty { padding: 14px; color: var(--workflow-gray-500); font-size: 13px; }
+.wf-user-permissions-page .selected-user { display: flex; min-height: 46px; align-items: center; gap: 10px; padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+.wf-user-permissions-page .selected-user strong, .wf-user-permissions-page .selected-user small { display: block; }
+.wf-user-permissions-page .refresh-user { min-height: 46px; white-space: nowrap; }
+.wf-user-permissions-page .user-table-toolbar { display: flex; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--workflow-gray-200); }
+.wf-user-permissions-page .user-table-toolbar .search-box { flex: 1; }
+.wf-user-permissions-page .user-table-toolbar .form-select { max-width: 260px; }
+.wf-user-permissions-page .user-permission-table { min-width: 820px; }
+.wf-user-permissions-page .user-permission-table th, .wf-user-permissions-page .user-permission-table td { padding: 15px 16px; }
+.wf-user-permissions-page .user-step { display: flex; align-items: center; gap: 10px; min-width: 290px; }
+.wf-user-permissions-page .user-step strong, .wf-user-permissions-page .user-step small { display: block; }
+.wf-user-permissions-page .stage-label { display: inline-block; padding: 5px 9px; border-radius: 7px; color: #1d4ed8; background: #eff6ff; font-size: 12px; font-weight: 700; }
+.wf-user-permissions-page .permission-check { display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.wf-user-permissions-page .permission-check input { width: 18px; height: 18px; margin: 0; cursor: pointer; accent-color: var(--workflow-primary); }
+.wf-user-permissions-page .permission-check span { color: var(--workflow-gray-700); }
+.wf-user-permissions-page .permission-check.view { color: #2563eb; }
+.wf-user-permissions-page .permission-check.process { color: #0891b2; }
+.wf-user-permissions-page .permission-check.approve { color: #16a34a; }
+.wf-user-permissions-page .permission-check.reject { color: #dc2626; }
+.wf-user-permissions-page .permission-check.view input { accent-color: #2563eb; }
+.wf-user-permissions-page .permission-check.process input { accent-color: #0891b2; }
+.wf-user-permissions-page .permission-check.approve input { accent-color: #16a34a; }
+.wf-user-permissions-page .permission-check.reject input { accent-color: #dc2626; }
+.wf-user-permissions-page .permission-change-state { color: var(--workflow-gray-500); font-size: 12px; }
+.wf-user-permissions-page .permission-change-state.is-dirty { color: #b45309; font-weight: 700; }
+.wf-user-permissions-page .permission-state { padding: 42px 24px; color: var(--workflow-gray-500); text-align: center; }
+.wf-user-permissions-page .permission-state i { display: block; color: #94a3b8; font-size: 22px; }
+.wf-user-permissions-page .permission-error { color: #b91c1c; background: #fff7f7; }
+.wf-user-permissions-page #userPermissionAlert { position: fixed; right: 20px; bottom: 20px; z-index: 9999; min-width: 320px; border-radius: 12px; box-shadow: var(--workflow-shadow); }
+@media (max-width: 992px) { .wf-user-permissions-page .user-filter-grid { grid-template-columns: 1fr 1fr; } .wf-user-permissions-page .refresh-user { grid-column: 2; } }
+@media (max-width: 640px) { .wf-user-permissions-page { padding: 16px; } .wf-user-permissions-page .page-header { display: block; } .wf-user-permissions-page .page-header > button { width: 100%; margin-top: 16px; } .wf-user-permissions-page .user-filter-grid, .wf-user-permissions-page .user-table-toolbar { display: block; } .wf-user-permissions-page .selected-user, .wf-user-permissions-page .user-filter-grid > div, .wf-user-permissions-page .refresh-user, .wf-user-permissions-page .user-table-toolbar > * { width: 100%; margin-bottom: 12px; max-width: none; } }
+

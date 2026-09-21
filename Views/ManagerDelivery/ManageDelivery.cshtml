@@ -83,10 +83,19 @@
     }
 
     .table-responsive {
-      max-height: calc(100vh - 280px); 
-      overflow-y: auto;
+        max-height: calc(100vh - 280px);
+        overflow-y: auto;
+        overflow-x: auto; /* Thêm dòng này để tạo thanh cuộn ngang */
     }
 
+    .table th, .table td {
+        white-space: nowrap; /* Ngăn text tự động rớt dòng, ép bảng rộng ra */
+    }
+
+    .text-wrap-col {
+        white-space: normal !important;
+        min-width: 250px; 
+    }
     .table th {
         position: sticky;
         top: 0;
@@ -215,7 +224,7 @@
                 </div>
             @if (currentTab == "trong")
                 {
-                    div_layout = "col-md-4";
+                    div_layout = "col-md-3";
                     <div class="col-md-1">
                         <label class="form-label fw-semibold">PullIn/PullOut</label>
                         <select name="pullStatus" class="form-control">
@@ -224,6 +233,14 @@
                             <option value="out" selected="@((ViewBag.PullStatus as string) == "out")">PullOut</option>
                         </select>
 
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label fw-semibold">Mã hàng</label>
+                        <select name="mahang" class="form-control">
+                            <option value="" selected="@(string.IsNullOrEmpty(ViewBag.Mahang as string))">-- Tất cả --</option>
+                            <option value="A" selected="@((ViewBag.Mahang as string) == "A")">Mã A</option>
+                            <option value="E" selected="@((ViewBag.Mahang as string) == "E")">Mã E</option>
+                        </select>
                     </div>
                 }
                 <div class="col-md-1">
@@ -272,8 +289,22 @@
                             <!-- DÙNG HÀM TẠO HEADER CÓ SẮP XẾP -->
                             @RenderSortHeader("Ngayyc", "Ngày YC", "bg-pur text-white")                        
                             @RenderSortHeader("Ngayycgiao", "Ngày YC giao", "bg-pur text-white")
-                            @RenderSortHeader("Dieuchinhlichgiao", "Điều chỉnh", "bg-pur text-white")
+                            @if (userSection == "2500")
+                            {
+                                <th class="bg-pur text-white" colspan="2" width="120px">Điều chỉnh</th>
+                            }
+                            else
+                            {
+                                <th class="bg-pur text-white" width="120px">Điều chỉnh</th>
+                            }
+
                             @RenderSortHeader("SoPO", "Số PO", "bg-pur text-white", "80px")
+                            @if (currentTab == "ngoai")
+                            {
+                                <th class="bg-pur text-white"width="100px">Code Request</th>
+                                <th class="bg-pur text-white" width="80px">Good Code</th>
+                            }
+
                             @RenderSortHeader("Tentiengviet", "Tên hàng", "bg-pur text-white", "230px")
                             @RenderSortHeader("Mahang", "Mã hàng", "bg-pur text-white")
                             @RenderSortHeader("Soluong", "SL", "bg-pur text-white")
@@ -364,12 +395,29 @@
                                     <td class="text-center">@CheckDate(item.Ngayyc!)</td>                                  
                                     <td class="text-center">@CheckDate(item.Ngayycgiao!)</td>
                                     <td class="text-center">@CheckDate(item.Dieuchinhlichgiao!)</td>
+                                    @if (userSection == "2500")
+                                    {
+                                        <td class="text-center text-info cursor-pointer" width="25px" title="Bấm để điều chỉnh lịch giao">
+                                            <i class="fa fa-calendar-check btn-adjust-date fs-6 hover-primary"
+                                               data-po="@item.SoPO"
+                                               data-item-name="@item.Tentiengviet"
+                                               data-item-code="@item.Mahang"
+                                               data-po-detail-id="@item.PO_Detail_Id"
+                                               data-current-date="@CheckDate(item.Dieuchinhlichgiao!)">
+                                            </i>
+                                        </td>
+                                    }
                                     <td class="text-center fw-bold text-primary">@item.SoPO</td>
-                                    <td>@item.Tentiengviet</td>
+                                    @if (currentTab == "ngoai")
+                                    {
+                                        <td class="text-center fw-bold text-primary">@item.Code_Request</td>
+                                        <td class="text-center fw-bold text-primary">@item.Good_Code</td>
+                                    }
+                                    <td class="text-wrap-col">@item.Tentiengviet</td>
                                     <td class="text-center fw-bold">@item.Mahang</td>
                                     <td class="text-end">@item.Soluong.ToString("N0")</td>
                                     <td class="text-center">@item.Donvi</td>
-                                    <td>@item.Nhacungcap</td>
+                                    <td class="text-wrap-col">@item.Nhacungcap</td>
                                     <td>@CheckDate(item.ngayguiPO!)</td>
                                     @if (item.khoi == "GA")
                                     {
@@ -382,8 +430,7 @@
                  
                                     <td>@CheckDate(item.ngaynccxngiao!)</td>
                                     <td>@CheckDate(item.Ngay_GHchinhthuc!)</td>
-                                    <td>@item.Gio_GH</td>
-                                
+                                    <td>@item.Gio_GH</td>                               
                                     <!-- Cột Trạng thái & Toggle -->
                                     <td class="text-center cursor-pointer toggle-detail">
                                     @if (currentTab == "trong")
@@ -585,14 +632,13 @@
                                     }
 
                                     <td class="text-center align-middle">
-                                        @if (!string.IsNullOrEmpty(item.Note))
-                                        {
-                                            <button class="btn btn-sm btn-outline-secondary btn-view-note"
-                                                    data-note="@item.Note"
-                                                    title="Xem chi tiết ghi chú">
-                                                <i class="fa-solid fa-note-sticky"></i> Xem
-                                            </button>
-                                        }
+                                        <!-- Chỉ hiển thị một nút sửa (Cái bút) -->
+                                        <button class="btn btn-sm btn-outline-primary btn-edit-note"
+                                                data-id="@item.PO_Detail_Id"
+                                                data-note="@item.Note"
+                                                title="Sửa ghi chú">
+                                            <i class="fa-solid fa fa-pen"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             }
@@ -619,16 +665,15 @@
                     <ul class="pagination pagination-sm mb-0">
                        <!-- Nút Trước -->
                         <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Trước</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Trước</a>
                         </li>
-
                         <!-- Các nút số trang -->
                         @for (int i = 1; i <= totalPages; i++)
                         {
                             if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
                             {
                                 <li class="page-item @(i == currentPage ? "active" : "")">
-                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">@i</a>
+                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">@i</a>
                                 </li>
                             }
                             else if (i == currentPage - 3 || i == currentPage + 3)
@@ -636,10 +681,9 @@
                                 <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
                             }
                         }
-
                         <!-- Nút Sau -->
                         <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Sau</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Sau</a>
                         </li>
                     </ul>
                 </nav>
@@ -1015,7 +1059,7 @@
                         <label class="form-label fw-bold text-dark">Nhập số lượng muốn tách ra dòng mới</label>
                         <div class="input-group">
                             <span class="input-group-text border-warning text-warning"><i class="fa-solid fa fa-calculator"></i></span>
-                            <input type="number" step="any" id="modalSplitQty" class="form-control border-warning" placeholder="Ví dụ: 100" required>
+                            <input type="number" step="any" id="modalSplitQty" class="form-control border-warning" required>
                         </div>
                         <small class="text-danger mt-1 d-block fst-italic">* Hệ thống sẽ tạo 1 dòng PO mới với số lượng này và tự động trừ đi ở dòng PO gốc.</small>
                     </div>
@@ -1048,6 +1092,78 @@
     </div>
 </div>
 
+<!-- 10. Modal Điều Chỉnh Lịch Giao Hàng -->
+<div class="modal fade" id="adjustDateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-info">
+            <div class="modal-header bg-info text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-calendar-day me-1"></i> Điều chỉnh ngày yêu cầu giao hàng : <span id="adjPoNumber"></span></h6>
+                <button type="button" class="btn-close btn-close-white" onclick="closeMyModal('adjustDateModal')"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <div class="alert alert-secondary py-2 mb-3 fs-7 border">
+                    <strong>Mặt hàng:</strong> <span id="adjItemName" class="text-primary"></span> (<span id="adjItemCode" class="text-danger"></span>)
+                    <span id="adjPoDetailId" style="display:none;" ></span>
+                </div>
+                <form id="adjustDateForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark">Ngày điều chỉnh ngày yêu cầu giao hàng mới</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-info text-info"><i class="fa-regular fa fa-calendar"></i></span>
+                            <input type="date" id="modalAdjustDate" class="form-control border-info" required>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-dark">Phạm vi áp dụng thay đổi</label>
+                        <div class="d-flex gap-4 mt-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="updateScopeAdjust" id="full_PO_adj" value="full" checked>
+                                <label class="form-check-label cursor-pointer text-success fw-semibold" for="full_PO_adj">
+                                    Cập nhật tất cả các mã trong PO này
+                                </label>
+                            </div>
+                            <div class="form-check ml-2">
+                                <input class="form-check-input" type="radio" name="updateScopeAdjust" id="single_item_adj" value="single">
+                                <label class="form-check-label cursor-pointer text-danger fw-semibold" for="single_item_adj">
+                                    Chỉ cập nhật mã dòng hiện tại
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeMyModal('adjustDateModal')">Đóng</button>
+                <button type="button" id="btnSaveAdjustDate" class="btn btn-sm btn-info text-white fw-bold"><i class="fa-solid fa-floppy-disk me-1"></i> Lưu điều chỉnh</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 11. Modal Cập Nhật Ghi chú (Note) -->
+<div class="modal fade" id="editNoteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-primary">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-pen me-1"></i> Nhập/Cập nhật Ghi chú</h6>
+                <button type="button" class="btn-close btn-close-white" onclick="closeMyModal('editNoteModal')"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <input type="hidden" id="editNotePoDetailId" />
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark">Nội dung ghi chú</label>
+                    <textarea id="editNoteContent" class="form-control border-primary" rows="4" placeholder="Nhập ghi chú vào đây..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeMyModal('editNoteModal')">Đóng</button>
+                <button type="button" id="btnSaveNote" class="btn btn-sm btn-primary fw-bold">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu ghi chú
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         // Hàm xuất Excel
@@ -1076,7 +1192,7 @@
         }
 
         // Các biến lưu trữ instance của Modal
-        let bsEstModal, bsOffModal, bsPayModal, bsImportModal, bsImpactModal, bsSupplierModal, bsGateModal, bsSplitModal, bsNoteModal;
+        let bsEstModal, bsOffModal, bsPayModal, bsImportModal, bsImpactModal, bsSupplierModal, bsGateModal, bsSplitModal, bsNoteModal, bsAdjustModal,bsEditNoteModal;
 
         // Hàm đóng Modal
         function closeMyModal(modalName) {
@@ -1089,6 +1205,8 @@
             if (modalName === 'gateRegistrationModal' && bsGateModal) bsGateModal.hide();
             if (modalName === 'splitPoModal' && bsSplitModal) bsSplitModal.hide();
             if (modalName === 'noteModal' && bsNoteModal) bsNoteModal.hide();
+            if (modalName === 'adjustDateModal' && bsAdjustModal) bsAdjustModal.hide();
+            if (modalName === 'editNoteModal' && bsEditNoteModal) bsEditNoteModal.hide();
         }
 
         // Hàm ẩn/hiện chi tiết (Phải nằm ngoài DOMContentLoaded để onclick gọi được)
@@ -1116,6 +1234,8 @@
             bsGateModal = new bootstrap.Modal(document.getElementById('gateRegistrationModal'), { backdrop: false });
             bsSplitModal = new bootstrap.Modal(document.getElementById('splitPoModal'), { backdrop: false });
             bsNoteModal = new bootstrap.Modal(document.getElementById('noteModal'), { backdrop: false });
+            bsAdjustModal = new bootstrap.Modal(document.getElementById('adjustDateModal'), { backdrop: false });
+            bsEditNoteModal = new bootstrap.Modal(document.getElementById('editNoteModal'), { backdrop: false });
 
             document.getElementById('btnOpenSupplierNg')?.addEventListener('click', () => bsSupplierModal.show());
 
@@ -1124,6 +1244,19 @@
                 const noteContent = $(this).attr('data-note');
                 $('#modalNoteContent').text(noteContent);
                 bsNoteModal.show();
+            });
+
+            $(document).on('click', '.btn-edit-note', function(e) {
+                e.preventDefault();
+                const poDetailId = $(this).attr('data-id');
+                const noteContent = $(this).attr('data-note');
+
+                // Đổ dữ liệu vào Modal
+                $('#editNotePoDetailId').val(poDetailId);
+                $('#editNoteContent').val(noteContent);
+
+                // Mở Modal
+                bsEditNoteModal.show();
             });
             // EVENT DELEGATION cho toàn bộ bảng chính
             const tableBody = document.querySelector('.table tbody');
@@ -1305,6 +1438,24 @@
                         bsSplitModal.show();
                         return;
                     }
+
+                            // --- G. XỬ LÝ CLICK NÚT ĐIỀU CHỈNH LỊCH GIAO ---
+                    const btnAdjust = e.target.closest('.btn-adjust-date');
+                    if (btnAdjust) {
+                        e.preventDefault();
+                        document.getElementById('adjPoNumber').textContent = btnAdjust.getAttribute('data-po');
+                        document.getElementById('adjItemName').textContent = btnAdjust.getAttribute('data-item-name');
+                        document.getElementById('adjItemCode').textContent = btnAdjust.getAttribute('data-item-code');
+                        document.getElementById('adjPoDetailId').textContent = btnAdjust.getAttribute('data-po-detail-id');
+
+                        // Reset form
+                        document.getElementById('modalAdjustDate').value = '';
+                        $('#full_PO_adj').prop('checked', true); // Mặc định chọn cập nhật cả PO
+
+                        bsAdjustModal.show();
+                        return;
+                    }
+
                 });
             }
 
@@ -1536,6 +1687,100 @@
                 });
             });
 
+
+                    // --- LƯU ĐIỀU CHỈNH LỊCH GIAO (AJAX) ---
+            $('#btnSaveAdjustDate').off('click').on('click', function (e) {
+                e.preventDefault();
+
+                var poDetailId = parseInt($('#adjPoDetailId').text().trim()) || 0;
+                var poNumber = $('#adjPoNumber').text().trim();
+                var adjustDate = $('#modalAdjustDate').val();
+                var scope = $('input[name="updateScopeAdjust"]:checked').val() || 'full';
+
+                if (!adjustDate) {
+                    alert('Vui lòng chọn ngày điều chỉnh lịch giao!');
+                    $('#modalAdjustDate').focus();
+                    return;
+                }
+
+                var formData = {
+                    PoNumber: poNumber,
+                    PoDetailId: poDetailId,
+                    DieuChinhDate: adjustDate,
+                    Scope: scope
+                };
+
+                var $btn = $(this);
+                var originalText = $btn.html();
+                $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
+
+                $.ajax({
+                    url: '/ManagerDelivery/UpdateDieuChinhLichGiao', // Tên API tại C# Controller
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message || 'Cập nhật ngày điều chỉnh thành công!');
+                            bsAdjustModal.hide();
+                            window.location.reload();
+                        } else {
+                            alert('Thất bại: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Có lỗi xảy ra trong quá trình gửi dữ liệu lên máy chủ.');
+                        console.error(error);
+                    },
+                    complete: function () {
+                        $btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+
+            $('#btnSaveNote').off('click').on('click', function (e) {
+                e.preventDefault();
+
+                var poDetailId = parseInt($('#editNotePoDetailId').val()) || 0;
+                var noteContent = $('#editNoteContent').val().trim();
+
+                if (poDetailId === 0) {
+                    alert("Lỗi: Không tìm thấy ID của PO.");
+                    return;
+                }
+
+                var formData = {
+                    PoDetailId: poDetailId,
+                    Note: noteContent
+                };
+
+                var $btn = $(this);
+                var originalText = $btn.html();
+                $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
+
+                $.ajax({
+                    url: '/ManagerDelivery/UpdateNote', // <-- Đảm bảo bạn có API này ở Backend
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message || 'Cập nhật ghi chú thành công!');
+                            bsEditNoteModal.hide();
+                            window.location.reload();
+                        } else {
+                            alert('Thất bại: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Có lỗi xảy ra trong quá trình gửi dữ liệu lên máy chủ.');
+                        console.error(error);
+                    },
+                    complete: function () {
+                        $btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
 
             // --- LƯU DỰ KIẾN (FETCH API) ---
             document.getElementById('btnSaveInfo')?.addEventListener('click', async () => {
@@ -1878,5 +2123,6 @@
             // Submit form (gọi lại request về server để lấy data mới)
             document.getElementById('filterForm').submit();
         }
+
     </script>
 }

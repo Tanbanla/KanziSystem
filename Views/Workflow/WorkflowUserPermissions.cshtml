@@ -2,7 +2,57 @@
 @{
     ViewData["Title"] = "Phân quyền theo user";
 }
-<link rel="stylesheet" href="~/css/workflow.css" asp-append-version="true" />
-<div class="container-fluid py-3 workflow-page"><div class="d-flex justify-content-between align-items-center mb-4"><div><h4 class="page-title mb-1">Phân quyền riêng theo user</h4><div class="subtitle">Quyền riêng sẽ được ưu tiên hơn quyền theo role.</div></div><button class="btn btn-primary"><i class="fas fa-plus me-2"></i>Gán quyền</button></div>
-<div class="card mb-3"><div class="card-body row g-2"><div class="col-md-5"><label class="small text-muted">Tìm user</label><div class="input-group"><input class="form-control" placeholder="ADID hoặc họ tên..." value="khanhmf" /><button class="btn btn-outline-primary"><i class="fas fa-search"></i></button></div></div><div class="col-md-3"><label class="small text-muted">Role hiện tại</label><input class="form-control" value="PUR" readonly /></div></div></div>
-<div class="card"><div class="card-header d-flex justify-content-between"><div><strong>Nguyễn Khánh</strong><div class="small text-muted">ADID: khanhmf · Purchasing</div></div><span class="badge bg-light text-primary">4 quyền riêng</span></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Workflow</th><th>Bước</th><th>Xem</th><th>Xử lý</th><th>Duyệt</th><th>Từ chối</th><th></th></tr></thead><tbody><tr><td>GOODS · PUR</td><td>Phê duyệt kết quả báo giá</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr><tr><td>GOODS · PUR</td><td>Xác nhận tên hải quan</td><td>✓</td><td>✓</td><td>—</td><td>—</td><td><button class="btn btn-sm btn-light"><i class="fas fa-pen"></i></button></td></tr></tbody></table></div></div></div>
+<link rel="stylesheet" href="~/css/workflow/workflow.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/workflow/WFUserPessions.css" asp-append-version="true" />
+
+<div class="workflow-page wf-user-permissions-page">
+    <div id="userPermissionAlert" class="alert d-none" role="alert"></div>
+
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow"><i class="fas fa-user-cog me-2"></i>Thiết lập quy trình</div>
+            <h1 class="page-title">Phân quyền riêng theo user</h1>
+            <p class="page-subtitle">Quyền riêng theo user được ưu tiên hơn quyền theo role.</p>
+        </div>
+        <button id="btnSaveUserPermissions" type="button" class="btn btn-primary" disabled>
+            <i class="fas fa-save me-2"></i><span>Lưu thay đổi</span>
+        </button>
+    </header>
+
+    <section class="card workflow-card user-filter-card">
+        <div class="card-body">
+            <div class="filter-heading">
+                <div><h2 class="section-title">Chọn người dùng</h2><p class="section-hint">Tìm user đang hoạt động để xem và gán quyền trực tiếp.</p></div>
+                <span class="filter-icon"><i class="fas fa-user-check"></i></span>
+            </div>
+            <div class="user-filter-grid">
+                <div class="user-picker">
+                    <label class="form-label" for="userSearch">ADID hoặc họ tên</label>
+                    <div class="search-box"><i class="fas fa-search"></i><input id="userSearch" type="search" autocomplete="off" placeholder="Ví dụ: khanhmf hoặc Nguyễn Khánh" /><button id="btnSearchUser" type="button" class="search-submit" title="Tìm user"><i class="fas fa-arrow-right"></i></button></div>
+                    <div id="userSuggestions" class="user-suggestions d-none"></div>
+                </div>
+                <div class="selected-user" id="selectedUserCard"><span class="selected-user-icon"><i class="fas fa-user"></i></span><div><strong id="selectedUserName">Chưa chọn user</strong><small id="selectedUserMeta">Tìm và chọn một user để bắt đầu</small></div></div>
+                <div><label class="form-label" for="workflowSelect">Workflow </label><select id="workflowSelect" class="form-select" disabled><option value="">Chọn user trước</option></select></div>
+                <button id="btnRefreshUserPermissions" type="button" class="btn btn-light refresh-user" title="Tải lại dữ liệu" disabled><i class="fas fa-rotate me-1"></i>Làm mới</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="card workflow-card user-permission-table-card">
+        <div class="card-header table-header"><div><h2 class="section-title mb-1">Quyền xử lý theo bước</h2><p id="userPermissionHint" class="section-hint mb-0">Chưa chọn user</p></div><div class="permission-summary"><span id="userPermissionCount" class="record-count">0 quyền</span><span id="userPermissionChangeState" class="permission-change-state">Chưa có thay đổi</span></div></div>
+        <div class="user-table-toolbar"><div class="search-box"><i class="fas fa-filter"></i><input id="stepSearch" type="search" placeholder="Tìm mã, tên bước hoặc bước lớn..." /></div><select id="stageFilter" class="form-select"><option value="">Tất cả bước lớn</option></select></div>
+        <div id="userPermissionLoading" class="permission-state d-none"><span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>Đang tải dữ liệu...</div>
+        <div id="userPermissionError" class="permission-state permission-error d-none"></div>
+        <div id="userPermissionEmpty" class="permission-state"><i class="fas fa-hand-pointer mb-2"></i><span>Chọn user để xem quyền riêng.</span></div>
+        <div id="userPermissionTableWrap" class="table-responsive d-none"><table class="table workflow-table user-permission-table align-middle mb-0"><thead><tr><th>Bước xử lý</th><th>Bước lớn</th><th class="permission-cell">Xem</th><th class="permission-cell">Xử lý</th><th class="permission-cell">Duyệt</th><th class="permission-cell">Từ chối</th></tr></thead><tbody id="userPermissionTableBody"></tbody></table></div>
+    </section>
+</div>
+
+<script>
+    window.searchWorkflowUsersUrl = '@Url.Action("SearchWorkflowUsers", "Workflow")';
+    window.workflowUserPermissionsUrl = '@Url.Action("GetWorkflowUserPermissions", "Workflow")';
+    window.saveWorkflowUserPermissionsUrl = '@Url.Action("SaveWorkflowUserPermissions", "Workflow")';
+</script>
+@section Scripts {
+    <script src="~/js/workflow/wfUserPessions.js" asp-append-version="true"></script>
+}

@@ -18,7 +18,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             SQL_Connect_DB20 _context = new SQL_Connect_DB20();
 
             var group = _context.ReturnString($"SELECT [Group_Code] FROM [COST_MANAGEMENT].[dbo].[GROUP_MEMBER] where CHR_USERID = '{us}'");
-            var _cmd = _context.GET_DATA_FROM_SQL($"select * from [MST_WAREHOUSE] where [CHR_NOTE] = '{group}'");
+            var _cmd = _context.GET_DATA_FROM_SQL($"select * from [MST_WAREHOUSE] where [CHR_NOTE] = '{group}' order by [CHR_WAREHOUSE]");
             List<MST_WAREHOUSE> _wh = new List<MST_WAREHOUSE>();
             for (int i = 0; i < _cmd.Rows.Count; i++)
             {

@@ -24,7 +24,7 @@
                     <h2 class="section-title">Ma trận quyền</h2>
                     <p class="section-hint">Chọn workflow và bật quyền tương ứng cho từng role.</p>
                 </div>
-                <span class="filter-icon"><i class="fas fa-sliders"></i></span>
+                <span class="filter-icon"><i class="fas fa-file-code"></i></span>
             </div>
             <div class="permission-toolbar">
                 <div class="permission-workflow-select">
@@ -44,6 +44,12 @@
                     <label class="form-label" for="roleFilter">Hiển thị role</label>
                     <select id="roleFilter" class="form-select">
                         <option value="">Tất cả role</option>
+                    </select>
+                </div>
+                <div class="permission-stage-filter">
+                    <label class="form-label" for="stageFilter">Hiển thị bước lớn</label>
+                    <select id="stageFilter" class="form-select">
+                        <option value="">Tất cả bước lớn</option>
                     </select>
                 </div>
                 <button id="btnResetPermissions" type="button" class="btn btn-light permission-reset" title="Tải lại dữ liệu">
