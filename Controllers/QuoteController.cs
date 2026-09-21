@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -7,6 +8,7 @@ using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using Path = System.IO.Path;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
@@ -329,6 +331,26 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return Ok(danhSachBaoGia);
         }
+        // tạo mã đơn
+        private static string? generateMaDonRequest(string? section) {
+            try {
+                var now = DateTime.Now;
+                var utc = now.ToUniversalTime();
+                var nowVN = utc.AddHours(7);
+                var yyyy = nowVN.Year;
+                var MM = nowVN.Month.ToString().PadLeft(2, '0');
+                var dd = nowVN.Day.ToString().PadLeft(2, '0');
+                var sec = (section ?? "").Trim().Replace("[^a-zA-Z0-9_-]", "_");
+                if (string.IsNullOrEmpty(sec))
+                {
+                    sec = "GEN";
+                }
+                return $"RQ_{sec}_{yyyy}_{MM}_{dd}";
+            } catch (Exception e) {
+                Console.WriteLine("Error generating MaDonRequest: " + e.Message);
+            }
+                return null;
+        }
         // Inser dữ liệu vào DB
         [HttpPost]
         public async Task<IActionResult> InsertQuotation([FromBody] List<InsertBaoGiaModel> items)
@@ -621,6 +643,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var workflowRespAsync = await _baoGiaWorkflowDefinitionService.GetWorkflowIDs();
             var wfREsult = workflowRespAsync.Data;
 
+            var madon = generateMaDonRequest(items.FirstOrDefault()?.CHR_SectionCode ?? string.Empty);
 
             foreach (var item in items)
             {
@@ -650,6 +673,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     list.Add(new BaoGia_Request_of_QuotationDTO
                     {
+                        CHR_MaDon = madon,
                         CHR_CreateBy = currentUserId,
                         DTM_CreateDate = createDate,
                         CHR_Gap = item.CHR_Gap,

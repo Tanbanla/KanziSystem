@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
@@ -10,12 +11,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaStepService _baoGiaStepService;
         private readonly IBaoGiaWorkflowStageService _baoGiaWorkflowStageService;
         private readonly IBaoGiaWorkflowStepService _baoGiaWorkflowStepService;
+        private readonly COST_MANAGEMENTContext _context;
 
-        public WorkflowController(IBaoGiaStepService baoGiaStepService, IBaoGiaWorkflowStageService baoGiaWorkflowStageService, IBaoGiaWorkflowStepService baoGiaWorkflowStepService)
+        public WorkflowController(IBaoGiaStepService baoGiaStepService, IBaoGiaWorkflowStageService baoGiaWorkflowStageService, IBaoGiaWorkflowStepService baoGiaWorkflowStepService, COST_MANAGEMENTContext context)
         {
             _baoGiaStepService = baoGiaStepService;
             _baoGiaWorkflowStageService = baoGiaWorkflowStageService;
             _baoGiaWorkflowStepService = baoGiaWorkflowStepService;
+            _context = context;
         }
 
         public IActionResult DasboadWorkFlow()
@@ -33,6 +36,156 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         // MARK: - Workflow Role Permissions
         public IActionResult WorkflowRolePermissions() => View();
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkflowRolePermissions(int? workflowId)
+        {
+            var workflows = await _context.BaoGia_WorkflowDefinitions
+                .AsNoTracking()
+                .Where(workflow => workflow.IsActive)
+                .OrderBy(workflow => workflow.WorkflowName)
+                .Select(workflow => new
+                {
+                    id = workflow.WorkflowID,
+                    code = workflow.FlowCode,
+                    name = workflow.WorkflowName
+                })
+                .ToListAsync();
+
+            var selectedWorkflowId = workflowId ?? workflows.FirstOrDefault()?.id;
+            if (selectedWorkflowId == null)
+            {
+                return Ok(new { success = true, data = Array.Empty<object>(), workflows, roles = Array.Empty<object>(), workflowId = (int?)null });
+            }
+
+            if (!workflows.Any(workflow => workflow.id == selectedWorkflowId))
+            {
+                return BadRequest(new { success = false, message = "Workflow không tồn tại hoặc đã bị ngừng hoạt động." });
+            }
+
+            var roles = await _context.BaoGia_WorkflowRoles
+                .AsNoTracking()
+                .Where(role => role.IsActive)
+                .OrderBy(role => role.RoleCode)
+                .Select(role => new { code = role.RoleCode, name = role.RoleName })
+                .ToListAsync();
+
+            var rows = await _context.BaoGia_WorkflowDefinitionSteps
+                .AsNoTracking()
+                .Where(definitionStep => definitionStep.WorkflowID == selectedWorkflowId && definitionStep.IsEnabled)
+                .OrderBy(definitionStep => definitionStep.StepOrder)
+                .ThenBy(definitionStep => definitionStep.WorkflowStepID)
+                .Select(definitionStep => new
+                {
+                    id = definitionStep.WorkflowStepID,
+                    order = definitionStep.StepOrder,
+                    code = definitionStep.Step.StepCode,
+                    name = definitionStep.Step.StepName,
+                    description = definitionStep.Step.Description,
+                    permissions = definitionStep.BaoGia_WorkflowStepRoles.Select(permission => new
+                    {
+                        roleCode = permission.RoleCode,
+                        canView = permission.CanView,
+                        canProcess = permission.CanProcess,
+                        canApprove = permission.CanApprove,
+                        canReject = permission.CanReject
+                    })
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, data = rows, workflows, roles, workflowId = selectedWorkflowId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveWorkflowRolePermissions([FromBody] WorkflowRolePermissionsRequest? request)
+        {
+            if (request == null || request.WorkflowId <= 0 || request.Rows == null)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu phân quyền không hợp lệ." });
+            }
+
+            var workflowExists = await _context.BaoGia_WorkflowDefinitions
+                .AsNoTracking()
+                .AnyAsync(workflow => workflow.WorkflowID == request.WorkflowId && workflow.IsActive);
+            if (!workflowExists)
+            {
+                return BadRequest(new { success = false, message = "Workflow không tồn tại hoặc đã bị ngừng hoạt động." });
+            }
+
+            var definitionStepIds = await _context.BaoGia_WorkflowDefinitionSteps
+                .Where(step => step.WorkflowID == request.WorkflowId && step.IsEnabled)
+                .Select(step => step.WorkflowStepID)
+                .ToListAsync();
+            var roleCodes = await _context.BaoGia_WorkflowRoles
+                .Where(role => role.IsActive)
+                .Select(role => role.RoleCode)
+                .ToListAsync();
+            var roleCodeSet = roleCodes.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var validRows = request.Rows
+                .Where(row => definitionStepIds.Contains(row.WorkflowStepId) && roleCodeSet.Contains(row.RoleCode))
+                .GroupBy(row => new { row.WorkflowStepId, row.RoleCode })
+                .Select(group => group.Last())
+                .ToList();
+
+            var stepIds = definitionStepIds.ToHashSet();
+            var existingPermissions = await _context.BaoGia_WorkflowStepRoles
+                .Where(permission => stepIds.Contains(permission.WorkflowStepID) && roleCodes.Contains(permission.RoleCode))
+                .ToListAsync();
+
+            foreach (var row in validRows)
+            {
+                var permission = existingPermissions.FirstOrDefault(item => item.WorkflowStepID == row.WorkflowStepId && item.RoleCode == row.RoleCode);
+                var hasPermission = row.CanView || row.CanProcess || row.CanApprove || row.CanReject;
+                if (permission == null)
+                {
+                    if (hasPermission)
+                    {
+                        _context.BaoGia_WorkflowStepRoles.Add(new BaoGia_WorkflowStepRole
+                        {
+                            WorkflowStepID = row.WorkflowStepId,
+                            RoleCode = row.RoleCode,
+                            CanView = row.CanView,
+                            CanProcess = row.CanProcess,
+                            CanApprove = row.CanApprove,
+                            CanReject = row.CanReject
+                        });
+                    }
+                    continue;
+                }
+
+                if (hasPermission)
+                {
+                    permission.CanView = row.CanView;
+                    permission.CanProcess = row.CanProcess;
+                    permission.CanApprove = row.CanApprove;
+                    permission.CanReject = row.CanReject;
+                }
+                else
+                {
+                    _context.BaoGia_WorkflowStepRoles.Remove(permission);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Đã lưu ma trận phân quyền." });
+        }
+
+        public sealed class WorkflowRolePermissionsRequest
+        {
+            public int WorkflowId { get; set; }
+            public List<WorkflowRolePermissionRequest> Rows { get; set; } = new();
+        }
+
+        public sealed class WorkflowRolePermissionRequest
+        {
+            public int WorkflowStepId { get; set; }
+            public string RoleCode { get; set; } = string.Empty;
+            public bool CanView { get; set; }
+            public bool CanProcess { get; set; }
+            public bool CanApprove { get; set; }
+            public bool CanReject { get; set; }
+        }
         // MARK: - Workflow User Permissions
         public IActionResult WorkflowUserPermissions() => View();
         // MARK: - Workflow Tasks
