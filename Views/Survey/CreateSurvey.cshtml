@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Tạo đơn khảo sát";
+}
+<link rel="stylesheet" href="~/css/survey/survey.css" asp-append-version="true" />
+
+<div class="survey-page">
+    <div class="survey-hero">
+        <div><div class="survey-eyebrow"><i class="fas fa-clipboard-check mr-1"></i> Xin khảo sát</div><h1 class="survey-title">Tạo đơn khảo sát</h1><p class="survey-subtitle">Gửi yêu cầu khảo sát mới và theo dõi tiến độ xử lý.</p></div>
+        <i class="fas fa-file-circle-plus survey-hero-icon"></i>
+    </div>
+    <div class="survey-stepper"><div class="survey-step active"><span class="survey-step-number">1</span><span>Thông tin đơn</span></div><div class="survey-step"><span class="survey-step-number">2</span><span>Nội dung khảo sát</span></div><div class="survey-step"><span class="survey-step-number">3</span><span>Gửi xác nhận</span></div></div>
+    <form class="card" id="createSurveyForm">
+        <div class="survey-card-header"><div><h2 class="survey-section-title">Thông tin đơn khảo sát</h2><p class="survey-section-hint">Các trường có dấu <span class="text-danger">*</span> là bắt buộc.</p></div><span class="badge badge-light">Mẫu nháp mới</span></div>
+        <div class="survey-card-body">
+            <div class="row">
+                <div class="col-12 col-md-4"><label class="form-label" for="surveyDepartment">Phòng ban yêu cầu <span class="text-danger">*</span></label><select class="form-select" id="surveyDepartment" required><option value="">Chọn phòng ban</option><option>GA - General Affairs</option><option>PUR - Purchasing</option><option>R&D - Research & Development</option></select></div>
+                <div class="col-12 col-md-4"><label class="form-label" for="surveyType">Loại khảo sát <span class="text-danger">*</span></label><select class="form-select" id="surveyType" required><option value="">Chọn loại khảo sát</option><option>Khảo sát hiện trạng</option><option>Khảo sát mặt bằng</option><option>Khảo sát kỹ thuật</option></select></div>
+                <div class="col-12 col-md-4"><label class="form-label" for="surveyDueDate">Thời hạn mong muốn</label><input class="form-control" id="surveyDueDate" type="date"></div>
+            </div>
+            <div class="row mt-2"><div class="col-12 col-md-6"><label class="form-label" for="surveyLocation">Địa điểm khảo sát <span class="text-danger">*</span></label><input class="form-control" id="surveyLocation" placeholder="Ví dụ: Nhà máy BIVN - khu vực kho thành phẩm" required></div><div class="col-12 col-md-6"><label class="form-label" for="surveyContact">Người liên hệ tại hiện trường</label><input class="form-control" id="surveyContact" placeholder="Họ tên, số máy lẻ hoặc email"></div></div>
+            <div class="row mt-2"><div class="col-12"><label class="form-label" for="surveyTitle">Tên đơn khảo sát <span class="text-danger">*</span></label><input class="form-control" id="surveyTitle" placeholder="Đặt tên ngắn gọn để dễ tra cứu" required></div></div>
+            <div class="row mt-2"><div class="col-12"><label class="form-label" for="surveyDescription">Mục đích và nội dung cần khảo sát <span class="text-danger">*</span></label><textarea class="form-control" id="surveyDescription" rows="5" placeholder="Mô tả vấn đề, phạm vi, yêu cầu đầu ra..." required></textarea></div></div>
+            <div class="row mt-2"><div class="col-12 col-md-6"><label class="form-label" for="surveyAttachment">Tài liệu đính kèm</label><input class="form-control" id="surveyAttachment" type="file"><small class="form-text text-muted">Có thể đính kèm bản vẽ, hình ảnh hoặc tài liệu liên quan.</small></div><div class="col-12 col-md-6"><label class="form-label" for="surveyApprover">Người tiếp nhận đề xuất</label><select class="form-select" id="surveyApprover"><option>Chọn người tiếp nhận</option><option>Bộ phận kỹ thuật</option><option>Bộ phận mua hàng</option></select></div></div>
+            <div class="survey-note mt-4"><i class="fas fa-circle-info mr-1"></i> Sau khi gửi, đơn sẽ ở trạng thái <strong>Chờ tiếp nhận</strong>. Bạn có thể theo dõi và bổ sung thông tin ở màn hình quản lý.</div>
+            <div class="survey-actions"><button class="btn btn-light" type="button"><i class="fas fa-save mr-1"></i>Lưu bản nháp</button><button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane mr-1"></i>Gửi đơn khảo sát</button></div>
+        </div>
+    </form>
+</div>

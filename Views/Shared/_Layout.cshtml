@@ -196,6 +196,36 @@
                             </ul>
                         </li>
 
+                        <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Survey" ? "active" : "")">
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-clipboard-check"></i> <span>Xin khảo sát</span></a>
+                            <ul class="dropdown-menu" style="max-width: 320px;">
+                                <li>
+                                    <a class="dropdown-item py-2" href="~/Survey/CreateSurvey">
+                                        <i class="fas fa-file-medical me-2"></i>
+                                        <span class="small">Tạo đơn khảo sát</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2" href="~/Survey/ReceiveSurvey">
+                                        <i class="fas fa-file-signature me-2"></i>
+                                        <span class="small">Tiếp nhận đơn - xác nhận đơn khảo sát</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2" href="~/Survey/ManageSurvey">
+                                        <i class="fas fa-tasks me-2"></i>
+                                        <span class="small">Quản lý thông tin khảo sát</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2" href="~/Survey/ApproveSurvey">
+                                        <i class="fas fa-check-double me-2"></i>
+                                        <span class="small">Phê duyệt - lựa chọn thông tin khảo sát</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "ReceiveMaterial" ? "active" : "")">
 
                         </li>
