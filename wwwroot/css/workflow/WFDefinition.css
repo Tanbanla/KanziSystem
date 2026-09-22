@@ -1,0 +1,151 @@
+.workflow-page .workflow-modal-close {
+.workflow-page .workflow-modal-close,
+#workflowModal .workflow-modal-close {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #e1e7f2;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all .25s ease;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, .08), inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.workflow-page .workflow-modal-close span,
+.workflow-page .workflow-modal-close span::before,
+#workflowModal .workflow-modal-close span,
+#workflowModal .workflow-modal-close span::before {
+    content: "";
+    position: absolute;
+    width: 17px;
+    height: 2px;
+    background: #64748b;
+    border-radius: 10px;
+    transition: all .25s ease;
+}
+
+.workflow-page .workflow-modal-close span,
+#workflowModal .workflow-modal-close span {
+    transform: rotate(45deg);
+}
+
+.workflow-page .workflow-modal-close span::before,
+#workflowModal .workflow-modal-close span::before {
+    transform: rotate(90deg);
+}
+
+.workflow-page .workflow-modal-close:hover,
+#workflowModal .workflow-modal-close:hover {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    border-color: transparent;
+    transform: rotate(90deg);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, .25);
+}
+
+.workflow-page .workflow-modal-close:hover span,
+.workflow-page .workflow-modal-close:hover span::before,
+#workflowModal .workflow-modal-close:hover span,
+#workflowModal .workflow-modal-close:hover span::before {
+    background: #fff;
+}
+
+.workflow-page .workflow-modal-close:focus-visible,
+#workflowModal .workflow-modal-close:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
+}
+
+.workflow-page .definition-select,
+#workflowModal .form-select {
+    min-height: 46px;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    padding: .65rem 2.75rem .65rem 1rem;
+    color: #334155;
+    font-weight: 500;
+    appearance: none;
+    cursor: pointer;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 16 16'%3E%3Cpath fill='%2364758b' d='M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+.workflow-page .definition-select:hover,
+#workflowModal .form-select:hover {
+    border-color: #93c5fd;
+    background-color: #f8fbff;
+}
+
+.workflow-page .definition-select:focus,
+#workflowModal .form-select:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, .12), 0 6px 16px rgba(37, 99, 235, .08);
+}
+
+.workflow-page .definition-select option,
+#workflowModal .form-select option {
+    color: #334155;
+    background: #fff;
+}
+.workflow-page .workflow-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: #1f2a56;
+}
+
+.workflow-page .workflow-select-wrapper {
+    position: relative;
+}
+
+.workflow-page .workflow-select {
+    height: 54px;
+    border-radius: 14px;
+    padding-left: 16px;
+    padding-right: 50px;
+    border: 1px solid #dbe2ea;
+    background: linear-gradient(135deg,#ffffff,#f8fbff);
+    font-weight: 500;
+    color: #334155;
+    appearance: none;
+    transition: all .25s ease;
+}
+
+    .workflow-page .workflow-select:hover {
+        border-color: #93c5fd;
+    }
+
+    .workflow-page .workflow-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37,99,235,.12), 0 6px 16px rgba(37,99,235,.1);
+    }
+
+.workflow-page .workflow-select-icon {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+    transition: all .25s ease;
+}
+
+.workflow-page .workflow-select:focus + .workflow-select-icon {
+    color: #2563eb;
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.workflow-page .workflow-help-text {
+    display: block;
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 12px;
+}

@@ -45,9 +45,161 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         // MARK: - Workflow Request Detail
         public IActionResult WorkflowRequestDetail() => View();
         // MARK: - Workflow
-        public IActionResult workflow()
+        public IActionResult WorkflowDefinition()
         {
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkflowDefinitions(bool includeInactive = true)
+        {
+            var query = _context.BaoGia_WorkflowDefinitions
+                .AsNoTracking()
+                .Include(workflow => workflow.RequestType)
+                .AsQueryable();
+
+            if (!includeInactive)
+            {
+                query = query.Where(workflow => workflow.IsActive);
+            }
+
+            var workflows = await query
+                .OrderBy(workflow => workflow.RequestType.NVCHR_Name)
+                .ThenBy(workflow => workflow.FlowCode)
+                .Select(workflow => new
+                {
+                    id = workflow.WorkflowID,
+                    requestTypeId = workflow.RequestTypeID,
+                    requestTypeCode = workflow.RequestType.CHR_Code,
+                    requestTypeName = workflow.RequestType.NVCHR_Name,
+                    flowCode = workflow.FlowCode,
+                    workflowName = workflow.WorkflowName,
+                    isActive = workflow.IsActive,
+                    stepCount = workflow.BaoGia_WorkflowDefinitionSteps.Count(step => step.IsEnabled)
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, data = workflows });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkflowRequestTypes()
+        {
+            var requestTypes = await _context.BaoGia_RequestTypes
+                .AsNoTracking()
+                .OrderBy(requestType => requestType.NVCHR_Name)
+                .Select(requestType => new
+                {
+                    id = requestType.ID,
+                    code = requestType.CHR_Code,
+                    name = requestType.NVCHR_Name
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, data = requestTypes });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateWorkflowDefinition([FromBody] BaoGia_WorkflowDefinitionDTO model)
+        {
+            if (model == null || model.RequestTypeID <= 0 || string.IsNullOrWhiteSpace(model.FlowCode) || string.IsNullOrWhiteSpace(model.WorkflowName))
+            {
+                return BadRequest(new { success = false, message = "Loại yêu cầu, mã luồng và tên workflow là bắt buộc." });
+            }
+
+            var flowCode = model.FlowCode.Trim();
+            var workflowName = model.WorkflowName.Trim();
+            if (flowCode.Length > 20 || workflowName.Length > 300)
+            {
+                return BadRequest(new { success = false, message = "Mã luồng tối đa 20 ký tự và tên workflow tối đa 300 ký tự." });
+            }
+
+            var requestTypeExists = await _context.BaoGia_RequestTypes.AnyAsync(requestType => requestType.ID == model.RequestTypeID);
+            if (!requestTypeExists)
+            {
+                return BadRequest(new { success = false, message = "Loại yêu cầu không tồn tại." });
+            }
+
+            var duplicate = await _context.BaoGia_WorkflowDefinitions.AnyAsync(workflow =>
+                workflow.RequestTypeID == model.RequestTypeID && workflow.FlowCode == flowCode);
+            if (duplicate)
+            {
+                return BadRequest(new { success = false, message = "Mã luồng đã tồn tại trong loại yêu cầu này." });
+            }
+
+            var entity = new BaoGia_WorkflowDefinition
+            {
+                RequestTypeID = model.RequestTypeID,
+                FlowCode = flowCode,
+                WorkflowName = workflowName,
+                IsActive = model.IsActive,
+                CreatedDate = DateTime.Now,
+                CreatedBy = User.Identity?.Name ?? "system"
+            };
+
+            _context.BaoGia_WorkflowDefinitions.Add(entity);
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, data = new { id = entity.WorkflowID } });
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateWorkflowDefinition(int id, [FromBody] BaoGia_WorkflowDefinitionDTO model)
+        {
+            if (id <= 0 || model == null || model.RequestTypeID <= 0 || string.IsNullOrWhiteSpace(model.FlowCode) || string.IsNullOrWhiteSpace(model.WorkflowName))
+            {
+                return BadRequest(new { success = false, message = "Thông tin workflow không hợp lệ." });
+            }
+
+            var flowCode = model.FlowCode.Trim();
+            var workflowName = model.WorkflowName.Trim();
+            if (flowCode.Length > 20 || workflowName.Length > 300)
+            {
+                return BadRequest(new { success = false, message = "Mã luồng tối đa 20 ký tự và tên workflow tối đa 300 ký tự." });
+            }
+
+            var entity = await _context.BaoGia_WorkflowDefinitions.FirstOrDefaultAsync(workflow => workflow.WorkflowID == id);
+            if (entity == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy workflow." });
+            }
+
+            var requestTypeExists = await _context.BaoGia_RequestTypes.AnyAsync(requestType => requestType.ID == model.RequestTypeID);
+            var duplicate = await _context.BaoGia_WorkflowDefinitions.AnyAsync(workflow =>
+                workflow.WorkflowID != id && workflow.RequestTypeID == model.RequestTypeID && workflow.FlowCode == flowCode);
+            if (!requestTypeExists || duplicate)
+            {
+                return BadRequest(new { success = false, message = !requestTypeExists ? "Loại yêu cầu không tồn tại." : "Mã luồng đã tồn tại trong loại yêu cầu này." });
+            }
+
+            entity.RequestTypeID = model.RequestTypeID;
+            entity.FlowCode = flowCode;
+            entity.WorkflowName = workflowName;
+            entity.IsActive = model.IsActive;
+            entity.UpdatedDate = DateTime.Now;
+            entity.UpdatedBy = User.Identity?.Name ?? "system";
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteWorkflowDefinition(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(new { success = false, message = "Mã workflow không hợp lệ." });
+            }
+
+            var entity = await _context.BaoGia_WorkflowDefinitions.FirstOrDefaultAsync(workflow => workflow.WorkflowID == id);
+            if (entity == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy workflow." });
+            }
+
+            entity.IsActive = false;
+            entity.UpdatedDate = DateTime.Now;
+            entity.UpdatedBy = User.Identity?.Name ?? "system";
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
         }
 
         [HttpGet]

@@ -50,8 +50,8 @@ namespace PRJ_WAREHOUSE_BIVN.Common
 
             try
             {
-                //mail_to = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
-                //mail_cc = "lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                mail_to = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                mail_cc = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
 
                 using var msg = new MailMessage();
 

@@ -227,6 +227,7 @@
     <Folder Include="Data\BBGH\" />
     <Folder Include="Data\HD\" />
     <Folder Include="wwwroot\File\" />
+    <Folder Include="wwwroot\js\Survey\" />
   </ItemGroup>
 
 </Project>

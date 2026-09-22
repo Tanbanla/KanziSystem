@@ -48,9 +48,9 @@ body { background: #f4f7fb; }
 .workflow-page .btn-icon:hover { color: #fff; }
 .workflow-page .btn-edit:hover { background: var(--workflow-primary); }
 .workflow-page .btn-delete:hover { background: var(--workflow-danger); }
-.workflow-page .stage-modal-close, #stepModal .stage-modal-close, #stageModal .stage-modal-close { align-items: center; background: #f6f7fb; border: 1px solid #e1e5f0; border-radius: 50%; color: #68728a; display: inline-flex; flex: 0 0 36px; font-size: 1rem; height: 36px; justify-content: center; margin: -6px -6px -6px 16px; padding: 0; transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease; width: 36px; }
-.workflow-page .stage-modal-close:hover, #stepModal .stage-modal-close:hover, #stageModal .stage-modal-close:hover { border-color: #cfd6eb; background: #eef1ff; color: #5164d8; transform: rotate(90deg); }
-.workflow-page .stage-modal-close:focus-visible, #stepModal .stage-modal-close:focus-visible, #stageModal .stage-modal-close:focus-visible { outline: 0; border-color: #5164d8; box-shadow: 0 0 0 4px rgba(81, 100, 216, .15); }
+.workflow-page .stage-modal-close, #workflowModal .stage-modal-close, #stepModal .stage-modal-close, #stageModal .stage-modal-close { align-items: center; background: #f6f7fb; border: 1px solid #e1e5f0; border-radius: 50%; color: #68728a; display: inline-flex; flex: 0 0 36px; font-size: 1rem; height: 36px; justify-content: center; margin: -6px -6px -6px 16px; padding: 0; transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease; width: 36px; }
+.workflow-page .stage-modal-close:hover, #workflowModal .stage-modal-close:hover, #stepModal .stage-modal-close:hover, #stageModal .stage-modal-close:hover { border-color: #cfd6eb; background: #eef1ff; color: #5164d8; transform: rotate(90deg); }
+.workflow-page .stage-modal-close:focus-visible, #workflowModal .stage-modal-close:focus-visible, #stepModal .stage-modal-close:focus-visible, #stageModal .stage-modal-close:focus-visible { outline: 0; border-color: #5164d8; box-shadow: 0 0 0 4px rgba(81, 100, 216, .15); }
 .workflow-page .modal-content, #stepModal .modal-content, #stageModal .modal-content { border: none; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, .15); }
 .workflow-page .modal-header, #stepModal .modal-header, #stageModal .modal-header { border-bottom: 1px solid var(--workflow-gray-200); padding: 20px 24px; }
 .workflow-page .modal-title, #stepModal .modal-title, #stageModal .modal-title { font-size: 20px; font-weight: 700; }
@@ -114,3 +114,87 @@ body { background: #f4f7fb; }
 .workflow-page .permission-cell .form-check { display: inline-block; margin: 0 .2rem; }
 .workflow-page .permission-cell input { cursor: pointer; }
 @media (max-width: 768px) { .workflow-page .step-list { max-height: none; } .workflow-page .summary-table { min-width: 720px; } }
+
+/* Workflow definition modal and filters */
+#workflowModal .workflow-modal-close {
+    align-items: center;
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    border: 1px solid #e1e7f2;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, .08);
+    cursor: pointer;
+    display: flex;
+    height: 42px;
+    justify-content: center;
+    margin: -6px -6px -6px 16px;
+    padding: 0;
+    position: relative;
+    transition: all .25s ease;
+    width: 42px;
+}
+
+#workflowModal .workflow-modal-close span,
+#workflowModal .workflow-modal-close span::before {
+    background: #64748b;
+    border-radius: 10px;
+    content: "";
+    height: 2px;
+    position: absolute;
+    transition: all .25s ease;
+    width: 17px;
+}
+
+#workflowModal .workflow-modal-close span {
+    transform: rotate(45deg);
+}
+
+#workflowModal .workflow-modal-close span::before {
+    transform: rotate(90deg);
+}
+
+#workflowModal .workflow-modal-close:hover {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    border-color: transparent;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, .25);
+    transform: rotate(90deg);
+}
+
+#workflowModal .workflow-modal-close:hover span,
+#workflowModal .workflow-modal-close:hover span::before {
+    background: #fff;
+}
+
+#workflowModal .workflow-modal-close:focus-visible {
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
+    outline: none;
+}
+
+.workflow-definition-page .definition-select,
+#workflowModal .form-select {
+    appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 16 16'%3E%3Cpath fill='%2364758b' d='M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06z'/%3E%3C/svg%3E");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    color: #334155;
+    cursor: pointer;
+    font-weight: 500;
+    min-height: 46px;
+    padding: .65rem 2.75rem .65rem 1rem;
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+.workflow-definition-page .definition-select:hover,
+#workflowModal .form-select:hover {
+    background-color: #f8fbff;
+    border-color: #93c5fd;
+}
+
+.workflow-definition-page .definition-select:focus,
+#workflowModal .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, .12), 0 6px 16px rgba(37, 99, 235, .08);
+    outline: none;
+}

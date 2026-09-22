@@ -1,0 +1,145 @@
+@{
+    ViewData["Title"] = "Quản lý workflow";
+}
+
+<link rel="stylesheet" href="~/css/workflow/workflow.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/workflow/WFDefinition.css" asp-append-version="true" />
+
+<div class="workflow-page workflow-definition-page">
+    <header class="page-header">
+        <div>
+            <div class="page-eyebrow">
+                <i class="fas fa-diagram-project me-2"></i>Thiết lập quy trình
+            </div>
+            <h1 class="page-title">Quản lý workflow</h1>
+            <p class="page-subtitle">Quản lý mã luồng, tên quy trình và loại yêu cầu sử dụng trong hệ thống.</p>
+        </div>
+        <button id="btnAddWorkflow" type="button" class="btn btn-primary btn-add-workflow">
+            <i class="fas fa-plus me-2"></i>Thêm workflow
+        </button>
+    </header>
+
+    <section class="card workflow-card filter-card definition-filter-card">
+        <div class="card-body">
+            <div class="filter-heading">
+                <div>
+                    <h2 class="section-title">Tra cứu workflow</h2>
+                    <p class="section-hint">Lọc theo mã, tên workflow, loại yêu cầu hoặc trạng thái.</p>
+                </div>
+                <span class="filter-icon" aria-hidden="true">
+                    <i class="fas fa-filter"></i>
+                </span>
+            </div>
+
+            <div class="toolbar definition-toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input id="workflowSearch" type="search" placeholder="Tìm mã hoặc tên workflow..." aria-label="Tìm workflow" autocomplete="off" />
+                </div>
+                <select id="workflowRequestType" class="form-select definition-select" aria-label="Lọc theo loại yêu cầu">
+                    <option value="">Tất cả loại yêu cầu</option>
+                </select>
+                <select id="workflowStatus" class="form-select definition-select" aria-label="Lọc theo trạng thái">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="true">Hoạt động</option>
+                    <option value="false">Không hoạt động</option>
+                </select>
+                <button id="btnSearchWorkflow" type="button" class="btn btn-outline-primary btn-search-workflow">
+                    <i class="fas fa-search me-1"></i>Tìm kiếm
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="card workflow-card table-card definition-table-card">
+        <div class="card-header table-header">
+            <div>
+                <h2 class="section-title mb-1">Danh sách workflow</h2>
+                <p class="section-hint mb-0">Thông tin cấu hình trong bảng BaoGia_WorkflowDefinition.</p>
+            </div>
+            <span id="workflowCount" class="record-count">0 bản ghi</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table workflow-table definition-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Loại yêu cầu</th>
+                        <th scope="col">Mã luồng</th>
+                        <th scope="col">Tên workflow</th>
+                        <th scope="col" class="text-center">Số bước</th>
+                        <th scope="col" class="text-center">Trạng thái</th>
+                        <th scope="col" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="workflowTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="workflowModal" tabindex="-1" aria-labelledby="workflowModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="workflowForm" class="modal-content" novalidate>
+            <div class="modal-header">
+                <div>
+                    <h5 id="workflowModalTitle" class="modal-title">Thêm workflow</h5>
+                    <div class="modal-subtitle">Nhập thông tin workflow trong hệ thống</div>
+                </div>
+                <button type="button" class="stage-modal-close" data-dismiss="modal" aria-label="Đóng">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="workflowId" type="hidden" />
+                <div class="mb-3">
+                    <label class="form-label" for="workflowRequestTypeId">Loại yêu cầu <span class="text-danger">*</span></label>
+                    <select id="workflowRequestTypeId" class="form-select" required>
+                        <option value="">Chọn loại yêu cầu</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label" for="workflowFlowCode">Mã luồng <span class="text-danger">*</span></label>
+                        <input id="workflowFlowCode" class="form-control text-uppercase" maxlength="20" required />
+                        <div class="form-text">Tối đa 20 ký tự.</div>
+                    </div>
+                    <div class="col-md-7 mb-3">
+                        <label class="form-label" for="workflowName">Tên workflow <span class="text-danger">*</span></label>
+                        <input id="workflowName" class="form-control" maxlength="300" required />
+                    </div>
+                </div>
+                <div class="workflow-active-setting" style="margin-left: 20px;">
+                    <input id="workflowIsActive" class="form-check-input" type="checkbox" checked />
+                    <div>
+                        <label class="form-check-label" for="workflowIsActive">Đang hoạt động</label>
+                        <div class="form-text">Workflow đang hoạt động có thể được sử dụng trong các yêu cầu mới.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-dismiss="modal">Hủy</button>
+                <button id="btnSaveWorkflow" type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Lưu dữ liệu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="workflowAlert" class="alert d-none" role="alert" aria-live="polite"></div>
+
+<script>
+    window.workflowDefinitionsUrl = '@Url.Action("GetWorkflowDefinitions", "Workflow")';
+    window.workflowRequestTypesUrl = '@Url.Action("GetWorkflowRequestTypes", "Workflow")';
+</script>
+@section Scripts {
+    <script src="~/js/workflow/wfDefinition.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var panel = document.getElementById('workflowModal');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        })();
+    </script>
+}

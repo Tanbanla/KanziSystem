@@ -382,24 +382,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     .ToList();
                 if (SectionApporve != null)
                 {
-                    //_ = Task.Run(async () =>
-                    //{
-                    //    using (var scope = _serviceScopeFactory.CreateScope())
-                    //    {
-                    //        try
-                    //        {
-                    //            var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                    //            foreach (var item in SectionApporve)
-                    //            {
-                    //                await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", currentUserId + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
-                    //            }
-                    //        }
-                    //        catch (Exception ex)
-                    //        {
-                    //            _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
-                    //        }
-                    //    }
-                    //});
+                    _ = Task.Run(async () =>
+                    {
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            try
+                            {
+                                var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+                                foreach (var item in SectionApporve)
+                                {
+                                    await sendMailService.SendMailAsync(item.CHR_UserApproval + "@brothergroup.net", currentUserId + "@brothergroup.net", 11, "ApprovalQuote/Index", item.CHR_Gap == "false" ? false : true, item.CHR_SectionCode ?? "", item.CHR_MaDon ?? "", currentUserId);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Lỗi khi gửi mail phê duyệt");
+                            }
+                        }
+                    });
                 }
 
                 return Ok(listInser);
@@ -714,7 +714,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         NVCHR_DiaDiemNH = item.NVCHR_DiaDiemNH,
                         NVCHR_NguoiNhan = item.NVCHR_NguoiNhan,
                         CHR_SDT = item.CHR_SDT,
-                        WorkflowID = wfREsult?.FirstOrDefault(w => w.FlowCode == item.WfSection && w.CHR_Code == item.WfType)?.WorkflowID ?? 1
+                        WorkflowID = wfREsult?.FirstOrDefault(w => w.FlowCode == item.WfSection && w.CHR_Code == item.WfType)?.WorkflowID ?? 1,
+                        ID_Status = "APPROVAL2",
+                        ID_StepBaoGia = 2
                     });
                 }
             }
