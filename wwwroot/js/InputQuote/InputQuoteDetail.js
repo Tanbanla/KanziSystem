@@ -167,8 +167,8 @@
                 <td><input type="text" class="form-control form-control-sm ${getClassIfMismatch(item.NVCHR_TenHangHQ, requestItem?.nvchR_NameVN)}" value="${item.NVCHR_TenHangHQ || ''}"></td>
                 <td><input type="number" class="form-control form-control-sm ${getClassIfMismatch(item.INT_SoLuong, requestItem?.inT_SoLuong)}" value="${item.INT_SoLuong || 0}" step="1" min="0"></td>
                 <td><input type="text" class="form-control form-control-sm ${getClassIfMismatch(item.NVCHR_DonVi, requestItem?.nvchR_DonVi)}" value="${item.NVCHR_DonVi || ''}"></td>
-                <td><input type="number" class="form-control form-control-sm price-usd" value="${item.FL_USD || 0}" step="1" min="0"></td>
-                <td><input type="number" class="form-control form-control-sm price-vnd" value="${item.FL_VND || 0}" readonly></td>
+                <td><input type="text" class="form-control form-control-sm price-usd" value="${item.FL_USD}"></td>
+                <td><input type="text" class="form-control form-control-sm price-vnd" value="${item.FL_VND}"></td>
                 <td><input type="number" class="form-control form-control-sm ${getClassIfMismatch(item.NVCHR_MOQ, item.INT_SoLuong, (moq, qty) => parseFloat(moq || 0) > parseFloat(qty || 0))}" value="${item.NVCHR_MOQ || ''}" step="1" min="0" placeholder="MOQ"></td>
                 <td><input type="number" class="form-control form-control-sm" value="${item.DTM_LeadTime || ''}" step="1" min="0" placeholder="Lead Time"></td>
                 <td><input type="date" class="form-control form-control-sm ${getClassIfMismatch(item.DTM_ShipTime, requestItem?.dtM_KyHan, (ship, kyhan) => ship && kyhan && new Date(ship) > new Date(kyhan))}" value="${item.DTM_ShipTime ? new Date(item.DTM_ShipTime).toISOString().split('T')[0] : ''}"></td>
@@ -261,19 +261,19 @@
             anToanSelect.addEventListener('change', () => updateSelectHighlight(anToanSelect, requestItem?.nvchR_AnToan));
             camKetSelect.addEventListener('change', () => updateCamKetHighlight(camKetSelect));
 
-            // Attach event listeners for price calculation
-            const usdInput = row.querySelector('.price-usd');
-            const vndInput = row.querySelector('.price-vnd');
-            usdInput.addEventListener('input', () => {
-                const val = parseFloat(usdInput.value) || 0;
-                if (val <= 0) {
-                    showAlert('warning', window.i18nInputQuoteDetail.PriceMustBeGreaterThanZero);
-                    usdInput.value = 0;
-                }
-                vndInput.value = (parseFloat(usdInput.value) || 0) * quoteState.exchangeRate;
-            });
-            // Set initial VND value
-            vndInput.value = (parseFloat(usdInput.value) || 0) * quoteState.exchangeRate;
+            //// Attach event listeners for price calculation
+            //const usdInput = row.querySelector('.price-usd');
+            //const vndInput = row.querySelector('.price-vnd');
+            //usdInput.addEventListener('input', () => {
+            //    const val = parseFloat(usdInput.value) || 0;
+            //    if (val <= 0) {
+            //        showAlert('warning', window.i18nInputQuoteDetail.PriceMustBeGreaterThanZero);
+            //        usdInput.value = 0;
+            //    }
+            //    vndInput.value = (parseFloat(usdInput.value) || 0) * quoteState.exchangeRate;
+            //});
+            //// Set initial VND value
+            //vndInput.value = (parseFloat(usdInput.value) || 0) * quoteState.exchangeRate;
         });
     }
 
@@ -292,30 +292,83 @@
     }
 
     // Save quote
-    function saveQuote() {
-        //const supplier = elements.pageSupplierSelect.value;
-        //if (!supplier) {
-        //    showAlert('warning', 'Vui lòng chọn nhà cung cấp');
-        //    return;
-        //}
+    async function saveQuote() {
+        const rows = elements.quoteInputBody?.querySelectorAll('tr') || [];
+        if (rows.length === 0) {
+            showAlert('warning', window.i18nInputQuoteDetail.NoValidDataToSendMail);
+            return;
+        }
 
         const items = collectQuoteItems();
-        // Call API to save
-        callApi((window.apiBaseUrl || '') + '/InputQuotation/UpdateQuoteDetail', items)
-            .then(data => {
-                showAlert('success', window.i18nInputQuoteDetail.DataFilteredSuccessfully);
-            })
-            .catch(err => showAlert('danger', window.i18nInputQuoteDetail.SaveError + err));
+        const exchangeRate = quoteState.exchangeRate > 0 ? quoteState.exchangeRate : 24500;
+        const errors = [];
+
+        items.forEach((item, index) => {
+            const rowNumber = index + 1;
+            const isRefuse = item.CHR_Status === 'Refuse';
+
+            if (!item.ID) {
+                errors.push(`Dòng ${rowNumber}: không xác định được bản ghi báo giá`);
+                return;
+            }
+
+            if (!item.NVCHR_TenHangHQ && !isRefuse) {
+                errors.push(`Dòng ${rowNumber}: tên hàng không được để trống`);
+            }
+            if (item.INT_SoLuong <= 0) {
+                errors.push(`Dòng ${rowNumber}: số lượng phải lớn hơn 0`);
+            }
+
+            if (isRefuse) {
+                item.CHR_Status = 'Refuse';
+                item.FL_USD = null;
+                item.FL_VND = null;
+                item.NVCHR_MOQ = null;
+                item.DTM_ShipTime = null;
+                item.VCHR_CamKet = null;
+                item.NVCHR_DeliveryTerm = null;
+                item.NVCHR_PaymentTerm = null;
+                item.DTM_EffectiveDate = null;
+                item.DTM_ExpiryDate = null;
+                return;
+            }
+
+            const usd = parseFloat(item.FL_USD) || 0;
+            const vnd = parseFloat(item.FL_VND) || 0;
+            if (usd <= 0 && vnd <= 0) {
+                errors.push(`Dòng ${rowNumber}: phải nhập giá USD hoặc VND`);
+            } else {
+                item.FL_USD = usd > 0 ? usd : vnd / exchangeRate;
+                item.FL_VND = vnd > 0 ? vnd : usd * exchangeRate;
+            }
+
+            if (!item.VCHR_CamKet) errors.push(`Dòng ${rowNumber}: cam kết là bắt buộc`);
+            if (!item.NVCHR_DeliveryTerm) errors.push(`Dòng ${rowNumber}: Delivery Term là bắt buộc`);
+            if (!item.NVCHR_PaymentTerm) errors.push(`Dòng ${rowNumber}: Payment Term là bắt buộc`);
+            if (!item.DTM_ShipTime) errors.push(`Dòng ${rowNumber}: ngày giao hàng là bắt buộc`);
+        });
+
+        if (errors.length > 0) {
+            showAlert('warning', errors.slice(0, 5).join('<br>'));
+            return;
+        }
+
+        const saveButton = document.getElementById('pageSave');
+        if (saveButton) saveButton.disabled = true;
+
+        try {
+            await callApi((window.apiBaseUrl || '') + '/InputQuotation/UpdateQuoteDetail', items);
+            showAlert('success', window.i18nInputQuoteDetail.SaveSuccess);
+            await loadDetailData();
+        } catch (err) {
+            showAlert('danger', window.i18nInputQuoteDetail.SaveError + err);
+        } finally {
+            if (saveButton) saveButton.disabled = false;
+        }
     }
 
     // Send mail quote
     function SendMail() {
-        //const supplier = elements.pageSupplierSelect.value;
-        //if (!supplier) {
-        //    showAlert('warning', 'Vui lòng chọn nhà cung cấp trước khi gửi mail');
-        //    return;
-        //}
-
         // Collect data from pageDetailBody
         const rows = elements.pageDetailBody.querySelectorAll('tr');
         if (rows.length === 0) {
@@ -414,6 +467,8 @@
                 DTM_EffectiveDate: inputs[17]?.value || null,
                 DTM_ExpiryDate: inputs[18]?.value || null,
                 CHR_UpdateBy: window.inputQuoteDetailData?.user,
+                CHR_Status: [inputs[4]?.value, inputs[5]?.value]
+                    .some(value => String(value || '').trim().toLowerCase() === 'refuse') ? 'Refuse' : null,
                 //DTM_QuoteDate: elements.pageQuoteDate.value,
                 //DTM_ValidUntil: elements.pageValidUntil.value,
             });

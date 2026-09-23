@@ -1,14 +1,16 @@
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Models_Working;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Implementations;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
-using PRJ_WAREHOUSE_BIVN.Common;
 using System;
 using System.Collections.Immutable;
 using System.Drawing.Printing;
@@ -16,7 +18,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Path = System.IO.Path;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
     public class InputQuotationController(IExchangeRateService exchangeRateService, IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
@@ -371,13 +372,31 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         item.CHR_Status,
                         "Refuse",
                         StringComparison.OrdinalIgnoreCase);
+                    // Tổng hợp Other request từ các trường ROHS, COCQ, MSDS, AnToan
+                    var otherRequestList = new List<string>();
+                    if (!string.IsNullOrEmpty(item.NVCHR_Rohs))
+                        otherRequestList.Add($"ROHS: {item.NVCHR_Rohs}");
+                    if (!string.IsNullOrEmpty(item.NVCHR_COCQ))
+                        otherRequestList.Add($"COCQ: {item.NVCHR_COCQ}");
+                    if (!string.IsNullOrEmpty(item.NVCHR_MSDS))
+                        otherRequestList.Add($"MSDS: {item.NVCHR_MSDS}");
+                    if (!string.IsNullOrEmpty(item.NVCHR_AnToan))
+                        otherRequestList.Add($"An toàn: {item.NVCHR_AnToan}");
+
+                    string otherRequest = string.Join(" & ", otherRequestList);
+
 
                     ws.Cell(row, 1).Value = item.CHR_MaDon ?? "";
-                    ws.Cell(row, 2).Value = item.CHR_CodeNCC ?? "";
-                    ws.Cell(row, 3).Value = item.NVCHR_NameNCC ?? "";
-                    ws.Cell(row, 4).Value = item.CHR_MaVatTu ?? "";
+                    ws.Cell(row, 2).Value = item.CHR_MaThietBi ?? "";
+                    ws.Cell(row, 3).Value = item.CHR_MaHangNoiBo ?? "";
+                    ws.Cell(row, 4).Value = item.CHR_MaHangNCC ?? "";
+                    ws.Cell(row, 5).Value = item.NVCHR_NameVN ?? "";
+                    ws.Cell(row, 6).Value = item.INT_SoLuong ?? string.Empty;                  // Quantity
+                    ws.Cell(row, 7).Value = item.NVCHR_DonVi ?? string.Empty;                  // Unit
+                    ws.Cell(row, 8).Value = otherRequest;
+                    ws.Cell(row, 9).Value = item.NVCHR_NhaSanXuat ?? "";
 
-                    ws.Cell(row, 10).Value = item.NVCHR_TenHangHQ ?? "";
+                    ws.Cell(row, 10).Value = item.CHR_CodeNCC ?? "";
 
                     ws.Cell(row, 11).Value = item.CHR_MaHangNCC ?? "";
                     ws.Cell(row, 12).Value = item.NVCHR_TenHangHQ ?? "";
@@ -488,11 +507,56 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                if (details == null || details.Count == 0)
+                    return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
+
+                var uniqueFiles = details.Select(c => c.NVCHR_File)
+                       .Where(f => !string.IsNullOrWhiteSpace(f))
+                       .Distinct(StringComparer.OrdinalIgnoreCase)
+                       .ToList();
+
+                var savedMap = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+                foreach (var src in uniqueFiles)
+                {
+                    try
+                    {
+                        var saveRes = await _fileImportService.SaveFileFromPathAsync(src);
+                        savedMap[src] = (saveRes != null && saveRes.Success) ? saveRes.Data : null;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed saving link {Link}", src);
+                        return BadRequest($"Lỗi khi lưu file từ đường dẫn: {src}. Chi tiết: {ex.Message}");
+                    }
+                }
+
+                foreach (var dto in details.Where(d => !string.IsNullOrWhiteSpace(d.NVCHR_File)))
+                {
+                    if (savedMap.TryGetValue(dto.NVCHR_File ?? "", out var saved) && !string.IsNullOrWhiteSpace(saved))
+                    {
+                        dto.NVCHR_dataOld = dto.NVCHR_File; // Lưu giá trị cũ trước khi thay đổi
+                        dto.NVCHR_File = saved;
+                    }
+                }
+
                 var result = await _baoGiaDetailService.UpdateListThongTinNhapBaoGiaAsync(details);
                 if (!result.Success)
                 {
                     return BadRequest(result.Message);
                 }
+
+                var ids = details
+                    .Where(x => x.ID > 0)
+                    .Select(x => x.ID)
+                    .Distinct()
+                    .ToList();
+                var statusResult = await _baoGiaDetailService.UpdateStatusAsync(ids);
+                if (!statusResult.Success)
+                {
+                    _logger.LogError("Lỗi khi cập nhật trạng thái báo giá: {Message}", statusResult.Message);
+                    return BadRequest(statusResult.Message);
+                }
+
                 return Ok(result.Data);
             }
             catch (Exception ex)

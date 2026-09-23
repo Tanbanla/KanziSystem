@@ -182,7 +182,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string loaiNhap { get; set; }
         public string duLieu { get; set; }
     }
-    public class UpdateNoteRequest
+    public class UpdateNoteModel
     {
         public int PoDetailId { get; set; }
         public string Note { get; set; }
@@ -250,12 +250,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             // Tối ưu: Dùng Value?.ToString() thay vì Text sẽ xử lý nhanh hơn trong EPPlus
                             string idDetailPo = worksheet.Cells[row, 1].Text?.ToString()?.Trim() ?? "";
-                            string soPO = worksheet.Cells[row, 5].Text?.ToString()?.Trim() ?? "";
+                            string soPO = worksheet.Cells[row, 3].Text?.ToString()?.Trim() ?? "";
 
-                            string rawNgaydieuchinh = worksheet.Cells[row, 4].Text?.ToString()?.Trim() ?? "";
+                            string rawNgaydieuchinh = worksheet.Cells[row, 14].Text?.ToString()?.Trim() ?? "";
                             string rawNgayGuiPo = worksheet.Cells[row, 11].Text?.ToString()?.Trim() ?? "";
-                            string rawNgayNccXacnhanGh = worksheet.Cells[row, 13].Text?.ToString()?.Trim() ?? "";
-                            string rawNgayGhChinhThuc = worksheet.Cells[row, 14].Text?.ToString()?.Trim() ?? "";
+                            string rawNgayNccXacnhanGh = worksheet.Cells[row, 15].Text?.ToString()?.Trim() ?? "";
+                            string rawNgayGhChinhThuc = worksheet.Cells[row, 16].Text?.ToString()?.Trim() ?? "";
                           
 
                             if (!IsValidDate(rawNgayGuiPo) || !IsValidDate(rawNgayNccXacnhanGh) || !IsValidDate(rawNgayGhChinhThuc))
@@ -273,14 +273,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             // Bỏ qua nếu dòng trống dữ liệu cần thiết
                             if (ngayGuiPo == "NULL") continue;
 
-                            string giogh = SafeString(worksheet.Cells[row, 15].Text?.ToString()!);
-                            string lichGiao = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 16].Text) ? null : worksheet.Cells[row, 16].Text.Trim());
-                            string anhHuongSx = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 17].Text) ? null : worksheet.Cells[row, 17].Text.Trim());
-                            string cuaGh = SafeString(worksheet.Cells[row, 18].Text?.ToString()!);
-                            string congNhanHang = SafeString(worksheet.Cells[row, 19].Text?.ToString()!);
-                            string nguoiNhanHang = worksheet.Cells[row, 20].Text?.ToString()!;
-                            string soDntt = SafeString(worksheet.Cells[row, 21].Text?.ToString()!);
-                            string soHoaDon = SafeString(worksheet.Cells[row, 22].Text?.ToString()!);
+                            string giogh = SafeString(worksheet.Cells[row, 17].Text?.ToString()!);
+                            string lichGiao = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 18].Text) ? null : worksheet.Cells[row, 18].Text.Trim());
+                            string anhHuongSx = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 19].Text) ? null : worksheet.Cells[row, 19].Text.Trim());
+                            string cuaGh = SafeString(worksheet.Cells[row, 20].Text?.ToString()!);
+                            string congNhanHang = SafeString(worksheet.Cells[row, 21].Text?.ToString()!);
+                            string nguoiNhanHang = worksheet.Cells[row, 22].Text?.ToString()!;
+                          
                             string Note = SafeString(worksheet.Cells[row, 23].Text?.ToString()!);
 
                             // Đưa câu lệnh vào bộ đệm (Không gọi DB ngay)
@@ -289,7 +288,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     BEGIN
                                         UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] 
                                         SET
-                                            SoPO = '{soPO}',
                                             Ngay_gui_PO = {ngayGuiPo},
                                             Ngay_NCC_xacnhanGH = {ngayNccXacnhanGh},
                                             Ngay_GHchinhthuc = {ngayGhChinhThuc},
@@ -299,8 +297,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                             Cua_GH = {cuaGh},
                                             Cong_Nhanhang = {congNhanHang},
                                             Nguoi_Nhanhang = N'{nguoiNhanHang}',
-                                            So_DNTT = {soDntt},
-                                            So_hoadon = {soHoaDon},
                                             Dieuchinhlichgiao = {ngayDieuchinh},
                                             Note = {Note}
                                         WHERE Id_Detail_PO = '{idDetailPo}';
@@ -310,12 +306,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         INSERT INTO [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] 
                                         (
                                             SoPO, Id_Detail_PO, Ngay_gui_PO, Ngay_NCC_xacnhanGH, Ngay_GHchinhthuc, Gio_GH, 
-                                            Lichgiao, Anh_huong_SX, Cua_GH, Cong_Nhanhang, Nguoi_Nhanhang, So_DNTT, So_hoadon, Dieuchinhlichgiao, Note
+                                            Lichgiao, Anh_huong_SX, Cua_GH, Cong_Nhanhang, Nguoi_Nhanhang, Dieuchinhlichgiao, Note
                                         )
                                         VALUES  
                                         (
                                             '{soPO}', '{idDetailPo}', {ngayGuiPo}, {ngayNccXacnhanGh}, {ngayGhChinhThuc}, {giogh},
-                                            {lichGiao}, {anhHuongSx}, {cuaGh}, {congNhanHang}, N'{nguoiNhanHang}', {soDntt}, {soHoaDon}, {ngayDieuchinh}, {Note}
+                                            {lichGiao}, {anhHuongSx}, {cuaGh}, {congNhanHang}, N'{nguoiNhanHang}', {ngayDieuchinh}, {Note}
                                         );
                                     END;
                                 ");
@@ -421,7 +417,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return "";
         }
-        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc", string mahang = "")
+        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc", string mahang = "", string tenncc = "")
         {          
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             tinhtoanlichgiao();
@@ -429,7 +425,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var checkus = sql.ReturnString($"select [Group_Code] from [GROUP_MEMBER] where CHR_USERID = '{us}'");
 
             var khoi = "";
-            if (checkus == "PUR") { khoi = "AND (Group_Code = 'PUR' OR Group_Code = 'PROD')"; }
+            if (checkus == "PUR") { khoi = "AND (a.Group_Code = 'PUR' OR a.Group_Code = 'PROD')"; }
             if (checkus == "GA") { khoi = "AND Group_Code = 'GA'"; }
             var get_sec = sql.ReturnString($"SELECT CHR_SECTION  FROM [TM_USER] where CHR_USERID = '{us}'");
             var hientheophongban = "";
@@ -466,7 +462,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     mainCondition = $"MONTH(Ngayphathanh) = '{reqMonth.Split('-')[1]}' AND YEAR(Ngayphathanh) = '{reqMonth.Split('-')[0]}' ";
                 }
             }
-            string query = $@"SELECT a.*, b.*, c.Damnhiem FROM [COST_MANAGEMENT].[dbo].[PO] as a 
+            if (!string.IsNullOrEmpty(tenncc)) { mainCondition += $" AND a.TenNCC LIKE N'%{tenncc.Replace("'", "''")}%'"; }
+            string query = $@"SELECT a.*, b.*, c.Damnhiem, d.User_Create FROM [COST_MANAGEMENT].[dbo].[PO] as a 
                 OUTER APPLY (
                     SELECT TOP 1 * FROM PE_THEODOITIENDO WHERE Id_Detail_PO = a.PO_Detail_Id 
                     ORDER BY Ngay_NCC_xacnhanGH DESC 
@@ -474,6 +471,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 OUTER APPLY (
                     SELECT TOP 1 Damnhiem FROM PE_DamnhiemNCC WHERE MaNCC = a.MaNCC
                 ) as c
+                LEFT JOIN REQUEST as d on a.Code_Request = d.Code_Request
                 WHERE {mainCondition} {khoi} {tabCondition}
                 AND Ngayphathanh >= '2024-01-01'
                 AND TinhtrangPO <> 'HOANTHANH' AND TinhtrangPO <> 'HUY' AND Luongvekho is null
@@ -586,7 +584,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.Soluong = double.Parse(lst.Rows[i]["Soluong"].ToString()!);
                 po.Donvi = lst.Rows[i]["Dovi"].ToString();
                 po.Nhacungcap = lst.Rows[i]["TenNCC"].ToString();
-                po.DNphathanhpo = lst.Rows[i]["Nguoilamdon"].ToString()?.ToLower();
+                po.DNphathanhpo = lst.Rows[i]["User_Create"].ToString()?.ToLower();
                 po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
                 po.MaNhacungcap = lst.Rows[i]["MaNCC"].ToString();
                 po.picpur = lst.Rows[i]["Damnhiem"].ToString();
@@ -1165,7 +1163,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
         }
         [HttpGet] // Hoặc [HttpGet] tùy thuộc vào form của bạn ở View đang dùng gì
-        public IActionResult ExportExcel(string searchTerm = "", string picpur = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "", string mahang = "")
+        public IActionResult ExportExcel(string searchTerm = "", string picpur = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "", string mahang = "", string tenncc="")
         {
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             tinhtoanlichgiao();
@@ -1213,7 +1211,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                   
             }
-
+            if (!string.IsNullOrEmpty(tenncc)) { mainCondition += $" AND a.TenNCC LIKE N'%{tenncc.Replace("'", "''")}%'"; }
             // Đã thêm điều kiện loại bỏ HOANTHANH và HUY giống ManageDelivery
             string query = $@"SELECT a.*, b.*, c.Damnhiem 
                     FROM [COST_MANAGEMENT].[dbo].[PO] as a 
@@ -1258,6 +1256,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.DNphathanhpo = lst.Rows[i]["Nguoilamdon"].ToString()?.ToLower();
                 po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
                 po.MaNhacungcap = lst.Rows[i]["MaNCC"].ToString();
+                po.Code_Request = lst.Rows[i]["Code_Request"].ToString();
+                po.Good_Code = lst.Rows[i]["Good_Code"].ToString();
                 po.picpur = lst.Rows[i]["Damnhiem"].ToString();
                 object valNgayGui = lst.Rows[i]["Ngay_gui_PO"];
                 po.ngayguiPO = (valNgayGui != null && valNgayGui != DBNull.Value) ? Convert.ToDateTime(valNgayGui).ToString("yyyy-MM-dd") : "";
@@ -1436,9 +1436,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     x.PO_Detail_Id,
                     x.Ngayyc,
-                    x.Ngayycgiao,
-                    x.Dieuchinhlichgiao,
                     x.SoPO,
+                    x.Code_Request,
+                    x.Good_Code,
                     x.Tentiengviet,
                     x.Mahang,
                     x.Soluong,
@@ -1446,6 +1446,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     x.Nhacungcap,
                     x.ngayguiPO,
                     x.picpur,
+                    x.Ngayycgiao,
+                    x.Dieuchinhlichgiao,
                     x.ngaynccxngiao,
                     x.Ngay_GHchinhthuc,
                     x.Gio_GH,
@@ -1454,8 +1456,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     x.Cua_GH,
                     x.Cong_Nhanhang,
                     x.Nguoi_Nhanhang,
-                    x.So_DNTT,
-                    x.So_hoadon,
                     x.Note
                 }).ToList();
 
@@ -3474,8 +3474,263 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
-     
-        
+
+        [HttpPost]
+        public IActionResult UpdateNote([FromBody] UpdateNoteModel model)
+        {
+            try
+            {
+                if (model.PoDetailId <= 0)
+                {
+                    return Json(new { success = false, message = "ID chi tiết PO không hợp lệ." });
+                }
+
+                // Xử lý chuỗi để tránh lỗi SQL Injection khi người dùng nhập dấu nháy đơn (')
+                string safeNote = string.IsNullOrEmpty(model.Note) ? "" : model.Note.Replace("'", "''");
+
+                // Logic UPSERT: Update nếu đã có dòng theo dõi, Insert nếu chưa có
+                string sqlQuery = $@"
+                        IF EXISTS (SELECT 1 FROM [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] WHERE [Id_Detail_PO] = {model.PoDetailId})
+                        BEGIN
+                            UPDATE [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO]
+                            SET [Note] = N'{safeNote}'
+                            WHERE [Id_Detail_PO] = {model.PoDetailId}
+                        END
+                        ELSE
+                        BEGIN
+                            -- Nếu chưa có dòng theo dõi tiến độ, thực hiện Insert lấy SoPO từ bảng PO gốc
+                            INSERT INTO [COST_MANAGEMENT].[dbo].[PE_THEODOITIENDO] ([SoPO], [Id_Detail_PO], [Note])
+                            SELECT [SoPO], {model.PoDetailId}, N'{safeNote}'
+                            FROM [COST_MANAGEMENT].[dbo].[PO]
+                            WHERE [PO_Detail_Id] = {model.PoDetailId}
+                        END
+                    ";
+
+                // Thực thi câu lệnh SQL bằng class kết nối của bạn
+                SQL_Connect_DB20 sql = new SQL_Connect_DB20();
+                sql.GET_DATA_FROM_SQL(sqlQuery);
+
+                return Json(new { success = true, message = "Cập nhật ghi chú thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+        public IActionResult Master_NCC()
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            List<NccModel> list = new List<NccModel>();
+            string sql = "SELECT [Id], [TenNCC], [MaNCC], [Damnhiem] FROM [COST_MANAGEMENT].[dbo].[PE_DamnhiemNCC]";
+           
+            using (SqlConnection conn = new SqlConnection(db.connectString))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new NccModel
+                        {
+                            Id = Convert.ToInt32(reader["Id"]),
+                            TenNCC = reader["TenNCC"].ToString(),
+                            MaNCC = reader["MaNCC"].ToString(),
+                            Damnhiem = reader["Damnhiem"].ToString()
+                        });
+                    }
+                }
+            }
+            return View(list);
+        }
+        [HttpPost]
+        public IActionResult CreateNCC([FromBody] NccModel model)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            try
+            {
+                if (string.IsNullOrEmpty(model.MaNCC)) return Json(new { success = false, message = "Mã NCC không được để trống." });
+
+                string sqlQuery = @"INSERT INTO [COST_MANAGEMENT].[dbo].[PE_DamnhiemNCC] (TenNCC, MaNCC, Damnhiem) 
+                                VALUES (@TenNCC, @MaNCC, @Damnhiem)";
+
+                using (SqlConnection conn = new SqlConnection(db.connectString))
+                using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TenNCC", model.TenNCC ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MaNCC", model.MaNCC);
+                    cmd.Parameters.AddWithValue("@Damnhiem", model.Damnhiem ?? (object)DBNull.Value);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+
+                return Json(new { success = true, message = "Thêm nhà cung cấp thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
+        // --- API CẬP NHẬT (SỬA) ---
+        [HttpPost]
+        public IActionResult UpdateNCC([FromBody] NccModel model)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            try
+            {
+                if (model.Id <= 0) return Json(new { success = false, message = "ID không hợp lệ." });
+
+                string sqlQuery = @"UPDATE [COST_MANAGEMENT].[dbo].[PE_DamnhiemNCC] 
+                                SET TenNCC = @TenNCC, MaNCC = @MaNCC, Damnhiem = @Damnhiem 
+                                WHERE Id = @Id";
+
+                using (SqlConnection conn = new SqlConnection(db.connectString))
+                using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", model.Id);
+                    cmd.Parameters.AddWithValue("@TenNCC", model.TenNCC ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MaNCC", model.MaNCC ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Damnhiem", model.Damnhiem ?? (object)DBNull.Value);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+
+                return Json(new { success = true, message = "Cập nhật thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
+        // --- API XÓA ---
+        [HttpPost]
+        public IActionResult DeleteNCC([FromBody] DeleteNccModel model)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            try
+            {
+                if (model.Id <= 0) return Json(new { success = false, message = "ID không hợp lệ." });
+
+                string sqlQuery = "DELETE FROM [COST_MANAGEMENT].[dbo].[PE_DamnhiemNCC] WHERE Id = @Id";
+
+                using (SqlConnection conn = new SqlConnection(db.connectString))
+                using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", model.Id);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+
+                return Json(new { success = true, message = "Xóa nhà cung cấp thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+
+        // --- API IMPORT EXCEL ---
+        [HttpPost]
+        public IActionResult ImportExcel(IFormFile file)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            try
+            {
+                if (file == null || file.Length == 0) return Json(new { success = false, message = "Vui lòng chọn file Excel." });
+
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                int count = 0;
+
+                using (var stream = new System.IO.MemoryStream())
+                {
+                    file.CopyTo(stream);
+                    using (var package = new ExcelPackage(stream))
+                    {
+                        var worksheet = package.Workbook.Worksheets[0];
+                        int rowCount = worksheet.Dimension.Rows;
+
+                        using (SqlConnection conn = new SqlConnection(db.connectString))
+                        {
+                            conn.Open();
+                            // Chạy từ dòng 2 (bỏ dòng tiêu đề)
+                            for (int row = 2; row <= rowCount; row++)
+                            {
+                                var tenNcc = worksheet.Cells[row, 2].Value?.ToString();
+                                var maNcc = worksheet.Cells[row, 3].Value?.ToString();
+                                var damNhiem = worksheet.Cells[row, 4].Value?.ToString();
+
+                                if (!string.IsNullOrEmpty(maNcc))
+                                {
+                                    // Sử dụng IF EXISTS để kiểm tra xem MaNCC đã tồn tại chưa
+                                    string sqlQuery = @"
+                                        IF EXISTS (SELECT 1 FROM [COST_MANAGEMENT].[dbo].[PE_DamnhiemNCC] WHERE MaNCC = @MaNCC)
+                                        BEGIN
+                                            UPDATE [COST_MANAGEMENT].[dbo].[PE_DamnhiemNCC]
+                                            SET TenNCC = @TenNCC,
+                                                Damnhiem = @Damnhiem
+                                            WHERE MaNCC = @MaNCC
+                                        END
+                                        ELSE
+                                        BEGIN
+                                            INSERT INTO [COST_MANAGEMENT].[dbo].[PE_DamnhiemNCC] (TenNCC, MaNCC, Damnhiem) 
+                                            VALUES (@TenNCC, @MaNCC, @Damnhiem)
+                                        END";
+
+                                    using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
+                                    {
+                                        // Gán tham số (thêm DBNull.Value nếu giá trị null để tránh lỗi SQL)
+                                        cmd.Parameters.AddWithValue("@TenNCC", tenNcc ?? (object)DBNull.Value);
+                                        cmd.Parameters.AddWithValue("@MaNCC", maNcc);
+                                        cmd.Parameters.AddWithValue("@Damnhiem", damNhiem ?? (object)DBNull.Value);
+
+                                        // Thực thi câu lệnh
+                                        cmd.ExecuteNonQuery();
+                                        count++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return Json(new { success = true, message = $"Import thành công {count} dòng dữ liệu!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+       
+        public class DeleteNccModel
+        {
+            public int Id { get; set; }
+        }
+
+        public JsonResult List_DamnhiemNCC()
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var lt = db.GET_DATA_FROM_SQL("select distinct(Damnhiem) from PE_DamnhiemNCC");
+            List<string> damnhiem = new List<string>();
+            for(int i = 0; i < lt.Rows.Count; i++)
+            {
+                damnhiem.Add(lt.Rows[i][0].ToString()!);
+            }
+            return Json(damnhiem);
+        }
+        public JsonResult List_NCCtheodamnhiem(string tendamnhiem)
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var lt = db.GET_DATA_FROM_SQL($"select TenNCC from PE_DamnhiemNCC where Damnhiem = N'{tendamnhiem}'");
+            List<string> damnhiem = new List<string>();
+            for (int i = 0; i < lt.Rows.Count; i++)
+            {
+                damnhiem.Add(lt.Rows[i][0].ToString()!);
+            }
+            return Json(damnhiem);
+        }
     }
 }
 

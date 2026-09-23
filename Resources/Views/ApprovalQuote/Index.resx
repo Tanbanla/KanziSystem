@@ -310,7 +310,7 @@
     <value>Lấy báo giá</value>
   </data>
   <data name="Reason" xml:space="preserve">
-    <value>Lý do</value>
+    <value>Lý do không tin báo giá</value>
   </data>
   <data name="Urgent" xml:space="preserve">
     <value>Gấp</value>

@@ -147,11 +147,12 @@
 
         if (!pageItems.length) {
             const message = hasFilter ? 'Không tìm thấy mặt hàng phù hợp' : 'Không có dữ liệu';
-            body.innerHTML = `<tr><td colspan="14" class="text-center text-muted py-4">${message}</td></tr>`;
+            body.innerHTML = `<tr><td colspan="15" class="text-center text-muted py-4">${message}</td></tr>`;
             return;
         }
         body.innerHTML = pageItems.map(({ item, index }, pageIndex) => `<tr>
             <td class="text-center">${startIndex + pageIndex + 1}</td>
+            <td class="text-center">${escapeHtml(item.requestTypeName || item.requestType)}</td>
             <td class="text-center">${escapeHtml(item.internalCode)}</td>
             <td class="text-center">${escapeHtml(item.category)}</td>
             <td class="text-center">${escapeHtml(item.classification)}</td>
@@ -182,8 +183,8 @@
 
     const validateAndCollect = () => {
         const errors = [];
-        ['selectPhanLoai', 'selectChungLoai', 'selectTenVN', 'selectTenEN', 'selectSoLuong', 'editDonVi', 'NgayMuonNhan', 'LuaChonNcc']
-            .forEach((id, index) => required(id, ['Phân loại hàng', 'Chủng loại hàng', 'Tên tiếng Việt', 'Tên tiếng Anh', 'Số lượng', 'Đơn vị', 'Ngày muốn nhận hàng', 'Hạn chọn nhà cung cấp'][index], errors));
+        ['selectPhanLoai', 'selectChungLoai', 'selectType', 'selectTenVN', 'selectTenEN', 'selectSoLuong', 'editDonVi', 'NgayMuonNhan', 'LuaChonNcc']
+            .forEach((id, index) => required(id, ['Phân loại hàng', 'Chủng loại hàng', 'Loại hàng xin báo giá', 'Tên tiếng Việt', 'Tên tiếng Anh', 'Số lượng', 'Đơn vị', 'Ngày muốn nhận hàng', 'Hạn chọn nhà cung cấp'][index], errors));
         const suppliers = Array.from(document.querySelectorAll('#supplierTableBody tr')).filter(row => row.querySelector('.supplier-quote-checkbox')).map(row => ({
             code: row.querySelector('input[name^="supplierCode_"]')?.value || '',
             name: row.cells[2]?.textContent.trim() || '',
@@ -233,6 +234,8 @@
             internalCode: valueOf('searchMahangNB'),
             category: valueOf('selectChungLoai'),
             classification: valueOf('selectPhanLoai'),
+            requestType: valueOf('selectType'),
+            requestTypeName: $('selectType')?.selectedOptions?.[0]?.textContent.trim() || '',
             vietnameseName: valueOf('selectTenVN'),
             englishName: valueOf('selectTenEN'),
             supplierItemCode: valueOf('selectMaHangNCC'),
@@ -436,6 +439,7 @@
             searchMahangNB: item.internalCode,
             selectPhanLoai: item.classification,
             selectChungLoai: item.category,
+            selectType: item.requestType,
             selectTenVN: item.vietnameseName,
             selectTenEN: item.englishName,
             selectMaThietBi: item.equipmentCode,
@@ -465,7 +469,7 @@
         Object.entries(fields).forEach(([id, value]) => setFieldValue(id, value, false));
         await loadSuppliers(item.category);
         Object.entries(fields).forEach(([id, value]) => setFieldValue(id, value, false));
-        ['searchMahangNB', 'selectPhanLoai', 'selectChungLoai', 'selectGap']
+            ['searchMahangNB', 'selectPhanLoai', 'selectChungLoai', 'selectType', 'selectGap']
             .forEach(refreshSearchableSelect);
         applySupplierValues(item.suppliers);
     };
@@ -603,6 +607,8 @@
             return {
                 internalCode: getImportedField(item, 'CHR_MaHangNoiBo', 'MaHangNoiBo', 'InternalCode'),
                 category: getImportedField(item, 'NVCHR_ChungLoai', 'ChungLoai', 'Category'),
+                requestType: getImportedField(item, 'WfType', 'WFType', 'RequestType', 'LoaiHangXinBaoGia'),
+                requestTypeName: getImportedField(item, 'WfTypeName', 'RequestTypeName', 'LoaiHangXinBaoGiaName'),
                 classification: getImportedField(item, 'CHR_Phanloai', 'Phanloai', 'Classification'),
                 vietnameseName: getImportedField(item, 'NVCHR_NameVN', 'NameVN', 'VietnameseName'),
                 englishName: getImportedField(item, 'CHR_NameEN', 'NameEN', 'EnglishName'),
@@ -684,6 +690,8 @@
             return quoteItems.map(item => ({
                 CHR_MaHangNoiBo: item.internalCode || null,
                 CHR_MaHangNCC: item.supplierItemCode || null,
+                WfType: item.requestType || null,
+                WfTypeName: item.requestTypeName || null,
                 CHR_MaThietBi: item.equipmentCode || null,
                 CHR_NameEN: item.englishName || null,
                 CHR_Phanloai: item.classification || null,
@@ -759,7 +767,7 @@
                 NVCHR_LyDo: supplier.reason || null
             })),
             WfSection: valueOf('selectSection') || null,
-            WfType: valueOf('selectType') || null,
+             WfType: item.requestType || null,
         }));
         const getDownloadFileName = response => {
             const contentDisposition = response.headers.get('content-disposition');

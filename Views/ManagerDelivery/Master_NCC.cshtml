@@ -1,0 +1,166 @@
+@model IEnumerable<PRJ_WAREHOUSE_BIVN.Models.NccModel>
+
+@{
+    ViewData["Title"] = "Quản lý đảm nhiệm nhà cung cấp";
+}
+
+<div class="mb-3 d-flex gap-2">
+    <!-- Nút thêm -->
+    <button class="btn btn-primary mr-3" onclick="openModal(0, '', '', '')">Thêm Mới</button>
+
+    <!-- Form Upload Excel -->
+    <input type="file" id="fileExcel" class="form-control w-auto" accept=".xlsx" />
+    <button class="btn btn-success" onclick="uploadExcel()">Import Excel</button> 
+    <a class="btn btn-info ml-3 text-white" href="~/template/Master_Damnhiem.xlsx">File mẫu</a> 
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr class="bg-primary">
+            <th>Id</th>
+            <th>Tên NCC</th>
+            <th>Mã NCC</th>
+            <th>Đảm nhiệm</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.TenNCC</td>
+                <td>@item.MaNCC</td>
+                <td>@item.Damnhiem</td>
+                <td>
+                       <button class="btn btn-sm btn-warning" 
+                            onclick="openModal(this)" 
+                            data-id="@item.Id" 
+                            data-ten="@item.TenNCC" 
+                            data-ma="@item.MaNCC" 
+                            data-damnhiem="@item.Damnhiem">
+                        Sửa
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteNCC(@item.Id)">Xóa</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- HTML Modal nhập liệu (Thêm/Sửa) -->
+<div id="nccModal" class="modal" tabindex="-1" style="display:none; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050;">
+    <div class="modal-dialog" style="margin-top: 10%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông tin NCC</h5>
+                <button type="button" class="btn-close" onclick="closeModal()"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtId" value="0" />
+                <div class="mb-2"><label>Tên NCC</label><input type="text" id="txtTenNcc" class="form-control" /></div>
+                <div class="mb-2"><label>Mã NCC</label><input type="text" id="txtMaNcc" class="form-control" /></div>
+                <div class="mb-2"><label>Đảm nhiệm</label><input type="text" id="txtDamnhiem" class="form-control" /></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="saveNCC()">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JAVASCRIPT GỌI API -->
+<script>
+   function openModal(btn) {
+    if (btn == null) {
+        // Form Thêm mới
+        document.getElementById("txtId").value = "0";
+        document.getElementById("txtTenNcc").value = "";
+        document.getElementById("txtMaNcc").value = "";
+        document.getElementById("txtDamnhiem").value = "";
+    } else {
+        // Form Sửa
+        document.getElementById("txtId").value = btn.getAttribute("data-id");
+        document.getElementById("txtTenNcc").value = btn.getAttribute("data-ten");
+        document.getElementById("txtMaNcc").value = btn.getAttribute("data-ma");
+        document.getElementById("txtDamnhiem").value = btn.getAttribute("data-damnhiem");
+    }
+    document.getElementById("nccModal").style.display = "block";
+}
+
+    function closeModal() {
+        document.getElementById("nccModal").style.display = "none";
+    }
+
+    // HÀM LƯU (THÊM / SỬA) GIỐNG LOGIC CỦA BẠN
+    async function saveNCC() {
+        let id = parseInt(document.getElementById("txtId").value);
+        let url = id === 0 ? '/ManagerDelivery/CreateNCC' : '/ManagerDelivery/UpdateNCC';
+
+        let model = {
+            Id: id,
+            TenNCC: document.getElementById("txtTenNcc").value,
+            MaNCC: document.getElementById("txtMaNcc").value,
+            Damnhiem: document.getElementById("txtDamnhiem").value
+        };
+
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(model)
+        });
+
+        let result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload(); // Tải lại trang để thấy dữ liệu mới
+        } else {
+            alert(result.message);
+        }
+    }
+
+    // HÀM XÓA
+    async function deleteNCC(id) {
+        if (!confirm("Bạn có chắc chắn muốn xóa không?")) return;
+
+        let response = await fetch('/ManagerDelivery/DeleteNCC', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ Id: id })
+        });
+
+        let result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert(result.message);
+        }
+    }
+
+    // HÀM IMPORT EXCEL
+    async function uploadExcel() {
+        let fileInput = document.getElementById("fileExcel");
+        if (fileInput.files.length === 0) {
+            alert("Vui lòng chọn file!"); return;
+        }
+
+        let formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        // Gửi qua Fetch API
+        let response = await fetch('/ManagerDelivery/ImportExcel', {
+            method: 'POST',
+            body: formData
+        });
+
+        let result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert(result.message);
+        }
+    }
+</script>

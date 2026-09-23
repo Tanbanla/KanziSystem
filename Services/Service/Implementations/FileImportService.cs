@@ -107,6 +107,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         await sourceStream.CopyToAsync(destStream);
                     }
 
+                    File.Delete(p);
+
                     var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
                     var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
                     savedFiles.Add((candidate.Value, fileUrl));

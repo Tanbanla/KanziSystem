@@ -74,12 +74,27 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> GetListApprovel([FromBody] SearchApprovalModel sr)
         {
-            var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 3, sr.SectionCost ?? "");
-            if (!result.Success)
+            var step = sr.Step ?? 3;
+            var sectionCost = sr.SectionCost ?? "";
+
+            if (step == 3)
             {
-                return BadRequest("Error list Approver: " + result.Message);
+                var agentResult = await _approverService.GetApproverByAgrentAsync(step, sectionCost);
+                if (!agentResult.Success)
+                {
+                    return BadRequest("Error list Approver: " + agentResult.Message);
+                }
+
+                return Ok(agentResult.Data);
             }
-            return Ok(result.Data);
+
+            var approverResult = await _approverService.GetApproverByStepAndSectionAsync(step, sectionCost);
+            if (!approverResult.Success)
+            {
+                return BadRequest("Error list Approver: " + approverResult.Message);
+            }
+
+            return Ok(approverResult.Data);
         }
         // Lay thong tin phong ban
         public async Task<List<DEPARTMENTDTO>> GetNhomViTriList()

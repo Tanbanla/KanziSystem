@@ -15,7 +15,7 @@
     var sortDirection = ViewBag.SortDirection as string ?? "asc";
 
     int stt = (currentPage - 1) * pageSize + 1;
-    var div_layout = "col-md-5";
+    var div_layout = "col-md-6";
     // Lấy thông tin quyền hạn của User
     var userSection = User.FindFirst("Section")?.Value;
 
@@ -64,7 +64,7 @@
     }
 
     body {
-        zoom: 90%;
+        zoom: 93%;
         background-color: #f8f9fa;
         font-size: 14px;
     }
@@ -83,7 +83,7 @@
     }
 
     .table-responsive {
-        max-height: calc(100vh - 280px);
+        max-height: calc(100vh - 330px);
         overflow-y: auto;
         overflow-x: auto; /* Thêm dòng này để tạo thanh cuộn ngang */
     }
@@ -168,6 +168,7 @@
 
     .nav-tabs .nav-link.active {
         color: white;
+
         background-color: #2335b7;
     }
 
@@ -182,7 +183,42 @@
     .bg-white {
         background-color: #ebf7ff !important;
     }
-   
+
+    /* --- CSS CHO CÁC CỘT ĐƯỢC FREEZE --- */
+    .sticky-td {
+        background-color: #ffffff; /* Nền trắng mặc định để chữ không đè lên nhau */
+    }
+    
+    /* Hover mặc định cho các dòng bình thường (không OK, không NG) */
+    .table-hover tbody tr.main-row:hover .sticky-td {
+        background-color: #e4e4e4 !important;
+    }
+
+    /* 1. Xử lý màu nền cho các dòng cảnh báo NG */
+    .row-alert-yes,
+    .row-alert-yes .sticky-td {
+        background-color: #fce8e6 !important; /* Đỏ nhạt cảnh báo */
+    }
+    .table-hover tbody tr.row-alert-yes:hover,
+    .table-hover tbody tr.row-alert-yes:hover .sticky-td {
+        background-color: #f5d6d2 !important; /* Đỏ đậm hơn khi hover để dễ nhận biết */
+    }
+
+    /* 2. Xử lý màu nền cho các dòng OK */
+    .row-alert-ok,
+    .row-alert-ok .sticky-td {
+        background-color: #e8f5e9 !important; /* Xanh lá nhạt an toàn */
+    }
+    .table-hover tbody tr.row-alert-ok:hover,
+    .table-hover tbody tr.row-alert-ok:hover .sticky-td {
+        background-color: #c8e6c9 !important; /* Xanh lá đậm hơn khi hover */
+    }
+
+    /* Đường kẻ phân cách để dễ phân biệt vùng đã Freeze */
+    .sticky-boundary {
+        border-right: 1px solid #a6a6a6 !important;
+        box-shadow: 1px 0 5px -2px rgba(0,0,0,0.15);
+    }
 </style>
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -202,10 +238,8 @@
         <div class="card-body">
             <form id="filterForm" asp-action="ManageDelivery" method="get" class="row g-3">
                 <input type="hidden" name="tab" id="activeTab" value="@currentTab" />
-
                 <input type="hidden" name="sortColumn" id="sortColumn" value="@sortColumn" />
                 <input type="hidden" name="sortDirection" id="sortDirection" value="@sortDirection" />
-
                 <div class="col-md-2">
                     <label class="form-label fw-semibold">Từ khóa tìm kiếm</label>
                     <input type="text" name="searchTerm" class="form-control" value="@searchTerm" placeholder="Nhập Số PO, NCC, hoặc Mã hàng...">
@@ -214,7 +248,7 @@
                     <label class="form-label fw-semibold">Tháng yêu cầu</label>
                  <input type="month" name="reqMonth" class="form-control">
                 </div>
-              <div class="col-md-1">
+                <div class="col-md-1">
                 <label class="form-label fw-semibold">Ảnh hưởng SX</label>
                     <select name="impactStatus" class="form-control">
                         <option value="" selected="@(string.IsNullOrEmpty(currentImpact))">-- Tất cả --</option>
@@ -222,9 +256,9 @@
                         <option value="OK" selected="@(currentImpact == "OK")">Lịch giao OK</option>                      
                     </select>
                 </div>
-            @if (currentTab == "trong")
+                @if (currentTab == "trong")
                 {
-                    div_layout = "col-md-3";
+                    div_layout = "col-md-4";
                     <div class="col-md-1">
                         <label class="form-label fw-semibold">PullIn/PullOut</label>
                         <select name="pullStatus" class="form-control">
@@ -243,22 +277,18 @@
                         </select>
                     </div>
                 }
-                <div class="col-md-1">
-                    <label class="form-label fw-semibold">Pic PUR</label>
-                    <input type="text" name="picpur" class="form-control" value="@ViewBag.PicPur">
-                </div>
+                
                 <div class="col-md-2 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary"><i class="fa-solid ion-funnel me-1"></i> Lọc</button>                 
                     <a href="@Url.Action("ManageDelivery", new { tab = currentTab })" class="btn btn-secondary ml-1"><i class="fa-solid ion-ios-loop-strong me-1"></i> Refresh</a>
                     <button type="button" class="btn btn-outline-danger ml-1" onclick="exportDataExcel()">
-                        <i class="fa-solid fa fa-file-excel me-1"></i> Export
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Xuất Excel
                     </button>
-                </div>
-               
+                </div>               
                 <div class="@div_layout d-flex align-items-end gap-2 justify-content-end">
                
                     <button type="button" class="btn btn-outline-success ml-1" id="btnOpenImportExcel">
-                        <i class="fa-solid fa fa-file-excel me-1"></i> Import Excel
+                        <i class="fa-solid fa fa-file-excel me-1"></i> Nhập Excel
                     </button>
                     @if (userSection == "3100" || userSection == "1100")
                     {
@@ -271,6 +301,19 @@
                             <span class="badge bg-danger rounded-pill ms-1 text-white" id="demgate" style="display:none;"></span>
                         </button>
                     }
+                </div>
+                <div class="col-md-1 mt-2">
+                    <label class="form-label fw-semibold">Pic PUR :</label>
+                    <select id="damnhiemDropdown" class="form-control" name="picpur" onchange="load_ncc()">
+                        <option value="">-- Chọn --</option>
+                        <!-- Dữ liệu được đổ từ hàm List_DamnhiemNCC ở câu trước -->
+                    </select>
+                </div>
+                <div class="col-md-2 mt-2">
+                    <label class="form-label fw-semibold">Nhà cung cấp :</label>
+                    <select id="nccDropdown" class="form-control" disabled name="tenncc">
+                        <option value="">-- Vui lòng chọn Đảm nhiệm trước --</option>
+                    </select>
                 </div>
             </form>
         </div>
@@ -287,17 +330,7 @@
                             }
                             <th class="bg-white text-dark" hidden>ID</th>
                             <!-- DÙNG HÀM TẠO HEADER CÓ SẮP XẾP -->
-                            @RenderSortHeader("Ngayyc", "Ngày YC", "bg-pur text-white")                        
-                            @RenderSortHeader("Ngayycgiao", "Ngày YC giao", "bg-pur text-white")
-                            @if (userSection == "2500")
-                            {
-                                <th class="bg-pur text-white" colspan="2" width="120px">Điều chỉnh</th>
-                            }
-                            else
-                            {
-                                <th class="bg-pur text-white" width="120px">Điều chỉnh</th>
-                            }
-
+                            @RenderSortHeader("Ngayyc", "Ngày YC", "bg-pur text-white")                                                  
                             @RenderSortHeader("SoPO", "Số PO", "bg-pur text-white", "80px")
                             @if (currentTab == "ngoai")
                             {
@@ -312,6 +345,18 @@
                             @RenderSortHeader("Nhacungcap", "Tên NCC", "bg-pur text-white", "200px")
                             @RenderSortHeader("ngayguiPO", "Ngày gửi PO", "bg-white", "80px")
                             @RenderSortHeader("PicPur", "Pic Pur", "bg-pur text-white")
+                             <th class="bg-pur text-white" width="80px">Người yêu cầu</th>
+                            @RenderSortHeader("Ngayycgiao", "Ngày YC giao", "bg-pur text-white")                       
+                            @if (userSection == "2500")
+                            {
+                                <th class="bg-pur text-white" colspan="2" width="120px">Điều chỉnh</th>
+                            }
+                            else
+                            {
+                                <th class="bg-pur text-white" width="120px">Điều chỉnh</th>
+                            }
+
+                          
                             @RenderSortHeader("ngaynccxngiao", "Ngày GH dự kiến", "bg-white", "80px")                          
                             <th class="bg-white" width="100px">Ngày GH Chính thức</th>
                             <th class="bg-white" width="80px">Giờ chính thức</th>
@@ -326,16 +371,16 @@
                             {
                                 <th class="bg-white" width="80px">Cửa GH Cổng GH</th>
                                 <th class="bg-white">Người nhận</th>
-                                <th class="bg-white">Số ĐNTT</th>
-                                <th class="bg-white">Số HĐ</th>
-                                <th class="bg-white" colspan="3">NHẬP DỮ LIỆU</th>
+                             @*    <th class="bg-white">Số ĐNTT</th>
+                                <th class="bg-white">Số HĐ</th> *@
+                                <th class="bg-white" colspan="2">NHẬP DỮ LIỆU</th>
                             }
                             else
                             {
-                                <th class="bg-white" width="130px">ẢNH HƯỞNG SX</th>
+                                <th class="bg-white" width="130px">Nhập Yes/No</th>
                             }
 
-                            <th class="bg-white">Note</th>
+                            <th colspan="2" class="bg-white" w  >Note</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -393,25 +438,12 @@
 
                                     <td class="text-center fw-bold" hidden>@(item.PO_Detail_Id)</td>
                                     <td class="text-center">@CheckDate(item.Ngayyc!)</td>                                  
-                                    <td class="text-center">@CheckDate(item.Ngayycgiao!)</td>
-                                    <td class="text-center">@CheckDate(item.Dieuchinhlichgiao!)</td>
-                                    @if (userSection == "2500")
-                                    {
-                                        <td class="text-center text-info cursor-pointer" width="25px" title="Bấm để điều chỉnh lịch giao">
-                                            <i class="fa fa-calendar-check btn-adjust-date fs-6 hover-primary"
-                                               data-po="@item.SoPO"
-                                               data-item-name="@item.Tentiengviet"
-                                               data-item-code="@item.Mahang"
-                                               data-po-detail-id="@item.PO_Detail_Id"
-                                               data-current-date="@CheckDate(item.Dieuchinhlichgiao!)">
-                                            </i>
-                                        </td>
-                                    }
+                                   
                                     <td class="text-center fw-bold text-primary">@item.SoPO</td>
                                     @if (currentTab == "ngoai")
                                     {
                                         <td class="text-center fw-bold text-primary">@item.Code_Request</td>
-                                        <td class="text-center fw-bold text-primary">@item.Good_Code</td>
+                                        <td class="text-center fw-bold text-primary text-wrap-col">@item.Good_Code</td>
                                     }
                                     <td class="text-wrap-col">@item.Tentiengviet</td>
                                     <td class="text-center fw-bold">@item.Mahang</td>
@@ -427,7 +459,21 @@
                                     {
                                         <td class="text-center fw-bold text-danger">@item.picpur</td>
                                     }
-                 
+                                    <td class="text-center">@item.DNphathanhpo</td>
+                                    <td class="text-center">@CheckDate(item.Ngayycgiao!)</td>
+                                    <td class="text-center">@CheckDate(item.Dieuchinhlichgiao!)</td>
+                                    @if (userSection == "2500")
+                                    {
+                                        <td class="text-center text-info cursor-pointer" width="25px" title="Bấm để điều chỉnh lịch giao">
+                                            <i class="fa fa-calendar-check btn-adjust-date fs-6 hover-primary"
+                                               data-po="@item.SoPO"
+                                               data-item-name="@item.Tentiengviet"
+                                               data-item-code="@item.Mahang"
+                                               data-po-detail-id="@item.PO_Detail_Id"
+                                               data-current-date="@CheckDate(item.Dieuchinhlichgiao!)">
+                                            </i>
+                                        </td>
+                                    }
                                     <td>@CheckDate(item.ngaynccxngiao!)</td>
                                     <td>@CheckDate(item.Ngay_GHchinhthuc!)</td>
                                     <td>@item.Gio_GH</td>                               
@@ -506,8 +552,8 @@
                                         {
                                             <td>@item.Cua_GH × @item.Cong_Nhanhang</td>
                                             <td>@item.Nguoi_Nhanhang</td>
-                                            <td>@item.So_DNTT</td>
-                                            <td>@item.So_hoadon</td>
+                                          @*   <td>@item.So_DNTT</td>
+                                            <td>@item.So_hoadon</td> *@
                                             <!-- Cột 1: Nút Dự kiến -->
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
@@ -530,14 +576,14 @@
                                             </td>
 
                                             <!-- Cột 3: Nút Thanh toán -->
-                                            <td class="text-center">
+                                          @*   <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
                                                         data-po="@item.SoPO" data-item-name="@item.Tentiengviet" data-item-code="@item.Mahang"
                                                         data-order-qty="@item.Soluong" data-req-date="@item.Ngayycgiao" data-po-detail-id="@item.PO_Detail_Id"
                                                         title="Nhập hồ sơ thanh toán">
                                                     <i class="fa-solid fa fa-credit-card"></i>
                                                 </button>
-                                            </td>
+                                            </td> *@
                                         }
                                         else if (userSection == "2500")
                                         {
@@ -573,8 +619,8 @@
                                         {
                                             <td>@item.Cua_GH × @item.Cong_Nhanhang</td>
                                             <td>@item.Nguoi_Nhanhang</td>
-                                            <td>@item.So_DNTT</td>
-                                            <td>@item.So_hoadon</td>
+                                       @*      <td>@item.So_DNTT</td>
+                                            <td>@item.So_hoadon</td> *@
                                             <!-- Cột 1: Nút Dự kiến -->
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-primary w-100 btn-update-po"
@@ -597,14 +643,14 @@
                                             </td>
 
                                             <!-- Cột 3: Nút Thanh toán -->
-                                            <td class="text-center">
+                                            @* <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-info w-100 btn-payment-po"
                                                         data-po="@item.SoPO" data-item-name="@item.Tentiengviet" data-item-code="@item.Mahang"
                                                         data-order-qty="@item.Soluong" data-req-date="@item.Ngayycgiao" data-po-detail-id="@item.PO_Detail_Id"
                                                         title="Nhập hồ sơ thanh toán">
                                                     <i class="fa-solid fa fa-credit-card"></i>
                                                 </button>
-                                            </td>
+                                            </td> *@
                                         }
                                         else
                                         {
@@ -631,13 +677,14 @@
 
                                     }
 
+                                    <td  class="text-wrap-col">@item.Note</td>
                                     <td class="text-center align-middle">
                                         <!-- Chỉ hiển thị một nút sửa (Cái bút) -->
-                                        <button class="btn btn-sm btn-outline-primary btn-edit-note"
+                                        <button class="btn btn-sm btn-outline-info btn-edit-note"
                                                 data-id="@item.PO_Detail_Id"
                                                 data-note="@item.Note"
                                                 title="Sửa ghi chú">
-                                            <i class="fa-solid fa fa-pen"></i>
+                                            <i class="fa-solid fa fa-book"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -649,6 +696,7 @@
                                 <td colspan="23" class="text-center text-muted py-4">Không có dữ liệu PO nào phù hợp với điều kiện lọc.</td>
                             </tr>
                         }
+
                     </tbody>
                 </table>
             </div>
@@ -1164,8 +1212,10 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
+        
         // Hàm xuất Excel
         function exportDataExcel() {
             const form = document.getElementById('filterForm');
@@ -1223,7 +1273,7 @@
 
         // --- 2. SỰ KIỆN KHI TRANG TẢI XONG ---
         document.addEventListener("DOMContentLoaded", function () {
-
+           
             // Khởi tạo tất cả Bootstrap Modals
             bsEstModal = new bootstrap.Modal(document.getElementById('updateModal'), { backdrop: false });
             bsOffModal = new bootstrap.Modal(document.getElementById('officialModal'), { backdrop: false });
@@ -1296,7 +1346,7 @@
                             // HTML Chi tiết
                             const detailHtml = [
                                 '<tr id="info-', id, '" class="detail-row" style="display:none;">',
-                                '<td colspan="23">',
+                                '<td colspan="23" style="position: sticky; left: 0; z-index: 1;">',
                                 '<div class="detail-container">',
                                 '<h6 class="text-success fw-bold mb-3"><i class="fa-solid fa fa-list-check me-2"></i>THÔNG TIN CHI TIẾT ĐÃ NHẬP HỆ THỐNG</h6>',
                                 '<div class="row g-3">',
@@ -1459,6 +1509,29 @@
                 });
             }
 
+            fetch('/ManagerDelivery/List_DamnhiemNCC')
+            .then(response => response.json())
+            .then(data => {
+                let dropdown = document.getElementById('damnhiemDropdown');
+                dropdown.innerHTML = '<option value="">-- Chọn--</option>'; // Xóa dữ liệu cũ
+
+                // Lặp qua mảng dữ liệu trả về và thêm vào select
+                data.forEach(item => {
+                    let option = document.createElement('option');
+                    option.value = item;
+                    option.text = item;
+                    dropdown.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Lỗi khi tải dữ liệu:', error);
+                document.getElementById('damnhiemDropdown').innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+            });
+
+
+            setTimeout(applyStickyColumns, 150); // Delay nhẹ để đợi UI vẽ xong độ rộng cột
+            window.addEventListener('resize', applyStickyColumns);
+
             // SỰ KIỆN NGOÀI BẢNG (Import Excel, Checkbox phạm vi...)
             document.getElementById('btnOpenImportExcel')?.addEventListener('click', () => bsImportModal.show());
 
@@ -1468,6 +1541,8 @@
                 }
             });
 
+
+      
             // Sự kiện Import
                 
             document.getElementById('btnExecuteImport')?.addEventListener('click', async function () {
@@ -1634,7 +1709,6 @@
                 });
             });
 
-
              // --- THỰC HIỆN TÁCH PO (AJAX) ---
             $('#btnExecuteSplit').off('click').on('click', function (e) {
                 e.preventDefault();
@@ -1686,7 +1760,6 @@
                     }
                 });
             });
-
 
                     // --- LƯU ĐIỀU CHỈNH LỊCH GIAO (AJAX) ---
             $('#btnSaveAdjustDate').off('click').on('click', function (e) {
@@ -2040,6 +2113,7 @@
                                         <td class="text-center align-middle">${item.nguoinhanhang}</td>
                                     </tr>
                                 `;
+
                             });
 
                             html += `</tbody></table></td></tr>`;
@@ -2053,7 +2127,6 @@
                     tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4 fw-bold"><i class="fa-solid fa-circle-xmark me-1"></i> Lỗi kết nối. Không thể tải dữ liệu.</td></tr>`;
                 }
             });
-
 
             // Khởi chạy đếm số lượng
             getDemNccCount();
@@ -2124,5 +2197,96 @@
             document.getElementById('filterForm').submit();
         }
 
+                // Hàm tự động cố định cột từ trái sang phải đến hết cột "Tên NCC"
+        function applyStickyColumns() {
+            const table = document.querySelector('.table-responsive table');
+            if (!table) return;
+
+            const theadTr = table.querySelector('thead tr');
+            if (!theadTr) return;
+            const ths = Array.from(theadTr.children);
+
+            // 1. Tìm vị trí (index) của cột "Tên NCC"
+            let targetIndex = -1;
+            for (let i = 0; i < ths.length; i++) {
+                if (ths[i].textContent.trim().includes('Tên NCC')) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+
+            if (targetIndex === -1) return; // Không tìm thấy cột
+
+            let currentLeft = 0;
+            const leftOffsets = [];
+
+            // 2. Tính toán độ rộng cộng dồn (offset left) của từng cột
+            for (let i = 0; i <= targetIndex; i++) {
+                leftOffsets.push(currentLeft);
+                // Lấy chiều rộng thực tế (kể cả với cột có thuộc tính hidden sẽ = 0)
+                const w = ths[i].getBoundingClientRect().width;
+                currentLeft += w;
+            }
+
+            // 3. Set sticky cho Thead (Th)
+            for (let i = 0; i <= targetIndex; i++) {
+                ths[i].style.position = 'sticky';
+                ths[i].style.left = leftOffsets[i] + 'px';
+                ths[i].style.zIndex = '4'; // Đảm bảo nổi lên trên
+                if (i === targetIndex) {
+                    ths[i].classList.add('sticky-boundary');
+                }
+            }
+
+            // 4. Set sticky cho Tbody (Td)
+            const tbodyTrs = table.querySelectorAll('tbody tr:not(.detail-row)');
+            tbodyTrs.forEach(tr => {
+                const tds = tr.children;
+                // Bỏ qua nếu là dòng "Không có dữ liệu"
+                if (tds.length === 1 && tds[0].colSpan > 1) return;
+
+                for (let i = 0; i <= targetIndex; i++) {
+                    if (tds[i]) {
+                        tds[i].classList.add('sticky-td');
+                        tds[i].style.position = 'sticky';
+                        tds[i].style.left = leftOffsets[i] + 'px';
+                        tds[i].style.zIndex = '2'; // Nổi lên trên dữ liệu cuộn, nhưng dưới thead
+                        if (i === targetIndex) {
+                            tds[i].classList.add('sticky-boundary');
+                        }
+                    }
+                }
+            });
+        }
+        function load_ncc(){
+            let damnhiemDropdown = document.getElementById('damnhiemDropdown').value;
+            let nccDropdown = document.getElementById('nccDropdown');
+
+                nccDropdown.disabled = true;
+
+                // Nối tham số vào URL query string
+                let url = `/ManagerDelivery/List_NCCtheodamnhiem?tendamnhiem=${encodeURIComponent(damnhiemDropdown)}`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        nccDropdown.innerHTML = '<option value="">-- Chọn Nhà cung cấp --</option>';
+
+                        data.forEach(item => {
+                            let option = document.createElement('option');
+                            option.value = item;
+                            option.text = item;
+                            nccDropdown.appendChild(option);
+                        });
+
+                        nccDropdown.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Lỗi:', error);
+                        nccDropdown.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+                    });
+            }
+
+        
     </script>
 }

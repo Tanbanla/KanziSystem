@@ -125,25 +125,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NguoiThaoTac = GetCurrentUserId() ?? "",
                 RequestTypes = (List<BaoGia_RequestTypeDTO>)(requestTypesResp.Data ?? new List<BaoGia_RequestTypeDTO>())
             };
-            try
-            {
-                var section = GetCurrentUserSection() ?? string.Empty;
-                var approverResp = await _approverService.GetApproverByStepAndSectionAsync(2, section);
-                if (approverResp != null && approverResp.Success && approverResp.Data != null)
-                {
-                    vm.ListApprovel = approverResp.Data;
-                }
-            }
-            catch
-            {
-            }
 
             return View(vm);
         }
         [HttpPost]
         public async Task<IActionResult> GetListApprovel([FromBody] SearchApprovalModel sr)
         {
-            var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 2, sr.SectionCost ?? "");
+            var result = await _approverService.GetApproverByAgrentAsync(sr.Step ?? 2, sr.SectionCost ?? "");
             if (!result.Success)
             {
                 return BadRequest("Error list Approver: " + result.Message);
@@ -565,6 +553,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var sectionCode = ws.Cell(row, 2).GetString().Trim();
                 if (sectionCode == null || sectionCode == "") break;
 
+                var wfType = ws.Cell(row,5).GetString().Trim();
                 var internalCode = ws.Cell(row, 7).GetString().Trim();
                 var supplierItemCode = ws.Cell(row, 8).GetString().Trim();
                 var rowItems = items
@@ -591,6 +580,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         rowErrors.Add("Hàng chưa có mã nội bộ bắt buộc phải có chủng loại.");
                 }
 
+                if(string.IsNullOrWhiteSpace(wfType))
+                    rowErrors.Add("Loại báo giá là bắt buộc.");
                 if (!rowItems.Any(item => item.INT_SoLuong.HasValue))
                     rowErrors.Add("Số lượng là bắt buộc.");
                 if (!rowItems.Any(item => !string.IsNullOrWhiteSpace(item.NVCHR_DonVi)))
@@ -633,6 +624,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return null;
         }
+
+        private static string? NormalizeQuotationType(string? quotationType)
+        {
+            var value = quotationType?.Trim();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return value switch
+            {
+                "Hàng hóa" => "Hàng hóa",
+                "Dịch vụ" => "Dịch vụ",
+                "Cải tạo / công trình" => "Cải tạo / công trình",
+                _ => value
+            };
+        }
+
         // Convert dữ liệu từ model sang DTO
         private async Task<List<BaoGia_Request_of_QuotationDTO>> ConvertModelToDTO(List<InsertBaoGiaModel> items)
         {
@@ -714,7 +723,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         NVCHR_DiaDiemNH = item.NVCHR_DiaDiemNH,
                         NVCHR_NguoiNhan = item.NVCHR_NguoiNhan,
                         CHR_SDT = item.CHR_SDT,
-                        WorkflowID = wfREsult?.FirstOrDefault(w => w.FlowCode == item.WfSection && w.CHR_Code == item.WfType)?.WorkflowID ?? 1,
+                        WfType = item.WfType,
+                        WorkflowID = wfREsult?.FirstOrDefault(w =>
+                            w.FlowCode == item.WfSection &&
+                            (string.Equals(w.CHR_Code, item.WfType, StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(w.WorkflowName, item.WfType, StringComparison.OrdinalIgnoreCase)))?.WorkflowID ?? 1,
                         ID_Status = "APPROVAL2",
                         ID_StepBaoGia = 2
                     });
@@ -744,6 +757,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     item.CHR_Phanloai,
                     item.CHR_SectionCode,
                     item.CHR_SectionName,
+                    item.WfType,
                     item.DTM_Deadline,
                     item.DTM_KyHan,
                     item.DTM_NgayMuonNhan
@@ -790,6 +804,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         NVCHR_DiaDiemNH = first.NVCHR_DiaDiemNH,
                         NVCHR_NguoiNhan = first.NVCHR_NguoiNhan,
                         CHR_SDT = first.CHR_SDT,
+                        WfType = first.WfType,
                         Vendors = group
                             .Where(item => !string.IsNullOrWhiteSpace(item.CHR_MaNCC))
                             .Select(item => new VendorQuoteModel
@@ -974,6 +989,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CHR_SectionCode = rowData.SectionCode,
                 CHR_SectionName = rowData.SectionName,
                 CHR_Phanloai = material.LoaiHang,
+                WfType = NormalizeQuotationType(rowData.TypeQuation),
                 CHR_MaThietBi = rowData.MaThietBi,
                 CHR_MaHangNoiBo = material.Material_Code,
                 CHR_MaHangNCC = material.Code_Suppiler,//string.IsNullOrEmpty(rowData.MaHangNCC) ? material.Code_Suppiler : rowData.MaHangNCC,
@@ -1023,6 +1039,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CHR_SectionCode = rowData.SectionCode,
                 CHR_SectionName = rowData.SectionName,
                 CHR_Phanloai = ConvertHelper.ParsePhanloai(rowData.Phanloai),
+                WfType = NormalizeQuotationType(rowData.TypeQuation),
                 CHR_MaThietBi = rowData.MaThietBi,
                 CHR_MaHangNoiBo = rowData.MaHangNoiBo,
                 CHR_MaHangNCC = rowData.MaHangNCC,
@@ -1101,6 +1118,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CHR_MaDon = src.CHR_MaDon,
                 CHR_MaThietBi = src.CHR_MaThietBi,
                 CHR_Phanloai = src.CHR_Phanloai,
+                WfType = src.WfType,
                 CHR_MaHangNoiBo = src.CHR_MaHangNoiBo,
                 CHR_MaHangNCC = src.CHR_MaHangNCC,
                 NVCHR_NameVN = src.NVCHR_NameVN,

@@ -310,7 +310,7 @@
     <value>見積取得</value>
   </data>
   <data name="Reason" xml:space="preserve">
-    <value>理由</value>
+    <value>見積依頼を行わない理由</value>
   </data>
   <data name="Urgent" xml:space="preserve">
     <value>緊急</value>

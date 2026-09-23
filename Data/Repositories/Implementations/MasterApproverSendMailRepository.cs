@@ -1,18 +1,27 @@
+using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
+using PRJ_WAREHOUSE_BIVN.Models_Agent;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using System.Text;
+using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
     public class MasterApproverSendMailRepository : BaseRepository<BaoGia_Master_Approver_Send_Mail, int>, IMasterApproverSendMailRepository
     {
         private readonly COST_MANAGEMENTContext _context;
-        public MasterApproverSendMailRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration)
+        private readonly AgentContext _agentContext;
+        public MasterApproverSendMailRepository(COST_MANAGEMENTContext context, AgentContext agentContext, IOptions<ConnectionStringOptions> options, IConfiguration configuration)
             : base(context, options, configuration)
         {
             _context = context;
+            _agentContext = agentContext;
         }
         // Lấy dữ liệu theo điều kiện và phân trang
         public async Task<List<BaoGia_Master_Approver_Send_Mail>> GetByConditionAsync(string? sectionCode, string? adid, int? IdStep, int pageIndex, int pageSize)
@@ -96,6 +105,51 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var approvers = await query.ToListAsync();
             return approvers;
+        }
+
+        public async Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode)
+        {
+            // lấy thông tin phòng từ sectionCode
+            var section = await _context.DEPARTMENTs.Where(d => d.Cost_Center == sectionCode)
+                .Select(d =>  d.CHR_Section_Code)
+                .FirstOrDefaultAsync();
+
+            var sql = new StringBuilder();
+            sql.Append(@"SELECT
+                  [CHR_EMPLOYEE_ID]
+                  ,[CHR_EMPLOYEE_NAME]  as NVCHR_UserName
+                  ,[CHR_EMPLOYEE_ADID] as CHR_UserAdid
+                  ,[CHR_EMPLOYEE_MAIL] 
+                  ,[CHR_POSITION] 
+                  ,[CHR_POSITION_GROUP] as NVCHR_Position
+              FROM [AGENTDB].[dbo].[TM_EMPLOYEE]
+              where CHR_NOTE is null and (DTM_LEAVE_DATE is null or DTM_LEAVE_DATE < Getdate())
+            ");
+
+            var parameters = new DynamicParameters();
+
+            if (!string.IsNullOrEmpty(section))
+            {
+                sql.Append(" AND CHR_SECTION like  @section");
+                parameters.Add("@section", $"%{section.Trim()} :%");
+            }
+
+            switch(idStep)
+            {
+                case 2:
+                    sql.Append(" AND CHR_POSITION_GROUP = 'Chief'");
+                    break;
+                case 3:
+                    sql.Append(" AND CHR_POSITION_GROUP = 'Section Manager'");
+                    break;
+                default:
+                    break;
+            }
+
+            var result = await _conn.QueryAsync<dynamic>(
+                sql.ToString(),
+                parameters);
+            return result.ToList();
         }
         // Inser thông tin và đăng ký user đăng nhập
         public async Task<bool> InsertMasterApproverSendMailAsync(List<BaoGia_Master_Approver_Send_Mail> dtos)

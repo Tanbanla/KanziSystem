@@ -310,7 +310,7 @@
     <value>Get quotation</value>
   </data>
   <data name="Reason" xml:space="preserve">
-    <value>Reason</value>
+    <value>Reason for Not Requesting a Quotation</value>
   </data>
   <data name="Urgent" xml:space="preserve">
     <value>Urgent</value>

@@ -38,9 +38,9 @@
                     list.forEach(item => {
                         const o = document.createElement('option');
                         // normalize keys to accept server DTO naming
-                        const adid = item.chR_UserAdid || '';
-                        const name = item.nvchR_UserName || '';
-                        o.value = adid || (item.chR_UserAdid);
+                        const adid = item.CHR_UserAdid || '';
+                        const name = item.NVCHR_UserName || '';
+                        o.value = adid || (item.CHR_UserAdid);
                         o.textContent = (name ? (name + (adid ? (' (' + adid + ')') : '')) : (adid || ''));
                         o.dataset.raw = JSON.stringify(item);
                         sel.appendChild(o);

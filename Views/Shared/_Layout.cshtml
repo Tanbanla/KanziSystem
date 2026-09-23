@@ -62,7 +62,6 @@
                             <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                                 <i class="fa fa-user-check"></i>
                                 @Localizer["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "User")!
-
                                 <div class="d-sm-none d-lg-inline-block"></div>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
@@ -78,8 +77,6 @@
                                 <a href="@Url.Action("Profile", "Account")" class="dropdown-item has-icon">
                                     <i class="far fa-user"></i> @Localizer["Profile"]
                                 </a>
-
-
                                 <div class="dropdown-divider"></div>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
@@ -107,7 +104,6 @@
                             @(User.FindFirst("Email")?.Value ?? "Chưa xác định")
                         </span>
                     </li>
-
                 </ul>
             </nav>
             <div class="main-sidebar sidebar-style-2" tabindex="1" style="overflow: auto visible; outline: none;">
@@ -159,7 +155,6 @@
                                             <span class="small">@Localizer["MenuQuoteInput"]</span>
                                         </a>
                                     </li>
-
                                     <li>
                                         <a class="dropdown-item py-2" href="~/QuoteResults/Quotation_Results">
                                             <i class="fas fa-clipboard-list me-2"></i>
@@ -178,7 +173,6 @@
                                         <i class="fas fa-history me-2"></i>
                                         <span class="small">@Localizer["MenuQuoteHistory"]</span>
                                     </a>
-
                                 </li>
                             </ul>
                         </li>
@@ -263,13 +257,13 @@
                                 <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/User/QuanlyUyquyen"><i class="fas fa-handshake"></i> @Languages.uyquyen</a></li>
                                 <li><a class="dropdown-item py-2" href="~/ManagerDelivery/UsingManager"><i class="fas fa-asterisk"></i> Using</a></li>
+                                <li><a class="dropdown-item py-2" href="~/ManagerDelivery/Master_NCC"><i class="fas fa-user"></i> Đảm nhiệm NCC</a></li>
                                 <li><a class="dropdown-item py-2" href="~/ManagerDelivery/Giaonhanhang_Master"><i class="fas fa-book-reader"></i>Quản lý tồn kho </a></li>
                                 @if (User.FindFirst("Roles")?.Value == "PUR")
                                 {
                                     <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> @Localizer["MenuMasterSendMail"]</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/SupplierMana"><i class="fas fa-handshake"></i> @Localizer["MenuMasterSupplierManage"]</a></li>
-
                                 }
                             </ul>
                         </li>

@@ -99,6 +99,24 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return response;
         }
+
+
+        public async Task<GenericResponse<List<dynamic>>> GetApproverByAgrentAsync(int idStep, string sectionCode)
+        {
+            var response = new GenericResponse<List<dynamic>>();
+            try
+            {
+                var data = await _repo.GetApproverByAgrentAsync(idStep, sectionCode);
+                response.Data = data;
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error in GetApproverByAgrentAsync: {ex.Message}";
+            }
+            return response;
+        }
         // Inser thông tin và đăng ký user đăng nhập
         public async Task<GenericResponse<bool>> InsertMasterApproverSendMailAsync(List<BaoGia_Master_Approver_Send_Mail> dtos)
         {

@@ -264,6 +264,7 @@ function _insert_request_GA() {
         alert("Vui lòng điền đủ thông tin vào đơn !");
     }
     else {
+      
         $.ajax({
             url: ROUTES.insertRequestGA,
             type: 'POST',

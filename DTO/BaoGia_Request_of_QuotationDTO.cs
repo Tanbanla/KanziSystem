@@ -101,6 +101,8 @@ public partial class BaoGia_Request_of_QuotationDTO
     public string? CHR_SDT { get; set; }
 
     // cac truong wf
+    public string? WfType { get; set; }
+
     public int? WorkflowID { get; set; }
     public int? CurrentWorkflowStepID { get; set; }
 }
