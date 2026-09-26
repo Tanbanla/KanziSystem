@@ -41,7 +41,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM BaoGia_Confirm_Name_Quotation c
                 INNER JOIN BaoGia_Request_of_Quotation r 
                     ON c.ID_RequestQuote = r.ID
-                    AND r.ID_StepBaoGia >= 12
+                    --AND r.ID_StepBaoGia >= 12
                     AND r.BIT_LayBaoGia = 1
                 INNER JOIN BaoGia_Detail_of_Quotation d 
                     ON c.ID_RequestQuote = d.ID_RequestQuote
@@ -424,49 +424,78 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     nameof(confirmNames));
             }
 
-            var requestIds = confirmNames
-                .Select(x => x.ID_RequestQuote)
-                .Distinct()
-                .ToList();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            // Luôn update Request
-            var requests = await _context.BaoGia_Request_of_Quotations
-                .Where(x => requestIds.Contains(x.ID))
-                .ToListAsync();
-
-            foreach (var request in requests)
+            try
             {
-                request.ID_StepBaoGia = 12;
-                request.ID_Status = "WAIT_CONFIRM_NAME";
+                var requestIds = confirmNames
+                    .Select(x => x.ID_RequestQuote)
+                    .Distinct()
+                    .ToList();
+
+                // Luôn update Request
+                var requests = await _context.BaoGia_Request_of_Quotations
+                    .Where(x => requestIds.Contains(x.ID))
+                    .ToListAsync();
+
+                foreach (var request in requests)
+                {
+                    request.ID_StepBaoGia = 12;
+                    request.ID_Status = "WAIT_CONFIRM_NAME";
+                }
+
+                // Lấy các Request đã có Confirm Name
+                var existingConfirmNames = await _context.BaoGia_Confirm_Name_Quotations
+                    .Where(x => requestIds.Contains(x.ID_RequestQuote))
+                    .ToListAsync();
+
+                var existingRequestIds = existingConfirmNames.Select(x => x.ID_RequestQuote).ToHashSet();
+
+                // Chỉ insert những Request chưa có
+                var newConfirmNames = confirmNames
+                    .Where(x => !existingRequestIds.Contains(x.ID_RequestQuote))
+                    .ToList();
+
+                if (newConfirmNames.Any())
+                {
+                    await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(newConfirmNames);
+                }
+
+                // Cập nhật các đơn đã có confirm name
+                foreach (var a in existingConfirmNames)
+                {
+                    a.CHR_StatusShip = "Confirming";
+                    a.CHR_StatusACC = "Confirmed";
+                    a.CHR_Status = "Confirmed";
+                }
+
+                await _context.SaveChangesAsync();
+
+                if (newConfirmNames.Any())
+                {
+                    var histories = newConfirmNames.Select(confirmName =>
+                        new BaoGia_Confirm_Name_Quotation_History
+                        {
+                            QuotationID = confirmName.ID_RequestQuote,
+                            ConfirmID = confirmName.ID,
+                            OldValue = null,
+                            NewValue = "Khởi tạo yêu cầu xác nhận tên",
+                            ActionBy = "system",
+                            ActionDate = DateTime.Now
+                        }).ToList();
+
+                    await _context.BaoGia_Confirm_Name_Quotation_Histories.AddRangeAsync(histories);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                return newConfirmNames;
             }
-
-            // Lấy các Request đã có Confirm Name
-            var existingConfirmNames = await _context.BaoGia_Confirm_Name_Quotations
-                .Where(x => requestIds.Contains(x.ID_RequestQuote))
-                .ToListAsync();
-
-            var existingRequestIds = existingConfirmNames.Select(x => x.ID_RequestQuote).ToHashSet();
-
-            // Chỉ insert những Request chưa có
-            var newConfirmNames = confirmNames
-                .Where(x => !existingRequestIds.Contains(x.ID_RequestQuote))
-                .ToList();
-
-            if (newConfirmNames.Any())
+            catch
             {
-                await _context.BaoGia_Confirm_Name_Quotations.AddRangeAsync(newConfirmNames);
+                await transaction.RollbackAsync();
+                throw;
             }
-            // Cập nhật các đơn đã có confirm name
-            foreach (var a in existingConfirmNames)
-            {
-                a.CHR_StatusShip = "Confirming";
-                a.CHR_StatusACC = "Confirmed";
-                a.CHR_Status = "Confirmed";
-            }
-
-            await _context.SaveChangesAsync();
-
-            return newConfirmNames;
         }
         // luu thong tin nhap file
         public async Task<bool> SaveFromFileAsync(
@@ -816,7 +845,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] r
                 LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] c
                     ON r.ID = c.ID_RequestQuote
-                WHERE r.ID_StepBaoGia = 13 and c.ID IN @ListCheck";
+                WHERE c.ID IN @ListCheck";
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -1160,7 +1189,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     if (!vendorRegionByCode.TryGetValue(request.CHR_MaNCC ?? string.Empty, out var region))
                         continue;
                     var checkDomestic = string.Equals(region?.Trim(), "Domestic",StringComparison.OrdinalIgnoreCase);
-                    if (checkDomestic)
+                    if(true) //(checkDomestic) bỏ phần xác nhận theo khu vực
                     {
                         var oldValue = confirmName.VCHR_TenHaiQuan;
 

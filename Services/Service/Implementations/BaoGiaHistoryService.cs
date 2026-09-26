@@ -18,13 +18,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _mapper = mapper;
         }
         // Lấy lịch sử báo giá theo ID_RequestQuote
-        public async Task<GenericResponse<List<BaoGia_History_Request_of_QuotationDTO>>> GetByRequestQuoteIdAsync(int idRequestQuote)
+        public async Task<GenericResponse<List<DetailHistoryDTO>>> GetByRequestQuoteIdAsync(SearchHistoryInfoByMaDonModel searchModel)
         {
-            var result = new GenericResponse<List<BaoGia_History_Request_of_QuotationDTO>>();
+            var result = new GenericResponse<List<DetailHistoryDTO>>();
             try
             {
-                var histories = await _repo.GetByRequestQuoteIdAsync(idRequestQuote);
-                result.Data = _mapper.Map<List<BaoGia_History_Request_of_QuotationDTO>>(histories);
+   
+                result.Data = await _repo.GetByRequestQuoteIdAsync(searchModel);
                 result.Success = true;
             }
             catch (Exception ex)

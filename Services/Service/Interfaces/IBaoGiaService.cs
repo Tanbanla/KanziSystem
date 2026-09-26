@@ -100,5 +100,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<List<dynamic>>> ExportExcelBaoGiaDoneAsync(string? maDon, string? section, string? maHang, string? maNCC, string user);
         // Search báo giá còn hiệu lực
         Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaConHieuLucAsync(SearchQuotationResultsModel search, string? user);
+        // xu ly ghi update phe duyet lai
+        Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdatePheDuyetLaiDonBaoGiaAsync(UpdateHistoryResult update);
     }
 }

@@ -124,15 +124,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 if (data == null) continue;
 
                 data.Category_VN = material.Category_VN;
-                data.Category_EN = material.Category_EN;
-                data.Category_JP = material.Category_JP;
                 data.Shape = material.Shape;
                 data.Material1 = material.Material1;
                 data.Composition = material.Composition;
                 data.Dimension = material.Dimension;
                 data.UsedFor = material.UsedFor;
                 data.Purpose = material.Purpose;
-
+                data.Material_Name_EN = material.Material_Name_EN;
+                data.Material_Name_VN = material.Material_Name_VN;
+                data.Unit = material.Unit;
+                data.CHR_MaterialOutSide = material.CHR_MaterialOutSide;
+                data.Group_Code = material.Group_Code;
+                data.Code_Suppiler = material.Code_Suppiler;
             }
             await _context.SaveChangesAsync();
             return true;

@@ -735,15 +735,50 @@
   <data name="ChangeHistory" xml:space="preserve">
     <value>変更履歴</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms" />
   <data name="OrderInformation" type="System.Resources.ResXNullRef, System.Windows.Forms">
-      <value>ご注文情報</value>
+    <value>ご注文情報</value>
   </data>
-  <data name="RecordId" xml:space="preserve"><value>レコードID</value></data>
-  <data name="IsTemplate" xml:space="preserve"><value>テンプレート</value></data>
-  <data name="Deadline" xml:space="preserve"><value>処理期限</value></data>
-  <data name="UpdateLater" xml:space="preserve"><value>次回更新日</value></data>
-  <data name="UpdateCount" xml:space="preserve"><value>更新回数</value></data>
-  <data name="NextApprover" xml:space="preserve"><value>承認者</value></data>
-  <data name="QuotationReason" xml:space="preserve"><value>見積理由</value></data>
-  <data name="FileLink" xml:space="preserve"><value>ファイルリンク</value></data>
- </root>
+  <data name="RecordId" xml:space="preserve">
+    <value>レコードID</value>
+  </data>
+  <data name="IsTemplate" xml:space="preserve">
+    <value>テンプレート</value>
+  </data>
+  <data name="Deadline" xml:space="preserve">
+    <value>処理期限</value>
+  </data>
+  <data name="UpdateLater" xml:space="preserve">
+    <value>次回更新日</value>
+  </data>
+  <data name="UpdateCount" xml:space="preserve">
+    <value>更新回数</value>
+  </data>
+  <data name="NextApprover" xml:space="preserve">
+    <value>承認者</value>
+  </data>
+  <data name="QuotationReason" xml:space="preserve">
+    <value>見積理由</value>
+  </data>
+  <data name="FileLink" xml:space="preserve">
+    <value>ファイルリンク</value>
+  </data>
+  <data name="RequestId" xml:space="preserve">
+    <value>リクエストID</value>
+  </data>
+  <data name="VietnameseName" xml:space="preserve">
+    <value>アクション</value>
+  </data>
+  <data name="UpdatedTime" xml:space="preserve">
+    <value>更新日時</value>
+  </data>
+  <data name="RecordCount" xml:space="preserve">
+    <value>件</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>詳細を見る</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>戻る</value>
+  </data>
+</root>

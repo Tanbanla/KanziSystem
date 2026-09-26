@@ -116,8 +116,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(historyByMaterial.Message);
             }
-            var stepByRole = GetRolesUser() == "PUR" ? 8 : 12;
 
+            var stepByRole = GetRolesUser() == "PUR" ? 7 : 12;
             try
             {
                 var historyData = result.Data;
@@ -564,7 +564,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 // cập nhật thông tin người phê duyệt
-                var result = await _baoGiaService.UpdateUserApprovalHistory(vm);
+                var result = await _baoGiaService.UpdatePheDuyetLaiDonBaoGiaAsync(vm);
                 if (!result.Success)
                 {
                     return BadRequest("Error: " + result.Message);
@@ -605,11 +605,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         // Lấy dữ liệu màn hình lịch sử báo giá theo ID yêu cầu báo giá
         [HttpPost]
-        public async Task<IActionResult> GetHistoryDataByID([FromBody] int idRequest)
+        public async Task<IActionResult> GetHistoryDataByID([FromBody] SearchHistoryInfoByMaDonModel searchModel)
         {
+            if (searchModel == null)
+            {
+                return BadRequest("Data error");
+            }
             try
             {
-                var result = await _baoGiaHistoryService.GetByRequestQuoteIdAsync(idRequest);
+                var result = await _baoGiaHistoryService.GetByRequestQuoteIdAsync(searchModel);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -708,12 +712,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> GetListApprovel([FromBody] SearchApprovalModel sr)
         {
-            var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 2, sr.SectionCost ?? "");
-            if (!result.Success)
+            var step = sr.Step ?? 2;
+            var sectionCost = sr.SectionCost ?? "";
+
+            var agentResult = await _approverService.GetApproverByAgrentAsync(step, sectionCost);
+            if (!agentResult.Success)
             {
-                return BadRequest("Error list Approver: " + result.Message);
+                return BadRequest("Error list Approver: " + agentResult.Message);
             }
-            return Ok(result.Data);
+
+            return Ok(agentResult.Data);
+
         }
         // tìm kiếm theo ID đơn báo giá
         [HttpPost]
@@ -1036,7 +1045,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     return BadRequest(result.Message);
                 }
 
-                var stepByRole = GetRolesUser() == "PUR" ? 8 : 12;
+                var stepByRole = GetRolesUser() == "PUR" ? 7 : 12;
+
 
                 var rows = result.Data?.Data?.ToList() ?? new List<dynamic>();
 
@@ -1671,7 +1681,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result.Message);
             }
 
-            var stepByRole = GetRolesUser() == "PUR" ? 8 : 12;
+            var stepByRole = GetRolesUser() == "PUR" ? 7 : 12;
+
             try
             {
                 var historyData = result.Data;
@@ -1891,7 +1902,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         GetReason(rq.ID, rq.ID_Status),
                         rq.ID_StepBaoGia > stepByRole ? selectMark : string.Empty,
                         rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_ReasonPick ?? string.Empty : string.Empty,
-                        canShowFile ? rq.NVCHR_File ?? string.Empty : string.Empty
+                       // canShowFile ? rq.NVCHR_File ?? string.Empty : string.Empty
+                        rq.ID_StepBaoGia > stepByRole ? rq.NVCHR_File ?? string.Empty : string.Empty
                     });
                 }
 

@@ -17,7 +17,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // Lay tien chuyen doi
         public async Task<float> GetExchangeRate()
         {
-            var exchangeRate = await _context.EXCHANGE_RATEs.Where(c => c.Currency == "VND").OrderByDescending(e => e.Id).FirstOrDefaultAsync();
+            var exchangeRate = await _context.EXCHANGE_RATEs
+                .Where(c => c.Currency == "VND" && c.DateApply.Month == DateTime.Now.Month && c.DateApply.Year == DateTime.Now.Year)
+                .OrderByDescending(e => e.Id).FirstOrDefaultAsync();
             if (exchangeRate != null)
             {
                 return float.Parse(exchangeRate.Rate);

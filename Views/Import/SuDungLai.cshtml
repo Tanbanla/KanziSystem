@@ -268,8 +268,18 @@
         _load_info_adid();
         _load_phongchiuphi_1();
         _load_account_1();
+        check_khoi();
     }
-
+    function check_khoi(){
+         var groupCode = document.getElementById("group_code").value;
+          if (groupCode === "GA") {
+                document.getElementById("modal-20").style.display = '';
+                document.getElementById("modal-6").style.display = 'none';
+            } else if (groupCode === "PROD") {
+                document.getElementById("modal-20").style.display = 'none';
+                document.getElementById("modal-6").style.display = '';
+            }
+    }
     function _load_material_1(Material_Code, id) {
         // Chặn lỗi nếu mã rỗng
         if (!Material_Code || Material_Code.trim() === "") return;
@@ -608,19 +618,21 @@
             if (data[0].urgent == true) {
                 document.getElementById("gap").checked = true;
             }
-             if (data[0].group_Code == "GA") {
-              
-                document.getElementById("modal-6").style.display = 'none';
+     
+            // Làm sạch dữ liệu: Xóa khoảng trắng 2 đầu và in hoa
+            const groupCode = data[0].group_Code ? data[0].group_Code.trim().toUpperCase() : "";
 
+            if (groupCode === "GA") {
+                document.getElementById("modal-20").style.display = '';
+                document.getElementById("modal-6").style.display = 'none';
+            } else if (groupCode === "PROD") {
+                document.getElementById("modal-20").style.display = 'none';
+                document.getElementById("modal-6").style.display = '';
             }
-            if (data[0].group_Code == "PROD") {
-               document.getElementById("modal-20").style.display = 'none';
-              
-            }
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+            });
     }
 
     function kiemTraViTriKhopNhau() {

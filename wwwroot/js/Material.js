@@ -331,16 +331,29 @@ async function saveMaterialChanges() {
 
         if (!res.ok) {
             const errorText = await res.text();
-            alert(errorText || t("UpdateFailed", "Cập nhật mã vật tư thất bại"));
+            showDialog({
+                title: t("ErrorTitle", "Lỗi"),
+                message: errorText || t("UpdateFailed", "Cập nhật mã vật tư thất bại"),
+                type: "error"
+            });
             return;
         }
 
         hideModal("editMaterialModal");
         selectedMaterialForEdit = null;
         await _load_material();
+        showDialog({
+            title: t("SuccessTitle", "Thành công"),
+            message: t("UpdateSuccess", "Cập nhật mã vật tư thành công"),
+            type: "success"
+        });
     } catch (err) {
         console.error(err);
-        alert(t("UpdateSystemError", "Lỗi hệ thống khi cập nhật vật tư"));
+        showDialog({
+            title: t("ErrorTitle", "Lỗi"),
+            message: t("UpdateSystemError", "Lỗi hệ thống khi cập nhật vật tư"),
+            type: "error"
+        });
     }
 }
 
@@ -520,24 +533,39 @@ document.getElementById('btnImportExcelMaterial')?.addEventListener('click', () 
 document.getElementById('itemsExcelFileInputMaterial')?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const T = window.i18nMaterial || {};
+
     try {
         const fd = new FormData();
         fd.append('FileExcel', file);
-        const res = await fetch('/Master/ImportExcelMaterial', { method: 'POST', body: fd });
+        const res = await fetch(apiUrl('/Master/ImportExcelMaterial'), { method: 'POST', body: fd });
+
         if (!res.ok) {
-            let txt = await res.text();
-            const T = window.i18nSupplierMana || {};
-            showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportFailed || 'Nhập thất bại') + ': ' + (txt || res.statusText), type: 'error' });
-        } else {
-            const T = window.i18nSupplierMana || {};
-            showDialog({ title: (T.ImportExcel || 'Nhập Excel'), message: (T.ImportSuccess || 'Nhập file thành công'), type: 'success' });
-            await loadSupplierItems(currentItemSupplier.ma);
+            const txt = await res.text();
+            showDialog({
+                title: T.ErrorTitle || 'Lỗi',
+                message: (T.ImportFailed || 'Nhập thất bại') + ': ' + (txt || res.statusText),
+                type: 'error'
+            });
+            return;
         }
+
+        await _load_material();
+        showDialog({
+            title: T.SuccessTitle || 'Thành công',
+            message: T.ImportSuccess || 'Nhập file thành công',
+            type: 'success'
+        });
     } catch (err) {
-        const T = window.i18nSupplierMana || {};
-        showDialog({ title: (T.ErrorTitle || 'Lỗi'), message: (T.CannotSendFile || 'Không thể gửi file') + ': ' + (err.message || err), type: 'error' });
+        showDialog({
+            title: T.ErrorTitle || 'Lỗi',
+            message: (T.CannotSendFile || 'Không thể gửi file') + ': ' + (err.message || err),
+            type: 'error'
+        });
+    } finally {
+        e.target.value = '';
     }
-    e.target.value = '';
 });
 // download template excel file
 document.getElementById('btnTemplateImportExcel')?.addEventListener('click', async () => {
@@ -631,12 +659,12 @@ function showDialog({ title = (window.i18nSupplierMana && window.i18nSupplierMan
     const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
     if (!overlay) return alert(message);
 
-    // Ensure overlay is attached to body so fixed positioning is not clipped by parent containers
     try {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
-    } catch (e) { /* ignore */ }
 
-    titleEl.textContent = title;
+    } catch (e) { /* ignore */ }
+    const T = window.i18nMaterial || {};
+    titleEl.textContent = title || T.Notification || 'Thông báo';
     bodyEl.innerHTML = `<div class="d-flex align-items-start gap-2">
             <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : type === 'error' ? 'fa-exclamation-circle text-danger' : 'fa-info-circle text-primary'}"></i>
             <div>${message}</div>
@@ -644,7 +672,6 @@ function showDialog({ title = (window.i18nSupplierMana && window.i18nSupplierMan
     footerEl.innerHTML = '';
     const okBtn = document.createElement('button');
     okBtn.className = 'cm-btn cm-btn-primary';
-    const T = window.i18nSupplierMana || {};
     okBtn.textContent = (buttons && buttons.okText) || (T.OK || 'Đồng ý');
     okBtn.addEventListener('click', () => hideDialog());
     footerEl.appendChild(okBtn);

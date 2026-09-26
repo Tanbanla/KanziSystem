@@ -263,12 +263,9 @@
                 const step = 2;
                 const section = importResult?.sectionCode || '';
 
-                // 
-                let selected = await openApproverSelector(step, section);
-                while (!selected) {
-                    showDialog({ title: T.Notification || 'Thông báo', message: (T.MustSelectApprover || 'Bạn phải chọn người phê duyệt trước khi thoát'), type: 'warning' });
-                    selected = await openApproverSelector(step, section);
-                }
+                // Người dùng đóng modal hoặc không chọn người phê duyệt thì kết thúc thao tác import.
+                const selected = await openApproverSelector(step, section);
+                if (!selected) return;
 
                 const approverId = selected.CHR_UserAdid ?? selected.chR_UserAdid ?? selected.CHR_Adid ?? selected.chR_Adid ?? selected.ADID ?? selected.Id ?? selected.id ?? selected.value ?? '';
                 const finalId = approverId || (selected.value || selected.Value || '');
@@ -311,7 +308,7 @@
         fileInput.click();
     });
 
-    // Open approver selection modal (copied/adapted from HistoryQuote.js)
+    // Open approver selection modal
     function openApproverSelector(stepNumber, sectionCode) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -660,6 +657,57 @@
         return rows;
     }
 
+    function buildHistoryGroupsHtml(result) {
+        const data = Array.isArray(result) ? result : (result?.data || result?.Data || []);
+        const T = window.i18nHistoryQuote || {};
+        if (!Array.isArray(data) || data.length === 0) {
+            return `<div class="text-muted small">${escapeHtml(T.MsgNoHistory || 'Không có lịch sử.')}</div>`;
+        }
+
+        const groups = [...data.reduce((map, item, index) => {
+            const id = String(getValue(item, ['ID_RequestQuote', 'iD_RequestQuote'], '-'));
+            if (!map.has(id)) map.set(id, []);
+            map.get(id).push({ item, index });
+            return map;
+        }, new Map()).entries()];
+
+        return `<div class="table-responsive"><table class="table table-sm history-groups-table">
+            <thead><tr><th>${escapeHtml(T.RequestId || 'ID yêu cầu')}</th><th>${escapeHtml(T.VietnameseName || 'Tên tiếng Việt')}</th><th>${escapeHtml(T.UpdatedTime || 'Thời điểm cập nhật')}</th><th>${escapeHtml(T.UpdatedBy || 'Người cập nhật')}</th><th>${escapeHtml(T.Reason || 'Lý do')}</th><th>${escapeHtml(T.Action || 'Thao tác')}</th></tr></thead>
+            <tbody>${groups.map(([id, records]) => `
+                <tr class="history-request-group-row">
+                    <td colspan="6"><span class="history-request-group-label"><i class="fas fa-layer-group"></i>
+                        ${escapeHtml(T.RequestId || 'ID_RequestQuote')}: ${escapeHtml(id)}</span><span class="history-request-group-count">${records.length} ${escapeHtml(T.RecordCount || 'bản ghi')}</span></td>
+                </tr>
+                ${records.map(({ item, index }) => {
+                    const updater = getValue(item, ['NVCHR_UpdateName', 'nvchR_UpdateName', 'CHR_UpdateBy']);
+                    const action = getValue(item, ['CHR_ActionType', 'chR_ActionType']);
+                    const language = String(window.HistoryData?.language || document.documentElement.lang || 'vi').toLowerCase().split('-')[0];
+                    const nameKeys = language === 'en'
+                        ? ['NameEN', 'nameEN', 'NameVN', 'nameVN']
+                        : language === 'ja'
+                            ? ['NameJP', 'nameJP', 'NameVN', 'nameVN']
+                            : ['NameVN', 'nameVN', 'NameEN', 'nameEN'];
+                    const displayName = getValue(item, nameKeys);
+                    const canViewDetail = ['INSERT', 'UPDATE'].includes(String(action || '').trim().toUpperCase());
+                    const detailButton = canViewDetail
+                        ? `<button type="button" class="btn btn-sm btn-outline-primary btn-history-record-detail" data-record-index="${index}">
+                            <i class="fas fa-eye"></i> ${escapeHtml(T.ViewDetails || 'Xem chi tiết')}</button>`
+                        : '';
+                    return `<tr class="history-record-row">
+                        <td class="history-record-id"><span class="history-record-branch"></span>${escapeHtml(id)}</td>
+                        <td>${escapeHtml(displayName)}</td>
+                        <td>${escapeHtml(formatDateTime(getValue(item, ['CHR_Updatedate', 'chR_Updatedate'])))}</td>
+                        <td>${escapeHtml(updater)}</td>
+                        <td class="history-reason-cell">${escapeHtml(getValue(item, ['NVCHR_LyDo', 'nvchR_LyDo']))}</td>
+                        <td class="text-end">${detailButton}</td></tr>`;
+                }).join('')}`).join('')}</tbody></table></div>`;
+    }
+
+    function buildHistoryDetailHtml(record) {
+        const T = window.i18nHistoryQuote || {};
+        return `${buildHistoryHtml([record])}`;
+    }
+
     function mapActionText(actionType) {
         const code = String(actionType || '').trim();
         if (!code) return '';
@@ -764,7 +812,7 @@
     }
 
     function buildHistoryHtml(result) {
-        const data = Array.isArray(result) ? result : (result?.data || result?.Data || []);
+        const data = Array.isArray(result) ? result : (result?.data || result?.Data);
         const T = window.i18nHistoryQuote || {};
         if (!Array.isArray(data) || data.length === 0) {
             return `<div class="text-muted small">${escapeHtml(T.MsgNoHistory || 'Không có lịch sử.')}</div>`;
@@ -831,6 +879,8 @@
         document.getElementById('historyDrawerSupplier').textContent = button.dataset.mahangncc || '-';
         const timeline = document.getElementById('historyChangeTimeline');
         if (timeline) timeline.innerHTML = content;
+        document.getElementById('historyDetailView')?.setAttribute('hidden', '');
+        document.querySelector('.history-drawer-section:has(#historyChangeTimeline)')?.removeAttribute('hidden');
         historyDrawer?.classList.add('show');
         historyDrawer?.setAttribute('aria-hidden', 'false');
         historyDrawerOverlay?.classList.add('show');
@@ -839,6 +889,10 @@
 
     document.getElementById('btnCloseHistoryDrawer')?.addEventListener('click', closeHistoryDrawer);
     historyDrawerOverlay?.addEventListener('click', closeHistoryDrawer);
+    document.getElementById('btnBackHistoryGroups')?.addEventListener('click', () => {
+        document.getElementById('historyDetailView')?.setAttribute('hidden', '');
+        document.querySelector('.history-drawer-section:has(#historyChangeTimeline)')?.removeAttribute('hidden');
+    });
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && historyDrawer?.classList.contains('show')) closeHistoryDrawer();
     });
@@ -892,9 +946,6 @@
                     modalEl.classList.remove('show');
                     document.body.classList.remove('modal-open');
                 }
-                try { confirmBtn.removeEventListener('click', onConfirm); } catch (e) { }
-                try { modalEl.querySelectorAll('[data-bs-dismiss="modal"]').forEach(b => b.removeEventListener('click', onCancel)); } catch (e) { }
-                try { modalEl.removeEventListener('hidden.bs.modal', onHidden); } catch (e) { }
             };
 
             const onHidden = () => {
@@ -938,12 +989,14 @@
 
         try {
             showLoading(T.LoadingData || 'Đang tải...');
-            const histories = await postJson('/History/GetHistoryApprover', {
-                maDon,
-                maHang,
-                maHangNCC: maHangNcc
+            const histories = await postJson('/History/GetHistoryDataByID', {
+                MaDon: maDon,
+                MaHang: maHang,
+                MaHangNCC: maHangNcc,
+                NameEn: ''
             });
-            openHistoryDrawer(button, buildHistoryHtml(histories));
+            window._historyDrawerData = Array.isArray(histories) ? histories : (histories?.data || histories?.Data || []);
+            openHistoryDrawer(button, buildHistoryGroupsHtml(histories));
         } catch (error) {
             showDialog({
                 title: T.Notification || 'Thông báo',
@@ -953,6 +1006,23 @@
         } finally {
             hideLoading();
         }
+
+    document.getElementById('historyChangeTimeline')?.addEventListener('click', event => {
+        const button = event.target.closest('.btn-history-record-detail');
+        if (!button) return;
+        const recordIndex = Number(button.dataset.recordIndex);
+        const data = window._historyDrawerData || [];
+        const record = data[recordIndex];
+        if (!record) return;
+        const requestId = getValue(record, ['ID_RequestQuote', 'iD_RequestQuote'], '-');
+        document.getElementById('historyChangeTimeline')?.closest('.history-drawer-section')?.setAttribute('hidden', '');
+        const detailView = document.getElementById('historyDetailView');
+        if (detailView) detailView.removeAttribute('hidden');
+        const idEl = document.getElementById('historyDetailRequestId');
+        if (idEl) idEl.textContent = `ID_RequestQuote: ${requestId}`;
+        const content = document.getElementById('historyDetailContent');
+        if (content) content.innerHTML = buildHistoryDetailHtml(record);
+    });
     }
 
     async function handleDeleteHistory(button) {
@@ -1082,7 +1152,7 @@
         const supplierName = String(value ?? '').trim();
         const selectedName = String(selectedSupplier ?? '').trim();
 
-        const stepByRole = role === 'UserPUR' ? 8 : 12;
+        const stepByRole = role === 'PUR' ? 7 : 12;
 
         // Vẫn tô nền xanh khi step > stepByRole
         const isPickedSupplier =
@@ -1194,7 +1264,7 @@
             const link5 = getValue(row, ['Link_5', 'link_5']);
 
             const keyDowndload = getValue(row, ['CHR_MaDon'])+getValue(row, ['CHR_MaHangNoiBo']);
-            const returnAction = role === 'UserPUR'
+            const returnAction = role === 'PUR'
                 ? `<button type="button" class="btn btn-outline-warning btn-return-history" title="${escapeHtml(window.i18nHistoryQuote?.ReturnTooltip || 'Return')}" data-madon="${escapeHtml(maDon)}"><i class="fas fa-undo"></i></button>`
                 : '';
             const StatusRow = StatusCell(getValue(row, [stepName]), step, isAllRefuse, getValue(row, ['CHR_Status']), getValue(row, ['CHR_StatusACC']), getValue(row, ['CHR_StatusShip']));

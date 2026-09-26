@@ -639,5 +639,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // xu ly ghi update phe duyet lai
+        public async Task<GenericResponse<List<BaoGia_Request_of_QuotationDTO>>> UpdatePheDuyetLaiDonBaoGiaAsync(UpdateHistoryResult update)
+        {
+            var result = new GenericResponse<List<BaoGia_Request_of_QuotationDTO>>();
+            try
+            {
+                var Data = await _repo.UpdatePheDuyetLaiDonBaoGiaAsync(update);
+                result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(Data);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
     }
 }

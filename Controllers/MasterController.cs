@@ -1398,7 +1398,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             outSide = "OUT";
                             break;
                         default:
-                            return BadRequest($"Dòng {r}: Giá trị cột 'MaterialType' không hợp lệ. Chỉ chấp nhận 'A', 'B', 'C', 'E', 'I' hoặc 'O'.");
+                            outSide = "OUT";
+                            break;
                     }
 
                     var material = new MATERIALDTO
@@ -1438,7 +1439,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 var materialInsertNews = new List<MATERIALDTO>();
 
-                var groups = insertRows.GroupBy(x => GetMaterialType(x.LoaiHang));
+                var groups = insertRows.GroupBy(x => GetMaterialType(x.LoaiHang ?? "O"));
 
                 foreach (var group in groups)
                 {

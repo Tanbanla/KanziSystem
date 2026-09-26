@@ -11,6 +11,7 @@ using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.View_Models.Quote;
 using System.Collections.Concurrent;
+using System.Drawing.Printing;
 using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -25,12 +26,55 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context = context;
         }
         // Lấy lịch sử báo giá theo ID_RequestQuote
-        public async Task<List<BaoGia_History_Request_of_Quotation>> GetByRequestQuoteIdAsync(int idRequestQuote)
+        public async Task<List<DetailHistoryDTO>> GetByRequestQuoteIdAsync(SearchHistoryInfoByMaDonModel searchModel)
         {
-            var result = await _context.BaoGia_History_Request_of_Quotations
-            .Where(h => h.ID_RequestQuote == idRequestQuote)
-            .OrderBy(h => h.ID)
-            .ToListAsync();
+            var sql = @"
+                SELECT distinct h.ID
+                      ,ID_RequestQuote
+                      ,h.CHR_MaDon
+                      ,CHR_UpdateBy
+                      ,NVCHR_UpdateName
+                      ,CHR_Updatedate
+                      ,CHR_OldData
+                      ,CHR_NewData
+                      ,h.NVCHR_LyDo
+                      ,CHR_ActionType
+                      , NVCHR_TenStatus as NameVN
+                      ,CHR_TenStatusJP as NameJP
+                      ,CHR_TenStatusEN as NameEN 
+                  FROM BaoGia_History_Request_of_Quotation as h
+                  left join BaoGia_Status as s on s.VCHR_CodeStatus = h.CHR_ActionType
+                  LEFT JOIN BaoGia_Request_of_Quotation as r ON h.ID_RequestQuote = r.ID
+                  where 1=1 
+                ";
+
+            var whereClauses = new List<string>();
+            var parameters = new Dapper.DynamicParameters();
+            // Dieu kien loc theo maDon, maHang, maHangNCC
+            if (!string.IsNullOrEmpty(searchModel.MaDon))
+            {
+                whereClauses.Add("r.CHR_MaDon = @MaDon");
+                parameters.Add("MaDon", searchModel.MaDon);
+            }
+            if (!string.IsNullOrEmpty(searchModel.MaHang))
+            {
+                whereClauses.Add("r.CHR_MaHangNoiBo = @Mahang");
+                parameters.Add("Mahang", searchModel.MaHang);
+            }
+            if (!string.IsNullOrEmpty(searchModel.MaHangNCC))
+            {
+                whereClauses.Add("r.CHR_MaHangNCC = @MaHangNCC");
+                parameters.Add("MaHangNCC", searchModel.MaHangNCC);
+            }
+
+            if (whereClauses.Any())
+            {
+                sql += " AND " + string.Join(" AND ", whereClauses);
+            }
+            sql += @"
+                order by ID_RequestQuote, h.ID 
+                ";
+            var result = (await _conn.QueryAsync<DetailHistoryDTO>(sql, parameters)).ToList();
             return result;
         }
         // Tìm kiếm danh sách thông tin lịch sử báo giá theo số đơn

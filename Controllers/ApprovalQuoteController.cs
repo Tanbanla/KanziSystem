@@ -135,6 +135,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 var adid = GetCurrentUserId() ?? string.Empty;
+                var role = GetRolesUser() ?? "USER";
                 var result = await _historyApproverServive.GetListApprover(
                     adid, searchModel.SoDon, searchModel.MaHang, searchModel.Section, searchModel.StatusApprover
                 );
@@ -290,12 +291,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ID_RequestQuote = b.ID,
                     CHR_MaDon = b.CHR_MaDon ?? string.Empty,
                     CHR_UpdateBy = currentUserId ?? string.Empty,
-                    NVCHR_UpdateName = currentUserId ?? string.Empty,
+                    NVCHR_UpdateName = GetCurrentUserFullName() ?? currentUserId ?? string.Empty,
                     CHR_Updatedate = DateTime.Now,
                     CHR_ChangedColumns = null,
                     CHR_OldData = null,
                     CHR_NewData = System.Text.Json.JsonSerializer.Serialize(b),
-                    NVCHR_LyDo = b.NVCHR_LyDo,
+                    NVCHR_LyDo = "",//b.NVCHR_LyDo,
                     CHR_ActionType = StatusOld(b.ID_StepBaoGia)
                 }).ToList();
 
@@ -575,7 +576,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ID_RequestQuote = b.ID,
                     CHR_MaDon = b.CHR_MaDon ?? string.Empty,
                     CHR_UpdateBy = GetCurrentUserId() ?? string.Empty,
-                    NVCHR_UpdateName = GetCurrentUserFullName() ?? string.Empty,
+                    NVCHR_UpdateName = GetCurrentUserFullName() ?? GetCurrentUserId() ?? string.Empty,
                     CHR_Updatedate = DateTime.Now,
                     CHR_ChangedColumns = null,
                     CHR_OldData = null,

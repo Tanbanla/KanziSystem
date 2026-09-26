@@ -19,7 +19,6 @@ async function _load_material() {
     params.append('Account_Name_VN', Account_Name_VN);
     params.append('Group_Code', Group_Code);
 
-
     fetch('/ipcs/Material/load_material', {
         method: 'POST',
         headers: {
@@ -77,8 +76,6 @@ function renderUserTable(data) {
 
     // Sử dụng Array.map() và Array.join('') để tối ưu hóa việc tạo HTML
     const htmlContent = data.map(mtr => {
-
-
         return `<tr>
                   
                     <td>${mtr.material_Code}</td>

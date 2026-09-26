@@ -111,7 +111,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             try
             {
                 var materials = _mapper.Map<List<MATERIAL>>(listDTO);
-                // You may need to implement this method in IMaterialRepository if not already present
                 var updateResult = await _repo.UpdateMaterialAsync(materials);
                 result.Data = updateResult;
                 result.Success = true;

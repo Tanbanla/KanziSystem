@@ -735,15 +735,50 @@
   <data name="ChangeHistory" xml:space="preserve">
     <value>Change History</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms" />
   <data name="OrderInformation" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value>Order Information</value>
   </data>
-  <data name="RecordId" xml:space="preserve"><value>Record ID</value></data>
-  <data name="IsTemplate" xml:space="preserve"><value>Is template</value></data>
-  <data name="Deadline" xml:space="preserve"><value>Processing deadline</value></data>
-  <data name="UpdateLater" xml:space="preserve"><value>Next update date</value></data>
-  <data name="UpdateCount" xml:space="preserve"><value>Update count</value></data>
-  <data name="NextApprover" xml:space="preserve"><value>Approver</value></data>
-  <data name="QuotationReason" xml:space="preserve"><value>Quotation reason</value></data>
-  <data name="FileLink" xml:space="preserve"><value>File link</value></data>
- </root>
+  <data name="RecordId" xml:space="preserve">
+    <value>Record ID</value>
+  </data>
+  <data name="IsTemplate" xml:space="preserve">
+    <value>Is template</value>
+  </data>
+  <data name="Deadline" xml:space="preserve">
+    <value>Processing deadline</value>
+  </data>
+  <data name="UpdateLater" xml:space="preserve">
+    <value>Next update date</value>
+  </data>
+  <data name="UpdateCount" xml:space="preserve">
+    <value>Update count</value>
+  </data>
+  <data name="NextApprover" xml:space="preserve">
+    <value>Approver</value>
+  </data>
+  <data name="QuotationReason" xml:space="preserve">
+    <value>Quotation reason</value>
+  </data>
+  <data name="FileLink" xml:space="preserve">
+    <value>File link</value>
+  </data>
+  <data name="RequestId" xml:space="preserve">
+    <value>Request ID</value>
+  </data>
+  <data name="VietnameseName" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="UpdatedTime" xml:space="preserve">
+    <value>Updated time</value>
+  </data>
+  <data name="RecordCount" xml:space="preserve">
+    <value>records</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View details</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+</root>

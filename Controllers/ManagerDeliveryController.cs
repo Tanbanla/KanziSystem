@@ -77,6 +77,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public string? Note { get; set; }
         public string? Code_Request { get; set; }
         public string? Good_Code { get; set; }
+        public string? Phongchiuphi { get; set; }
     }
     public class UpdateDuKienModel
     {
@@ -270,9 +271,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             string ngayNccXacnhanGh = FormatSqlDate(rawNgayNccXacnhanGh);
                             string ngayGhChinhThuc = FormatSqlDate(rawNgayGhChinhThuc);
 
-                            // Bỏ qua nếu dòng trống dữ liệu cần thiết
-                            if (ngayGuiPo == "NULL") continue;
-
                             string giogh = SafeString(worksheet.Cells[row, 17].Text?.ToString()!);
                             string lichGiao = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 18].Text) ? null : worksheet.Cells[row, 18].Text.Trim());
                             string anhHuongSx = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 19].Text) ? null : worksheet.Cells[row, 19].Text.Trim());
@@ -417,8 +415,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return "";
         }
-        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc", string mahang = "", string tenncc = "")
-        {          
+
+        public IActionResult ManageDelivery(int page = 1, string picpur = "", string searchTerm = "", string reqMonth = "", string tab = "", string impactStatus = "", string pullStatus = "", string sortColumn = "", string sortDirection = "asc", string mahang = "", string tenncc = "", string cost = "", string anhhuongsx = "")
+        {
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             tinhtoanlichgiao();
             var us = User.FindFirst("UserId")?.Value;
@@ -427,42 +426,46 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var khoi = "";
             if (checkus == "PUR") { khoi = "AND (a.Group_Code = 'PUR' OR a.Group_Code = 'PROD')"; }
             if (checkus == "GA") { khoi = "AND Group_Code = 'GA'"; }
-            var get_sec = sql.ReturnString($"SELECT CHR_SECTION  FROM [TM_USER] where CHR_USERID = '{us}'");
+
+            var get_sec = sql.ReturnString($"SELECT CHR_SECTION FROM [TM_USER] where CHR_USERID = '{us}'");
             var hientheophongban = "";
             if (get_sec == "3100" || get_sec == "1100") { }
             else { hientheophongban = @$" AND a.Phongchiuchiphi IN ( SELECT Cost_Center FROM [COST_MANAGEMENT].[dbo].[USER_DEPT] WHERE CHR_USERID = '{us}')"; }
-            string tabCondition = "";
-            if (string.IsNullOrEmpty(tab))
-            {
-                tab = "ngoai";
-            }
-            if (tab == "trong") { tabCondition = "AND a.Danhmuc = 'IN'"; };
-            if (tab == "ngoai") { tabCondition = "AND a.Danhmuc = 'OUT'"; };
-            if (tab == "trong") {
-                hientheophongban = "";
-            };
 
-            // --- LOGIC XỬ LÝ ĐIỀU KIỆN TÌM KIẾM VÀ THÁNG ---
-            string mainCondition = "1=1"; 
+            string tabCondition = "";
+            if (string.IsNullOrEmpty(tab)) tab = "ngoai";
+            if (tab == "trong") { tabCondition = "AND a.Danhmuc = 'IN'"; hientheophongban = ""; }
+            if (tab == "ngoai") { tabCondition = "AND a.Danhmuc = 'OUT'"; }
+
+            // --- XỬ LÝ ĐIỀU KIỆN TÌM KIẾM VÀ THÁNG ---
+            string mainCondition = "1=1";
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                reqMonth = ""; // Ép rỗng reqMonth để giao diện tự động clear ô Tháng
-                string s = searchTerm.Replace("'", "''"); 
+                reqMonth = ""; // Clear reqMonth khi dùng từ khóa
+                string s = searchTerm.Replace("'", "''");
                 mainCondition = $"(a.SoPO LIKE '%{s}%' OR a.Mahang LIKE '%{s}%' OR a.Tentiengviet LIKE N'%{s}%' OR a.TenNCC LIKE N'%{s}%')";
             }
             else
             {
-                if (reqMonth == "")
+                if (string.IsNullOrEmpty(reqMonth))
                 {
                     mainCondition = $"Ngayphathanh >= '2024-01-01'";
                 }
                 else
                 {
-                    mainCondition = $"MONTH(Ngayphathanh) = '{reqMonth.Split('-')[1]}' AND YEAR(Ngayphathanh) = '{reqMonth.Split('-')[0]}' ";
+                    var monthParts = reqMonth.Split('-');
+                    if (monthParts.Length == 2)
+                    {
+                        mainCondition = $"MONTH(Ngayphathanh) = '{monthParts[1]}' AND YEAR(Ngayphathanh) = '{monthParts[0]}'";
+                    }
                 }
             }
+
             if (!string.IsNullOrEmpty(tenncc)) { mainCondition += $" AND a.TenNCC LIKE N'%{tenncc.Replace("'", "''")}%'"; }
+            if (!string.IsNullOrEmpty(cost)) { mainCondition += $" AND a.Phongchiuchiphi = N'{cost.Replace("'", "''")}'"; }
+            if (!string.IsNullOrEmpty(anhhuongsx)) { mainCondition += $" AND b.Anh_huong_SX = N'{anhhuongsx.Replace("'", "''")}'"; }
+
             string query = $@"SELECT a.*, b.*, c.Damnhiem, d.User_Create FROM [COST_MANAGEMENT].[dbo].[PO] as a 
                 OUTER APPLY (
                     SELECT TOP 1 * FROM PE_THEODOITIENDO WHERE Id_Detail_PO = a.PO_Detail_Id 
@@ -476,19 +479,80 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 AND Ngayphathanh >= '2024-01-01'
                 AND TinhtrangPO <> 'HOANTHANH' AND TinhtrangPO <> 'HUY' AND Luongvekho is null
                 {hientheophongban} ORDER BY a.Ngaytao DESC";
-                var lst = sql.GET_DATA_FROM_SQL(query);
+
+            var lst = sql.GET_DATA_FROM_SQL(query);
 
             List<PoDetailViewModel> listPo = new List<PoDetailViewModel>();
-            if (tab == "trong" )
+
+            // [BƯỚC 1]: ĐỔ DỮ LIỆU TỪ SQL VÀO LIST TRƯỚC
+            if (lst != null)
             {
-                // Lấy danh sách các mã hàng độc nhất (không trùng lặp)
+                for (int i = 0; i < lst.Rows.Count; i++)
+                {
+                    PoDetailViewModel po = new PoDetailViewModel();
+                    po.PO_Detail_Id = int.Parse(lst.Rows[i]["PO_Detail_Id"].ToString()!);
+                    object valNgaytao = lst.Rows[i]["Ngaytao"];
+                    po.Ngayyc = (valNgaytao != null && valNgaytao != DBNull.Value) ? Convert.ToDateTime(valNgaytao).ToString("yyyy-MM-dd") : "";
+
+                    object valNgayyc = lst.Rows[i]["Ngaygiaohangdukien"];
+                    po.Ngayycgiao = (valNgayyc != null && valNgayyc != DBNull.Value) ? Convert.ToDateTime(valNgayyc).ToString("yyyy-MM-dd") : "";
+
+                    po.SoPO = lst.Rows[i]["SoPO"].ToString();
+                    po.Tentiengviet = lst.Rows[i]["Tentiengviet"].ToString();
+                    po.Mahang = lst.Rows[i]["Mahang"].ToString();
+                    po.Soluong = double.TryParse(lst.Rows[i]["Soluong"].ToString(), out double sl) ? sl : 0;
+                    po.Donvi = lst.Rows[i]["Dovi"].ToString();
+                    po.Nhacungcap = lst.Rows[i]["TenNCC"].ToString();
+                    po.DNphathanhpo = lst.Rows[i]["User_Create"].ToString()?.ToLower();
+                    po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
+                    po.MaNhacungcap = lst.Rows[i]["MaNCC"].ToString();
+                    po.Phongchiuphi = lst.Rows[i]["Phongchiuchiphi"].ToString();
+                    po.picpur = lst.Rows[i]["Damnhiem"].ToString();
+
+                    object valNgayGui = lst.Rows[i]["Ngay_gui_PO"];
+                    po.ngayguiPO = (valNgayGui != null && valNgayGui != DBNull.Value) ? Convert.ToDateTime(valNgayGui).ToString("yyyy-MM-dd") : "";
+
+                    object valNgayNcc = lst.Rows[i]["Ngay_NCC_xacnhanGH"];
+                    po.ngaynccxngiao = (valNgayNcc != null && valNgayNcc != DBNull.Value) ? Convert.ToDateTime(valNgayNcc).ToString("yyyy-MM-dd") : "";
+
+                    po.anhuongsx = lst.Rows[i]["Anh_huong_SX"].ToString();
+                    po.lichgiao = lst.Rows[i]["Lichgiao"].ToString();
+                    po.trangthai = "";
+                    po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
+                    po.Danhmuc = lst.Rows[i]["Danhmuc"].ToString();
+
+                    object valNgaydieuchinh = lst.Rows[i]["Dieuchinhlichgiao"];
+                    po.Dieuchinhlichgiao = (valNgaydieuchinh != null && valNgaydieuchinh != DBNull.Value) ? Convert.ToDateTime(valNgaydieuchinh).ToString("yyyy-MM-dd") : "";
+
+                    po.Note = lst.Rows[i]["Note"].ToString();
+                    po.Good_Code = lst.Rows[i]["Good_Code"].ToString();
+                    po.Code_Request = lst.Rows[i]["Code_Request"].ToString();
+
+                    object valNgayGH = lst.Rows[i]["Ngay_GHchinhthuc"];
+                    po.Ngay_GHchinhthuc = (valNgayGH != null && valNgayGH != DBNull.Value) ? Convert.ToDateTime(valNgayGH).ToString("yyyy-MM-dd") : "";
+
+                    po.Gio_GH = lst.Rows[i]["Gio_GH"].ToString();
+                    po.Cua_GH = lst.Rows[i]["Cua_GH"].ToString();
+                    po.Cong_Nhanhang = lst.Rows[i]["Cong_Nhanhang"].ToString();
+                    po.Nguoi_Nhanhang = lst.Rows[i]["Nguoi_Nhanhang"].ToString();
+                    po.SL_Thucte = lst.Rows[i]["SL_Thucte"].ToString();
+                    po.So_DNTT = lst.Rows[i]["So_DNTT"].ToString();
+                    po.So_hoadon = lst.Rows[i]["So_hoadon"].ToString();
+                    po.khoi = lst.Rows[i]["Group_Code"].ToString();
+                    po.canhbao = "";
+                    listPo.Add(po);
+                }
+            }
+
+            // [BƯỚC 2]: TÍNH TOÁN VÀ LỌC THEO PULL IN/PULL OUT NẾU LÀ TAB TRONG
+            if (tab == "trong")
+            {
                 var uniqueItems = listPo.Select(x => x.Mahang).Where(x => !string.IsNullOrEmpty(x)).Distinct().ToList();
 
                 if (uniqueItems.Any())
                 {
                     string inClause = string.Join(",", uniqueItems.Select(x => $"'{x}'"));
 
-                    // 1. Lấy toàn bộ Tồn Kho (Stock) 1 lần
                     var dictKho = new Dictionary<string, double>();
                     var dtKho = sql.GET_DATA_FROM_SQL($"SELECT MaNguyenLieu, ISNULL(SUM(Hientai), 0) AS Stock FROM KHO WHERE MaNguyenLieu IN ({inClause}) GROUP BY MaNguyenLieu");
                     if (dtKho != null)
@@ -496,7 +560,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         foreach (System.Data.DataRow r in dtKho.Rows)
                             dictKho[r["MaNguyenLieu"].ToString()!] = Convert.ToDouble(r["Stock"]);
                     }
-                    // 2. Lấy toàn bộ PE_Using 1 lần
+
                     var dictUsing = new Dictionary<string, double>();
                     var dtUsing = sql.GET_DATA_FROM_SQL($"SELECT MaVatTu, Thang, Nam, ISNULL(SUM(Soluong), 0) AS Soluong FROM PE_Using WHERE MaVatTu IN ({inClause}) GROUP BY MaVatTu, Thang, Nam");
                     if (dtUsing != null)
@@ -505,16 +569,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             dictUsing[$"{r["MaVatTu"]}_{r["Thang"]}_{r["Nam"]}"] = Convert.ToDouble(r["Soluong"]);
                     }
 
-                    // 3. Lấy toàn bộ SoLuongPO 1 lần
                     var dictPoSum = new Dictionary<string, double>();
                     var dtPoSum = sql.GET_DATA_FROM_SQL($@"
-                        SELECT a.Mahang, 
-                                COALESCE(b.Ngay_GHchinhthuc, b.Ngay_NCC_xacnhanGH, a.Ngaygiaohangdukien) AS Ngay,
-                                ISNULL(SUM(a.Soluong), 0) AS SoLuongPO
-                        FROM [COST_MANAGEMENT].[dbo].[PO] AS a 
-                        LEFT JOIN PE_THEODOITIENDO AS b ON a.PO_Detail_Id = b.Id_Detail_PO 
-                        WHERE a.Danhmuc = 'IN' AND a.Mahang IN ({inClause})
-                        GROUP BY a.Mahang, COALESCE(b.Ngay_GHchinhthuc, b.Ngay_NCC_xacnhanGH, a.Ngaygiaohangdukien)");
+                    SELECT a.Mahang, 
+                            COALESCE(b.Ngay_GHchinhthuc, b.Ngay_NCC_xacnhanGH, a.Ngaygiaohangdukien) AS Ngay,
+                            ISNULL(SUM(a.Soluong), 0) AS SoLuongPO
+                    FROM [COST_MANAGEMENT].[dbo].[PO] AS a 
+                    LEFT JOIN PE_THEODOITIENDO AS b ON a.PO_Detail_Id = b.Id_Detail_PO 
+                    WHERE a.Danhmuc = 'IN' AND a.Mahang IN ({inClause})
+                    GROUP BY a.Mahang, COALESCE(b.Ngay_GHchinhthuc, b.Ngay_NCC_xacnhanGH, a.Ngaygiaohangdukien)");
                     if (dtPoSum != null)
                     {
                         foreach (System.Data.DataRow r in dtPoSum.Rows)
@@ -526,13 +589,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         }
                     }
 
-                    // 4. Gắn kết quả Cảnh Báo và Lọc dữ liệu
                     var filteredByPull = new List<PoDetailViewModel>();
                     foreach (var po in listPo)
                     {
                         string ngayUuTien = !string.IsNullOrEmpty(po.Ngay_GHchinhthuc) ? po.Ngay_GHchinhthuc :
-                                              !string.IsNullOrEmpty(po.ngaynccxngiao) ? po.ngaynccxngiao :
-                                              po.Ngayycgiao!;
+                                            !string.IsNullOrEmpty(po.ngaynccxngiao) ? po.ngaynccxngiao :
+                                            po.Ngayycgiao!;
 
                         if (!string.IsNullOrEmpty(po.Mahang) && DateTime.TryParse(ngayUuTien, out DateTime baseDate))
                         {
@@ -547,15 +609,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             double using_ngay = dictUsing.ContainsKey(uBase) ? dictUsing[uBase] / 22.0 : 0;
 
                             double using3thang = (dictUsing.ContainsKey($"{po.Mahang}_{month1.Month}_{month1.Year}") ? dictUsing[$"{po.Mahang}_{month1.Month}_{month1.Year}"] : 0) +
-                                                   (dictUsing.ContainsKey($"{po.Mahang}_{month2.Month}_{month2.Year}") ? dictUsing[$"{po.Mahang}_{month2.Month}_{month2.Year}"] : 0) +
-                                                   (dictUsing.ContainsKey($"{po.Mahang}_{month3.Month}_{month3.Year}") ? dictUsing[$"{po.Mahang}_{month3.Month}_{month3.Year}"] : 0);
+                                                 (dictUsing.ContainsKey($"{po.Mahang}_{month2.Month}_{month2.Year}") ? dictUsing[$"{po.Mahang}_{month2.Month}_{month2.Year}"] : 0) +
+                                                 (dictUsing.ContainsKey($"{po.Mahang}_{month3.Month}_{month3.Year}") ? dictUsing[$"{po.Mahang}_{month3.Month}_{month3.Year}"] : 0);
 
                             double canhbao = stock + sl_po - using_ngay;
                             if (canhbao < 0) po.canhbao = "PullIn";
                             else if (stock > using3thang) po.canhbao = "PullOut";
                         }
 
-                        // Nếu người dùng chọn lọc và trạng thái cảnh báo khớp (hoặc không chọn lọc thì lấy hết)
                         if (string.IsNullOrEmpty(pullStatus) ||
                            (pullStatus == "in" && po.canhbao == "PullIn") ||
                            (pullStatus == "out" && po.canhbao == "PullOut"))
@@ -563,67 +624,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             filteredByPull.Add(po);
                         }
                     }
-                    listPo = filteredByPull; // Gán lại danh sách PO đã được lọc
+                    listPo = filteredByPull;
                 }
             }
-            if (lst == null) return View(new List<PoDetailViewModel>());
-      
-            for (int i = 0; i < lst.Rows.Count; i++)
-            {
-                PoDetailViewModel po = new PoDetailViewModel();
-                po.PO_Detail_Id = int.Parse(lst.Rows[i]["PO_Detail_Id"].ToString()!);
-                object valNgaytao = lst.Rows[i]["Ngaytao"];
-                po.Ngayyc = (valNgaytao != null && valNgaytao != DBNull.Value) ? Convert.ToDateTime(valNgaytao).ToString("yyyy-MM-dd") : "";
-       
-                object valNgayyc = lst.Rows[i]["Ngaygiaohangdukien"];
-                po.Ngayycgiao = (valNgayyc != null && valNgayyc != DBNull.Value) ? Convert.ToDateTime(valNgayyc).ToString("yyyy-MM-dd") : "";
 
-                po.SoPO = lst.Rows[i]["SoPO"].ToString();
-                po.Tentiengviet = lst.Rows[i]["Tentiengviet"].ToString();
-                po.Mahang = lst.Rows[i]["Mahang"].ToString();
-                po.Soluong = double.Parse(lst.Rows[i]["Soluong"].ToString()!);
-                po.Donvi = lst.Rows[i]["Dovi"].ToString();
-                po.Nhacungcap = lst.Rows[i]["TenNCC"].ToString();
-                po.DNphathanhpo = lst.Rows[i]["User_Create"].ToString()?.ToLower();
-                po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
-                po.MaNhacungcap = lst.Rows[i]["MaNCC"].ToString();
-                po.picpur = lst.Rows[i]["Damnhiem"].ToString();
-                object valNgayGui = lst.Rows[i]["Ngay_gui_PO"];
-                po.ngayguiPO = (valNgayGui != null && valNgayGui != DBNull.Value) ? Convert.ToDateTime(valNgayGui).ToString("yyyy-MM-dd") : "";
-
-                object valNgayNcc = lst.Rows[i]["Ngay_NCC_xacnhanGH"];
-                po.ngaynccxngiao = (valNgayNcc != null && valNgayNcc != DBNull.Value) ? Convert.ToDateTime(valNgayNcc).ToString("yyyy-MM-dd") : "";
-
-                po.anhuongsx = lst.Rows[i]["Anh_huong_SX"].ToString();
-                po.lichgiao = lst.Rows[i]["Lichgiao"].ToString();
-                po.trangthai = "";
-                po.LuongvekhoKhonhap = lst.Rows[i]["LuongvekhoKhonhap"].ToString();
-                po.Danhmuc = lst.Rows[i]["Danhmuc"].ToString();
-                po.Dieuchinhlichgiao = lst.Rows[i]["Dieuchinhlichgiao"].ToString();
-
-                object valNgaydieuchinh = lst.Rows[i]["Dieuchinhlichgiao"];
-                po.Dieuchinhlichgiao = (valNgaydieuchinh != null && valNgaydieuchinh != DBNull.Value) ? Convert.ToDateTime(valNgaydieuchinh).ToString("yyyy-MM-dd") : "";
-                
-                po.Note = lst.Rows[i]["Note"].ToString();
-                po.Good_Code = lst.Rows[i]["Good_Code"].ToString();
-                po.Code_Request = lst.Rows[i]["Code_Request"].ToString();
-
-                object valNgayGH = lst.Rows[i]["Ngay_GHchinhthuc"];
-                po.Ngay_GHchinhthuc = (valNgayGH != null && valNgayGH != DBNull.Value) ? Convert.ToDateTime(valNgayGH).ToString("yyyy-MM-dd") : "";
-
-                po.Gio_GH = lst.Rows[i]["Gio_GH"].ToString();
-                po.Cua_GH = lst.Rows[i]["Cua_GH"].ToString();
-                po.Cong_Nhanhang = lst.Rows[i]["Cong_Nhanhang"].ToString();
-                po.Nguoi_Nhanhang = lst.Rows[i]["Nguoi_Nhanhang"].ToString();
-                po.SL_Thucte = lst.Rows[i]["SL_Thucte"].ToString();
-                po.So_DNTT = lst.Rows[i]["So_DNTT"].ToString();
-                po.So_hoadon = lst.Rows[i]["So_hoadon"].ToString();
-                po.khoi = lst.Rows[i]["Group_Code"].ToString();
-                po.canhbao = ""; // Khởi tạo mặc định
-                listPo.Add(po);
-            }
-
-            // Lọc theo Search Text (Lọc thêm cho chắc chắn dù đã lấy từ SQL)
+            // Các bộ lọc phụ C# Memory
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 string searchLower = searchTerm.ToLower();
@@ -635,93 +640,32 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 ).ToList();
             }
 
-            // Lọc theo Tháng yêu cầu
             if (!string.IsNullOrWhiteSpace(reqMonth))
             {
-                // Chỉ lọc theo tháng khi ô tháng có giá trị
                 listPo = listPo.Where(x => {
                     if (DateTime.TryParse(x.Ngayycgiao, out DateTime dt)) return dt.ToString("yyyy-MM") == reqMonth;
                     return false;
                 }).ToList();
             }
 
-            // Lọc theo Impact Status
             if (!string.IsNullOrEmpty(impactStatus))
             {
                 if (impactStatus == "WAIT")
-                {
                     listPo = listPo.Where(x => !string.IsNullOrEmpty(x.lichgiao) && x.lichgiao.Trim().ToUpper() == "NG" && string.IsNullOrEmpty(x.anhuongsx)).ToList();
-                }
                 else
-                {
-                    listPo = listPo.Where(x => x.lichgiao!.Trim().Equals(impactStatus)).ToList();
-                }
+                    listPo = listPo.Where(x => x.lichgiao != null && x.lichgiao.Trim().Equals(impactStatus)).ToList();
             }
 
-            if (!string.IsNullOrEmpty(sortColumn))
-            {
-                bool isDesc = sortDirection.ToLower() == "desc";
-
-                // Định dạng ngày yyyy-MM-dd chuẩn nên có thể sort theo chuỗi (string)
-                switch (sortColumn)
-                {
-                    case "Ngayyc":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Ngayyc).ToList() : listPo.OrderBy(x => x.Ngayyc).ToList();
-                        break;
-                    case "Ngayycgiao":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Ngayycgiao).ToList() : listPo.OrderBy(x => x.Ngayycgiao).ToList();
-                        break;
-                    case "SoPO":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.SoPO).ToList() : listPo.OrderBy(x => x.SoPO).ToList();
-                        break;
-                    case "Tentiengviet":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Tentiengviet).ToList() : listPo.OrderBy(x => x.Tentiengviet).ToList();
-                        break;
-                    case "Mahang":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Mahang).ToList() : listPo.OrderBy(x => x.Mahang).ToList();
-                        break;
-                    case "Soluong":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Soluong).ToList() : listPo.OrderBy(x => x.Soluong).ToList();
-                        break;
-                    case "Donvi":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Donvi).ToList() : listPo.OrderBy(x => x.Donvi).ToList();
-                        break;
-                    case "Nhacungcap":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Nhacungcap).ToList() : listPo.OrderBy(x => x.Nhacungcap).ToList();
-                        break;
-                    case "ngayguiPO":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.ngayguiPO).ToList() : listPo.OrderBy(x => x.ngayguiPO).ToList();
-                        break;
-                    case "PicPur":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.DNphathanhpo).ToList() : listPo.OrderBy(x => x.DNphathanhpo).ToList();
-                        break;
-                    case "ngaynccxngiao":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.ngaynccxngiao).ToList() : listPo.OrderBy(x => x.ngaynccxngiao).ToList();
-                        break;
-                    case "Ngay_GHchinhthuc":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.Ngay_GHchinhthuc).ToList() : listPo.OrderBy(x => x.Ngay_GHchinhthuc).ToList();
-                        break;
-                    case "lichgiao":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.lichgiao).ToList() : listPo.OrderBy(x => x.lichgiao).ToList();
-                        break;
-                    case "anhuongsx":
-                        listPo = isDesc ? listPo.OrderByDescending(x => x.anhuongsx).ToList() : listPo.OrderBy(x => x.anhuongsx).ToList();
-                        break;
-                }
-            }
-
-            // Lọc theo Pic Pur
             if (!string.IsNullOrWhiteSpace(picpur))
             {
-                // Chỉ lọc theo tháng khi ô tháng có giá trị
-                listPo = listPo.Where(x => x.picpur!.Contains(picpur)).ToList();
+                listPo = listPo.Where(x => x.picpur != null && x.picpur.Contains(picpur)).ToList();
             }
-  
+
             if (!string.IsNullOrEmpty(mahang))
             {
-                // Lọc những mã hàng bắt đầu bằng kí tự A hoặc E
                 listPo = listPo.Where(x => !string.IsNullOrEmpty(x.Mahang) && x.Mahang.ToUpper().StartsWith(mahang.ToUpper())).ToList();
             }
+
             // Phân trang
             int pageSize = 100;
             int totalRecords = listPo.Count;
@@ -732,6 +676,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var pagedList = listPo.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
+            // [BƯỚC 3]: ĐẨY ĐẦY ĐỦ CÁC BỘ LỌC RA VIEWBAG NỔI BẬT LÊN TRÊN DÒNG PHÂN TRANG
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalRecords = totalRecords;
@@ -742,14 +687,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             ViewBag.ImpactStatus = impactStatus;
             ViewBag.PullStatus = pullStatus;
             ViewBag.PicPur = picpur;
-            // Đẩy thông tin sort ra View để icon hiển thị đúng trạng thái
             ViewBag.SortColumn = sortColumn;
             ViewBag.SortDirection = sortDirection;
             ViewBag.Mahang = mahang;
+            ViewBag.TenNcc = tenncc;
+            ViewBag.Cost = cost;
+            ViewBag.AnhHuongSx = anhhuongsx;
+
             TempData["Tongsoluong"] = totalRecords;
 
             return View(pagedList);
         }
+
         [HttpPost]
         public IActionResult UpdateDuKien([FromBody] UpdateDuKienModel model)
         {
@@ -1163,7 +1112,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
         }
         [HttpGet] // Hoặc [HttpGet] tùy thuộc vào form của bạn ở View đang dùng gì
-        public IActionResult ExportExcel(string searchTerm = "", string picpur = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "", string mahang = "", string tenncc="")
+        public IActionResult ExportExcel(string searchTerm = "", string picpur = "", string reqMonth = "", string tab = "ngoai", string impactStatus = "", string pullStatus = "", string mahang = "", string tenncc= "" , string cost = "", string anhhuongsx = "")
         {
             SQL_Connect_DB20 sql = new SQL_Connect_DB20();
             tinhtoanlichgiao();
@@ -1172,7 +1121,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var checkus = sql.ReturnString($"select [Group_Code] from [GROUP_MEMBER] where CHR_USERID = '{us}'");
             var khoi = "";
           
-            if (checkus == "PUR") { khoi = "AND (Group_Code = 'PUR' OR Group_Code = 'PROD')"; }
+            if (checkus == "PUR") { khoi = "AND (a.Group_Code = 'PUR' OR a.Group_Code = 'PROD')"; }
             if (checkus == "GA") { khoi = "AND Group_Code = 'GA'"; }
             var get_sec = sql.ReturnString($"SELECT CHR_SECTION  FROM [TM_USER] where CHR_USERID = '{us}'");
             var hientheophongban = "";
@@ -1212,8 +1161,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                   
             }
             if (!string.IsNullOrEmpty(tenncc)) { mainCondition += $" AND a.TenNCC LIKE N'%{tenncc.Replace("'", "''")}%'"; }
+            if (!string.IsNullOrEmpty(cost)) { mainCondition += $" AND a.Phongchiuchiphi = N'{cost.Replace("'", "''")}'"; }
+            if (!string.IsNullOrEmpty(anhhuongsx)) { mainCondition += $" AND b.Anh_huong_SX = N'{anhhuongsx.Replace("'", "''")}'"; }
             // Đã thêm điều kiện loại bỏ HOANTHANH và HUY giống ManageDelivery
-            string query = $@"SELECT a.*, b.*, c.Damnhiem 
+            string query = $@"SELECT a.*, b.*, c.Damnhiem, d.User_Create
                     FROM [COST_MANAGEMENT].[dbo].[PO] as a 
                     OUTER APPLY (
                         SELECT TOP 1 * FROM PE_THEODOITIENDO 
@@ -1224,6 +1175,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         SELECT TOP 1 Damnhiem FROM PE_DamnhiemNCC 
                         WHERE MaNCC = a.MaNCC
                     ) as c
+                    LEFT JOIN REQUEST as d on a.Code_Request = d.Code_Request
                     WHERE {mainCondition} {khoi} {tabCondition}
                     AND Ngayphathanh >= '2024-01-01'
                     AND TinhtrangPO <> 'HOANTHANH' AND TinhtrangPO <> 'HUY' AND Luongvekho is null
@@ -1253,7 +1205,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.Soluong = double.Parse(lst.Rows[i]["Soluong"].ToString()!);
                 po.Donvi = lst.Rows[i]["Dovi"].ToString();
                 po.Nhacungcap = lst.Rows[i]["TenNCC"].ToString();
-                po.DNphathanhpo = lst.Rows[i]["Nguoilamdon"].ToString()?.ToLower();
+                po.DNphathanhpo = lst.Rows[i]["User_Create"].ToString()?.ToLower();
                 po.DNphongban = lst.Rows[i]["Nguoixacnhan"].ToString();
                 po.MaNhacungcap = lst.Rows[i]["MaNCC"].ToString();
                 po.Code_Request = lst.Rows[i]["Code_Request"].ToString();
@@ -1286,7 +1238,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 po.So_DNTT = lst.Rows[i]["So_DNTT"].ToString();
                 po.So_hoadon = lst.Rows[i]["So_hoadon"].ToString();
                 po.khoi = lst.Rows[i]["Group_Code"].ToString();
-                po.canhbao = ""; // Khởi tạo mặc định
+                po.canhbao = ""; // Khởi tạo mặc định\
+               
                 listPo.Add(po);
             }
 
@@ -1435,7 +1388,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var exportData = listPo.Select(x => new
                 {
                     x.PO_Detail_Id,
-                    x.Ngayyc,
+                    Ngayyc = string.IsNullOrEmpty(x.Ngayyc) ? (DateTime?)null : DateTime.Parse(x.Ngayyc),
                     x.SoPO,
                     x.Code_Request,
                     x.Good_Code,
@@ -1444,23 +1397,30 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     x.Soluong,
                     x.Donvi,
                     x.Nhacungcap,
-                    x.ngayguiPO,
+                    ngayguiPO = string.IsNullOrEmpty(x.ngayguiPO) ? (DateTime?)null : DateTime.Parse(x.ngayguiPO),
                     x.picpur,
-                    x.Ngayycgiao,
-                    x.Dieuchinhlichgiao,
-                    x.ngaynccxngiao,
-                    x.Ngay_GHchinhthuc,
+                    Ngayycgiao = string.IsNullOrEmpty(x.Ngayycgiao) ? (DateTime?)null : DateTime.Parse(x.Ngayycgiao),
+                    Dieuchinhlichgiao = string.IsNullOrEmpty(x.Dieuchinhlichgiao) ? (DateTime?)null : DateTime.Parse(x.Dieuchinhlichgiao),
+                    ngaynccxngiao = string.IsNullOrEmpty(x.ngaynccxngiao) ? (DateTime?)null : DateTime.Parse(x.ngaynccxngiao),    
+                    Ngay_GHchinhthuc = string.IsNullOrEmpty(x.Ngay_GHchinhthuc) ? (DateTime?)null : DateTime.Parse(x.Ngay_GHchinhthuc),
                     x.Gio_GH,
                     x.lichgiao,
                     x.anhuongsx,
                     x.Cua_GH,
                     x.Cong_Nhanhang,
                     x.Nguoi_Nhanhang,
-                    x.Note
+                    x.Note,
+                    x.DNphathanhpo
                 }).ToList();
 
                 worksheet.Cells["A2"].LoadFromCollection(exportData, false);
 
+                worksheet.Column(2).Style.Numberformat.Format = "yyyy-MM-dd";
+                worksheet.Column(11).Style.Numberformat.Format = "yyyy-MM-dd";
+                worksheet.Column(13).Style.Numberformat.Format = "yyyy-MM-dd";
+                worksheet.Column(14).Style.Numberformat.Format = "yyyy-MM-dd";
+                worksheet.Column(15).Style.Numberformat.Format = "yyyy-MM-dd";
+                worksheet.Column(16).Style.Numberformat.Format = "yyyy-MM-dd";
                 var stream = new MemoryStream();
                 package.SaveAs(stream);
                 stream.Position = 0;
@@ -3394,70 +3354,100 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
 
                 SQL_Connect_DB20 sQL_Connect = new SQL_Connect_DB20();
-
-                // 2. Xây dựng câu lệnh SQL chạy Transaction (Bảo toàn dữ liệu)
-                // Lưu ý: Tính toán số tiền (Sotien) và Đổi sang USD (DoisangUSD) sẽ được tính tự động bằng [Soluongmoi] * [Dongia] ngay trong SQL
                 string sqlQuery = $@"
-                    BEGIN TRY
+                        BEGIN TRY
                             BEGIN TRANSACTION;
+                                -- 1. Khai báo biến để lưu ID mới được tạo
+                                DECLARE @NewPoDetailId INT;
 
-                            -- A. INSERT DÒNG MỚI (Số lượng = {request.Soluongmoi})
-                            INSERT INTO IM_PO_DETAIL(
-                                [SoPO],[Tentienganh],[Tentiengviet],[Mahang],[Soluong],[Dovi],[Dongia],[Dieukiengiaohang],
-                                [Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien],[Vat],[Maphongyeucau],[Tenphongyeucau],
-                                [Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],
-                                [Loaitien],[Tygia],[DoisangUSD],[Danhmuc],[Id_Goc],[Hienthi],[Benxacnhantruoc],[Good_Code]
-                            )
-                            SELECT 
-                                [SoPO], [Tentienganh], [Tentiengviet], [Mahang], 
-                                {request.Soluongmoi}, 
-                                [Dovi], [Dongia], [Dieukiengiaohang],
-                                [Diadiemgiaohang], [Phuongthucvanchuyen],
-                                (ISNULL([Dongia], 0) * {request.Soluongmoi}),
-                                [Vat], [Maphongyeucau], [Tenphongyeucau],
-                                [Ngaygiaohangdukien], [Noigiaodukien], [Thoigianthanhtoan],
-                                [Code_Request], [Id_RequestDetail], [Loaitien], [Tygia],
-                                CASE 
-                                    WHEN ISNULL([Tygia], 0) > 0 THEN ((ISNULL([Dongia], 0) * {request.Soluongmoi}) / [Tygia]) 
-                                    ELSE 0 
-                                END,
-                                [Danhmuc], 
-                                [PO_Detail_Id], 
-                                ISNULL([Hienthi], 0) + 1, 
-                                'STOCK', 
-                                [Good_Code]
-                            FROM IM_PO_DETAIL 
-                            WHERE PO_Detail_Id = {request.PoDetailId};
+                                -- A. INSERT DÒNG MỚI (Số lượng = {request.Soluongmoi})
+                                INSERT INTO IM_PO_DETAIL(
+                                    [SoPO],[Tentienganh],[Tentiengviet],[Mahang],[Soluong],[Dovi],[Dongia],[Dieukiengiaohang],
+                                    [Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien],[Vat],[Maphongyeucau],[Tenphongyeucau],
+                                    [Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],
+                                    [Loaitien],[Tygia],[DoisangUSD],[Danhmuc],[Id_Goc],[Hienthi],[Benxacnhantruoc],[Good_Code]
+                                )
+                                SELECT 
+                                    [SoPO], [Tentienganh], [Tentiengviet], [Mahang], 
+                                    {request.Soluongmoi}, 
+                                    [Dovi], [Dongia], [Dieukiengiaohang],
+                                    [Diadiemgiaohang], [Phuongthucvanchuyen],
+                                    (ISNULL([Dongia], 0) * {request.Soluongmoi}),
+                                    [Vat], [Maphongyeucau], [Tenphongyeucau],
+                                    [Ngaygiaohangdukien], [Noigiaodukien], [Thoigianthanhtoan],
+                                    [Code_Request], [Id_RequestDetail], [Loaitien], [Tygia],
+                                    CASE 
+                                        WHEN ISNULL([Tygia], 0) > 0 THEN ((ISNULL([Dongia], 0) * {request.Soluongmoi}) / [Tygia]) 
+                                        ELSE 0 
+                                    END,
+                                    [Danhmuc], 
+                                    [PO_Detail_Id], 
+                                    ISNULL([Hienthi], 0) + 1, 
+                                    'STOCK', 
+                                    [Good_Code]
+                                FROM IM_PO_DETAIL 
+                                WHERE PO_Detail_Id = {request.PoDetailId};
 
-                            -- B. UPDATE LẠI DÒNG GỐC (Trừ đi số lượng đã tách)
-                            UPDATE IM_PO_DETAIL
-                            SET 
-                                -- Đưa tính toán Sotien và DoisangUSD lên trước
-                                Sotien = (Soluong - {request.Soluongmoi}) * ISNULL(Dongia, 0),
-                                DoisangUSD = CASE 
-                                                 WHEN ISNULL(Tygia, 0) > 0 THEN ((Soluong - {request.Soluongmoi}) * ISNULL(Dongia, 0)) / Tygia 
-                                                 ELSE 0 
-                                             END,
-                                -- Cập nhật Soluong để ở cuối cùng
-                                Soluong = Soluong - {request.Soluongmoi}
-                            WHERE PO_Detail_Id = {request.PoDetailId};
 
-                            -- Xác nhận lưu dữ liệu
-                            COMMIT TRANSACTION;
+                                -- 2. Lấy ID của dòng vừa INSERT thành công
+                                SET @NewPoDetailId = SCOPE_IDENTITY();
 
-                        -- SỬA LỖI TẠI ĐÂY: Phải là END TRY và thêm khối CATCH
-                        END TRY
-                        BEGIN CATCH
-                            -- Nếu có lỗi, huỷ bỏ toàn bộ các thay đổi chưa được commit
-                            IF @@TRANCOUNT > 0
-                                ROLLBACK TRANSACTION;
+                                -- 3. INSERT VÀO BẢNG PE_THEODOITIENDO
+                                -- Trường hợp 1: Nếu PO cũ đã có dữ liệu trong PE_THEODOITIENDO -> Sao chép thông tin sang cho PO_Detail_Id mới
+                                IF EXISTS (SELECT 1 FROM [PE_THEODOITIENDO] WHERE [Id_Detail_PO] = {request.PoDetailId})
+                                BEGIN
+                                    INSERT INTO [PE_THEODOITIENDO] (
+                                        [SoPO], [Id_PO], [Id_Detail_PO], [Ngay_gui_PO], 
+                                        [Dieuchinhlichgiao], [Drawchinhlichgiao], [Note]
+                                    )
+                                    SELECT 
+                                        [SoPO], [Id_PO], @NewPoDetailId, [Ngay_gui_PO],
+                                        [Dieuchinhlichgiao], [Drawchinhlichgiao],
+                                        N'Tách từ Id_Detail_PO: {request.PoDetailId}'
+                                    FROM [PE_THEODOITIENDO]
+                                    WHERE [Id_Detail_PO] = {request.PoDetailId};
+                                END
+                                -- Trường hợp 2: Nếu PO cũ chưa có trong PE_THEODOITIENDO -> Tạo dòng mới với các thông tin cơ bản từ IM_PO_DETAIL
+                                ELSE
+                                BEGIN
+                                    INSERT INTO [PE_THEODOITIENDO] (
+                                        [SoPO], [Id_Detail_PO], [Note]
+                                    )
+                                    SELECT 
+                                        [SoPO], @NewPoDetailId, N'Tách mới từ PO_Detail_Id: {request.PoDetailId}'
+                                    FROM IM_PO_DETAIL
+                                    WHERE PO_Detail_Id = @NewPoDetailId;
+                                END
 
-                            -- Quăng lỗi ra ngoài cho code (ví dụ C#) bắt được exception
-                            DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
-                            RAISERROR(@ErrorMessage, 16, 1);
-                        END CATCH;
-                ";
 
+                                -- B. UPDATE LẠI DÒNG GỐC (Trừ đi số lượng đã tách)
+                                UPDATE IM_PO_DETAIL
+                                SET 
+                                    -- Đưa tính toán Sotien và DoisangUSD lên trước
+                                    Sotien = (Soluong - {request.Soluongmoi}) * ISNULL(Dongia, 0),
+                                    DoisangUSD = CASE 
+                                                     WHEN ISNULL(Tygia, 0) > 0 THEN ((Soluong - {request.Soluongmoi}) * ISNULL(Dongia, 0)) / Tygia 
+                                                     ELSE 0 
+                                                 END,
+                                    -- Cập nhật Soluong để ở cuối cùng
+                                    Soluong = Soluong - {request.Soluongmoi}
+                                WHERE PO_Detail_Id = {request.PoDetailId};
+
+
+                                -- Xác nhận lưu dữ liệu
+                                COMMIT TRANSACTION;
+
+                            END TRY
+                            BEGIN CATCH
+                                -- Nếu có lỗi, huỷ bỏ toàn bộ các thay đổi chưa được commit
+                                IF @@TRANCOUNT > 0
+                                    ROLLBACK TRANSACTION;
+
+                                -- Quăng lỗi ra ngoài cho code (ví dụ C#) bắt được exception
+                                DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+                                RAISERROR(@ErrorMessage, 16, 1);
+                            END CATCH;
+                    ";
                 bool isSuccess = sQL_Connect.EXECUTE_SQL(sqlQuery);
 
                 if (isSuccess)
@@ -3720,10 +3710,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Json(damnhiem);
         }
-        public JsonResult List_NCCtheodamnhiem(string tendamnhiem)
+        public JsonResult List_NCCtheodamnhiem(string tendamnhiem, string danhmuc)
         {
+            if(danhmuc == "ngoai") { danhmuc = "OUT"; } else { danhmuc = "IN"; };
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
-            var lt = db.GET_DATA_FROM_SQL($"select TenNCC from PE_DamnhiemNCC where Damnhiem = N'{tendamnhiem}'");
+            var lt = db.GET_DATA_FROM_SQL(@$"SELECT a.TenNCC 
+                FROM [COST_MANAGEMENT].[dbo].[PO] AS a
+                OUTER APPLY (
+                    SELECT TOP 1 Damnhiem 
+                    FROM PE_DamnhiemNCC 
+                    WHERE MaNCC = a.MaNCC
+                ) AS c
+                WHERE a.Group_Code = 'PUR' 
+                  AND a.Danhmuc = '{danhmuc}'
+                  AND a.Ngayphathanh >= '2024-01-01'
+                  AND a.TinhtrangPO NOT IN ('HOANTHANH', 'HUY') 
+                  AND a.Luongvekho IS NULL 
+                  AND a.Luongvethucte IS NULL
+                  AND c.Damnhiem = N'{tendamnhiem}'
+                GROUP BY a.TenNCC");
             List<string> damnhiem = new List<string>();
             for (int i = 0; i < lt.Rows.Count; i++)
             {

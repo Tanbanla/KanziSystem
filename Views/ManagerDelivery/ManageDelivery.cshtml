@@ -249,7 +249,7 @@
                  <input type="month" name="reqMonth" class="form-control">
                 </div>
                 <div class="col-md-1">
-                <label class="form-label fw-semibold">Ảnh hưởng SX</label>
+                <label class="form-label fw-semibold">Lịch giao hàng :</label>
                     <select name="impactStatus" class="form-control">
                         <option value="" selected="@(string.IsNullOrEmpty(currentImpact))">-- Tất cả --</option>
                         <option value="NG" selected="@(currentImpact == "NG")">Lịch giao NG</option>
@@ -303,16 +303,31 @@
                     }
                 </div>
                 <div class="col-md-1 mt-2">
-                    <label class="form-label fw-semibold">Pic PUR :</label>
-                    <select id="damnhiemDropdown" class="form-control" name="picpur" onchange="load_ncc()">
-                        <option value="">-- Chọn --</option>
-                        <!-- Dữ liệu được đổ từ hàm List_DamnhiemNCC ở câu trước -->
+                    <label class="form-label fw-semibold">Cost :</label>
+                    <input type="text" class="form-control" name="cost" value="@ViewBag.Cost" />
+                </div>
+                <div class="col-md-1 mt-2">
+                    <label class="form-label fw-semibold">Ảnh hưởng SX :</label>
+                    <select id="" class="form-control" name="anhhuongsx">
+                        <option value="" selected="@(string.IsNullOrEmpty(ViewBag.Anhhuongsx as string))"></option>
+                        <option value="Yes" selected="@((ViewBag.Anhhuongsx as string) == "Yes")">Yes</option>
+                        <option value="No" selected="@((ViewBag.Anhhuongsx as string) == "No")">No</option>
                     </select>
                 </div>
+                <div class="col-md-1 mt-2">
+                    <label class="form-label fw-semibold">Pic PUR :</label>
+                    <!-- Chuyển về thẻ select, gọi hàm load_ncc(this.value) khi thay đổi giá trị -->
+                    <select id="damnhiemDropdown" class="form-control" name="picpur" onchange="load_ncc(this.value)">
+                        <option value="">-- Chọn --</option>
+                        <!-- Dữ liệu được đổ từ hàm List_DamnhiemNCC -->
+                    </select>
+                </div>
+
                 <div class="col-md-2 mt-2">
                     <label class="form-label fw-semibold">Nhà cung cấp :</label>
-                    <select id="nccDropdown" class="form-control" disabled name="tenncc">
-                        <option value="">-- Vui lòng chọn Đảm nhiệm trước --</option>
+                    <select id="nccDropdown" class="form-control" name="tenncc">
+                        <option value="">-- Vui lòng chọn Pic PUR --</option>
+                        <!-- Dữ liệu được đổ động từ hàm load_ncc -->
                     </select>
                 </div>
             </form>
@@ -371,8 +386,7 @@
                             {
                                 <th class="bg-white" width="80px">Cửa GH Cổng GH</th>
                                 <th class="bg-white">Người nhận</th>
-                             @*    <th class="bg-white">Số ĐNTT</th>
-                                <th class="bg-white">Số HĐ</th> *@
+                         
                                 <th class="bg-white" colspan="2">NHẬP DỮ LIỆU</th>
                             }
                             else
@@ -380,7 +394,11 @@
                                 <th class="bg-white" width="130px">Nhập Yes/No</th>
                             }
 
-                            <th colspan="2" class="bg-white" w  >Note</th>
+                            <th colspan="2" class="bg-white" >Note</th>
+                            @if (currentTab == "ngoai")
+                            {
+                                <th class="bg-white">Cost</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -687,6 +705,10 @@
                                             <i class="fa-solid fa fa-book"></i>
                                         </button>
                                     </td>
+                                    @if (currentTab == "ngoai")
+                                    {
+                                        <td>@item.Phongchiuphi</td>
+                                    }
                                 </tr>
                             }
                         }
@@ -713,7 +735,7 @@
                     <ul class="pagination pagination-sm mb-0">
                        <!-- Nút Trước -->
                         <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Trước</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage - 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur, cost = ViewBag.Cost, anhhuongsx = ViewBag.Anhhuongsx, tenncc = ViewBag.Tenncc })">Trước</a>
                         </li>
                         <!-- Các nút số trang -->
                         @for (int i = 1; i <= totalPages; i++)
@@ -721,7 +743,7 @@
                             if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
                             {
                                 <li class="page-item @(i == currentPage ? "active" : "")">
-                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">@i</a>
+                                    <a class="page-link" href="@Url.Action("ManageDelivery", new { page = i, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur, cost = ViewBag.Cost, anhhuongsx = ViewBag.Anhhuongsx, tenncc = ViewBag.Tenncc })">@i</a>
                                 </li>
                             }
                             else if (i == currentPage - 3 || i == currentPage + 3)
@@ -731,7 +753,7 @@
                         }
                         <!-- Nút Sau -->
                         <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur })">Sau</a>
+                            <a class="page-link" href="@Url.Action("ManageDelivery", new { page = currentPage + 1, searchTerm = searchTerm, tab = currentTab, reqMonth = reqMonth, impactStatus = ViewBag.ImpactStatus, pullStatus = ViewBag.PullStatus, mahang = ViewBag.Mahang, sortColumn = sortColumn, sortDirection = sortDirection, picpur = ViewBag.PicPur, cost = ViewBag.Cost, anhhuongsx = ViewBag.Anhhuongsx, tenncc = ViewBag.Tenncc })">Sau</a>
                         </li>
                     </ul>
                 </nav>
@@ -1215,7 +1237,25 @@
 
 @section Scripts {
     <script>
-        
+        $(document).ready(function () {
+            // 1. Lấy giá trị đã tìm kiếm từ ViewBag
+        var currentPic = '@Html.Raw(ViewBag.PicPur)';
+        var currentNcc = '@Html.Raw(ViewBag.TenNcc)';
+
+            // 2. Gọi hàm tải danh sách Pic PUR trước
+            List_DamnhiemNCC().then(function() {
+
+                // 3. Nếu có dữ liệu Pic PUR từ lần tìm kiếm trước
+                if (currentPic) {
+                    // Tự động chọn lại Pic PUR
+                    $('#damnhiemDropdown').val(currentPic);
+
+                    // 4. Gọi tiếp hàm tải danh sách Nhà cung cấp tương ứng với Pic PUR đó
+                    // Truyền currentNcc vào để hàm tự động chọn sau khi tải xong
+                    load_ncc(currentPic, currentNcc);
+                }
+            });
+        });
         // Hàm xuất Excel
         function exportDataExcel() {
             const form = document.getElementById('filterForm');
@@ -1507,27 +1547,7 @@
                     }
 
                 });
-            }
-
-            fetch('/ManagerDelivery/List_DamnhiemNCC')
-            .then(response => response.json())
-            .then(data => {
-                let dropdown = document.getElementById('damnhiemDropdown');
-                dropdown.innerHTML = '<option value="">-- Chọn--</option>'; // Xóa dữ liệu cũ
-
-                // Lặp qua mảng dữ liệu trả về và thêm vào select
-                data.forEach(item => {
-                    let option = document.createElement('option');
-                    option.value = item;
-                    option.text = item;
-                    dropdown.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Lỗi khi tải dữ liệu:', error);
-                document.getElementById('damnhiemDropdown').innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
-            });
-
+            }           
 
             setTimeout(applyStickyColumns, 150); // Delay nhẹ để đợi UI vẽ xong độ rộng cột
             window.addEventListener('resize', applyStickyColumns);
@@ -2258,35 +2278,61 @@
                 }
             });
         }
-        function load_ncc(){
-            let damnhiemDropdown = document.getElementById('damnhiemDropdown').value;
-            let nccDropdown = document.getElementById('nccDropdown');
 
-                nccDropdown.disabled = true;
 
-                // Nối tham số vào URL query string
-                let url = `/ManagerDelivery/List_NCCtheodamnhiem?tendamnhiem=${encodeURIComponent(damnhiemDropdown)}`;
+                // 1. Hàm load danh sách Pic PUR (trả về Promise để đồng bộ khi load trang)
+        function List_DamnhiemNCC() {
+            return fetch('/ManagerDelivery/List_DamnhiemNCC')
+                .then(response => response.json())
+                .then(data => {
+                    let $dropdown =$('#damnhiemDropdown');
+                    $dropdown.html('<option value="">-- Chọn Pic PUR --</option>');
 
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        nccDropdown.innerHTML = '<option value="">-- Chọn Nhà cung cấp --</option>';
+                    data.forEach(item => {
+                        // Hỗ trợ cả trường hợp C# trả về Chuỗi đơn hoặc Object {Value, Text}
+                        let val = typeof item === 'object' ? (item.Value || item.value) : item;
+                        let text = typeof item === 'object' ? (item.Text || item.text) : item;
 
-                        data.forEach(item => {
-                            let option = document.createElement('option');
-                            option.value = item;
-                            option.text = item;
-                            nccDropdown.appendChild(option);
-                        });
-
-                        nccDropdown.disabled = false;
-                    })
-                    .catch(error => {
-                        console.error('Lỗi:', error);
-                        nccDropdown.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+                        $dropdown.append(new Option(text, val));
                     });
-            }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi tải Pic PUR:', error);
+                    $('#damnhiemDropdown').html('<option value="">Lỗi tải dữ liệu</option>');
+                });
+        }
 
-        
+        // 2. Hàm load Nhà cung cấp theo Pic PUR
+        function load_ncc(tendamnhiem, selectedNcc = '') {
+            if (!tendamnhiem) {
+                $('#nccDropdown').html('<option value="">-- Vui lòng chọn Pic PUR --</option>');
+                return;
+            }
+            var danhmuc = '@currentTab';
+            $.ajax({
+                url: '/ManagerDelivery/List_NCCtheodamnhiem', // Đã sửa đúng Controller
+                type: 'GET',
+                data: { tendamnhiem: tendamnhiem , danhmuc : danhmuc},
+                success: function (data) {
+                    var options = '<option value="">-- Tất cả NCC --</option>';
+
+                    $.each(data, function (i, item) {
+                        let val = typeof item === 'object' ? (item.Value || item.value) : item;
+                        let text = typeof item === 'object' ? (item.Text || item.text) : item;
+                        options += `<option value="${val}">${text}</option>`;
+                    });
+
+                    $('#nccDropdown').html(options);
+
+                  if (selectedNcc) {
+                        $('#nccDropdown').val(selectedNcc);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Lỗi khi tải Nhà cung cấp:', error);
+                    $('#nccDropdown').html('<option value="">Lỗi tải dữ liệu</option>');
+                }
+            });
+        }
     </script>
 }

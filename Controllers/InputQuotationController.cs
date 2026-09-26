@@ -104,6 +104,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         if (string.IsNullOrWhiteSpace(ws.Cell(r, 23).GetString())) errors.Add("Cột 23 (Delivery Term) bắt buộc");
                         if (string.IsNullOrWhiteSpace(ws.Cell(r, 24).GetString())) errors.Add("Cột 24 (Payment Term) bắt buộc");
 
+                        var date = ConvertHelper.ParseDate(ws.Cell(r, 26).GetString());
+                        if (date != null && date < DateTime.Now) errors.Add("Cột 26 (DTM_NgayMuonNhan) không phải ngày hợp lệ");
+
                         var ship = ConvertHelper.ParseDate(ws.Cell(r, 21).GetString());
                         var reqDate = ConvertHelper.ParseDate(ws.Cell(r, 28).GetString());
                         if (ship == null) errors.Add("Cột 21 (DTM_ShipTime) không phải ngày hợp lệ");
@@ -443,7 +446,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 30).Value = item.NVCHR_File ?? "";
 
                     // Cột dùng để import update lại
-                    ws.Cell(row, 32).Value = item.ID;
+                    ws.Cell(row, 32).Value = item.ID_RequestQuote;
 
                     // Lý do sửa
                     ws.Cell(row, 34).Value = item.NVCHR_ReasonUpdate ?? "";

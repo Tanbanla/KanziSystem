@@ -218,7 +218,7 @@ async function _load_name_inv(group_code) {
                 document.getElementById("modal-6").style.display = 'none';
                
             }
-            if (group_code == "PROD") {
+            else if (group_code == "PROD") {
                 document.getElementById("modal-20").style.display = 'none';
                 document.getElementById("modal-6").style.display = '';
                

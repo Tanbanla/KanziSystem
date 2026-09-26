@@ -138,9 +138,6 @@
   <data name="DownloadData" xml:space="preserve">
     <value>Tải dữ liệu</value>
   </data>
-  <data name="HeaderMaterialCode" xml:space="preserve">
-    <value>Mã vật tư</value>
-  </data>
   <data name="HeaderNameVN" xml:space="preserve">
     <value>Tên VN</value>
   </data>
@@ -260,5 +257,17 @@
   </data>
   <data name="TemplateImportExcel" xml:space="preserve">
     <value>File mẫu nhập Excel</value>
+  </data>
+  <data name="SuccessTitle" xml:space="preserve">
+    <value>Thành công</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Lỗi</value>
+  </data>
+  <data name="HeaderMaterialCode" xml:space="preserve">
+    <value>Mã vật tư</value>
+  </data>
+  <data name="UpdateSuccess" xml:space="preserve">
+    <value>Cập nhật thành công</value>
   </data>
 </root>

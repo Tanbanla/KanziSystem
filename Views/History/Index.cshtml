@@ -300,6 +300,7 @@
                 </div>
                 <div class="col-12 col-md-6 col-xl-3 d-flex gap-2 align-items-end history-filter-actions">
                     <button type="button" class="btn btn-primary flex-fill" id="btnApplyFilters"><i class="fas fa-search"></i> @Localizer["Filter"]</button>
+                    <div style="margin-left: 4px;"></div>
                     <button type="button" class="btn btn-outline-secondary flex-fill" id="btnResetFilters"><i class="fas fa-undo"></i> @Localizer["Reset"]</button>
                 </div>
             </form>
@@ -655,11 +656,13 @@
                 <div class="text-muted small">@Localizer["LoadingData"]</div>
             </div>
         </div>
+        @await Html.PartialAsync("DetailHistory")
     </div>
 </aside>
 <script>
     window.HistoryData = {
-        role : @Html.Raw(System.Text.Json.JsonSerializer.Serialize(role))
+        role : @Html.Raw(System.Text.Json.JsonSerializer.Serialize(role)),
+        language: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(uiLang))
     };
     window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
     window.i18nHistoryQuote = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
@@ -734,6 +737,12 @@
         HistoryTime= Localizer["HistoryTime"].Value,
         RequestNo= Localizer["RequestNo"].Value,
         Action =Localizer["Action"].Value,
+         RequestId = Localizer["RequestId"].Value,
+         VietnameseName = Localizer["VietnameseName"].Value,
+         UpdatedTime = Localizer["UpdatedTime"].Value,
+         RecordCount = Localizer["RecordCount"].Value,
+         ViewDetails = Localizer["ViewDetails"].Value,
+         Back = Localizer["Back"].Value,
         OldValue = Localizer["OldValue"].Value,
         NewValue = Localizer["NewValue"].Value,
         NoChanges = Localizer["NoChanges"].Value,

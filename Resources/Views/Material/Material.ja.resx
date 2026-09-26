@@ -138,9 +138,6 @@
   <data name="DownloadData" xml:space="preserve">
     <value>データをダウンロード</value>
   </data>
-  <data name="HeaderMaterialCode" xml:space="preserve">
-    <value>資材コード</value>
-  </data>
   <data name="HeaderNameVN" xml:space="preserve">
     <value>名称 VN</value>
   </data>
@@ -260,5 +257,17 @@
   </data>
   <data name="TemplateImportExcel" xml:space="preserve">
     <value>Excelインポートテンプレート</value>
+  </data>
+  <data name="SuccessTitle" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="HeaderMaterialCode" xml:space="preserve">
+    <value>資材コード</value>
+  </data>
+  <data name="UpdateSuccess" xml:space="preserve">
+    <value>更新に成功しました</value>
   </data>
 </root>

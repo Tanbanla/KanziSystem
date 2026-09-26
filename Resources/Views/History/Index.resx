@@ -736,14 +736,48 @@
     <value>Lịch sử thay đổi</value>
   </data>
   <data name="OrderInformation" xml:space="preserve">
-      <value>Thông tin đặt hàng</value>
+    <value>Thông tin đặt hàng</value>
   </data>
-  <data name="RecordId" xml:space="preserve"><value>ID bản ghi</value></data>
-  <data name="IsTemplate" xml:space="preserve"><value>Là mẫu</value></data>
-  <data name="Deadline" xml:space="preserve"><value>Hạn xử lý</value></data>
-  <data name="UpdateLater" xml:space="preserve"><value>Ngày cập nhật tiếp theo</value></data>
-  <data name="UpdateCount" xml:space="preserve"><value>Số lần cập nhật</value></data>
-  <data name="NextApprover" xml:space="preserve"><value>Người phê duyệt</value></data>
-  <data name="QuotationReason" xml:space="preserve"><value>Lý do báo giá</value></data>
-  <data name="FileLink" xml:space="preserve"><value>Đường dẫn tệp</value></data>
+  <data name="RecordId" xml:space="preserve">
+    <value>ID bản ghi</value>
+  </data>
+  <data name="IsTemplate" xml:space="preserve">
+    <value>Là mẫu</value>
+  </data>
+  <data name="Deadline" xml:space="preserve">
+    <value>Hạn xử lý</value>
+  </data>
+  <data name="UpdateLater" xml:space="preserve">
+    <value>Ngày cập nhật tiếp theo</value>
+  </data>
+  <data name="UpdateCount" xml:space="preserve">
+    <value>Số lần cập nhật</value>
+  </data>
+  <data name="NextApprover" xml:space="preserve">
+    <value>Người phê duyệt</value>
+  </data>
+  <data name="QuotationReason" xml:space="preserve">
+    <value>Lý do báo giá</value>
+  </data>
+  <data name="FileLink" xml:space="preserve">
+    <value>Đường dẫn tệp</value>
+  </data>
+  <data name="RequestId" xml:space="preserve">
+    <value>ID yêu cầu</value>
+  </data>
+  <data name="VietnameseName" xml:space="preserve">
+    <value>Thao tác</value>
+  </data>
+  <data name="UpdatedTime" xml:space="preserve">
+    <value>Thời điểm cập nhật</value>
+  </data>
+  <data name="RecordCount" xml:space="preserve">
+    <value>bản ghi</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>Xem chi tiết</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Quay lại</value>
+  </data>
 </root>

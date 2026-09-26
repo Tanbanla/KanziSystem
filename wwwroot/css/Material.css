@@ -365,6 +365,83 @@
     }
 }
 
+/* ===== MESSAGE DIALOG ===== */
+.cm-dialog-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    z-index: 4000;
+}
+
+.cm-dialog {
+    position: relative;
+    z-index: 4001;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 40px);
+    max-width: 720px;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.cm-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.cm-dialog-title {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.cm-dialog-body {
+    padding: 14px 16px;
+    max-height: 60vh;
+    overflow: auto;
+}
+
+.cm-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid #e9ecef;
+}
+
+.cm-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 3999;
+}
+
+.cm-btn {
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.cm-btn.cm-btn-primary {
+    border-color: #0d6efd;
+    background: #0d6efd;
+    color: #ffffff;
+}
+
+.cm-btn.cm-btn-outline {
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+}
+
 /* Scrollbar */
 .table-responsive::-webkit-scrollbar {
     width: 5px;

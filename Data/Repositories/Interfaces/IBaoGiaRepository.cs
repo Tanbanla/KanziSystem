@@ -84,5 +84,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 
         // Search báo giá còn hiệu lực
         Task<ListRequest<dynamic>> SearchBaoGiaConHieuLucAsync(SearchQuotationResultsModel search, string? user);
+
+        // xu ly ghi update phe duyet lai
+        Task<List<BaoGia_Request_of_Quotation>> UpdatePheDuyetLaiDonBaoGiaAsync(UpdateHistoryResult update);
     }
 }

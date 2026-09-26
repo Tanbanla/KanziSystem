@@ -138,9 +138,6 @@
   <data name="DownloadData" xml:space="preserve">
     <value>Download data</value>
   </data>
-  <data name="HeaderMaterialCode" xml:space="preserve">
-    <value>Material code</value>
-  </data>
   <data name="HeaderNameVN" xml:space="preserve">
     <value>Name VN</value>
   </data>
@@ -260,5 +257,17 @@
   </data>
   <data name="TemplateImportExcel" xml:space="preserve">
     <value>Template Import Excel</value>
+  </data>
+  <data name="SuccessTitle" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="HeaderMaterialCode" xml:space="preserve">
+    <value>Material code</value>
+  </data>
+  <data name="UpdateSuccess" xml:space="preserve">
+    <value>Update Success</value>
   </data>
 </root>

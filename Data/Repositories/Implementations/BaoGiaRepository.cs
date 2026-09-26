@@ -841,10 +841,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     dto.NVCHR_UserRequest = baoGia.NVCHR_UserRequest;
                     dto.DTM_UpdateLater = DateTime.Now;
                     dto.INT_SoLanUpdate = (dto.INT_SoLanUpdate ?? 0) + 1;
-                    if (dto.ID_Status.Contains("RETURN"))
+                    if (dto.ID_StepBaoGia < 2)
                     {
-                        dto.ID_StepBaoGia = 2;
-                        dto.ID_Status = "APPROVAL2";
+                        //dto.ID_StepBaoGia = 2;
+                        //dto.ID_Status = "APPROVAL2";
                         isReturn = true;
                     }
                     listUpdate.Add(dto);
@@ -1450,6 +1450,36 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 if (data != null)
                 {
                     data.CHR_UserApproval = update.sectionCode;
+                    updatedRecords.Add(data);
+                }
+            }
+
+            if (updatedRecords.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            return updatedRecords;
+        }
+        public async Task<List<BaoGia_Request_of_Quotation>> UpdatePheDuyetLaiDonBaoGiaAsync(UpdateHistoryResult update)
+        {
+            if (update == null || update.listUpdate == null || update.listUpdate.Count == 0 || string.IsNullOrEmpty(update.sectionCode))
+            {
+                throw new Exception("Data error");
+            }
+
+            var updatedRecords = new List<BaoGia_Request_of_Quotation>();
+
+            foreach (var id in update.listUpdate)
+            {
+                var data = await _context.BaoGia_Request_of_Quotations
+                    .FirstOrDefaultAsync(c => c.ID == id);
+
+                if (data != null)
+                {
+                    data.CHR_UserApproval = update.sectionCode;
+                    data.ID_StepBaoGia = 2;
+                    data.ID_Status = "APPROVER2";
                     updatedRecords.Add(data);
                 }
             }

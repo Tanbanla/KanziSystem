@@ -813,7 +813,7 @@
                     if (!selected) return; // cancelled or none selected
                     // attach chosen approver adid to each payload item
                     payload.forEach(p => {
-                        p.chR_UserApproval = selected.chR_UserAdid || '';
+                        p.chR_UserApproval = selected.CHR_UserAdid || selected.chR_UserAdid || '';
                         p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
                         //if (p.iD_StepBaoGia == 6) {
                         //    p.iD_Status = 'WAIT_SEND_MAIL';
@@ -1070,7 +1070,7 @@
                 openApproverSelector(nextStep, sectionCode).then(selected => {
                     if (!selected) return;
                     payload.forEach(p => {
-                        p.chR_UserApproval = selected.chR_UserAdid || '';
+                        p.chR_UserApproval = selected.CHR_UserAdid || selected.chR_UserAdid || '';
                         p.iD_StepBaoGia = (p.iD_StepBaoGia != null ? parseInt(p.iD_StepBaoGia) + 1 : 3);
                         //if (p.iD_StepBaoGia == 6) {
                         //    p.iD_Status = 'WAIT_SEND_MAIL';

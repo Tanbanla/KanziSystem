@@ -8,7 +8,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
     public interface IBaoGiaHistoryService: IBaseService<BaoGia_History_Request_of_Quotation, int, BaoGia_History_Request_of_QuotationDTO>
     {
         // Lấy lịch sử báo giá theo ID_RequestQuote
-        public Task<GenericResponse<List<BaoGia_History_Request_of_QuotationDTO>>> GetByRequestQuoteIdAsync(int idRequestQuote);
+        public Task<GenericResponse<List<DetailHistoryDTO>>> GetByRequestQuoteIdAsync(SearchHistoryInfoByMaDonModel searchModel);
         // Tìm kiếm danh sách thông tin lịch sử báo giá theo số đơn
         public Task<GenericResponse<List<BaoGia_History_Request_of_QuotationDTO>>> SearchBySoDonAsync(string soDon);
         // Tìm kiếm lịch sử báo giá và phân trang

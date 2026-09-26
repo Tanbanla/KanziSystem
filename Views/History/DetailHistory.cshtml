@@ -1,0 +1,14 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
+<section class="history-drawer-section history-detail-view" id="historyDetailView" hidden>
+    <div class="history-detail-view-header">
+        <button type="button" class="btn btn-sm btn-light" id="btnBackHistoryGroups">
+            <i class="fas fa-arrow-left"></i> @Localizer["Back"]
+        </button>
+        <div>
+            <h6 class="history-drawer-section-title mb-0">@Localizer["ChangeHistory"]</h6>
+            <small class="text-muted" id="historyDetailRequestId"></small>
+        </div>
+    </div>
+    <div class="history-detail-content" id="historyDetailContent"></div>
+</section>

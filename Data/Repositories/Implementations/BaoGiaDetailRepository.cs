@@ -93,6 +93,16 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.DTM_KyHan,
 					r.CHR_MaThietBi,
                     r.NVCHR_NhaSanXuat,
+
+                    r.NVCHR_Rohs,
+					r.NVCHR_NameVN,
+					r.NVCHR_COCQ,
+					r.NVCHR_MSDS,
+					r.NVCHR_AnToan,
+					r.NVCHR_FileThietKe,
+					r.DTM_NgayMuonNhan,
+					r.DTM_KyHan,
+
                     CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
                     CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
                     CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
@@ -421,8 +431,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 foreach(var confirn in confirmNameBaoGias)
                 {
                     confirn.CHR_Status = "Confirmed";
-                    confirn.CHR_StatusACC = "";
-                    confirn.CHR_StatusShip = "";
+                    confirn.CHR_StatusACC = "Confirmed";
+                    confirn.CHR_StatusShip = "Confirmed";
                     confirn.VCHR_UpdateBy = "System";
                     confirn.DTM_UpdateDate = now;
                     confirn.NVCHR_LyDo = "PUR cập nhật thông tin báo giá";
