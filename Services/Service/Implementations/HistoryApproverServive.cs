@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRJ_WAREHOUSE_BIVN.Common;
 using PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces;
 using PRJ_WAREHOUSE_BIVN.DTO;
@@ -126,6 +126,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             {
                 var list = await _repo.GetListApprover(adid, soDon, maHang, section, statusApprover);
                 result.Data = _mapper.Map<List<BaoGia_Request_of_QuotationDTO>>(list);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+            }
+            return result;
+        }
+
+        public async Task<GenericResponse<bool>> CanUserApproveAsync(string adid, List<int> quotationIds)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                result.Data = await _repo.CanUserApproveAsync(adid, quotationIds);
                 result.Success = true;
             }
             catch (Exception ex)

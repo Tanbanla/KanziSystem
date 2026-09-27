@@ -107,6 +107,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return approvers;
         }
 
+        public async Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByPicDepartmentsAsync()
+        {
+            var query = from m in _context.BaoGia_Master_Approver_Send_Mails
+                        join d in _context.USER_DEPTs on m.CHR_CodeSection equals d.Cost_Center
+                        join r in _context.BaoGia_RoleUsers on d.CHR_USERID equals r.UserAdid
+                        where m.ID_BaoGiaStep == 5
+                              && r.IsUsing
+                              && (r.Role == "PUR" || r.Role == "GA")
+                        group m by m.CHR_UserAdid into g
+                        select g.OrderBy(x => x.ID).FirstOrDefault();
+
+            var approvers = await query.ToListAsync();
+            return approvers;
+        }
+
         //public async Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode)
         //{
         //    // lấy thông tin phòng từ sectionCode

@@ -88,6 +88,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Ok(agentResult.Data);
             }
 
+            if (step == 5)
+            {
+                var picDepartmentResult = await _approverService.GetApproverByPicDepartmentsAsync();
+                if (!picDepartmentResult.Success)
+                {
+                    return BadRequest("Error list Approver: " + picDepartmentResult.Message);
+                }
+
+                return Ok(picDepartmentResult.Data);
+            }
+
             var approverResult = await _approverService.GetApproverByStepAndSectionAsync(step, sectionCost);
             if (!approverResult.Success)
             {
@@ -182,8 +193,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                var currentUserId = GetCurrentUserId() ?? string.Empty;
+                var quotationIds = updateModel?.Select(x => x.ID).Where(x => x > 0).Distinct().ToList() ?? new List<int>();
+                var permission = await _historyApproverServive.CanUserApproveAsync(currentUserId, quotationIds);
+                if (!permission.Success || permission.Data != true)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền phê duyệt đơn theo WorkflowID này." });
+                }
+
                 var result = await _baoGiaService.CapNhatDanhSachBGAsync(updateModel);
-                var currentUserId = GetCurrentUserId();
                 if (result.Success)
                 {
                     var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
@@ -240,6 +258,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                var currentUserId = GetCurrentUserId() ?? string.Empty;
+                var quotationIds = updateModel?.Select(x => x.ID).Where(x => x > 0).Distinct().ToList() ?? new List<int>();
+                var permission = await _historyApproverServive.CanUserApproveAsync(currentUserId, quotationIds);
+                if (!permission.Success || permission.Data != true)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xử lý đơn theo WorkflowID này." });
+                }
+
                 var result = await _baoGiaService.UpdatePheDuyetDonBaoGiaAsync(updateModel);
                 if (result.Success)
                 {

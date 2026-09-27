@@ -1,4 +1,4 @@
-﻿using PRJ_WAREHOUSE_BIVN.Models_Auto;
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
 {
@@ -18,5 +18,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<bool> UpdateHistoryAsync(BaoGia_History_Approver_of_Quotation history);
         // Lấy danh sách phê duyệt của người dùng 
         Task<List<BaoGia_Request_of_Quotation>> GetListApprover(string adid, string? soDon, string? maHang, string? section, string? statusApprover);
+        Task<bool> CanUserApproveAsync(string adid, List<int> quotationIds);
     }
 }

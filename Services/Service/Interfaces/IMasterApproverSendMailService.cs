@@ -18,6 +18,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
 
         // Lấy thông tin phê duyệt step của phòng ban
         public Task<GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>> GetApproverByStepAndSectionAsync(int idStep, string sectionCode);
+        // Lấy approver step 5 theo phòng ban PIC có role PUR/GA
+        public Task<GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>> GetApproverByPicDepartmentsAsync();
 
         public Task<GenericResponse<List<dynamic>>> GetApproverByAgrentAsync(int idStep, string sectionCode);
         // Inser thông tin và đăng ký user đăng nhập
