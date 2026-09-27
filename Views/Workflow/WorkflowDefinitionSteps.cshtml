@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Cấu hình bước theo workflow";
+}
+<link rel="stylesheet" href="~/css/workflow/workflow.css" asp-append-version="true" />
+<div class="workflow-page container-fluid py-3">
+    <header class="page-header d-flex justify-content-between align-items-center mb-3">
+        <div><div class="page-eyebrow"><i class="fas fa-route me-2"></i>Thiết lập quy trình</div><h1 class="page-title">Bước theo workflow</h1><p class="page-subtitle">Chọn các bước được sử dụng trong từng workflow và cấu hình thứ tự xử lý.</p></div>
+        <button id="btnSaveWorkflowSteps" class="btn btn-primary" disabled><i class="fas fa-save me-2"></i>Lưu cấu hình</button>
+    </header>
+    <section class="card workflow-card mb-3">
+        <div class="card-body">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label" for="workflowSelect">Workflow</label>
+                    <select id="workflowSelect" class="form-select"></select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="catalogStepSelect">Step catalog</label>
+                    <select id="catalogStepSelect" class="form-select"></select>
+                </div>
+                <div class="col-md-2">
+                    <button id="btnAddWorkflowStep" class="btn btn-outline-primary w-100" type="button"><i class="fas fa-plus me-1"></i>Thêm step</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="card workflow-card"><div class="card-header d-flex justify-content-between"><strong>Danh sách bước</strong><span id="stepCount" class="record-count">0 bước</span></div><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th width="70">Thứ tự</th><th>Bước</th><th>Bước lớn</th><th class="text-center">Bật</th><th class="text-center">Bắt buộc</th><th class="text-center">Bỏ qua</th><th class="text-center">Cuối</th><th></th></tr></thead><tbody id="workflowStepBody"></tbody></table></div></section>
+</div>
+<script>
+window.workflowDefinitionStepsUrl='@Url.Action("GetWorkflowDefinitionSteps", "Workflow")';
+window.saveWorkflowDefinitionStepsUrl='@Url.Action("SaveWorkflowDefinitionSteps", "Workflow")';
+</script>
+@section Scripts { <script src="~/js/workflow/wfDefinitionSteps.js" asp-append-version="true"></script> }

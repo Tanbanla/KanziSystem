@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[BaoGia_RequestType]
+CREATE TABLE [dbo].[BaoGia_RequestType]
 (
     [ID] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [CHR_Code] VARCHAR(50) NOT NULL,

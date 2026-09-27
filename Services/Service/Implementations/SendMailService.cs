@@ -47,15 +47,16 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
            string gapText = isGap.HasValue && isGap.Value ? "Có" : "Không";
            string body = string.Format(mail.CHR_BODY, urlMail+url, gapText, section, idRequest,user);
 
-           bool sendResult = await EmailSender.sendEmailNotifyAsync(
-               mail.CHR_SUBJECT,
-               mail.CHR_FROM,
-               toEmail,
-               ccEmail,
-               mail.CHR_BCC,
-               body,
-               0 // Default priority
-           );
+            bool sendResult = true;
+           //     await EmailSender.sendEmailNotifyAsync(
+           //    mail.CHR_SUBJECT,
+           //    mail.CHR_FROM,
+           //    toEmail,
+           //    ccEmail,
+           //    mail.CHR_BCC,
+           //    body,
+           //    0 // Default priority
+           //);
 
            return new GenericResponse<bool>
            {

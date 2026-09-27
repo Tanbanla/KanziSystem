@@ -918,10 +918,10 @@
                 showQuoteNotification('Vui lòng chọn phòng ban xin báo giá.');
                 return;
             }
-            if (!valueOf('selectType')) {
-                showQuoteNotification('Vui lòng chọn loại hàng.');
-                return;
-            }
+            // if (!valueOf('selectType')) {
+            //     showQuoteNotification('Vui lòng chọn loại hàng.');
+            //     return;
+            // }
             if (!quoteItems.length) {
                 showQuoteNotification('Danh sách báo giá trống.');
                 return;

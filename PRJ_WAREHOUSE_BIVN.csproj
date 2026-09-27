@@ -229,6 +229,7 @@
     <Folder Include="Data\DNTT\" />
     <Folder Include="Data\BBGH\" />
     <Folder Include="Data\HD\" />
+    <Folder Include="Services\Workflow\" />
     <Folder Include="wwwroot\File\" />
     <Folder Include="wwwroot\js\Survey\" />
   </ItemGroup>

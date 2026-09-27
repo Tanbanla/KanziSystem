@@ -50,6 +50,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View();
         }
 
+        public IActionResult WorkflowDefinitionSteps() => View();
+
+        public IActionResult WorkflowTransitions() => View();
+
         [HttpGet]
         public async Task<IActionResult> GetWorkflowDefinitions(bool includeInactive = true)
         {
@@ -177,6 +181,140 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             entity.IsActive = model.IsActive;
             entity.UpdatedDate = DateTime.Now;
             entity.UpdatedBy = User.Identity?.Name ?? "system";
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkflowDefinitionSteps(int workflowId)
+        {
+            if (workflowId <= 0)
+            {
+                return BadRequest(new { success = false, message = "Workflow không hợp lệ." });
+            }
+
+            var workflowExists = await _context.BaoGia_WorkflowDefinitions.AsNoTracking()
+                .AnyAsync(workflow => workflow.WorkflowID == workflowId);
+            if (!workflowExists)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy workflow." });
+            }
+
+            var workflows = await _context.BaoGia_WorkflowDefinitions.AsNoTracking()
+                .OrderBy(workflow => workflow.WorkflowName)
+                .Select(workflow => new { id = workflow.WorkflowID, code = workflow.FlowCode, name = workflow.WorkflowName, isActive = workflow.IsActive })
+                .ToListAsync();
+            var steps = await _context.BaoGia_WorkflowSteps.AsNoTracking()
+                .Include(step => step.Stage)
+                .Where(step => step.IsActive)
+                .OrderBy(step => step.Stage.StageOrder).ThenBy(step => step.StepOrder).ThenBy(step => step.StepCode)
+                .Select(step => new { id = step.StepID, code = step.StepCode, name = step.StepName, stage = step.Stage.StageName })
+                .ToListAsync();
+            var selected = await _context.BaoGia_WorkflowDefinitionSteps.AsNoTracking()
+                .Where(item => item.WorkflowID == workflowId)
+                .Include(item => item.Step).ThenInclude(step => step.Stage)
+                .OrderBy(item => item.StepOrder)
+                .Select(item => new
+                {
+                    id = item.WorkflowStepID, stepId = item.StepID, order = item.StepOrder,
+                    code = item.Step.StepCode, name = item.Step.StepName, stage = item.Step.Stage.StageName,
+                    isEnabled = item.IsEnabled, isRequired = item.IsRequired, allowSkip = item.AllowSkip, isFinalStep = item.IsFinalStep
+                }).ToListAsync();
+
+            return Ok(new { success = true, workflows, steps, data = selected, workflowId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveWorkflowDefinitionSteps([FromBody] WorkflowDefinitionStepsRequest? request)
+        {
+            if (request == null || request.WorkflowId <= 0 || request.Rows == null || request.Rows.Count == 0)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu step workflow không hợp lệ." });
+            }
+
+            var workflowExists = await _context.BaoGia_WorkflowDefinitions.AnyAsync(item => item.WorkflowID == request.WorkflowId);
+            var stepIds = request.Rows.Select(item => item.StepId).ToList();
+            var validStepIds = await _context.BaoGia_WorkflowSteps.Where(item => item.IsActive && stepIds.Contains(item.StepID)).Select(item => item.StepID).ToListAsync();
+            if (!workflowExists || validStepIds.Count != stepIds.Distinct().Count())
+            {
+                return BadRequest(new { success = false, message = "Workflow hoặc bước xử lý không tồn tại." });
+            }
+
+            var rows = request.Rows.GroupBy(item => item.StepId).Select(group => group.Last()).OrderBy(item => item.Order).ToList();
+            var existing = await _context.BaoGia_WorkflowDefinitionSteps.Where(item => item.WorkflowID == request.WorkflowId).ToListAsync();
+            _context.BaoGia_WorkflowDefinitionSteps.RemoveRange(existing);
+            _context.BaoGia_WorkflowDefinitionSteps.AddRange(rows.Select((row, index) => new BaoGia_WorkflowDefinitionStep
+            {
+                WorkflowID = request.WorkflowId, StepID = row.StepId, StepOrder = index + 1,
+                IsEnabled = row.IsEnabled, IsRequired = row.IsRequired, AllowSkip = row.AllowSkip,
+                IsFinalStep = row.IsFinalStep, CreatedDate = DateTime.Now, CreatedBy = User.Identity?.Name ?? "system"
+            }));
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkflowTransitions(int? workflowId)
+        {
+            var workflows = await _context.BaoGia_WorkflowDefinitions.AsNoTracking()
+                .OrderBy(item => item.WorkflowName)
+                .Select(item => new { id = item.WorkflowID, code = item.FlowCode, name = item.WorkflowName, isActive = item.IsActive }).ToListAsync();
+            var selectedId = workflowId ?? workflows.FirstOrDefault()?.id;
+            if (selectedId == null) return Ok(new { success = true, workflows, steps = Array.Empty<object>(), data = Array.Empty<object>(), workflowId = (int?)null });
+
+            var steps = await _context.BaoGia_WorkflowDefinitionSteps.AsNoTracking()
+                .Where(item => item.WorkflowID == selectedId && item.IsEnabled)
+                .OrderBy(item => item.StepOrder)
+                .Select(item => new { id = item.WorkflowStepID, order = item.StepOrder, code = item.Step.StepCode, name = item.Step.StepName })
+                .ToListAsync();
+            var transitions = await _context.BaoGia_WorkflowTransitions.AsNoTracking()
+                .Where(item => item.WorkflowID == selectedId)
+                .OrderBy(item => item.FromWorkflowStep.StepOrder).ThenBy(item => item.ActionCode)
+                .Select(item => new { id = item.TransitionID, fromId = item.FromWorkflowStepID, toId = item.ToWorkflowStepID, actionCode = item.ActionCode, condition = item.ConditionExpression, isActive = item.IsActive })
+                .ToListAsync();
+            return Ok(new { success = true, workflows, steps, data = transitions, workflowId = selectedId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveWorkflowTransition([FromBody] BaoGia_WorkflowTransitionDTO model)
+        {
+            var actions = new[] { "APPROVE", "REJECT", "RETURN", "SKIP", "CANCEL", "ESCALATE" };
+            var action = model?.ActionCode?.Trim().ToUpperInvariant();
+            if (model == null || model.WorkflowID <= 0 || model.FromWorkflowStepID <= 0 || model.ToWorkflowStepID <= 0 || !actions.Contains(action))
+            {
+                return BadRequest(new { success = false, message = "Workflow, bước nguồn, bước đích và action là bắt buộc." });
+            }
+
+            var steps = await _context.BaoGia_WorkflowDefinitionSteps.Where(item => item.WorkflowID == model.WorkflowID && item.IsEnabled && (item.WorkflowStepID == model.FromWorkflowStepID || item.WorkflowStepID == model.ToWorkflowStepID)).ToListAsync();
+            if (steps.Count != 2 || model.FromWorkflowStepID == model.ToWorkflowStepID)
+            {
+                return BadRequest(new { success = false, message = "Bước nguồn và bước đích phải thuộc cùng workflow và khác nhau." });
+            }
+
+            BaoGia_WorkflowTransition entity;
+            if (model.TransitionID > 0)
+            {
+                entity = await _context.BaoGia_WorkflowTransitions.FirstOrDefaultAsync(item => item.TransitionID == model.TransitionID && item.WorkflowID == model.WorkflowID)
+                    ?? throw new InvalidOperationException("Không tìm thấy transition.");
+            }
+            else
+            {
+                entity = new BaoGia_WorkflowTransition { WorkflowID = model.WorkflowID, CreatedDate = DateTime.Now, CreatedBy = User.Identity?.Name ?? "system" };
+                _context.BaoGia_WorkflowTransitions.Add(entity);
+            }
+            entity.FromWorkflowStepID = model.FromWorkflowStepID; entity.ToWorkflowStepID = model.ToWorkflowStepID;
+            entity.ActionCode = action!; entity.ConditionExpression = model.ConditionExpression?.Trim(); entity.IsActive = model.IsActive;
+            entity.UpdatedDate = DateTime.Now; entity.UpdatedBy = User.Identity?.Name ?? "system";
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, id = entity.TransitionID });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteWorkflowTransition(int id)
+        {
+            var entity = await _context.BaoGia_WorkflowTransitions.FirstOrDefaultAsync(item => item.TransitionID == id);
+            if (entity == null) return NotFound(new { success = false, message = "Không tìm thấy transition." });
+            entity.IsActive = false; entity.UpdatedDate = DateTime.Now; entity.UpdatedBy = User.Identity?.Name ?? "system";
             await _context.SaveChangesAsync();
             return Ok(new { success = true });
         }

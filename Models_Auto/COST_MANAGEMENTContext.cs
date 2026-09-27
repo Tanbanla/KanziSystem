@@ -87,6 +87,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<BaoGia_WorkflowStepUser> BaoGia_WorkflowStepUsers { get; set; }
 
+    public virtual DbSet<BaoGia_WorkflowTransition> BaoGia_WorkflowTransitions { get; set; }
+
     public virtual DbSet<Baocao_ACC_KIEMKE> Baocao_ACC_KIEMKEs { get; set; }
 
     public virtual DbSet<Baocao_ACC_NHAP_THONGTIN> Baocao_ACC_NHAP_THONGTINs { get; set; }
@@ -367,7 +369,7 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=apbivnap19;Database=COST_MANAGEMENT;User Id=sub_sa;Password=sa1AB4@APPLap19!;TrustServerCertificate=true;");
+        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=COST_MANAGEMENT;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;");
         //=> optionsBuilder.UseSqlServer("Server=APBIVNDB14;Database=COST_MANAGEMENT;User Id=COST_MANAGEMENT;Password=COST_MANAGEMENT;TrustServerCertificate=true;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -387,6 +389,31 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(500);
             entity.Property(e => e.Name_Jp).HasMaxLength(500);
             entity.Property(e => e.Phongbanchiuchiphi).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<BaoGia_WorkflowTransition>(entity =>
+        {
+            entity.HasKey(e => e.TransitionID);
+            entity.ToTable("BaoGia_WorkflowTransition");
+            entity.HasIndex(e => new { e.WorkflowID, e.FromWorkflowStepID, e.ActionCode }, "UQ_BaoGia_WorkflowTransition_Source_Action").IsUnique();
+            entity.Property(e => e.ActionCode).HasMaxLength(30).IsUnicode(false);
+            entity.Property(e => e.ConditionExpression).HasMaxLength(2000);
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasPrecision(0).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedDate).HasPrecision(0);
+            entity.HasOne(e => e.Workflow).WithMany()
+                .HasForeignKey(e => e.WorkflowID)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_BaoGia_WorkflowTransition_Workflow");
+            entity.HasOne(e => e.FromWorkflowStep).WithMany()
+                .HasForeignKey(e => e.FromWorkflowStepID)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_BaoGia_WorkflowTransition_FromStep");
+            entity.HasOne(e => e.ToWorkflowStep).WithMany()
+                .HasForeignKey(e => e.ToWorkflowStepID)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_BaoGia_WorkflowTransition_ToStep");
         });
 
         modelBuilder.Entity<ACCREPORT>(entity =>

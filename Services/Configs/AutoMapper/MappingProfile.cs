@@ -94,6 +94,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
             CreateMap<BaoGia_WorkflowStepRole, BaoGia_WorkflowStepRoleDTO>();
             CreateMap<BaoGia_WorkflowStepRoleDTO, BaoGia_WorkflowStepRole>();
 
+            CreateMap<BaoGia_WorkflowTransition, BaoGia_WorkflowTransitionDTO>();
+            CreateMap<BaoGia_WorkflowTransitionDTO, BaoGia_WorkflowTransition>();
+
             CreateMap<BaoGia_RequestType, BaoGia_RequestTypeDTO>();
             CreateMap<BaoGia_RequestTypeDTO, BaoGia_RequestType>();
         }

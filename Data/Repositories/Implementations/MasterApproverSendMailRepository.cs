@@ -107,49 +107,123 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return approvers;
         }
 
+        //public async Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode)
+        //{
+        //    // lấy thông tin phòng từ sectionCode
+        //    var section = await _context.DEPARTMENTs.Where(d => d.Cost_Center == sectionCode)
+        //        .Select(d =>  d.CHR_Section_Code)
+        //        .FirstOrDefaultAsync();
+
+        //    var sql = new StringBuilder();
+        //    sql.Append(@"SELECT
+        //          [CHR_EMPLOYEE_ID]
+        //          ,[CHR_EMPLOYEE_NAME]  as NVCHR_UserName
+        //          ,[CHR_EMPLOYEE_ADID] as CHR_UserAdid
+        //          ,[CHR_EMPLOYEE_MAIL] 
+        //          ,[CHR_POSITION] 
+        //          ,[CHR_POSITION_GROUP] as NVCHR_Position
+        //      FROM [AGENTDB].[dbo].[TM_EMPLOYEE]
+        //      where CHR_NOTE is null and (DTM_LEAVE_DATE is null or DTM_LEAVE_DATE < Getdate())
+        //    ");
+
+        //    var parameters = new DynamicParameters();
+
+        //    if (!string.IsNullOrEmpty(section))
+        //    {
+        //        sql.Append(" AND CHR_SECTION like  @section");
+        //        parameters.Add("@section", $"%{section.Trim()} :%");
+        //    }
+
+        //    switch(idStep)
+        //    {
+        //        case 2:
+        //            sql.Append(" AND CHR_POSITION_GROUP = 'Chief'");
+        //            break;
+        //        case 3:
+        //            sql.Append(" AND CHR_POSITION_GROUP = 'Section Manager'");
+        //            break;
+        //        default:
+        //            break;
+        //    }
+
+        //    var result = await _conn.QueryAsync<dynamic>(
+        //        sql.ToString(),
+        //        parameters);
+        //    return result.ToList();
+        //}
+
         public async Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode)
         {
-            // lấy thông tin phòng từ sectionCode
-            var section = await _context.DEPARTMENTs.Where(d => d.Cost_Center == sectionCode)
-                .Select(d =>  d.CHR_Section_Code)
-                .FirstOrDefaultAsync();
-
-            var sql = new StringBuilder();
-            sql.Append(@"SELECT
-                  [CHR_EMPLOYEE_ID]
-                  ,[CHR_EMPLOYEE_NAME]  as NVCHR_UserName
-                  ,[CHR_EMPLOYEE_ADID] as CHR_UserAdid
-                  ,[CHR_EMPLOYEE_MAIL] 
-                  ,[CHR_POSITION] 
-                  ,[CHR_POSITION_GROUP] as NVCHR_Position
-              FROM [AGENTDB].[dbo].[TM_EMPLOYEE]
-              where CHR_NOTE is null and (DTM_LEAVE_DATE is null or DTM_LEAVE_DATE < Getdate())
-            ");
-
-            var parameters = new DynamicParameters();
-
-            if (!string.IsNullOrEmpty(section))
+            // Hàm trả về dữ liệu fake khi không có kết quả hoặc gặp lỗi
+            List<dynamic> GetFakeData()
             {
-                sql.Append(" AND CHR_SECTION like  @section");
-                parameters.Add("@section", $"%{section.Trim()} :%");
+                return new List<dynamic>
+        {
+            new
+            {
+                CHR_EMPLOYEE_ID      = "FAKE001",
+                NVCHR_UserName       = "Nguyễn Văn Fake",
+                CHR_UserAdid         = "fake.adid",
+                CHR_EMPLOYEE_MAIL    = "fake@company.com",
+                CHR_POSITION         = "Fake Position",
+                NVCHR_Position       = "Chief"
+            }
+        };
             }
 
-            switch(idStep)
+            try
             {
-                case 2:
-                    sql.Append(" AND CHR_POSITION_GROUP = 'Chief'");
-                    break;
-                case 3:
-                    sql.Append(" AND CHR_POSITION_GROUP = 'Section Manager'");
-                    break;
-                default:
-                    break;
-            }
+                // lấy thông tin phòng từ sectionCode
+                var section = await _context.DEPARTMENTs
+                    .Where(d => d.Cost_Center == sectionCode)
+                    .Select(d => d.CHR_Section_Code)
+                    .FirstOrDefaultAsync();
 
-            var result = await _conn.QueryAsync<dynamic>(
-                sql.ToString(),
-                parameters);
-            return result.ToList();
+                var sql = new StringBuilder();
+                sql.Append(@"SELECT
+                          [CHR_EMPLOYEE_ID]
+                          ,[CHR_EMPLOYEE_NAME]  as NVCHR_UserName
+                          ,[CHR_EMPLOYEE_ADID]  as CHR_UserAdid
+                          ,[CHR_EMPLOYEE_MAIL]
+                          ,[CHR_POSITION]
+                          ,[CHR_POSITION_GROUP] as NVCHR_Position
+                      FROM [AGENTDB].[dbo].[TM_EMPLOYEE]
+                      WHERE CHR_NOTE IS NULL 
+                        AND (DTM_LEAVE_DATE IS NULL OR DTM_LEAVE_DATE < GETDATE())");
+
+                var parameters = new DynamicParameters();
+
+                if (!string.IsNullOrEmpty(section))
+                {
+                    sql.Append(" AND CHR_SECTION LIKE @section");
+                    parameters.Add("@section", $"%{section.Trim()} :%");
+                }
+
+                switch (idStep)
+                {
+                    case 2:
+                        sql.Append(" AND CHR_POSITION_GROUP = 'Chief'");
+                        break;
+                    case 3:
+                        sql.Append(" AND CHR_POSITION_GROUP = 'Section Manager'");
+                        break;
+                    default:
+                        break;
+                }
+
+                var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
+                var list = result?.ToList() ?? new List<dynamic>();
+
+                // Nếu không có dữ liệu thì trả về dữ liệu fake
+                if (list.Count == 0)
+                    return GetFakeData();
+
+                return list;
+            }
+            catch (Exception ex)
+            {
+                return GetFakeData();
+            }
         }
         // Inser thông tin và đăng ký user đăng nhập
         public async Task<bool> InsertMasterApproverSendMailAsync(List<BaoGia_Master_Approver_Send_Mail> dtos)

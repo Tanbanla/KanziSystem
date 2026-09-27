@@ -35,4 +35,20 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.WorkFlowModel
         public bool CanApprove { get; set; }
         public bool CanReject { get; set; }
     }
+
+    public sealed class WorkflowDefinitionStepsRequest
+    {
+        public int WorkflowId { get; set; }
+        public List<WorkflowDefinitionStepRequest> Rows { get; set; } = new();
+    }
+
+    public sealed class WorkflowDefinitionStepRequest
+    {
+        public int StepId { get; set; }
+        public int Order { get; set; }
+        public bool IsEnabled { get; set; }
+        public bool IsRequired { get; set; }
+        public bool AllowSkip { get; set; }
+        public bool IsFinalStep { get; set; }
+    }
 }
