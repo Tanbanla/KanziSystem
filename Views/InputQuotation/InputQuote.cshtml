@@ -12,6 +12,7 @@
 <head>
     <link rel="stylesheet" href="~/css/Approval_Quote.css" />
     <link rel="stylesheet" href="~/css/Quote.css" />
+    <link rel="stylesheet" href="~/css/HistoryQuote.css" />
 </head>
 
 <div class="container-fluid" id="input-quote">
@@ -303,11 +304,12 @@
                                     <th style="min-width: 100px;">@Localizer["InputTime"]</th>
                                     <th style="min-width: 100px;">@Localizer["ApplyDay"]</th>
                                     <th style="min-width: 100px;">@Localizer["DueDay"]</th>
+                                     <th style="min-width: 170px;">@Localizer["Actions"]</th>
                                 </tr>
                             </thead>
                             <tbody id="supplierQuoteBody">
                                 <tr class="text-center">
-                                    <td colspan="24" class="text-muted py-4">
+                                     <td colspan="25" class="text-muted py-4">
                                         <i class="ion ion-load-c ion-spin"></i> @Localizer["LoadingData"]
                                     </td>
                                 </tr>
@@ -337,6 +339,30 @@
         </div>
     </div>
 </div>
+
+<div class="history-drawer-overlay" id="inputQuoteHistoryDrawerOverlay" aria-hidden="true"></div>
+<aside class="history-detail-drawer" id="inputQuoteHistoryDrawer" aria-hidden="true">
+    <div class="history-drawer-header">
+        <h5 class="mb-0">@Localizer["ViewQuotationHistory"]</h5>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCloseInputQuoteHistory" aria-label="@Localizer["Close"]">✕</button>
+    </div>
+    <div class="history-drawer-body">
+        <div class="history-drawer-section mb-3">
+            <h6 class="history-drawer-section-title">Thông tin báo giá</h6>
+            <div class="history-detail-grid">
+                <div><span>@Localizer["OrderCode"]</span><b id="inputQuoteHistoryOrder">-</b></div>
+                <div><span>@Localizer["SupplierItemCode"]</span><b id="inputQuoteHistorySupplierItem">-</b></div>
+            </div>
+        </div>
+        <div class="history-drawer-section">
+            <h6 class="history-drawer-section-title">Lịch thay đổi</h6>
+            <div class="history-change-timeline" id="inputQuoteHistoryTimeline">
+                <div class="text-muted small">Đang tải dữ liệu...</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
 <!-- Custom dialog root -->
 <div id="cmDialogOverlay" class="cm-dialog-overlay" aria-hidden="true">
     <div class="cm-dialog" role="dialog" aria-modal="true" aria-labelledby="cmDialogTitle">
@@ -457,6 +483,9 @@
         Date = Localizer["Date"].Value,
         ImportExcel = Localizer["ImportExcel"].Value,
         OrderNumber = Localizer["OrderNumber"].Value,
+        Actions = Localizer["Actions"].Value,
+        EnterQuotation = Localizer["EnterQuotation"].Value,
+        ViewQuotationHistory = Localizer["ViewQuotationHistory"].Value,
         SupplierCodeShort = Localizer["SupplierCodeShort"].Value,
         SupplierName = Localizer["SupplierName"].Value,
         ItemNameHQ = Localizer["ItemNameHQ"].Value,

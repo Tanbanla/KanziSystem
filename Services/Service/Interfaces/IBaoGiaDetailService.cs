@@ -15,6 +15,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<bool>> UpdateLuaChonNCCBaoGiaDetailAsync(List<dynamic> listUp, string user, string name);
         // Lấy thông tin theo ID_RequestQuote
         public Task<GenericResponse<BaoGia_Detail_of_QuotationDTO>> GetByIdRequestQuoteAsync(int idRequest);
+        // Lấy lịch sử thay đổi chi tiết báo giá theo mã đơn
+        public Task<GenericResponse<List<BaoGia_History_Detail_Request>>> GetInputQuoteHistoryAsync(string maDon, string? maHangNcc);
         // Update list thông tin ghi nhập báo giá
         public Task<GenericResponse<bool>> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_QuotationDTO> listDto);
         // lấy id của đơn báo giá

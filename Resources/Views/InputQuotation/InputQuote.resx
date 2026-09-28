@@ -603,4 +603,13 @@
   <data name="ExportLoading" xml:space="preserve">
     <value>Đang xuất Excel, vui lòng chờ...</value>
   </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Thao tác</value>
+  </data>
+  <data name="EnterQuotation" xml:space="preserve">
+    <value>Nhập thông tin báo giá</value>
+  </data>
+  <data name="ViewQuotationHistory" xml:space="preserve">
+    <value>Xem lịch thay đổi báo giá</value>
+  </data>
 </root>

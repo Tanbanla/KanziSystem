@@ -326,6 +326,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(result.Data);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> GetInputQuoteHistory([FromBody] SearchHistoryInfoByMaDonModel searchModel)
+        {
+            if (searchModel == null || string.IsNullOrWhiteSpace(searchModel.MaDon))
+                return BadRequest("Thiếu mã đơn hàng");
+
+            var result = await _baoGiaDetailService.GetInputQuoteHistoryAsync(
+                searchModel.MaDon,
+                searchModel.MaHangNCC);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data ?? new List<BaoGia_History_Detail_Request>());
+        }
         // export excel tab2
         [HttpPost]
         public async Task<IActionResult> ExportExcelTab2([FromBody] SearchInputQuote searchInputQuote)

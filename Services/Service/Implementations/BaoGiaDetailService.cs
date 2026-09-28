@@ -93,6 +93,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+
+        public async Task<GenericResponse<List<BaoGia_History_Detail_Request>>> GetInputQuoteHistoryAsync(string maDon, string? maHangNcc)
+        {
+            var result = new GenericResponse<List<BaoGia_History_Detail_Request>>();
+            try
+            {
+                result.Data = await _repo.GetInputQuoteHistoryAsync(maDon, maHangNcc);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return result;
+        }
         // Update list thông tin ghi nhập báo giá
         public async Task<GenericResponse<bool>> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_QuotationDTO> listDto)
         {

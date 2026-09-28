@@ -244,6 +244,27 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .FirstOrDefaultAsync();
             return a;
         }
+
+        public async Task<List<BaoGia_History_Detail_Request>> GetInputQuoteHistoryAsync(string maDon, string? maHangNcc)
+        {
+            var query = from history in _context.BaoGia_History_Detail_Requests.AsNoTracking()
+                        join detail in _context.BaoGia_Detail_of_Quotations.AsNoTracking()
+                            on history.ID_RQ_Detail equals detail.ID
+                        join request in _context.BaoGia_Request_of_Quotations.AsNoTracking()
+                            on detail.ID_RequestQuote equals request.ID
+                        where request.CHR_MaDon == maDon
+                        select new { history, detail };
+
+            if (!string.IsNullOrWhiteSpace(maHangNcc))
+            {
+                query = query.Where(x => x.detail.CHR_MaHangNCC == maHangNcc);
+            }
+
+            return await query
+                .OrderByDescending(x => x.history.DTM_CreateBy)
+                .Select(x => x.history)
+                .ToListAsync();
+        }
         // Update infor input bao gia
         public async Task<bool> UpdateListThongTinNhapBaoGiaAsync_BackUp(List<BaoGia_Detail_of_Quotation> listDto)
         {

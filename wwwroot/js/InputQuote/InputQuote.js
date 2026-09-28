@@ -44,6 +44,7 @@
         document.getElementById('btnClear')?.addEventListener('click', clearFilters);
         document.getElementById('selectAll')?.addEventListener('change', toggleSelectAll);
         document.getElementById('btnSampleExcel')?.addEventListener('click', exportSampleExcel);
+        initializeInputQuoteHistoryDrawer();
         elements.pageSizeSelect?.addEventListener('change', function () {
             const v = parseInt(this.value, 10) || 10;
             quoteState.pageSize = v;
@@ -167,6 +168,59 @@
         }
     }
 
+    const inputQuoteHistoryFields = [
+        ['ID', 'ID'],
+        ['ID_RequestQuote', 'ID yêu cầu báo giá'],
+        ['CHR_CodeNCC', 'Mã nhà cung cấp'],
+        ['NVCHR_NameNCC', 'Tên nhà cung cấp'],
+        ['CHR_MaHangNCC', 'Mã hàng nhà cung cấp'],
+        ['NVCHR_TenHangHQ', 'Tên hàng HQ'],
+        ['FL_USD', 'Đơn giá USD'],
+        ['FL_VND', 'Đơn giá VND'],
+        ['DTM_EndDate', 'Ngày kết thúc'],
+        ['NVCHR_MOQ', 'MOQ'],
+        ['DTM_LeadTime', 'Thời gian sản xuất'],
+        ['DTM_ShipTime', 'Thời gian vận chuyển'],
+        ['NVCHR_Packing', 'Quy cách đóng gói'],
+        ['BIT_Commit', 'Cam kết'],
+        ['NVCHR_Note', 'Ghi chú'],
+        ['NVCHR_File', 'Tệp đính kèm'],
+        ['DTM_CreateDate', 'Ngày tạo báo giá'],
+        ['CHR_CreateBy', 'Người tạo báo giá'],
+        ['DTM_UpdateDate', 'Ngày cập nhật'],
+        ['CHR_UpdateBy', 'Người cập nhật'],
+        ['FL_Sum', 'Tổng tiền'],
+        ['BIT_Select', 'Đã chọn'],
+        ['NVCHR_ReasonPick', 'Lý do chọn'],
+        ['CHR_Status', 'Trạng thái'],
+        ['INT_NumberEdit', 'Số lần chỉnh sửa'],
+        ['FL_ExchangeRate', 'Tỷ giá'],
+        ['FL_TaxRate', 'Thuế suất'],
+        ['FL_TaxAmount', 'Tiền thuế'],
+        ['FL_TotalAfterTax', 'Tổng tiền sau thuế'],
+        ['NVCHR_PaymentTerm', 'Điều khoản thanh toán'],
+        ['NVCHR_Warranty', 'Bảo hành'],
+        ['NVCHR_DeliveryTerm', 'Điều khoản giao hàng'],
+        ['VCHR_Rohs', 'ROHS'],
+        ['VCHR_COCQ', 'CO/CQ'],
+        ['VCHR_MSDS', 'MSDS'],
+        ['VCHR_AnToan', 'An toàn'],
+        ['VCHR_CamKet', 'Cam kết'],
+        ['CHR_NameEN', 'Tên tiếng Anh'],
+        ['INT_SoLuong', 'Số lượng'],
+        ['NVCHR_DonVi', 'Đơn vị'],
+        ['NVCHR_NhaSanXuat', 'Nhà sản xuất'],
+        ['DTM_EffectiveDate', 'Ngày hiệu lực'],
+        ['DTM_ExpiryDate', 'Ngày hết hạn']
+    ];
+
+    function formatHistoryFieldValue(key, value) {
+        if (value === undefined || value === null || value === '') return '-';
+        if (key.startsWith('DTM_')) return formatHistoryDate(value);
+        if (typeof value === 'boolean') return value ? 'Có' : 'Không';
+        return value;
+    }
+
     function goToPage(index) {
         if (index < 1) index = 1;
         quoteState.pageIndex = index;
@@ -179,6 +233,132 @@
     function openDetailPage(item) {
         window.location.href = (window.apiBaseUrl || '') + `/InputQuotation/InputQuoteDetail?maDon=${item.CHR_MaDon}`;
     }
+
+    function initializeInputQuoteHistoryDrawer() {
+        const drawer = document.getElementById('inputQuoteHistoryDrawer');
+        const overlay = document.getElementById('inputQuoteHistoryDrawerOverlay');
+        const closeButton = document.getElementById('btnCloseInputQuoteHistory');
+
+        const closeDrawer = () => {
+            drawer?.classList.remove('show');
+            drawer?.setAttribute('aria-hidden', 'true');
+            overlay?.classList.remove('show');
+            overlay?.setAttribute('aria-hidden', 'true');
+        };
+
+        closeButton?.addEventListener('click', closeDrawer);
+        overlay?.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && drawer?.classList.contains('show')) closeDrawer();
+        });
+    }
+
+    function historyValue(item, names) {
+        for (const name of names) {
+            if (item && item[name] !== undefined && item[name] !== null) return item[name];
+        }
+
+        if (item) {
+            const itemKeys = Object.keys(item);
+            for (const name of names) {
+                const matchingKey = itemKeys.find(key => key.toLowerCase() === name.toLowerCase());
+                if (matchingKey && item[matchingKey] !== undefined && item[matchingKey] !== null) {
+                    return item[matchingKey];
+                }
+            }
+        }
+
+        return '';
+    }
+
+    function escapeHistoryHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function formatHistoryDate(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('vi-VN');
+    }
+
+    function parseHistoryData(value) {
+        if (!value) return {};
+        if (typeof value === 'object') return value;
+
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function renderInputQuoteHistory(items) {
+        const timeline = document.getElementById('inputQuoteHistoryTimeline');
+        if (!timeline) return;
+
+        if (!Array.isArray(items) || items.length === 0) {
+            timeline.innerHTML = '<div class="text-muted small">Không có lịch sử thay đổi.</div>';
+            return;
+        }
+
+        timeline.innerHTML = items.map(item => {
+            const dataNew = parseHistoryData(historyValue(item, ['NVCHR_dataNew', 'nvchR_dataNew']));
+            const dataOld = parseHistoryData(historyValue(item, ['NVCHR_dataOld', 'nvchR_dataOld']));
+            const data = Object.keys(dataNew).length > 0 ? dataNew : dataOld;
+            const createdBy = historyValue(item, ['CHR_CreateBy', 'chR_CreateBy']);
+            const createdDate = formatHistoryDate(historyValue(item, ['DTM_CreateBy', 'dtm_CreateBy']));
+            const reason = historyValue(item, ['NVCHR_ReasonUpdate', 'nvchR_ReasonUpdate']);
+            const detailHtml = inputQuoteHistoryFields.map(([key, label]) => {
+                const value = formatHistoryFieldValue(key, historyValue(data, [key]));
+                return `<div><span>${escapeHistoryHtml(label)}</span><b>${escapeHistoryHtml(value)}</b></div>`;
+            }).join('');
+
+            return `<div class="history-change-item">
+                <div class="history-change-header">
+                    <span class="history-change-icon"><i class="fas fa-history"></i></span>
+                    <span class="history-change-action">Dữ liệu lịch sử</span>
+                    <span class="history-change-value">${escapeHistoryHtml(createdBy)}</span>
+                    <span class="history-change-meta">${escapeHistoryHtml(createdDate)}</span>
+                </div>
+                <div class="history-detail-grid">${detailHtml}</div>
+                ${reason ? `<div class="history-change-reason">Lý do: ${escapeHistoryHtml(reason)}</div>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    async function openInputQuoteHistory(item) {
+        const drawer = document.getElementById('inputQuoteHistoryDrawer');
+        const overlay = document.getElementById('inputQuoteHistoryDrawerOverlay');
+        const timeline = document.getElementById('inputQuoteHistoryTimeline');
+        if (!drawer || !overlay) return;
+
+        const maDon = item?.CHR_MaDon || '';
+        const maHangNcc = item?.CHR_MaHangNCC || '';
+        document.getElementById('inputQuoteHistoryOrder').textContent = maDon || '-';
+        document.getElementById('inputQuoteHistorySupplierItem').textContent = maHangNcc || '-';
+        if (timeline) timeline.innerHTML = '<div class="text-muted small">Đang tải dữ liệu...</div>';
+        drawer.classList.add('show');
+        drawer.setAttribute('aria-hidden', 'false');
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        try {
+            const result = await callApi((window.apiBaseUrl || '') + '/InputQuotation/GetInputQuoteHistory', {
+                MaDon: maDon,
+                MaHangNCC: maHangNcc
+            });
+            const items = Array.isArray(result) ? result : (result?.data || result?.Data || []);
+            renderInputQuoteHistory(items);
+        } catch (error) {
+            if (timeline) timeline.innerHTML = `<div class="text-danger small">${escapeHistoryHtml(error?.message || 'Không tải được lịch sử.')}</div>`;
+        }
+    }
+
     // Download sample Excel file
     function exportSampleExcel() {
         const url = (window.apiBaseUrl || '') + '/template/TmSendMailNew_Reason.xlsx';
@@ -926,6 +1106,31 @@
 
             // 24 - DTM_ExpiryDate
             row.appendChild(td(formatDateNotTime(item.DTM_ExpiryDate) || ''));
+
+            // 25 - Actions
+            const actionCell = td('', 'text-center');
+            const maDon = item.CHR_MaDon || '';
+            const enterButton = document.createElement('button');
+            enterButton.type = 'button';
+            enterButton.className = 'btn btn-sm btn-outline-primary me-1';
+            enterButton.title = window.i18nInputQuote.EnterQuotation || 'Enter quotation information';
+            enterButton.setAttribute('aria-label', enterButton.title);
+            enterButton.innerHTML = '<i class="fas fa-edit"></i>';
+            enterButton.addEventListener('click', () => {
+                window.location.href = (window.apiBaseUrl || '') + '/InputQuotation/InputQuoteDetail?maDon=' + encodeURIComponent(maDon);
+            });
+
+            const historyButton = document.createElement('button');
+            historyButton.type = 'button';
+            historyButton.className = 'btn btn-sm btn-outline-secondary';
+            historyButton.title = window.i18nInputQuote.ViewQuotationHistory || 'View quotation change history';
+            historyButton.setAttribute('aria-label', historyButton.title);
+            historyButton.innerHTML = '<i class="fas fa-history"></i>';
+            historyButton.addEventListener('click', () => openInputQuoteHistory(item));
+
+            actionCell.appendChild(enterButton);
+            actionCell.appendChild(historyButton);
+            row.appendChild(actionCell);
 
             tbody.appendChild(row);
         });

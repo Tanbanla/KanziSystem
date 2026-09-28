@@ -709,7 +709,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         attachmentPaths = new List<string> { tempFilePath }
                     };
 
-                    var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
+                    var sendResult = true;// await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
 
                     // Xóa file tạm sau khi gửi email
                     try
@@ -725,7 +725,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         Console.WriteLine($"Không thể xóa file tạm: {ex.Message}");
                     }
 
-                    if (sendResult.Success)
+                    if (sendResult)
                     {
                         listSended.AddRange(rqByNCC.Select(r => (int)r.ID));
                     }

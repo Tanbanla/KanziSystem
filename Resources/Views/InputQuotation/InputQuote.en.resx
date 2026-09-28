@@ -603,4 +603,13 @@
   <data name="ExportLoading" xml:space="preserve">
     <value>Exporting to Excel, please wait...</value>
   </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="EnterQuotation" xml:space="preserve">
+    <value>Enter quotation information</value>
+  </data>
+  <data name="ViewQuotationHistory" xml:space="preserve">
+    <value>View quotation change history</value>
+  </data>
 </root>

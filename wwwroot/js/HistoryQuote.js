@@ -1352,6 +1352,14 @@
     }
     // Initial load
     document.addEventListener('DOMContentLoaded', function () {
+        const maDon = new URLSearchParams(window.location.search).get('maDon');
+        if (maDon) {
+            const orderSelect = document.getElementById('searchMaDon');
+            if (orderSelect) {
+                orderSelect.value = maDon;
+                orderSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
         applyFilters(1);
     });
 })();

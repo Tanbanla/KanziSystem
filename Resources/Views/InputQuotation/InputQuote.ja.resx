@@ -603,4 +603,13 @@
   <data name="ExportLoading" xml:space="preserve">
     <value>Excelへエクスポートしています。少々お待ちください...</value>
   </data>
+  <data name="Actions" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="EnterQuotation" xml:space="preserve">
+    <value>見積情報を入力</value>
+  </data>
+  <data name="ViewQuotationHistory" xml:space="preserve">
+    <value>見積変更履歴を表示</value>
+  </data>
 </root>
