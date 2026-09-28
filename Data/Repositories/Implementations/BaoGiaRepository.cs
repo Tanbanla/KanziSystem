@@ -45,7 +45,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var sql = @"
                 SELECT DISTINCT q.*
                 FROM BaoGia_Request_of_Quotation as q
-                INNER JOIN [BaoGia_Master_Approver_Send_Mail] as s ON q.CHR_SectionCode = s.CHR_CodeSection
+                INNER JOIN BaoGia_WorkflowDefinition as wf ON q.WorkflowID = wf.WorkflowID
                 WHERE --(@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
                   (@MaDon IS NULL OR CHR_MaDon = @MaDon)
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
@@ -55,7 +55,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                   AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
                   AND (@Step IS NULL OR ID_StepBaoGia = @Step)
                   AND (@Date IS NULL OR CAST(DTM_CreateDate AS DATE) = CAST(@Date AS DATE))
-                  AND ( s.CHR_UserAdid = @Adid)
+                  AND EXISTS (
+                      SELECT 1
+                      FROM BaoGia_RoleUser as ru
+                      WHERE ru.UserAdid = @Adid
+                        AND ru.IsUsing = 1
+                        AND UPPER(ru.Role) = UPPER(wf.FlowCode)
+                  )
             ";
 
             var statusSql = "1=1";
@@ -88,9 +94,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var countSql = @"
                 SELECT COUNT(distinct q.ID)
                 FROM BaoGia_Request_of_Quotation as q
-				  inner join [BaoGia_Master_Approver_Send_Mail] as s 
-				on q.CHR_SectionCode = s.CHR_CodeSection
-                WHERE (@MaDon IS NULL OR CHR_MaDon LIKE '%' + @MaDon + '%')
+                INNER JOIN BaoGia_WorkflowDefinition as wf ON q.WorkflowID = wf.WorkflowID
+                WHERE (@MaDon IS NULL OR CHR_MaDon = @MaDon)
                   AND (@MaNcc IS NULL OR CHR_MaNCC LIKE '%' + @MaNcc + '%')
                   AND (@ChungLoai IS NULL OR NVCHR_ChungLoai LIKE '%' + @ChungLoai + '%')
                   AND (@Section IS NULL OR CHR_SectionCode LIKE '%' + @Section + '%')
@@ -98,7 +103,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                   AND (@MaHang IS NULL OR CHR_MaHangNoiBo LIKE '%' + @MaHang + '%')
                   AND (@Step IS NULL OR ID_StepBaoGia = @Step)
                   AND (@Date IS NULL OR CAST(DTM_CreateDate AS DATE) = CAST(@Date AS DATE))
-                  AND ( s.CHR_UserAdid = @Adid)
+                  AND EXISTS (
+                      SELECT 1
+                      FROM BaoGia_RoleUser as ru
+                      WHERE ru.UserAdid = @Adid
+                        AND ru.IsUsing = 1
+                        AND UPPER(ru.Role) = UPPER(wf.FlowCode)
+                  )
                   AND (" + statusSql + ")";
 
             // Add ordering and paging to main query
@@ -402,13 +413,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
         public async Task<ListRequest<dynamic>> SearchThongTinNhapBaoGiaAsync(
-            string? maDon,
-            string? section,
-            string? maHang,
-            string? user,
-            string? status,
-            int pageIndex,
-            int pageSize)
+            ThongTinBaoGiaGomNhomModel mod, string user, string role)
         {
             var cteBuilder = new StringBuilder();
 
@@ -424,9 +429,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.CHR_MaNCC,
                     r.ID_StepBaoGia
                 FROM BaoGia_Request_of_Quotation r
+                INNER JOIN BaoGia_WorkflowDefinition wf
+                    ON r.WorkflowID = wf.WorkflowID
                 LEFT JOIN BaoGia_Master_Approver_Send_Mail s
                     ON r.CHR_SectionCode = s.CHR_CodeSection
-                WHERE r.ID_StepBaoGia > 5
+                WHERE r.ID_StepBaoGia > 5 and r.BIT_LayBaoGia = 1
             ");
 
             var parameters = new DynamicParameters();
@@ -437,22 +444,28 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("Adid", user);
             }
 
-            if (!string.IsNullOrWhiteSpace(maDon))
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                cteBuilder.Append(" AND UPPER(LTRIM(RTRIM(wf.FlowCode))) = UPPER(LTRIM(RTRIM(@FlowCode)))");
+                parameters.Add("FlowCode", role);
+            }
+
+            if (!string.IsNullOrWhiteSpace(mod.maDon))
             {
                 cteBuilder.Append(" AND r.CHR_MaDon = @MaDon");
-                parameters.Add("MaDon", maDon);
+                parameters.Add("MaDon", mod.maDon);
             }
 
-            if (!string.IsNullOrWhiteSpace(maHang))
+            if (!string.IsNullOrWhiteSpace(mod.maHang))
             {
                 cteBuilder.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
-                parameters.Add("MaHang", maHang);
+                parameters.Add("MaHang", mod.maHang);
             }
 
-            if (!string.IsNullOrWhiteSpace(section))
+            if (!string.IsNullOrWhiteSpace(mod.section))
             {
                 cteBuilder.Append(" AND r.CHR_SectionCode = @Section");
-                parameters.Add("Section", section);
+                parameters.Add("Section", mod.section);
             }
 
             cteBuilder.Append(@"
@@ -508,22 +521,22 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 WHERE 1 = 1
             ");
 
-            if (!string.IsNullOrWhiteSpace(status))
+            if (!string.IsNullOrWhiteSpace(mod.status))
             {
-                if (status.Equals("Confirm", StringComparison.OrdinalIgnoreCase))
+                if (mod.status.Equals("Confirm", StringComparison.OrdinalIgnoreCase))
                 {
                     sql.Append(@"
                         AND t.MinStep = 6
                         AND t.MaxStep = 6 ");
                 }
-                else if (status.Equals("Done", StringComparison.OrdinalIgnoreCase))
+                else if (mod.status.Equals("Done", StringComparison.OrdinalIgnoreCase))
                 {
                     sql.Append(@"
                         AND NOT (t.MinStep = 6 AND t.MaxStep = 6) ");
                 }
             }
 
-            if (pageSize > 0 && pageIndex > 0)
+            if (mod.pageSize > 0 && mod.pageIndex > 0)
             {
                 sql.Append(@"
                     ORDER BY
@@ -535,8 +548,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY");
 
-                parameters.Add("Offset", (pageIndex - 1) * pageSize);
-                parameters.Add("PageSize", pageSize);
+                parameters.Add("Offset", (mod.pageIndex - 1) * mod.pageSize);
+                parameters.Add("PageSize", mod.pageSize);
             }
             else
             {
@@ -562,15 +575,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 FROM TongHop t
                 WHERE 1 = 1 ");
 
-            if (!string.IsNullOrWhiteSpace(status))
+            if (!string.IsNullOrWhiteSpace(mod.status))
             {
-                if (status.Equals("Confirm", StringComparison.OrdinalIgnoreCase))
+                if (mod.status.Equals("Confirm", StringComparison.OrdinalIgnoreCase))
                 {
                     countSql.Append(@"
                         AND t.MinStep = 6
                         AND t.MaxStep = 6 ");
                 }
-                else if (status.Equals("Done", StringComparison.OrdinalIgnoreCase))
+                else if (mod.status.Equals("Done", StringComparison.OrdinalIgnoreCase))
                 {
                     countSql.Append(@"
                         AND NOT (t.MinStep = 6 AND t.MaxStep = 6) ");

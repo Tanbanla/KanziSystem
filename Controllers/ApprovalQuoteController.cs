@@ -29,11 +29,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IDepartmentService _deparmentService;
         private readonly IWebHostEnvironment _env;
         private readonly IMasterApproverSendMailService _approverService;
+        private readonly IBaoGiaWFDefinitionService _baoGiaWorkflowDefinitionService;
         private readonly IConfiguration _configuration;
         public ApprovalQuoteController(ILogger<ApprovalQuoteController> logger, IConfiguration configuration,
             IHistoryApproverServive historyApproverServive, IMaterialService materialService, IMasterApproverSendMailService approverService,
             IBaoGiaService baoGiaService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStatusService baoGiaStatusService, IDepartmentService departmentService
-            , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IWebHostEnvironment env)
+            , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IBaoGiaWFDefinitionService baoGiaWorkflowDefinitionService, IWebHostEnvironment env)
         {
             _logger = logger;
             _historyApproverServive = historyApproverServive;
@@ -48,6 +49,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _deparmentService = departmentService;
             _approverService = approverService;
             _configuration = configuration;
+            _baoGiaWorkflowDefinitionService = baoGiaWorkflowDefinitionService;
         }
         public async Task<IActionResult> Index()
         {
@@ -88,6 +90,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return Ok(agentResult.Data);
             }
 
+            if (step == 5)
+            {
+                var picDepartmentResult = await _approverService.GetApproverByPicDepartmentsAsync(GetRolesUser() ?? "");
+                if (!picDepartmentResult.Success)
+                {
+                    return BadRequest("Error list Approver: " + picDepartmentResult.Message);
+                }
+
+                return Ok(picDepartmentResult.Data);
+            }
             var approverResult = await _approverService.GetApproverByStepAndSectionAsync(step, sectionCost);
             if (!approverResult.Success)
             {
@@ -182,8 +194,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                var currentUserId = GetCurrentUserId() ?? string.Empty;
+                var quotationIds = updateModel?.Select(x => x.ID).Where(x => x > 0).Distinct().ToList() ?? new List<int>();
+                var permission = await _historyApproverServive.CanUserApproveAsync(currentUserId, quotationIds);
+                if (!permission.Success || permission.Data != true)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền phê duyệt đơn theo WorkflowID này." });
+                }
                 var result = await _baoGiaService.CapNhatDanhSachBGAsync(updateModel);
-                var currentUserId = GetCurrentUserId();
+
                 if (result.Success)
                 {
                     var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
@@ -240,10 +259,30 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                var currentUserId = GetCurrentUserId() ?? string.Empty;
+                var quotationIds = updateModel?.Select(x => x.ID).Where(x => x > 0).Distinct().ToList() ?? new List<int>();
+                var permission = await _historyApproverServive.CanUserApproveAsync(currentUserId, quotationIds);
+                if (!permission.Success || permission.Data != true)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xử lý đơn theo WorkflowID này." });
+                }
+
+                // Giữ lại lý do từ request để bảo đảm không bị mất sau khi map/update dữ liệu.
+                var returnReasons = updateModel
+                    .Where(x => x.ID > 0)
+                    .GroupBy(x => x.ID)
+                    .ToDictionary(g => g.Key, g => g.Select(x => x.NVCHR_LyDo).FirstOrDefault());
                 var result = await _baoGiaService.UpdatePheDuyetDonBaoGiaAsync(updateModel);
                 if (result.Success)
                 {
                     var insertedList = result.Data ?? new List<BaoGia_Request_of_QuotationDTO>();
+                    foreach (var item in insertedList)
+                    {
+                        if (returnReasons.TryGetValue(item.ID, out var reason))
+                        {
+                            item.NVCHR_LyDo = reason;
+                        }
+                    }
                     await EventApprovelNG(insertedList);
                     return Json(new { success = true, message = result.Message });
                 }
@@ -541,6 +580,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private async Task<IActionResult> EventApprovelNG(List<BaoGia_Request_of_QuotationDTO> insertedList)
         {
             try {
+                if (insertedList == null || insertedList.Count == 0)
+                {
+                    return BadRequest("Không có dữ liệu đơn trả lại để lưu lịch sử.");
+                }
+
                 // Capture user info before background task
                 var currentUserId = GetCurrentUserId();
                 var firstItem = insertedList.FirstOrDefault();
@@ -581,7 +625,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     CHR_ChangedColumns = null,
                     CHR_OldData = null,
                     CHR_NewData = System.Text.Json.JsonSerializer.Serialize(b),
-                    NVCHR_LyDo = b.NVCHR_LyDo,
+                    NVCHR_LyDo = string.IsNullOrWhiteSpace(b.NVCHR_LyDo)
+                        ? "Đơn bị trả lại"
+                        : b.NVCHR_LyDo.Trim(),
                     CHR_ActionType = b.ID_Status
                 }).ToList();
 
@@ -631,6 +677,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     return BadRequest("Không tìm thấy file template: TemplateApprover.xlsx");
                 }
+                // thong tin workflowID
+                var workflowRespAsync = await _baoGiaWorkflowDefinitionService.GetWorkflowIDs();
+                var wfREsult = workflowRespAsync.Data;
+
 
                 using var fs = System.IO.File.OpenRead(templatePath);
                 using var workbook = new ClosedXML.Excel.XLWorkbook(fs);
@@ -651,6 +701,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.CHR_SectionCode);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_SectionName);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_Phanloai);
+                    ws.Cell(rowStart, col++).SetValue(wfREsult.Where(w => w.WorkflowID == item?.WorkflowID).Select(w => w.WorkflowName).FirstOrDefault() ?? string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaThietBi);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNoiBo);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaHangNCC);
@@ -670,7 +721,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_MSDS);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_AnToan);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_FileThietKe);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_LinkFile);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_NhaSanXuat);
+                    ws.Cell(rowStart, col++).SetValue(item.CHR_LinkImage);
                     ws.Cell(rowStart, col++).SetValue(item.CHR_MaNCC);
                     ws.Cell(rowStart, col++).SetValue(item.NVCHR_TenNCC);
                     ws.Cell(rowStart, col++).SetValue(item.BIT_LayBaoGia == false ? "X" : "O");
@@ -678,6 +731,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(rowStart, col++).SetValue(item?.DTM_NgayMuonNhan.HasValue == true ? item.DTM_NgayMuonNhan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item?.DTM_KyHan.HasValue == true ? item.DTM_KyHan.Value.ToString("dd/MM/yyyy") : string.Empty);
                     ws.Cell(rowStart, col++).SetValue(item?.CHR_Gap == "false" ? "X" : "O");
+
+                    ws.Cell(rowStart, col++).SetValue(item?.NVCHR_DiaDiemNH);
+                    ws.Cell(rowStart, col++).SetValue(item?.NVCHR_NguoiNhan);
+                    ws.Cell(rowStart, col++).SetValue(item?.CHR_SDT);
+
                     ws.Cell(rowStart, col++).SetValue(item?.NVCHR_UserRequest);
                     ws.Cell(rowStart, col++).SetValue(item?.NVCHR_ReasonQuotation);
                     ws.Cell(rowStart, col++).SetValue(item?.ID_StepBaoGia);
@@ -741,8 +799,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         break;
                     }
-                    var bitSelect = ws.Cell(r, 38).GetString().Contains("NG");
-                    var reason = ws.Cell(r, 39).GetString();
+                    var bitSelect = ws.Cell(r, 32).GetString()
+                        .Contains("NG", StringComparison.OrdinalIgnoreCase);
+                    var reason = ws.Cell(r, 33).GetString().Trim();
                     var maDon = ws.Cell(r, 3).GetString();
 
                     // Validate từng dòng
@@ -779,8 +838,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     errorWs.Cell(1, 1).Value = "Row";
                     errorWs.Cell(1, 2).Value = "MaDon";
                     errorWs.Cell(1, 3).Value = "ID";
-                    errorWs.Cell(1, 4).Value = "BIT_Select";
-                    errorWs.Cell(1, 5).Value = "NVCHR_ReasonPick";
+                    errorWs.Cell(1, 4).Value = "BIT_LayBaoGia";
+                    errorWs.Cell(1, 5).Value = "NVCHR_LyDo";
                     errorWs.Cell(1, 6).Value = "Errors";
                     for (int i = 0; i < errorRows.Count; i++)
                     {
@@ -802,16 +861,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 else
                 {
                     // Xử lý theo nhóm MaDon
-                    var groupedByMaDon = allRows.GroupBy(x => x.MaDon);
+                    var groupedByMaDon = allRows
+                        .GroupBy(x => x.MaDon, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
 
                     foreach (var group in groupedByMaDon)
                     {
-                        var maDon = group.Key;
                         var hasAnyNG = group.Any(x => x.BitSelect);
 
                         if (hasAnyNG)
                         {
-                            // Nếu có ít nhất một NG, tất cả đều NG với lý do chung
+                            // Chỉ cần một dòng NG thì toàn bộ đơn được trả lại.
                             foreach (var item in group)
                             {
                                 var i = item.Dto;
@@ -823,13 +883,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         }
                         else
                         {
-                            // Tất cả OK
+                            // Chỉ chuyển tiếp đơn khi toàn bộ dòng trong đơn đều OK.
                             foreach (var item in group)
                             {
                                 var i = item.Dto;
                                 i.ID_StepBaoGia = i.ID_StepBaoGia + 1;
                                 i.ID_Status = GetStatusFromStep(i.ID_StepBaoGia);
-                                i.CHR_UserApproval = "nganng";
                                 itemsOK.Add(i);
                             }
                         }
@@ -837,6 +896,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if(itemsOK.Any())
                     {
+                        var picDepartmentResult = await _approverService
+                            .GetApproverByPicDepartmentsAsync(GetRolesUser() ?? string.Empty);
+                        if (!picDepartmentResult.Success)
+                        {
+                            return BadRequest("Error list Approver: " + picDepartmentResult.Message);
+                        }
+
+                        var nextApprover = picDepartmentResult.Data?
+                            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.CHR_UserAdid));
+                        if (nextApprover == null)
+                        {
+                            return BadRequest("Không tìm thấy người phê duyệt tiếp theo theo role hiện tại.");
+                        }
+
+                        foreach (var item in itemsOK)
+                        {
+                            item.CHR_UserApproval = nextApprover.CHR_UserAdid;
+                        }
+
                         var updateResult = await _baoGiaService.UpdatePheDuyetDonBaoGiaAsync(itemsOK);
                         if (!updateResult.Success)
                         {
@@ -911,36 +989,43 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CHR_SectionCode = ws.Cell(row, 4).GetString(),
                 CHR_SectionName = ws.Cell(row, 5).GetString(),
                 CHR_Phanloai = ParsePhanloai(ws.Cell(row, 6).GetString()),
-                CHR_MaThietBi = ws.Cell(row, 7).GetString(),
-                CHR_MaHangNoiBo = ws.Cell(row, 8).GetString(),
-                CHR_MaHangNCC = ws.Cell(row, 9).GetString(),
-                NVCHR_NameVN = ws.Cell(row, 10).GetString(),
-                CHR_NameEN = ws.Cell(row, 11).GetString(),
-                INT_SoLuong = ParseDouble(ws.Cell(row, 12).GetString()),
-                NVCHR_DonVi = ws.Cell(row, 13).GetString(),
-                NVCHR_ChungLoai = ws.Cell(row, 14).GetString(),
-                NVCHR_HinhDang = ws.Cell(row, 15).GetString(),
-                NVCHR_ChatLieu = ws.Cell(row, 16).GetString(),
-                NVCHR_ThanhPhan = ws.Cell(row, 17).GetString(),
-                NVCHR_KichThuoc = ws.Cell(row, 18).GetString(),
-                NVCHR_DongMay = ws.Cell(row, 19).GetString(),
-                NVCHR_TinhNang = ws.Cell(row, 20).GetString(),
-                NVCHR_Rohs = ws.Cell(row, 21).GetString(),
-                NVCHR_COCQ = ws.Cell(row, 22).GetString(),
-                NVCHR_MSDS = ws.Cell(row, 23).GetString(),
-                NVCHR_AnToan = ws.Cell(row, 24).GetString(),
-                NVCHR_FileThietKe = ws.Cell(row, 25).GetString(),
-                NVCHR_NhaSanXuat = ws.Cell(row, 26).GetString(),
-                CHR_MaNCC = ws.Cell(row, 27).GetString(),
-                NVCHR_TenNCC = ws.Cell(row, 28).GetString(),
-                BIT_LayBaoGia = ParseBool(ws.Cell(row, 29).GetString()),
-                NVCHR_LyDo = ws.Cell(row, 30).GetString(),
-                DTM_NgayMuonNhan = ParseDate(ws.Cell(row, 31).GetString()   ),
-                DTM_KyHan = ParseDate(ws.Cell(row, 32).GetString()),
-                CHR_Gap = ParseBool(ws.Cell(row, 33).GetString()) == false ? "false" : "true",
-                NVCHR_UserRequest = ws.Cell(row, 34).GetString(),
-                ID_StepBaoGia = ParseInt(ws.Cell(row, 36).GetString()),
-                ID_Status = ws.Cell(row, 37).GetString()
+                // Cột 7 là WorkflowName, không có trường tương ứng để cập nhật.
+                CHR_MaThietBi = ws.Cell(row, 8).GetString(),
+                CHR_MaHangNoiBo = ws.Cell(row, 9).GetString(),
+                CHR_MaHangNCC = ws.Cell(row, 10).GetString(),
+                NVCHR_NameVN = ws.Cell(row, 11).GetString(),
+                CHR_NameEN = ws.Cell(row, 12).GetString(),
+                INT_SoLuong = ParseDouble(ws.Cell(row, 13).GetString()),
+                NVCHR_DonVi = ws.Cell(row, 14).GetString(),
+                NVCHR_ChungLoai = ws.Cell(row, 15).GetString(),
+                NVCHR_HinhDang = ws.Cell(row, 16).GetString(),
+                NVCHR_ChatLieu = ws.Cell(row, 17).GetString(),
+                NVCHR_ThanhPhan = ws.Cell(row, 18).GetString(),
+                NVCHR_KichThuoc = ws.Cell(row, 19).GetString(),
+                NVCHR_DongMay = ws.Cell(row, 20).GetString(),
+                NVCHR_TinhNang = ws.Cell(row, 21).GetString(),
+                NVCHR_Rohs = ws.Cell(row, 22).GetString(),
+                NVCHR_COCQ = ws.Cell(row, 23).GetString(),
+                NVCHR_MSDS = ws.Cell(row, 24).GetString(),
+                NVCHR_AnToan = ws.Cell(row, 25).GetString(),
+                NVCHR_FileThietKe = ws.Cell(row, 26).GetString(),
+                CHR_LinkFile = ws.Cell(row, 27).GetString(),
+                NVCHR_NhaSanXuat = ws.Cell(row, 28).GetString(),
+                CHR_LinkImage = ws.Cell(row, 29).GetString(),
+                CHR_MaNCC = ws.Cell(row, 30).GetString(),
+                NVCHR_TenNCC = ws.Cell(row, 31).GetString(),
+                BIT_LayBaoGia = ParseBool(ws.Cell(row, 32).GetString()),
+                NVCHR_LyDo = ws.Cell(row, 33).GetString(),
+                DTM_NgayMuonNhan = ParseDate(ws.Cell(row, 34).GetString()),
+                DTM_KyHan = ParseDate(ws.Cell(row, 35).GetString()),
+                CHR_Gap = ParseBool(ws.Cell(row, 36).GetString()) == false ? "false" : "true",
+                NVCHR_DiaDiemNH = ws.Cell(row, 37).GetString(),
+                NVCHR_NguoiNhan = ws.Cell(row, 38).GetString(),
+                CHR_SDT = ws.Cell(row, 39).GetString(),
+                NVCHR_UserRequest = ws.Cell(row, 40).GetString(),
+                NVCHR_ReasonQuotation = ws.Cell(row, 41).GetString(),
+                ID_StepBaoGia = ParseInt(ws.Cell(row, 42).GetString()),
+                ID_Status = ws.Cell(row, 43).GetString()
             };
         }
         private static string? ParsePhanloai(string s)

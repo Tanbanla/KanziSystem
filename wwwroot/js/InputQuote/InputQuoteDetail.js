@@ -1,4 +1,3 @@
-// InputQuoteDetail.js - JavaScript cho màn hình chi tiết nhập báo giá
 (function () {
     'use strict';
 

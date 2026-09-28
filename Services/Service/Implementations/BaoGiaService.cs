@@ -200,12 +200,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Tìm kiến thông tin nhập báo nhập báo giá theo mã đơn yêu cầu
-        public async Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(string? maDon, string? section, string? maHang, string? user, string? status, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(ThongTinBaoGiaGomNhomModel mod, string user, string role)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.SearchThongTinNhapBaoGiaAsync(maDon, section, maHang, user, status, pageIndex, pageSize);
+                result.Data = await _repo.SearchThongTinNhapBaoGiaAsync(mod, user, role);
                 result.Success = true;
             }
             catch (Exception ex)

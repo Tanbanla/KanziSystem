@@ -213,20 +213,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             string thang = thangnam.Split('-')[1];
             string nam = thangnam.Split('-')[0];
           
-            if (thang.Length == 2)
-            {
-                thang = thang.Substring(1);
-            }
+         
             if (chk == "GA")
             {
-                var list = Models.REQUEST_PROCESS_GA._load_tonkhoxuathang(mayeucau, nguoitao, khoi, thang, nam);
+                var list = Models.REQUEST_PROCESS_GA._load_tonkhoxuathang(mayeucau, nguoitao, chk, thang, nam);
                 return Json(list);
             }
 
             if (chk == "PROD")
             {
                 
-                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us, mayeucau, nguoitao, khoi, thang, nam);
+                var list = Models.REQUEST_PROCESS._load_tonkhoxuathang(us, mayeucau, nguoitao, chk, thang, nam);
                 return Json(list);
             }
 

@@ -278,7 +278,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             string congNhanHang = SafeString(worksheet.Cells[row, 21].Text?.ToString()!);
                             string nguoiNhanHang = worksheet.Cells[row, 22].Text?.ToString()!;
                           
-                            string Note = SafeString(worksheet.Cells[row, 23].Text?.ToString()!);
+                            string Note = worksheet.Cells[row, 23].Text?.ToString()!;
 
                             // Đưa câu lệnh vào bộ đệm (Không gọi DB ngay)
                             sqlBatch.AppendLine($@"
@@ -296,7 +296,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                             Cong_Nhanhang = {congNhanHang},
                                             Nguoi_Nhanhang = N'{nguoiNhanHang}',
                                             Dieuchinhlichgiao = {ngayDieuchinh},
-                                            Note = {Note}
+                                            Note = N'{Note}'
                                         WHERE Id_Detail_PO = '{idDetailPo}';
                                     END 
                                     ELSE 
@@ -309,7 +309,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         VALUES  
                                         (
                                             '{soPO}', '{idDetailPo}', {ngayGuiPo}, {ngayNccXacnhanGh}, {ngayGhChinhThuc}, {giogh},
-                                            {lichGiao}, {anhHuongSx}, {cuaGh}, {congNhanHang}, N'{nguoiNhanHang}', {ngayDieuchinh}, {Note}
+                                            {lichGiao}, {anhHuongSx}, {cuaGh}, {congNhanHang}, N'{nguoiNhanHang}', {ngayDieuchinh}, N'{Note}'
                                         );
                                     END;
                                 ");

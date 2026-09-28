@@ -106,7 +106,36 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var approvers = await query.ToListAsync();
             return approvers;
         }
+        public async Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByPicDepartmentsAsync(string role)
+        {
+            const string sql = @"
+                WITH CTE AS
+                (
+                    SELECT 
+                        m.*,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY m.CHR_UserAdid
+                            ORDER BY m.ID
+                        ) AS RN
+                    FROM BaoGia_Master_Approver_Send_Mail m
+                    INNER JOIN BaoGia_RoleUser r
+                        ON m.CHR_UserAdid = r.UserAdid
+                    WHERE m.ID_BaoGiaStep = 5
+                        AND r.IsUsing = 1
+                        AND r.Role = @Role
+                )
+                SELECT *
+                FROM CTE
+                WHERE RN = 1;
+            ";
 
+            var result = await _conn.QueryAsync<BaoGia_Master_Approver_Send_Mail>(
+                sql,
+                new { Role = role }
+            );
+
+            return result.ToList();
+        }
         public async Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode)
         {
             // lấy thông tin phòng từ sectionCode

@@ -96,7 +96,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 LEFT JOIN BaoGia_Master_Approver_Send_Mail as m ON m.ID_BaoGiaStep = r.ID_StepBaoGia
                 LEFT JOIN IM_NCC_NEW n 
                     ON r.CHR_MaNCC = n.Ma
-                WHERE (r.CHR_UserApproval = @Adid OR (r.ID_StepBaoGia = 4 AND m.CHR_UserAdid = @Adid)) 
+                WHERE (
+                    (r.ID_StepBaoGia IN (2, 3, 5) AND r.CHR_UserApproval = @Adid)
+                    OR (
+                        r.ID_StepBaoGia = 4
+                        AND EXISTS (
+                            SELECT 1
+                            FROM BaoGia_RoleUser AS ru
+                            INNER JOIN BaoGia_WorkflowDefinition AS wf ON wf.WorkflowID = r.WorkflowID
+                            WHERE ru.UserAdid = @Adid
+                              AND ru.IsUsing = 1
+                              AND ru.Role IN ('PUR', 'GA')
+                              AND UPPER(wf.FlowCode) = UPPER(ru.Role)
+                        )
+                    )
+                )
                   AND r.ID_StepBaoGia < 6 
                   AND r.ID_StepBaoGia > 1
                 ";
@@ -134,6 +148,42 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var re = (await _conn.QueryAsync<BaoGia_Request_of_Quotation>(sql, parameter)).ToList();
             return re;
+        }
+        public async Task<bool> CanUserApproveAsync(string adid, List<int> quotationIds)
+        {
+            if (string.IsNullOrWhiteSpace(adid) || quotationIds == null || quotationIds.Count == 0)
+            {
+                return false;
+            }
+
+            const string sql = @"
+                SELECT COUNT(1)
+                FROM BaoGia_Request_of_Quotation AS r
+                WHERE r.ID IN @QuotationIds
+                  AND (
+                      (r.ID_StepBaoGia IN (2, 3, 5) AND r.CHR_UserApproval = @Adid)
+                      OR (
+                          r.ID_StepBaoGia = 4
+                          AND EXISTS (
+                              SELECT 1
+                              FROM BaoGia_RoleUser AS ru
+                              INNER JOIN BaoGia_WorkflowDefinition AS wf
+                                  ON wf.WorkflowID = r.WorkflowID
+                              WHERE ru.UserAdid = @Adid
+                                AND ru.IsUsing = 1
+                                AND ru.Role IN ('PUR', 'GA')
+                                AND UPPER(wf.FlowCode) = UPPER(ru.Role)
+                          )
+                      )
+                  );";
+
+            var allowedCount = await _conn.ExecuteScalarAsync<int>(sql, new
+            {
+                Adid = adid,
+                QuotationIds = quotationIds.Distinct().ToArray()
+            });
+
+            return allowedCount == quotationIds.Distinct().Count();
         }
     }
 }

@@ -473,7 +473,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchInputQuoteBySoDon([FromBody] ThongTinBaoGiaGomNhomModel mod)
         {
-            var result = await _baoGiaService.SearchThongTinNhapBaoGiaAsync(mod.maDon, mod.section, mod.maHang, GetCurrentUserId(), mod.status, mod.pageIndex, mod.pageSize);
+            var result = await _baoGiaService.SearchThongTinNhapBaoGiaAsync(mod, GetCurrentUserId(), GetRolesUser());
             if (!result.Success)
             {
                 return BadRequest(result.Message);
