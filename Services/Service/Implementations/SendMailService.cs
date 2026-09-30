@@ -538,6 +538,248 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
         }
 
         // Gửi mail nhà cung cấp theo mã đơn 
+        public async Task<GenericResponse<bool>> SendMailToSupplierWithAttachmentsAsync()
+        {
+            const long maxRawAttachmentBytes = 11 * 1024 * 1024;
+            var suppliers = await _repo.GetSuppliersToNotifyAsync();
+            if (suppliers == null || !suppliers.Any())
+            {
+                return new GenericResponse<bool> { Success = false, Message = "No suppliers to notify" };
+            }
+
+            var suppliersNoRequest = new HashSet<string>(
+                await _repo.SupplierNeedToSendMailAsync() ?? new List<string>(),
+                StringComparer.OrdinalIgnoreCase);
+            var mail = await _repo.GetMailByIdAsync(19);
+            if (mail == null)
+            {
+                return new GenericResponse<bool> { Success = false, Message = "Mail template not found" };
+            }
+
+            var sentRequestIds = new List<int>();
+            var quotationDetails = new List<BaoGia_Detail_of_Quotation>();
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template", "TmSendMailNew.xlsx");
+            var failedSuppliers = new List<string>();
+
+            foreach (var supplier in suppliers)
+            {
+                var requests = await _repo.GetBaoGiaRequestBySupplierAsync(supplier);
+                var toEmail = await _repo.GetSupplierEmailAsync(supplier);
+                if (requests == null || !requests.Any() || string.IsNullOrWhiteSpace(toEmail) || suppliersNoRequest.Contains(supplier))
+                {
+                    continue;
+                }
+
+                var temporaryFiles = new List<string>();
+                try
+                {
+                    var excelPath = Path.Combine(Path.GetTempPath(), $"{supplier}_{DateTime.Now:yyyyMMddHHmmssfff}.xlsx");
+                    temporaryFiles.Add(excelPath);
+                    var tablePicInfo = new StringBuilder();
+                    tablePicInfo.AppendLine("<table border='1' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;'>");
+                    tablePicInfo.AppendLine("<tr><th>Quotation Request Number<br/>Số yêu cầu báo giá</th><th>PIC explain about Product description</th></tr>");
+                    var lastCreator = string.Empty;
+
+                    using (var workbook = new XLWorkbook(templatePath))
+                    {
+                        var worksheet = workbook.Worksheet(1);
+                        worksheet.Column(30).Hide();
+                        var rowIndex = 13;
+                        var lastRequestCode = string.Empty;
+
+                        foreach (var rq in requests)
+                        {
+                            var requesterEmail = await _repo.GetRequesterEmailByAdidAsync(rq.CHR_CreateBy);
+                            if (lastCreator != requesterEmail || lastRequestCode != rq.CHR_MaDon)
+                            {
+                                tablePicInfo.AppendLine($"<tr><td>{rq.CHR_MaDon ?? ""}</td><td>{requesterEmail}</td></tr>");
+                                lastCreator = requesterEmail;
+                                lastRequestCode = rq.CHR_MaDon;
+                            }
+
+                            var otherRequests = new[]
+                            {
+                                string.IsNullOrWhiteSpace(rq.NVCHR_Rohs) ? null : $"ROHS: {rq.NVCHR_Rohs}",
+                                string.IsNullOrWhiteSpace(rq.NVCHR_COCQ) ? null : $"COCQ: {rq.NVCHR_COCQ}",
+                                string.IsNullOrWhiteSpace(rq.NVCHR_MSDS) ? null : $"MSDS: {rq.NVCHR_MSDS}",
+                                string.IsNullOrWhiteSpace(rq.NVCHR_AnToan) ? null : $"An toàn: {rq.NVCHR_AnToan}"
+                            };
+
+                            worksheet.Cell(1, 3).Value = rq.NVCHR_TenNCC ?? string.Empty;
+                            worksheet.Cell(2, 3).Value = rq.Diachi ?? string.Empty;
+                            worksheet.Cell(rowIndex, 1).Value = rq.CHR_MaDon ?? string.Empty;
+                            worksheet.Cell(rowIndex, 2).Value = rq.CHR_MaThietBi ?? string.Empty;
+                            worksheet.Cell(rowIndex, 3).Value = rq.CHR_MaHangNoiBo ?? string.Empty;
+                            worksheet.Cell(rowIndex, 4).Value = rq.CHR_MaHangNCC ?? string.Empty;
+                            worksheet.Cell(rowIndex, 5).Value = rq.NVCHR_NameVN ?? string.Empty;
+                            worksheet.Cell(rowIndex, 6).Value = rq.INT_SoLuong ?? string.Empty;
+                            worksheet.Cell(rowIndex, 7).Value = rq.NVCHR_DonVi ?? string.Empty;
+                            worksheet.Cell(rowIndex, 8).Value = string.Join(" & ", otherRequests.Where(x => x != null));
+                            worksheet.Cell(rowIndex, 9).Value = rq.NVCHR_NhaSanXuat ?? string.Empty;
+                            worksheet.Cell(rowIndex, 10).Value = rq.CHR_MaNCC ?? string.Empty;
+                            worksheet.Cell(rowIndex, 27).Value = rq.NVCHR_FileThietKe ?? string.Empty;
+                            worksheet.Cell(rowIndex, 28).Value = rq.DTM_NgayMuonNhan?.ToString("yyyy-MM-dd") ?? string.Empty;
+                            worksheet.Cell(rowIndex, 29).Value = rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? string.Empty;
+                            worksheet.Cell(rowIndex, 31).Value = requesterEmail;
+                            worksheet.Cell(rowIndex, 32).Value = rq.ID ?? string.Empty;
+                            rowIndex++;
+                        }
+
+                        tablePicInfo.AppendLine("</table>");
+                        workbook.SaveAs(excelPath);
+                    }
+
+                    var attachmentPaths = new List<string> { excelPath };
+                    attachmentPaths.AddRange(await GetMailAttachmentPathsAsync(requests));
+                    temporaryFiles.AddRange(attachmentPaths.Skip(1));
+
+                    var mailBody = string.Format(
+                        mail.CHR_BODY + tablePicInfo,
+                        $"nhà cung cấp {requests.FirstOrDefault()?.Ten ?? ""} yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!",
+                        lastCreator);
+                    var title = $"Yêu cầu báo giá (Quotation requesting) - {requests.FirstOrDefault()?.ShortName ?? requests.FirstOrDefault()?.Ten ?? "NCC"} - {DateTime.Now:yyyy-MM-dd}";
+                    var batches = SplitAttachmentPaths(attachmentPaths, maxRawAttachmentBytes);
+                    var supplierSent = true;
+
+                    for (var batchIndex = 0; batchIndex < batches.Count; batchIndex++)
+                    {
+                        var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
+                        {
+                            mail_from = mail.CHR_FROM,
+                            mail_to = toEmail,
+                            mail_cc = string.IsNullOrEmpty(mail.CHR_CC) ? mailPICTo : mail.CHR_CC,
+                            mail_bcc = mail.CHR_BCC,
+                            title = batches.Count == 1 ? title : $"{title} ({batchIndex + 1}/{batches.Count})",
+                            body = mailBody,
+                            attachmentPaths = batches[batchIndex]
+                        };
+
+                        var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
+                        if (!sendResult.Success)
+                        {
+                            supplierSent = false;
+                            break;
+                        }
+                    }
+
+                    if (supplierSent)
+                    {
+                        sentRequestIds.AddRange(requests.Select(r => (int)r.ID));
+                        quotationDetails.AddRange(requests.Select(r => new BaoGia_Detail_of_Quotation
+                        {
+                            ID_RequestQuote = r.ID,
+                            CHR_CodeNCC = r.CHR_MaNCC ?? string.Empty,
+                            NVCHR_NameNCC = r.NVCHR_TenNCC ?? string.Empty,
+                            DTM_CreateDate = DateTime.Now,
+                            CHR_CreateBy = "System Send Mail",
+                            CHR_MaHangNCC = r.CHR_MaHangNCC,
+                            NVCHR_TenHangHQ = r.NVCHR_NameVN
+                        }));
+                    }
+                    else
+                    {
+                        failedSuppliers.Add(supplier);
+                    }
+                }
+                catch
+                {
+                    failedSuppliers.Add(supplier);
+                }
+                finally
+                {
+                    foreach (var path in temporaryFiles.Distinct())
+                    {
+                        try
+                        {
+                            if (File.Exists(path)) File.Delete(path);
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            if (sentRequestIds.Any())
+            {
+                await _repo.UpdateMailSentStatusAsync(sentRequestIds);
+            }
+            if (quotationDetails.Any())
+            {
+                await _repo.InsertBaoGiaDetailAsync(quotationDetails);
+            }
+
+            return new GenericResponse<bool>
+            {
+                Success = failedSuppliers.Count == 0,
+                Message = failedSuppliers.Count == 0
+                    ? "Mail sent successfully"
+                    : $"Could not send mail to: {string.Join(", ", failedSuppliers)}"
+            };
+        }
+
+        private async Task<List<string>> GetMailAttachmentPathsAsync(IEnumerable<dynamic> requests)
+        {
+            var paths = new List<string>();
+            var links = requests
+                .SelectMany(r => new[] { (string?)r.NVCHR_FileThietKe, (string?)r.CHR_LinkImage, (string?)r.CHR_LinkFile })
+                .Where(link => !string.IsNullOrWhiteSpace(link))
+                .Select(link => link!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var link in links)
+            {
+                var fileResponse = await _repo.GetFileToLinkAsync(link);
+                if (fileResponse?.Success != true || fileResponse.Data == null)
+                {
+                    continue;
+                }
+
+                var fileName = Path.GetFileName(fileResponse.Data.FileName ?? link);
+                var temporaryPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_{fileName}");
+                using (var source = fileResponse.Data.OpenReadStream())
+                using (var target = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    await source.CopyToAsync(target);
+                }
+                paths.Add(temporaryPath);
+            }
+
+            return paths;
+        }
+
+        private static List<List<string>> SplitAttachmentPaths(IEnumerable<string> paths, long maxBytes)
+        {
+            var batches = new List<List<string>>();
+            var currentBatch = new List<string>();
+            long currentSize = 0;
+
+            foreach (var path in paths)
+            {
+                var fileSize = new FileInfo(path).Length;
+                if (fileSize > maxBytes)
+                {
+                    throw new InvalidOperationException($"Attachment '{Path.GetFileName(path)}' is larger than the email limit.");
+                }
+
+                if (currentBatch.Count > 0 && currentSize + fileSize > maxBytes)
+                {
+                    batches.Add(currentBatch);
+                    currentBatch = new List<string>();
+                    currentSize = 0;
+                }
+
+                currentBatch.Add(path);
+                currentSize += fileSize;
+            }
+
+            if (currentBatch.Count > 0)
+            {
+                batches.Add(currentBatch);
+            }
+
+            return batches;
+        }
+
+        // Gửi mail nhà cung cấp theo mã đơn 
         public async Task<GenericResponse<bool>> SendMailToSupplierByRequestCodeAsync(string requestCode)
         {
             string dearMail = "";

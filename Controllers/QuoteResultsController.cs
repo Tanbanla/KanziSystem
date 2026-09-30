@@ -60,20 +60,27 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> SearchSupplierQuoteBody([FromBody] SearchQuotationResultsModel search)
         {
             var result = await _baoGiaService.GetThongTinBaoGiaChiTietAsync(
-                search.MaDon ?? "",
-                search.Section ?? "",
-                search.MaVatTu ?? "",
-                search.MaNcc ?? "",
-                search.Status ?? "",
-                GetCurrentUserId() ?? "",
-                search.PageIndex ?? 1,
-                search.PageSize ?? 10);
+                search, 
+                GetCurrentUserId() ?? "", 
+                GetRolesUser() ?? "");
+
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
             return Ok(result);
 
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetLatestSelectedPrices([FromBody] List<string> maHangNoiBo)
+        {
+            var result = await _baoGiaDetailService.GetLatestSelectedPricesAsync(maHangNoiBo ?? new List<string>());
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
         }
         // Search Infor table tab Master Quote Info
         [HttpPost]
@@ -183,15 +190,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             try
             {
+                search.PageIndex = 0;
+                search.PageSize = 0; 
                 var result = await _baoGiaService.GetThongTinBaoGiaChiTietAsync(
-                    search.MaDon ?? "",
-                    search.Section ?? "",
-                    search.MaVatTu ?? "",
-                    search.MaNcc ?? "",
-                    search.Status ?? "",
+                    search,
                     GetCurrentUserId() ?? "",
-                    0,
-                    0);
+                    GetRolesUser() ?? "");
                 if (!result.Success)
                 {
                     return BadRequest(result.Message);
@@ -1114,7 +1118,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> GetThongTinBaoGiaGomNhom([FromBody] ThongTinBaoGiaGomNhomModel model)
         {
-            var result = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync(model.maDon, model.section, model.maHang, model.status, GetCurrentUserId(), model.pageIndex, model.pageSize);
+            var result = await _baoGiaService.GetThongTinBaoGiaGomNhomAsync(model, GetCurrentUserId(), GetRolesUser());
             if (!result.Success)
             {
                 return BadRequest(result.Message);

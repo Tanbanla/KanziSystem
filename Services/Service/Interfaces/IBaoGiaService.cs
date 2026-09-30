@@ -33,7 +33,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<BaoGia_Request_of_QuotationDTO>> CapNhatDonBaoGiaAsync(BaoGia_Request_of_QuotationDTO baogia);
 
         // Lấy thông tin báo giá gom nhóm
-        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string? status, string user, int pageIndex, int pageSize);
+        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaGomNhomAsync(ThongTinBaoGiaGomNhomModel search, string user, string role);
 
         // Xuất báo giá
         public Task<GenericResponse<List<int>>> ExportBaoGiaAsync(string? maDon);
@@ -42,7 +42,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<ListRequest<dynamic>>> SearchThongTinNhapBaoGiaAsync(ThongTinBaoGiaGomNhomModel mod, string user, string role);
 
         // Lấy thông tin kèm chi tiết báo giá
-        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize);
+        public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(SearchQuotationResultsModel search, string user, string role);
 
         // Lấy mã đơn theo Adid
         public Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid, int step, string? role);

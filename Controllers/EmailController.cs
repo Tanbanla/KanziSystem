@@ -52,6 +52,19 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Ok(new { success = true, message = "Email API is running" });
         }
+
+        [HttpGet("SendMailSupplierWithAttachments")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendMailSupplierWithAttachments()
+        {
+            var res = await _sendMailService.SendMailToSupplierWithAttachmentsAsync();
+            if (!res.Success)
+            {
+                return StatusCode(500, new { success = false, message = res.Message });
+            }
+            return Ok(new { success = true, message = res.Message });
+        }
+
         [HttpGet]
         [HttpGet("UpdateFileDetail")]
         [AllowAnonymous]

@@ -143,6 +143,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        public async Task<GenericResponse<List<LatestSelectedQuotationPriceDTO>>> GetLatestSelectedPricesAsync(List<string> maHangNoiBo)
+        {
+            var result = new GenericResponse<List<LatestSelectedQuotationPriceDTO>>();
+            try
+            {
+                result.Data = await _repo.GetLatestSelectedPricesAsync(maHangNoiBo);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
+            return result;
+        }
         // Lấy id detail theo ID RequestQuote
         public async Task<GenericResponse<int>> GetIdDetailAsync(int? idRequest)
         {

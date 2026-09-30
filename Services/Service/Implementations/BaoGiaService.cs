@@ -166,12 +166,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Lấy thông tin báo giá gom nhóm
-        public async Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string? status, string user, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaGomNhomAsync(ThongTinBaoGiaGomNhomModel search, string user, string role)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.GetThongTinBaoGiaGomNhomAsync(maDon, section, maHang, status, user, pageIndex, pageSize);
+                result.Data = await _repo.GetThongTinBaoGiaGomNhomAsync(search, user, role);
                 result.Success = true;
             }
             catch (Exception ex)
@@ -216,12 +216,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // Lấy thông tin kèm chi tiết báo giá
-        public async Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize)
+        public async Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(SearchQuotationResultsModel search, string user, string role)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                result.Data = await _repo.GetThongTinBaoGiaChiTietAsync(maDon, section, maHang, maNCC, status, user, pageIndex, pageSize);
+                result.Data = await _repo.GetThongTinBaoGiaChiTietAsync(search, user, role);
                 result.Success = true;
             }
             catch (Exception ex)

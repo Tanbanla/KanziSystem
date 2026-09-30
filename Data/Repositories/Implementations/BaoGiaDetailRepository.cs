@@ -592,6 +592,48 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await _context.SaveChangesAsync();
             return resultList.FirstOrDefault();
         }
+        public async Task<List<LatestSelectedQuotationPriceDTO>> GetLatestSelectedPricesAsync(List<string> maHangNoiBo)
+        {
+            var codes = maHangNoiBo
+                .Where(code => !string.IsNullOrWhiteSpace(code))
+                .Select(code => code.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (codes.Count == 0)
+            {
+                return new List<LatestSelectedQuotationPriceDTO>();
+            }
+
+            const string sql = @"
+                WITH LatestSelected AS
+                (
+                    SELECT
+                        r.CHR_MaHangNoiBo AS MaHangNoiBo,
+                        d.FL_VND,
+                        d.FL_USD,
+                        d.DTM_CreateDate,
+                        ROW_NUMBER() OVER
+                        (
+                            PARTITION BY r.CHR_MaHangNoiBo
+                            ORDER BY COALESCE(d.DTM_UpdateDate, d.DTM_CreateDate) DESC, d.ID DESC
+                        ) AS RowNumber
+                    FROM BaoGia_Detail_of_Quotation d
+                    INNER JOIN BaoGia_Request_of_Quotation r ON r.ID = d.ID_RequestQuote
+                    WHERE d.BIT_Select = 1
+                      AND r.CHR_MaHangNoiBo IN @MaHangNoiBo
+                      AND (d.FL_VND IS NOT NULL OR d.FL_USD IS NOT NULL)
+                )
+                SELECT MaHangNoiBo, FL_VND, FL_USD, DTM_CreateDate
+                FROM LatestSelected
+                WHERE RowNumber = 1";
+
+            var rows = await _conn.QueryAsync<LatestSelectedQuotationPriceDTO>(
+                sql,
+                new { MaHangNoiBo = codes });
+
+            return rows.ToList();
+        }
         // Lấy id detail theo ID RequestQuote
         public async Task<int> GetIdDetailAsync(int? idRequest)
         {

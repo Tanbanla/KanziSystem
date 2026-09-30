@@ -292,7 +292,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return existingEntity;
         }
 
-        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaGomNhomAsync(string? maDon, string? section, string? maHang, string? status, string user, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaGomNhomAsync(ThongTinBaoGiaGomNhomModel search, string user, string role)
         {
             var parameters = new DynamicParameters();
 
@@ -307,20 +307,20 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 whereConditions.Add("(r.CHR_UserApproval = @Adid OR (r.ID_StepBaoGia = 11 AND m.CHR_UserAdid = @Adid))");
                 parameters.Add("Adid", user);
             }
-            if (!string.IsNullOrEmpty(maDon))
+            if (!string.IsNullOrEmpty(search.maDon))
             {
                 whereConditions.Add("r.CHR_MaDon = @MaDon");
-                parameters.Add("MaDon", maDon);
+                parameters.Add("MaDon", search.maDon);
             }
-            if (!string.IsNullOrEmpty(maHang))
+            if (!string.IsNullOrEmpty(search.maHang))
             {
                 whereConditions.Add("r.CHR_MaHangNoiBo = @MaHang");
-                parameters.Add("MaHang", maHang);
+                parameters.Add("MaHang", search.maHang);
             }
-            if (!string.IsNullOrEmpty(section))
+            if (!string.IsNullOrEmpty(search.section))
             {
                 whereConditions.Add("r.CHR_SectionCode = @Section");
-                parameters.Add("Section", section);
+                parameters.Add("Section", search.section);
             }
 
             var whereClause = whereConditions.Any() ? "AND " + string.Join(" AND ", whereConditions) : "";
@@ -366,18 +366,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 --    FOR XML PATH('')
                 --), 1, 2, '') AS categoryList
             FROM rq rr
-            {(string.IsNullOrEmpty(status) ? "" : "WHERE CASE WHEN rr.ID_StepBaoGia = 6 THEN N'WAITING_NCC' WHEN rr.ID_StepBaoGia = 7 THEN N'WAITING_PICK_NCC' WHEN rr.ID_StepBaoGia IN (9,10,11) THEN N'WAITING_APPROVER' ELSE 'NO' END = @Status")}
+            {(string.IsNullOrEmpty(search.status) ? "" : "WHERE CASE WHEN rr.ID_StepBaoGia = 6 THEN N'WAITING_NCC' WHEN rr.ID_StepBaoGia = 7 THEN N'WAITING_PICK_NCC' WHEN rr.ID_StepBaoGia IN (9,10,11) THEN N'WAITING_APPROVER' ELSE 'NO' END = @Status")}
             ORDER BY rr.CHR_MaDon DESC
-            {(pageSize > 0 && pageIndex > 0 ? "OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY" : "")}";
+            {(search.pageSize > 0 && search.pageIndex > 0 ? "OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY" : "")}";
 
-            if (pageSize > 0 && pageIndex > 0)
+            if (search.pageSize > 0 && search.pageIndex > 0)
             {
-                parameters.Add("Offset", (pageIndex - 1) * pageSize);
-                parameters.Add("PageSize", pageSize);
+                parameters.Add("Offset", (search.pageIndex - 1) * search.pageSize);
+                parameters.Add("PageSize", search.pageSize);
             }
-            if (!string.IsNullOrEmpty(status))
+            if (!string.IsNullOrEmpty(search.status))
             {
-                parameters.Add("Status", status);
+                parameters.Add("Status", search.status);
             }
 
             var data = (await _conn.QueryAsync<dynamic>(sql, parameters)).ToList();
@@ -388,7 +388,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             FROM [BaoGia_Request_of_Quotation] r
             LEFT JOIN BaoGia_Master_Approver_Send_Mail m ON r.ID_StepBaoGia = m.ID_BaoGiaStep
             WHERE 1=1 {whereClause}
-            {(string.IsNullOrEmpty(status) ? "" : @" AND 
+            {(string.IsNullOrEmpty(search.status) ? "" : @" AND 
             CASE 
                 WHEN r.ID_StepBaoGia = 6 THEN N'WAITING_NCC'
                 WHEN r.ID_StepBaoGia = 7 THEN N'WAITING_PICK_NCC'
@@ -601,7 +601,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             };
         }
         // Lấy thông tin kèm chi tiết báo giá
-        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize)
+        public async Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(SearchQuotationResultsModel search, string user, string role)
         {
             var sql = new StringBuilder(@"
              SELECT r.*,
@@ -674,6 +674,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
              LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
              LEFT JOIN BaoGia_Status st on r.ID_Status = st.VCHR_CodeStatus
              left Join IM_NCC_NEW as n on r.CHR_MaNCC = n.Ma
+             INNER JOIN BaoGia_WorkflowDefinition wf ON r.WorkflowID = wf.WorkflowID
              WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1 ");
 
             var parameters = new DynamicParameters();
@@ -682,30 +683,35 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sql.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @User)");
                 parameters.Add("User", user);
             }
-            if (!string.IsNullOrEmpty(maDon))
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                sql.Append(" AND UPPER(LTRIM(RTRIM(wf.FlowCode))) = UPPER(LTRIM(RTRIM(@FlowCode)))");
+                parameters.Add("FlowCode", role);
+            }
+            if (!string.IsNullOrEmpty(search.MaDon))
             {
                 sql.Append(" AND r.CHR_MaDon = @MaDon");
-                parameters.Add("MaDon", maDon);
+                parameters.Add("MaDon", search.MaDon);
             }
-            if (!string.IsNullOrEmpty(maHang))
+            if (!string.IsNullOrEmpty(search.MaVatTu))
             {
                 sql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
-                parameters.Add("MaHang", maHang);
+                parameters.Add("MaHang", search.MaVatTu);
             }
-            if (!string.IsNullOrEmpty(section))
+            if (!string.IsNullOrEmpty(search.Section))
             {
                 sql.Append(" AND r.CHR_SectionCode = @Section");
-                parameters.Add("Section", section);
+                parameters.Add("Section", search.Section);
             }
-            if (!string.IsNullOrEmpty(maNCC))
+            if (!string.IsNullOrEmpty(search.MaNcc))
             {
                 sql.Append(" AND r.CHR_MaNCC = @MaNCC");
-                parameters.Add("MaNCC", maNCC);
+                parameters.Add("MaNCC", search.MaNcc);
             }
             // Filter by status 
-            if (!string.IsNullOrEmpty(status))
+            if (!string.IsNullOrEmpty(search.Status))
             {
-                switch (status)
+                switch (search.Status)
                 {
                     case "WAIT_PICK_NCC":
                         sql.Append(" AND (r.ID_StepBaoGia >5 and r.ID_StepBaoGia <=7)");
@@ -724,11 +730,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon ,r.CHR_MaThietBi, r.CHR_MaNCC ,r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
 
-            if (pageSize > 0 && pageIndex >= 0)
+            if (search.PageSize > 0 && search.PageIndex >= 0)
             {
                 sql.Append(" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY");
-                parameters.Add("Offset", (pageIndex - 1) * pageSize);
-                parameters.Add("PageSize", pageSize);
+                parameters.Add("Offset", (search.PageIndex - 1) * search.PageSize);
+                parameters.Add("PageSize", search.PageSize);
             }
             var a = sql.ToString();
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
@@ -737,30 +743,35 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var countSql = new StringBuilder(@"
             SELECT COUNT(r.id)
                 FROM BaoGia_Request_of_Quotation r
+                INNER JOIN BaoGia_WorkflowDefinition wf ON r.WorkflowID = wf.WorkflowID
                 WHERE r.ID_StepBaoGia > 5 AND r.ID_StepBaoGia <= 11 and r.BIT_LayBaoGia = 1");
             if (!string.IsNullOrEmpty(user))
             {
                 countSql.Append(" AND EXISTS (SELECT 1 FROM BaoGia_Master_Approver_Send_Mail s WHERE s.CHR_CodeSection = r.CHR_SectionCode AND s.CHR_UserAdid = @User)");
             }
-            if (!string.IsNullOrEmpty(maDon))
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                countSql.Append(" AND UPPER(LTRIM(RTRIM(wf.FlowCode))) = UPPER(LTRIM(RTRIM(@FlowCode)))");
+            }
+            if (!string.IsNullOrEmpty(search.MaDon))   
             {
                 countSql.Append(" AND r.CHR_MaDon = @MaDon");
             }
-            if (!string.IsNullOrEmpty(maHang))
+            if (!string.IsNullOrEmpty(search.MaVatTu))
             {
                 countSql.Append(" AND r.CHR_MaHangNoiBo = @MaHang");
             }
-            if (!string.IsNullOrEmpty(section))
+            if (!string.IsNullOrEmpty(search.Section))
             {
                 countSql.Append(" AND r.CHR_SectionCode = @Section");
             }
-            if (!string.IsNullOrEmpty(maNCC))
+            if (!string.IsNullOrEmpty(search.MaNcc))
             {
                 countSql.Append(" AND r.CHR_MaNCC = @MaNCC");
             }
-            if (!string.IsNullOrEmpty(status))
+            if (!string.IsNullOrEmpty(search.Status))
             {
-                switch (status)
+                switch (search.Status)
                 {
                     case "WAIT_PICK_NCC":
                         countSql.Append(" AND (r.ID_StepBaoGia >5 and r.ID_StepBaoGia <=7)");

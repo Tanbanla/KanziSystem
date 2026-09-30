@@ -54,7 +54,8 @@ document.addEventListener('DOMContentLoaded', function () {
         pageSize: 20,
         returnedCount: 0,
         totalCount: 0,
-        lastPage: false
+        lastPage: false,
+        latestSelectedPrices: {}
     };
 
     // hàm formart
@@ -159,13 +160,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify(payload)
             })
                 .then(res => res.json())
-                .then(data => {
+                .then(async data => {
                     const items = Array.isArray(data.data.data) ? data.data.data : [];
                     const total = typeof data.data.totalCount === 'number' ? data.data.totalCount : items.length;
                     supplierState.returnedCount = items.length;
                     supplierState.totalCount = total;
                     supplierState.lastPage = (supplierState.pageIndex * supplierState.pageSize) >= total;
 
+                    await this.loadLatestSelectedPrices(items);
                     this.renderSupplierTable(items);
 
                     // Update summary
@@ -179,6 +181,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     this.applyAdditionalColumnsVisibility();
                 })
                 .catch(err => console.error('Load supplier data failed', err));
+        },
+        loadLatestSelectedPrices: async function (items) {
+            const codes = [...new Set(items.map(item => item.CHR_MaHangNoiBo).filter(Boolean))];
+            supplierState.latestSelectedPrices = {};
+            if (!codes.length) return;
+
+            try {
+                const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/GetLatestSelectedPrices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(codes)
+                });
+                if (!response.ok) throw new Error(await response.text() || 'Không thể lấy giá gần nhất');
+                const result = await response.json();
+                const prices = Array.isArray(result?.data) ? result.data : [];
+                prices.forEach(price => {
+                    if (price.MaHangNoiBo) supplierState.latestSelectedPrices[price.MaHangNoiBo] = price;
+                });
+            } catch (error) {
+                console.error('Load latest selected prices failed', error);
+            }
         },
         loadMasterQuoteData: async function () {
             const value = id => document.getElementById(id)?.value?.trim() || '';
@@ -376,7 +399,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (document.getElementById(styleId)) return;
                 const styleEl = document.createElement('style');
                 styleEl.id = styleId;
-                styleEl.textContent = '#supplierQuoteTable tbody tr.refuse-row > td { background-color: #f8d7da !important; color: #721c24 !important; }';
+                styleEl.textContent = '#supplierQuoteTable tbody tr.refuse-row > td { background-color: #f8d7da !important; color: #721c24 !important; }\n'
+                    + '#supplierQuoteTable tbody tr.cheapest-row > td { background-color: #e4f5e5 !important; }\n'
+                    + '#supplierQuoteTable .price-warning { color: #9a6700; background: #fff3cd; border: 1px solid #ffecb5; border-radius: 3px; padding: 2px 4px; margin-bottom: 3px; font-size: 10px; }';
                 document.head.appendChild(styleEl);
             };
 
@@ -388,6 +413,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 } catch { }
                 return '';
             };
+
+            const getPrice = item => {
+                const vnd = Number(item.FL_VND);
+                if (Number.isFinite(vnd) && vnd > 0) return { value: vnd, currency: 'VND' };
+                const usd = Number(item.FL_USD);
+                if (Number.isFinite(usd) && usd > 0) return { value: usd, currency: 'USD' };
+                return null;
+            };
+            const priceByGroup = new Map();
+            data.forEach(item => {
+                const price = getPrice(item);
+                if (!price) return;
+                const key = `${item.CHR_MaDon || ''}|${item.CHR_MaHangNoiBo || ''}`;
+                const current = priceByGroup.get(key);
+                if (!current || (current.currency === price.currency && price.value < current.value)) {
+                    priceByGroup.set(key, price);
+                }
+            });
 
             const rowsHtml = data.map((d, index) => {
 
@@ -403,8 +446,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     totalCell = totalCell + ' USD';
                 }
                 const checkRefuse = (d.CHR_Status === 'Refuse') ? true : false;
+                const currentPrice = getPrice(d);
+                const groupKey = `${d.CHR_MaDon || ''}|${d.CHR_MaHangNoiBo || ''}`;
+                const cheapestPrice = priceByGroup.get(groupKey);
+                const isCheapest = !!currentPrice && !!cheapestPrice
+                    && currentPrice.currency === cheapestPrice.currency
+                    && currentPrice.value === cheapestPrice.value;
+                const latestPrice = supplierState.latestSelectedPrices[d.CHR_MaHangNoiBo || ''];
+                const previousPrice = latestPrice ? getPrice(latestPrice) : null;
+                const priceIncrease = !!currentPrice && !!previousPrice
+                    && currentPrice.currency === previousPrice.currency
+                    && previousPrice.value > 0
+                    && currentPrice.value > previousPrice.value * 1.05;
+                const priceWarning = priceIncrease
+                    ? 'Giá cao hơn giá đã đặt gần nhất trên 5%, bắt buộc nhập lý do.'
+                    : '';
                 return `
-                <tr class="text-center ${checkRefuse ? 'refuse-row' : ''}" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" style="text-align: center;">
+                <tr class="text-center ${checkRefuse ? 'refuse-row' : ''} ${isCheapest ? 'cheapest-row' : ''}" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" data-price-increase="${priceIncrease}" style="text-align: center;">
                     <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.status || ''}</td>
@@ -463,7 +521,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
                         </select>
                     </td>
-                    <td><input type="text" class="form-control form-control-sm reason-input" list="${supplierReasonDatalistId}" value="${d.NVCHR_ReasonPick || ''}"></td>
+                    <td>
+                        ${priceWarning ? `<div class="price-warning" role="alert">${priceWarning}</div>` : ''}
+                        <input type="text" class="form-control form-control-sm reason-input" list="${supplierReasonDatalistId}" value="${d.NVCHR_ReasonPick || ''}">
+                    </td>
                     <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_Note || ''}"></td>
                 </tr>
             `;
@@ -655,10 +716,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     const reasonEl = row?.querySelector('.reason-input');
                     if (val === 'true') {
                         const reason = reasonEl?.value?.trim() || '';
+                        const priceIncrease = row?.getAttribute('data-price-increase') === 'true';
                         if (!reason) {
                             showPrompt({
                                 title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do',
-                                message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp',
+                                message: priceIncrease
+                                    ? 'Giá cao hơn giá đã đặt gần nhất trên 5%. Vui lòng nhập lý do.'
+                                    : ((window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp'),
                                 placeholder: '',
                                 allowCustom: true,
                                 options: supplierPickReasonOptions
@@ -690,6 +754,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (btn) btn.disabled = true;
                 const rows = Array.from(document.querySelectorAll('#supplierQuoteBody tr'));
                 const payload = [];
+                let missingPriceReason = false;
                 rows.forEach(row => {
                     const sel = row.querySelector('select.supplier-choice');
                     if (!sel) return;
@@ -698,10 +763,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     const idAttr = row.getAttribute('data-id') || sel.getAttribute('data-id') || '';
                     const id = idAttr !== '' && !isNaN(Number(idAttr)) ? Number(idAttr) : idAttr;
                     const reason = (row.querySelector('.reason-input')?.value || '').toString();
+                    if (val === 'true' && row.getAttribute('data-price-increase') === 'true' && !reason.trim()) {
+                        missingPriceReason = true;
+                    }
                     const maDon = row.getAttribute('data-madon') || sel.getAttribute('data-madon') || '';
                     const maHang = row.getAttribute('data-mahang') || sel.getAttribute('data-mahang') || '';
                     payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, NVCHR_NameNCC: maDon, CHR_MaHangNCC: maHang });
                 });
+                if (missingPriceReason) {
+                    showDialog({
+                        title: T.Notification || 'Thông báo',
+                        message: 'Các mặt hàng có giá cao hơn giá đã đặt gần nhất trên 5% bắt buộc phải nhập lý do.',
+                        type: 'error'
+                    });
+                    return;
+                }
                 const approverNext = window.__selectedNextApprover || '';
                 if (!payload.length) {
                     showDialog({ title: T.Notification || 'Thông báo', message: (T.MsgWarnSelectOne || 'Vui lòng chọn ít nhất một nhà cung cấp.'), type: 'info' });
