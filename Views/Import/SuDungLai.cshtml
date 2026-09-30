@@ -199,7 +199,7 @@
                                         <td><input type="number" class="form-control dg" id="dg_@index" value="@item.Price" readonly> </td>
                                         <td><input type="text" class="form-control nt" id="nt_@index" value="@item.Currency" readonly></td>
 
-                                        <td><input type="text" class="form-control tcp" id="tcp_@index" value="@item.Total_exchange" readonly></td>
+                                        <td><input type="text" class="form-control tcp" id="tcp_@index" value="@item.Total" readonly></td>
 
                                         <td><input type="text" class="form-control md" id="md_@index" value="@item.Aim"></td>
                                         <td>
@@ -258,24 +258,26 @@
     //     request: '@Url.Action("request", "Import", new { area = "" })'
     // };
 
-    window.onload = function(){
-        //let group_code = document.getElementById("group_code").value + "_CPK";
+      window.onload = function(){
         let group_code = document.getElementById("group_code").value;
-
-        _load_name_inv(group_code);
-        _load_request();
-        _load_rate();
-        _load_info_adid();
-        _load_phongchiuphi_1();
-        _load_account_1();
-        check_khoi();
+         _load_name_inv(group_code);
+         _load_request();
+        // Đợi 500ms (0.5 giây) rồi mới thực thi các hàm tải dữ liệu
+        setTimeout(function() {
+           
+            _load_rate();
+            _load_info_adid();
+            _load_phongchiuphi_1();
+            _load_account_1();
+            check_khoi();
+        }, 3000); // 500 là số mili-giây, bạn có thể thay đổi tùy ý
     }
     function check_khoi(){
          var groupCode = document.getElementById("group_code").value;
-          if (groupCode === "GA") {
+          if (groupCode == "GA") {
                 document.getElementById("modal-20").style.display = '';
                 document.getElementById("modal-6").style.display = 'none';
-            } else if (groupCode === "PROD") {
+            } else if (groupCode == "PROD") {
                 document.getElementById("modal-20").style.display = 'none';
                 document.getElementById("modal-6").style.display = '';
             }

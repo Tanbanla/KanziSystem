@@ -1,9 +1,11 @@
 @model PRJ_WAREHOUSE_BIVN.View_Models.Quote.QuoteModel
 @using System.Collections.Generic
 @using System.Linq
+@using System.Text.Json
 @using PRJ_WAREHOUSE_BIVN.DTO
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Tạo yêu cầu báo giá";
+    ViewData["Title"] = Localizer["PageTitle"];
 
     var suppliers = Model?.DanhSachNhaCungCap ?? new List<IM_NCC_NEWDTO>();
     var materials = Model?.DanhSachVatTu ?? new List<MATERIALDTO>();
@@ -23,41 +25,41 @@
     <div id="globalLoading" class="quote-global-loading" aria-hidden="true">
         <div class="quote-loading-box" role="status" aria-live="polite">
             <div class="quote-loading-spinner" aria-hidden="true"></div>
-            <div class="quote-loading-message">Đang xử lý...</div>
+            <div class="quote-loading-message">@Localizer["Processing"]</div>
         </div>
     </div>
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h4>Tạo xin báo giá mới</h4>
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar">
+        <h4>@Localizer["PageTitle"]</h4>
+        <div class="btn-toolbar" role="toolbar" aria-label="@Localizer["PageTitle"]">
             <div class="d-flex gap-2 mb-2" role="group">
-                <button type="button" class="btn btn-success" id="btnDownloadExcel"><i class="fas fa-file-excel me-1"></i>Tải file mẫu</button>
+                <button type="button" class="btn btn-success" id="btnDownloadExcel"><i class="fas fa-file-excel me-1"></i>@Localizer["DownloadTemplate"]</button>
                 <div style="margin-left: 6px;"></div>
-                <button type="button" class="btn btn-warning w-100" id="btnDownMaster"><i class="fas fa-file-download me-1"></i> Tải dữ liệu master</button>
+                <button type="button" class="btn btn-warning w-100" id="btnDownMaster"><i class="fas fa-file-download me-1"></i> @Localizer["DownloadMaster"]</button>
             </div>
         </div>
     </div>
     <div class ="card shadow-sm quote-card mb-3">
         <div class="card-header bg-white quote-card-header">
-            <h6 class="mb-0">Thông tin báo giá</h6>
+            <h6 class="mb-0">@Localizer["QuoteInformation"]</h6>
         </div>
         <div class="card-body">
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-3">
                     <label for="selectSection" class="form-label fw-semibold">
-                        Phòng ban xin báo giá <span class="text-danger">*</span>
+                        @Localizer["RequestDepartment"] <span class="text-danger">*</span>
                     </label>
                     <select id="selectSection" name="selectSection" class="form-select searchable-select">
-                        <option value="">Chọn phòng ban</option>
+                        <option value="">@Localizer["SelectDepartment"]</option>
                         <option value="GA">GA - General Affairs</option>
                         <option value="PUR">PUR - Purchasing</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-3">
                     <label for="searchPhongBan" class="form-label">
-                        Mã chi phí <span class="text-danger">*</span>
+                        @Localizer["CostCenter"] <span class="text-danger">*</span>
                     </label>
                     <select id="searchPhongBan" name="searchPhongBan" class="form-select searchable-select">
-                        <option value="" selected>Chọn mã chi phí</option>
+                        <option value="" selected>@Localizer["SelectCostCenter"]</option>
                         @foreach (var s in sections)
                         {
                             <option value="@s.Cost_Center">
@@ -68,7 +70,7 @@
                 </div>
                 <div class="col-12 col-md-3">
                     <button type="button" id="btnSendQuotation" class="btn btn-primary w-100">
-                        <i class="fas fa-paper-plane me-1"></i> Gửi
+                        <i class="fas fa-paper-plane me-1"></i> @Localizer["Send"]
                     </button>
                 </div>
             </div>
@@ -79,33 +81,33 @@
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class ="d-flex align-items-center gap-3">
                     <h6 class="mb-0 me-4" style="color:black">
-                        Danh sách xin báo giá
+                        @Localizer["QuotationList"]
                     </h6>
                 </div>
                 <div class="d-flex align-items-center gap-1">
                     <button type="button" class="btn"
                             id="btnImportfile"
                             style="color:darkgreen; background-color:white">
-                        <i class="fas fa-file-excel"></i> Import file Excel
+                        <i class="fas fa-file-excel"></i> @Localizer["ImportExcel"]
                     </button>
                     <button type="button" class="btn"
                             id="btnExportTablefile"
                             style="color:goldenrod; background-color:white">
-                        <i class="fas fa-download me-1"></i> Tải dữ liệu bảng
+                        <i class="fas fa-download me-1"></i> @Localizer["ExportTable"]
                     </button>
                     <button type="button" class="btn btn-primary"
                             id="btnAdd">
-                        Thêm <i class="fas fa-plus-circle ms-1"></i>
+                        @Localizer["Add"] <i class="fas fa-plus-circle ms-1"></i>
                     </button>
                 </div>
 
             </div>
         </div>
         <div class="card-body">
-            <div class="quote-table-search mb-3" aria-label="Tìm kiếm mặt hàng trong bảng">
+            <div class="quote-table-search mb-3" aria-label="@Localizer["SearchInTable"]">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                     <div>
-                        <div class="quote-table-search-title"><i class="fas fa-search me-2"></i>Tìm kiếm trong bảng</div>
+                        <div class="quote-table-search-title"><i class="fas fa-search me-2"></i>@Localizer["SearchInTable"]</div>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-secondary" id="btnClearTableSearch">
                         <i class="fas fa-eraser me-1"></i>
@@ -113,24 +115,24 @@
                 </div>
                 <div class="row g-2">
                     <div class="col-12 col-md-4">
-                        <label for="tableSearchInternalCode" class="visually-hidden">Mã hàng nội bộ</label>
+                        <label for="tableSearchInternalCode" class="visually-hidden">@Localizer["InternalCode"]</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                            <input type="search" class="form-control" id="tableSearchInternalCode" placeholder="Mã hàng nội bộ" autocomplete="off">
+                            <input type="search" class="form-control" id="tableSearchInternalCode" placeholder="@Localizer["InternalCode"]" autocomplete="off">
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label for="tableSearchCategory" class="visually-hidden">Chủng loại</label>
+                        <label for="tableSearchCategory" class="visually-hidden">@Localizer["Category"]</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-tags"></i></span>
-                            <input type="search" class="form-control" id="tableSearchCategory" placeholder="Chủng loại" autocomplete="off">
+                            <input type="search" class="form-control" id="tableSearchCategory" placeholder="@Localizer["Category"]" autocomplete="off">
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label for="tableSearchSupplierCode" class="visually-hidden">Mã hàng nhà cung cấp</label>
+                        <label for="tableSearchSupplierCode" class="visually-hidden">@Localizer["SupplierItemCode"]</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-truck"></i></span>
-                            <input type="search" class="form-control" id="tableSearchSupplierCode" placeholder="Mã hàng nhà cung cấp" autocomplete="off">
+                            <input type="search" class="form-control" id="tableSearchSupplierCode" placeholder="@Localizer["SupplierItemCode"]" autocomplete="off">
                         </div>
                     </div>
                 </div>
@@ -141,24 +143,24 @@
                     <thead class="table-header-custom">
                         <tr class="text-center align-middle">
                             <th style="min-width: 40px">No.</th>
-                            <th style="min-width: 160px">Loại báo giá</th>
-                            <th style="min-width: 160px">Mã hàng nội bộ</th>
-                            <th style="min-width: 140px">Chủng loại</th>
-                            <th style="min-width: 100px">Phân loại hàng</th>
-                            <th style="min-width: 270px">Tên tiếng việt</th>
-                            <th style="min-width: 240px">Tên tiếng anh</th>
-                            <th style="min-width: 140px">Mã hàng nhà cung cấp</th>
-                            <th style="min-width: 80px">Số lượng</th>
-                            <th style="min-width: 80px">Đơn vị</th>
-                            <th style="min-width: 140px">Kỳ hạn lựa chọn nhà cung cấp</th>
-                            <th style="min-width: 140px">Ngày mong muốn nhận hàng</th>
-                            <th style="min-width: 60px">Gấp</th>
-                            <th style="min-width: 160px">Nhà cung cấp xin báo giá</th>
-                            <th style="min-width: 80px">Hành động</th>
+                            <th style="min-width: 160px">@Localizer["QuotationType"]</th>
+                            <th style="min-width: 160px">@Localizer["InternalCode"]</th>
+                            <th style="min-width: 140px">@Localizer["Category"]</th>
+                            <th style="min-width: 100px">@Localizer["Classification"]</th>
+                            <th style="min-width: 270px">@Localizer["NameVN"]</th>
+                            <th style="min-width: 240px">@Localizer["NameEN"]</th>
+                            <th style="min-width: 140px">@Localizer["SupplierItemCode"]</th>
+                            <th style="min-width: 80px">@Localizer["Quantity"]</th>
+                            <th style="min-width: 80px">@Localizer["Unit"]</th>
+                            <th style="min-width: 140px">@Localizer["SupplierDeadline"]</th>
+                            <th style="min-width: 140px">@Localizer["DesiredDate"]</th>
+                            <th style="min-width: 60px">@Localizer["Urgent"]</th>
+                            <th style="min-width: 160px">@Localizer["Supplier"]</th>
+                            <th style="min-width: 80px">@Localizer["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody id="InforTableBody">
-                        <tr><td colspan="15" class="text-center text-muted py-4">Không có dữ liệu</td></tr>
+                        <tr><td colspan="15" class="text-center text-muted py-4">@Localizer["NoData"]</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -166,7 +168,7 @@
         <div class="card-footer quote-card-footer">
             <div id="paginationInfo" class="d-flex justify-content-between align-items-center mt-2" style="display:none;">
                 <div class="d-flex align-items-center gap-2">
-                    <label for="rowsPerPageSelect" class="form-label mb-0" style="margin-right: 4px;">Hiển thị </label>
+                    <label for="rowsPerPageSelect" class="form-label mb-0" style="margin-right: 4px;">@Localizer["Showing"] </label>
                     <select id="rowsPerPageSelect" class="form-select form-select-sm" style="width: auto;">
                         <option value="5">5</option>
                         <option value="10">10</option>
@@ -197,9 +199,9 @@
             <div class="modal-content">
                 <div class="modal-header quote-modal-header">
                     <div>
-                        <div class="quote-modal-kicker"><i class="fas fa-file-invoice me-1"></i> Yêu cầu báo giá</div>
-                        <h5 class="modal-title" id="addInforModalLabel">Thêm mặt hàng báo giá</h5>
-                        <div class="quote-modal-caption">Nhập đầy đủ thông tin để gửi yêu cầu đến nhà cung cấp</div>
+                        <div class="quote-modal-kicker"><i class="fas fa-file-invoice me-1"></i> @Localizer["QuotationRequest"]</div>
+                        <h5 class="modal-title" id="addInforModalLabel">@Localizer["AddQuotationItem"]</h5>
+                        <div class="quote-modal-caption">@Localizer["EnterCompleteInfo"]</div>
                     </div>
                     <button type="button" class="quote-modal-close" id="btnCloseAddInforModal" aria-label="Đóng cửa sổ">
                         <i class="fas fa-times" aria-hidden="true"></i>
@@ -210,13 +212,13 @@
                     <form id="addInforForm">
                         <div class="quote-form-section">
                             <div class="card-body">
-                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-info-circle"></i></span><div><h6>Thông tin cơ bản</h6><small>Thông tin nhận diện mặt hàng và nhu cầu</small></div></div>
+                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-info-circle"></i></span><div><h6>@Localizer["BasicInformation"]</h6><small>@Localizer["ItemIdentity"]</small></div></div>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
-                                        <label for="searchMahangNB" class="form-label fw-semibold">Mã hàng nội bộ <span class="text-danger">*</span></label>
+                                        <label for="searchMahangNB" class="form-label fw-semibold">@Localizer["InternalCode"] <span class="text-danger">*</span></label>
                                         <select id="searchMahangNB" name="searchMahangNB" class="form-select searchMahangNB searchable-select"
                                                 data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="200">
-                                            <option value="" selected>Chọn mã hàng nội bộ</option>
+                                            <option value="" selected>@Localizer["InternalCode"]</option>
                                             @foreach (var s in materials)
                                             {
                                                 <option value="@s.Material_Code">@s.Material_Code - @s.Material_Name_VN</option>
@@ -224,9 +226,9 @@
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="selectType" class="form-label fw-semibold">Loại báo giá <span class="text-danger">*</span></label>
+                                        <label for="selectType" class="form-label fw-semibold">@Localizer["QuotationType"] <span class="text-danger">*</span></label>
                                         <select id="selectType" name="selectType" class="form-select searchable-select">
-                                            <option value="" selected>Chọn loại báo giá</option>
+                                            <option value="" selected>@Localizer["SelectQuotationType"]</option>
                                             @foreach (var t in requestTypes)
                                             {
                                                 <option value="@t.CHR_Code">@t.NVCHR_Name</option>
@@ -234,9 +236,9 @@
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="selectPhanLoai" class="form-label fw-semibold">Phân loại hàng <span class="text-danger">*</span></label>
+                                        <label for="selectPhanLoai" class="form-label fw-semibold">@Localizer["Classification"] <span class="text-danger">*</span></label>
                                         <select id="selectPhanLoai" name="selectPhanLoai" class="form-select searchable-select">
-                                            <option value="" selected>Chọn phân loại</option>
+                                            <option value="" selected>@Localizer["SelectClassification"]</option>
                                             <option value="A">A</option>
                                             <option value="B">B</option>
                                             <option value="C">C</option>
@@ -246,9 +248,9 @@
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="selectChungLoai" class="form-label fw-semibold">Chủng loại hàng <span class="text-danger">*</span></label>
+                                        <label for="selectChungLoai" class="form-label fw-semibold">@Localizer["Category"] <span class="text-danger">*</span></label>
                                         <select id="selectChungLoai" name="selectChungLoai" class="form-select searchable-select">
-                                            <option value="" selected>Chọn chủng loại</option>
+                                            <option value="" selected>@Localizer["SelectCategory"]</option>
                                             @foreach (var s in categories)
                                             {
                                                 <option value="@s">@s</option>
@@ -256,32 +258,32 @@
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label for="selectTenVN" class="form-label fw-semibold">Tên hàng tiếng Việt <span class="text-danger">*</span></label>
-                                        <input type="text" id="selectTenVN" name="selectTenVN" class="form-control" placeholder="Nhập tên tiếng Việt" />
+                                        <label for="selectTenVN" class="form-label fw-semibold">@Localizer["NameVN"] <span class="text-danger">*</span></label>
+                                        <input type="text" id="selectTenVN" name="selectTenVN" class="form-control" placeholder="@Localizer["EnterVNName"]" />
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label for="selectTenEN" class="form-label fw-semibold">Tên hàng tiếng Anh <span class="text-danger">*</span></label>
-                                        <input type="text" id="selectTenEN" name="selectTenEN" class="form-control" placeholder="Nhập tên tiếng Anh" />
+                                        <label for="selectTenEN" class="form-label fw-semibold">@Localizer["NameEN"] <span class="text-danger">*</span></label>
+                                        <input type="text" id="selectTenEN" name="selectTenEN" class="form-control" placeholder="@Localizer["EnterENName"]" />
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="selectMaThietBi" class="form-label fw-semibold">Mã thiết bị</label>
+                                        <label for="selectMaThietBi" class="form-label fw-semibold">@Localizer["EquipmentCode"]</label>
                                         <input type="text" id="selectMaThietBi" name="selectMaThietBi" class="form-control" />
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="selectMaHangNCC" class="form-label fw-semibold">Mã hàng NCC</label>
+                                        <label for="selectMaHangNCC" class="form-label fw-semibold">@Localizer["SupplierItemCode"]</label>
                                         <input type="text" id="selectMaHangNCC" name="selectMaHangNCC" class="form-control" />
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="selectSoLuong" class="form-label fw-semibold">Số lượng <span class="text-danger">*</span></label>
+                                        <label for="selectSoLuong" class="form-label fw-semibold">@Localizer["Quantity"] <span class="text-danger">*</span></label>
                                         <input type="number" min="1" id="selectSoLuong" name="selectSoLuong" class="form-control" />
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="editDonVi" class="form-label fw-semibold">Đơn vị <span class="text-danger">*</span></label>
+                                        <label for="editDonVi" class="form-label fw-semibold">@Localizer["Unit"] <span class="text-danger">*</span></label>
                                         <input type="text" id="editDonVi" name="editDonVi" class="form-control" />
                                     </div>
                                     <div class="col-12">
-                                        <label for="LyDoXinBaoGia" class="form-label fw-semibold">Lý do xin báo giá</label>
-                                        <textarea class="form-control" id="LyDoXinBaoGia" name="LyDoXinBaoGia" rows="2" placeholder="Nhập lý do chi tiết..."></textarea>
+                                        <label for="LyDoXinBaoGia" class="form-label fw-semibold">@Localizer["QuotationReason"]</label>
+                                        <textarea class="form-control" id="LyDoXinBaoGia" name="LyDoXinBaoGia" rows="2" placeholder="@Localizer["EnterReason"]"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -291,30 +293,30 @@
                             <div class="col-12 col-lg-6">
                                 <div class="quote-form-section h-100">
                                     <div class="card-body">
-                                        <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-boxes"></i></span><div><h6>Mô tả hàng hóa</h6><small>Thông số kỹ thuật và mục đích sử dụng</small></div></div>
+                                        <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-boxes"></i></span><div><h6>@Localizer["ItemDescription"]</h6><small>@Localizer["TechnicalPurpose"]</small></div></div>
                                         <div class="row g-3">
                                             <div class="col-12 col-md-6">
-                                                <label for="selectHinhDang" class="form-label fw-semibold">Hình dáng</label>
+                                                <label for="selectHinhDang" class="form-label fw-semibold">@Localizer["Shape"]</label>
                                                 <textarea type="text" id="selectHinhDang" name="selectHinhDang" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="selectChatLieu" class="form-label fw-semibold">Chất liệu / Màu sắc</label>
+                                                <label for="selectChatLieu" class="form-label fw-semibold">@Localizer["Material"]</label>
                                                 <textarea type="text" id="selectChatLieu" name="selectChatLieu" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="selectThanhPhan" class="form-label fw-semibold">Thành phần, hàm lượng</label>
+                                                <label for="selectThanhPhan" class="form-label fw-semibold">@Localizer["Composition"]</label>
                                                 <textarea type="text" id="selectThanhPhan" name="selectThanhPhan" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="selectKichThuoc" class="form-label fw-semibold">Kích thước</label>
+                                                <label for="selectKichThuoc" class="form-label fw-semibold">@Localizer["Dimensions"]</label>
                                                 <textarea type="text" id="selectKichThuoc" name="selectKichThuoc" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="selectDungcho" class="form-label fw-semibold">Dùng cho máy/vị trí</label>
+                                                <label for="selectDungcho" class="form-label fw-semibold">@Localizer["UsedFor"]</label>
                                                 <textarea type="text" id="selectDungcho" name="selectDungcho" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="selectDungde" class="form-label fw-semibold">Dùng để làm gì</label>
+                                                <label for="selectDungde" class="form-label fw-semibold">@Localizer["Purpose"]</label>
                                                 <textarea type="text" id="selectDungde" name="selectDungde" class="form-control" ></textarea>
                                             </div>
                                         </div>
@@ -325,30 +327,30 @@
                             <div class="col-12 col-lg-6">
                                 <div class="quote-form-section h-100">
                                     <div class="card-body">
-                                        <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-shield-alt"></i></span><div><h6>Yêu cầu an toàn & tiêu chuẩn</h6><small>Chứng từ và tiêu chuẩn bắt buộc</small></div></div>
+                                        <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-shield-alt"></i></span><div><h6>@Localizer["SafetyRequirements"]</h6><small>@Localizer["RequiredDocuments"]</small></div></div>
                                         <div class="row g-3">
                                             <div class="col-12 col-md-6">
                                                 <label for="selectROHS" class="form-label fw-semibold">ROHS</label>
                                                 <select id="selectROHS" name="selectROHS" class="form-select">
-                                                    <option value="" selected>Chọn tiêu chuẩn ROHS</option>
-                                                    <option value="NEED">Need (Cần)</option>
+                                                    <option value="" selected>@Localizer["SelectRohs"]</option>
+                                                    <option value="NEED">@Localizer["RohsNeed"]</option>
                                                 </select>
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="selectCOCQ" class="form-label fw-semibold">CO / CQ</label>
                                                 <select id="selectCOCQ" name="selectCOCQ" class="form-select">
-                                                    <option value="" selected>Chọn tiêu chuẩn CO/CQ</option>
+                                                    <option value="" selected>@Localizer["SelectCoCq"]</option>
                                                     <option value="CO">CO</option>
                                                     <option value="CQ">CQ</option>
                                                     <option value="CO&CQ">CO & CQ</option>
                                                 </select>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="selectMSDS" class="form-label fw-semibold">MSDS & CAS No</label>
+                                                <label for="selectMSDS" class="form-label fw-semibold">@Localizer["Msds"]</label>
                                                 <textarea type="text" id="selectMSDS" name="selectMSDS" class="form-control" ></textarea>
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="selectAnToan" class="form-label fw-semibold">Tiêu chuẩn an toàn</label>
+                                                <label for="selectAnToan" class="form-label fw-semibold">@Localizer["SafetyStandard"]</label>
                                                 <textarea type="text" id="selectAnToan" name="selectAnToan" class="form-control" ></textarea>
                                             </div>
                                         </div>
@@ -359,33 +361,33 @@
 
                         <div class="quote-form-section mb-3">
                             <div class="card-body">
-                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-truck"></i></span><div><h6>Thời gian & địa điểm giao hàng</h6><small>Kế hoạch nhận hàng và thông tin liên hệ</small></div></div>
+                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-truck"></i></span><div><h6>@Localizer["DeliveryInformation"]</h6><small>@Localizer["ReceivingPlan"]</small></div></div>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-3">
-                                        <label for="NgayMuonNhan" class="form-label fw-semibold">Ngày muốn nhận hàng <span class="text-danger">*</span></label>
+                                        <label for="NgayMuonNhan" class="form-label fw-semibold">@Localizer["ReceiveDate"] <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control" id="NgayMuonNhan" name="NgayMuonNhan" />
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="LuaChonNcc" class="form-label fw-semibold">Hạn chọn nhà cung cấp <span class="text-danger">*</span></label>
+                                        <label for="LuaChonNcc" class="form-label fw-semibold">@Localizer["SupplierDeadline"] <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control" id="LuaChonNcc" name="LuaChonNcc" />
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="selectGap" class="form-label fw-semibold">Đơn hàng gấp</label>
+                                        <label for="selectGap" class="form-label fw-semibold">@Localizer["Urgent"]</label>
                                         <select id="selectGap" name="selectGap" class="form-select fw-bold text-danger  searchable-select">
-                                            <option value="false" selected class="text-dark">Không</option>
-                                            <option value="true" class="text-danger">Có</option>
+                                            <option value="false" selected class="text-dark">@Localizer["No"]</option>
+                                            <option value="true" class="text-danger">@Localizer["Yes"]</option>
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="NguoiNhanHang" class="form-label fw-semibold">Người nhận hàng</label>
+                                        <label for="NguoiNhanHang" class="form-label fw-semibold">@Localizer["Receiver"]</label>
                                         <input type="text" class="form-control" id="NguoiNhanHang" name="NguoiNhanHang" />
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="SDTNguoiNhanHang" class="form-label fw-semibold">SĐT người nhận</label>
+                                        <label for="SDTNguoiNhanHang" class="form-label fw-semibold">@Localizer["ReceiverPhone"]</label>
                                         <input type="tel" class="form-control" id="SDTNguoiNhanHang" name="SDTNguoiNhanHang" />
                                     </div>
                                     <div class="col-12 col-md-8">
-                                        <label for="DiaDiemGiaoHang" class="form-label fw-semibold">Địa điểm giao hàng</label>
+                                        <label for="DiaDiemGiaoHang" class="form-label fw-semibold">@Localizer["DeliveryLocation"]</label>
                                         <input type="text" class="form-control" id="DiaDiemGiaoHang" name="DiaDiemGiaoHang" />
                                     </div>
                                 </div>
@@ -394,19 +396,19 @@
 
                         <div class="quote-form-section mb-3">
                             <div class="card-body">
-                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-paperclip"></i></span><div><h6>Tài liệu kèm theo</h6><small>Đính kèm tài liệu hỗ trợ cho yêu cầu</small></div></div>
+                                <div class="quote-section-heading"><span class="quote-section-icon"><i class="fas fa-paperclip"></i></span><div><h6>@Localizer["Attachments"]</h6><small>@Localizer["AttachmentDescription"]</small></div></div>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
-                                        <label for="FileThietKe" class="form-label fw-semibold">File thiết kế</label>
-                                        <input type="file" class="form-control" id="FileThietKe" name="FileThietKe" />
+                                        <label for="FileThietKe" class="form-label fw-semibold">@Localizer["DesignFile"]</label>
+                                        <input type="file" class="form-control" id="FileThietKe" name="FileThietKe" accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.zip" />
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="LinkHinhAnh" class="form-label fw-semibold">Link/File hình ảnh</label>
-                                        <input type="file" class="form-control" id="LinkHinhAnh" name="LinkHinhAnh" placeholder="" />
+                                        <label for="LinkHinhAnh" class="form-label fw-semibold">@Localizer["ImageFile"]</label>
+                                        <input type="file" class="form-control" id="LinkHinhAnh" name="LinkHinhAnh" accept="image/jpeg,image/png,image/webp" />
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="LinkBox" class="form-label fw-semibold">Link Box/Drive</label>
-                                        <input type="text" class="form-control" id="LinkBox" name="LinkBox" placeholder="Link + Password" />
+                                        <label for="LinkBox" class="form-label fw-semibold">@Localizer["BoxLink"]</label>
+                                        <input type="text" class="form-control" id="LinkBox" name="LinkBox" placeholder="@Localizer["LinkPassword"]" />
                                     </div>
                                 </div>
                             </div>
@@ -415,26 +417,26 @@
                         <div class="quote-form-section" id="supplierTableContainer">
                             <div class="card-body">
                                 <div class="quote-section-heading justify-content-between">
-                                    <div class="d-flex align-items-center gap-2"><span class="quote-section-icon" style="margin-right: 8px;" ><i class="fas fa-building"></i></span><div><h6>Danh sách nhà cung cấp</h6><small>Chọn các nhà cung cấp cần gửi báo giá</small></div></div>
+                                    <div class="d-flex align-items-center gap-2"><span class="quote-section-icon" style="margin-right: 8px;" ><i class="fas fa-building"></i></span><div><h6>@Localizer["SupplierList"]</h6><small>@Localizer["SelectSuppliers"]</small></div></div>
                                     <span class="badge bg-warning text-dark fs-7">
-                                        <i class="fas fa-exclamation-circle me-1"></i> Tối đa 5 NCC
+                                        <i class="fas fa-exclamation-circle me-1"></i> @Localizer["MaximumFiveSuppliers"]
                                     </span>
                                 </div>
                                 <div class="table-responsive supplier-table-container">
                                     <table class="table table-sm table-hover table-bordered bg-white align-middle" id="supplierTable">
                                         <thead class="table-light text-center">
                                             <tr>
-                                                <th style="width: 50px">STT</th>
-                                                <th style="min-width: 140px">Mã NCC</th>
-                                                <th style="min-width: 200px">Tên NCC</th>
-                                                <th style="min-width: 140px">Nhà sản xuất</th>
-                                                <th style="min-width: 120px">Lấy báo giá</th>
-                                                <th style="min-width: 180px">Lý do không xin BG</th>
+                                                <th style="width: 50px">No.</th>
+                                                <th style="min-width: 140px">@Localizer["SupplierCode"]</th>
+                                                <th style="min-width: 200px">@Localizer["SupplierName"]</th>
+                                                <th style="min-width: 140px">@Localizer["Manufacturer"]</th>
+                                                <th style="min-width: 120px">@Localizer["GetQuotation"]</th>
+                                                <th style="min-width: 180px">@Localizer["RejectReason"]</th>
                                             </tr>
                                         </thead>
                                         <tbody id="supplierTableBody">
                                             <tr>
-                                                <td colspan="6" class="text-center text-muted py-4">Chưa có thông tin nhà cung cấp</td>
+                                                <td colspan="6" class="text-center text-muted py-4">@Localizer["NoSupplierInfo"]</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -447,13 +449,13 @@
 
                 <div class="modal-footer quote-modal-footer">
                     <button type="button" class="btn btn-outline-warning px-4" id="btnClearAddInforModal">
-                        <i class="fas fa-eraser me-1"></i> Xóa dữ liệu
+                        <i class="fas fa-eraser me-1"></i> @Localizer["ClearData"]
                     </button>
                     <button type="button" class="btn btn-outline-secondary px-4 quote-modal-close-action" id="btnCancelAddInforModal">
-                        <i class="fas fa-times me-1"></i> Đóng
+                        <i class="fas fa-times me-1"></i> @Localizer["Close"]
                     </button>
                     <button type="button" class="btn btn-primary px-4 fw-semibold" id="btnSaveHistoryEdit">
-                        <i class="fas fa-save me-1"></i> Lưu thông tin
+                        <i class="fas fa-save me-1"></i> @Localizer["SaveInformation"]
                     </button>
                 </div>
             </div>
@@ -464,19 +466,19 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <div class="quote-validation-kicker"><i class="fas fa-exclamation-triangle me-1"></i> Kiểm tra thông tin</div>
-                        <h5 class="modal-title" id="quoteValidationModalLabel">Chưa thể lưu thông tin</h5>
+                        <div class="quote-validation-kicker"><i class="fas fa-exclamation-triangle me-1"></i> @Localizer["ValidationTitle"]</div>
+                        <h5 class="modal-title" id="quoteValidationModalLabel">@Localizer["CannotSave"]</h5>
                     </div>
                     <button type="button" class="quote-validation-close" data-bs-dismiss="modal" aria-label="Đóng">
                         <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-2">Vui lòng bổ sung các thông tin sau:</p>
+                    <p class="mb-2">@Localizer["FillRequired"]</p>
                     <ul id="quoteValidationErrors" class="quote-validation-errors mb-0"></ul>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">@Localizer["Understood"]</button>
                 </div>
             </div>
         </div>
@@ -485,26 +487,81 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="quoteApproverModalLabel">Chọn người phê duyệt</h5>
+                    <h5 class="modal-title" id="quoteApproverModalLabel">@Localizer["SelectApprover"]</h5>
                     <button type="button" class="quote-validation-close" id="btnCloseQuoteApproverModal" aria-label="Đóng">
                         <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <label for="quoteApproverSelect" class="form-label">Người phê duyệt <span class="text-danger">*</span></label>
+                    <label for="quoteApproverSelect" class="form-label">@Localizer["ApproverRequired"] <span class="text-danger">*</span></label>
                     <select id="quoteApproverSelect" class="form-select">
-                        <option value="">Đang tải danh sách...</option>
+                        <option value="">@Localizer["LoadingList"]</option>
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" id="btnCancelQuoteApproverModal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="btnConfirmSendQuotation">Gửi yêu cầu</button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnCancelQuoteApproverModal">@Localizer["Cancel"]</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmSendQuotation">@Localizer["SendRequest"]</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 @section Scripts {
+    <script>
+        window.i18nQuote = @Html.Raw(JsonSerializer.Serialize(new {
+            CannotLoadData = Localizer["CannotLoadData"].Value,
+            CannotLoadMaterials = Localizer["CannotLoadMaterials"].Value,
+            CannotLoadSuppliers = Localizer["CannotLoadSuppliers"].Value,
+            SupplierLoadFailed = Localizer["SupplierLoadFailed"].Value,
+            GetQuotation = Localizer["GetQuotation"].Value,
+            EnterRejectReason = Localizer["EnterRejectReason"].Value,
+            SelectPlaceholder = Localizer["SelectPlaceholder"].Value,
+            SelectExcelFile = Localizer["SelectExcelFile"].Value,
+            InvalidQuotationFile = Localizer["InvalidQuotationFile"].Value,
+            ImportFailed = Localizer["ImportFailed"].Value,
+            NoValidData = Localizer["NoValidData"].Value,
+            EmptyQuotationList = Localizer["EmptyQuotationList"].Value,
+            ExportFailed = Localizer["ExportFailed"].Value,
+            Processing = Localizer["Processing"].Value,
+            TableExporting = Localizer["TableExporting"].Value,
+            TableExportFailed = Localizer["TableExportFailed"].Value,
+            ExcelImporting = Localizer["ExcelImporting"].Value,
+            ExcelImportFailed = Localizer["ExcelImportFailed"].Value,
+            SelectApproverPrompt = Localizer["SelectApproverPrompt"].Value,
+            SelectCostCenterRequired = Localizer["SelectCostCenterRequired"].Value,
+            SelectDepartmentRequired = Localizer["SelectDepartmentRequired"].Value,
+            LoadingList = Localizer["LoadingList"].Value,
+            SelectApprover = Localizer["SelectApprover"].Value,
+            NoApprover = Localizer["NoApprover"].Value,
+            ApproverLoadFailed = Localizer["ApproverLoadFailed"].Value,
+            SavingQuotation = Localizer["SavingQuotation"].Value,
+            QuotationSent = Localizer["QuotationSent"].Value,
+            SaveFailed = Localizer["SaveFailed"].Value,
+            MasterLoading = Localizer["MasterLoading"].Value,
+            AddQuotationItem = Localizer["AddQuotationItem"].Value,
+            EditQuotationItem = Localizer["EditQuotationItem"].Value,
+            SaveInformation = Localizer["SaveInformation"].Value,
+            UpdateInformation = Localizer["UpdateInformation"].Value,
+            Showing = Localizer["Showing"].Value,
+            Total = Localizer["Total"].Value,
+            Items = Localizer["Items"].Value,
+            NoMatchingItem = Localizer["NoMatchingItem"].Value,
+            NoData = Localizer["NoData"].Value,
+            Yes = Localizer["Yes"].Value,
+            No = Localizer["No"].Value,
+            RequiredField = Localizer["RequiredField"].Value,
+            DownloadTemplate = Localizer["DownloadTemplate"].Value,
+            Classification = Localizer["Classification"].Value,
+            Category = Localizer["Category"].Value,
+            QuotationType = Localizer["QuotationType"].Value,
+            NameVN = Localizer["NameVN"].Value,
+            NameEN = Localizer["NameEN"].Value,
+            Quantity = Localizer["Quantity"].Value,
+            Unit = Localizer["Unit"].Value,
+            DesiredDate = Localizer["DesiredDate"].Value,
+            SupplierDeadline = Localizer["SupplierDeadline"].Value
+        })) ;
+    </script>
     <script src="~/js/common/searchable-dropdown.js" asp-append-version="true"></script>
     <script src="~/js/shared/QuoteNotification.js" asp-append-version="true"></script>
     <script src="~/js/CreateQuotation/QuoteNew.js" asp-append-version="true"></script>

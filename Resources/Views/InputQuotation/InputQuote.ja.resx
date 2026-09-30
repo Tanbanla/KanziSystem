@@ -603,13 +603,24 @@
   <data name="ExportLoading" xml:space="preserve">
     <value>Excelへエクスポートしています。少々お待ちください...</value>
   </data>
-  <data name="Actions" xml:space="preserve">
-    <value>操作</value>
-  </data>
-  <data name="EnterQuotation" xml:space="preserve">
-    <value>見積情報を入力</value>
-  </data>
-  <data name="ViewQuotationHistory" xml:space="preserve">
-    <value>見積変更履歴を表示</value>
-  </data>
+  <data name="QuotationInformation" xml:space="preserve"><value>見積情報</value></data>
+  <data name="ChangeHistory" xml:space="preserve"><value>変更履歴</value></data>
+  <data name="ViewQuotationHistory" xml:space="preserve"><value>見積変更履歴を表示</value></data>
+  <data name="HistoryData" xml:space="preserve"><value>履歴データ</value></data>
+  <data name="NoHistory" xml:space="preserve"><value>変更履歴はありません。</value></data>
+  <data name="MissingDetailId" xml:space="preserve"><value>詳細IDがありません。</value></data>
+  <data name="HistoryLoadFailed" xml:space="preserve"><value>履歴を読み込めません。</value></data>
+  <data name="ReasonPrefix" xml:space="preserve"><value>理由: </value></data>
+  <data name="ExportSuccess" xml:space="preserve"><value>Excelを正常に出力しました</value></data>
+  <data name="ConfirmTitle" xml:space="preserve"><value>確認</value></data>
+  <data name="ConfirmButton" xml:space="preserve"><value>確認</value></data>
+  <data name="CancelButton" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="Refused" xml:space="preserve"><value>拒否</value></data>
+  <data name="NumberOfEdits" xml:space="preserve"><value>編集回数</value></data>
+  <data name="ExchangeRate" xml:space="preserve"><value>為替レート</value></data>
+  <data name="TaxRate" xml:space="preserve"><value>税率</value></data>
+  <data name="TaxAmount" xml:space="preserve"><value>税額</value></data>
+  <data name="TotalAfterTax" xml:space="preserve"><value>税込合計</value></data>
+  <data name="Warranty" xml:space="preserve"><value>保証</value></data>
+  <data name="Manufacturer" xml:space="preserve"><value>メーカー</value></data>
 </root>

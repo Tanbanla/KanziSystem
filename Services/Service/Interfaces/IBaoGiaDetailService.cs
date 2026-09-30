@@ -8,15 +8,13 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
     public interface IBaoGiaDetailService : IBaseService<BaoGia_Detail_of_Quotation, int, BaoGia_Detail_of_QuotationDTO>
     {
         // Tìm kiếm thông tin liên quan đến báo giá
-        public Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, string? status, int? PageSize, int? PageIndex);
+        public Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, string? status, string role, int? PageSize, int? PageIndex);
         // Insert danh sách báo giá
         public Task<GenericResponse<bool>> InsertListBaoGiaDetailAsync(List<BaoGia_Detail_of_QuotationDTO> listDto);
         // Update lua chon NCC
         public Task<GenericResponse<bool>> UpdateLuaChonNCCBaoGiaDetailAsync(List<dynamic> listUp, string user, string name);
         // Lấy thông tin theo ID_RequestQuote
         public Task<GenericResponse<BaoGia_Detail_of_QuotationDTO>> GetByIdRequestQuoteAsync(int idRequest);
-        // Lấy lịch sử thay đổi chi tiết báo giá theo mã đơn
-        public Task<GenericResponse<List<BaoGia_History_Detail_Request>>> GetInputQuoteHistoryAsync(string maDon, string? maHangNcc);
         // Update list thông tin ghi nhập báo giá
         public Task<GenericResponse<bool>> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_QuotationDTO> listDto);
         // lấy id của đơn báo giá
@@ -25,6 +23,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<BaoGia_Request_of_Quotation>> UpdatePickSupplierDetailAsync(List<BaoGia_Detail_of_QuotationDTO> dtos, string userApproverNext, string userUpdate);
         // Lấy id detail theo ID RequestQuote
         public Task<GenericResponse<int>> GetIdDetailAsync(int? idRequest);
+        // Lấy lịch sử thay đổi chi tiết báo giá theo mã đơn
+        public Task<GenericResponse<List<BaoGia_History_Detail_Request>>> GetInputQuoteHistoryAsync(int idDetail);
         // Cập nhật thông tin status của đơn báo giá
         Task<GenericResponse<bool>> UpdateStatusAsync(List<int> ids);
         // Cập nhật thông tin link báo giá trên hệ thống

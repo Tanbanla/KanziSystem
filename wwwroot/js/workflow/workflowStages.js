@@ -70,6 +70,10 @@
 
     async function saveStage(event) {
         event.preventDefault();
+        if (!$('#stageForm').checkValidity()) {
+            $('#stageForm').classList.add('was-validated');
+            return;
+        }
         const id = $('#stageId').value;
         const payload = { stageCode: $('#stageCode').value.trim(), stageName: $('#stageName').value.trim(), stageOrder: Number($('#stageOrder').value), isActive: $('#stageIsActive').checked };
         try {

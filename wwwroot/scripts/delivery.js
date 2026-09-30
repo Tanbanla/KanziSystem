@@ -1,25 +1,32 @@
+// API Configuration - Centralized endpoint management
+const API_CONFIG = {
+    NhapKhoAction: '/ipcs/Delivery/NhapKhoAction',
+    Sudungngay: '/ipcs/Delivery/Sudungngay',
+    SearchDataPo: '/ipcs/Delivery/SearchDataPo',
+    LoadDataPo: '/ipcs/Delivery/LoadDataPo',
+    ResetImportRow: '/ipcs/Delivery/ResetImportRow'
+};
+//const API_CONFIG = {
+//    NhapKhoAction: '/Delivery/NhapKhoAction',
+//    Sudungngay: '/Delivery/Sudungngay',
+//    SearchDataPo: '/Delivery/SearchDataPo',
+//    LoadDataPo: '/Delivery/LoadDataPo',
+//    ResetImportRow: '/Delivery/ResetImportRow'
+//};
 function resett() {
     document.getElementById("show_kho_iv").innerHTML = "";
     document.getElementById("poNumber").value = "";
     _Load_PO()
 }
+
 function ImportWarehouse() {
-    const url = '/ipcs/Delivery/NhapKhoAction';
+    const url = API_CONFIG.NhapKhoAction;
 
     let table = document.getElementById('show_kho_iv');
-    //Scan table with row selected will import to warehouse
-    // let dateInput = document.getElementById('idTimeDelivery').value;
-    //let warehouseName = document.getElementById('IdWarehouse').value;
-
-    //if (dateInput == '' || warehouseName == '--') {
-    //    alert("Bạn cần nhập đầy đủ : ngày nhận và kho nhận");
-    //    return;
-    // }
     let group_code = document.getElementById("IdDept").value;
     let UserName = document.getElementById("us").innerHTML;
-    //let [year, month, day] = dateInput.split('-');
-    //let formattedDate = `${month}/${day}/${year}`;
     var ngaynhap = document.getElementById("idTimeDelivery").value;
+    
     for (let i = 0; i < table.rows.length; i++) {
         let row = table.rows[i];
         let cbxSelect = row.cells[0].querySelector('input[type="checkbox"]');
@@ -29,7 +36,7 @@ function ImportWarehouse() {
                 PO_Detail_Id: row.cells[4].innerHTML,
                 Id_nhapkho: row.cells[1].innerHTML,
                 benXacNhanTruoc: 'STOCK',
-                luongvethuctekho:  txtLuongVeKho.value,
+                luongvethuctekho: txtLuongVeKho.value,
                 NgayNhap: ngaynhap,
                 Mahang: row.cells[5].innerHTML,
                 Soluong: row.cells[9].innerHTML,
@@ -53,23 +60,15 @@ function ImportWarehouse() {
     alert("Nhận hàng thành công !");
     SearchPoDel();
 }
+
 function Usingg() {
-    const url = '/ipcs/Delivery/Sudungngay';
+    const url = API_CONFIG.Sudungngay;
 
     let table = document.getElementById('show_kho_iv');
-    //Scan table with row selected will import to warehouse
-    // let dateInput = document.getElementById('idTimeDelivery').value;
-    //let warehouseName = document.getElementById('IdWarehouse').value;
-
-    //if (dateInput == '' || warehouseName == '--') {
-    //    alert("Bạn cần nhập đầy đủ : ngày nhận và kho nhận");
-    //    return;
-    // }
     let group_code = document.getElementById("IdDept").value;
     let UserName = document.getElementById("us").innerHTML;
-    //let [year, month, day] = dateInput.split('-');
-    //let formattedDate = `${month}/${day}/${year}`;
     var ngaynhap = document.getElementById("idTimeDelivery").value;
+    
     for (let i = 0; i < table.rows.length; i++) {
         let row = table.rows[i];
         let cbxSelect = row.cells[0].querySelector('input[type="checkbox"]');
@@ -102,6 +101,7 @@ function Usingg() {
         }
     }
 }
+
 async function SearchPoDel() {     
     let UserName = document.getElementById("us").innerHTML;
     let GetPO = document.getElementById('poNumber').value;
@@ -109,9 +109,9 @@ async function SearchPoDel() {
     let mayeucau = document.getElementById('mayeucau').value;
     let mahang = document.getElementById('mahang').value;
     let Phongbanyeucau = document.getElementById('phongyeucau').value;
-    const url = '/ipcs/Delivery/SearchDataPo';
-    let payload =
-    {
+    const url = API_CONFIG.SearchDataPo;
+    
+    let payload = {
         PoNumber: GetPO,
         Department: GetDept,
         Mayeucau: mayeucau,
@@ -119,12 +119,13 @@ async function SearchPoDel() {
         Phongbanyeucau: Phongbanyeucau,
         UserName: UserName
     };
-    let options =
-    {
+    
+    let options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     };
+    
     try {
         const response = await fetch(url, options);
         const result = await response.json();
@@ -133,28 +134,18 @@ async function SearchPoDel() {
         let opt = document.getElementById('show_kho_iv');
         opt.innerHTML = "";
         result.forEach((value) => {
-            // 1. Chuyển đổi kiểu dữ liệu
             let solg = parseFloat(value.soluong) || 0;
             let lgvekho = parseFloat(value.luongvekho) || 0;
             let rowClass = "";
 
-            // Lưu ý: Đảm bảo kiểu dữ liệu khi so sánh id để class text-primary hoạt động đúng
-          
-            let benXacNhan = String(value.benxacnhantruoc || "").trim().toUpperCase();
-
-            //if (solg > lgvekho && benXacNhan === "STOCK" && (String(value.id_Goc).trim() !== "")) {
-            //    rowClass = "text-danger";   // Màu đỏ
-            //}
-
-            // update
             if (String(value.luongvekho) == "") {
-                rowClass = "text-danger";   // Màu đỏ
+                rowClass = "text-danger";
             }
-            else if (solg > lgvekho ) {
-                rowClass = "text-primary";  // Màu xanh dương
+            else if (solg > lgvekho) {
+                rowClass = "text-primary";
             }
             else {
-                rowClass = "text-dark";     // Màu đen
+                rowClass = "text-dark";
             }
            
             opt.innerHTML += `<tr class="${rowClass}"><td class="text-center"><input type="checkbox" class="item" value="${value.pO_Detail_Id}" /></td><td>${value.pO_Detail_Id}</td><td>${value.id_Goc}</td><td>${value.benxacnhantruoc}</td><td>${value.soPO}</td><td>${value.mahang}</td><td>${value.good_Code}</td><td>${value.tentienganh}</td><td>${value.tentiengviet}</td><td id="soluong_${value.pO_Detail_Id}">${value.soluong}</td>`
@@ -170,6 +161,7 @@ async function SearchPoDel() {
         console.error('Error : ', error);
     }
 }
+
 function Check_luongvethucte(id) {
     let soluong = document.getElementById("soluong_" + id).innerHTML;
     let luongthucte = document.getElementById("luongvethucte_" + id).value;
@@ -189,8 +181,7 @@ async function _Load_PO() {
     params.append('us', us);
 
     try {
-        // Sử dụng await đồng bộ hóa request để try...catch có thể hoạt động đúng
-        const response = await fetch('/ipcs/Delivery/LoadDataPo', {
+        const response = await fetch(API_CONFIG.LoadDataPo, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -203,31 +194,20 @@ async function _Load_PO() {
         const result = await response.json();
         let opt = document.getElementById('show_kho_iv');
         console.log(result);
-        // Sử dụng mảng để gom các dòng HTML lại, sau đó nối chuỗi 1 lần
+        
         let htmlRows = result.map((value) => {
             let solg = parseFloat(value.soluong) || 0;
             let lgvekho = parseFloat(value.luongvekho) || 0;
             let rowClass = "";
 
-            // Lưu ý: Đảm bảo kiểu dữ liệu khi so sánh id để class text-primary hoạt động đúng
-          
-            let benXacNhan = String(value.benxacnhantruoc || "").trim().toUpperCase();
-
-            // 3. Xử lý Id_Goc an toàn (chấp nhận cả giá trị số 0)
-          
-
-            // Chạy lại logic If...Else
-            //if (solg > lgvekho && benXacNhan === "STOCK" && (String(value.id_Goc).trim() !== "" )) {
-            //    rowClass = "text-danger";   // Màu đỏ
-            //}
             if (String(value.luongvekho) == "") {
                 rowClass = "text-danger";
             }
             else if (solg > lgvekho) {
-                rowClass = "text-primary";  // Màu xanh dương
+                rowClass = "text-primary";
             }
             else {
-                rowClass = "text-dark";     // Màu đen
+                rowClass = "text-dark";
             }
 
             return `<tr class="${rowClass}">
@@ -267,19 +247,18 @@ async function _Load_PO() {
                 <td>${value.code_Request}</td>
                 <td>${value.invoice}</td>
                 <td>${value.tinhtranghaiquanPO}</td>
-                
             </tr>`;
         });
 
-        // Chỉ cập nhật giao diện đúng 1 lần
         opt.innerHTML = htmlRows.join('');
 
     } catch (error) {
         console.error('Error fetching PO Data: ', error);
     }
 }
+
 function ResetWarehouse() {
-    const url = '/ipcs/Delivery/ResetImportRow';
+    const url = API_CONFIG.ResetImportRow;
 
     let table = document.getElementById('show_kho_iv');
     let group_code = document.getElementById("IdDept").value;
@@ -289,7 +268,6 @@ function ResetWarehouse() {
     let checkedCount = 0;
     let checkedRow = null;
 
-    // 1. Quét để đếm số dòng được chọn và lưu lại dòng đó
     for (let i = 0; i < table.rows.length; i++) {
         let row = table.rows[i];
         let cbxSelect = row.cells[0].querySelector('input[type="checkbox"]');
@@ -300,15 +278,15 @@ function ResetWarehouse() {
         }
     }
 
-    // 2. Chỉ cho phép xử lý nếu chọn đúng 1 dòng
     if (checkedCount !== 1) {
         alert("Vui lòng chọn đúng 1 dòng hàng để reset!");
         return;
     }
+    
     var invoice = checkedRow.cells[34].innerHTML;
     var tinhtrang = checkedRow.cells[35].innerHTML;
+    
     if (String(invoice) == "") {
-        // 3. Thực thi gọi API cho dòng duy nhất được chọn
         let txtLuongVeKho = checkedRow.cells[11].querySelector('input[type="number"]');
 
         let payload = {
@@ -343,5 +321,4 @@ function ResetWarehouse() {
     else {
         alert("Đã khai báo hải quan, không thể reset");
     }
- 
 }

@@ -603,13 +603,24 @@
   <data name="ExportLoading" xml:space="preserve">
     <value>Đang xuất Excel, vui lòng chờ...</value>
   </data>
-  <data name="Actions" xml:space="preserve">
-    <value>Thao tác</value>
-  </data>
-  <data name="EnterQuotation" xml:space="preserve">
-    <value>Nhập thông tin báo giá</value>
-  </data>
-  <data name="ViewQuotationHistory" xml:space="preserve">
-    <value>Xem lịch thay đổi báo giá</value>
-  </data>
+  <data name="QuotationInformation" xml:space="preserve"><value>Thông tin báo giá</value></data>
+  <data name="ChangeHistory" xml:space="preserve"><value>Lịch thay đổi</value></data>
+  <data name="ViewQuotationHistory" xml:space="preserve"><value>Xem lịch sử thay đổi báo giá</value></data>
+  <data name="HistoryData" xml:space="preserve"><value>Dữ liệu lịch sử</value></data>
+  <data name="NoHistory" xml:space="preserve"><value>Không có lịch sử thay đổi.</value></data>
+  <data name="MissingDetailId" xml:space="preserve"><value>Thiếu mã chi tiết.</value></data>
+  <data name="HistoryLoadFailed" xml:space="preserve"><value>Không tải được lịch sử.</value></data>
+  <data name="ReasonPrefix" xml:space="preserve"><value>Lý do: </value></data>
+  <data name="ExportSuccess" xml:space="preserve"><value>Xuất Excel thành công</value></data>
+  <data name="ConfirmTitle" xml:space="preserve"><value>Xác nhận</value></data>
+  <data name="ConfirmButton" xml:space="preserve"><value>Đồng ý</value></data>
+  <data name="CancelButton" xml:space="preserve"><value>Hủy</value></data>
+  <data name="Refused" xml:space="preserve"><value>Từ chối</value></data>
+  <data name="NumberOfEdits" xml:space="preserve"><value>Số lần chỉnh sửa</value></data>
+  <data name="ExchangeRate" xml:space="preserve"><value>Tỷ giá</value></data>
+  <data name="TaxRate" xml:space="preserve"><value>Thuế suất</value></data>
+  <data name="TaxAmount" xml:space="preserve"><value>Tiền thuế</value></data>
+  <data name="TotalAfterTax" xml:space="preserve"><value>Tổng tiền sau thuế</value></data>
+  <data name="Warranty" xml:space="preserve"><value>Bảo hành</value></data>
+  <data name="Manufacturer" xml:space="preserve"><value>Nhà sản xuất</value></data>
 </root>

@@ -5,11 +5,14 @@ using PRJ_WAREHOUSE_BIVN.DTO;
 using PRJ_WAREHOUSE_BIVN.Models_Auto;
 using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 using PRJ_WAREHOUSE_BIVN.View_Models.WorkFlowModel;
+using System.Text.RegularExpressions;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
     public class WorkflowController: BaseAuthController
     {
+        private const int WorkflowCodeMaxLength = 50;
+        private const int HoursPerWorkflowDay = 8;
         private readonly IBaoGiaStepService _baoGiaStepService;
         private readonly IBaoGiaWorkflowStageService _baoGiaWorkflowStageService;
         private readonly IBaoGiaWorkflowStepService _baoGiaWorkflowStepService;
@@ -248,6 +251,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(new { success = false, message = "Mã và tên bước lớn là bắt buộc." });
             }
 
+            if (!IsValidWorkflowCode(model.StageCode))
+            {
+                return BadRequest(new { success = false, message = "Mã bước lớn phải viết tiếng Anh dạng chữ thường, dùng dấu gạch nối giữa các từ và tối đa 50 ký tự (ví dụ: quotation-review)." });
+            }
+
             var response = await _baoGiaWorkflowStageService.AddWFStageAsync(new BaoGia_WorkflowStageDTO
             {
                 StageCode = model.StageCode.Trim(), StageName = model.StageName.Trim(),
@@ -265,6 +273,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (model == null || id <= 0 || string.IsNullOrWhiteSpace(model.StageCode) || string.IsNullOrWhiteSpace(model.StageName))
             {
                 return BadRequest(new { success = false, message = "Thông tin bước lớn không hợp lệ." });
+            }
+
+            if (!IsValidWorkflowCode(model.StageCode))
+            {
+                return BadRequest(new { success = false, message = "Mã bước lớn phải viết tiếng Anh dạng chữ thường, dùng dấu gạch nối giữa các từ và tối đa 50 ký tự (ví dụ: quotation-review)." });
             }
 
             var response = await _baoGiaWorkflowStageService.UpdateWFStageAsync(new BaoGia_WorkflowStageDTO
@@ -354,6 +367,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(new { success = false, message = "Bước lớn, thứ tự, mã và tên bước là bắt buộc." });
             }
 
+            if (!IsValidWorkflowCode(model.StepCode))
+            {
+                return BadRequest(new { success = false, message = "Mã bước nhỏ phải viết tiếng Anh dạng chữ thường, dùng dấu gạch nối giữa các từ và tối đa 50 ký tự (ví dụ: validate-request)." });
+            }
+
+            if (!IsValidWorkflowDuration(model.DefaultDurationHours))
+            {
+                return BadRequest(new { success = false, message = "Thời gian xử lý chỉ được nhập số ngày tròn hoặc nửa ngày (0, 0.5, 1, 1.5...)." });
+            }
+
             var response = await _baoGiaWorkflowStepService.CreateWFStep(new BaoGia_WorkflowStepDTO
             {
                 StageID = model.StageID,
@@ -377,6 +400,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (model == null || id <= 0 || model.StageID <= 0 || model.StepOrder <= 0 || string.IsNullOrWhiteSpace(model.StepCode) || string.IsNullOrWhiteSpace(model.StepName))
             {
                 return BadRequest(new { success = false, message = "Thông tin bước nhỏ không hợp lệ." });
+            }
+
+            if (!IsValidWorkflowCode(model.StepCode))
+            {
+                return BadRequest(new { success = false, message = "Mã bước nhỏ phải viết tiếng Anh dạng chữ thường, dùng dấu gạch nối giữa các từ và tối đa 50 ký tự (ví dụ: validate-request)." });
+            }
+
+            if (!IsValidWorkflowDuration(model.DefaultDurationHours))
+            {
+                return BadRequest(new { success = false, message = "Thời gian xử lý chỉ được nhập số ngày tròn hoặc nửa ngày (0, 0.5, 1, 1.5...)." });
             }
 
             var response = await _baoGiaWorkflowStepService.UpdateWFStep(new BaoGia_WorkflowStepDTO
@@ -483,9 +516,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     {
                         roleCode = permission.RoleCode,
                         canView = permission.CanView,
-                        canProcess = permission.CanProcess,
-                        canApprove = permission.CanApprove,
-                        canReject = permission.CanReject
+                        canApprove = permission.CanProcess || permission.CanApprove || permission.CanReject
                     })
                 })
                 .ToListAsync();
@@ -533,7 +564,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             foreach (var row in validRows)
             {
                 var permission = existingPermissions.FirstOrDefault(item => item.WorkflowStepID == row.WorkflowStepId && item.RoleCode == row.RoleCode);
-                var hasPermission = row.CanView || row.CanProcess || row.CanApprove || row.CanReject;
+                var canApprove = row.CanProcess || row.CanApprove || row.CanReject;
+                var hasPermission = row.CanView || canApprove;
                 if (permission == null)
                 {
                     if (hasPermission)
@@ -543,9 +575,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             WorkflowStepID = row.WorkflowStepId,
                             RoleCode = row.RoleCode,
                             CanView = row.CanView,
-                            CanProcess = row.CanProcess,
-                            CanApprove = row.CanApprove,
-                            CanReject = row.CanReject
+                            CanProcess = canApprove,
+                            CanApprove = canApprove,
+                            CanReject = canApprove
                         });
                     }
                     continue;
@@ -554,9 +586,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (hasPermission)
                 {
                     permission.CanView = row.CanView;
-                    permission.CanProcess = row.CanProcess;
-                    permission.CanApprove = row.CanApprove;
-                    permission.CanReject = row.CanReject;
+                    permission.CanProcess = canApprove;
+                    permission.CanApprove = canApprove;
+                    permission.CanReject = canApprove;
                 }
                 else
                 {
@@ -663,9 +695,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         .Select(permission => new
                         {
                             canView = permission.CanView,
-                            canProcess = permission.CanProcess,
-                            canApprove = permission.CanApprove,
-                            canReject = permission.CanReject
+                            canApprove = permission.CanProcess || permission.CanApprove || permission.CanReject
                         })
                         .FirstOrDefault()
                 })
@@ -711,7 +741,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             foreach (var row in validRows)
             {
                 var permission = existingPermissions.FirstOrDefault(item => item.WorkflowStepID == row.WorkflowStepId);
-                var hasPermission = row.CanView || row.CanProcess || row.CanApprove || row.CanReject;
+                var canApprove = row.CanProcess || row.CanApprove || row.CanReject;
+                var hasPermission = row.CanView || canApprove;
                 if (permission == null)
                 {
                     if (hasPermission)
@@ -721,9 +752,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             WorkflowStepID = row.WorkflowStepId,
                             UserADID = normalizedUser,
                             CanView = row.CanView,
-                            CanProcess = row.CanProcess,
-                            CanApprove = row.CanApprove,
-                            CanReject = row.CanReject,
+                            CanProcess = canApprove,
+                            CanApprove = canApprove,
+                            CanReject = canApprove,
                             IsActive = true
                         });
                     }
@@ -733,9 +764,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (hasPermission)
                 {
                     permission.CanView = row.CanView;
-                    permission.CanProcess = row.CanProcess;
-                    permission.CanApprove = row.CanApprove;
-                    permission.CanReject = row.CanReject;
+                    permission.CanProcess = canApprove;
+                    permission.CanApprove = canApprove;
+                    permission.CanReject = canApprove;
                     permission.IsActive = true;
                 }
                 else
@@ -746,6 +777,22 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             await _context.SaveChangesAsync();
             return Ok(new { success = true, message = "Đã lưu quyền riêng theo user." });
+        }
+
+        private static bool IsValidWorkflowCode(string? code)
+        {
+            var normalizedCode = code?.Trim();
+            return !string.IsNullOrEmpty(normalizedCode)
+                && normalizedCode.Length <= WorkflowCodeMaxLength
+                && Regex.IsMatch(normalizedCode, "^[a-z0-9]+(?:-[a-z0-9]+)*$", RegexOptions.CultureInvariant);
+        }
+
+        private static bool IsValidWorkflowDuration(int? durationHours)
+        {
+            return !durationHours.HasValue
+                || (durationHours.Value >= 0
+                    && durationHours.Value <= 8760
+                    && durationHours.Value % (HoursPerWorkflowDay / 2) == 0);
         }
     }
 }

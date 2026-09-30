@@ -140,12 +140,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 Where(c => c.CHR_Status == "ON").
                 Select(c => c.CHR_MaNcc).ToListAsync();
 
-            var tb2 = await _context.IM_NCC_NEWs.
-                Where(c => c.Khuvuc != null && c.Khuvuc.Contains("Overseas")).
-                Select(c => c.Ma).ToListAsync();
+            //var tb2 = await _context.IM_NCC_NEWs.
+            //    Where(c => c.Khuvuc != null && c.Khuvuc.Contains("Overseas")).
+            //    Select(c => c.Ma).ToListAsync();
 
             result.UnionWith(tb1);
-            result.UnionWith(tb2);
+            //result.UnionWith(tb2);
 
             return result.ToList();
         }

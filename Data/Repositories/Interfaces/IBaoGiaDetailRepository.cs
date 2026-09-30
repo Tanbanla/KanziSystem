@@ -8,7 +8,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
     public interface IBaoGiaDetailRepository : IBaseRepository<BaoGia_Detail_of_Quotation, int>
     {
         // Tìm kiếm thông tin liên quan đến báo giá
-        public Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, string? status, int? PageSize, int? PageIndex);
+        public Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, string? status, string role, int? PageSize, int? PageIndex);
         // Insert danh sách báo giá
         public Task<bool> InsertListBaoGiaDetailAsync(List<BaoGia_Detail_of_Quotation> listDto);
         // Update lua chon NCC
@@ -16,7 +16,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Lấy thông tin theo ID_RequestQuote
         public Task<BaoGia_Detail_of_Quotation> GetByIdRequestQuoteAsync(int idRequest);
         // Lấy lịch sử thay đổi chi tiết báo giá theo mã đơn
-        public Task<List<BaoGia_History_Detail_Request>> GetInputQuoteHistoryAsync(string maDon, string? maHangNcc);
+        public Task<List<BaoGia_History_Detail_Request>> GetInputQuoteHistoryAsync(int idDetail);
         // Update infor input bao gia
         public Task<bool> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_Quotation> listDto);
         // lấy id của đơn báo giá

@@ -10,7 +10,7 @@
         <div>
             <div class="page-eyebrow"><i class="fas fa-user-shield me-2"></i>Thiết lập quy trình</div>
             <h1 class="page-title">Phân quyền theo role</h1>
-            <p class="page-subtitle">Cấu hình quyền xem, xử lý, duyệt và từ chối cho từng bước trong workflow.</p>
+            <p class="page-subtitle">Cấu hình quyền xem và duyệt cho từng bước trong workflow.</p>
         </div>
         <button id="btnSavePermissions" type="button" class="btn btn-primary" disabled>
             <i class="fas fa-save me-2"></i><span>Lưu thay đổi</span>
@@ -22,7 +22,7 @@
             <div class="filter-heading">
                 <div>
                     <h2 class="section-title">Ma trận quyền</h2>
-                    <p class="section-hint">Chọn workflow và bật quyền tương ứng cho từng role.</p>
+                    <p class="section-hint">Chọn workflow và bật quyền tương ứng cho từng role. Quyền Duyệt bao gồm xử lý, duyệt và hủy/từ chối.</p>
                 </div>
                 <span class="filter-icon"><i class="fas fa-file-code"></i></span>
             </div>
@@ -58,9 +58,7 @@
             </div>
             <div class="permission-legend" aria-label="Chú thích quyền">
                 <span><i class="legend-dot view"></i>Xem</span>
-                <span><i class="legend-dot process"></i>Xử lý</span>
-                <span><i class="legend-dot approve"></i>Duyệt</span>
-                <span><i class="legend-dot reject"></i>Từ chối</span>
+                <span><i class="legend-dot approve"></i>Duyệt (xử lý, hủy/từ chối)</span>
             </div>
         </div>
     </section>

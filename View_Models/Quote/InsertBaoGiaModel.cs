@@ -90,4 +90,17 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Quote
         public string? NVCHR_LyDo { get; set; }
 
     }
+
+    public sealed class InsertQuotationFormModel
+    {
+        public string Items { get; set; } = "[]";
+        public string FileManifest { get; set; } = "[]";
+        public List<IFormFile> Files { get; set; } = [];
+    }
+
+    public sealed class QuotationFileManifestModel
+    {
+        public int ItemIndex { get; set; }
+        public string Kind { get; set; } = string.Empty;
+    }
 }

@@ -24,12 +24,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _fileImportService = fileImportService;
         }
         // Tìm kiếm thông tin liên quan đến báo giá
-        public async Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, string? status, int? PageSize, int? PageIndex)
+        public async Task<GenericResponse<ListRequest<dynamic>>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM, string? status, string role, int? PageSize, int? PageIndex)
         {
             var result = new GenericResponse<ListRequest<dynamic>>();
             try
             {
-                var data = await _repo.SearchBaoGiaAsync(idRequest, maDon, maVatTu, maNcc, section, user, dayMM, status, PageSize, PageIndex);
+                var data = await _repo.SearchBaoGiaAsync(idRequest, maDon, maVatTu, maNcc, section, user, dayMM, status,role, PageSize, PageIndex);
                 result.Data = data;
                 result.Success = true;
             }
@@ -91,23 +91,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = ex.Message;
                 result.Success = false;
             }
-            return result;
-        }
-
-        public async Task<GenericResponse<List<BaoGia_History_Detail_Request>>> GetInputQuoteHistoryAsync(string maDon, string? maHangNcc)
-        {
-            var result = new GenericResponse<List<BaoGia_History_Detail_Request>>();
-            try
-            {
-                result.Data = await _repo.GetInputQuoteHistoryAsync(maDon, maHangNcc);
-                result.Success = true;
-            }
-            catch (Exception ex)
-            {
-                result.Message = ex.Message;
-                result.Success = false;
-            }
-
             return result;
         }
         // Update list thông tin ghi nhập báo giá
@@ -174,6 +157,22 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = ex.Message;
                 result.Success = false;
             }
+            return result;
+        }
+        public async Task<GenericResponse<List<BaoGia_History_Detail_Request>>> GetInputQuoteHistoryAsync(int idDetail)
+        {
+            var result = new GenericResponse<List<BaoGia_History_Detail_Request>>();
+            try
+            {
+                result.Data = await _repo.GetInputQuoteHistoryAsync(idDetail);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+
             return result;
         }
         // Cập nhật thông tin status của đơn báo giá

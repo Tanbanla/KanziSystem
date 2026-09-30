@@ -179,8 +179,6 @@
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Material" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-social-dropbox"></i> <span>@Localizer["MenuMaterial"]</span></a>
                             <ul class="dropdown-menu">
-                                @*                                 <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
-                                <li><a class="nav-link" href="~/Material/Creat_Material"><i class="fas fa-plus-square"></i> @Localizer["MenuMaterialCreate"]</a></li> *@
                                 <li>
                                     <a class="dropdown-item py-2" href="~/Material/ConfirmNameV2">
                                         <i class="fas fa-check-square"></i>
@@ -226,12 +224,9 @@
                         <li class="dropdown @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Import" ? "active" : "")">
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cloud-upload"></i> <span>@Localizer["MenuWarehouse"]</span></a>
                             <ul class="dropdown-menu">
-                                @*   <li><a class="nav-link" href="~/Delivery/PO_Info"><i class="ion ion-ios-information"></i> Thông tin PO</a></li> @* thông tin PO *@
-                                @*  <li><a class="nav-link" href="~/Approval/Approval"><i class="ion ion-social-dropbox"></i> Nhận hàng PO</a></li> *@ @* Nhập hàng PO 
-                             @*    <li><a class="nav-link" href="~/Delivery/Giaohang"><i class="ion ion-ios-cart"></i>Giao hàng PO</a></li> @* Nhập kho *@
-                                <li><a class="nav-link" href="~/ManagerDelivery/ManageDelivery"><i class="fas fa-reply"></i>@Languages.Giaohang</a></li>
-                                <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="ion ion-ios-cart"></i> @Languages.NhaphangPO</a></li> @* Nhập hàng PO  *@
-                                @*   <li><a class="nav-link" href="~/Delivery/"><i class="ion ion-ios-home-outline"></i> @Languages.Nhapkho</a></li>   *@
+                             <li><a class="nav-link" href="~/ManagerDelivery/ManageDelivery"><i class="fas fa-reply"></i>@Languages.Giaohang</a></li>
+                                <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="ion ion-ios-cart"></i> @Languages.NhaphangPO</a></li>
+                              
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExportRequest"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Tainhap"><i class="fas fa-donate"></i> @Localizer["MenuWarehouseReimport"]</a></li>
@@ -252,8 +247,6 @@
                             <a href="#" class="nav-link has-dropdown"><i class="ion ion-ios-cog"></i> <span>@Localizer["MenuMaster"]</span></a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item py-2" href="~/Master/Masters"><i class="ion ion-ios-home"></i> @Localizer["MenuMasterWarehouse"]</a></li>
-                                @*                                 <li><a class="dropdown-item py-2" href="~/Master/master_vender"><i class="ion ion-social-snapchat"></i> @Localizer["MenuMasterVendor"]</a></li> *@
-                                @*                                 <li><a class="dropdown-item py-2" href="~/Master/master_material"><i class="ion ion-android-options"></i> @Localizer["MenuMasterMaterial"]</a></li> *@
                                 <li><a class="nav-link" href="~/Material/Material"><i class="fas fa-business-time"></i> @Localizer["MenuMaterialManage"]</a></li>
                                 <li><a class="dropdown-item py-2" href="~/User/QuanlyUyquyen"><i class="fas fa-handshake"></i> @Languages.uyquyen</a></li>
                                 <li><a class="dropdown-item py-2" href="~/ManagerDelivery/UsingManager"><i class="fas fa-asterisk"></i> Using</a></li>

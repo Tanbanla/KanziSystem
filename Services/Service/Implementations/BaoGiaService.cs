@@ -232,12 +232,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
         // lấy mã đơn theo Adid
-        public async Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid, int step)
+        public async Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid, int step, string? role)
         {
             var result = new GenericResponse<List<string>>();
             try
             {
-                result.Data = await _repo.GetMaDonByAdidAsync(adid, step);
+                result.Data = await _repo.GetMaDonByAdidAsync(adid, step, role);
                 result.Success = true;
             }
             catch (Exception ex)

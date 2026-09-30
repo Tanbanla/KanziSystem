@@ -235,8 +235,8 @@
                         </div>
 
                         <div class="col-12 col-md-4 col-lg-2">
-                            <label for="supplierSearchStatus" class="form-label small text-uppercase fw-semibold">
-                                Trạng thái
+                                 <label for="supplierSearchStatus" class="form-label small text-uppercase fw-semibold">
+                                 @Localizer["Status"]
                             </label>
                             <select id="supplierSearchStatus"
                                     name="supplierSearchStatus"
@@ -281,6 +281,7 @@
                             <thead class="table-header-custom">
                                 <tr class="text-center align-middle">
                                     <th style="min-width: 40px;">@Localizer["STT"]</th>
+                                    <th style="min-width: 70px;">@Localizer["Actions"]</th>
                                     <th style="min-width: 50px;">@Localizer["OrderNumber"]</th>
                                     <th style="min-width: 100px;">@Localizer["SupplierCodeShort"]</th>
                                     <th style="min-width: 180px;">@Localizer["SupplierName"]</th>
@@ -304,12 +305,11 @@
                                     <th style="min-width: 100px;">@Localizer["InputTime"]</th>
                                     <th style="min-width: 100px;">@Localizer["ApplyDay"]</th>
                                     <th style="min-width: 100px;">@Localizer["DueDay"]</th>
-                                     <th style="min-width: 170px;">@Localizer["Actions"]</th>
                                 </tr>
                             </thead>
                             <tbody id="supplierQuoteBody">
                                 <tr class="text-center">
-                                     <td colspan="25" class="text-muted py-4">
+                                    <td colspan="25" class="text-muted py-4">
                                         <i class="ion ion-load-c ion-spin"></i> @Localizer["LoadingData"]
                                     </td>
                                 </tr>
@@ -339,7 +339,6 @@
         </div>
     </div>
 </div>
-
 <div class="history-drawer-overlay" id="inputQuoteHistoryDrawerOverlay" aria-hidden="true"></div>
 <aside class="history-detail-drawer" id="inputQuoteHistoryDrawer" aria-hidden="true">
     <div class="history-drawer-header">
@@ -348,16 +347,16 @@
     </div>
     <div class="history-drawer-body">
         <div class="history-drawer-section mb-3">
-            <h6 class="history-drawer-section-title">Thông tin báo giá</h6>
+                             <h6 class="history-drawer-section-title">@Localizer["QuotationInformation"]</h6>
             <div class="history-detail-grid">
                 <div><span>@Localizer["OrderCode"]</span><b id="inputQuoteHistoryOrder">-</b></div>
                 <div><span>@Localizer["SupplierItemCode"]</span><b id="inputQuoteHistorySupplierItem">-</b></div>
             </div>
         </div>
         <div class="history-drawer-section">
-            <h6 class="history-drawer-section-title">Lịch thay đổi</h6>
+             <h6 class="history-drawer-section-title">@Localizer["ChangeHistory"]</h6>
             <div class="history-change-timeline" id="inputQuoteHistoryTimeline">
-                <div class="text-muted small">Đang tải dữ liệu...</div>
+                 <div class="text-muted small">@Localizer["LoadingData"]...</div>
             </div>
         </div>
     </div>
@@ -483,9 +482,6 @@
         Date = Localizer["Date"].Value,
         ImportExcel = Localizer["ImportExcel"].Value,
         OrderNumber = Localizer["OrderNumber"].Value,
-        Actions = Localizer["Actions"].Value,
-        EnterQuotation = Localizer["EnterQuotation"].Value,
-        ViewQuotationHistory = Localizer["ViewQuotationHistory"].Value,
         SupplierCodeShort = Localizer["SupplierCodeShort"].Value,
         SupplierName = Localizer["SupplierName"].Value,
         ItemNameHQ = Localizer["ItemNameHQ"].Value,
@@ -501,6 +497,64 @@
         ContinueImport = Localizer["ContinueImport"].Value,
         Notification = Localizer["Notification"].Value,
         ExportLoading = Localizer["ExportLoading"].Value
+         ,QuotationInformation = Localizer["QuotationInformation"].Value
+         ,ChangeHistory = Localizer["ChangeHistory"].Value
+         ,ViewQuotationHistory = Localizer["ViewQuotationHistory"].Value
+         ,HistoryData = Localizer["HistoryData"].Value
+         ,NoHistory = Localizer["NoHistory"].Value
+         ,MissingDetailId = Localizer["MissingDetailId"].Value
+         ,HistoryLoadFailed = Localizer["HistoryLoadFailed"].Value
+         ,ReasonPrefix = Localizer["ReasonPrefix"].Value
+         ,ExportSuccess = Localizer["ExportSuccess"].Value
+         ,ConfirmTitle = Localizer["ConfirmTitle"].Value
+         ,ConfirmButton = Localizer["ConfirmButton"].Value
+         ,CancelButton = Localizer["CancelButton"].Value
+         ,Refused = Localizer["Refused"].Value
+         ,HistoryFieldLabels = new {
+             ID = Localizer["FooterID"].Value,
+             ID_RequestQuote = Localizer["QuoteRequestCode"].Value,
+             CHR_CodeNCC = Localizer["SupplierCode"].Value,
+             NVCHR_NameNCC = Localizer["SupplierName"].Value,
+             CHR_MaHangNCC = Localizer["SupplierItemCode"].Value,
+             NVCHR_TenHangHQ = Localizer["ItemNameHQ"].Value,
+             FL_USD = Localizer["PriceUSD"].Value,
+             FL_VND = Localizer["PriceVND"].Value,
+             DTM_EndDate = Localizer["DueDay"].Value,
+             NVCHR_MOQ = Localizer["MOQ"].Value,
+             DTM_LeadTime = Localizer["LeadTime"].Value,
+             DTM_ShipTime = Localizer["DeliveryDate"].Value,
+             NVCHR_Packing = Localizer["Packing"].Value,
+             BIT_Commit = Localizer["Commitment"].Value,
+             NVCHR_Note = Localizer["Reason"].Value,
+             NVCHR_File = Localizer["Attachment"].Value,
+             DTM_CreateDate = Localizer["QuoteDate"].Value,
+             CHR_CreateBy = Localizer["CreatorPIC"].Value,
+             DTM_UpdateDate = Localizer["InputTime"].Value,
+             CHR_UpdateBy = Localizer["CreatorPIC"].Value,
+             FL_Sum = Localizer["TotalPrefix"].Value,
+             BIT_Select = Localizer["Select"].Value,
+             NVCHR_ReasonPick = Localizer["Reason"].Value,
+             CHR_Status = Localizer["Status"].Value,
+             INT_NumberEdit = Localizer["NumberOfEdits"].Value,
+             FL_ExchangeRate = Localizer["ExchangeRate"].Value,
+             FL_TaxRate = Localizer["TaxRate"].Value,
+             FL_TaxAmount = Localizer["TaxAmount"].Value,
+             FL_TotalAfterTax = Localizer["TotalAfterTax"].Value,
+             NVCHR_PaymentTerm = Localizer["PaymentTerms"].Value,
+             NVCHR_Warranty = Localizer["Warranty"].Value,
+             NVCHR_DeliveryTerm = Localizer["DeliveryMethod"].Value,
+             VCHR_Rohs = Localizer["Rohs"].Value,
+             VCHR_COCQ = Localizer["COCQ"].Value,
+             VCHR_MSDS = Localizer["MSDSWithCAS"].Value,
+             VCHR_AnToan = Localizer["Safety"].Value,
+             VCHR_CamKet = Localizer["Commitment"].Value,
+             CHR_NameEN = Localizer["ItemNameVNEN"].Value,
+             INT_SoLuong = Localizer["Quantity"].Value,
+             NVCHR_DonVi = Localizer["Unit"].Value,
+             NVCHR_NhaSanXuat = Localizer["Manufacturer"].Value,
+             DTM_EffectiveDate = Localizer["ApplyDay"].Value,
+             DTM_ExpiryDate = Localizer["DueDay"].Value
+         }
 
     }));
 </script>

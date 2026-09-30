@@ -4,9 +4,7 @@
 	const state = { user: null, workflows: [], rows: [], stages: [], workflowId: null, dirty: false, searchTimer: null };
 	const permissionTypes = [
 		{ key: 'canView', label: 'Xem', short: 'X', className: 'view' },
-		{ key: 'canProcess', label: 'Xử lý', short: 'XL', className: 'process' },
-		{ key: 'canApprove', label: 'Duyệt', short: 'D', className: 'approve' },
-		{ key: 'canReject', label: 'Từ chối', short: 'TC', className: 'reject' }
+		{ key: 'canApprove', label: 'Duyệt (xử lý, hủy/từ chối)', short: 'D', className: 'approve' }
 	];
 	const elements = {
 		userSearch: document.getElementById('userSearch'), suggestions: document.getElementById('userSuggestions'), searchUser: document.getElementById('btnSearchUser'),
@@ -27,7 +25,7 @@
 	const toggle = (element, visible) => element.classList.toggle('d-none', !visible);
 	const showAlert = (message, type = 'success') => { elements.alert.className = `alert alert-${type}`; elements.alert.textContent = message; window.setTimeout(() => elements.alert.classList.add('d-none'), 3500); };
 	const markDirty = dirty => { state.dirty = dirty; elements.save.disabled = !dirty; elements.changeState.textContent = dirty ? 'Có thay đổi chưa lưu' : 'Chưa có thay đổi'; elements.changeState.classList.toggle('is-dirty', dirty); };
-	const emptyPermission = () => ({ canView: false, canProcess: false, canApprove: false, canReject: false });
+	const emptyPermission = () => ({ canView: false, canApprove: false });
 
 	const renderSuggestions = users => {
 		if (!users.length) { elements.suggestions.innerHTML = '<div class="suggestion-empty">Không tìm thấy user phù hợp.</div>'; toggle(elements.suggestions, true); return; }
@@ -64,7 +62,7 @@
 		toggle(elements.loading, true); toggle(elements.error, false); toggle(elements.table, false); toggle(elements.empty, false);
 		try {
 			const payload = await request(`${window.workflowUserPermissionsUrl}?userADID=${encodeURIComponent(state.user.adid)}&workflowId=${encodeURIComponent(workflowId || '')}`);
-			state.workflows = payload.workflows || []; state.workflowId = payload.workflowId; state.rows = (payload.data || []).map(row => ({ ...row, permissions: { ...emptyPermission(), ...(row.permissions || {}) } }));
+			state.workflows = payload.workflows || []; state.workflowId = payload.workflowId; state.rows = (payload.data || []).map(row => ({ ...row, permissions: { ...emptyPermission(), canView: !!row.permissions?.canView, canApprove: !!row.permissions?.canProcess || !!row.permissions?.canApprove || !!row.permissions?.canReject } }));
 			renderFilters(); renderTable(); markDirty(false); elements.workflow.disabled = !state.workflows.length; elements.refresh.disabled = false;
 		} catch (error) { elements.error.textContent = error.message; toggle(elements.error, true); toggle(elements.empty, false); }
 		finally { toggle(elements.loading, false); }
@@ -73,7 +71,7 @@
 	const save = async () => {
 		if (!state.user || !state.workflowId) return;
 		elements.save.disabled = true; elements.save.querySelector('span').textContent = 'Đang lưu...';
-		try { const payload = await request(window.saveWorkflowUserPermissionsUrl, { method: 'POST', body: JSON.stringify({ workflowId: state.workflowId, userADID: state.user.adid, rows: state.rows.map(row => ({ workflowStepId: row.id, ...row.permissions })) }) }); showAlert(payload.message || 'Đã lưu quyền riêng theo user.'); markDirty(false); }
+		try { const payload = await request(window.saveWorkflowUserPermissionsUrl, { method: 'POST', body: JSON.stringify({ workflowId: state.workflowId, userADID: state.user.adid, rows: state.rows.map(row => { const canApprove = !!row.permissions.canApprove; return { workflowStepId: row.id, canView: !!row.permissions.canView, canProcess: canApprove, canApprove, canReject: canApprove }; }) }) }); showAlert(payload.message || 'Đã lưu quyền riêng theo user.'); markDirty(false); }
 		catch (error) { showAlert(error.message, 'danger'); markDirty(true); }
 		finally { elements.save.querySelector('span').textContent = 'Lưu thay đổi'; elements.save.disabled = !state.dirty; }
 	};

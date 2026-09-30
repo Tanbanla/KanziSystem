@@ -600,7 +600,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     double usdMoi = Math.Round(tienMoi / tyGia, 2);
 
                     string Insert = "INSERT INTO IM_PO_DETAIL([SoPO],[Tentienganh],[Tentiengviet],[Mahang],[Soluong],[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],[Sotien],[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],[DoisangUSD],[Danhmuc],[Id_Goc],[Hienthi],[Benxacnhantruoc],[Good_Code]) ";
-                    Insert += $" SELECT [SoPO],[Tentienganh],[Tentiengviet],[Mahang],'{slMoi.ToString(CultureInfo.InvariantCulture)}',[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],'{tienMoi.ToString(CultureInfo.InvariantCulture)}',[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],'{usdMoi.ToString(CultureInfo.InvariantCulture)}',[Danhmuc],[PO_Detail_Id],[Hienthi] + 1,'STOCK',[Good_Code]";
+                    Insert += $" SELECT [SoPO],[Tentienganh],[Tentiengviet],[Mahang],'{slMoi.ToString(CultureInfo.InvariantCulture)}',[Dovi],[Dongia],[Dieukiengiaohang],[Diadiemgiaohang],[Phuongthucvanchuyen],'{tienMoi.ToString(CultureInfo.InvariantCulture)}',[Vat],[Maphongyeucau],[Tenphongyeucau],[Ngaygiaohangdukien],[Noigiaodukien],[Thoigianthanhtoan],[Code_Request],[Id_RequestDetail],[Loaitien],[Tygia],'{usdMoi.ToString(CultureInfo.InvariantCulture)}',[Danhmuc],[PO_Detail_Id],[Hienthi] + 1,'',[Good_Code]";
                     Insert += $" FROM IM_PO_DETAIL WHERE PO_Detail_Id = '{data.Id_nhapkho}' ";
                     db.GET_DATA_FROM_SQL(Insert);
 

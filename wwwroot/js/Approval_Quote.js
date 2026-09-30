@@ -536,6 +536,43 @@
         if (tbody) {
         tbody.innerHTML = '';
         const frag = document.createDocumentFragment();
+        const fileEndpoint = `${window.apiBaseUrl || ''}/ApprovalQuote/QuoteFile`;
+        const getFileUrl = (value, download = false) => {
+            if (!value) return '';
+            return `${fileEndpoint}?filePath=${encodeURIComponent(value)}${download ? '&download=true' : ''}`;
+        };
+        const appendFileLink = (cell, value, label, download = false) => {
+            if (!value) return;
+            const link = document.createElement('a');
+            link.style.display = 'flex';
+            link.style.justifyContent = 'center';
+            link.style.alignItems = 'center';
+            link.href = getFileUrl(value, download);
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = label;
+            cell.appendChild(link);
+        };
+        const appendImagePreview = (cell, value) => {
+            if (!value) return;
+            const translations = window.i18nApproval || {};
+
+            cell.style.textAlign = 'center';
+            cell.style.verticalAlign = 'middle';
+
+            const viewButton = document.createElement('button');
+            viewButton.type = 'button';
+            viewButton.className = 'btn btn-link approval-quote-image-view';
+            viewButton.title = translations.ViewImage || 'View image';
+            viewButton.setAttribute('aria-label', translations.ViewImage || 'View image');
+            viewButton.innerHTML = `<i class="fas fa-eye" aria-hidden="true"></i> ${translations.ViewImage || 'View image'}`;
+
+            viewButton.addEventListener('click', () =>
+                window.open(getFileUrl(value), '_blank', 'noopener')
+            );
+
+            cell.appendChild(viewButton);
+        };
         group.forEach((it, idx) => {
             const tr = document.createElement('tr');
             function td(text) { const c = document.createElement('td'); c.textContent = text == null ? '' : String(text); return c; }
@@ -571,7 +608,19 @@
             tr.appendChild(td(getVal(it, 'nvchR_TinhNang', 'nvchR_TinhNang'))); // Tính năng/Purpose
 
             // Additional fields requested
-            tr.appendChild(td(getVal(it, 'nvchR_FileThietKe', 'nvchR_FileThietKe', 'chr_FileThietKe'))); // File thiết kế
+            const designCell = td('');
+            const translations = window.i18nApproval || {};
+            appendFileLink(designCell, getVal(it, 'nvchR_FileThietKe', 'NVCHR_FileThietKe', 'chr_FileThietKe'), translations.DownloadFile || 'Download', true);
+            tr.appendChild(designCell); // File thiết kế
+            const imageCell = td('');
+            appendImagePreview(imageCell, getVal(it, 'chR_LinkImage', 'CHR_LinkImage'));
+            if (!imageCell.firstChild) imageCell.textContent = '';
+            tr.appendChild(imageCell); // Link hình ảnh
+
+            const boxCell = td('');
+            appendFileLink(boxCell, getVal(it, 'chR_LinkFile', 'CHR_LinkFile'), translations.OpenLink || 'Open link', false);
+            tr.appendChild(boxCell); // Link box
+
             tr.appendChild(td(getVal(it, 'nvchR_NhaSanXuat', 'nvchR_NhaSanXuat'))); // Nhà sản xuất / Maker
             tr.appendChild(td(getVal(it, 'chR_MaNCC', 'chR_MaNCC', 'MaNCC'))); // Mã nhà cung cấp / Vendor code
             tr.appendChild(td(getVal(it, 'nvchR_TenNCC', 'nvchR_TenNCC'))); // Tên nhà cung cấp / Vendor name

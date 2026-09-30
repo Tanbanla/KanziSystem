@@ -30,11 +30,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IMasterApproverSendMailService _approverService;
         private readonly IBaoGiaWFDefinitionService _baoGiaWorkflowDefinitionService;
+        private readonly IFileImportService _fileImportService;
         private readonly IConfiguration _configuration;
         public ApprovalQuoteController(ILogger<ApprovalQuoteController> logger, IConfiguration configuration,
             IHistoryApproverServive historyApproverServive, IMaterialService materialService, IMasterApproverSendMailService approverService,
             IBaoGiaService baoGiaService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStatusService baoGiaStatusService, IDepartmentService departmentService
-            , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IBaoGiaWFDefinitionService baoGiaWorkflowDefinitionService, IWebHostEnvironment env)
+            , IBaoGiaStepService baoGiaStepService, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IBaoGiaWFDefinitionService baoGiaWorkflowDefinitionService, IWebHostEnvironment env,
+            IFileImportService fileImportService)
         {
             _logger = logger;
             _historyApproverServive = historyApproverServive;
@@ -50,6 +52,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _approverService = approverService;
             _configuration = configuration;
             _baoGiaWorkflowDefinitionService = baoGiaWorkflowDefinitionService;
+            _fileImportService = fileImportService;
         }
         public async Task<IActionResult> Index()
         {
@@ -125,7 +128,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             //var result = await _baoGiaService.GetListMaDonBGAsync();
             var adid = GetCurrentUserId() ?? string.Empty;
-            var result = await _baoGiaService.GetMaDonByAdidAsync(adid, 6);
+            var result = await _baoGiaService.GetMaDonByAdidAsync(adid, 6,"");
             return result.Data;
         }
         // Lay status bao gia
@@ -164,6 +167,45 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> QuoteFile(string filePath, bool download = false)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return BadRequest("Không có đường dẫn file.");
+            }
+
+            var fileResult = await _fileImportService.GetFileToLinkAsync(filePath);
+            if (!fileResult.Success || fileResult.Data == null)
+            {
+                return NotFound("Không tìm thấy file.");
+            }
+
+            var file = fileResult.Data;
+            var contentType = GetFileContentType(file.FileName);
+            return download
+                ? File(file.OpenReadStream(), contentType, file.FileName)
+                : File(file.OpenReadStream(), contentType);
+        }
+
+        private static string GetFileContentType(string? fileName)
+        {
+            return Path.GetExtension(fileName ?? string.Empty).ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".webp" => "image/webp",
+                ".pdf" => "application/pdf",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".xls" => "application/vnd.ms-excel",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".doc" => "application/msword",
+                _ => "application/octet-stream"
+            };
         }
         // Lưu thông tin phê duyệt báo giá
         [HttpPost]

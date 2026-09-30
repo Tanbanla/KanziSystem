@@ -79,7 +79,7 @@
 
     function renderRow(step) {
         const stage = state.stages.find(item => item.id === step.stageId);
-        const duration = step.durationHours == null ? '-' : `${step.durationHours} giờ`;
+        const duration = step.durationHours == null ? '-' : `${formatDurationDays(step.durationHours)} ngày`;
         return `<tr><td class="text-center"><span class="step-number">${step.stepOrder ?? '-'}</span></td><td class="text-center"><code>${escapeHtml(step.code)}</code></td><td class="text-center">${escapeHtml(stage?.name || 'Chưa phân loại')}</td><td><strong>${escapeHtml(step.name)}</strong>${step.nameEn ? `<div class="small text-muted">${escapeHtml(step.nameEn)}</div>` : ''}${step.description ? `<div class="small text-muted">${escapeHtml(step.description)}</div>` : ''}</td><td class="text-center">${duration}</td><td class="text-center"><span class="status-badge ${step.isActive ? 'status-active' : 'status-inactive'}"><i class="fas ${step.isActive ? 'fa-check-circle' : 'fa-pause-circle'} me-1"></i>${step.isActive ? 'Hoạt động' : 'Không hoạt động'}</span></td><td class="text-center"><div class="action-group"><button class="btn-icon btn-edit" type="button" data-action="edit" data-id="${step.id}" title="Sửa"><i class="fas fa-pen"></i></button><button class="btn-icon btn-delete" type="button" data-action="delete" data-id="${step.id}" title="Xóa"><i class="fas fa-trash"></i></button></div></td></tr>`;
     }
 
@@ -92,7 +92,7 @@
         $('#stepNameEn').value = step?.nameEn || '';
         $('#stepDescription').value = step?.description || '';
         $('#stepOrder').value = step?.stepOrder ?? getNextStepOrder(step?.stageId);
-        $('#stepDuration').value = step?.durationHours ?? '';
+        $('#stepDuration').value = step?.durationHours == null ? '' : step.durationHours / 8;
         $('#stepStageId').value = step?.stageId || '';
         $('#stepIsActive').checked = step?.isActive ?? true;
         $('#stepModalTitle').textContent = step ? 'Sửa bước nhỏ' : 'Thêm bước nhỏ';
@@ -103,7 +103,14 @@
         event.preventDefault();
         if (!$('#stepForm').checkValidity()) { $('#stepForm').classList.add('was-validated'); return; }
         const id = $('#stepId').value;
-        const payload = { stageID: Number($('#stepStageId').value), stepOrder: Number($('#stepOrder').value), stepCode: $('#stepCode').value.trim(), stepName: $('#stepName').value.trim(), stepNameEN: $('#stepNameEn').value.trim() || null, description: $('#stepDescription').value.trim() || null, defaultDurationHours: $('#stepDuration').value === '' ? null : Number($('#stepDuration').value), isActive: $('#stepIsActive').checked };
+        const durationDays = $('#stepDuration').value === '' ? null : Number($('#stepDuration').value);
+        if (durationDays !== null && (!Number.isFinite(durationDays) || durationDays < 0 || durationDays > 1095 || durationDays % 0.5 !== 0)) {
+            $('#stepDuration').setCustomValidity('Thời gian chỉ được nhập ngày tròn hoặc nửa ngày.');
+            $('#stepDuration').reportValidity();
+            return;
+        }
+        $('#stepDuration').setCustomValidity('');
+        const payload = { stageID: Number($('#stepStageId').value), stepOrder: Number($('#stepOrder').value), stepCode: $('#stepCode').value.trim(), stepName: $('#stepName').value.trim(), stepNameEN: $('#stepNameEn').value.trim() || null, description: $('#stepDescription').value.trim() || null, defaultDurationHours: durationDays === null ? null : Math.round(durationDays * 8), isActive: $('#stepIsActive').checked };
         const button = $('#btnSaveStep'); button.disabled = true;
         try {
             await callApi(id ? `/Workflow/UpdateWorkflowStep?id=${id}` : '/Workflow/CreateWorkflowStep', { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -114,6 +121,11 @@
     function getNextStepOrder(stageId) {
         const stageSteps = state.steps.filter(step => step.stageId === stageId);
         return stageSteps.reduce((max, step) => Math.max(max, Number(step.stepOrder) || 0), 0) + 1;
+    }
+
+    function formatDurationDays(durationHours) {
+        const durationDays = Number(durationHours) / 8;
+        return Number.isInteger(durationDays) ? durationDays : durationDays.toFixed(1);
     }
 
     async function deleteStep(step) {

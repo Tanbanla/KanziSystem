@@ -17,6 +17,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IBaoGiaWorkflowRoleService _baoGiaWorkflowRoleService;
         private readonly IEmployeeWorkingService _employeeWorkingService;
         private readonly IConfiguration _configuration;
+        private readonly string _applicationInstanceId;
 
         public AccountController(ITmUserService userService, IBaoGiaWorkflowRoleService baoGiaWorkflowRoleService, IEmployeeWorkingService employeeWorkingService, IConfiguration configuration)
         {
@@ -24,6 +25,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _baoGiaWorkflowRoleService = baoGiaWorkflowRoleService;
             _employeeWorkingService = employeeWorkingService;
             _configuration = configuration;
+            _applicationInstanceId = _configuration["ApplicationInstanceId"]
+                ?? throw new InvalidOperationException("ApplicationInstanceId chưa được cấu hình.");
         }
 
         [HttpGet]
@@ -71,14 +74,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         new Claim("Email", loginResult.Data.dia_chi_mail ?? ""),
                         new Claim("Permission", loginResult.Data.phan_quyen.ToString()),
                         new Claim("Department", loginResult.Data.phong_ban ?? ""),
-                        new Claim("Roles", roleAsync.Data ?? "")
+                        new Claim("Roles", roleAsync.Data ?? ""),
+                        new Claim("ApplicationInstanceId", _applicationInstanceId),
+                        new Claim("LoginTime", DateTimeOffset.UtcNow.ToString("O"))
                     };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties
                     {
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(3),
-                        IsPersistent = model.RememberMe,
+                        IsPersistent = true,
                         AllowRefresh = true
                     };
 
@@ -137,8 +141,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             var userId = User.FindFirst("UserId")?.Value;
             var fullName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var loginTime = HttpContext.Session.GetString("LoginTime");
-
+            var loginTime = HttpContext.Session.GetString("LoginTime")
+                ?? User.FindFirst("LoginTime")?.Value;
+            
             ViewBag.UserId = userId;
             ViewBag.FullName = fullName;
             ViewBag.LoginTime = loginTime;

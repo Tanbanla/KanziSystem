@@ -7,21 +7,8 @@ namespace PRJ_WAREHOUSE_BIVN.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var user = context.HttpContext.User;
-            
-            if (user.Identity?.IsAuthenticated == true)
-            {
-                // Ki?m tra xem session c� h?t h?n kh�ng
-                var loginTime = context.HttpContext.Session.GetString("LoginTime");
-                
-                if (string.IsNullOrEmpty(loginTime))
-                {
-                    // Session ?� h?t h?n, redirect v? login
-                    context.Result = new RedirectToActionResult("Login", "Account", null);
-                    return;
-                }
-            }
-            
+            // Trạng thái đăng nhập được lưu trong authentication cookie.
+            // Session có thể bị mất khi IIS recycle nên không dùng session để logout user.
             base.OnActionExecuting(context);
         }
     }

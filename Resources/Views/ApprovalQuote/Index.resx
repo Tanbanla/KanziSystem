@@ -300,6 +300,24 @@
   <data name="DesignFile" xml:space="preserve">
     <value>File thiết kế</value>
   </data>
+  <data name="ImageLink" xml:space="preserve">
+    <value>Link hình ảnh</value>
+  </data>
+  <data name="BoxLink" xml:space="preserve">
+    <value>Link box</value>
+  </data>
+  <data name="DownloadFile" xml:space="preserve">
+    <value>Tải xuống</value>
+  </data>
+  <data name="OpenLink" xml:space="preserve">
+    <value>Mở link</value>
+  </data>
+  <data name="ViewImage" xml:space="preserve">
+    <value>Xem hình ảnh</value>
+  </data>
+  <data name="ProductImageAlt" xml:space="preserve">
+    <value>Ảnh sản phẩm</value>
+  </data>
   <data name="Manufacturer" xml:space="preserve">
     <value>Nhà sản xuất</value>
   </data>

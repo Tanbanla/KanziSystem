@@ -270,7 +270,7 @@
                     </div>
                     <div class="col-md-1">
                         <label class="form-label fw-semibold">Mã hàng</label>
-                        <select name="mahang" class="form-control">
+                        <select name="mahang" class="form-control" id="mahangg" onchange="load_ncc($('#damnhiemDropdown').val())">
                             <option value="" selected="@(string.IsNullOrEmpty(ViewBag.Mahang as string))">-- Tất cả --</option>
                             <option value="A" selected="@((ViewBag.Mahang as string) == "A")">Mã A</option>
                             <option value="E" selected="@((ViewBag.Mahang as string) == "E")">Mã E</option>
@@ -1235,10 +1235,59 @@
 
 @section Scripts {
     <script>
+        // ===== API ENDPOINTS CONFIGURATION =====
+        // Tập trung quản lý tất cả các API endpoints tại một chỗ
+        // const API_ENDPOINTS = {
+        //     // Export & Import
+        //     ExportExcel: '@Url.Action("ExportExcel", "ManagerDelivery")',
+        //     ImportExcelTiendo: '/ManagerDelivery/ImportExcelTiendo',
+            
+        //     // Update Operations
+        //     UpdateDuKien: '/ManagerDelivery/UpdateDuKien',
+        //     UpdateChinhThuc: '/ManagerDelivery/UpdateChinhThuc',
+        //     UpdateThanhToan: '/ManagerDelivery/UpdateThanhToan',
+        //     UpdateDieuChinhLichGiao: '/ManagerDelivery/UpdateDieuChinhLichGiao',
+        //     UpdateAnhHuongSX: '/ManagerDelivery/UpdateAnhHuongSX',
+        //     UpdateNote: '/ManagerDelivery/UpdateNote',
+            
+        //     // PO Operations
+        //     SplitPO: '/ManagerDelivery/SplitPO',
+            
+        //     // Data Retrieval
+        //     NCC_NG: '/ManagerDelivery/NCC_NG',
+        //     NCC_Giaohang: '/ManagerDelivery/NCC_Giaohang',
+        //     SendMailListNG: '/ManagerDelivery/SendMailListNG',
+        //     List_DamnhiemNCC: '/ManagerDelivery/List_DamnhiemNCC',
+        //     List_NCCtheodamnhiem: '/ManagerDelivery/List_NCCtheodamnhiem'
+        // };
+        const API_ENDPOINTS = {
+            // Export & Import
+            ExportExcel: '@Url.Action("ExportExcel", "ManagerDelivery")',
+            ImportExcelTiendo: '/ipcs/ManagerDelivery/ImportExcelTiendo',
+
+            // Update Operations
+            UpdateDuKien: '/ipcs/ManagerDelivery/UpdateDuKien',
+            UpdateChinhThuc: '/ipcs/ManagerDelivery/UpdateChinhThuc',
+            UpdateThanhToan: '/ipcs/ManagerDelivery/UpdateThanhToan',
+            UpdateDieuChinhLichGiao: '/ipcs/ManagerDelivery/UpdateDieuChinhLichGiao',
+            UpdateAnhHuongSX: '/ipcs/ManagerDelivery/UpdateAnhHuongSX',
+            UpdateNote: '/ipcs/ManagerDelivery/UpdateNote',
+
+            // PO Operations
+            SplitPO: '/ipcs/ManagerDelivery/SplitPO',
+
+            // Data Retrieval
+            NCC_NG: '/ipcs/ManagerDelivery/NCC_NG',
+            NCC_Giaohang: '/ipcs/ManagerDelivery/NCC_Giaohang',
+            SendMailListNG: '/ipcs/ManagerDelivery/SendMailListNG',
+            List_DamnhiemNCC: '/ipcs/ManagerDelivery/List_DamnhiemNCC',
+            List_NCCtheodamnhiem: '/ipcs/ManagerDelivery/List_NCCtheodamnhiem'
+        };
+
         $(document).ready(function () {
             // 1. Lấy giá trị đã tìm kiếm từ ViewBag
-        var currentPic = '@Html.Raw(ViewBag.PicPur)';
-        var currentNcc = '@Html.Raw(ViewBag.TenNcc)';
+            var currentPic = '@Html.Raw(ViewBag.PicPur)';
+            var currentNcc = '@Html.Raw(ViewBag.TenNcc)';
 
             // 2. Gọi hàm tải danh sách Pic PUR trước
             List_DamnhiemNCC().then(function() {
@@ -1254,17 +1303,18 @@
                 }
             });
         });
+
         // Hàm xuất Excel
         function exportDataExcel() {
             const form = document.getElementById('filterForm');
             const formData = new FormData(form);
             const searchParams = new URLSearchParams(formData);
-            window.location.href = '@Url.Action("ExportExcel", "ManagerDelivery")?' + searchParams.toString();
+            window.location.href = API_ENDPOINTS.ExportExcel + '?' + searchParams.toString();
         }
 
         // Alias cho nút xuất Excel cũ
         function exportExcel() {
-            exportDataExcel();
+            exportDataExcel();  
         }
 
         // Hàm chuyển tab
@@ -1327,7 +1377,7 @@
 
             document.getElementById('btnOpenSupplierNg')?.addEventListener('click', () => bsSupplierModal.show());
 
-            $(document).on('click', '.btn-view-note', function(e) { // <--- Thêm chữ 'e' vào đây
+            $(document).on('click', '.btn-view-note', function(e) {
                 e.preventDefault();
                 const noteContent = $(this).attr('data-note');
                 $('#modalNoteContent').text(noteContent);
@@ -1508,7 +1558,7 @@
                         return;
                     }
 
-                            // --- F. XỬ LÝ CLICK NÚT TÁCH PO ---
+                    // --- F. XỬ LÝ CLICK NÚT TÁCH PO ---
                     const btnSplit = e.target.closest('.btn-split-po');
                     if (btnSplit) {
                         e.preventDefault();
@@ -1527,7 +1577,7 @@
                         return;
                     }
 
-                            // --- G. XỬ LÝ CLICK NÚT ĐIỀU CHỈNH LỊCH GIAO ---
+                    // --- G. XỬ LÝ CLICK NÚT ĐIỀU CHỈNH LỊCH GIAO ---
                     const btnAdjust = e.target.closest('.btn-adjust-date');
                     if (btnAdjust) {
                         e.preventDefault();
@@ -1538,7 +1588,7 @@
 
                         // Reset form
                         document.getElementById('modalAdjustDate').value = '';
-                        $('#full_PO_adj').prop('checked', true); // Mặc định chọn cập nhật cả PO
+                        $('#full_PO_adj').prop('checked', true);
 
                         bsAdjustModal.show();
                         return;
@@ -1547,10 +1597,9 @@
                 });
             }           
 
-            setTimeout(applyStickyColumns, 150); // Delay nhẹ để đợi UI vẽ xong độ rộng cột
+            setTimeout(applyStickyColumns, 150);
             window.addEventListener('resize', applyStickyColumns);
 
-            // SỰ KIỆN NGOÀI BẢNG (Import Excel, Checkbox phạm vi...)
             document.getElementById('btnOpenImportExcel')?.addEventListener('click', () => bsImportModal.show());
 
             document.getElementById('excelFileInput')?.addEventListener('change', function () {
@@ -1559,10 +1608,7 @@
                 }
             });
 
-
-      
             // Sự kiện Import
-                
             document.getElementById('btnExecuteImport')?.addEventListener('click', async function () {
                 const fileInput = document.getElementById('excelFileInput');
 
@@ -1574,10 +1620,8 @@
                 const file = fileInput.files[0];
                 const formData = new FormData();
 
-                // 1. SỬA LỖI Ở ĐÂY: Key phải trùng khớp hoàn toàn với tham số IFormFile trong Controller
                 formData.append("excelFileInput", file);
 
-                // 2. THÊM BIẾN 'us': Controller của bạn yêu cầu string us, lấy tạm tên user từ User.Identity của Razor
                 const currentUser = document.getElementById("us").innerHTML;
                 formData.append("us", currentUser);
 
@@ -1587,7 +1631,7 @@
                 btn.disabled = true;
 
                 try {
-                    const response = await fetch('/ManagerDelivery/ImportExcelTiendo', {
+                    const response = await fetch(API_ENDPOINTS.ImportExcelTiendo, {
                         method: 'POST',
                         body: formData
                     });
@@ -1652,7 +1696,7 @@
                 $btn.html('<i class="fa-solid fa fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
 
                 $.ajax({
-                    url: '/ManagerDelivery/UpdateThanhToan',
+                    url: API_ENDPOINTS.UpdateThanhToan,
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
@@ -1704,7 +1748,7 @@
                 $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
 
                 $.ajax({
-                    url: '/ManagerDelivery/UpdateChinhThuc',
+                    url: API_ENDPOINTS.UpdateChinhThuc,
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
@@ -1727,7 +1771,7 @@
                 });
             });
 
-             // --- THỰC HIỆN TÁCH PO (AJAX) ---
+            // --- THỰC HIỆN TÁCH PO (AJAX) ---
             $('#btnExecuteSplit').off('click').on('click', function (e) {
                 e.preventDefault();
 
@@ -1756,7 +1800,7 @@
                 $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
 
                 $.ajax({
-                    url: '/ManagerDelivery/SplitPO', // Backend API của bạn
+                    url: API_ENDPOINTS.SplitPO,
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
@@ -1764,7 +1808,7 @@
                         if (response.success) {
                             alert(response.message || 'Tách PO thành công!');
                             bsSplitModal.hide();
-                            window.location.reload(); // Reload lại bảng để hiển thị dòng PO mới
+                            window.location.reload();
                         } else {
                             alert('Thất bại: ' + response.message);
                         }
@@ -1779,7 +1823,7 @@
                 });
             });
 
-                    // --- LƯU ĐIỀU CHỈNH LỊCH GIAO (AJAX) ---
+            // --- LƯU ĐIỀU CHỈNH LỊCH GIAO (AJAX) ---
             $('#btnSaveAdjustDate').off('click').on('click', function (e) {
                 e.preventDefault();
 
@@ -1806,7 +1850,7 @@
                 $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
 
                 $.ajax({
-                    url: '/ManagerDelivery/UpdateDieuChinhLichGiao', // Tên API tại C# Controller
+                    url: API_ENDPOINTS.UpdateDieuChinhLichGiao,
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
@@ -1850,7 +1894,7 @@
                 $btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
 
                 $.ajax({
-                    url: '/ManagerDelivery/UpdateNote', // <-- Đảm bảo bạn có API này ở Backend
+                    url: API_ENDPOINTS.UpdateNote,
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
@@ -1892,7 +1936,7 @@
                 btnSave.disabled = true;
 
                 try {
-                    const res = await fetch('/ManagerDelivery/UpdateDuKien', {
+                    const res = await fetch(API_ENDPOINTS.UpdateDuKien, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1931,7 +1975,7 @@
                 btn.disabled = true;
 
                 try {
-                    const res = await fetch('/ManagerDelivery/UpdateAnhHuongSX', {
+                    const res = await fetch(API_ENDPOINTS.UpdateAnhHuongSX, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1966,7 +2010,7 @@
                 btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang xử lý và gửi mail...';
                 btn.disabled = true;
 
-                fetch('/ManagerDelivery/SendMailListNG', {
+                fetch(API_ENDPOINTS.SendMailListNG, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1997,7 +2041,7 @@
                 tbody.innerHTML = '<tr><td colspan="3" class="text-center text-primary py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
 
                 try {
-                    const response = await fetch('/ManagerDelivery/NCC_NG');
+                    const response = await fetch(API_ENDPOINTS.NCC_NG);
                     const data = await response.json();
 
                     const masterList = data.ncc_ng;
@@ -2075,7 +2119,7 @@
                 tbody.innerHTML = '<tr><td colspan="4" class="text-center text-info py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
 
                 try {
-                    const response = await fetch('/ManagerDelivery/NCC_Giaohang');
+                    const response = await fetch(API_ENDPOINTS.NCC_Giaohang);
                     const data = await response.json();
 
                     const masterList = data.ncc_ng;
@@ -2156,7 +2200,7 @@
             const badgeDemNcc = document.getElementById('demncc');
             if (!badgeDemNcc) return;
             try {
-                const response = await fetch('/ManagerDelivery/NCC_NG');
+                const response = await fetch(API_ENDPOINTS.NCC_NG);
                 const data = await response.json();
                 if (data && data.ncc_ng) {
                     const count = data.ncc_ng.length;
@@ -2177,7 +2221,7 @@
             const badgeDemGate = document.getElementById('demgate');
             if (!badgeDemGate) return;
             try {
-                const response = await fetch('/ManagerDelivery/NCC_Giaohang');
+                const response = await fetch(API_ENDPOINTS.NCC_Giaohang);
                 const data = await response.json();
                 if (data && data.ncc_ng) {
                     const count = data.ncc_ng.length;
@@ -2199,23 +2243,19 @@
             const currentSortCol = document.getElementById('sortColumn').value;
             let currentSortDir = document.getElementById('sortDirection').value;
 
-            // Nếu bấm lại vào cột đang được sort, đổi chiều (asc -> desc -> asc)
             if (currentSortCol === column) {
                 currentSortDir = (currentSortDir === 'asc') ? 'desc' : 'asc';
             } else {
-                // Nếu bấm sang cột mới, mặc định là chiều tăng dần (asc)
                 currentSortDir = 'asc';
             }
 
-            // Gán giá trị vào form ẩn
             document.getElementById('sortColumn').value = column;
             document.getElementById('sortDirection').value = currentSortDir;
 
-            // Submit form (gọi lại request về server để lấy data mới)
             document.getElementById('filterForm').submit();
         }
 
-                // Hàm tự động cố định cột từ trái sang phải đến hết cột "Tên NCC"
+        // Hàm tự động cố định cột từ trái sang phải đến hết cột "Tên NCC"
         function applyStickyColumns() {
             const table = document.querySelector('.table-responsive table');
             if (!table) return;
@@ -2224,7 +2264,6 @@
             if (!theadTr) return;
             const ths = Array.from(theadTr.children);
 
-            // 1. Tìm vị trí (index) của cột "Tên NCC"
             let targetIndex = -1;
             for (let i = 0; i < ths.length; i++) {
                 if (ths[i].textContent.trim().includes('Tên NCC')) {
@@ -2233,34 +2272,29 @@
                 }
             }
 
-            if (targetIndex === -1) return; // Không tìm thấy cột
+            if (targetIndex === -1) return;
 
             let currentLeft = 0;
             const leftOffsets = [];
 
-            // 2. Tính toán độ rộng cộng dồn (offset left) của từng cột
             for (let i = 0; i <= targetIndex; i++) {
                 leftOffsets.push(currentLeft);
-                // Lấy chiều rộng thực tế (kể cả với cột có thuộc tính hidden sẽ = 0)
                 const w = ths[i].getBoundingClientRect().width;
                 currentLeft += w;
             }
 
-            // 3. Set sticky cho Thead (Th)
             for (let i = 0; i <= targetIndex; i++) {
                 ths[i].style.position = 'sticky';
                 ths[i].style.left = leftOffsets[i] + 'px';
-                ths[i].style.zIndex = '4'; // Đảm bảo nổi lên trên
+                ths[i].style.zIndex = '4';
                 if (i === targetIndex) {
                     ths[i].classList.add('sticky-boundary');
                 }
             }
 
-            // 4. Set sticky cho Tbody (Td)
             const tbodyTrs = table.querySelectorAll('tbody tr:not(.detail-row)');
             tbodyTrs.forEach(tr => {
                 const tds = tr.children;
-                // Bỏ qua nếu là dòng "Không có dữ liệu"
                 if (tds.length === 1 && tds[0].colSpan > 1) return;
 
                 for (let i = 0; i <= targetIndex; i++) {
@@ -2268,7 +2302,7 @@
                         tds[i].classList.add('sticky-td');
                         tds[i].style.position = 'sticky';
                         tds[i].style.left = leftOffsets[i] + 'px';
-                        tds[i].style.zIndex = '2'; // Nổi lên trên dữ liệu cuộn, nhưng dưới thead
+                        tds[i].style.zIndex = '2';
                         if (i === targetIndex) {
                             tds[i].classList.add('sticky-boundary');
                         }
@@ -2277,17 +2311,15 @@
             });
         }
 
-
-                // 1. Hàm load danh sách Pic PUR (trả về Promise để đồng bộ khi load trang)
+        // 1. Hàm load danh sách Pic PUR
         function List_DamnhiemNCC() {
-            return fetch('/ManagerDelivery/List_DamnhiemNCC')
+            return fetch(API_ENDPOINTS.List_DamnhiemNCC)
                 .then(response => response.json())
                 .then(data => {
                     let $dropdown =$('#damnhiemDropdown');
                     $dropdown.html('<option value="">-- Chọn Pic PUR --</option>');
 
                     data.forEach(item => {
-                        // Hỗ trợ cả trường hợp C# trả về Chuỗi đơn hoặc Object {Value, Text}
                         let val = typeof item === 'object' ? (item.Value || item.value) : item;
                         let text = typeof item === 'object' ? (item.Text || item.text) : item;
 
@@ -2299,18 +2331,24 @@
                     $('#damnhiemDropdown').html('<option value="">Lỗi tải dữ liệu</option>');
                 });
         }
-
-        // 2. Hàm load Nhà cung cấp theo Pic PUR
-        function load_ncc(tendamnhiem, selectedNcc = '') {
+        function load_ncc(tendamnhiem = $('#damnhiemDropdown').val(), selectedNcc = '') {
+            // Nếu chưa chọn Pic PUR thì reset dropdown NCC
             if (!tendamnhiem) {
                 $('#nccDropdown').html('<option value="">-- Vui lòng chọn Pic PUR --</option>');
                 return;
             }
+
             var danhmuc = '@currentTab';
+            var mahang = $('#mahangg').val() || ''; // Lấy giá trị mã hàng hiện tại
+
             $.ajax({
-                url: '/ManagerDelivery/List_NCCtheodamnhiem', // Đã sửa đúng Controller
+                url: API_ENDPOINTS.List_NCCtheodamnhiem,
                 type: 'GET',
-                data: { tendamnhiem: tendamnhiem , danhmuc : danhmuc},
+                data: {
+                    tendamnhiem: tendamnhiem,
+                    danhmuc: danhmuc,
+                    mahang: mahang
+                },
                 success: function (data) {
                     var options = '<option value="">-- Tất cả NCC --</option>';
 
@@ -2322,7 +2360,7 @@
 
                     $('#nccDropdown').html(options);
 
-                  if (selectedNcc) {
+                    if (selectedNcc) {
                         $('#nccDropdown').val(selectedNcc);
                     }
                 },

@@ -34,7 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         public Task<ListRequest<dynamic>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize);
 
         // lấy mã đơn theo Adid
-        public Task<List<string>> GetMaDonByAdidAsync(string adid, int step);
+        public Task<List<string>> GetMaDonByAdidAsync(string adid, int step, string? role);
         // update thông tin màn hình lịch sử báo giá
         public Task<UpdateHistoryResult> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_Quotation> baoGias);
         // Get thông tin đơn phê duyệt lựa chọn ncc

@@ -27,12 +27,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         {
             _context = context;
         }
-        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user, DateTime? dayMM,string? status, int? PageSize, int? PageIndex)
+        public async Task<ListRequest<dynamic>> SearchBaoGiaAsync(int? idRequest, string? maDon, string? maVatTu, string? maNcc, string? section, string? user,
+            DateTime? dayMM,string? status, string role, int? PageSize, int? PageIndex)
         {
             var baseFrom = new StringBuilder();
             baseFrom.Append(@"FROM [BaoGia_Detail_of_Quotation] as d
 			LEFT JOIN [BaoGia_Request_of_Quotation] AS r ON d.ID_RequestQuote = r.ID
 			LEFT JOIN [BaoGia_Master_Approver_Send_Mail] AS s ON r.CHR_SectionCode = s.CHR_CodeSection
+			INNER JOIN BaoGia_WorkflowDefinition wf
+                    ON r.WorkflowID = wf.WorkflowID
             WHERE 1 = 1");
 
             var whereBuilder = new StringBuilder();
@@ -66,6 +69,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 whereBuilder.Append(" AND r.CHR_SectionCode = @Section");
                 parameters.Add("Section", section);
+            }
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                whereBuilder.Append(" AND UPPER(LTRIM(RTRIM(wf.FlowCode))) = UPPER(LTRIM(RTRIM(@FlowCode)))");
+                parameters.Add("FlowCode", role);
             }
             if (dayMM != null)
             {
@@ -244,21 +252,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 .FirstOrDefaultAsync();
             return a;
         }
-
-        public async Task<List<BaoGia_History_Detail_Request>> GetInputQuoteHistoryAsync(string maDon, string? maHangNcc)
+        public async Task<List<BaoGia_History_Detail_Request>> GetInputQuoteHistoryAsync(int idDetail)
         {
             var query = from history in _context.BaoGia_History_Detail_Requests.AsNoTracking()
                         join detail in _context.BaoGia_Detail_of_Quotations.AsNoTracking()
                             on history.ID_RQ_Detail equals detail.ID
                         join request in _context.BaoGia_Request_of_Quotations.AsNoTracking()
                             on detail.ID_RequestQuote equals request.ID
-                        where request.CHR_MaDon == maDon
+                        where detail.ID == idDetail
                         select new { history, detail };
-
-            if (!string.IsNullOrWhiteSpace(maHangNcc))
-            {
-                query = query.Where(x => x.detail.CHR_MaHangNCC == maHangNcc);
-            }
 
             return await query
                 .OrderByDescending(x => x.history.DTM_CreateBy)
@@ -434,6 +436,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     detail.VCHR_MSDS = item.VCHR_MSDS;
                     detail.VCHR_AnToan = item.VCHR_AnToan;
                     detail.VCHR_CamKet = item.VCHR_CamKet;
+                    detail.CHR_NameEN = item.CHR_NameEN;
                     detail.NVCHR_DonVi = item.NVCHR_DonVi;
                     detail.DTM_EffectiveDate = item.DTM_EffectiveDate;
                     detail.DTM_ExpiryDate = item.DTM_ExpiryDate;

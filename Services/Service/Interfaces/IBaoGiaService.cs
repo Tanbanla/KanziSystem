@@ -45,7 +45,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<ListRequest<dynamic>>> GetThongTinBaoGiaChiTietAsync(string? maDon, string? section, string? maHang, string? maNCC, string? status, string user, int pageIndex, int pageSize);
 
         // Lấy mã đơn theo Adid
-        public Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid, int step);
+        public Task<GenericResponse<List<string>>> GetMaDonByAdidAsync(string adid, int step, string? role);
 
         // Update thông tin màn hình lịch sử báo giá
         public Task<GenericResponse<UpdateHistoryResult>> UpdateThongTinLichSuBaoGiaAsync(List<BaoGia_Request_of_QuotationDTO> baoGias);

@@ -841,10 +841,13 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     r.CHR_MaDon AS MaDon,
                     r.CHR_SectionCode AS Section,
                     r.CHR_CreateBy AS UserCreate,
+                    n.Khuvuc AS Khuvuc,
                     r.ID AS ID
-                FROM [COST_MANAGEMENT].[dbo].[BaoGia_Request_of_Quotation] r
-                LEFT JOIN [COST_MANAGEMENT].[dbo].[BaoGia_Confirm_Name_Quotation] c
+                FROM [BaoGia_Request_of_Quotation] r
+                LEFT JOIN [BaoGia_Confirm_Name_Quotation] c
                     ON r.ID = c.ID_RequestQuote
+                LEFT JOIN [IM_NCC_NEW] n
+                    ON n.Ma = r.CHR_MaNCC
                 WHERE c.ID IN @ListCheck";
 
             using (var connection = new SqlConnection(_connectionString))
@@ -1189,7 +1192,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     if (!vendorRegionByCode.TryGetValue(request.CHR_MaNCC ?? string.Empty, out var region))
                         continue;
                     var checkDomestic = string.Equals(region?.Trim(), "Domestic",StringComparison.OrdinalIgnoreCase);
-                    if(true) //(checkDomestic) bỏ phần xác nhận theo khu vực
+                    if(checkDomestic)// bỏ phần xác nhận theo khu vực
                     {
                         var oldValue = confirmName.VCHR_TenHaiQuan;
 

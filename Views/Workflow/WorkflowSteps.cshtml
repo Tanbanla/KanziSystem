@@ -92,7 +92,8 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label" for="stepCode">Mã bước <span class="text-danger">*</span></label>
-                        <input id="stepCode" class="form-control" maxlength="50" required />
+                        <input id="stepCode" class="form-control" maxlength="50" pattern="[a-z0-9]+(-[a-z0-9]+)*" title="Dùng tiếng Anh dạng chữ thường, nối các từ bằng dấu gạch nối, tối đa 50 ký tự." required />
+                        <div class="form-text">Tiếng Anh dạng chữ thường, nối bằng dấu gạch nối (ví dụ: validate-request).</div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label" for="stepStageId">Bước lớn <span class="text-danger">*</span></label>
@@ -117,8 +118,9 @@
                         <input id="stepOrder" class="form-control" type="number" min="1" required />
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for="stepDuration">Thời gian (giờ)</label>
-                        <input id="stepDuration" class="form-control" type="number" min="0" max="8760" />
+                        <label class="form-label" for="stepDuration">Thời gian xử lý (ngày)</label>
+                        <input id="stepDuration" class="form-control" type="number" min="0" max="1095" step="0.5" />
+                        <div class="form-text">Chỉ nhập ngày tròn hoặc nửa ngày (ví dụ: 0.5, 1, 1.5).</div>
                     </div>
                     <div class="col-md-6 mb-3 step-active-setting" style="margin-left: 24px;">
                         <input id="stepIsActive" class="form-check-input" type="checkbox" checked />

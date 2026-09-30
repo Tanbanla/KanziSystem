@@ -603,13 +603,24 @@
   <data name="ExportLoading" xml:space="preserve">
     <value>Exporting to Excel, please wait...</value>
   </data>
-  <data name="Actions" xml:space="preserve">
-    <value>Actions</value>
-  </data>
-  <data name="EnterQuotation" xml:space="preserve">
-    <value>Enter quotation information</value>
-  </data>
-  <data name="ViewQuotationHistory" xml:space="preserve">
-    <value>View quotation change history</value>
-  </data>
+  <data name="QuotationInformation" xml:space="preserve"><value>Quotation information</value></data>
+  <data name="ChangeHistory" xml:space="preserve"><value>Change history</value></data>
+  <data name="ViewQuotationHistory" xml:space="preserve"><value>View quotation change history</value></data>
+  <data name="HistoryData" xml:space="preserve"><value>Historical data</value></data>
+  <data name="NoHistory" xml:space="preserve"><value>No change history.</value></data>
+  <data name="MissingDetailId" xml:space="preserve"><value>Detail ID is missing.</value></data>
+  <data name="HistoryLoadFailed" xml:space="preserve"><value>Unable to load history.</value></data>
+  <data name="ReasonPrefix" xml:space="preserve"><value>Reason: </value></data>
+  <data name="ExportSuccess" xml:space="preserve"><value>Excel exported successfully</value></data>
+  <data name="ConfirmTitle" xml:space="preserve"><value>Confirmation</value></data>
+  <data name="ConfirmButton" xml:space="preserve"><value>Confirm</value></data>
+  <data name="CancelButton" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Refused" xml:space="preserve"><value>Refused</value></data>
+  <data name="NumberOfEdits" xml:space="preserve"><value>Number of edits</value></data>
+  <data name="ExchangeRate" xml:space="preserve"><value>Exchange rate</value></data>
+  <data name="TaxRate" xml:space="preserve"><value>Tax rate</value></data>
+  <data name="TaxAmount" xml:space="preserve"><value>Tax amount</value></data>
+  <data name="TotalAfterTax" xml:space="preserve"><value>Total after tax</value></data>
+  <data name="Warranty" xml:space="preserve"><value>Warranty</value></data>
+  <data name="Manufacturer" xml:space="preserve"><value>Manufacturer</value></data>
 </root>

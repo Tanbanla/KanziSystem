@@ -830,7 +830,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<string>> LoadMadonAsync(int step)
         {
-            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step);
+            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step, "");
             return madons.Data ?? new List<string>();
         }
         // MARK: - HistoryQuote

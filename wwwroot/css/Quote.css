@@ -380,3 +380,23 @@ select.is-invalid {
 }
 /* Ensure table body rows have white background when scrolling under header */
 .table-responsive.fixed-header tbody td { background: #fff; }
+
+.action-icon-btn {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 4px 6px;
+    color: #0d6efd;
+}
+
+    .action-icon-btn:hover {
+        background: #f1f5f9 !important;
+        border-radius: 4px;
+    }
+
+    .action-icon-btn:focus,
+    .action-icon-btn:active {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }

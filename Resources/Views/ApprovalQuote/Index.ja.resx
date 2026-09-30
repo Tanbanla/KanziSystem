@@ -300,6 +300,24 @@
   <data name="DesignFile" xml:space="preserve">
     <value>設計ファイル</value>
   </data>
+  <data name="ImageLink" xml:space="preserve">
+    <value>画像リンク</value>
+  </data>
+  <data name="BoxLink" xml:space="preserve">
+    <value>ボックスリンク</value>
+  </data>
+  <data name="DownloadFile" xml:space="preserve">
+    <value>ダウンロード</value>
+  </data>
+  <data name="OpenLink" xml:space="preserve">
+    <value>リンクを開く</value>
+  </data>
+  <data name="ViewImage" xml:space="preserve">
+    <value>画像を見る</value>
+  </data>
+  <data name="ProductImageAlt" xml:space="preserve">
+    <value>商品画像</value>
+  </data>
   <data name="Manufacturer" xml:space="preserve">
     <value>メーカー</value>
   </data>

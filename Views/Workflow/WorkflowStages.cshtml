@@ -114,8 +114,11 @@
 
                     <input id="stageCode"
                            class="form-control"
-                           maxlength="50" required />
-                    <div class="form-text">Mã duy nhất, tối đa 50 ký tự.</div>
+                              maxlength="50"
+                              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                              title="Dùng tiếng Anh dạng chữ thường, nối các từ bằng dấu gạch nối, tối đa 50 ký tự."
+                              required />
+                          <div class="form-text">Tiếng Anh dạng chữ thường, nối bằng dấu gạch nối, tối đa 50 ký tự (ví dụ: quotation-review).</div>
                 </div>
 
                 <div class="mb-3">

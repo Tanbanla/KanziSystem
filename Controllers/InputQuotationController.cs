@@ -256,6 +256,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        // lấy giá tiền USD sang VND
+        [HttpGet]
+        public async Task<IActionResult> GetExchangeRate()
+        {
+            try
+            {
+                var result = await _exchangeRateService.GetExchangeRate();
+                if (!result.Success)
+                    return BadRequest(result.Message);
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy tỷ giá");
+                return BadRequest(ex.Message);
+            }
+        }
         // Kiểm tra Step đơn
         [HttpPost]
         public async Task<IActionResult> CheckImportExcelInputQuote([FromForm] IFormFile file)
@@ -319,7 +337,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             if (searchModel == null) return BadRequest("Không nhận Search Input");
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
                 searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM,
-                searchModel.status,searchModel.pageSize, searchModel.pageIndex);
+                searchModel.status,GetRolesUser(),searchModel.pageSize, searchModel.pageIndex);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -328,15 +346,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetInputQuoteHistory([FromBody] SearchHistoryInfoByMaDonModel searchModel)
+        public async Task<IActionResult> GetInputQuoteHistory([FromBody] int idDetail)
         {
-            if (searchModel == null || string.IsNullOrWhiteSpace(searchModel.MaDon))
-                return BadRequest("Thiếu mã đơn hàng");
+            if (idDetail <= 0)
+                return BadRequest("Thiếu id detail");
 
-            var result = await _baoGiaDetailService.GetInputQuoteHistoryAsync(
-                searchModel.MaDon,
-                searchModel.MaHangNCC);
-
+            var result = await _baoGiaDetailService.GetInputQuoteHistoryAsync(idDetail);
             if (!result.Success)
                 return BadRequest(result.Message);
 
@@ -358,6 +373,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 GetCurrentUserId(),
                 searchInputQuote.dayMM,
                 searchInputQuote.status,
+                GetRolesUser(),
                 searchInputQuote.pageSize,
                 searchInputQuote.pageIndex);
 
@@ -617,7 +633,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<string>> LoadMadonAsync(int step)
         {
-            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step);
+            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step,GetRolesUser());
             return madons.Data ?? new List<string>();
         }
 

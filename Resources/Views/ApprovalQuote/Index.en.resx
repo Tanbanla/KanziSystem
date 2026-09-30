@@ -300,6 +300,24 @@
   <data name="DesignFile" xml:space="preserve">
     <value>Design file</value>
   </data>
+  <data name="ImageLink" xml:space="preserve">
+    <value>Image link</value>
+  </data>
+  <data name="BoxLink" xml:space="preserve">
+    <value>Box link</value>
+  </data>
+  <data name="DownloadFile" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="OpenLink" xml:space="preserve">
+    <value>Open link</value>
+  </data>
+  <data name="ViewImage" xml:space="preserve">
+    <value>View image</value>
+  </data>
+  <data name="ProductImageAlt" xml:space="preserve">
+    <value>Product image</value>
+  </data>
   <data name="Manufacturer" xml:space="preserve">
     <value>Manufacturer</value>
   </data>

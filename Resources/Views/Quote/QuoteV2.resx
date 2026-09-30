@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="PageTitle" xml:space="preserve"><value>Tạo yêu cầu báo giá mới</value></data>
+  <data name="DownloadTemplate" xml:space="preserve"><value>Tải file mẫu</value></data>
+  <data name="DownloadMaster" xml:space="preserve"><value>Tải dữ liệu master</value></data>
+  <data name="QuoteInformation" xml:space="preserve"><value>Thông tin báo giá</value></data>
+  <data name="RequestDepartment" xml:space="preserve"><value>Phòng ban xin báo giá</value></data>
+  <data name="CostCenter" xml:space="preserve"><value>Mã chi phí</value></data>
+  <data name="SelectDepartment" xml:space="preserve"><value>Chọn phòng ban</value></data>
+  <data name="SelectCostCenter" xml:space="preserve"><value>Chọn mã chi phí</value></data>
+  <data name="Send" xml:space="preserve"><value>Gửi</value></data>
+  <data name="QuotationList" xml:space="preserve"><value>Danh sách xin báo giá</value></data>
+  <data name="ImportExcel" xml:space="preserve"><value>Import file Excel</value></data>
+  <data name="ExportTable" xml:space="preserve"><value>Tải dữ liệu bảng</value></data>
+  <data name="Add" xml:space="preserve"><value>Thêm</value></data>
+  <data name="SearchInTable" xml:space="preserve"><value>Tìm kiếm trong bảng</value></data>
+  <data name="InternalCode" xml:space="preserve"><value>Mã hàng nội bộ</value></data>
+  <data name="Category" xml:space="preserve"><value>Chủng loại</value></data>
+  <data name="SupplierItemCode" xml:space="preserve"><value>Mã hàng nhà cung cấp</value></data>
+  <data name="QuotationType" xml:space="preserve"><value>Loại báo giá</value></data>
+  <data name="Classification" xml:space="preserve"><value>Phân loại hàng</value></data>
+  <data name="NameVN" xml:space="preserve"><value>Tên hàng tiếng Việt</value></data>
+  <data name="NameEN" xml:space="preserve"><value>Tên hàng tiếng Anh</value></data>
+  <data name="Quantity" xml:space="preserve"><value>Số lượng</value></data>
+  <data name="Unit" xml:space="preserve"><value>Đơn vị</value></data>
+  <data name="SupplierDeadline" xml:space="preserve"><value>Kỳ hạn lựa chọn nhà cung cấp</value></data>
+  <data name="DesiredDate" xml:space="preserve"><value>Ngày mong muốn nhận hàng</value></data>
+  <data name="Urgent" xml:space="preserve"><value>Gấp</value></data>
+  <data name="Supplier" xml:space="preserve"><value>Nhà cung cấp xin báo giá</value></data>
+  <data name="Actions" xml:space="preserve"><value>Hành động</value></data>
+  <data name="NoData" xml:space="preserve"><value>Không có dữ liệu</value></data>
+  <data name="NoMatchingItem" xml:space="preserve"><value>Không tìm thấy mặt hàng phù hợp</value></data>
+  <data name="Showing" xml:space="preserve"><value>Hiển thị</value></data>
+  <data name="Total" xml:space="preserve"><value>Tổng số</value></data>
+  <data name="Items" xml:space="preserve"><value>mặt hàng</value></data>
+  <data name="Of" xml:space="preserve"><value>/</value></data>
+  <data name="AddQuotationItem" xml:space="preserve"><value>Thêm mặt hàng báo giá</value></data>
+  <data name="EditQuotationItem" xml:space="preserve"><value>Chỉnh sửa mặt hàng báo giá</value></data>
+  <data name="QuotationRequest" xml:space="preserve"><value>Yêu cầu báo giá</value></data>
+  <data name="EnterCompleteInfo" xml:space="preserve"><value>Nhập đầy đủ thông tin để gửi yêu cầu đến nhà cung cấp</value></data>
+  <data name="BasicInformation" xml:space="preserve"><value>Thông tin cơ bản</value></data>
+  <data name="ItemIdentity" xml:space="preserve"><value>Thông tin nhận diện mặt hàng và nhu cầu</value></data>
+  <data name="SelectQuotationType" xml:space="preserve"><value>Chọn loại báo giá</value></data>
+  <data name="SelectClassification" xml:space="preserve"><value>Chọn phân loại</value></data>
+  <data name="SelectCategory" xml:space="preserve"><value>Chọn chủng loại</value></data>
+  <data name="EnterVNName" xml:space="preserve"><value>Nhập tên tiếng Việt</value></data>
+  <data name="EnterENName" xml:space="preserve"><value>Nhập tên tiếng Anh</value></data>
+  <data name="QuotationReason" xml:space="preserve"><value>Lý do xin báo giá</value></data>
+  <data name="EnterReason" xml:space="preserve"><value>Nhập lý do chi tiết...</value></data>
+  <data name="ItemDescription" xml:space="preserve"><value>Mô tả hàng hóa</value></data>
+  <data name="TechnicalPurpose" xml:space="preserve"><value>Thông số kỹ thuật và mục đích sử dụng</value></data>
+  <data name="Shape" xml:space="preserve"><value>Hình dáng</value></data>
+  <data name="Material" xml:space="preserve"><value>Chất liệu / Màu sắc</value></data>
+  <data name="Composition" xml:space="preserve"><value>Thành phần, hàm lượng</value></data>
+  <data name="Dimensions" xml:space="preserve"><value>Kích thước</value></data>
+  <data name="UsedFor" xml:space="preserve"><value>Dùng cho máy/vị trí</value></data>
+  <data name="Purpose" xml:space="preserve"><value>Dùng để làm gì</value></data>
+  <data name="SafetyRequirements" xml:space="preserve"><value>Yêu cầu an toàn &amp; tiêu chuẩn</value></data>
+  <data name="RequiredDocuments" xml:space="preserve"><value>Chứng từ và tiêu chuẩn bắt buộc</value></data>
+  <data name="SelectRohs" xml:space="preserve"><value>Chọn tiêu chuẩn ROHS</value></data>
+  <data name="SelectCoCq" xml:space="preserve"><value>Chọn tiêu chuẩn CO/CQ</value></data>
+  <data name="DeliveryInformation" xml:space="preserve"><value>Thời gian &amp; địa điểm giao hàng</value></data>
+  <data name="ReceivingPlan" xml:space="preserve"><value>Kế hoạch nhận hàng và thông tin liên hệ</value></data>
+  <data name="ReceiveDate" xml:space="preserve"><value>Ngày muốn nhận hàng</value></data>
+  <data name="Receiver" xml:space="preserve"><value>Người nhận hàng</value></data>
+  <data name="ReceiverPhone" xml:space="preserve"><value>SĐT người nhận</value></data>
+  <data name="DeliveryLocation" xml:space="preserve"><value>Địa điểm giao hàng</value></data>
+  <data name="Attachments" xml:space="preserve"><value>Tài liệu kèm theo</value></data>
+  <data name="AttachmentDescription" xml:space="preserve"><value>Đính kèm tài liệu hỗ trợ cho yêu cầu</value></data>
+  <data name="DesignFile" xml:space="preserve"><value>File thiết kế</value></data>
+  <data name="ImageFile" xml:space="preserve"><value>Link/File hình ảnh</value></data>
+  <data name="BoxLink" xml:space="preserve"><value>Link Box/Drive</value></data>
+  <data name="LinkPassword" xml:space="preserve"><value>Link + Password</value></data>
+  <data name="SupplierList" xml:space="preserve"><value>Danh sách nhà cung cấp</value></data>
+  <data name="SelectSuppliers" xml:space="preserve"><value>Chọn các nhà cung cấp cần gửi báo giá</value></data>
+  <data name="MaximumFiveSuppliers" xml:space="preserve"><value>Tối đa 5 NCC</value></data>
+  <data name="SupplierCode" xml:space="preserve"><value>Mã NCC</value></data>
+  <data name="Manufacturer" xml:space="preserve"><value>Nhà sản xuất</value></data>
+  <data name="GetQuotation" xml:space="preserve"><value>Lấy báo giá</value></data>
+  <data name="RejectReason" xml:space="preserve"><value>Lý do không xin BG</value></data>
+  <data name="NoSupplierInfo" xml:space="preserve"><value>Chưa có thông tin nhà cung cấp</value></data>
+  <data name="EnterRejectReason" xml:space="preserve"><value>Nhập lý do không lấy báo giá</value></data>
+  <data name="ClearData" xml:space="preserve"><value>Xóa dữ liệu</value></data>
+  <data name="Close" xml:space="preserve"><value>Đóng</value></data>
+  <data name="SaveInformation" xml:space="preserve"><value>Lưu thông tin</value></data>
+  <data name="UpdateInformation" xml:space="preserve"><value>Cập nhật thông tin</value></data>
+  <data name="ValidationTitle" xml:space="preserve"><value>Kiểm tra thông tin</value></data>
+  <data name="CannotSave" xml:space="preserve"><value>Chưa thể lưu thông tin</value></data>
+  <data name="FillRequired" xml:space="preserve"><value>Vui lòng bổ sung các thông tin sau:</value></data>
+  <data name="Understood" xml:space="preserve"><value>Đã hiểu</value></data>
+  <data name="SelectApprover" xml:space="preserve"><value>Chọn người phê duyệt</value></data>
+  <data name="ApproverRequired" xml:space="preserve"><value>Người phê duyệt</value></data>
+  <data name="LoadingList" xml:space="preserve"><value>Đang tải danh sách...</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Hủy</value></data>
+  <data name="SendRequest" xml:space="preserve"><value>Gửi yêu cầu</value></data>
+  <data name="Processing" xml:space="preserve"><value>Đang xử lý...</value></data>
+  <data name="LoadingData" xml:space="preserve"><value>Đang tải dữ liệu...</value></data>
+  <data name="NoApprover" xml:space="preserve"><value>Không tìm thấy người phê duyệt phù hợp.</value></data>
+  <data name="EmptyQuotationList" xml:space="preserve"><value>Danh sách báo giá trống</value></data>
+  <data name="InvalidQuotationFile" xml:space="preserve"><value>File có lỗi dữ liệu. File lỗi đã được tải xuống, vui lòng kiểm tra cột Thông tin lỗi.</value></data>
+  <data name="ImportFailed" xml:space="preserve"><value>Import file thất bại</value></data>
+  <data name="NoValidData" xml:space="preserve"><value>File không có dữ liệu hợp lệ</value></data>
+  <data name="ExportFailed" xml:space="preserve"><value>Xuất file thất bại</value></data>
+  <data name="SelectCostCenterRequired" xml:space="preserve"><value>Vui lòng chọn mã chi phí.</value></data>
+  <data name="SelectDepartmentRequired" xml:space="preserve"><value>Vui lòng chọn phòng ban xin báo giá.</value></data>
+  <data name="QuotationSent" xml:space="preserve"><value>Đã gửi yêu cầu báo giá thành công.</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Không thể lưu yêu cầu báo giá.</value></data>
+  <data name="ApproverLoadFailed" xml:space="preserve"><value>Không thể tải danh sách người phê duyệt.</value></data>
+  <data name="SelectApproverPrompt" xml:space="preserve"><value>Vui lòng chọn người phê duyệt.</value></data>
+  <data name="SupplierLoadFailed" xml:space="preserve"><value>Không thể tải danh sách nhà cung cấp</value></data>
+  <data name="MasterLoading" xml:space="preserve"><value>Đang tải dữ liệu master...</value></data>
+  <data name="TableExporting" xml:space="preserve"><value>Đang xuất dữ liệu bảng...</value></data>
+  <data name="TableExportFailed" xml:space="preserve"><value>Không thể xuất dữ liệu bảng</value></data>
+  <data name="ExcelImporting" xml:space="preserve"><value>Đang nhập dữ liệu bảng...</value></data>
+  <data name="ExcelImportFailed" xml:space="preserve"><value>Không thể import dữ liệu Excel</value></data>
+  <data name="SavingQuotation" xml:space="preserve"><value>Đang lưu yêu cầu báo giá...</value></data>
+  <data name="CannotLoadData" xml:space="preserve"><value>Không thể tải dữ liệu</value></data>
+  <data name="CannotLoadMaterials" xml:space="preserve"><value>Không thể tải thông tin mặt hàng</value></data>
+  <data name="CannotLoadSuppliers" xml:space="preserve"><value>Không thể tải danh sách nhà cung cấp</value></data>
+  <data name="SelectedSupplierCount" xml:space="preserve"><value>Nhà cung cấp đã chọn</value></data>
+  <data name="SelectPlaceholder" xml:space="preserve"><value>Chọn</value></data>
+  <data name="SelectExcelFile" xml:space="preserve"><value>Vui lòng chọn file Excel để import</value></data>
+  <data name="Yes" xml:space="preserve"><value>Có</value></data>
+  <data name="No" xml:space="preserve"><value>Không</value></data>
+  <data name="RequiredField" xml:space="preserve"><value>{0} không được để trống.</value></data>
+  <data name="EquipmentCode" xml:space="preserve"><value>Mã thiết bị</value></data>
+  <data name="RohsNeed" xml:space="preserve"><value>Cần</value></data>
+  <data name="Msds" xml:space="preserve"><value>MSDS &amp; CAS No</value></data>
+  <data name="SafetyStandard" xml:space="preserve"><value>Tiêu chuẩn an toàn</value></data>
+  <data name="SupplierName" xml:space="preserve"><value>Tên NCC</value></data>
+</root>

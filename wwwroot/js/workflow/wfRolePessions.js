@@ -4,9 +4,7 @@
     const state = { workflows: [], roles: [], stages: [], rows: [], workflowId: null, dirty: false };
     const permissionTypes = [
         { key: 'canView', label: 'Xem', short: 'X', className: 'view' },
-        { key: 'canProcess', label: 'Xử lý', short: 'XL', className: 'process' },
-        { key: 'canApprove', label: 'Duyệt', short: 'D', className: 'approve' },
-        { key: 'canReject', label: 'Từ chối', short: 'TC', className: 'reject' }
+        { key: 'canApprove', label: 'Duyệt (xử lý, hủy/từ chối)', short: 'D', className: 'approve' }
     ];
 
     const elements = {
@@ -31,7 +29,8 @@
     const normalizeRows = rows => (rows || []).map(row => {
         const permissions = {};
         (row.permissions || []).forEach(item => permissions[item.roleCode] = {
-            canView: !!item.canView, canProcess: !!item.canProcess, canApprove: !!item.canApprove, canReject: !!item.canReject
+            canView: !!item.canView,
+            canApprove: !!item.canProcess || !!item.canApprove || !!item.canReject
         });
         return { ...row, permissions };
     });
@@ -76,7 +75,7 @@
         setState('permissionEmpty', false); setState('permissionTableWrap', true);
         elements.head.innerHTML = `<tr><th class="permission-step-heading">Bước xử lý</th>${roles.map(role => `<th class="permission-role-heading"><strong>${role.code}</strong><small>${role.name}</small></th>`).join('')}</tr>`;
         elements.body.innerHTML = rows.map(row => `<tr><td class="permission-step"><span class="step-order">${row.order}</span><div><strong>${row.name}</strong><small>${row.stageCode} · ${row.stageName}${row.description ? ` · ${row.description}` : ''}</small></div></td>${roles.map(role => {
-            const permission = row.permissions[role.code] || { canView: false, canProcess: false, canApprove: false, canReject: false };
+            const permission = row.permissions[role.code] || { canView: false, canApprove: false };
             row.permissions[role.code] = permission;
             return `<td class="permission-role-cell"><div class="permission-checks">${permissionTypes.map(type => `<label class="permission-check ${type.className}" title="${type.label}"><input type="checkbox" data-step="${row.id}" data-role="${role.code}" data-permission="${type.key}" ${permission[type.key] ? 'checked' : ''}><span>${type.short}</span></label>`).join('')}</div></td>`;
         }).join('')}</tr>`).join('');
@@ -98,7 +97,8 @@
         elements.save.disabled = true; elements.save.querySelector('span').textContent = 'Đang lưu...';
         const rows = state.rows.flatMap(row => state.roles.map(role => {
             const permission = row.permissions[role.code] || {};
-            return { workflowStepId: row.id, roleCode: role.code, canView: !!permission.canView, canProcess: !!permission.canProcess, canApprove: !!permission.canApprove, canReject: !!permission.canReject };
+            const canApprove = !!permission.canApprove;
+            return { workflowStepId: row.id, roleCode: role.code, canView: !!permission.canView, canProcess: canApprove, canApprove, canReject: canApprove };
         }));
         try {
             const payload = await jsonRequest(window.saveWorkflowRolePermissionsUrl, { method: 'POST', body: JSON.stringify({ workflowId: state.workflowId, rows }) });

@@ -785,14 +785,34 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             };
         }
         // lấy mã đơn theo Adid
-        public async Task<List<string>> GetMaDonByAdidAsync(string adid, int step)
+        public async Task<List<string>> GetMaDonByAdidAsync(string adid, int step, string? role)
         {
-            var sql = @"  SELECT DISTINCT CHR_MaDon FROM BaoGia_Request_of_Quotation as q
-                  inner join [BaoGia_Master_Approver_Send_Mail] as s 
-                  on q.CHR_SectionCode = s.CHR_CodeSection
-                  WHERE s.CHR_UserAdid = @Adid AND ID_StepBaoGia < @Step  AND ID_STATUS <> 'DELETE'
-                  order by CHR_MaDon";
-            var parameters = new { Adid = adid , Step = step};
+            var sql = @"
+                SELECT DISTINCT q.CHR_MaDon
+                FROM BaoGia_Request_of_Quotation q
+                INNER JOIN BaoGia_Master_Approver_Send_Mail s
+                    ON q.CHR_SectionCode = s.CHR_CodeSection
+                INNER JOIN BaoGia_WorkflowDefinition wf
+                    ON q.WorkflowID = wf.WorkflowID
+                WHERE s.CHR_UserAdid = @Adid
+                    AND q.ID_StepBaoGia < @Step
+                AND q.ID_STATUS <> 'DELETE'";
+
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                sql += @"
+                    AND UPPER(LTRIM(RTRIM(wf.FlowCode))) = UPPER(LTRIM(RTRIM(@FlowCode)))";
+            }
+
+            sql += " ORDER BY q.CHR_MaDon";
+
+            var parameters = new
+            {
+                Adid = adid,
+                Step = step,
+                FlowCode = role
+            };
+
             var maDons = await _conn.QueryAsync<string>(sql, parameters);
             return maDons.ToList();
         }

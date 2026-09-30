@@ -45,7 +45,7 @@
     }
 
     // Event Listeners
-    function initializeEventListeners() {
+    async function initializeEventListeners() {
         // Button events
         document.getElementById('pageSave')?.addEventListener('click', saveQuote);
         document.getElementById('pageSendMail')?.addEventListener('click', SendMail);
@@ -55,11 +55,33 @@
         // Exchange rate change
         elements.exchangeRateInput?.addEventListener('input', updateExchangeRate);
 
-        // Set initial exchange rate
-        updateExchangeRate();
+        // Load the exchange rate from the server before rendering prices.
+        await loadExchangeRate();
 
         // Load initial data
         loadDetailData();
+    }
+
+    async function loadExchangeRate() {
+        try {
+            const response = await fetch((window.apiBaseUrl || '') + '/InputQuotation/GetExchangeRate');
+            if (!response.ok) {
+                throw new Error(await response.text() || `HTTP ${response.status}`);
+            }
+
+            const result = await response.json();
+            const rate = Number(result?.data ?? result);
+            if (!Number.isFinite(rate) || rate <= 0) {
+                throw new Error('Tỷ giá không hợp lệ');
+            }
+
+            quoteState.exchangeRate = rate;
+            elements.exchangeRateInput.value = rate;
+        } catch (error) {
+            quoteState.exchangeRate = 24500;
+            elements.exchangeRateInput.value = quoteState.exchangeRate;
+            showAlert('warning', 'Không thể lấy tỷ giá từ máy chủ. Đang sử dụng tỷ giá mặc định 24500.');
+        }
     }
 
     // Load detail data for the current request
@@ -163,7 +185,7 @@
                 <td>${item.NVCHR_NameNCC || ''}</td>
                 <td>${item.CHR_MaHangNoiBo || ''}</td>
                 <td><input type="text" class="form-control form-control-sm" value="${item.CHR_MaHangNCC || ''}" placeholder="${window.i18nInputQuoteDetail.SupplierCode}"></td>
-                <td><input type="text" class="form-control form-control-sm ${getClassIfMismatch(item.NVCHR_TenHangHQ, requestItem?.nvchR_NameVN)}" value="${item.NVCHR_TenHangHQ || ''}"></td>
+                <td><textarea class="form-control form-control-sm quote-text-input ${getClassIfMismatch(item.NVCHR_TenHangHQ, requestItem?.nvchR_NameVN)}" rows="2">${item.NVCHR_TenHangHQ || ''}</textarea></td>
                 <td><input type="number" class="form-control form-control-sm ${getClassIfMismatch(item.INT_SoLuong, requestItem?.inT_SoLuong)}" value="${item.INT_SoLuong || 0}" step="1" min="0"></td>
                 <td><input type="text" class="form-control form-control-sm ${getClassIfMismatch(item.NVCHR_DonVi, requestItem?.nvchR_DonVi)}" value="${item.NVCHR_DonVi || ''}"></td>
                 <td><input type="text" class="form-control form-control-sm price-usd" value="${item.FL_USD}"></td>
@@ -210,9 +232,9 @@
                         <option value="Không đồng ý (not accept)" ${item.VCHR_CamKet === 'Không đồng ý (not accept)' ? 'selected' : ''}>Không đồng ý (not accept)</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control form-control-sm" value="${item.NVCHR_DeliveryTerm || ''}" placeholder="${window.i18nInputQuoteDetail.DeliveryMethod}"></td>
-                <td><input type="text" class="form-control form-control-sm" value="${item.NVCHR_PaymentTerm || ''}" placeholder="${window.i18nInputQuoteDetail.PaymentCondition}"></td>
-                <td><input type="text" class="form-control form-control-sm" value="${item.NVCHR_File || ''}" placeholder="${window.i18nInputQuoteDetail.Attachment}"></td>
+                <td><textarea class="form-control form-control-sm quote-text-input" rows="2" placeholder="${window.i18nInputQuoteDetail.DeliveryMethod}">${item.NVCHR_DeliveryTerm || ''}</textarea></td>
+                <td><textarea class="form-control form-control-sm quote-text-input" rows="2" placeholder="${window.i18nInputQuoteDetail.PaymentCondition}">${item.NVCHR_PaymentTerm || ''}</textarea></td>
+                <td><textarea class="form-control form-control-sm quote-text-input" rows="2" placeholder="${window.i18nInputQuoteDetail.Attachment}">${item.NVCHR_File || ''}</textarea></td>
                 <td><input type="date" class="form-control form-control-sm" value="${item.DTM_EffectiveDate ? new Date(item.DTM_EffectiveDate).toISOString().split('T')[0] : ''}"></td>
                 <td><input type="date" class="form-control form-control-sm" value="${item.DTM_ExpiryDate ? new Date(item.DTM_ExpiryDate).toISOString().split('T')[0] : ''}"></td>
             `;
@@ -260,32 +282,53 @@
             anToanSelect.addEventListener('change', () => updateSelectHighlight(anToanSelect, requestItem?.nvchR_AnToan));
             camKetSelect.addEventListener('change', () => updateCamKetHighlight(camKetSelect));
 
-            //// Attach event listeners for price calculation
-            //const usdInput = row.querySelector('.price-usd');
-            //const vndInput = row.querySelector('.price-vnd');
-            //usdInput.addEventListener('input', () => {
-            //    const val = parseFloat(usdInput.value) || 0;
-            //    if (val <= 0) {
-            //        showAlert('warning', window.i18nInputQuoteDetail.PriceMustBeGreaterThanZero);
-            //        usdInput.value = 0;
-            //    }
-            //    vndInput.value = (parseFloat(usdInput.value) || 0) * quoteState.exchangeRate;
-            //});
-            //// Set initial VND value
-            //vndInput.value = (parseFloat(usdInput.value) || 0) * quoteState.exchangeRate;
+            attachPriceConversion(row);
         });
+    }
+
+    function roundPrice(value) {
+        return Number.isFinite(value) ? Number(value.toFixed(4)) : 0;
+    }
+
+    function attachPriceConversion(row) {
+        const usdInput = row.querySelector('.price-usd');
+        const vndInput = row.querySelector('.price-vnd');
+        if (!usdInput || !vndInput) return;
+
+        usdInput.addEventListener('input', () => {
+            const usd = parseFloat(usdInput.value);
+            vndInput.value = Number.isFinite(usd)
+                ? roundPrice(usd * quoteState.exchangeRate)
+                : '';
+        });
+
+        vndInput.addEventListener('input', () => {
+            const vnd = parseFloat(vndInput.value);
+            usdInput.value = Number.isFinite(vnd) && quoteState.exchangeRate > 0
+                ? roundPrice(vnd / quoteState.exchangeRate)
+                : '';
+        });
+
+        const usd = parseFloat(usdInput.value);
+        const vnd = parseFloat(vndInput.value);
+        if (Number.isFinite(usd) && usd > 0) {
+            vndInput.value = roundPrice(usd * quoteState.exchangeRate);
+        } else if (Number.isFinite(vnd) && vnd > 0) {
+            usdInput.value = roundPrice(vnd / quoteState.exchangeRate);
+        }
     }
 
     // Update exchange rate and recalculate VND prices
     function updateExchangeRate() {
-        const newRate = parseFloat(elements.exchangeRateInput.value) || 24500;
+        const newRate = parseFloat(elements.exchangeRateInput.value) || quoteState.exchangeRate || 24500;
         quoteState.exchangeRate = newRate;
         // Recalculate all VND prices
         const usdInputs = document.querySelectorAll('.price-usd');
         usdInputs.forEach(usd => {
             const vndInput = usd.closest('td').nextElementSibling.querySelector('.price-vnd');
             if (vndInput) {
-                vndInput.value = (parseFloat(usd.value) || 0) * newRate;
+                const value = parseFloat(usd.value);
+                vndInput.value = Number.isFinite(value) ? roundPrice(value * newRate) : '';
             }
         });
     }
@@ -337,8 +380,8 @@
             if (usd <= 0 && vnd <= 0) {
                 errors.push(`Dòng ${rowNumber}: phải nhập giá USD hoặc VND`);
             } else {
-                item.FL_USD = usd > 0 ? usd : vnd / exchangeRate;
-                item.FL_VND = vnd > 0 ? vnd : usd * exchangeRate;
+                item.FL_USD = usd > 0 ? roundPrice(usd) : roundPrice(vnd / exchangeRate);
+                item.FL_VND = vnd > 0 ? roundPrice(vnd) : roundPrice(usd * exchangeRate);
             }
 
             if (!item.VCHR_CamKet) errors.push(`Dòng ${rowNumber}: cam kết là bắt buộc`);

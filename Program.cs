@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PRJ_WAREHOUSE_BIVN.Common;
@@ -17,6 +18,19 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
+
+var applicationInstanceId = Guid.NewGuid().ToString("N");
+builder.Configuration["ApplicationInstanceId"] = applicationInstanceId;
+
+var dataProtectionKeysPath = builder.Configuration["DataProtection:KeysPath"]
+    ?? Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        "PRJ_WAREHOUSE_BIVN",
+        "DataProtection-Keys");
+Directory.CreateDirectory(dataProtectionKeysPath);
+builder.Services.AddDataProtection()
+    .SetApplicationName("PRJ_WAREHOUSE_BIVN")
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddControllersWithViews()
@@ -53,12 +67,22 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login"; // Đường dẫn đến trang login
         options.LogoutPath = "/Account/Logout"; // Đường dẫn logout
         options.AccessDeniedPath = "/Account/AccessDenied"; // Đường dẫn khi bị từ chối truy cập
-        options.ExpireTimeSpan = TimeSpan.FromHours(10); // Thời gian hết hạn cookie 3 tiếng
-        options.SlidingExpiration = true; // Gia hạn cookie khi user hoạt động
+        options.ExpireTimeSpan = TimeSpan.FromDays(3650);
+        options.SlidingExpiration = false;
         options.Cookie.Name = ".PRJ_WAREHOUSE_BIVN.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Events.OnValidatePrincipal = context =>
+        {
+            var cookieInstanceId = context.Principal?.FindFirst("ApplicationInstanceId")?.Value;
+            if (!string.Equals(cookieInstanceId, applicationInstanceId, StringComparison.Ordinal))
+            {
+                context.RejectPrincipal();
+            }
+
+            return Task.CompletedTask;
+        };
     });
 
 // Cấu hình DbContext với SQL Server
@@ -114,26 +138,6 @@ var localizationOptions = new RequestLocalizationOptions()
 // Thêm middleware cho session và authentication
 app.UseSession();
 app.UseAuthentication(); // Phải đặt trước UseAuthorization
-// Tự động xóa cookie khi hết phiên đăng nhập (session hết hạn)
-app.Use(async (context, next) =>
-{
-    if (context.User?.Identity?.IsAuthenticated == true)
-    {
-        // Kiểm tra session còn tồn tại không
-        var hasSession = !string.IsNullOrEmpty(context.Session.GetString("UserId"));
-        if (!hasSession)
-        {
-            // Xóa thông tin đăng nhập (cookie auth) khi session hết hạn
-            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            // Đưa người dùng về trang đăng nhập
-            var loginUrl = $"{context.Request.PathBase}/Account/Login";
-            context.Response.Redirect(loginUrl);
-            return;
-        }
-    }
-    await next();
-});
 app.UseAuthorization();
 
 

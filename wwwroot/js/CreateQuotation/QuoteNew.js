@@ -2,6 +2,11 @@
     'use strict';
 
     const $ = id => document.getElementById(id);
+    const T = key => window.i18nQuote?.[key] || key;
+    const format = (key, ...values) => values.reduce(
+        (message, value, index) => message.replace(`{${index}}`, value),
+        T(key)
+    );
 
     const getModalController = modal => {
         const { bootstrap, jQuery } = window;
@@ -39,7 +44,7 @@
     const readJsonResponse = async response => {
         if (!response.ok) {
             const message = await response.text().catch(() => response.statusText);
-            throw new Error(message || response.statusText || 'Không thể tải dữ liệu');
+            throw new Error(message || response.statusText || T('CannotLoadData'));
         }
 
         return response.json();
@@ -73,7 +78,7 @@
         const field = $(id);
         const valid = valueOf(id) !== '';
         setInvalid(field, !valid);
-        if (!valid) errors.push(`${name} không được để trống.`);
+        if (!valid) errors.push(format('RequiredField', name));
     };
 
     const normalizeSearchValue = value => String(value ?? '')
@@ -118,8 +123,8 @@
 
         if (result) {
             result.textContent = hasFilter
-                ? `Hiển thị ${items.length}/${quoteItems.length} mặt hàng`
-                : (quoteItems.length ? `Tổng số: ${quoteItems.length} mặt hàng` : '');
+                ? `${T('Showing')} ${items.length}/${quoteItems.length} ${T('Items')}`
+                : (quoteItems.length ? `${T('Total')}: ${quoteItems.length} ${T('Items')}` : '');
         }
 
         if (paginationInfo) {
@@ -128,7 +133,7 @@
 
         if (pageInfo) {
             pageInfo.textContent = items.length
-                ? `Hiển thị ${startIndex + 1}-${Math.min(startIndex + rowsPerPage, items.length)} / ${items.length}`
+                ? `${T('Showing')} ${startIndex + 1}-${Math.min(startIndex + rowsPerPage, items.length)} / ${items.length}`
                 : '';
         }
 
@@ -146,7 +151,7 @@
         nextPage?.classList.toggle('disabled', currentPage >= totalPages);
 
         if (!pageItems.length) {
-            const message = hasFilter ? 'Không tìm thấy mặt hàng phù hợp' : 'Không có dữ liệu';
+            const message = hasFilter ? T('NoMatchingItem') : T('NoData');
             body.innerHTML = `<tr><td colspan="15" class="text-center text-muted py-4">${message}</td></tr>`;
             return;
         }
@@ -163,7 +168,7 @@
             <td class="text-center">${escapeHtml(item.unit)}</td>
             <td class="text-center">${escapeHtml(item.supplierDeadline)}</td>
             <td class="text-center">${escapeHtml(item.desiredDate)}</td>
-            <td class="text-center">${item.urgent ? 'Có' : 'Không'}</td>
+            <td class="text-center">${item.urgent ? T('Yes') : T('No')}</td>
             <td class="text-center">${escapeHtml(item.suppliers.filter(s => s.selected).map(s => s.code).join(', '))}</td>
            <td class="text-center">
                 <button type="button"
@@ -184,7 +189,7 @@
     const validateAndCollect = () => {
         const errors = [];
         ['selectPhanLoai', 'selectChungLoai', 'selectType', 'selectTenVN', 'selectTenEN', 'selectSoLuong', 'editDonVi', 'NgayMuonNhan', 'LuaChonNcc']
-            .forEach((id, index) => required(id, ['Phân loại hàng', 'Chủng loại hàng', 'Loại hàng xin báo giá', 'Tên tiếng Việt', 'Tên tiếng Anh', 'Số lượng', 'Đơn vị', 'Ngày muốn nhận hàng', 'Hạn chọn nhà cung cấp'][index], errors));
+            .forEach((id, index) => required(id, [T('Classification'), T('Category'), T('QuotationType'), T('NameVN'), T('NameEN'), T('Quantity'), T('Unit'), T('DesiredDate'), T('SupplierDeadline')][index], errors));
         const suppliers = Array.from(document.querySelectorAll('#supplierTableBody tr')).filter(row => row.querySelector('.supplier-quote-checkbox')).map(row => ({
             code: row.querySelector('input[name^="supplierCode_"]')?.value || '',
             name: row.cells[2]?.textContent.trim() || '',
@@ -260,7 +265,9 @@
             msds: valueOf('selectMSDS'),
             safety: valueOf('selectAnToan'),
             boxLink: valueOf('LinkBox'),
-            suppliers
+             suppliers,
+             designFile: $('FileThietKe')?.files?.[0] || null,
+             imageFile: $('LinkHinhAnh')?.files?.[0] || null
         } };
     };
 
@@ -283,7 +290,7 @@
 
         const option = Array.from(field.options).find(item => item.value === field.value);
         button.querySelector('.ms-values').textContent = option?.textContent || '';
-        button.querySelector('.ms-placeholder').textContent = option ? '' : '-- Chọn --';
+                button.querySelector('.ms-placeholder').textContent = option ? '' : `-- ${T('SelectPlaceholder')} --`;
     };
 
     const fillMaterialFields = material => {
@@ -343,12 +350,12 @@
                 <td class="text-center supplier-checkbox-cell">
                     <input type="checkbox" class="form-check-input supplier-quote-checkbox"
                            name="supplierQuote_${index}" value="true" checked
-                           aria-label="Lấy báo giá từ ${escapeHtml(name)}">
+                           aria-label="${escapeHtml(T('GetQuotation'))} ${escapeHtml(name)}">
                     <input type="hidden" name="supplierCode_${index}" value="${escapeHtml(code)}">
                 </td>
                 <td>
                     <textarea type="text" class="form-control form-control-sm supplier-reason"
-                           name="supplierReason_${index}" placeholder="Nhập lý do không lấy báo giá" disabled></textarea>
+                           name="supplierReason_${index}" placeholder="${escapeHtml(T('EnterRejectReason'))}" disabled></textarea>
                 </td>`;
             body.appendChild(row);
         });
@@ -382,7 +389,7 @@
             const materials = getResponseData(await readJsonResponse(response));
             fillMaterialFields(materials[0]);
         } catch (error) {
-            console.error('Không thể tải thông tin mặt hàng', error);
+            console.error(T('CannotLoadMaterials'), error);
         }
     };
 
@@ -400,9 +407,9 @@
             renderSuppliers(suppliers);
             return suppliers;
         } catch (error) {
-            console.error('Không thể tải danh sách nhà cung cấp', error);
+            console.error(T('CannotLoadSuppliers'), error);
             const body = $('supplierTableBody');
-            if (body) body.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Không thể tải danh sách nhà cung cấp</td></tr>';
+            if (body) body.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">${escapeHtml(T('SupplierLoadFailed'))}</td></tr>`;
             return [];
         }
     };
@@ -411,10 +418,10 @@
         const title = $('addInforModalLabel');
         const saveButton = $('btnSaveHistoryEdit');
 
-        if (title) title.textContent = editing ? 'Chỉnh sửa mặt hàng báo giá' : 'Thêm mặt hàng báo giá';
+        if (title) title.textContent = editing ? T('EditQuotationItem') : T('AddQuotationItem');
         if (saveButton) saveButton.innerHTML = editing
-            ? '<i class="fas fa-save me-1"></i> Cập nhật thông tin'
-            : '<i class="fas fa-save me-1"></i> Lưu thông tin';
+            ? `<i class="fas fa-save me-1"></i> ${T('UpdateInformation')}`
+            : `<i class="fas fa-save me-1"></i> ${T('SaveInformation')}`;
     };
 
     const applySupplierValues = suppliers => {
@@ -539,6 +546,11 @@
             if (editingQuoteIndex === null) {
                 quoteItems.push(result.item);
             } else {
+                const previous = quoteItems[editingQuoteIndex];
+                result.item.designFile ??= previous?.designFile || null;
+                result.item.imageFile ??= previous?.imageFile || null;
+                result.item.designFilePath ??= previous?.designFilePath || null;
+                result.item.imageFilePath ??= previous?.imageFilePath || null;
                 quoteItems[editingQuoteIndex] = result.item;
             }
             currentPage = Math.ceil(quoteItems.length / rowsPerPage) || 1;
@@ -634,6 +646,8 @@
                 msds: getImportedField(item, 'NVCHR_MSDS', 'MSDS'),
                 safety: getImportedField(item, 'NVCHR_AnToan', 'AnToan', 'Safety'),
                 boxLink: getImportedField(item, 'Link_box', 'LinkBox', 'BoxLink'),
+                designFilePath: getImportedField(item, 'NVCHR_FileThietKe', 'FileThietKe', 'DesignFilePath'),
+                imageFilePath: getImportedField(item, 'CHR_LinkImage', 'LinkImage', 'ImageFilePath'),
                 suppliers: importedVendors.length
                     ? importedVendors.map(mapImportedSupplier)
                     : (singleVendorCode ? [mapImportedSupplier(item)] : [])
@@ -642,7 +656,7 @@
 
         const importExcelFile = async file => {
             if (!file) {
-                throw new Error('Vui lòng chọn file Excel để import');
+                throw new Error(T('SelectExcelFile'));
             }
 
             const formData = new FormData();
@@ -665,16 +679,16 @@
                     link.click();
                     link.remove();
                     window.URL.revokeObjectURL(objectUrl);
-                    throw new Error('File có lỗi dữ liệu. File lỗi đã được tải xuống, vui lòng kiểm tra cột Thông tin lỗi.');
+                    throw new Error(T('InvalidQuotationFile'));
                 }
 
                 const message = await response.text().catch(() => response.statusText);
-                throw new Error(message || response.statusText || 'Import file thất bại');
+                throw new Error(message || response.statusText || T('ImportFailed'));
             }
 
             const importedItems = getResponseData(await response.json());
             if (!Array.isArray(importedItems) || !importedItems.length) {
-                throw new Error('File không có dữ liệu hợp lệ');
+                throw new Error(T('NoValidData'));
             }
 
             quoteItems = importedItems.map(mapImportedItem);
@@ -760,6 +774,8 @@
             NVCHR_NguoiNhan: item.receiver || null,
             CHR_SDT: item.receiverPhone || null,
             Link_box: item.boxLink || null,
+            NVCHR_FileThietKe: item.designFilePath || null,
+            CHR_LinkImage: item.imageFilePath || null,
             Vendors: (item.suppliers || []).map(supplier => ({
                 MaNcc: supplier.code || null,
                 TenNcc: supplier.name || null,
@@ -780,7 +796,7 @@
 
         const downloadExportedTable = async () => {
             if (!quoteItems.length) {
-                throw new Error('Danh sách báo giá trống');
+                throw new Error(T('EmptyQuotationList'));
             }
 
             const response = await fetch(getApiUrl('/Quote/ExportExcel'), {
@@ -791,7 +807,7 @@
 
             if (!response.ok) {
                 const message = await response.text().catch(() => response.statusText);
-                throw new Error(message || response.statusText || 'Xuất file thất bại');
+                throw new Error(message || response.statusText || T('ExportFailed'));
             }
 
             const blob = await response.blob();
@@ -805,7 +821,7 @@
             window.URL.revokeObjectURL(objectUrl);
         };
 
-        window.showQuoteLoading = (message = 'Đang xử lý...') => {
+        window.showQuoteLoading = (message = T('Processing')) => {
             if (!loading) return;
 
             messageEl && (messageEl.textContent = message);
@@ -821,13 +837,13 @@
             loading.setAttribute('aria-hidden', 'true');
 
             if (messageEl) {
-                messageEl.textContent = 'Đang xử lý...';
+                messageEl.textContent = T('Processing');
             }
         };
 
         $('btnDownloadExcel')?.addEventListener('click', () => {
             try {
-                showQuoteLoading('Đang tải file mẫu...');
+                showQuoteLoading(T('DownloadTemplate'));
 
                 const link = document.createElement('a');
                 link.href = `${window.apiBaseUrl || ''}/template/TemplateQuationN.xlsx`;
@@ -843,11 +859,11 @@
 
         $('btnExportTablefile')?.addEventListener('click', async () => {
             try {
-                showQuoteLoading('Đang xuất dữ liệu bảng...');
+                showQuoteLoading(T('TableExporting'));
                 await downloadExportedTable();
             } catch (error) {
                 console.error('Error exporting quote table', error);
-                showQuoteNotification(error.message || 'Không thể xuất dữ liệu bảng');
+                showQuoteNotification(error.message || T('TableExportFailed'));
             } finally {
                 hideQuoteLoading();
             }
@@ -865,11 +881,11 @@
                 if (!file) return;
 
                 try {
-                    showQuoteLoading('Đang nhập dữ liệu bảng...');
+                    showQuoteLoading(T('ExcelImporting'));
                     await importExcelFile(file);
                 } catch (error) {
                     console.error('Error importing quote table', error);
-                    showQuoteNotification(error.message || 'Không thể import dữ liệu Excel');
+                    showQuoteNotification(error.message || T('ExcelImportFailed'));
                 } finally {
                     hideQuoteLoading();
                 }
@@ -896,12 +912,29 @@
         };
 
         const sendQuotation = async approval => {
-            if (!approval) throw new Error('Vui lòng chọn người phê duyệt.');
+            if (!approval) throw new Error(T('SelectApproverPrompt'));
+
+            const payload = buildInsertPayload(approval);
+            const formData = new FormData();
+            const fileManifest = [];
+
+            quoteItems.forEach((item, itemIndex) => {
+                for (const [kind, file] of [
+                    ['design', item.designFile],
+                    ['image', item.imageFile]
+                ]) {
+                    if (!file) continue;
+                    formData.append('Files', file, file.name);
+                    fileManifest.push({ itemIndex, kind });
+                }
+            });
+
+            formData.append('Items', JSON.stringify(payload));
+            formData.append('FileManifest', JSON.stringify(fileManifest));
 
             const response = await fetch(getApiUrl('/Quote/InsertQuotation'), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(buildInsertPayload(approval))
+                body: formData
             });
             await readJsonResponse(response);
             clearQuoteItems();
@@ -911,41 +944,41 @@
         $('btnSendQuotation')?.addEventListener('click', async () => {
             const sectionCode = valueOf('searchPhongBan');
             if (!sectionCode) {
-                showQuoteNotification('Vui lòng chọn mã chi phí.');
+                showQuoteNotification(T('SelectCostCenterRequired'));
                 return;
             }
             if (!valueOf('selectSection')) {
-                showQuoteNotification('Vui lòng chọn phòng ban xin báo giá.');
+                showQuoteNotification(T('SelectDepartmentRequired'));
                 return;
             }
-            if (!valueOf('selectType')) {
-                showQuoteNotification('Vui lòng chọn loại hàng.');
-                return;
-            }
+            //if (!valueOf('selectType')) {
+            //    showQuoteNotification('Vui lòng chọn loại hàng.');
+            //    return;
+            //}
             if (!quoteItems.length) {
-                showQuoteNotification('Danh sách báo giá trống.');
+                showQuoteNotification(T('EmptyQuotationList'));
                 return;
             }
 
             const approverSelect = $('quoteApproverSelect');
             const approverModal = $('quoteApproverModal');
             try {
-                showQuoteLoading('Đang tải danh sách người phê duyệt...');
+                showQuoteLoading(T('LoadingList'));
                 const response = await fetch(getApiUrl('/Quote/GetListApprovel'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ Step: 2, SectionCost: sectionCode })
                 });
                 const approvers = getResponseData(await readJsonResponse(response));
-                approverSelect.innerHTML = '<option value="">Chọn người phê duyệt</option>';
+                approverSelect.innerHTML = `<option value="">${T('SelectApprover')}</option>`;
                 approvers.forEach(approver => {
                     const value = getApproverValue(approver);
                     if (value) approverSelect.add(new Option(getApproverText(approver), value));
                 });
-                if (approverSelect.options.length === 1) throw new Error('Không tìm thấy người phê duyệt phù hợp.');
+                if (approverSelect.options.length === 1) throw new Error(T('NoApprover'));
                 getModalController(approverModal)?.show();
             } catch (error) {
-                showQuoteNotification(error.message || 'Không thể tải danh sách người phê duyệt.');
+                showQuoteNotification(error.message || T('ApproverLoadFailed'));
             } finally {
                 hideQuoteLoading();
             }
@@ -953,12 +986,12 @@
 
         $('btnConfirmSendQuotation')?.addEventListener('click', async () => {
             try {
-                showQuoteLoading('Đang lưu yêu cầu báo giá...');
+                showQuoteLoading(T('SavingQuotation'));
                 await sendQuotation(valueOf('quoteApproverSelect'));
                 closeQuoteModal($('quoteApproverModal'));
-                showQuoteNotification('Đã gửi yêu cầu báo giá thành công.', 'success');
+                showQuoteNotification(T('QuotationSent'), 'success');
             } catch (error) {
-                showQuoteNotification(error.message || 'Không thể lưu yêu cầu báo giá.');
+                showQuoteNotification(error.message || T('SaveFailed'));
             } finally {
                 hideQuoteLoading();
             }
@@ -984,14 +1017,14 @@
             ];
 
             try {
-                showQuoteLoading('Đang tải dữ liệu master...');
+                showQuoteLoading(T('MasterLoading'));
 
                 for (const endpoint of endpoints) {
                     const response = await fetch(endpoint.url, { method: 'GET' });
 
                     if (!response.ok) {
                         const responseText = await response.text().catch(() => response.statusText);
-                        throw new Error(responseText || response.statusText || 'Xuất file thất bại');
+                        throw new Error(responseText || response.statusText || T('ExportFailed'));
                     }
 
                     const blob = await response.blob();

@@ -658,20 +658,28 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 var get_phongban = db.ReturnString("select [Name] from DEPARTMENT as a left join REQUEST_DETAIL as b on a.Cost_Center = b.Phongchiuchiphi where Id_RequestDetail = '" + request_detail.Rows[i]["Id_RequestDetail"].ToString() + "'");
 
+                var get_price = db.ReturnString($"select Price from MATERIAL where Material_Code ='{request_detail.Rows[i]["Material_Code"].ToString()}'");
+                var get_tigia = db.ReturnString($"select Exchange_rate from REQUEST where Id_Request ='{iD_REQUEST}'");
+                float total = float.Parse(get_price) * float.Parse(request_detail.Rows[i]["Amount"].ToString()!);
+                if (request_detail.Rows[i]["Currency"].ToString() == "VND")
+                {
+                    total = total / float.Parse(get_tigia);
+                }
                 rq_dt.Add(new Models.REQUEST_DETAIL
                 {
                     Material_Name = request_detail.Rows[i]["Material_Code"].ToString() + ":" + request_detail.Rows[i]["Material_Name"].ToString(),
                     Account_Code = request_detail.Rows[i]["Account_Code"].ToString() + ":" + request_detail.Rows[i]["Account_Name"].ToString(),
                     Amount = float.Parse(request_detail.Rows[i]["Amount"].ToString()!),
                     Unit = request_detail.Rows[i]["Unit"].ToString(),
-                    Price = float.Parse(request_detail.Rows[i]["Price"].ToString()!),
+                    Price = float.Parse(get_price),
                     Currency = request_detail.Rows[i]["Currency"].ToString(),
-                    Total_exchange = float.Parse(request_detail.Rows[i]["Total_exchange"].ToString()!),
+                    Total_exchange = float.Parse(get_price) * float.Parse(request_detail.Rows[i]["Amount"].ToString()!),
                     Aim = request_detail.Rows[i]["Aim"].ToString(),
                     Phongchiuchiphi = request_detail.Rows[i]["Phongchiuchiphi"].ToString() + ":" + get_phongban.ToString(),
                     Vitri = request_detail.Rows[i]["Vitri"].ToString(),
                     Poisition = request_detail.Rows[i]["Poisition"].ToString(),
-                    Id_RequestDetail = int.Parse(request_detail.Rows[i]["Id_RequestDetail"].ToString()!)
+                    Id_RequestDetail = int.Parse(request_detail.Rows[i]["Id_RequestDetail"].ToString()!),
+                    Total = total
                 });
             }
             return rq_dt;
@@ -686,7 +694,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             List<Models.REQUEST> rq_dt = new List<Models.REQUEST>();
             var get_namesec = request_detail.Rows[0]["Cost_Center"].ToString();
             for (int i = 0; i < request_detail.Rows.Count; i++)
-            {
+            {      
                 rq_dt.Add(new Models.REQUEST
                 {
                     Code_Request = request_detail.Rows[i]["Code_Request"].ToString(),

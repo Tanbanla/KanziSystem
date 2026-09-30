@@ -35,6 +35,16 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 return result;
             }
 
+            var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty)
+                .TrimEnd('/', '\\');
+
+            if (IsFileAlreadyInUploadFolder(sourcePath, uploadFolder))
+            {
+                result.Success = true;
+                result.Data = sourcePath.Trim().Trim('"', '\'');
+                return result;
+            }
+
             var candidates = new List<(string Value, bool IsQuoted)>();
             var quoteMatches = System.Text.RegularExpressions.Regex.Matches(sourcePath, "\"([^\"]+)\"|'([^']+)'");
             foreach (System.Text.RegularExpressions.Match match in quoteMatches)
@@ -74,7 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             var savedFiles = new List<(string InputPath, string FileUrl)>();
             var processedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
 
             foreach (var candidate in candidates)
             {
@@ -94,7 +104,6 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                 try
                 {
-                    var uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
                     if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
 
                     var fileName = Path.GetFileName(p) ?? (Guid.NewGuid().ToString() + ".dat");
@@ -141,6 +150,28 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             result.Success = true;
             return result;
         }
+
+        private static bool IsFileAlreadyInUploadFolder(string sourcePath, string uploadFolder)
+        {
+            if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(uploadFolder))
+                return false;
+
+            try
+            {
+                var normalizedSource = Path.GetFullPath(sourcePath.Trim().Trim('"', '\''))
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                var normalizedUploadFolder = Path.GetFullPath(uploadFolder)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                var folderPrefix = normalizedUploadFolder + Path.DirectorySeparatorChar;
+
+                return normalizedSource.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase)
+                    && File.Exists(normalizedSource);
+            }
+            catch
+            {
+                return false;
+            }
+        }
        
         private static string ReplaceFirstIgnoreCase(string input, string oldValue, string newValue)
         {
@@ -183,7 +214,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             try
             {
                 string uploadFolder = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/', '\\');
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
                 var inputPaths = new List<string>();
 
                 var quoteMatches = System.Text.RegularExpressions.Regex.Matches(filePath, "\"([^\"]+)\"|'([^']+)'");

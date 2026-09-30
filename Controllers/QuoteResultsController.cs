@@ -1103,7 +1103,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (searchModel == null) return BadRequest(_localizer["SearchInputMissing"].Value);
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
-                searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM,searchModel.status, searchModel.pageSize, searchModel.pageIndex);
+                searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM,searchModel.status,GetRolesUser(), searchModel.pageSize, searchModel.pageIndex);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1713,7 +1713,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<string>> LoadMadonAsync(int step)
         {
-            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step);
+            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step, GetRolesUser() ?? "USER");
             return madons.Data ?? new List<string>();
         }
 

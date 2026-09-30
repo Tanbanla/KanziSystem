@@ -425,7 +425,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             var khoi = "";
             if (checkus == "PUR") { khoi = "AND (a.Group_Code = 'PUR' OR a.Group_Code = 'PROD')"; }
-            if (checkus == "GA") { khoi = "AND Group_Code = 'GA'"; }
+            if (checkus == "GA") { khoi = "AND a.Group_Code = 'GA'"; }
 
             var get_sec = sql.ReturnString($"SELECT CHR_SECTION FROM [TM_USER] where CHR_USERID = '{us}'");
             var hientheophongban = "";
@@ -3710,7 +3710,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Json(damnhiem);
         }
-        public JsonResult List_NCCtheodamnhiem(string tendamnhiem, string danhmuc)
+        public JsonResult List_NCCtheodamnhiem(string tendamnhiem, string danhmuc, string mahang)
         {
             if(danhmuc == "ngoai") { danhmuc = "OUT"; } else { danhmuc = "IN"; };
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
@@ -3728,6 +3728,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                   AND a.Luongvekho IS NULL 
                   AND a.Luongvethucte IS NULL
                   AND c.Damnhiem = N'{tendamnhiem}'
+                  AND a.Mahang like N'%{mahang}%'
                 GROUP BY a.TenNCC");
             List<string> damnhiem = new List<string>();
             for (int i = 0; i < lt.Rows.Count; i++)

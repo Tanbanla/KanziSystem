@@ -215,7 +215,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
         private async Task<List<string>> LoadMadonAsync(int step)
         {
-            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step);
+            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step, "");
             return madons.Data ?? new List<string>();
         }
 
@@ -855,34 +855,79 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             return BadRequest("Bug insert confirmName: " + (rp.Message ?? "Unknown error"));
                         }
 
+                        var listIdSendMail = listDifferent.Select(d => d.ID).ToList();
+
                         _ = Task.Run(async () =>
                         {
                             using (var scope = _serviceScopeFactory.CreateScope())
                             {
                                 try
                                 {
-                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
-                                    var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
-
-                                    //danh sach PIC
-                                    var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
-                                    if (!result.Success)
+                                    var listRequest = await _confirmNameService.SearchSendMailConfirmNameAsync(listIdSendMail);
+                                    if (!listRequest.Success || listRequest.Data == null)
                                     {
-                                        _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
+                                        _logger.LogError("Không lấy được thông tin nhà cung cấp để gửi mail: " + listRequest.Message);
+                                        return;
                                     }
-                                    var dataPic = result.Data;
-                                    string emailList = string.Join("; ", dataPic.Select(x => x.CHR_UserAdid + "@brothergroup.net"));
 
-                                    // gửi mail thông báo có yêu cầu xác nhận tên mới
-                                    var emailResult = await sendMailService.SendMailAsync(
-                                        emailList,
-                                        string.Empty,
-                                        21,
-                                        "Material/ConfirmName",
-                                        true,
-                                        "",
-                                        "",
-                                        "");
+                                    var sendMailService = scope.ServiceProvider.GetRequiredService<ISendMailService>();
+
+                                    var domesticRequests = listRequest.Data
+                                        .Where(x => string.Equals(x.Khuvuc?.Trim(), "Domestic", StringComparison.OrdinalIgnoreCase))
+                                        .ToList();
+                                    var nonDomesticRequests = listRequest.Data
+                                        .Where(x => !string.Equals(x.Khuvuc?.Trim(), "Domestic", StringComparison.OrdinalIgnoreCase))
+                                        .ToList();
+
+                                    // Nhà cung cấp Domestic vẫn gửi mail yêu cầu PIC xác nhận tên mới.
+                                    if (domesticRequests.Any())
+                                    {
+                                        var approverService = scope.ServiceProvider.GetRequiredService<IMasterApproverSendMailService>();
+                                        var result = await approverService.GetApproverByStepAndSectionAsync(4, "3110");
+                                        if (!result.Success || result.Data == null)
+                                        {
+                                            _logger.LogError("Không lấy được thông tin PIC phụ trách: " + result.Message);
+                                        }
+                                        else
+                                        {
+                                            var emailList = string.Join("; ", result.Data
+                                                .Select(x => x.CHR_UserAdid + "@brothergroup.net")
+                                                .Distinct(StringComparer.OrdinalIgnoreCase));
+
+                                            if (!string.IsNullOrWhiteSpace(emailList))
+                                            {
+                                                await sendMailService.SendMailAsync(
+                                                    emailList,
+                                                    string.Empty,
+                                                    21,
+                                                    "Material/ConfirmName",
+                                                    true,
+                                                    "",
+                                                    "",
+                                                    "");
+                                            }
+                                        }
+                                    }
+
+                                    // Nhà cung cấp không phải Domestic đã hoàn thành xác nhận tên hải quan.
+                                    foreach (var item in nonDomesticRequests)
+                                    {
+                                        if (string.IsNullOrWhiteSpace(item.UserCreate))
+                                        {
+                                            _logger.LogWarning("Không gửi được mail hoàn thành vì đơn {MaDon} không có người tạo.", item.MaDon);
+                                            continue;
+                                        }
+
+                                        await sendMailService.SendMailAsync(
+                                            item.UserCreate + "@brothergroup.net",
+                                            string.Empty,
+                                            23,
+                                            "SelectQuote/SelectQuoteSection",
+                                            true,
+                                            item.Section,
+                                            item.MaDon,
+                                            item.UserCreate);
+                                    }
                                 }
                                 catch (Exception ex)
                                 {

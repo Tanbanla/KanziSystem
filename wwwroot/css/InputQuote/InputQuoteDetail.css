@@ -1,0 +1,110 @@
+/* Input quotation table */
+.quote-input-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quote-exchange-rate {
+    width: 260px;
+}
+
+.quote-input-hint {
+    color: #5c6773;
+    background: #f8f9fa;
+    border-left: 3px solid #0d6efd;
+    padding: .5rem .75rem;
+    margin-bottom: .75rem;
+    font-size: .82rem;
+}
+
+.quote-input-table-wrapper {
+    max-height: 620px;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+}
+
+#quoteInputTable {
+    min-width: 2850px;
+    margin-bottom: 0;
+    table-layout: auto;
+    font-size: .82rem;
+}
+
+#quoteInputTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    min-width: 105px;
+    padding: .65rem .5rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+    vertical-align: middle;
+    background: #e9ecef;
+    box-shadow: 0 1px 0 #adb5bd;
+}
+
+#quoteInputTable thead th:nth-child(1) { min-width: 48px; }
+#quoteInputTable thead th:nth-child(2) { min-width: 180px; }
+#quoteInputTable thead th:nth-child(3) { min-width: 190px; }
+#quoteInputTable thead th:nth-child(4) { min-width: 180px; }
+#quoteInputTable thead th:nth-child(5) { min-width: 260px; }
+#quoteInputTable thead th:nth-child(6) { min-width: 95px; }
+#quoteInputTable thead th:nth-child(7) { min-width: 110px; }
+#quoteInputTable thead th:nth-child(8),
+#quoteInputTable thead th:nth-child(9) { min-width: 145px; }
+#quoteInputTable thead th:nth-child(10),
+#quoteInputTable thead th:nth-child(11) { min-width: 125px; }
+#quoteInputTable thead th:nth-child(18),
+#quoteInputTable thead th:nth-child(19) { min-width: 190px; }
+#quoteInputTable thead th:nth-child(20) { min-width: 230px; }
+
+#quoteInputTable tbody td {
+    min-width: 105px;
+    padding: .45rem .4rem;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#quoteInputTable tbody td:nth-child(1) { min-width: 48px; }
+#quoteInputTable tbody td:nth-child(3),
+#quoteInputTable tbody td:nth-child(4),
+#quoteInputTable tbody td:nth-child(5) { min-width: 180px; }
+#quoteInputTable tbody td:nth-child(6) { min-width: 260px; }
+
+#quoteInputTable input,
+#quoteInputTable select,
+#quoteInputTable textarea {
+    width: 100%;
+    min-height: 38px;
+    padding: .45rem .55rem;
+    font-size: .82rem;
+    line-height: 1.25;
+}
+
+#quoteInputTable textarea {
+    min-height: 58px;
+    resize: vertical;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+#quoteInputTable input[type="number"] { min-width: 90px; }
+#quoteInputTable input[type="date"] { min-width: 145px; }
+#quoteInputTable input:focus,
+#quoteInputTable select:focus,
+#quoteInputTable textarea:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
+}
+
+#quoteInputTable tbody tr:hover { background-color: #f4f8ff; }
+
+@media (max-width: 768px) {
+    .quote-exchange-rate { width: 100%; }
+    .quote-input-table-wrapper { max-height: 70vh; }
+}

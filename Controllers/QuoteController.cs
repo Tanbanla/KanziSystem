@@ -160,11 +160,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var nccNews = await _tmNccNewService.GetAllNccNew();
             return nccNews.Data ?? new List<IM_NCC_NEWDTO>();
         }
-        private async Task<List<string>> LoadMadonAsync(int step)
-        {
-            var madons = await _baoGiaService.GetMaDonByAdidAsync(GetCurrentUserId() ?? "", step);
-            return madons.Data ?? new List<string>();
-        }
         // lấy thông tin mặt hàng
         [HttpGet]
         public async Task<IActionResult> GetMaterialsByNameOrCode(string keyword)
@@ -214,10 +209,16 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest("Lỗi ràng buộc nhà cung cấp: " + string.Join("; ", messages));
             }
 
-            var distinctLinks = danhSachBaoGia.Select(b => b.CHR_LinkFile)
-                                               .Where(s => !string.IsNullOrWhiteSpace(s))
-                                               .Distinct(StringComparer.OrdinalIgnoreCase)
-                                               .ToList();
+            var distinctLinks = danhSachBaoGia
+                .SelectMany(b => new[]
+                {
+                    b.CHR_LinkImage,
+                    b.NVCHR_FileThietKe
+                })
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s!.Trim().Trim('"', '\''))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var savedMap = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             foreach (var src in distinctLinks)
@@ -245,13 +246,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             foreach (var dto in danhSachBaoGia)
             {
-                if (string.IsNullOrWhiteSpace(dto.CHR_LinkFile)) continue;
-                var checkKey = dto.CHR_LinkFile?.Trim().Trim('"', '\'') ?? dto.CHR_LinkFile;
-                if (savedMap.TryGetValue(checkKey, out var saved) && !string.IsNullOrWhiteSpace(saved))
-                {
-                    dto.CHR_LinkFile = saved;
-                }
-
+                dto.CHR_LinkImage = ReplaceSavedFilePath(dto.CHR_LinkImage, savedMap);
+                dto.NVCHR_FileThietKe = ReplaceSavedFilePath(dto.NVCHR_FileThietKe, savedMap);
             }
 
             var result = await _baoGiaService.NhapDanhSachBaoGiaAsync(danhSachBaoGia);
@@ -317,16 +313,78 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             return Ok(danhSachBaoGia);
         }
+
+        private static string? ReplaceSavedFilePath(
+            string? sourcePath,
+            IReadOnlyDictionary<string, string?> savedMap)
+        {
+            if (string.IsNullOrWhiteSpace(sourcePath)) return sourcePath;
+
+            var key = sourcePath.Trim().Trim('"', '\'');
+            return savedMap.TryGetValue(key, out var saved) && !string.IsNullOrWhiteSpace(saved)
+                ? saved
+                : sourcePath;
+        }
         // Inser dữ liệu vào DB
         [HttpPost]
-        public async Task<IActionResult> InsertQuotation([FromBody] List<InsertBaoGiaModel> items)
+        [RequestSizeLimit(100 * 1024 * 1024)]
+        public async Task<IActionResult> InsertQuotation([FromForm] InsertQuotationFormModel request)
         {
+            if (request == null)
+            {
+                return BadRequest("Dữ liệu báo giá không hợp lệ.");
+            }
+
+            List<InsertBaoGiaModel>? items;
+            try
+            {
+                items = System.Text.Json.JsonSerializer.Deserialize<List<InsertBaoGiaModel>>(
+                    request.Items,
+                    new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                return BadRequest("Dữ liệu báo giá không hợp lệ.");
+            }
+
             if (items == null || !items.Any())
             {
                 return BadRequest("Danh sách báo giá trống");
             }
 
-            try {
+            var savedFiles = new List<string>();
+            try
+            {
+                var manifest = System.Text.Json.JsonSerializer.Deserialize<List<QuotationFileManifestModel>>(
+                    request.FileManifest ?? "[]",
+                    new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web)) ?? [];
+                var files = request.Files ?? [];
+
+                if (manifest.Count != files.Count || manifest.Any(x => x.ItemIndex < 0 || x.ItemIndex >= items.Count ||
+                    (x.Kind != "design" && x.Kind != "image")))
+                {
+                    return BadRequest("Thông tin file đính kèm không hợp lệ.");
+                }
+
+                // Files are only for newly selected files. Imported Excel items already
+                // contain the paths returned by ImportExcel and must be kept as-is.
+                for (var fileIndex = 0; fileIndex < files.Count; fileIndex++)
+                {
+                    var file = files[fileIndex];
+                    var fileInfo = manifest[fileIndex];
+                    var savedPath = await SaveQuotationFileAsync(file, fileInfo.Kind);
+                    savedFiles.Add(savedPath);
+
+                    if (fileInfo.Kind == "design")
+                    {
+                        items[fileInfo.ItemIndex].NVCHR_FileThietKe = savedPath;
+                    }
+                    else
+                    {
+                        items[fileInfo.ItemIndex].CHR_LinkImage = savedPath;
+                    }
+                }
+
                 var listInser = await ConvertModelToDTO(items);
                 var currentUserId = GetCurrentUserId() ?? string.Empty;
                 var createDate = DateTime.Now;
@@ -395,8 +453,43 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch (Exception ex)
             {
+                foreach (var file in savedFiles)
+                {
+                    if (System.IO.File.Exists(file))
+                    {
+                        System.IO.File.Delete(file);
+                    }
+                }
                 return BadRequest($"Lỗi khi xử lý dữ liệu: {ex.Message}");
             }
+        }
+
+        private async Task<string> SaveQuotationFileAsync(IFormFile file, string kind)
+        {
+            if (file.Length <= 0 || file.Length > 50 * 1024 * 1024)
+                throw new InvalidDataException("File rỗng hoặc vượt quá dung lượng cho phép.");
+
+            var allowedExtensions = kind == "image"
+                ? new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" }
+                : new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".dwg", ".zip" };
+            var extension = Path.GetExtension(file.FileName);
+            if (!allowedExtensions.Contains(extension))
+                throw new InvalidDataException($"Định dạng file {extension} không được phép.");
+
+            var baseUpload = _configuration["ApiSettings:BaseUpload"];
+            if (string.IsNullOrWhiteSpace(baseUpload))
+                throw new InvalidOperationException("Chưa cấu hình ApiSettings:BaseUpload.");
+
+            var folder = Path.Combine(
+                baseUpload,
+                "Quotations",
+                DateTime.UtcNow.ToString("yyyyMMdd"));
+            Directory.CreateDirectory(folder);
+            var storedName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+            var physicalPath = Path.Combine(folder, storedName);
+            await using var stream = System.IO.File.Create(physicalPath);
+            await file.CopyToAsync(stream);
+            return physicalPath;
         }
         [HttpPost]
         public async Task<IActionResult> ExportExcel([FromBody] List<InsertBaoGiaModel> items)
@@ -527,6 +620,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         $"ImportErrors_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
                 }
 
+                // Các cột file trong Excel chứa đường dẫn file nguồn. Lưu file ngay
+                // trong bước import để khi người dùng bấm Gửi chỉ sử dụng đường dẫn đã lưu.
+                await SaveImportedFileLinksAsync(items);
+
                 var result = ConvertDTOToModel(items);
 
                 return Ok(result);
@@ -534,6 +631,43 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Lỗi đọc file: {ex.Message}");
+            }
+        }
+
+        private async Task SaveImportedFileLinksAsync(
+            IReadOnlyCollection<BaoGia_Request_of_QuotationDTO> items)
+        {
+            var sourcePaths = items
+                .SelectMany(item => new[]
+                {
+                    item.CHR_LinkImage,
+                    item.NVCHR_FileThietKe
+                })
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .Select(path => path!.Trim().Trim('"', '\''))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (sourcePaths.Count == 0) return;
+
+            var savedPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var sourcePath in sourcePaths)
+            {
+                var saveResult = await _fileImportService.SaveFileFromPathAsync(sourcePath);
+                if (saveResult == null || !saveResult.Success || string.IsNullOrWhiteSpace(saveResult.Data))
+                {
+                    throw new InvalidDataException(
+                        $"Không thể lưu file '{sourcePath}' vào thư mục BaseUpload. " +
+                        (saveResult?.Message ?? "Không tìm thấy file nguồn."));
+                }
+
+                savedPaths[sourcePath] = saveResult.Data;
+            }
+
+            foreach (var item in items)
+            {
+                item.CHR_LinkImage = ReplaceSavedFilePath(item.CHR_LinkImage, savedPaths);
+                item.NVCHR_FileThietKe = ReplaceSavedFilePath(item.NVCHR_FileThietKe, savedPaths);
             }
         }
 
@@ -887,7 +1021,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 KichThuoc = ws.Cell(row, 17).GetString(),
                 DongMay = ws.Cell(row, 18).GetString(),
                 TinhNang = ws.Cell(row, 19).GetString(),
-                Rohs = ws.Cell(row, 20).GetString(),
+                Rohs = ws.Cell(row, 20).GetString().Contains("Need") ? "Need" : "",
                 COCQ = ws.Cell(row, 21).GetString(),
                 MSDS = ws.Cell(row, 22).GetString(),
                 AnToan = ws.Cell(row, 23).GetString(),

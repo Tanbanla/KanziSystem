@@ -687,7 +687,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                         dearMail = "nhà cung cấp " + rq.Ten + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Rất mong nhận được phản hồi báo giá sớm nhất từ quý nhà cung cấp. Trân trọng cảm ơn!";
                         mailTk = maiUserCreate;
-                        titleMail = (rq.ShortName ?? rq.Ten) + " - Deadline: " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
+                        titleMail ="Yêu cầu báo giá (Quotation requesting) "+ (rq.ShortName ?? rq.Ten) + " - Deadline: " + (rq.DTM_KyHan?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")) + " - Số đơn yêu cầu: " + rq.CHR_MaDon;
                         rowIndex++;
                     }
 
@@ -709,7 +709,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         attachmentPaths = new List<string> { tempFilePath }
                     };
 
-                    var sendResult = true;// await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
+                    var sendResult = await EmailSender.SendEmailNotifyCustomSendMultiAttachFileAsync(emailForm);
 
                     // Xóa file tạm sau khi gửi email
                     try
@@ -725,7 +725,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         Console.WriteLine($"Không thể xóa file tạm: {ex.Message}");
                     }
 
-                    if (sendResult)
+                    if (sendResult.Success)
                     {
                         listSended.AddRange(rqByNCC.Select(r => (int)r.ID));
                     }
