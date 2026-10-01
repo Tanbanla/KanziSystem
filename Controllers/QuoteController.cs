@@ -352,6 +352,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest("Danh sách báo giá trống");
             }
 
+            var supplierValidationErrors = await ValidateSupplierSelectionAsync(items);
+            if (supplierValidationErrors.Any())
+            {
+                return BadRequest("Lỗi ràng buộc nhà cung cấp: " + string.Join("; ", supplierValidationErrors));
+            }
+
             var savedFiles = new List<string>();
             try
             {
@@ -462,6 +468,60 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 return BadRequest($"Lỗi khi xử lý dữ liệu: {ex.Message}");
             }
+        }
+
+        private async Task<List<string>> ValidateSupplierSelectionAsync(IEnumerable<InsertBaoGiaModel> items)
+        {
+            var errors = new List<string>();
+            var groups = items
+                .Where(item => item != null)
+                .GroupBy(item => (Category: item.NVCHR_ChungLoai?.Trim() ?? string.Empty,
+                    InternalCode: item.CHR_MaHangNoiBo?.Trim() ?? string.Empty,
+                    SupplierItemCode: item.CHR_MaHangNCC?.Trim() ?? string.Empty));
+
+            foreach (var group in groups)
+            {
+                var suppliersResponse = await _baoGiaNccCategoryService
+                    .GetBaoGiaNccCategoryByChungLoai(group.Key.Category);
+                var categorySupplierCodes = suppliersResponse.Success
+                    ? suppliersResponse.Data?.Select(s => s.CHR_MaNCC?.Trim())
+                        .Where(code => !string.IsNullOrWhiteSpace(code))
+                        .ToHashSet(StringComparer.OrdinalIgnoreCase)
+                        ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                    : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var supplierCount = categorySupplierCodes.Count;
+                var selectedCodes = group.SelectMany(item => item.Vendors ?? [])
+                    .Where(supplier => supplier.BIT_LayBaoGia && !string.IsNullOrWhiteSpace(supplier.MaNcc))
+                    .Select(supplier => supplier.MaNcc!.Trim())
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var selectedCount = selectedCodes.Count;
+
+                var itemName = string.IsNullOrWhiteSpace(group.Key.InternalCode)
+                    ? group.Key.SupplierItemCode
+                    : group.Key.InternalCode;
+                if (supplierCount == 0)
+                {
+                    errors.Add($"Sản phẩm '{itemName}' / chủng loại '{group.Key.Category}' chưa có nhà cung cấp.");
+                }
+                else if (selectedCodes.Any(code => !categorySupplierCodes.Contains(code)))
+                {
+                    errors.Add($"Sản phẩm '{itemName}' / chủng loại '{group.Key.Category}' có nhà cung cấp được chọn không thuộc danh sách của chủng loại.");
+                }
+                else if (supplierCount <= 5 && selectedCount != supplierCount)
+                {
+                    errors.Add($"Sản phẩm '{itemName}' / chủng loại '{group.Key.Category}' có {supplierCount} nhà cung cấp, phải xin báo giá đủ {supplierCount} nhà.");
+                }
+                else if (supplierCount <= 5 && !categorySupplierCodes.IsSubsetOf(selectedCodes))
+                {
+                    errors.Add($"Sản phẩm '{itemName}' / chủng loại '{group.Key.Category}' phải chọn đủ toàn bộ {supplierCount} nhà cung cấp.");
+                }
+                else if (supplierCount > 5 && selectedCount != 5)
+                {
+                    errors.Add($"Sản phẩm '{itemName}' / chủng loại '{group.Key.Category}' có {supplierCount} nhà cung cấp, phải chọn đúng 5 nhà (đang chọn {selectedCount}).");
+                }
+            }
+
+            return errors;
         }
 
         private async Task<string> SaveQuotationFileAsync(IFormFile file, string kind)

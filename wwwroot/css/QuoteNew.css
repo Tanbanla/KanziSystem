@@ -546,6 +546,11 @@
     border-radius: 6px;
 }
 
+.supplier-table-error .invalid-feedback {
+    display: block;
+    font-weight: 600;
+}
+
     .supplier-table-error table {
         border-color: #dc3545 !important;
     }

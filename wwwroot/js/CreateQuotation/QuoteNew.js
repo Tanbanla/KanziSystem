@@ -57,6 +57,7 @@
     const quoteStorageKey = 'quote-v2-items';
     let quoteItems = [];
     let editingQuoteIndex = null;
+    let loadedSupplierCount = 0;
     let currentPage = 1;
     let rowsPerPage = 20;
     const clearQuoteItems = () => {
@@ -66,12 +67,53 @@
     clearQuoteItems();
 
     const valueOf = id => ($(id)?.value || '').toString().trim();
+    const hasQuoteContext = () => Boolean(valueOf('selectSection') && valueOf('searchPhongBan'));
+
+    const updateQuoteActionsState = () => {
+        const ready = hasQuoteContext();
+        const actionIds = [
+            'btnAdd',
+            'btnImportfile',
+            'btnExportTablefile',
+            'btnSendQuotation',
+            'btnClearTableSearch',
+            'tableSearchInternalCode',
+            'tableSearchCategory',
+            'tableSearchSupplierCode',
+            'rowsPerPageSelect'
+        ];
+
+        actionIds.forEach(id => {
+            const field = $(id);
+            if (field) field.disabled = !ready;
+        });
+
+        ['prevPage', 'nextPage'].forEach(id => {
+            const pageItem = $(id);
+            if (!pageItem) return;
+            pageItem.classList.toggle('disabled', !ready || pageItem.classList.contains('page-disabled'));
+            pageItem.setAttribute('aria-disabled', String(!ready));
+        });
+
+        const message = $('quoteContextValidationMessage');
+        if (message) {
+            message.textContent = ready
+                ? ''
+                : 'Vui lòng chọn Phòng ban xin báo giá và Mã chi phí trước khi thao tác với bảng báo giá.';
+        }
+    };
+
     const setInvalid = (field, invalid) => {
         if (!field) return;
         field.classList.toggle('is-invalid', invalid);
         if (field.tagName === 'SELECT') {
             field.nextElementSibling?.querySelector('.ms-btn')?.classList.toggle('is-invalid', invalid);
         }
+    };
+
+    const setSupplierValidationMessage = message => {
+        const field = $('supplierValidationMessage');
+        if (field) field.textContent = message || '';
     };
 
     const required = (id, name, errors) => {
@@ -147,8 +189,9 @@
 
         const previousPage = $('prevPage');
         const nextPage = $('nextPage');
-        previousPage?.classList.toggle('disabled', currentPage <= 1);
-        nextPage?.classList.toggle('disabled', currentPage >= totalPages);
+        previousPage?.classList.toggle('page-disabled', currentPage <= 1);
+        nextPage?.classList.toggle('page-disabled', currentPage >= totalPages);
+        updateQuoteActionsState();
 
         if (!pageItems.length) {
             const message = hasFilter ? T('NoMatchingItem') : T('NoData');
@@ -199,9 +242,20 @@
 
         const supplierContainer = $('supplierTableContainer');
         let supplierError = false;
+        const selectedSupplierCount = suppliers.filter(s => s.selected).length;
+        const supplierCount = loadedSupplierCount || suppliers.length;
+        let supplierRuleError = '';
 
-        if (suppliers.filter(s => s.selected).length > 5) {
-            errors.push('Chỉ được chọn tối đa 5 nhà cung cấp.');
+        if (supplierCount === 0) {
+            supplierRuleError = 'Chủng loại này chưa có nhà cung cấp để xin báo giá.';
+        } else if (supplierCount <= 5 && selectedSupplierCount !== supplierCount) {
+            supplierRuleError = `Chủng loại này có ${supplierCount} nhà cung cấp, bắt buộc phải xin báo giá đủ ${supplierCount} nhà.`;
+        } else if (supplierCount > 5 && selectedSupplierCount !== 5) {
+            supplierRuleError = `Chủng loại này có ${supplierCount} nhà cung cấp, bắt buộc phải chọn đúng 5 nhà để xin báo giá (đang chọn ${selectedSupplierCount}).`;
+        }
+
+        if (supplierRuleError) {
+            errors.push(supplierRuleError);
             supplierError = true;
         }
 
@@ -230,10 +284,8 @@
             setInvalid(materialCode, false);
             setInvalid(nccCode, false);
         }
-        supplierContainer.classList.toggle(
-            'supplier-table-error',
-            supplierError
-        );
+        supplierContainer.classList.toggle('supplier-table-error', supplierError);
+        setSupplierValidationMessage(supplierRuleError);
         if (errors.length) return { errors };
         return { item: {
             internalCode: valueOf('searchMahangNB'),
@@ -309,6 +361,9 @@
     };
 
     const clearSupplierTable = () => {
+        loadedSupplierCount = 0;
+        setSupplierValidationMessage('');
+        $('supplierTableContainer')?.classList.remove('supplier-table-error');
         const body = $('supplierTableBody');
         if (body) {
             body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Chưa có thông tin nhà cung cấp</td></tr>';
@@ -331,6 +386,9 @@
         const body = $('supplierTableBody');
         if (!body) return;
 
+        loadedSupplierCount = Array.isArray(suppliers) ? suppliers.length : 0;
+        setSupplierValidationMessage('');
+        $('supplierTableContainer')?.classList.remove('supplier-table-error');
         body.innerHTML = '';
         if (!Array.isArray(suppliers) || suppliers.length === 0) {
             clearSupplierTable();
@@ -858,6 +916,7 @@
         });
 
         $('btnExportTablefile')?.addEventListener('click', async () => {
+            if (!hasQuoteContext()) return;
             try {
                 showQuoteLoading(T('TableExporting'));
                 await downloadExportedTable();
@@ -869,6 +928,7 @@
             }
         });
         $('btnImportfile')?.addEventListener('click', () => {
+            if (!hasQuoteContext()) return;
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = '.xlsx,.xls';
@@ -942,6 +1002,7 @@
         };
 
         $('btnSendQuotation')?.addEventListener('click', async () => {
+            if (!hasQuoteContext()) return;
             const sectionCode = valueOf('searchPhongBan');
             if (!sectionCode) {
                 showQuoteNotification(T('SelectCostCenterRequired'));
@@ -1084,6 +1145,9 @@
         initializeQuoteModal();
         initializeQuoteLoading();
 
+        ['selectSection', 'searchPhongBan'].forEach(id => $(id)?.addEventListener('change', updateQuoteActionsState));
+        updateQuoteActionsState();
+
         ['tableSearchInternalCode', 'tableSearchCategory', 'tableSearchSupplierCode']
             .forEach(id => $(id)?.addEventListener('input', () => {
                 currentPage = 1;
@@ -1105,6 +1169,7 @@
 
         $('prevPage')?.addEventListener('click', event => {
             event.preventDefault();
+            if (!hasQuoteContext()) return;
             if (currentPage <= 1) return;
             currentPage -= 1;
             renderQuoteItems();
@@ -1112,6 +1177,7 @@
 
         $('nextPage')?.addEventListener('click', event => {
             event.preventDefault();
+            if (!hasQuoteContext()) return;
             const totalItems = getFilteredQuoteItems().items.length;
             const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
             if (currentPage >= totalPages) return;
