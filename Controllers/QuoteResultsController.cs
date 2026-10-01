@@ -60,8 +60,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public async Task<IActionResult> SearchSupplierQuoteBody([FromBody] SearchQuotationResultsModel search)
         {
             var result = await _baoGiaService.GetThongTinBaoGiaChiTietAsync(
-                search, 
-                GetCurrentUserId() ?? "", 
+                search,
+                GetCurrentUserId() ?? "",
                 GetRolesUser() ?? "");
 
             if (!result.Success)
@@ -191,7 +191,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             try
             {
                 search.PageIndex = 0;
-                search.PageSize = 0; 
+                search.PageSize = 0;
                 var result = await _baoGiaService.GetThongTinBaoGiaChiTietAsync(
                     search,
                     GetCurrentUserId() ?? "",
@@ -626,7 +626,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                     var approverNext = await sendMailService.SendMailToRequesterAsync("", 11);
                                     userSend = approverNext?.Data ?? "";
                                     // update ngươì phê duyệt
-                                    if(!string.IsNullOrEmpty(userSend))
+                                    if (!string.IsNullOrEmpty(userSend))
                                     {
                                         var item = new UpdateHistoryResult
                                         {
@@ -778,6 +778,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 int lastRow = ws.LastRowUsed()?.RowNumber() ?? startRow;
 
                 var allRowsData = new List<BaoGiaImportModel>();
+                var validationRows = new List<(BaoGiaImportModel Row, string Link, DateTime? Expiry)>();
 
                 for (int r = startRow; r <= lastRow; r++)
                 {
@@ -803,13 +804,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var nhaSanXuat = ws.Cell(r, 33).GetString();
                     var donGiaUSD = ws.Cell(r, 34).GetDouble();
                     var donGiaVND = ws.Cell(r, 35).GetDouble();
+                    var quoteLink = ws.Cell(r, 47).GetString()?.Trim() ?? string.Empty;
+                    DateTime? expiry = DateTime.TryParse(ws.Cell(r, 49).GetString(), out var expiryValue)
+                        ? expiryValue
+                        : null;
 
                     var bitSelect = ws.Cell(r, 51).GetString();
                     var reason = ws.Cell(r, 52).GetString();
 
                     var reasonRemark = ws.Cell(r, 53).GetString();
 
-                    allRowsData.Add(new BaoGiaImportModel
+                    var rowData = new BaoGiaImportModel
                     {
                         Row = r,
                         MaDon = maDon,
@@ -830,13 +835,57 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         BIT_Select = bitSelect,
                         NVCHR_ReasonPick = reason,
                         NVCHR_Note = reasonRemark
+                    };
+                    allRowsData.Add(rowData);
+                    validationRows.Add((rowData, quoteLink, expiry));
+                }
+
+                var warningRows = validationRows
+                    .GroupBy(x => $"{x.Row.MaDon}|{x.Row.MaHangNoiBo}")
+                    .SelectMany(group =>
+                    {
+                        var quoted = group.Any(x => (x.Row.DonGiaUSD ?? 0) > 0 || (x.Row.DonGiaVND ?? 0) > 0);
+                        var selected = group.Where(x => (x.Row.BIT_Select ?? string.Empty).Contains("O")).ToList();
+                        var result = new List<object>();
+                        if (quoted && selected.Count == 0)
+                        {
+                            result.Add(new { Row = group.First().Row.Row, MaDon = group.First().Row.MaDon, MaHangNoiBo = group.First().Row.MaHangNoiBo, VendorCode = group.First().Row.CodeVender, Reason = "Có NCC báo giá nhưng toàn bộ NCC đang tick X, chưa chọn NCC nào." });
+                        }
+                        foreach (var item in selected)
+                        {
+                            if ((item.Row.DonGiaUSD ?? 0) <= 0 && (item.Row.DonGiaVND ?? 0) <= 0)
+                                result.Add(new { Row = item.Row.Row, MaDon = item.Row.MaDon, MaHangNoiBo = item.Row.MaHangNoiBo, VendorCode = item.Row.CodeVender, Reason = "Đã chọn NCC nhưng giá báo giá bằng 0." });
+                            if (item.Expiry.HasValue && item.Expiry.Value.Date < DateTime.Today)
+                                result.Add(new { Row = item.Row.Row, MaDon = item.Row.MaDon, MaHangNoiBo = item.Row.MaHangNoiBo, VendorCode = item.Row.CodeVender, Reason = "Đã chọn NCC nhưng báo giá đã hết hiệu lực." });
+                            if (string.IsNullOrWhiteSpace(item.Link))
+                                result.Add(new { Row = item.Row.Row, MaDon = item.Row.MaDon, MaHangNoiBo = item.Row.MaHangNoiBo, VendorCode = item.Row.CodeVender, Reason = "Đã chọn NCC nhưng link báo giá đang để trống." });
+                        }
+                        return result;
+                    })
+                    .ToList();
+
+                if (warningRows.Any())
+                {
+                    var confirmationItems = allRowsData.Select(item => new BaoGia_Detail_of_QuotationDTO
+                    {
+                        ID = item.ID,
+                        BIT_Select = (item.BIT_Select ?? string.Empty).Contains("O"),
+                        NVCHR_ReasonPick = item.NVCHR_ReasonPick ?? string.Empty,
+                        NVCHR_Note = item.NVCHR_Note ?? string.Empty
+                    }).ToList();
+                    return Ok(new
+                    {
+                        RequiresWarning = true,
+                        Warnings = warningRows,
+                        Items = confirmationItems,
+                        UserNextApproval = vm.userNextApproval
                     });
                 }
 
                 // Kiểm tra đơn hàng + mã hàng nội bộ đều đã báo giá hết chưa, nếu chưa thì báo lỗi
                 var requestCheck = await _baoGiaService.CheckPermissionSelectSupplierAsync(allRowsData);
 
-                if(requestCheck.Data.Count > 0 && requestCheck.Success)
+                if (requestCheck.Data.Count > 0 && requestCheck.Success)
                 {
                     foreach (var item in requestCheck.Data)
                     {
@@ -1103,11 +1152,25 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> ConfirmImportedSupplier([FromBody] ConfirmImportedSupplierRequest req)
+        {
+            if (req?.Items == null || !req.Items.Any())
+                return BadRequest(_localizer["NoValidDataReceived"].Value);
+
+            var result = await _baoGiaDetailService.UpdatePickSupplierDetailAsync(
+                req.Items, req.UserNextApproval ?? string.Empty, GetCurrentUserId());
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(new { message = "Import successful", totalRows = req.Items.Count });
+        }
+
+        [HttpPost]
         public async Task<IActionResult> SearchInputQuote([FromBody] SearchInputQuote searchModel)
         {
             if (searchModel == null) return BadRequest(_localizer["SearchInputMissing"].Value);
             var result = await _baoGiaDetailService.SearchBaoGiaAsync(searchModel.idRequestQuote, searchModel.maDon,
-                searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM,searchModel.status,GetRolesUser(), searchModel.pageSize, searchModel.pageIndex);
+                searchModel.maVatTu, searchModel.maNcc, searchModel.section, GetCurrentUserId(), searchModel.dayMM, searchModel.status, GetRolesUser(), searchModel.pageSize, searchModel.pageIndex);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -1743,4 +1806,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return View(vm);
         }
     }
+}
+
+public class ConfirmImportedSupplierRequest
+{
+    public List<BaoGia_Detail_of_QuotationDTO> Items { get; set; } = new();
+    public string? UserNextApproval { get; set; }
 }

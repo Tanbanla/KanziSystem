@@ -65,30 +65,30 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             ";
 
             var statusSql = "1=1";
-                switch (status)
-                {
-                    case "RETURN":
-                        statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
-                        break;
-                    case "DONE":
-                        statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
-                        break;
-                    case "APPROVAL":
-                        statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
-                        break;
-                    case "WAIT":
-                        statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
-                        break;
-                    case "DELETE":
-                        statusSql = "ID_Status LIKE 'DELETE'";
-                        break;
-                    default:
-                        statusSql = "ID_Status NOT LIKE 'DELETE'";
-                        break;
-                }
+            switch (status)
+            {
+                case "RETURN":
+                    statusSql = "ID_Status LIKE '%RETURN%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DONE":
+                    statusSql = "ID_Status = 'DONE' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "APPROVAL":
+                    statusSql = "ID_Status LIKE 'APPROVAL%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "WAIT":
+                    statusSql = "ID_Status LIKE '%WAIT%' AND ID_Status NOT LIKE 'DELETE'";
+                    break;
+                case "DELETE":
+                    statusSql = "ID_Status LIKE 'DELETE'";
+                    break;
+                default:
+                    statusSql = "ID_Status NOT LIKE 'DELETE'";
+                    break;
+            }
 
-                // append status filter
-                sql += " AND (" + statusSql + ")";
+            // append status filter
+            sql += " AND (" + statusSql + ")";
 
             // Build count query first
             var countSql = @"
@@ -215,9 +215,9 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 return new List<BaoGia_Request_of_Quotation>();
             }
-            foreach(var item in danhSachMaDonBG)
+            foreach (var item in danhSachMaDonBG)
             {
-                if(item.BIT_LayBaoGia == false)
+                if (item.BIT_LayBaoGia == false)
                 {
                     item.ID_Status = "NOT_QUOTATION";
                 }
@@ -723,7 +723,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         sql.Append(" AND (r.ID_StepBaoGia = 8)");
                         break;
                     default:
-                        sql.Append(" AND 1=0"); 
+                        sql.Append(" AND 1=0");
                         break;
                 }
             }
@@ -753,7 +753,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 countSql.Append(" AND UPPER(LTRIM(RTRIM(wf.FlowCode))) = UPPER(LTRIM(RTRIM(@FlowCode)))");
             }
-            if (!string.IsNullOrEmpty(search.MaDon))   
+            if (!string.IsNullOrEmpty(search.MaDon))
             {
                 countSql.Append(" AND r.CHR_MaDon = @MaDon");
             }
@@ -843,17 +843,19 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             foreach (var baoGia in baoGias)
             {
                 var dto = listOldData.Find(c => c.ID == baoGia.ID);
-                if (dto != null) {
-                    if(dto.ID_StepBaoGia >= 6)
+                if (dto != null)
+                {
+                    if (dto.ID_StepBaoGia >= 6)
                     {
-                       throw new Exception($"Đơn đã phê duyệt, không cập nhật");
+                        throw new Exception($"Đơn đã phê duyệt, không cập nhật");
                     }
-                    if (sectionCode == "") {
+                    if (sectionCode == "")
+                    {
                         sectionCode = baoGia.CHR_SectionCode;
                     }
 
                     dto.CHR_SectionCode = baoGia.CHR_SectionCode;
-                    dto.CHR_SectionName = baoGia.CHR_SectionName;   
+                    dto.CHR_SectionName = baoGia.CHR_SectionName;
                     dto.CHR_Phanloai = baoGia.CHR_Phanloai;
                     dto.CHR_MaThietBi = baoGia.CHR_MaThietBi;
                     dto.CHR_MaHangNoiBo = baoGia.CHR_MaHangNoiBo ?? "";
@@ -1041,7 +1043,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 WHERE r.ID_StepBaoGia >= 9  and r.ID_StepBaoGia <12 and r.BIT_LayBaoGia = 1");
 
             var parameters = new DynamicParameters();
-            if(!string.IsNullOrEmpty(adid))
+            if (!string.IsNullOrEmpty(adid))
             {
                 sql.Append(" AND r.CHR_UserApproval = @Adid");
                 parameters.Add("Adid", adid);
@@ -1146,7 +1148,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             return data;
         }
         // Phê duyệt thông tin lựa chọn nhà cung cấp
-        public async Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarOK(string maDon, string userNext,string userUpdate)
+        public async Task<List<BaoGia_Request_of_Quotation>> UpdateApprovarOK(string maDon, string userNext, string userUpdate)
         {
             if (string.IsNullOrEmpty(maDon))
             {
@@ -1159,7 +1161,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 item.ID_StepBaoGia = item.ID_StepBaoGia + 1;
                 item.CHR_UserApproval = userNext;
                 item.DTM_UpdateLater = DateTime.Now;
-            
+
                 var h = new BaoGia_History_Request_of_Quotation
                 {
                     ID_RequestQuote = item.ID,
@@ -1192,10 +1194,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var data = await _context.BaoGia_Request_of_Quotations.Where(c => c.CHR_MaDon == maDon && c.ID_StepBaoGia >= 9 && c.ID_StepBaoGia <= 11).ToListAsync();
             foreach (var item in data)
             {
-                if(item.ID_StepBaoGia == 9)
+                if (item.ID_StepBaoGia == 9)
                 {
                     item.ID_Status = "RETURN_QLSC_AFTER";
-                }else if (item.ID_StepBaoGia == 10)
+                }
+                else if (item.ID_StepBaoGia == 10)
                 {
                     item.ID_Status = "RETURN_QLTC_AFTER";
                 }
@@ -1865,11 +1868,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         // lấy danh sách đơn yêu cầu hàng hóa
         public async Task<List<string>> GetMaDonYeuCauHangHoaAsync()
         {
-              var data = await _context.BaoGia_Request_of_Quotations
-                .Where(c => c.ID_StepBaoGia == 13 && c.BIT_LayBaoGia == true)
-                .Select(c => c.CHR_MaDon)
-                .Distinct()
-                .ToListAsync();
+            var data = await _context.BaoGia_Request_of_Quotations
+              .Where(c => c.ID_StepBaoGia == 13 && c.BIT_LayBaoGia == true)
+              .Select(c => c.CHR_MaDon)
+              .Distinct()
+              .ToListAsync();
             return data;
         }
         // update phê duyệt đơn báo giá
@@ -1900,7 +1903,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     data.CHR_UserApproval = item.CHR_UserApproval;
                     data.DTM_UpdateLater = now;
                     item.CHR_CreateBy = data.CHR_CreateBy;
-                    if(data.BIT_LayBaoGia == false)
+                    if (data.BIT_LayBaoGia == false)
                     {
                         data.ID_Status = "NOT_QUOTATION";
                     }
@@ -2095,7 +2098,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
         }
 
         // Lấy danh sách NCC k cần xác nhận tên hàng
-         public async Task<List<string>> GetListNccNotConfirmNameAsync()
+        public async Task<List<string>> GetListNccNotConfirmNameAsync()
         {
             var sql = "SELECT CHR_MaNcc FROM BaoGia_Vender_NotConfirm WHERE CHR_Status = 'ON'";
             var result = await _conn.QueryAsync<string>(sql);
@@ -2288,7 +2291,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             sql.Append(" ORDER BY r.DTM_CreateDate, r.CHR_MaDon, r.CHR_MaThietBi, r.CHR_MaNCC, r.CHR_MaHangNoiBo, r.NVCHR_NameVN");
 
-        
+
 
             var a = sql.ToString();
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();

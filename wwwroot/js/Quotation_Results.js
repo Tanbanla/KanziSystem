@@ -62,6 +62,87 @@ document.addEventListener('DOMContentLoaded', function () {
     const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
     const date = value => value ? new Date(value).toLocaleDateString('vi-VN') : '';
     const cell = value => `<td class ="text-center">${escape(value)}</td>`;
+
+    function getSupplierValidationWarnings(rows) {
+        const groups = new Map();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        rows.forEach(row => {
+            const choice = row.querySelector('.supplier-choice')?.value || '';
+            if (!choice) return;
+            const groupKey = `${row.dataset.madon || ''}|${row.dataset.mahang || ''}`;
+            if (!groups.has(groupKey)) groups.set(groupKey, []);
+            groups.get(groupKey).push({ row, choice });
+        });
+
+        const warnings = [];
+        groups.forEach(items => {
+            const quoted = items.some(item => Number(item.row.dataset.priceUsd) > 0 || Number(item.row.dataset.priceVnd) > 0);
+            const selected = items.filter(item => item.choice === 'true');
+            if (quoted && selected.length === 0) {
+                warnings.push({ row: items[0].row, reason: 'Có NCC báo giá nhưng toàn bộ NCC đang tick X, chưa chọn NCC nào.' });
+            }
+            selected.forEach(item => {
+                const row = item.row;
+                if (Number(row.dataset.priceUsd) <= 0 && Number(row.dataset.priceVnd) <= 0) {
+                    warnings.push({ row, reason: 'Đã chọn NCC nhưng giá báo giá bằng 0.' });
+                }
+                const expiry = row.dataset.expiry ? new Date(row.dataset.expiry) : null;
+                if (expiry && !Number.isNaN(expiry.getTime())) {
+                    expiry.setHours(0, 0, 0, 0);
+                    if (expiry < today) warnings.push({ row, reason: 'Đã chọn NCC nhưng báo giá đã hết hiệu lực.' });
+                }
+                if (!row.dataset.quoteLink?.trim()) {
+                    warnings.push({ row, reason: 'Đã chọn NCC nhưng link báo giá đang để trống.' });
+                }
+            });
+        });
+        return warnings;
+    }
+
+    function exportSupplierWarnings(warnings) {
+        const lines = ['STT,Số đơn,Mã hàng nội bộ,Mã NCC,Lỗi'];
+        warnings.forEach((warning, index) => {
+            const row = warning.row;
+            const values = [index + 1, row.dataset.madon, row.dataset.mahang, row.dataset.vendor || '', warning.reason];
+            lines.push(values.map(value => `"${String(value).replace(/"/g, '""')}"`).join(','));
+        });
+        const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `SupplierValidationErrors_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function showSupplierValidationDialog(warnings) {
+        return new Promise(resolve => {
+            const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+            if (!overlay) { resolve('close'); return; }
+            const T = window.i18nQuotationResults || {};
+            titleEl.textContent = T.SupplierValidationWarningTitle || 'Cảnh báo lựa chọn nhà cung cấp';
+            bodyEl.innerHTML = `<div class="text-danger mb-2">Phát hiện ${warnings.length} lỗi. Bạn có muốn tiếp tục gửi dữ liệu không?</div><ul>${warnings.map(x => `<li>${escape(x.row.dataset.madon)} / ${escape(x.row.dataset.mahang)}: ${escape(x.reason)}</li>`).join('')}</ul>`;
+            footerEl.innerHTML = '';
+            const addButton = (text, action, className) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = className;
+                button.textContent = text;
+                button.onclick = () => { hideDialog(); resolve(action); };
+                footerEl.appendChild(button);
+            };
+            addButton(T.SupplierValidationClose || 'Đóng', 'close', 'cm-btn cm-btn-outline');
+            addButton(T.SupplierValidationExport || 'Xuất dữ liệu lỗi', 'export', 'cm-btn cm-btn-outline');
+            addButton(T.SupplierValidationContinue || 'Tiếp tục', 'continue', 'cm-btn cm-btn-primary');
+            overlay.setAttribute('aria-hidden', 'false');
+            overlay.style.display = 'flex';
+            attachDialogCloseHandlers();
+            const close = () => { hideDialog(); resolve('close'); };
+            overlay.querySelector('[data-cm-action="close"]').onclick = close;
+            overlay.querySelector('[data-cm-action="overlay"]').onclick = close;
+        });
+    }
     // Khai báo biến toàn cục cho file
     const quotationApp = {
         init: function () {
@@ -127,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Supplier page size change
             const supplierPageSize = document.getElementById('supplierPageSizeSelect');
             if (supplierPageSize) {
-                supplierPageSize.value = '20'; 
+                supplierPageSize.value = '20';
                 supplierPageSize.addEventListener('change', () => {
                     supplierState.pageSize = parseInt(supplierPageSize.value) || 50;
                     supplierState.pageIndex = 1;
@@ -461,8 +542,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const priceWarning = priceIncrease
                     ? 'Giá cao hơn giá đã đặt gần nhất trên 5%, bắt buộc nhập lý do.'
                     : '';
+                const customsNotificationDisabled = d.BIT_Select !== true;
                 return `
-                <tr class="text-center ${checkRefuse ? 'refuse-row' : ''} ${isCheapest ? 'cheapest-row' : ''}" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" data-price-increase="${priceIncrease}" style="text-align: center;">
+                <tr class="text-center ${checkRefuse ? 'refuse-row' : ''} ${isCheapest ? 'cheapest-row' : ''}" data-madon="${escape(d.CHR_MaDon || '')}" data-mahang="${escape(d.CHR_MaHangNoiBo || '')}" data-vendor="${escape(d.CHR_MaNCC || '')}" data-id="${escape(d.ID || '')}" data-price-usd="${usd}" data-price-vnd="${vnd}" data-expiry="${escape(d.DTM_ExpiryDate || '')}" data-quote-link="${escape(d.NVCHR_File || '')}" data-price-increase="${priceIncrease}" style="text-align: center;">
                     <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaDon || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.status || ''}</td>
@@ -492,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.BIT_LayBaoGia === true ? 'O' : 'X'}</td>
                     <td class="additional-column" style="padding: 2px 4px; text-align: center;">${d.NVCHR_LyDo || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.CHR_MaNCC || ''}</td>
-                    <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.ShortName ||d.NVCHR_NameNCC || ''}</td>
+                    <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.ShortName || d.NVCHR_NameNCC || ''}</td>
                     <td style="padding: 2px 4px; text-align: center;  ${getMismatchStyle(d.IsMatch_MaHangNCC)}">${d.CodeEquipmentNCC || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left; ${getMismatchStyle(d.IsMatch_NameVN)}">${d.NVCHR_TenHangHQ || ''}</td>
                     <td class="text-start" style="padding: 2px 4px; text-align: left;">${d.NameENByNCC || ''}</td>
@@ -514,23 +596,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_EffectiveDate ? new Date(d.DTM_EffectiveDate).toLocaleDateString() : ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${d.DTM_ExpiryDate ? new Date(d.DTM_ExpiryDate).toLocaleDateString() : ''}</td>
                     <td style="padding: 2px 4px; text-align: center;">${totalCell || ''}</td>
-                    <td style="padding: 2px 4px; text-align: center;">
-                        <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}">
+                    <td class="supplier-selection-cell" style="padding: 4px; text-align: center;">
+                        <select class="form-control form-control-sm supplier-choice" data-madon="${d.CHR_MaDon || ''}" data-mahang="${d.CHR_MaHangNoiBo || ''}" data-id="${d.ID || ''}" aria-label="Supplier selection">
                             <option value="" ${(!d.BIT_Select && d.BIT_Select !== false) ? 'selected' : ''}></option>
                             <option value="true" ${d.BIT_Select === true ? 'selected' : ''}>O</option>
                             <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
                         </select>
                     </td>
-                    <td>
-                        ${priceWarning ? `<div class="price-warning" role="alert">${priceWarning}</div>` : ''}
-                        <input type="text" class="form-control form-control-sm reason-input" list="${supplierReasonDatalistId}" value="${d.NVCHR_ReasonPick || ''}">
+                    <td class="customs-notification-cell">
+                        <select class="form-control form-control-sm customs-notification-choice" ${customsNotificationDisabled ? 'disabled' : ''} aria-label="Thông báo hải quan">
+                            <option value="NEED" selected>Need</option>
+                            <option value="NONEED">No need</option>
+                        </select>
                     </td>
-                    <td><input type="text" class="form-control form-control-sm reason-input" value="${d.NVCHR_Note || ''}"></td>
+                    <td class="reason-cell">
+                        ${priceWarning ? `<div class="price-warning" role="alert">${priceWarning}</div>` : ''}
+                        <textarea class="form-control form-control-sm reason-input" rows="2" list="${supplierReasonDatalistId}" placeholder="Nhập lý do...">${d.NVCHR_ReasonPick || ''}</textarea>
+                    </td>
+                    <td class="reason-cell"><textarea class="form-control form-control-sm reason-input" rows="2" placeholder="Nhập lý do...">${d.NVCHR_Note || ''}</textarea></td>
                 </tr>
             `;
             }).join('');
 
             tbody.innerHTML = rowsHtml;
+            this.syncCustomsNotificationChoices();
             ensureRefuseRowStyle();
             this.applyAdditionalColumnsVisibility();
         },
@@ -660,7 +749,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (btnImportSupplier) {
                 btnImportSupplier.addEventListener('click', this.ImportSupplier.bind(this));
             }
- 
+
             document.addEventListener('change', (e) => {
                 const cb = e.target.closest('.supplier-select');
                 if (cb) {
@@ -683,22 +772,22 @@ document.addEventListener('DOMContentLoaded', function () {
                             const reason = reasonEl?.value?.trim() || '';
                             if (!reason) {
                                 showPrompt({
-                                title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do',
-                                message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp',
-                                placeholder: '',
+                                    title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do',
+                                    message: (window.i18nQuotationResults && window.i18nQuotationResults.PromptEnterReason) || 'Vui lòng nhập lý do chọn nhà cung cấp',
+                                    placeholder: '',
                                     allowCustom: true,
-                                options: supplierPickReasonOptions
-                            })
-                                .then(r => {
-                                    if (!r) {
-                                        cb.checked = false;
-                                        try { reasonEl && reasonEl.focus(); } catch { }
-                                        return;
-                                    }
-                                    try { reasonEl.value = r; } catch { }
-                                    selMatch.value = 'true';
-                                    document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => { if (s !== selMatch) s.value = 'false'; });
-                                });
+                                    options: supplierPickReasonOptions
+                                })
+                                    .then(r => {
+                                        if (!r) {
+                                            cb.checked = false;
+                                            try { reasonEl && reasonEl.focus(); } catch { }
+                                            return;
+                                        }
+                                        try { reasonEl.value = r; } catch { }
+                                        selMatch.value = 'true';
+                                        document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => { if (s !== selMatch) s.value = 'false'; });
+                                    });
                                 return;
                             }
                             selMatch.value = 'true';
@@ -731,12 +820,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                     if (!r) {
                                         try { sel.value = ''; } catch { }
                                         try { reasonEl && reasonEl.focus(); } catch { }
+                                        this.syncCustomsNotificationChoices();
                                         return;
                                     }
                                     try { reasonEl.value = r; } catch { }
                                     document.querySelectorAll(`select.supplier-choice[data-madon="${maDon}"][data-mahang="${maHang}"]`).forEach(s => {
                                         if (s !== sel) s.value = 'false';
                                     });
+                                    this.syncCustomsNotificationChoices();
                                 });
                             return;
                         }
@@ -744,7 +835,19 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (s !== sel) s.value = 'false';
                         });
                     }
+                    this.syncCustomsNotificationChoices();
                 }
+            });
+        },
+        syncCustomsNotificationChoices: function () {
+            document.querySelectorAll('#supplierQuoteBody tr').forEach(row => {
+                const supplierChoice = row.querySelector('.supplier-choice');
+                const customsChoice = row.querySelector('.customs-notification-choice');
+                if (!supplierChoice || !customsChoice) return;
+
+                const isSelectedSupplier = supplierChoice.value === 'true';
+                customsChoice.disabled = !isSelectedSupplier;
+                if (!isSelectedSupplier) customsChoice.value = 'NEED';
             });
         },
         saveTab2: async function () {
@@ -777,6 +880,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         type: 'error'
                     });
                     return;
+                }
+                const warnings = getSupplierValidationWarnings(rows);
+                if (warnings.length) {
+                    const action = await showSupplierValidationDialog(warnings);
+                    if (action === 'export') exportSupplierWarnings(warnings);
+                    if (action !== 'continue') return;
                 }
                 const approverNext = window.__selectedNextApprover || '';
                 if (!payload.length) {
@@ -1188,8 +1297,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                             showDialog({ title: T.Notification || 'Thông báo', message: txt || (T.MsgSaveError || 'Lỗi khi xử lý phê duyệt'), type: 'error' });
                                             return;
                                         }
-                                showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
-                                try { quotationApp.reloadTables(); } catch (e) { }
+                                        showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                                        try { quotationApp.reloadTables(); } catch (e) { }
                                         return;
                                     }
                                 } catch (err) {
@@ -1274,7 +1383,28 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                         } else {
                             // Thành công
-                            return response.json().then(data => {
+                            return response.json().then(async data => {
+                                if (data && data.requiresWarning) {
+                                    const warnings = (data.warnings || []).map(item => ({
+                                        row: { dataset: { madon: item.maDon || '', mahang: item.maHangNoiBo || '', vendor: item.vendorCode || '' } },
+                                        reason: item.reason || ''
+                                    }));
+                                    const action = await showSupplierValidationDialog(warnings);
+                                    if (action === 'export') exportSupplierWarnings(warnings);
+                                    if (action !== 'continue') return;
+                                    try { showLoading((window.i18nQuotationResults && window.i18nQuotationResults.LoadingData) || 'Đang xử lý...'); } catch { }
+                                    const confirmResponse = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ConfirmImportedSupplier', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ items: data.items || [], userNextApproval: data.userNextApproval || '' })
+                                    });
+                                    if (!confirmResponse.ok) {
+                                        throw new Error(await confirmResponse.text() || 'Lỗi khi lưu dữ liệu import');
+                                    }
+                                    showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
+                                    try { quotationApp.reloadTables(); } catch (e) { }
+                                    return;
+                                }
                                 showDialog({ title: T.Notification || 'Thông báo', message: (T.DataUpdatedSuccessfully || 'Nhập file thành công'), type: 'success' });
                                 try { quotationApp.reloadTables(); } catch (e) { }
                             });
@@ -1289,7 +1419,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         document.body.removeChild(fileInput);
                     });
             });
-            this.loadSupplierData(); 
+            this.loadSupplierData();
             try {
                 fileInput.click();
             } catch (e) {

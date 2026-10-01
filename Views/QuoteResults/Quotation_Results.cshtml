@@ -472,7 +472,7 @@
                                     <th colspan="24" class="header-group header-group-bivn">@Localizer["BivnInput"].Value</th>
                                     <th colspan="22" class="header-group header-group-vendor">@Localizer["VendorInput"].Value</th>
                                     <th colspan="1" class="header-group header-group-approval">@Localizer["SystemCalculated"].Value</th>
-                                    <th colspan="3" class="header-group header-group-approval">@Localizer["BivnPur"].Value</th>
+                                    <th colspan="4" class="header-group header-group-approval">@Localizer["BivnPur"].Value</th>
                                 </tr>
                                 <tr class="text-center align-middle supplier-header-columns">
                                     <th rowspan="2"  style="min-width: 35px;background-color: #FFEDE8;">@Localizer["STT"]</th>
@@ -525,8 +525,9 @@
                                     @*  Phần phê duyệt  *@
                                     <th rowspan="2" style="min-width: 100px;background-color: #e5f2ff !important;">@Localizer["SystemCalculatedTotal"]</th>
                                     <th rowspan="2" style="min-width: 70px;background-color: #e5f2ff !important;">@Localizer["SupplierSelection"]</th>
+                                    <th rowspan="2" style="min-width: 105px;background-color: #e5f2ff !important;">Thông báo hải quan</th>
                                     <th rowspan="2" style="min-width: 220px;background-color: #e5f2ff !important;">@Localizer["SelectionReason"]</th>
-                                    <th rowspan="2" style="min-width: 100px;background-color: #e5f2ff !important;">@Localizer["PriceIncreaseReason"]</th>
+                                    <th rowspan="2" style="min-width: 200px;background-color: #e5f2ff !important;">@Localizer["PriceIncreaseReason"]</th>
                                 </tr>
                                 <tr class="text-center align-middle supplier-header-subcolumns">
                                     <th style="min-width: 60px;" class="additional-column">@Localizer["Shape"]</th>
@@ -961,6 +962,10 @@
             ,HideDetails = Localizer["HideDetails"].Value
             , UnHideDetail = Localizer["UnHideDetail"].Value
             , ShowDetails = Localizer["ShowDetails"].Value
+            , SupplierValidationWarningTitle = "Cảnh báo lựa chọn nhà cung cấp"
+            , SupplierValidationContinue = "Tiếp tục"
+            , SupplierValidationClose = "Đóng"
+            , SupplierValidationExport = "Xuất dữ liệu lỗi"
         }));
     </script>
 }
