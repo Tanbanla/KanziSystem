@@ -271,6 +271,8 @@ public partial class COST_MANAGEMENTContext : DbContext
 
     public virtual DbSet<TM_PO_NHAPKHO_MOLD_STATUS> TM_PO_NHAPKHO_MOLD_STATUSes { get; set; }
 
+    public virtual DbSet<TM_PRICE_MASTER> TM_PRICE_MASTERs { get; set; }
+
     public virtual DbSet<TM_PURPOSE_USING> TM_PURPOSE_USINGs { get; set; }
 
     public virtual DbSet<TM_QR_CODE> TM_QR_CODEs { get; set; }
@@ -2941,6 +2943,65 @@ public partial class COST_MANAGEMENTContext : DbContext
             entity.Property(e => e.CHR_SEC_CODE).HasMaxLength(50);
             entity.Property(e => e.CHR_USER_CONFIRM).HasMaxLength(200);
             entity.Property(e => e.DTM_DATE_CONFIRM).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<TM_PRICE_MASTER>(entity =>
+        {
+            entity.HasKey(e => e.ID).HasName("PK_TM_PRICE_MASTER");
+            entity.ToTable("TM_PRICE_MASTER");
+
+            entity.HasIndex(e => e.CHR_INTERNAL_PART_CODE, "IX_TM_PRICE_MASTER_PART_CODE");
+            entity.HasIndex(e => e.CHR_VENDOR_CODE, "IX_TM_PRICE_MASTER_VENDOR_CODE");
+            entity.HasIndex(e => e.CHR_QUOTATION_REQUEST_NO, "IX_TM_PRICE_MASTER_QUOTATION_REQUEST");
+            entity.HasIndex(e => new
+            {
+                e.CHR_INTERNAL_PART_CODE,
+                e.CHR_VENDOR_CODE,
+                e.DTM_PRICE_EFFECTIVE,
+                e.DTM_PRICE_EXPIRATION
+            }, "IX_TM_PRICE_MASTER_PRICE_SEARCH");
+            entity.HasIndex(e => e.CHR_INTERNAL_PART_CODE, "UX_TM_PRICE_MASTER_FIX_VENDOR")
+                .IsUnique()
+                .HasFilter("[BIT_FIX_VENDOR] = 1 AND [BIT_USE_LEAVE_RATE] = 1");
+
+            entity.Property(e => e.ID).ValueGeneratedOnAdd();
+            entity.Property(e => e.DTM_UPLOAD).HasDefaultValueSql("(getdate())").HasColumnType("datetime2(0)");
+            entity.Property(e => e.DTM_CREATE).HasDefaultValueSql("(getdate())").HasColumnType("datetime2(0)");
+            entity.Property(e => e.DTM_UPDATE).HasColumnType("datetime2(0)");
+            entity.Property(e => e.DTM_PRICE_EFFECTIVE).HasColumnType("date");
+            entity.Property(e => e.DTM_PRICE_EXPIRATION).HasColumnType("date");
+
+            entity.Property(e => e.CHR_UPLOAD_USERID).HasMaxLength(50);
+            entity.Property(e => e.CHR_QUOTATION_REQUEST_NO).HasMaxLength(50);
+            entity.Property(e => e.CHR_EQUIPMENT_CODE).HasMaxLength(50);
+            entity.Property(e => e.CHR_INTERNAL_PART_CODE).HasMaxLength(50);
+            entity.Property(e => e.CHR_VENDOR_PART_CODE).HasMaxLength(100);
+            entity.Property(e => e.NVCHR_PART_NAME_VN).HasMaxLength(1000);
+            entity.Property(e => e.NVCHR_PART_NAME_EN).HasMaxLength(1000);
+            entity.Property(e => e.NVCHR_UNIT).HasMaxLength(30);
+            entity.Property(e => e.NVCHR_OTHER_REQUIREMENT).HasMaxLength(1000);
+            entity.Property(e => e.NVCHR_MAKER_ORIGIN).HasMaxLength(250);
+            entity.Property(e => e.CHR_VENDOR_CODE).HasMaxLength(50);
+            entity.Property(e => e.NVCHR_VENDOR_NAME).HasMaxLength(250);
+            entity.Property(e => e.CHR_CURRENCY).HasMaxLength(3).IsUnicode(false).IsFixedLength();
+            entity.Property(e => e.NVCHR_REMARK).HasMaxLength(1000);
+            entity.Property(e => e.NVCHR_DELIVERY_TERM).HasMaxLength(100);
+            entity.Property(e => e.NVCHR_PLACE).HasMaxLength(250);
+            entity.Property(e => e.NVCHR_SHIPMENT_METHOD).HasMaxLength(100);
+            entity.Property(e => e.NVCHR_PAYMENT_TERM).HasMaxLength(250);
+            entity.Property(e => e.NVCHR_ADJUSTMENT_REASON).HasMaxLength(1000);
+            entity.Property(e => e.NVCHR_QTN_LINK).HasMaxLength(1000);
+            entity.Property(e => e.NVCHR_QTN_EXCEL_LINK).HasMaxLength(1000);
+            entity.Property(e => e.CHR_CRT_USERID).HasMaxLength(50);
+            entity.Property(e => e.CHR_UPD_USERID).HasMaxLength(50);
+
+            entity.Property(e => e.DEC_QUANTITY).HasColumnType("decimal(18, 4)");
+            entity.Property(e => e.DEC_UNIT_PRICE).HasColumnType("decimal(19, 6)");
+            entity.Property(e => e.DEC_UNIT_PRICE_USD).HasColumnType("decimal(19, 6)");
+            entity.Property(e => e.DEC_MOQ).HasColumnType("decimal(18, 4)");
+            entity.Property(e => e.DEC_VAT_PERCENT).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.BIT_FIX_VENDOR).HasDefaultValue(false);
+            entity.Property(e => e.BIT_USE_LEAVE_RATE).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<TM_PURPOSE_USING>(entity =>

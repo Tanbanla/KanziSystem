@@ -40,7 +40,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         public QuoteController(ILogger<QuoteController> logger, ITmNccNewService tmNccNewService, IConfiguration configuration,
             IBaoGiaService baoGiaService, IMaterialService materialService, ITmSectionService tmSectionService, IExchangeRateService exchangeRateService,
-           IDepartmentService deparmentService,  IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStepService baoGiaStepService,
+           IDepartmentService deparmentService, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaStepService baoGiaStepService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaDetailService baoGiaDetailService, IBaoGiaRequestTypeService baoGiaRequestTypeService,
             ITmCategoryService tmCategoryService, IBaoGiaNccCategoryService baoGiaNccCategoryService, ITmEmployeeAgentService tmEmployeeAgentService,
             IWebHostEnvironment env, ISendMailService sendMailService, IServiceScopeFactory serviceScopeFactory, IMasterApproverSendMailService approverService,
@@ -131,7 +131,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> GetListApprovel([FromBody] SearchApprovalModel sr)
         {
-            var result = await _approverService.GetApproverByAgrentAsync(sr.Step ?? 2, sr.SectionCost ?? "");
+            var result = await _approverService.GetApproverByAgrentAsync(sr.Step ?? 2, sr.SectionCost ?? "", GetRolesUser());
             if (!result.Success)
             {
                 return BadRequest("Error list Approver: " + result.Message);
@@ -183,7 +183,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             // kiểm tra số lượng nhà cung cấp cho mỗi sản phẩm (MaHangNoiBo, MaHangNCC) không vượt quá 5
             var violatingGroups = danhSachBaoGia
                 .Where(d => d != null && d.BIT_LayBaoGia == true)
-                .GroupBy(d => (MaHangNoiBo: (d.CHR_MaHangNoiBo ??  string.Empty).Trim(), MaHangNcc: (d.CHR_MaHangNCC ?? string.Empty).Trim()
+                .GroupBy(d => (MaHangNoiBo: (d.CHR_MaHangNoiBo ?? string.Empty).Trim(), MaHangNcc: (d.CHR_MaHangNCC ?? string.Empty).Trim()
                 , CHR_NameEN: (d.CHR_NameEN ?? string.Empty).Trim(), CHR_MaThietBi: (d.CHR_MaThietBi ?? string.Empty).Trim()
                 ))
                 .Select(g => new
@@ -378,8 +378,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 {
                     var file = files[fileIndex];
                     var fileInfo = manifest[fileIndex];
-                    var savedPath = await SaveQuotationFileAsync(file, fileInfo.Kind);
-                    savedFiles.Add(savedPath);
+                    var savedPathResult = await _fileImportService.SaveFileFromPathAsync(file.FileName);
+                    if (!savedPathResult.Success)
+                    {
+                        return BadRequest(savedPathResult.Message);
+                    }
+                    var savedPath = savedPathResult.Data;
+                    savedFiles.Add(savedPath ?? "");
 
                     if (fileInfo.Kind == "design")
                     {
@@ -524,33 +529,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return errors;
         }
 
-        private async Task<string> SaveQuotationFileAsync(IFormFile file, string kind)
-        {
-            if (file.Length <= 0 || file.Length > 50 * 1024 * 1024)
-                throw new InvalidDataException("File rỗng hoặc vượt quá dung lượng cho phép.");
-
-            var allowedExtensions = kind == "image"
-                ? new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" }
-                : new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".dwg", ".zip" };
-            var extension = Path.GetExtension(file.FileName);
-            if (!allowedExtensions.Contains(extension))
-                throw new InvalidDataException($"Định dạng file {extension} không được phép.");
-
-            var baseUpload = _configuration["ApiSettings:BaseUpload"];
-            if (string.IsNullOrWhiteSpace(baseUpload))
-                throw new InvalidOperationException("Chưa cấu hình ApiSettings:BaseUpload.");
-
-            var folder = Path.Combine(
-                baseUpload,
-                "Quotations",
-                DateTime.UtcNow.ToString("yyyyMMdd"));
-            Directory.CreateDirectory(folder);
-            var storedName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var physicalPath = Path.Combine(folder, storedName);
-            await using var stream = System.IO.File.Create(physicalPath);
-            await file.CopyToAsync(stream);
-            return physicalPath;
-        }
         [HttpPost]
         public async Task<IActionResult> ExportExcel([FromBody] List<InsertBaoGiaModel> items)
         {
@@ -559,7 +537,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 // lay thong tin WorkflowDefinition
                 var workflowRespAsync = await _baoGiaWorkflowDefinitionService.GetAllAsync();
-                if(!workflowRespAsync.Success|| workflowRespAsync.Data == null) 
+                if (!workflowRespAsync.Success || workflowRespAsync.Data == null)
                 {
                     return BadRequest("Lỗi khi lấy thông tin WorkflowDefinition");
                 }
@@ -747,7 +725,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var sectionCode = ws.Cell(row, 2).GetString().Trim();
                 if (sectionCode == null || sectionCode == "") break;
 
-                var wfType = ws.Cell(row,5).GetString().Trim();
+                var wfType = ws.Cell(row, 5).GetString().Trim();
                 var internalCode = ws.Cell(row, 7).GetString().Trim();
                 var supplierItemCode = ws.Cell(row, 8).GetString().Trim();
                 var rowItems = items
@@ -774,7 +752,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         rowErrors.Add("Hàng chưa có mã nội bộ bắt buộc phải có chủng loại.");
                 }
 
-                if(string.IsNullOrWhiteSpace(wfType))
+                if (string.IsNullOrWhiteSpace(wfType))
                     rowErrors.Add("Loại báo giá là bắt buộc.");
                 if (!rowItems.Any(item => item.INT_SoLuong.HasValue))
                     rowErrors.Add("Số lượng là bắt buộc.");
@@ -1354,7 +1332,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 CHR_SDT = src.CHR_SDT
             };
         }
-       
+
         // check NCC
         [HttpPost]
         public async Task<IActionResult> CheckNCC([FromBody] string maNcc, string catergory)
@@ -1383,7 +1361,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
-            if(result.Data.Count > 0)
+            if (result.Data.Count > 0)
             {
                 return BadRequest("Các nhà cung cấp không tồn tại chủng loại: " + string.Join(", ", result.Data.Select(d => $"{d.MaDon}-{d.ChungLoai}")));
             }

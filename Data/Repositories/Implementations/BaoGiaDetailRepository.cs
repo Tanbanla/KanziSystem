@@ -962,6 +962,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("PageSize", vm.PageSize);
             }
 
+            var a = sql.ToString();
+
             var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
             return result.ToList();
         }

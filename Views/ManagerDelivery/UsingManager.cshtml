@@ -54,7 +54,7 @@
             <div class="card-body pt-0 pl-0">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="d-flex gap-2 flex-fill">
-                        @*       <button type="button" class="btn btn-success" onclick="openModal()">
+                        @*<button type="button" class="btn btn-success" onclick="openModal()">
                             <i class="fa-solid fa fa-plus me-1"></i> Thêm Mới
                         </button> *@
                         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -91,15 +91,15 @@
                         <i class="fa-solid fa fa-file-excel me-1"></i> Xuất PullIn/Out
                     </button>
                     <a href="~/ManagerDelivery/LogChangeHistory" class="btn btn-warning ml-2"><i class="fa-solid fa fa-laravel me-1 "></i> Log Using </a>
-                       <a href="/File/Mau_Using.xlsx" class="btn btn-info ml-2"> <i class="fa fa-link"></i> File mẫu</a>
-                        <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
+                    <a href="/File/Mau_Using.xlsx" class="btn btn-info ml-2"> <i class="fa fa-link"></i> File mẫu</a>
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="d-none" onchange="uploadExcel()" />
                     <button type="button" class="btn btn-success text-white ms-2 ml-2" onclick="document.getElementById('excelFileInput').click()">
                         <i class="fa-solid fa fa-file-excel me-1"></i> Import Excel
                     </button>
-                        <!-- Ô TÌM KIẾM THEO MÃ -->
-                        <select id="selectYear" class="form-control form-select form-select-sm ml-2" style="width: 100px;" onchange="loadData()">
-                            <option>@DateTime.Now.Year</option>
-                            <option></option>
+                    <!-- Ô TÌM KIẾM THEO MÃ -->
+                    <select id="selectYear" class="form-control form-select form-select-sm ml-2" style="width: 100px;" onchange="loadData()">
+                        <option>@DateTime.Now.Year</option>
+                        <option></option>
                         @for(int i = (DateTime.Now.Year - 1); i < (DateTime.Now.Year + 3); i++)
                         {
                             <option>@i</option>
@@ -184,21 +184,60 @@
 </div>
 
 @section Scripts {
+ 
     <script>
+        // const ApiConfig = {
+        // base: '/ManagerDelivery',
+
+        //     endpoints: {
+        //         getMaterialData: '/ipcs/ManagerDelivery/GetMaterialData',
+        //         getData: '/ipcs/ManagerDelivery/GetData',
+        //         saveData: '/ipcs/ManagerDelivery/SaveData',
+        //         deleteDataByMaVT: '/ipcs/ManagerDelivery/DeleteDataByMaVT',
+        //         exportWarningPullInOut: '/ipcs/ManagerDelivery/ExportWarningPullInOut',
+        //         importExcel: '/ipcs/ManagerDelivery/ImportExcel',
+        //         logChangeHistory: '/ipcs/ManagerDelivery/LogChangeHistory',
+        //         templateFile: '/ipcs/File/Mau_Using.xlsx'
+        //     },
+
+        //     // Helper method to get endpoint URL
+        //     getUrl(endpointKey) {
+        //         return this.endpoints[endpointKey] || null;
+        //     }
+        // };
+        const ApiConfig = {
+        base: '/ManagerDelivery',
+
+            endpoints: {
+                getMaterialData: '/ManagerDelivery/GetMaterialData',
+                getData: '/ManagerDelivery/GetData',
+                saveData: '/ManagerDelivery/SaveData',
+                deleteDataByMaVT: '/ManagerDelivery/DeleteDataByMaVT',
+                exportWarningPullInOut: '/ManagerDelivery/ExportWarningPullInOut',
+                importExcel: '/ManagerDelivery/ImportExcel',
+                logChangeHistory: '~/ManagerDelivery/LogChangeHistory',
+                templateFile: '/File/Mau_Using.xlsx'
+            },
+
+            // Helper method to get endpoint URL
+            getUrl(endpointKey) {
+                return this.endpoints[endpointKey] || null;
+            }
+        };
         document.addEventListener("DOMContentLoaded", function () {
-            loadData(); // Load Vùng 1
+            loadData();
         });
-                // Mã JavaScript
-    function exportWarningPullInOut() {
-            // Chuyển hướng trình duyệt đến Action ExportWarningPullInOut
-            window.location.href = '/ManagerDelivery/ExportWarningPullInOut';
+        
+        function exportWarningPullInOut() {
+            window.location.href = ApiConfig.getUrl('exportWarningPullInOut');
         }
-      function loadData() {
+
+        function loadData() {
             const selectedYear = parseInt(document.getElementById('selectYear').value) || 2026;
 
             Promise.all([
-                fetch('/ManagerDelivery/GetMaterialData').then(res => res.json()), 
-                fetch('/ManagerDelivery/GetData').then(res => res.json())          
+                fetch(ApiConfig.getUrl('getMaterialData')).then(res => res.json()), 
+                fetch(ApiConfig.getUrl('getData')).then(res => res.json())          
             ])
             .then(([materialRes, dataRes]) => {
                 if (!materialRes.success || !dataRes.success) {
@@ -208,8 +247,6 @@
 
                 const allMaterials = materialRes.data || [];
         
-                // 1. ĐIỀU CHỈNH LỌC THEO NIÊN ĐỘ: 
-                // Niên độ 2026 = Tháng 4->12 (Năm 2026) VÀ Tháng 1->3 (Năm 2027)
                 const usingData = (dataRes.data || []).filter(item => {
                     if (item.nam === selectedYear && item.thang >= 4) return true;
                     if (item.nam === selectedYear + 1 && item.thang <= 3) return true;
@@ -238,12 +275,11 @@
                             };
                         }
                 
-                        // 2. ĐỔI INDEX ĐỂ KHỚP CỘT TRÊN GIAO DIỆN (T4: index 0 -> T3: index 11)
                         let monthIdx = -1;
                         if (item.thang >= 4 && item.thang <= 12) {
-                            monthIdx = item.thang - 4; // T4->T12
+                            monthIdx = item.thang - 4;
                         } else if (item.thang >= 1 && item.thang <= 3) {
-                            monthIdx = item.thang + 8; // T1->T3
+                            monthIdx = item.thang + 8;
                         }
 
                         if (monthIdx !== -1) {
@@ -267,7 +303,6 @@
                         let monthsHtml = '';
                 
                         row.months.forEach((qty, monthIdx) => {
-                            // 3. TÍNH LẠI SỐ THÁNG HIỂN THỊ ĐỂ GÁN VÀO data-thang
                             const thang = monthIdx < 9 ? monthIdx + 4 : monthIdx - 8;
                             const displayVal = qty > 0 ? Number(qty).toFixed(2) : '';
 
@@ -312,7 +347,6 @@
             });
         }
 
-        // Tự động tính lại tổng ngang real-time và format đúng 2 chữ số thập phân
         function calculateRowTotal(rowIndex) {
             const rowEl = document.getElementById(`row-${rowIndex}`);
             const inputs = rowEl.querySelectorAll('.table-input-cell');
@@ -332,60 +366,57 @@
             }
         }
 
-        // Hàm lưu dữ liệu (Tự động format lại ô input sau khi người dùng gõ xong)
-     function saveInlineData(inputElement) {
-        const maVatTu = inputElement.getAttribute('data-mavt');
-        const thang = parseInt(inputElement.getAttribute('data-thang'));
-        const selectedYear = parseInt(document.getElementById('selectYear').value) || 2026;
-        const soluong = parseFloat(inputElement.value) || 0;
+        function saveInlineData(inputElement) {
+            const maVatTu = inputElement.getAttribute('data-mavt');
+            const thang = parseInt(inputElement.getAttribute('data-thang'));
+            const selectedYear = parseInt(document.getElementById('selectYear').value) || 2026;
+            const soluong = parseFloat(inputElement.value) || 0;
 
-        // TÍNH TOÁN NĂM THỰC TẾ (Nếu tháng 1, 2, 3 thì cộng thêm 1 năm)
-        const actualYear = (thang <= 3) ? selectedYear + 1 : selectedYear;
+            const actualYear = (thang <= 3) ? selectedYear + 1 : selectedYear;
 
-        if (soluong > 0) {
-            inputElement.value = Number(soluong).toFixed(2);
-        } else {
-            inputElement.value = ''; 
+            if (soluong > 0) {
+                inputElement.value = Number(soluong).toFixed(2);
+            } else {
+                inputElement.value = ''; 
+            }
+
+            inputElement.style.backgroundColor = '#fff3cd';
+
+            const data = {
+                ID: 0,
+                MaVatTu: maVatTu,
+                Thang: thang,
+                Nam: actualYear,
+                Soluong: soluong,
+                Nguoiupdate: document.getElementById('us') ? document.getElementById('us').innerHTML : 'System'
+            };
+
+            fetch(ApiConfig.getUrl('saveData'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    inputElement.style.backgroundColor = '#d1e7dd';
+                    setTimeout(() => {
+                        inputElement.style.backgroundColor = 'transparent';
+                    }, 800);
+                } else {
+                    alert(`Lỗi khi lưu số lượng tháng ${thang}/${actualYear} cho mã ${maVatTu}!`);
+                    inputElement.style.backgroundColor = '#f8d7da';
+                }
+            })
+            .catch(() => {
+                alert("Lỗi kết nối đến máy chủ!");
+                inputElement.style.backgroundColor = '#f8d7da';
+            });
         }
 
-        inputElement.style.backgroundColor = '#fff3cd';
-
-        const data = {
-            ID: 0,
-            MaVatTu: maVatTu,
-            Thang: thang,
-            Nam: actualYear, // Sử dụng năm thực tế đã tính
-            Soluong: soluong,
-            Nguoiupdate: document.getElementById('us') ? document.getElementById('us').innerHTML : 'System'
-        };
-
-        fetch('/ManagerDelivery/SaveData', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                inputElement.style.backgroundColor = '#d1e7dd';
-                setTimeout(() => {
-                    inputElement.style.backgroundColor = 'transparent';
-                }, 800);
-            } else {
-                alert(`Lỗi khi lưu số lượng tháng ${thang}/${actualYear} cho mã ${maVatTu}!`);
-                inputElement.style.backgroundColor = '#f8d7da';
-            }
-        })
-        .catch(() => {
-            alert("Lỗi kết nối đến máy chủ!");
-            inputElement.style.backgroundColor = '#f8d7da';
-        });
-    }
-
-        // Xóa dữ liệu của Mã VT trong năm được chọn
         function deleteDataByMaVT(maVatTu, nam) {
             if (confirm(`Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của vật tư [${maVatTu}] trong năm ${nam}?`)) {
-                fetch(`/ManagerDelivery/DeleteDataByMaVT?maVatTu=${encodeURIComponent(maVatTu)}&nam=${nam}`, {
+                fetch(`${ApiConfig.getUrl('deleteDataByMaVT')}?maVatTu=${encodeURIComponent(maVatTu)}&nam=${nam}`, {
                     method: 'POST'
                 })
                 .then(res => res.json())
@@ -399,22 +430,20 @@
             }
         }
 
-        // Hàm bấm nút chọn nhanh nhóm A hoặc E (Tự đồng bộ luôn vào Dropdown Select)
         function quickFilterGroup(groupPrefix) {
             const selectGroup = document.getElementById('selectGroupMa');
             if (selectGroup) {
-                selectGroup.value = groupPrefix; // Gán giá trị vào dropdown tương ứng
+                selectGroup.value = groupPrefix;
             }
-            applyFilter(); // Kích hoạt bộ lọc
+            applyFilter();
         }
 
-        // Bộ lọc trung tâm: Kết hợp tìm kiếm từ khóa + Bộ lọc tiền tố (A, E)
         function applyFilter() {
             const searchInput = document.getElementById('txtSearchMaVT');
             const selectGroup = document.getElementById('selectGroupMa');
 
             const keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
-            const groupPrefix = selectGroup ? selectGroup.value.trim().toUpperCase() : ''; // "A", "E" hoặc ""
+            const groupPrefix = selectGroup ? selectGroup.value.trim().toUpperCase() : '';
 
             const rows = document.querySelectorAll('#tableBody tr.data-row');
             let visibleCount = 0;
@@ -422,13 +451,9 @@
             rows.forEach(row => {
                 const maVT = (row.getAttribute('data-mavt') || '').toUpperCase();
 
-                // 1. Kiểm tra điều kiện nhóm prefix (A, E) - Mã phải bắt đầu bằng chữ cái được chọn
                 const matchGroup = (groupPrefix === '') || maVT.startsWith(groupPrefix);
-
-                // 2. Kiểm tra điều kiện từ khóa tìm kiếm trong ô Text
                 const matchKeyword = (keyword === '') || maVT.toLowerCase().includes(keyword);
 
-                // Thỏa mãn cả 2 điều kiện thì hiển thị
                 if (matchGroup && matchKeyword) {
                     row.style.display = '';
                     visibleCount++;
@@ -437,13 +462,11 @@
                 }
             });
 
-            // Cập nhật số dòng hiển thị trên Header
             const rowCountLbl = document.getElementById('lblRowCount');
             if (rowCountLbl) {
                 rowCountLbl.innerText = `${visibleCount} dòng`;
             }
 
-            // Xử lý thông báo khi không tìm thấy dòng nào
             let noResultRow = document.getElementById('no-result-row');
             if (visibleCount === 0 && rows.length > 0) {
                 if (!noResultRow) {
@@ -489,7 +512,7 @@
                 Soluong: parseFloat(document.getElementById('txtSoLuong').value),
                 Nguoiupdate: document.getElementById('us') ? document.getElementById('us').innerHTML : 'System'
             };
-            fetch('/ManagerDelivery/SaveData', {
+            fetch(ApiConfig.getUrl('saveData'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -503,18 +526,19 @@
         }
 
         function uploadExcel() {
-                const fileInput = document.getElementById('excelFileInput');
+            const fileInput = document.getElementById('excelFileInput');
             if (fileInput.files.length === 0) return;
             const formData = new FormData();
-                formData.append('excelFileInput', fileInput.files[0]);
+            formData.append('excelFileInput', fileInput.files[0]);
             const usElement = document.getElementById("us");
             formData.append('us', usElement ? usElement.innerHTML : 'System');
 
-            fetch('/ManagerDelivery/ImportExcel', { method: 'POST', body: formData })
+            fetch(ApiConfig.getUrl('importExcel'), { method: 'POST', body: formData })
             .then(res => res.json()).then(res => {
                 if (res.success) { alert(res.message); fileInput.value = ''; loadData(); }
                 else alert('Lỗi: ' + res.message);
             });
         }
+
     </script>
 }

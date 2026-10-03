@@ -90,6 +90,7 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.Material
             public string? MaterialName { get; set; }
             public string? MaterialCatergory { get; set; }
             public string? MaterialGroup { get; set; }
+            public string? CodeMaterialBySupplier { get; set; }
             public int? pageIndex { get; set; } = 1;
             public int? pageSize { get; set; } = 50;
         }

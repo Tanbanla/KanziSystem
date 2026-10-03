@@ -63,6 +63,136 @@ document.addEventListener('DOMContentLoaded', function () {
     const date = value => value ? new Date(value).toLocaleDateString('vi-VN') : '';
     const cell = value => `<td class ="text-center">${escape(value)}</td>`;
 
+    const masterPriceFields = [
+        ['ID', 'ID', 'number', true], ['DTM_UPLOAD', 'Ngày upload', 'datetime-local'], ['CHR_UPLOAD_USERID', 'Người upload'],
+        ['CHR_QUOTATION_REQUEST_NO', 'Số đơn yêu cầu báo giá'], ['INT_QUOTATION_DETAIL', 'ID chi tiết báo giá', 'number'], ['CHR_EQUIPMENT_CODE', 'Mã thiết bị'],
+        ['CHR_INTERNAL_PART_CODE', 'Mã hàng nội bộ'], ['CHR_VENDOR_PART_CODE', 'Mã hàng nhà cung cấp'], ['NVCHR_PART_NAME_VN', 'Tên hàng tiếng Việt'],
+        ['NVCHR_PART_NAME_EN', 'Tên hàng tiếng Anh'], ['NVCHR_UNIT', 'Đơn vị'], ['NVCHR_OTHER_REQUIREMENT', 'Yêu cầu khác', 'textarea'],
+        ['NVCHR_MAKER_ORIGIN', 'Nhà sản xuất/Xuất xứ'], ['DEC_QUANTITY', 'Số lượng', 'number'], ['CHR_VENDOR_CODE', 'Mã nhà cung cấp'],
+        ['NVCHR_VENDOR_NAME', 'Tên nhà cung cấp'], ['DEC_UNIT_PRICE', 'Đơn giá nhà cung cấp', 'number'], ['CHR_CURRENCY', 'Đơn vị tiền'],
+        ['DEC_UNIT_PRICE_USD', 'Đơn giá USD', 'number'], ['INT_LEAD_TIME_DAY', 'Thời gian giao hàng (ngày)', 'number'], ['DEC_MOQ', 'MOQ', 'number'],
+        ['NVCHR_REMARK', 'Ghi chú', 'textarea'], ['NVCHR_DELIVERY_TERM', 'Điều kiện giao hàng'], ['NVCHR_PLACE', 'Địa điểm giao hàng'],
+        ['NVCHR_SHIPMENT_METHOD', 'Phương thức giao hàng'], ['DEC_VAT_PERCENT', 'VAT (%)', 'number'], ['NVCHR_PAYMENT_TERM', 'Phương thức thanh toán'],
+        ['DTM_PRICE_EFFECTIVE', 'Ngày hiệu lực', 'datetime-local'], ['DTM_PRICE_EXPIRATION', 'Ngày hết hạn', 'datetime-local'],
+        ['BIT_FIX_VENDOR', 'Cố định nhà cung cấp', 'checkbox'], ['NVCHR_ADJUSTMENT_REASON', 'Lý do điều chỉnh', 'textarea'],
+        ['NVCHR_QTN_LINK', 'Link báo giá'], ['NVCHR_QTN_EXCEL_LINK', 'Link file Excel báo giá'], ['BIT_USE_LEAVE_RATE', 'Dùng tỷ giá để lại', 'checkbox'],
+        ['CHR_CRT_USERID', 'Người tạo'], ['DTM_CREATE', 'Ngày tạo', 'datetime-local'], ['CHR_UPD_USERID', 'Người cập nhật'], ['DTM_UPDATE', 'Ngày cập nhật', 'datetime-local']
+    ];
+    const masterPriceGet = (row, name) => row?.[name] ?? row?.[name.charAt(0).toLowerCase() + name.slice(1)] ?? '';
+    const masterPriceDateInput = value => {
+        if (!value) return '';
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? '' : new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    };
+    const masterPriceDisplay = (value, type) => type === 'checkbox' ? (value ? 'Có' : 'Không') : (type === 'datetime-local' ? date(value) : value);
+    const masterPriceOverlay = (kind, open) => {
+        const overlay = document.getElementById(`masterPrice${kind === 'history' ? 'History' : 'Edit'}Overlay`);
+        if (!overlay) return;
+        overlay.classList.toggle('is-open', open);
+        overlay.setAttribute('aria-hidden', String(!open));
+        document.body.classList.toggle('master-price-modal-open', open);
+        if (open) overlay.querySelector('button, input, select, textarea')?.focus();
+    };
+
+    async function loadMasterPriceHistory(code) {
+        const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/GetPriceMasterHistory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(code) });
+        if (!response.ok) throw new Error(await response.text() || 'Không thể tải lịch sử master giá');
+        const result = await response.json();
+        return Array.isArray(result?.data) ? result.data : [];
+    }
+
+    async function exportMasterPriceHistory() {
+        const code = masterPriceModalState.code;
+        if (!code) return;
+        const button = document.getElementById('masterPriceHistoryExport');
+        if (button) button.disabled = true;
+        try {
+            const payload = {
+                internalPartCode: code,
+                vendorCode: document.getElementById('historyVendorCode')?.value.trim() || null,
+                quotationRequestNo: document.getElementById('historyQuotationNo')?.value.trim() || null,
+                from: document.getElementById('historyFrom')?.value || null,
+                to: document.getElementById('historyTo')?.value || null
+            };
+            const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ExportPriceMasterHistory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error(await response.text() || 'Không thể xuất lịch sử master giá');
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get('Content-Disposition') || '';
+            const fileNameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
+            const fileName = fileNameMatch ? decodeURIComponent(fileNameMatch[1].replace(/^"|"$/g, '')) : `LichSuMasterGia_${code}.xlsx`;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            showDialog({ title: 'Thông báo', message: error.message || 'Không thể xuất lịch sử master giá.', type: 'error' });
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    function renderMasterPriceHistory(rows) {
+        const head = document.getElementById('masterPriceHistoryHead');
+        const body = document.getElementById('masterPriceHistoryBody');
+        if (!head || !body) return;
+        head.innerHTML = `<tr><th>STT</th>${masterPriceFields.map(field => `<th>${escape(field[1])}</th>`).join('')}</tr>`;
+        body.innerHTML = rows.length ? rows.map((row, index) => `<tr><td class="text-center">${index + 1}</td>${masterPriceFields.map(field => `<td>${escape(masterPriceDisplay(masterPriceGet(row, field[0]), field[2]))}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="40" class="text-center text-muted py-4">Không có dữ liệu phù hợp</td></tr>';
+    }
+
+    function renderMasterPriceEdit(row, internalPartCode = '') {
+        const container = document.getElementById('masterPriceEditFields');
+        if (!container) return;
+        container.innerHTML = masterPriceFields.map(([name, label, type, readonly]) => {
+            const value = masterPriceGet(row, name);
+            const inputType = type === 'datetime-local' ? 'datetime-local' : (type === 'number' ? 'number' : 'text');
+            const isInternalCode = name === 'CHR_INTERNAL_PART_CODE';
+            const common = `class="form-control form-control-sm" name="${name}" ${readonly || isInternalCode ? 'readonly' : ''}`;
+            if (type === 'checkbox') return `<div class="col-12 col-md-3 master-price-field"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="${name}" ${value ? 'checked' : ''}><label class="form-check-label">${escape(label)}</label></div></div>`;
+            if (type === 'textarea') return `<div class="col-12 col-md-6 master-price-field"><label class="form-label small">${escape(label)}</label><textarea ${common}>${escape(value)}</textarea></div>`;
+            if (name === 'NVCHR_QTN_LINK' || name === 'NVCHR_QTN_EXCEL_LINK') return `<div class="col-12 col-md-6 master-price-field"><label class="form-label small">${escape(label)}</label><input type="file" class="form-control form-control-sm master-price-file-input" data-link-field="${name}" accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.zip,.csv"><input type="text" ${common} value="${escape(value)}" placeholder="Chưa có file hoặc chưa chọn file" readonly></div>`;
+            return `<div class="col-12 col-md-4 master-price-field"><label class="form-label small">${escape(label)}</label><input type="${inputType}" ${common} value="${escape(type === 'datetime-local' ? masterPriceDateInput(value) : value)}"></div>`;
+        }).join('');
+        container.querySelectorAll('.master-price-file-input').forEach(fileInput => fileInput.addEventListener('change', () => {
+            const linkInput = container.querySelector(`[name="${fileInput.dataset.linkField}"]`);
+            if (linkInput && fileInput.files?.[0]) linkInput.value = fileInput.files[0].name;
+        }));
+    }
+
+    async function uploadMasterPriceFiles(dto) {
+        const files = document.querySelectorAll('#masterPriceEditFields .master-price-file-input');
+        for (const fileInput of files) {
+            const file = fileInput.files?.[0];
+            if (!file) continue;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('kind', 'quotation');
+            const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/UploadPriceMasterFile', { method: 'POST', body: formData });
+            if (!response.ok) throw new Error(await response.text() || `Không thể tải file ${file.name}`);
+            const result = await response.json();
+            dto[fileInput.dataset.linkField] = result?.data || null;
+        }
+        return dto;
+    }
+
+    function readMasterPriceEdit() {
+        const form = document.getElementById('masterPriceEditForm');
+        const dto = {};
+        masterPriceFields.forEach(([name, , type]) => {
+            const input = form?.elements.namedItem(name);
+            if (!input) return;
+            if (type === 'checkbox') dto[name] = input.checked;
+            else if (type === 'number') dto[name] = input.value === '' ? null : Number(input.value);
+            else if (type === 'datetime-local') dto[name] = input.value ? new Date(input.value).toISOString() : null;
+            else dto[name] = input.value || null;
+        });
+        return dto;
+    }
+    const masterPriceModalState = { rows: [], code: '', mode: 'edit' };
+
     function getSupplierValidationWarnings(rows) {
         const groups = new Map();
         const today = new Date();
@@ -263,6 +393,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(err => console.error('Load supplier data failed', err));
         },
+        openMasterPriceModal: async function (code, kind) {
+            const title = document.getElementById(kind === 'history' ? 'masterPriceHistorySubtitle' : 'masterPriceEditTitle');
+            if (title && kind === 'history') title.textContent = `Mã hàng nội bộ: ${code}`;
+            if (kind === 'add') {
+                masterPriceModalState.code = code;
+                masterPriceModalState.mode = 'add';
+                const now = new Date().toISOString();
+                const blank = { CHR_INTERNAL_PART_CODE: code, DTM_UPLOAD: now, DTM_CREATE: now, BIT_FIX_VENDOR: false, BIT_USE_LEAVE_RATE: false };
+                document.getElementById('masterPriceEditTitle').textContent = 'Nhập master giá mới';
+                document.getElementById('masterPriceEditSubtitle').textContent = `Mã hàng nội bộ: ${code}`;
+                document.getElementById('masterPriceSaveButton').innerHTML = '<i class="fas fa-plus me-1"></i>Thêm master giá';
+                renderMasterPriceEdit(blank, code);
+                masterPriceOverlay('edit', true);
+                return;
+            }
+            masterPriceModalState.mode = 'edit';
+            document.getElementById('masterPriceEditTitle').textContent = 'Chỉnh sửa master giá';
+            document.getElementById('masterPriceEditSubtitle').textContent = 'Đang hiển thị bản ghi mới nhất';
+            document.getElementById('masterPriceSaveButton').innerHTML = '<i class="fas fa-save me-1"></i>Lưu thay đổi';
+            masterPriceOverlay(kind, true);
+            if (kind === 'history') renderMasterPriceHistory([]);
+            try {
+                const rows = await loadMasterPriceHistory(code);
+                masterPriceModalState.rows = rows;
+                masterPriceModalState.code = code;
+                if (kind === 'history') {
+                    renderMasterPriceHistory(rows);
+                } else if (rows.length) {
+                    renderMasterPriceEdit(rows[0]);
+                } else {
+                    masterPriceOverlay('edit', false);
+                    showDialog({ title: 'Thông báo', message: 'Không tìm thấy bản ghi master giá cho mã hàng này.', type: 'error' });
+                }
+            } catch (error) {
+                masterPriceOverlay(kind, false);
+                showDialog({ title: 'Thông báo', message: error.message || 'Không thể tải master giá.', type: 'error' });
+            }
+        },
         loadLatestSelectedPrices: async function (items) {
             const codes = [...new Set(items.map(item => item.CHR_MaHangNoiBo).filter(Boolean))];
             supplierState.latestSelectedPrices = {};
@@ -328,6 +496,32 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
                 console.error('Load master quote data failed', error);
                 if (tbody) tbody.innerHTML = '<tr><td colspan="27" class="text-center text-danger py-5"><i class="fas fa-exclamation-circle me-2"></i>Không thể tải dữ liệu</td></tr>';
+            }
+        },
+        ExpTemplateExcel: async function () {
+            const templateUrl = `${window.location.origin}/template/MasterGia.xlsx`;
+            const templateFileName = 'MasterGia.xlsx';
+
+            try {
+                const response = await fetch(templateUrl);
+                if (!response.ok) throw new Error('Không tìm thấy file mẫu MasterGia.xlsx');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = templateFileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                const T = window.i18nQuotationResults || {};
+                showDialog({
+                    title: T.Notification || 'Thông báo',
+                    message: error.message || 'Không thể tải file mẫu MasterGia.xlsx',
+                    type: 'error'
+                });
             }
         },
         getMasterQuoteCount: async function (payload) {
@@ -436,6 +630,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             title="${escape('Edit')}"
                             data-bivncode="${escape(get(row, 'BIVNPartCode'))}">
                             <i class="fas fa-edit text-primary"></i>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-add-price"
+                            title="${escape('Nhập master giá mới')}"
+                            data-bivncode="${escape(get(row, 'BIVNPartCode'))}">
+                            <i class="fas fa-plus text-success"></i>
                         </button>
                     </div>
                 </td>
@@ -647,6 +849,62 @@ document.addEventListener('DOMContentLoaded', function () {
                         this.openEditRequestModal(parseInt(id, 10));
                     }
                 }
+
+                const historyBtn = e.target.closest('.btn-view-history');
+                const editBtn = e.target.closest('.btn-edit-history');
+                if (historyBtn || editBtn) {
+                    const code = (historyBtn || editBtn).dataset.bivncode;
+                    if (code) this.openMasterPriceModal(code, historyBtn ? 'history' : 'edit');
+                }
+                const addBtn = e.target.closest('.btn-add-price');
+                if (addBtn?.dataset.bivncode) this.openMasterPriceModal(addBtn.dataset.bivncode, 'add');
+
+                const closeButton = e.target.closest('[data-master-price-close]');
+                if (closeButton) masterPriceOverlay(closeButton.dataset.masterPriceClose, false);
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    masterPriceOverlay('history', false);
+                    masterPriceOverlay('edit', false);
+                }
+            });
+
+            const historyFilter = document.getElementById('masterPriceHistoryFilter');
+            if (historyFilter) historyFilter.addEventListener('submit', event => {
+                event.preventDefault();
+                const vendor = document.getElementById('historyVendorCode')?.value.trim().toLowerCase() || '';
+                const quotation = document.getElementById('historyQuotationNo')?.value.trim().toLowerCase() || '';
+                const from = document.getElementById('historyFrom')?.value || '';
+                const to = document.getElementById('historyTo')?.value || '';
+                const filtered = masterPriceModalState.rows.filter(row => {
+                    const rowDate = String(masterPriceGet(row, 'DTM_UPLOAD')).slice(0, 10);
+                    return (!vendor || String(masterPriceGet(row, 'CHR_VENDOR_CODE')).toLowerCase().includes(vendor))
+                        && (!quotation || String(masterPriceGet(row, 'CHR_QUOTATION_REQUEST_NO')).toLowerCase().includes(quotation))
+                        && (!from || rowDate >= from) && (!to || rowDate <= to);
+                });
+                renderMasterPriceHistory(filtered);
+            });
+            if (historyFilter) historyFilter.addEventListener('reset', () => setTimeout(() => renderMasterPriceHistory(masterPriceModalState.rows), 0));
+            const historyExport = document.getElementById('masterPriceHistoryExport');
+            if (historyExport) historyExport.addEventListener('click', exportMasterPriceHistory);
+
+            const editForm = document.getElementById('masterPriceEditForm');
+            if (editForm) editForm.addEventListener('submit', async event => {
+                event.preventDefault();
+                const submit = editForm.querySelector('button[type="submit"]');
+                if (submit) submit.disabled = true;
+                try {
+                    const isAdd = masterPriceModalState.mode === 'add';
+                    const dto = await uploadMasterPriceFiles(readMasterPriceEdit());
+                    const response = await fetch((window.apiBaseUrl || '') + `/QuoteResults/${isAdd ? 'AddPriceMaster' : 'UpdatePriceMaster'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dto) });
+                    if (!response.ok) throw new Error(await response.text() || 'Không thể lưu master giá');
+                    masterPriceOverlay('edit', false);
+                    this.loadMasterQuoteData();
+                    showDialog({ title: 'Thông báo', message: isAdd ? 'Đã thêm master giá.' : 'Đã cập nhật master giá.', type: 'success' });
+                } catch (error) {
+                    showDialog({ title: 'Thông báo', message: error.message || 'Không thể lưu master giá.', type: 'error' });
+                } finally { if (submit) submit.disabled = false; }
             });
 
             // Filter theo trạng thái
@@ -730,6 +988,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (masterQuoteClearBtn) masterQuoteClearBtn.addEventListener('click', () => {
                 masterQuoteState.pageIndex = 1;
                 setTimeout(() => this.loadMasterQuoteData(), 0);
+            });
+
+            const masterQuoteExpTemBtn = document.getElementById('masterQuoteExpTemBtn');
+            if (masterQuoteExpTemBtn) masterQuoteExpTemBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                this.ExpTemplateExcel();
             });
 
             const masterQuotePageSize = document.getElementById('masterQuotePageSize');

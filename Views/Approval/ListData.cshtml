@@ -131,6 +131,17 @@
         background-color: #e8f3ff !important;
         z-index: 999;
     }
+    /* Hiệu ứng khi di chuột (hover) vào dòng */
+    .table tbody tr:hover td {
+        background-color: #dce8ff !important;
+        cursor: pointer;
+    }
+
+    /* Hiệu ứng đổi màu khi click/focus vào dòng */
+    .table tbody tr.selected-row td {
+        background-color: #fff9ad94 !important; /* Màu xanh biển nhạt */
+        transition: background-color 0.1s ease-in-out;
+    }
 </style>
 
 <div class="row">
@@ -202,6 +213,7 @@
                                     <th rowspan="2">@Languages.Tinhtrangdon</th>
                                     <th rowspan="2">@Languages.Trangthaidon</th>
                                     <th rowspan="2">@Languages.mayeucau</th>
+                                    <th rowspan="2">@Languages.Mahang</th>
                                     <th rowspan="2">Cost Center</th>
                                     <th rowspan="2">@Languages.Ngayyeucau</th>
                                     <th rowspan="2">@Languages.thoihanmuonnhan</th>
@@ -421,5 +433,24 @@
             });
         });
     }
+    // Xử lý sự kiện click để focus màu dòng trong table
+    document.addEventListener('click', function (e) {
+        // Tìm thẻ <tr> gần nhất chứa phần tử vừa click
+        const tr = e.target.closest('tbody tr');
 
+        // Nếu không click vào dòng trong thẻ <tbody> thì bỏ qua
+        if (!tr) return;
+
+        // Tìm <tbody> chứa dòng đó
+        const tbody = tr.closest('tbody');
+        if (tbody) {
+            // Xóa class 'selected-row' ở tất cả các dòng cùng thuộc <tbody> này
+            tbody.querySelectorAll('tr').forEach(row => {
+                row.classList.remove('selected-row');
+            });
+
+            // Thêm class 'selected-row' cho dòng vừa click
+            tr.classList.add('selected-row');
+        }
+    });
 </script>

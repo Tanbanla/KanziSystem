@@ -84,7 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             if (step == 3)
             {
-                var agentResult = await _approverService.GetApproverByAgrentAsync(step, sectionCost);
+                var agentResult = await _approverService.GetApproverByAgrentAsync(step, sectionCost, GetRolesUser());
                 if (!agentResult.Success)
                 {
                     return BadRequest("Error list Approver: " + agentResult.Message);

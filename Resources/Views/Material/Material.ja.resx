@@ -270,4 +270,7 @@
   <data name="UpdateSuccess" xml:space="preserve">
     <value>更新に成功しました</value>
   </data>
+  <data name="VendorGoodCode" xml:space="preserve">
+    <value>仕入先品目コード</value>
+  </data>
 </root>

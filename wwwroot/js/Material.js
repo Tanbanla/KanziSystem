@@ -77,6 +77,7 @@ function _getSearchData() {
         MaterialName: document.getElementById("Material_Name_VN").value.trim(),
         MaterialCatergory: document.getElementById("Category_VN").value.trim(),
         MaterialGroup: document.getElementById("lst_gc").value,
+        CodeMaterialBySupplier: document.getElementById("CodeSupplier").value.trim(),
         pageIndex: currentPage,
         pageSize: pageSize
     };

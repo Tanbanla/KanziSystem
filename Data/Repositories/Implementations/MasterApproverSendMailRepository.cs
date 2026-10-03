@@ -136,11 +136,53 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             return result.ToList();
         }
-        public async Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode)
+        public async Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode, string role)
         {
             // lấy thông tin phòng từ sectionCode
             var section = await _context.DEPARTMENTs.Where(d => d.Cost_Center == sectionCode)
-                .Select(d =>  d.CHR_Section_Code)
+                .Select(d => d.CHR_Section_Code)
+                .FirstOrDefaultAsync();
+
+            var query = _agentContext.TM_EMPLOYEE.AsNoTracking()
+                .Where(e => e.CHR_NOTE == null && (e.DTM_LEAVE_DATE == null || e.DTM_LEAVE_DATE < DateTime.Now));
+
+            if (!string.IsNullOrEmpty(section))
+            {
+                var sectionFilter = $"{section.Trim()} :";
+                query = query.Where(e => e.CHR_SECTION != null && e.CHR_SECTION.Contains(sectionFilter));
+            }
+
+            switch (idStep)
+            {
+                case 2:
+                    query = query.Where(e => e.CHR_POSITION_GROUP == "Chief");
+                    break;
+                case 3:
+                    query = query.Where(e => e.CHR_POSITION_GROUP == "Section Manager");
+                    break;
+                default:
+                    break;
+            }
+
+            var result = await query
+                .Select(e => new
+                {
+                    e.CHR_EMPLOYEE_ID,
+                    NVCHR_UserName = e.CHR_EMPLOYEE_NAME,
+                    CHR_UserAdid = e.CHR_EMPLOYEE_ADID,
+                    e.CHR_EMPLOYEE_MAIL,
+                    e.CHR_POSITION,
+                    NVCHR_Position = e.CHR_POSITION_GROUP
+                })
+                .ToListAsync();
+
+            return result.Cast<dynamic>().ToList();
+        }
+        public async Task<List<dynamic>> GetApproverByAgrentAsyncTest(int idStep, string sectionCode, string role)
+        {
+            // lấy thông tin phòng từ sectionCode
+            var section = await _context.DEPARTMENTs.Where(d => d.Cost_Center == sectionCode)
+                .Select(d => d.CHR_Section_Code)
                 .FirstOrDefaultAsync();
 
             var sql = new StringBuilder();
@@ -157,23 +199,29 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var parameters = new DynamicParameters();
 
-            if (!string.IsNullOrEmpty(section))
+            switch (role)
             {
-                sql.Append(" AND CHR_SECTION like  @section");
-                parameters.Add("@section", $"%{section.Trim()} :%");
-            }
-
-            switch(idStep)
-            {
-                case 2:
-                    sql.Append(" AND CHR_POSITION_GROUP = 'Chief'");
+                case "PUR":
+                    sql.Append(" AND CHR_EMPLOYEE_ADID in ('vuthipt','huongue','nganng') ");
                     break;
-                case 3:
-                    sql.Append(" AND CHR_POSITION_GROUP = 'Section Manager'");
+                case "GA":
+                    sql.Append(" AND CHR_EMPLOYEE_ADID in ('lanlh','huyendi','huyente')");
                     break;
                 default:
                     break;
             }
+
+            //switch (idStep)
+            //{
+            //    case 2:
+            //        sql.Append(" AND CHR_POSITION_GROUP = 'Chief'");
+            //        break;
+            //    case 3:
+            //        sql.Append(" AND CHR_POSITION_GROUP = 'Section Manager'");
+            //        break;
+            //    default:
+            //        break;
+            //}
 
             var result = await _conn.QueryAsync<dynamic>(
                 sql.ToString(),

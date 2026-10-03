@@ -49,6 +49,27 @@
     min-width: 0;
 }
 
+/* Keep all custom dropdowns in the supplier filter at the same height when
+   their selected text wraps on smaller screens. */
+#supplierFilterForm .ms-btn {
+    align-items: center;
+}
+
+#supplierFilterForm .ms-values,
+#supplierFilterForm .ms-placeholder {
+    min-width: 0;
+    max-width: calc(100% - 1.5rem);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+#supplierFilterForm .ms-caret {
+    flex-shrink: 0;
+}
+
 #supplierFilterForm .text-md-end .d-flex {
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -76,6 +97,20 @@
 
     #supplierFilterForm > .text-md-end .d-flex {
         justify-content: flex-start !important;
+    }
+}
+
+/* Give the filter fields more room and let them wrap into rows on smaller
+   laptop/tablet screens instead of squeezing all fields into one row. */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    #supplierFilterForm > .col-12:not(.text-md-end) {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    #supplierFilterForm > .text-md-end {
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 }
 
@@ -715,6 +750,22 @@ td[style*="#ffecec"] {
     padding: 2px 5px;
     font-size: 11px;
 }
+
+.master-price-overlay { position: fixed; inset: 0; z-index: 1060; display: none; align-items: center; justify-content: center; padding: 1rem; }
+.master-price-overlay.is-open { display: flex; }
+.master-price-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, .58); }
+.master-price-modal { position: relative; z-index: 1; width: min(1500px, 100%); max-height: calc(100vh - 2rem); display: flex; flex-direction: column; background: #fff; border: 1px solid #d9e1ec; border-radius: .35rem; box-shadow: 0 1rem 3rem rgba(15, 23, 42, .25); }
+.master-price-edit-modal { width: min(1180px, 100%); }
+.master-price-edit-modal > form { min-height: 0; display: flex; flex: 1 1 auto; flex-direction: column; overflow: hidden; }
+.master-price-modal-header, .master-price-modal-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+.master-price-modal-footer { justify-content: flex-end; border-top: 1px solid #e2e8f0; border-bottom: 0; }
+.master-price-modal-body { min-height: 0; overflow: auto; padding: 1rem; }
+.master-price-edit-modal > form > .master-price-modal-body { flex: 1 1 auto; }
+.master-price-history-table-wrap { max-height: 60vh; overflow: auto; }
+.master-price-history-table-wrap thead th { position: sticky; top: 0; z-index: 2; white-space: nowrap; background: #eaf2ff; color: #1e3a8a; }
+.master-price-history-table-wrap td { white-space: nowrap; }
+.master-price-field textarea { min-height: 74px; resize: vertical; }
+body.master-price-modal-open { overflow: hidden; }
 
 @media (max-width: 768px) {
     #supplierQuoteTable {

@@ -327,8 +327,21 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             if (!string.IsNullOrWhiteSpace(search.MaterialGroup))
             {
-                where.Add("Group_Code = @MaterialGroup");
-                parameters.Add("MaterialGroup", search.MaterialGroup);
+                if(search.MaterialGroup == "PUR")
+                {
+                    where.Add("Material_Code not like 'B%'");
+                }
+                else
+                {
+                    where.Add("Group_Code = @MaterialGroup");
+                    parameters.Add("MaterialGroup", search.MaterialGroup);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(search.CodeMaterialBySupplier))
+            {
+                where.Add("Code_Suppiler = @Code");
+                parameters.Add("Code", search.CodeMaterialBySupplier);
             }
 
             if (where.Any())

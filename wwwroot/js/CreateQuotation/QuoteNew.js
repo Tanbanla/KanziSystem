@@ -286,6 +286,38 @@
         }
         supplierContainer.classList.toggle('supplier-table-error', supplierError);
         setSupplierValidationMessage(supplierRuleError);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const desiredDateValue = valueOf('NgayMuonNhan');
+        const supplierDeadlineValue = valueOf('LuaChonNcc');
+
+        if (desiredDateValue) {
+            const desiredDate = new Date(desiredDateValue);
+            desiredDate.setHours(0, 0, 0, 0);
+
+            if (desiredDate <= today) {
+                setInvalid($('NgayMuonNhan'), true);
+                errors.push('Ngày muốn nhận phải lớn hơn ngày hiện tại.');
+            } else {
+                setInvalid($('NgayMuonNhan'), false);
+            }
+        }
+
+        if (supplierDeadlineValue) {
+            const supplierDeadline = new Date(supplierDeadlineValue);
+            supplierDeadline.setHours(0, 0, 0, 0);
+
+            if (supplierDeadline <= today) {
+                setInvalid($('LuaChonNcc'), true);
+                errors.push('Hạn xin báo giá phải lớn hơn ngày hiện tại.');
+            } else {
+                setInvalid($('LuaChonNcc'), false);
+            }
+        }
+
+
         if (errors.length) return { errors };
         return { item: {
             internalCode: valueOf('searchMahangNB'),
@@ -343,6 +375,19 @@
         const option = Array.from(field.options).find(item => item.value === field.value);
         button.querySelector('.ms-values').textContent = option?.textContent || '';
                 button.querySelector('.ms-placeholder').textContent = option ? '' : `-- ${T('SelectPlaceholder')} --`;
+    };
+
+    const refreshMaterialsByDepartment = () => {
+        const department = valueOf('selectSection');
+        const materialField = $('searchMahangNB');
+        if (!materialField) return;
+
+        materialField.dataset.materialGroup = department === 'GA' || department === 'PUR'
+            ? department
+            : '';
+        materialField.value = '';
+        materialField.dispatchEvent(new Event('change', { bubbles: true }));
+        materialField._refreshSearchableRemote?.();
     };
 
     const fillMaterialFields = material => {
@@ -1145,7 +1190,11 @@
         initializeQuoteModal();
         initializeQuoteLoading();
 
-        ['selectSection', 'searchPhongBan'].forEach(id => $(id)?.addEventListener('change', updateQuoteActionsState));
+        $('selectSection')?.addEventListener('change', () => {
+            refreshMaterialsByDepartment();
+            updateQuoteActionsState();
+        });
+        $('searchPhongBan')?.addEventListener('change', updateQuoteActionsState);
         updateQuoteActionsState();
 
         ['tableSearchInternalCode', 'tableSearchCategory', 'tableSearchSupplierCode']

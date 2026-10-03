@@ -117,12 +117,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return response;
         }
 
-        public async Task<GenericResponse<List<dynamic>>> GetApproverByAgrentAsync(int idStep, string sectionCode)
+        public async Task<GenericResponse<List<dynamic>>> GetApproverByAgrentAsync(int idStep, string sectionCode, string role)
         {
             var response = new GenericResponse<List<dynamic>>();
             try
             {
-                var data = await _repo.GetApproverByAgrentAsync(idStep, sectionCode);
+                var data = await _repo.GetApproverByAgrentAsync(idStep, sectionCode, role);
                 response.Data = data;
                 response.Success = true;
             }

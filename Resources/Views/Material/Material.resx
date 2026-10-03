@@ -270,4 +270,7 @@
   <data name="UpdateSuccess" xml:space="preserve">
     <value>Cập nhật thành công</value>
   </data>
+  <data name="VendorGoodCode" xml:space="preserve">
+    <value>Mã hàng nhà cung cấp</value>
+  </data>
 </root>

@@ -84,7 +84,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
             var savedFiles = new List<(string InputPath, string FileUrl)>();
             var processedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".pdf", ".xlsx", ".xls", ".docx", ".doc", ".msg", ".eml",".csv" };
 
             foreach (var candidate in candidates)
             {
@@ -106,6 +106,11 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     if (!Directory.Exists(uploadFolder)) Directory.CreateDirectory(uploadFolder);
 
+                    var sourceFullPath = Path.GetFullPath(p);
+                    var uploadFolderFullPath = Path.GetFullPath(uploadFolder);
+                    var uploadFolderPrefix = uploadFolderFullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                    var isFileAlreadyInUploadFolder = sourceFullPath.StartsWith(uploadFolderPrefix, StringComparison.OrdinalIgnoreCase);
+
                     var fileName = Path.GetFileName(p) ?? (Guid.NewGuid().ToString() + ".dat");
                     var uniqueName = $"{DateTime.Now:yyyyMMdd}_{Guid.NewGuid():N}_{fileName}";
                     var dest = Path.Combine(uploadFolder, uniqueName);
@@ -116,7 +121,10 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         await sourceStream.CopyToAsync(destStream);
                     }
 
-                    File.Delete(p);
+                    if (!isFileAlreadyInUploadFolder)
+                    {
+                        File.Delete(p);
+                    }
 
                     var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');
                     var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
@@ -329,6 +337,46 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 result.Message = ex.Message;
                 return result;
             }
+        }
+
+
+        public async Task<GenericResponse<string>> SaveQuotationFileAsync(IFormFile file, string kind)
+        {
+            var result = new GenericResponse<string>();
+            try
+            {
+                if (file.Length <= 0 || file.Length > 50 * 1024 * 1024)
+                    throw new InvalidDataException("File rỗng hoặc vượt quá dung lượng cho phép.");
+
+                var allowedExtensions = kind == "image"
+                    ? new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" }
+                    : new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".dwg", ".zip", ".csv" };
+                var extension = Path.GetExtension(file.FileName);
+                if (!allowedExtensions.Contains(extension))
+                    throw new InvalidDataException($"Định dạng file {extension} không được phép.");
+
+                var baseUpload = _configuration["ApiSettings:BaseUpload"];
+                if (string.IsNullOrWhiteSpace(baseUpload))
+                    throw new InvalidOperationException("Chưa cấu hình ApiSettings:BaseUpload.");
+
+                var folder = Path.Combine(
+                    baseUpload,
+                    "Quotations",
+                    DateTime.UtcNow.ToString("yyyyMMdd"));
+                Directory.CreateDirectory(folder);
+                var storedName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+                var physicalPath = Path.Combine(folder, storedName);
+                await using var stream = System.IO.File.Create(physicalPath);
+                await file.CopyToAsync(stream);
+                result.Data = physicalPath;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+            }
+            return result;
         }
     }
 }

@@ -178,6 +178,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
         public string? CHR_TEN_XACNHAN { get; set; }
         public string? CHR_TEN_XUATKHO { get; set; }
         public string? Cost_Center_Group { get; set; }
+        public string? Mahang { get; set; }
     }
     public class CHITIET_XUATKHO
     {
@@ -353,13 +354,39 @@ namespace PRJ_WAREHOUSE_BIVN.Models
             {
                 gia = "and b.Total >= '10000'";
             }
-            var list = _db.GET_DATA_FROM_SQL("select * from [PE_REQUEST_CONFIRM] as a left join REQUEST as b on a.ID_REQUEST = b.Id_Request" +
-                " where (" +
-                "(a.INT_STEP = 0 AND CHR_ADID_NGUOIYEUCAU = '" + us + "') " +
-                "OR ( a.INT_STEP = 1 AND CHR_ADID_NGUOITHAMTRA = '" + us + "') " +
-                "OR (a.INT_STEP = 2 AND CHR_ADID_NGUOIPHEDUYET = '" + us + "') " +
-                "OR (a.INT_STEP = 3 AND CHR_ADID_XACNHAN = '" + us + "')) and INT_STEP < 5 " +
-                $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%'");
+            string sqlQuery = $@"
+                SELECT 
+                    a.*, 
+                    b.*, 
+                    ISNULL(d.Material_Type, '') AS Material_Type
+                FROM [PE_REQUEST_CONFIRM] AS a 
+                LEFT JOIN REQUEST AS b ON a.ID_REQUEST = b.Id_Request
+                LEFT JOIN (
+                    SELECT 
+                        Code_Request,
+                        CASE 
+                            WHEN MAX(CASE WHEN Material_Code LIKE 'A%' THEN 1 ELSE 0 END) = 1 
+                             AND MAX(CASE WHEN Material_Code LIKE 'E%' THEN 1 ELSE 0 END) = 1 THEN N' A, E'
+                            WHEN MAX(CASE WHEN Material_Code LIKE 'A%' THEN 1 ELSE 0 END) = 1 THEN N' A'
+                            WHEN MAX(CASE WHEN Material_Code LIKE 'E%' THEN 1 ELSE 0 END) = 1 THEN N' E'
+                            ELSE N''
+                        END AS Material_Type
+                    FROM REQUEST_DETAIL 
+                    GROUP BY Code_Request
+                ) AS d ON b.Code_Request = d.Code_Request
+                WHERE (
+                    (a.INT_STEP = 0 AND a.CHR_ADID_NGUOIYEUCAU = '{us}') 
+                    OR (a.INT_STEP = 1 AND a.CHR_ADID_NGUOITHAMTRA = '{us}') 
+                    OR (a.INT_STEP = 2 AND a.CHR_ADID_NGUOIPHEDUYET = '{us}') 
+                    OR (a.INT_STEP = 3 AND a.CHR_ADID_XACNHAN = '{us}')
+                ) 
+                AND a.INT_STEP < 5 
+                AND Urgent LIKE '%{Urgent}%' {gia} 
+                AND b.Code_Request LIKE '%{Code_Request}%' 
+                AND a.INT_STEP LIKE '%{INT_STEP}%'
+            ";
+
+            var list = _db.GET_DATA_FROM_SQL(sqlQuery);
             for (int i = 0; i < list.Rows.Count; i++)
             {
                 pe_.Add(new PE_REQUEST_CONFIRM
@@ -392,7 +419,8 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                     CHR_MAIL_NGUOITHAMTRA = list.Rows[i]["CHR_MAIL_NGUOITHAMTRA"].ToString()!,
                     CHR_ADID_XUATKHO = list.Rows[i]["CHR_ADID_XUATKHO"].ToString()!,
                     //Cost_Center_Group = list.Rows[i]["Cost_Center_Group"].ToString()!,
-                    Urgent = list.Rows[i]["Urgent"].ToString()!
+                    Urgent = list.Rows[i]["Urgent"].ToString()!,
+                    Mahang = list.Rows[i]["Material_Type"].ToString()!
                 });
             }
             //pe_ = pe_.GroupBy(x => x.Code_Request)

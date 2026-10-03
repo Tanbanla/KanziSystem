@@ -158,7 +158,7 @@
                         MaterialCode: '',
                         MaterialName: remoteState.query || '',
                         MaterialCatergory: '',
-                        MaterialGroup: '',
+                        MaterialGroup: select.dataset.materialGroup || '',
                         pageIndex: pageToLoad,
                         pageSize: remoteState.pageSize
                     };
@@ -195,6 +195,13 @@
 
             dropdown._wrapper = wrapper;
             dropdown._detached = false;
+            select._refreshSearchableRemote = function () {
+                if (!remoteState.enabled) return;
+                remoteState.query = '';
+                remoteState.nextPage = 1;
+                remoteState.lastPage = false;
+                fetchRemoteMaterials(true);
+            };
 
             select.addEventListener('change', updateButtonText);
             updateButtonText();

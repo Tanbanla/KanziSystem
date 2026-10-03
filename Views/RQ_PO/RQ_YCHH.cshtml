@@ -1,0 +1,273 @@
+@{
+    ViewData["Title"] = "Yêu cầu hàng hóa";
+}
+
+<style>
+    /* Tuỳ chỉnh CSS cho bảng hiển thị đẹp hơn */
+    .table-custom-header th {
+        vertical-align: middle;
+        text-align: center;
+        background-color: #f8f9fa;
+        white-space: nowrap;
+    }
+
+    .approval-col th {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+    }
+
+    .note-box {
+        background-color: #e7f1ff;
+        border-left: 4px solid #0d6efd;
+    }
+
+    .card .card-header, .card .card-body, .card .card-footer {
+        background-color: #0836bb0d;
+    }
+</style>
+
+<div class="container-fluid mt-1">
+    <div class="row mb-2">
+        <!-- Vùng 1: Thông tin chung -->
+        <div class="col-lg-3 mb-1">
+            <div class="card h-100 shadow-sm border-1">
+                <div class="card-body">
+                    <div class="row mb-2 align-items-center">
+                        <label class="col-sm-5 col-form-label fw-semibold">Phòng ban đặt hàng</label>
+                        <div class="col-sm-7">
+                            <select class="form-select form-select-sm form-control">
+                                <option value="PUR">PUR</option>
+                                <option value="GA">GA</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2 align-items-center">
+                        <label class="col-sm-5 col-form-label fw-semibold">Ngày yêu cầu</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control form-control-sm bg-light" value="@DateTime.Now.ToString("dd/MM/yyyy")" readonly />
+                        </div>
+                    </div>
+                    <div class="row mb-2 align-items-center">
+                        <label class="col-sm-5 col-form-label fw-semibold">Phòng ban yêu cầu</label>
+                        <div class="col-sm-7">
+                            <select class="form-select form-select-sm form-control">
+                                <option value="">-- Chọn theo cost --</option>
+                                <option value="IT">IT Department</option>
+                                <option value="HR">HR Department</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <label class="col-sm-5 col-form-label fw-semibold">Tên phòng ban</label>
+                        <div class="col-sm-7">
+                            <select class="form-select form-select-sm form-control">
+                                <option value="">-- Phòng --</option>
+                                <option value="IT">IT Department</option>
+                                <option value="HR">HR Department</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vùng 2: Upload & Thao tác chính -->
+        <div class="col-lg-3 mb-1">
+            <div class="card h-100 shadow-sm border-1">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-warning btn-sm w-100 fw-bold mb-1 text-dark">
+                            <i class="fa fa-file-upload"></i> upload theo list
+                        </button>
+                        <small class="text-muted fst-italic">Nếu ấn nút này sẽ down ra được format ở sheet 1.</small>
+                    </div>
+                    <div class="input-group input-group-sm mb-1">
+                        <input type="text" class="form-control border-warning" placeholder="Điền số YCBG...">
+                        <button class="btn btn-outline-warning text-dark fw-bold" type="button">Up theo số YCBG</button>
+                    </div>
+                    <small class="text-muted fst-italic">Điền số YCBG, sau đó ấn nút "Up theo YCBG".</small>
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-success btn-sm w-50 fw-bold"><i class="fa fa-clipboard-check"></i> Check Form</button>
+                        <button class="btn btn-primary btn-sm w-50 fw-bold ml-1"><i class="fa fa-envelope"></i> Submit Form</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-1">
+            <div class="card h-100 shadow-sm border-1">
+
+                <div class="card-body d-flex flex-column justify-content-center">
+                  
+                    <div class="row">
+                        <!-- Mã đơn -->
+                        <div class="col-sm-6">
+                            <label for="searchMaDon" class="form-label small fw-semibold text-secondary mb-1">Mã đơn</label>
+                            <input type="text" id="searchMaDon" class="form-control form-control-sm" placeholder="Nhập mã đơn...">
+                        </div>
+
+                        <!-- Tình trạng -->
+                        <div class="col-sm-6">
+                            <label for="searchTinhTrang" class="form-label small fw-semibold text-secondary mb-1">Tình trạng</label>
+                            <select id="searchTinhTrang" class="form-control">
+                                <option value="" selected>-- Tất cả --</option>
+                                <option value="1">Chờ xử lý</option>
+                                <option value="2">Đang xử lý</option>
+                                <option value="3">Hoàn thành</option>
+                                <option value="4">Đã hủy</option>
+                            </select>
+                        </div>
+
+                        <!-- Người tạo -->
+                        <div class="col-sm-4">
+                            <label for="searchNguoiTao" class="form-label small fw-semibold text-secondary mb-1">Người tạo</label>
+                            <input type="text" id="searchNguoiTao" class="form-control form-control-sm" placeholder="Tên người tạo...">
+                        </div>
+
+                        <!-- Mã NCC -->
+                        <div class="col-sm-4">
+                            <label for="searchMaNCC" class="form-label small fw-semibold text-secondary mb-1">Mã NCC</label>
+                            <input type="text" id="searchMaNCC" class="form-control form-control-sm" placeholder="Mã nhà cung cấp...">
+                        </div>
+
+                        <!-- Phòng ban -->
+                        <div class="col-sm-4">
+                            <label for="searchPhongBan" class="form-label small fw-semibold text-secondary mb-1">Phòng ban</label>
+                            <input type="text" id="searchPhongBan" class="form-control form-control-sm" placeholder="Tên phòng ban...">
+                        </div>
+
+                    </div>
+                    <!-- Nút thao tác -->
+                    <div class="d-flex gap-2 mt-3 right">
+                        <button type="submit" class="btn btn-primary btn-sm px-4 shadow-sm">
+                            <i class="ion ion-search me-1"></i> Tìm kiếm
+                        </button>
+                        <button type="reset" class="btn btn-light btn-sm px-3 border ml-2">
+                            <i class="ion ion-refresh me-1"></i> Đặt lại
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Vùng 4: Bảng dữ liệu -->
+    <div class="card shadow-sm border-0">
+
+        <div class="table-responsive">
+                <table class="table table-hover table-bordered table-sm align-middle mb-0 table-custom-header">
+                    <thead class="table-light">
+                        <tr>
+                            <th rowspan="2" style="width: 40px;">Chọn</th>
+                            <th rowspan="2">Chi tiết</th>
+                            <th rowspan="2">Mã đơn</th>
+                            <th rowspan="2">Ngày tạo</th>
+                            <th rowspan="2">Người tạo</th>
+                            <th rowspan="2">Phòng ban</th>
+                            <th rowspan="2">Mã NCC</th>
+                            <th rowspan="2">Tên NCC</th>
+                            <th rowspan="2">Tổng tiền</th>
+                            <th rowspan="2">Tình trạng</th>
+                            <th colspan="7" class="text-primary bg-white">
+                                Dòng chảy phê duyệt<br />
+                                <span class="fw-normal text-muted" style="font-size:0.75rem;">(Ai phê duyệt rồi thì hiện thị tên và ngày giờ approve)</span>
+                            </th>
+                        </tr>
+                        <tr class="approval-col text-primary">
+                            <th>PIC<br />phòng ban</th>
+                            <th>QLSC<br />phòng ban</th>
+                            <th>QLTC<br />phòng ban</th>
+                            <th>QLCC<br />phòng ban</th>
+                            <th>QLTC<br />phòng đặt hàng</th>
+                            <th>QLCC<br />phòng ban</th>
+                            <th>Giám đốc<br />nhà máy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+           
+                        <tr>
+                                <td class= "text-center" ><input class= "form-check-input" type = "checkbox" value = ""></td>
+                                <td class= "text-center" ><a href = "#" class= "text-decoration-none" > Chi tiết </a></td>
+                                <td> REQ - 260901 </td>
+                                <td> 30 / 09 / 2026 </td>
+                                <td> Tuyen </td>
+                                <td> IT </td>
+                                <td> NCC001 </td>
+                                <td> Công ty A</td>
+                                <td>&lt; 3000$ (66 Tr)</td>
+                            <td><span class="badge bg-secondary">1. Đang tạo đơn</span></td>
+                            <td>O</td><td>O</td><td>O</td><td>X</td><td>O</td><td>O</td><td>X</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center"><input class="form-check-input" type="checkbox" value=""></td>
+                            <td class="text-center"><a href="#" class="text-decoration-none">Chi tiết</a></td>
+                            <td>REQ-260902</td>
+                            <td>30/09/2026</td>
+                            <td>Tuyen</td>
+                            <td>IT</td>
+                            <td>NCC002</td>
+                            <td>Công ty B</td>
+                            <td>3000 &lt;= AMT &lt; 10000$</td>
+                            <td><span class="badge bg-warning text-dark">2. Chờ QLSC phòng ban</span></td>
+                            <td>O</td><td>O</td><td>O</td><td>X</td><td>O</td><td>O</td><td>X</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center"><input class="form-check-input" type="checkbox" value=""></td>
+                            <td class="text-center"><a href="#" class="text-decoration-none">Chi tiết</a></td>
+                            <td>REQ-260903</td>
+                            <td>29/09/2026</td>
+                            <td>Tuyen</td>
+                            <td>IT</td>
+                            <td>NCC003</td>
+                            <td>Công ty C</td>
+                            <td>&gt; 10000$</td>
+                            <td><span class="badge bg-info text-dark">3. Chờ QLTC phòng ban</span></td>
+                            <td>O</td><td>X</td><td>O</td><td>O</td><td>O</td><td>X</td><td>O</td>
+                        </tr>
+                        <!-- Thêm các dòng trống cho giống giao diện Excel -->
+                        @for (int i = 0; i < 5; i++)
+                         {
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        
+        <div class="card-footer bg-white border-top-0 pt-0 pb-3 px-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted" style="font-size: 0.85rem;"><i class="bi bi-info-square"></i> Tick chi tiết để xem các nội dung khác</p>
+                </div>
+                <div class="col-md-6 mt-2">
+                    <div class="note-box p-2 rounded text-dark shadow-sm">
+                        <strong>Lưu ý:</strong> Yêu cầu hàng E/A lên PUR phát hành PO ko theo giá trị đơn hàng.<br />
+                        <span class="fst-italic text-secondary">Từ yêu cầu phòng ban &gt;&gt; PR1-MC tổng hợp &gt;&gt; Phê duyệt QLTC &gt;&gt; PIC gửi lên Pur</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

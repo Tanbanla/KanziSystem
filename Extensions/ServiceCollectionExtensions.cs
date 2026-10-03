@@ -99,6 +99,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBaoGiaRequestTypeService, BaoGiaRequestTypeService>();
 
         services.AddScoped<IFileImportService, FileImportService>();
+
+        services.AddScoped<ITmPriceMasterRepository, TmPriceMasterRepository>();
+        services.AddScoped<ITmPriceMasterService, TmPriceMasterService>();
+    
         return services;
     }
 }

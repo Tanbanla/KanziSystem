@@ -1432,35 +1432,23 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     .GroupBy(x => x.ID_RequestQuote)
                     .ToDictionary(x => x.Key, x => x.First());
 
-                // Cache link đã tồn tại
-                var inputLinks = baoGia
+                var fileLinkMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                var fileLinks = baoGia
                     .Select(x => x.LinkQ?.Trim())
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
-                var existingLinkRows = await _context.BaoGia_Detail_of_Quotations
-                    .Where(x =>
-                        (!string.IsNullOrEmpty(x.NVCHR_dataOld) &&
-                         inputLinks.Contains(x.NVCHR_dataOld)) ||
-                        (!string.IsNullOrEmpty(x.NVCHR_File) &&
-                         inputLinks.Contains(x.NVCHR_File)))
-                    .Select(x => new
-                    {
-                        x.NVCHR_dataOld,
-                        x.NVCHR_File
-                    })
-                    .ToListAsync();
+                foreach (var fileLink in fileLinks)
+                {
+                    var saveRes = await _fileImportService
+                        .SaveFileFromPathAsync(fileLink!);
 
-                var existingLinkMap = existingLinkRows
-                    .Where(x =>
-                        !string.IsNullOrWhiteSpace(x.NVCHR_dataOld) &&
-                        !string.IsNullOrWhiteSpace(x.NVCHR_File))
-                    .GroupBy(x => x.NVCHR_dataOld!, StringComparer.OrdinalIgnoreCase)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.First().NVCHR_File!,
-                        StringComparer.OrdinalIgnoreCase);
+                    if (saveRes != null && !string.IsNullOrWhiteSpace(saveRes.Data))
+                    {
+                        fileLinkMap[fileLink!] = saveRes.Data;
+                    }
+                }
 
                 var histories = new List<BaoGia_Confirm_Name_Quotation_History>();
 
@@ -1505,42 +1493,12 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                         var newLink = item.LinkQ?.Trim();
 
-                        if (!string.IsNullOrWhiteSpace(newLink))
+                        if (!string.IsNullOrWhiteSpace(newLink) &&
+                            fileLinkMap.TryGetValue(newLink, out var savedFileLink))
                         {
-                            var sameAsCurrent =
-                                string.Equals(detail.NVCHR_dataOld, newLink,
-                                    StringComparison.OrdinalIgnoreCase)
-                                ||
-                                string.Equals(detail.NVCHR_File, newLink,
-                                    StringComparison.OrdinalIgnoreCase);
-
-                            if (!sameAsCurrent)
-                            {
-                                if (existingLinkMap.TryGetValue(newLink, out var existedFile))
-                                {
-                                    detail.NVCHR_dataOld = newLink;
-                                    detail.NVCHR_File = existedFile;
-                                    rowChanged = true;
-                                }
-                                else
-                                {
-                                    var saveRes = await _fileImportService
-                                        .SaveFileFromPathAsync(newLink);
-
-                                    if (saveRes != null)
-                                    {
-                                        if (!string.IsNullOrWhiteSpace(saveRes.Data))
-                                        {
-                                            detail.NVCHR_dataOld = newLink;
-                                            detail.NVCHR_File = saveRes.Data;
-
-                                            existingLinkMap[newLink] = saveRes.Data;
-
-                                            rowChanged = true;
-                                        }
-                                    }
-                                }
-                            }
+                            detail.NVCHR_dataOld = newLink;
+                            detail.NVCHR_File = savedFileLink;
+                            rowChanged = true;
                         }
                     }
 

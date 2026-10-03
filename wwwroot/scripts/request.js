@@ -13,7 +13,7 @@ const ROUTES = {
     updateRequest: '/ipcs/Request/_update_request',
     updateRequestGA: '/ipcs/Request/_update_request_GA',
     updateDongyTatCa: '/ipcs/Request/_update_dongytatca',
-    updateDongyTatCaGA: '/ipcs/Request/_update_dongytatca_GA',
+    updateDongyTatCaGA: '/ipcs/Request/_uate_dongytatca_GA',
     reject: '/ipcs/Request/_reject',
     rejectGA: '/ipcs/Request/_reject_GA',
     huydonProd: '/ipcs/Request/_huydon_prod',
@@ -443,6 +443,7 @@ async function send_mail(mail_to, Urgent) {
 }
 
 async function _load_confirm() {
+
     var Urgent = document.getElementById("trangthaidon").value;
     var Total = document.getElementById("giadonhang").value;
     var Code_Request = document.getElementById("mnl").value;
@@ -455,6 +456,7 @@ async function _load_confirm() {
     formData.append('Total', Total);
     formData.append('Code_Request', Code_Request);
     formData.append('INT_STEP', INT_STEP);
+
 
     fetch(ROUTES.getConfirm, {
         method: 'POST',
@@ -469,6 +471,7 @@ async function _load_confirm() {
                 _updateHeaderRecordCount(0);
                 return;
             }
+
             const stepMap = {
                 "0": ["Đợi người dự thảo", "warning", 1],
                 "1": ["Đợi người thẩm tra", "info", 2],
@@ -482,12 +485,12 @@ async function _load_confirm() {
                 "9": ["Bị từ chối", "danger", 4],
                 "10": ["Bị từ chối", "danger", 5]
             };
+
             tbody.innerHTML = data.map((item, index) => {
                 const s = item.inT_STEP;
                 const config = stepMap[s] || ["Không xác định", "dark", 0];
                 const isReject = parseInt(s) >= 6;
                 const currentStep = config[2];
-
                 const dots = Array.from({ length: 5 }, (_, i) => {
                     const stepIdx = i + 1;
                     if (isReject && stepIdx === currentStep) return "<span class='text-danger'><b>×</b></span>";
@@ -505,10 +508,11 @@ async function _load_confirm() {
                     <td>${urg}</td>
                     <td>${trangthai}</td>
                     <td>${item.code_Request}</td>
+                    <td>${item.mahang}</td>
                     <td>${item.cost_Center}</td>
                     <td>${item.create_Date}</td>
                     <td>${item.dealine}</td>
-                    <td class="text-right">${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</td>
+                    <td class="text-right">${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>USD</td>
                     <td>${item.user_Create}</td>
                     <td>${item.chR_TEN_NGUOIYEUCAU} ${dots[0]}</td>
@@ -520,7 +524,7 @@ async function _load_confirm() {
             }).join('');
         })
         .catch(err => console.error('Fetch error:', err));
-}
+} 
 
 async function _load_confirm_GA() {
     var Urgent = document.getElementById("trangthaidon").value;

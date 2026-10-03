@@ -8,5 +8,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         Task<GenericResponse<string?>> SaveFileFromPathAsync(string sourcePath);
         // Lay file
         Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath);
+
+        Task<GenericResponse<string>> SaveQuotationFileAsync(IFormFile file, string kind);
     }
 }

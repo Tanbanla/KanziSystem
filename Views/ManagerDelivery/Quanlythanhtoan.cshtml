@@ -40,7 +40,7 @@
                 <div class="col-md-6 mt-3">
                     <button type="submit" class="btn btn-outline-danger fw-bold"><i class="fa fa-search"></i> Tìm kiếm</button>
                  @*    <a href="/QuanLyPO/Create" class="btn btn-outline-primary fw-bold text-decoration-none"> <i class="fa fa-envelope"></i> Phát hành</a> *@
-                    <a href="/ManagerDelivery/Quanlythanhtoan" class="btn btn-light border fw-bold text-dark text-decoration-none ml-2"> <i class="fa-solid ion-ios-loop-strong me-1"></i> Refresh</a>
+                    <a href="@Url.Action("Quanlythanhtoan","ManagerDelivery")" class="btn btn-light border fw-bold text-dark text-decoration-none ml-2"> <i class="fa-solid ion-ios-loop-strong me-1"></i> Refresh</a>
 
                     <!-- NÚT GỌI POPUP CẬP NHẬT THANH TOÁN -->
                     <button type="button" class="btn btn-success fw-bold ms-2 ml-2" onclick="openUpdateModal()">
@@ -345,6 +345,13 @@
 </div>
 @section Scripts {
     <script>
+        // Centralized routes object for easy configuration
+        var ROUTES = {
+            updateThanhToan: '@Url.Action("UpdateThanhToan","ManagerDelivery")',
+            getPoDetails: '@Url.Action("GetPoDetails","ManagerDelivery")',
+            listPage: '@Url.Action("Quanlythanhtoan","ManagerDelivery")'
+        };
+
         // Đẩy modal ra body để chống lỗi chìm nền khi trang vừa load xong
         $(document).ready(function () {
             $('#poDetailsModal').appendTo("body");
@@ -404,7 +411,7 @@
                 };
 
                 try {
-                    let response = await fetch('/ManagerDelivery/UpdateThanhToan', {
+                    let response = await fetch(ROUTES.updateThanhToan, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
@@ -422,6 +429,7 @@
             // Ẩn modal và tải lại trang
             closeUpdateModal();
             alert(`Đã thực hiện xong!\n- Thành công: ${successCount} PO\n- Thất bại: ${failCount} PO`);
+            // use centralized listPage if needed; keeping simple reload for state
             location.reload();
         }
 
@@ -477,7 +485,7 @@
             $('#poDetailsModal').modal('show');
 
             try {
-                let response = await fetch(`/ManagerDelivery/GetPoDetails?soPo=${encodeURIComponent(soPo)}`);
+                let response = await fetch(ROUTES.getPoDetails + '?soPo=' + encodeURIComponent(soPo));
                 let result = await response.json();
 
                 if (result.success) {

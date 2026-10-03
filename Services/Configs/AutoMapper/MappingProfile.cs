@@ -96,6 +96,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Configs.AutoMapper
 
             CreateMap<BaoGia_RequestType, BaoGia_RequestTypeDTO>();
             CreateMap<BaoGia_RequestTypeDTO, BaoGia_RequestType>();
+
+            CreateMap<TM_PRICE_MASTER, TM_PRICE_MASTERDTO>();
+            CreateMap<TM_PRICE_MASTERDTO, TM_PRICE_MASTER>();
         }
     }
 }

@@ -715,7 +715,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var step = sr.Step ?? 2;
             var sectionCost = sr.SectionCost ?? "";
 
-            var agentResult = await _approverService.GetApproverByAgrentAsync(step, sectionCost);
+            var agentResult = await _approverService.GetApproverByAgrentAsync(step, sectionCost, GetRolesUser());
             if (!agentResult.Success)
             {
                 return BadRequest("Error list Approver: " + agentResult.Message);

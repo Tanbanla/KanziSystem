@@ -13,6 +13,15 @@ using Path = System.IO.Path;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
+    public class PriceMasterHistoryExportRequest
+    {
+        public string InternalPartCode { get; set; } = string.Empty;
+        public string? VendorCode { get; set; }
+        public string? QuotationRequestNo { get; set; }
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
+    }
+
     public class QuoteResultsController : BaseAuthController
     {
 
@@ -27,6 +36,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         private readonly IMaterialService _materialService;
         private readonly IConfiguration _configuration;
         private readonly IBaoGiaDetailService _baoGiaDetailService;
+        private readonly ITmPriceMasterService _tmPriceMasterService;
+        private readonly IFileImportService _fileImportService;
 
         private readonly ITmCategoryService _tmCategoryService;
         private readonly IDepartmentService _deparmentService;
@@ -36,7 +47,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         public QuoteResultsController(IWebHostEnvironment env, IBaoGiaHistoryService baoGiaHistoryService, IBaoGiaService baoGiaService,
             IBaoGiaStatusService baoGiaStatusService, IBaoGiaStepService baoGiaStepService, ILogger<QuoteResultsController> logger, IServiceScopeFactory serviceScopeFactory,
             IMasterApproverSendMailService approverService, IMaterialService materialService, IConfiguration configuration, IBaoGiaDetailService baoGiaDetailService
-            , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService, IStringLocalizer<QuoteResultsController> localizer
+            , ITmCategoryService tmCategoryService, IDepartmentService deparmentService, ITmNccNewService tmNccNewService, IStringLocalizer<QuoteResultsController> localizer,
+            ITmPriceMasterService tmPriceMasterService, IFileImportService fileImportService
             )
         {
             _env = env;
@@ -54,6 +66,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             _tmNccNewService = tmNccNewService;
             _localizer = localizer;
             _baoGiaDetailService = baoGiaDetailService;
+            _tmPriceMasterService = tmPriceMasterService;
+            _fileImportService = fileImportService;
         }
         // Search Infor table tab supplierQuoteBody
         [HttpPost]
@@ -104,6 +118,238 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 return BadRequest(result.Message);
             }
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetPriceMasterHistory([FromBody] string internalPartCode)
+        {
+            if (string.IsNullOrWhiteSpace(internalPartCode))
+            {
+                return BadRequest("Mã hàng nội bộ không được để trống.");
+            }
+
+            var result = await _tmPriceMasterService.GetByInternalPartCode(internalPartCode.Trim());
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ExportPriceMasterHistory([FromBody] PriceMasterHistoryExportRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.InternalPartCode))
+            {
+                return BadRequest("Mã hàng nội bộ không được để trống.");
+            }
+
+            var result = await _tmPriceMasterService.GetByInternalPartCode(request.InternalPartCode.Trim());
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            var rows = result.Data ?? new List<TM_PRICE_MASTERDTO>();
+            if (!string.IsNullOrWhiteSpace(request.VendorCode))
+            {
+                rows = rows.Where(x => (x.CHR_VENDOR_CODE ?? string.Empty).Contains(request.VendorCode.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            if (!string.IsNullOrWhiteSpace(request.QuotationRequestNo))
+            {
+                rows = rows.Where(x => (x.CHR_QUOTATION_REQUEST_NO ?? string.Empty).Contains(request.QuotationRequestNo.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            if (request.From.HasValue)
+            {
+                rows = rows.Where(x => x.DTM_UPLOAD.Date >= request.From.Value.Date).ToList();
+            }
+            if (request.To.HasValue)
+            {
+                rows = rows.Where(x => x.DTM_UPLOAD.Date <= request.To.Value.Date).ToList();
+            }
+
+            var fields = typeof(TM_PRICE_MASTERDTO).GetProperties();
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Lich su master gia");
+            for (var column = 0; column < fields.Length; column++)
+            {
+                var header = worksheet.Cell(1, column + 1);
+                header.Value = fields[column].Name;
+                header.Style.Font.Bold = true;
+                header.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                header.Style.Alignment.WrapText = true;
+            }
+
+            for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+            {
+                for (var column = 0; column < fields.Length; column++)
+                {
+                    var cell = worksheet.Cell(rowIndex + 2, column + 1);
+                    var value = fields[column].GetValue(rows[rowIndex]);
+                    if (value is DateTime dateValue)
+                    {
+                        cell.Value = dateValue;
+                        cell.Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+                    }
+                    else if (value is decimal decimalValue)
+                    {
+                        cell.Value = decimalValue;
+                    }
+                    else if (value is int intValue)
+                    {
+                        cell.Value = intValue;
+                    }
+                    else if (value is bool boolValue)
+                    {
+                        cell.Value = boolValue ? "Có" : "Không";
+                    }
+                    else
+                    {
+                        cell.Value = value?.ToString() ?? string.Empty;
+                    }
+                }
+            }
+
+            worksheet.SheetView.FreezeRows(1);
+            worksheet.Columns().AdjustToContents();
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var fileName = $"LichSuMasterGia_{request.InternalPartCode.Trim()}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadPriceMasterFile([FromForm] IFormFile file, [FromForm] string kind = "quotation")
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Vui lòng chọn file cần tải lên.");
+            }
+
+            var result = await _fileImportService.SaveQuotationFileAsync(file, kind);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddPriceMaster([FromBody] TM_PRICE_MASTERDTO dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.CHR_INTERNAL_PART_CODE) || string.IsNullOrWhiteSpace(dto.CHR_VENDOR_CODE))
+            {
+                return BadRequest("Mã hàng nội bộ và mã nhà cung cấp không được để trống.");
+            }
+
+            var now = DateTime.Now;
+            var entity = new TM_PRICE_MASTER
+            {
+                DTM_UPLOAD = dto.DTM_UPLOAD == default ? now : dto.DTM_UPLOAD,
+                CHR_UPLOAD_USERID = GetCurrentUserId(),
+                CHR_QUOTATION_REQUEST_NO = dto.CHR_QUOTATION_REQUEST_NO,
+                INT_QUOTATION_DETAIL = dto.INT_QUOTATION_DETAIL,
+                CHR_EQUIPMENT_CODE = dto.CHR_EQUIPMENT_CODE,
+                CHR_INTERNAL_PART_CODE = dto.CHR_INTERNAL_PART_CODE.Trim(),
+                CHR_VENDOR_PART_CODE = dto.CHR_VENDOR_PART_CODE,
+                NVCHR_PART_NAME_VN = dto.NVCHR_PART_NAME_VN,
+                NVCHR_PART_NAME_EN = dto.NVCHR_PART_NAME_EN,
+                NVCHR_UNIT = dto.NVCHR_UNIT,
+                NVCHR_OTHER_REQUIREMENT = dto.NVCHR_OTHER_REQUIREMENT,
+                NVCHR_MAKER_ORIGIN = dto.NVCHR_MAKER_ORIGIN,
+                DEC_QUANTITY = dto.DEC_QUANTITY,
+                CHR_VENDOR_CODE = dto.CHR_VENDOR_CODE.Trim(),
+                NVCHR_VENDOR_NAME = dto.NVCHR_VENDOR_NAME ?? string.Empty,
+                DEC_UNIT_PRICE = dto.DEC_UNIT_PRICE,
+                CHR_CURRENCY = dto.CHR_CURRENCY,
+                DEC_UNIT_PRICE_USD = dto.DEC_UNIT_PRICE_USD,
+                INT_LEAD_TIME_DAY = dto.INT_LEAD_TIME_DAY,
+                DEC_MOQ = dto.DEC_MOQ,
+                NVCHR_REMARK = dto.NVCHR_REMARK,
+                NVCHR_DELIVERY_TERM = dto.NVCHR_DELIVERY_TERM,
+                NVCHR_PLACE = dto.NVCHR_PLACE,
+                NVCHR_SHIPMENT_METHOD = dto.NVCHR_SHIPMENT_METHOD,
+                DEC_VAT_PERCENT = dto.DEC_VAT_PERCENT,
+                NVCHR_PAYMENT_TERM = dto.NVCHR_PAYMENT_TERM,
+                DTM_PRICE_EFFECTIVE = dto.DTM_PRICE_EFFECTIVE,
+                DTM_PRICE_EXPIRATION = dto.DTM_PRICE_EXPIRATION,
+                BIT_FIX_VENDOR = dto.BIT_FIX_VENDOR,
+                NVCHR_ADJUSTMENT_REASON = dto.NVCHR_ADJUSTMENT_REASON,
+                NVCHR_QTN_LINK = dto.NVCHR_QTN_LINK,
+                NVCHR_QTN_EXCEL_LINK = dto.NVCHR_QTN_EXCEL_LINK,
+                BIT_USE_LEAVE_RATE = dto.BIT_USE_LEAVE_RATE,
+                CHR_CRT_USERID = GetCurrentUserId(),
+                DTM_CREATE = now
+            };
+
+            var result = await _tmPriceMasterService.AddAsyncV2(entity);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePriceMaster([FromBody] TM_PRICE_MASTERDTO dto)
+        {
+            if (dto == null || dto.ID <= 0 || string.IsNullOrWhiteSpace(dto.CHR_INTERNAL_PART_CODE))
+            {
+                return BadRequest("Dữ liệu master giá không hợp lệ.");
+            }
+
+            var entity = new TM_PRICE_MASTER
+            {
+                ID = dto.ID,
+                DTM_UPLOAD = dto.DTM_UPLOAD,
+                CHR_UPLOAD_USERID = dto.CHR_UPLOAD_USERID,
+                CHR_QUOTATION_REQUEST_NO = dto.CHR_QUOTATION_REQUEST_NO,
+                INT_QUOTATION_DETAIL = dto.INT_QUOTATION_DETAIL,
+                CHR_EQUIPMENT_CODE = dto.CHR_EQUIPMENT_CODE,
+                CHR_INTERNAL_PART_CODE = dto.CHR_INTERNAL_PART_CODE,
+                CHR_VENDOR_PART_CODE = dto.CHR_VENDOR_PART_CODE,
+                NVCHR_PART_NAME_VN = dto.NVCHR_PART_NAME_VN,
+                NVCHR_PART_NAME_EN = dto.NVCHR_PART_NAME_EN,
+                NVCHR_UNIT = dto.NVCHR_UNIT,
+                NVCHR_OTHER_REQUIREMENT = dto.NVCHR_OTHER_REQUIREMENT,
+                NVCHR_MAKER_ORIGIN = dto.NVCHR_MAKER_ORIGIN,
+                DEC_QUANTITY = dto.DEC_QUANTITY,
+                CHR_VENDOR_CODE = dto.CHR_VENDOR_CODE,
+                NVCHR_VENDOR_NAME = dto.NVCHR_VENDOR_NAME,
+                DEC_UNIT_PRICE = dto.DEC_UNIT_PRICE,
+                CHR_CURRENCY = dto.CHR_CURRENCY,
+                DEC_UNIT_PRICE_USD = dto.DEC_UNIT_PRICE_USD,
+                INT_LEAD_TIME_DAY = dto.INT_LEAD_TIME_DAY,
+                DEC_MOQ = dto.DEC_MOQ,
+                NVCHR_REMARK = dto.NVCHR_REMARK,
+                NVCHR_DELIVERY_TERM = dto.NVCHR_DELIVERY_TERM,
+                NVCHR_PLACE = dto.NVCHR_PLACE,
+                NVCHR_SHIPMENT_METHOD = dto.NVCHR_SHIPMENT_METHOD,
+                DEC_VAT_PERCENT = dto.DEC_VAT_PERCENT,
+                NVCHR_PAYMENT_TERM = dto.NVCHR_PAYMENT_TERM,
+                DTM_PRICE_EFFECTIVE = dto.DTM_PRICE_EFFECTIVE,
+                DTM_PRICE_EXPIRATION = dto.DTM_PRICE_EXPIRATION,
+                BIT_FIX_VENDOR = dto.BIT_FIX_VENDOR,
+                NVCHR_ADJUSTMENT_REASON = dto.NVCHR_ADJUSTMENT_REASON,
+                NVCHR_QTN_LINK = dto.NVCHR_QTN_LINK,
+                NVCHR_QTN_EXCEL_LINK = dto.NVCHR_QTN_EXCEL_LINK,
+                BIT_USE_LEAVE_RATE = dto.BIT_USE_LEAVE_RATE,
+                CHR_CRT_USERID = dto.CHR_CRT_USERID,
+                DTM_CREATE = dto.DTM_CREATE,
+                CHR_UPD_USERID = GetCurrentUserId(),
+                DTM_UPDATE = DateTime.Now
+            };
+
+            var result = await _tmPriceMasterService.UpdateAsync(entity);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
             return Ok(result);
         }
 

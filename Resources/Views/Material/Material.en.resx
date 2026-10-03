@@ -270,4 +270,7 @@
   <data name="UpdateSuccess" xml:space="preserve">
     <value>Update Success</value>
   </data>
+  <data name="VendorGoodCode" xml:space="preserve">
+    <value>Vendor good code</value>
+  </data>
 </root>
