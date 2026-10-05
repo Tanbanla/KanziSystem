@@ -64,7 +64,8 @@
 
     async function loadExchangeRate() {
         try {
-            const response = await fetch((window.apiBaseUrl || '') + '/InputQuotation/GetExchangeRate');
+            const url = `${window.apiBaseUrl || ''}/InputQuotation/GetExchangeRate?currency=VND`;
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(await response.text() || `HTTP ${response.status}`);
             }
