@@ -63,28 +63,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const date = value => value ? new Date(value).toLocaleDateString('vi-VN') : '';
     const cell = value => `<td class ="text-center">${escape(value)}</td>`;
 
-    const masterPriceFields = [
-        ['ID', 'ID', 'number', true], ['DTM_UPLOAD', 'Ngày upload', 'datetime-local'], ['CHR_UPLOAD_USERID', 'Người upload'],
-        ['CHR_QUOTATION_REQUEST_NO', 'Số đơn yêu cầu báo giá'], ['INT_QUOTATION_DETAIL', 'ID chi tiết báo giá', 'number'], ['CHR_EQUIPMENT_CODE', 'Mã thiết bị'],
-        ['CHR_INTERNAL_PART_CODE', 'Mã hàng nội bộ'], ['CHR_VENDOR_PART_CODE', 'Mã hàng nhà cung cấp'], ['NVCHR_PART_NAME_VN', 'Tên hàng tiếng Việt'],
-        ['NVCHR_PART_NAME_EN', 'Tên hàng tiếng Anh'], ['NVCHR_UNIT', 'Đơn vị'], ['NVCHR_OTHER_REQUIREMENT', 'Yêu cầu khác', 'textarea'],
-        ['NVCHR_MAKER_ORIGIN', 'Nhà sản xuất/Xuất xứ'], ['DEC_QUANTITY', 'Số lượng', 'number'], ['CHR_VENDOR_CODE', 'Mã nhà cung cấp'],
-        ['NVCHR_VENDOR_NAME', 'Tên nhà cung cấp'], ['DEC_UNIT_PRICE', 'Đơn giá nhà cung cấp', 'number'], ['CHR_CURRENCY', 'Đơn vị tiền'],
-        ['DEC_UNIT_PRICE_USD', 'Đơn giá USD', 'number'], ['INT_LEAD_TIME_DAY', 'Thời gian giao hàng (ngày)', 'number'], ['DEC_MOQ', 'MOQ', 'number'],
-        ['NVCHR_REMARK', 'Ghi chú', 'textarea'], ['NVCHR_DELIVERY_TERM', 'Điều kiện giao hàng'], ['NVCHR_PLACE', 'Địa điểm giao hàng'],
-        ['NVCHR_SHIPMENT_METHOD', 'Phương thức giao hàng'], ['DEC_VAT_PERCENT', 'VAT (%)', 'number'], ['NVCHR_PAYMENT_TERM', 'Phương thức thanh toán'],
-        ['DTM_PRICE_EFFECTIVE', 'Ngày hiệu lực', 'datetime-local'], ['DTM_PRICE_EXPIRATION', 'Ngày hết hạn', 'datetime-local'],
-        ['BIT_FIX_VENDOR', 'Cố định nhà cung cấp', 'checkbox'], ['NVCHR_ADJUSTMENT_REASON', 'Lý do điều chỉnh', 'textarea'],
-        ['NVCHR_QTN_LINK', 'Link báo giá'], ['NVCHR_QTN_EXCEL_LINK', 'Link file Excel báo giá'], ['BIT_USE_LEAVE_RATE', 'Dùng tỷ giá để lại', 'checkbox'],
-        ['CHR_CRT_USERID', 'Người tạo'], ['DTM_CREATE', 'Ngày tạo', 'datetime-local'], ['CHR_UPD_USERID', 'Người cập nhật'], ['DTM_UPDATE', 'Ngày cập nhật', 'datetime-local']
-    ];
     const masterPriceGet = (row, name) => row?.[name] ?? row?.[name.charAt(0).toLowerCase() + name.slice(1)] ?? '';
     const masterPriceDateInput = value => {
         if (!value) return '';
         const parsed = new Date(value);
         return Number.isNaN(parsed.getTime()) ? '' : new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     };
-    const masterPriceDisplay = (value, type) => type === 'checkbox' ? (value ? 'Có' : 'Không') : (type === 'datetime-local' ? date(value) : value);
+    const masterPriceHistoryCell = (row, name, type = 'text') => {
+        const value = masterPriceGet(row, name);
+        const displayValue = type === 'checkbox' ? (value ? 'Có' : 'Không') : (type === 'datetime-local' ? date(value) : value);
+        return `<td>${escape(displayValue)}</td>`;
+    };
     const masterPriceOverlay = (kind, open) => {
         const overlay = document.getElementById(`masterPrice${kind === 'history' ? 'History' : 'Edit'}Overlay`);
         if (!overlay) return;
@@ -139,27 +128,79 @@ document.addEventListener('DOMContentLoaded', function () {
         const head = document.getElementById('masterPriceHistoryHead');
         const body = document.getElementById('masterPriceHistoryBody');
         if (!head || !body) return;
-        head.innerHTML = `<tr><th>STT</th>${masterPriceFields.map(field => `<th>${escape(field[1])}</th>`).join('')}</tr>`;
-        body.innerHTML = rows.length ? rows.map((row, index) => `<tr><td class="text-center">${index + 1}</td>${masterPriceFields.map(field => `<td>${escape(masterPriceDisplay(masterPriceGet(row, field[0]), field[2]))}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="40" class="text-center text-muted py-4">Không có dữ liệu phù hợp</td></tr>';
+        body.innerHTML = rows.length ? rows.map((row, index) => `<tr><td class="text-center">${index + 1}</td>
+            ${masterPriceHistoryCell(row, 'ID', 'number')}${masterPriceHistoryCell(row, 'DTM_UPLOAD', 'datetime-local')}${masterPriceHistoryCell(row, 'CHR_UPLOAD_USERID')}
+            ${masterPriceHistoryCell(row, 'CHR_QUOTATION_REQUEST_NO')}${masterPriceHistoryCell(row, 'INT_QUOTATION_DETAIL', 'number')}${masterPriceHistoryCell(row, 'CHR_EQUIPMENT_CODE')}
+            ${masterPriceHistoryCell(row, 'CHR_INTERNAL_PART_CODE')}${masterPriceHistoryCell(row, 'CHR_VENDOR_PART_CODE')}${masterPriceHistoryCell(row, 'NVCHR_PART_NAME_VN')}
+            ${masterPriceHistoryCell(row, 'NVCHR_PART_NAME_EN')}${masterPriceHistoryCell(row, 'NVCHR_UNIT')}${masterPriceHistoryCell(row, 'NVCHR_OTHER_REQUIREMENT')}
+            ${masterPriceHistoryCell(row, 'NVCHR_MAKER_ORIGIN')}${masterPriceHistoryCell(row, 'DEC_QUANTITY', 'number')}${masterPriceHistoryCell(row, 'CHR_VENDOR_CODE')}
+            ${masterPriceHistoryCell(row, 'NVCHR_VENDOR_NAME')}${masterPriceHistoryCell(row, 'DEC_UNIT_PRICE', 'number')}${masterPriceHistoryCell(row, 'CHR_CURRENCY')}
+            ${masterPriceHistoryCell(row, 'DEC_UNIT_PRICE_USD', 'number')}${masterPriceHistoryCell(row, 'INT_LEAD_TIME_DAY', 'number')}${masterPriceHistoryCell(row, 'DEC_MOQ', 'number')}
+            ${masterPriceHistoryCell(row, 'NVCHR_REMARK')}${masterPriceHistoryCell(row, 'NVCHR_DELIVERY_TERM')}${masterPriceHistoryCell(row, 'NVCHR_PLACE')}
+            ${masterPriceHistoryCell(row, 'NVCHR_SHIPMENT_METHOD')}${masterPriceHistoryCell(row, 'DEC_VAT_PERCENT', 'number')}${masterPriceHistoryCell(row, 'NVCHR_PAYMENT_TERM')}
+            ${masterPriceHistoryCell(row, 'DTM_PRICE_EFFECTIVE', 'datetime-local')}${masterPriceHistoryCell(row, 'DTM_PRICE_EXPIRATION', 'datetime-local')}
+            ${masterPriceHistoryCell(row, 'BIT_FIX_VENDOR', 'checkbox')}${masterPriceHistoryCell(row, 'NVCHR_ADJUSTMENT_REASON')}
+            ${masterPriceHistoryCell(row, 'NVCHR_QTN_LINK')}${masterPriceHistoryCell(row, 'NVCHR_QTN_EXCEL_LINK')}
+            ${masterPriceHistoryCell(row, 'CHR_CRT_USERID')}${masterPriceHistoryCell(row, 'DTM_CREATE', 'datetime-local')}${masterPriceHistoryCell(row, 'CHR_UPD_USERID')}${masterPriceHistoryCell(row, 'DTM_UPDATE', 'datetime-local')}</tr>`).join('') : '<tr><td colspan="39" class="text-center text-muted py-4">Không có dữ liệu phù hợp</td></tr>';
     }
 
-    function renderMasterPriceEdit(row, internalPartCode = '') {
+    function renderMasterPriceEdit(row, internalPartCode = '', includeAuditFields = true) {
         const container = document.getElementById('masterPriceEditFields');
         if (!container) return;
-        container.innerHTML = masterPriceFields.map(([name, label, type, readonly]) => {
-            const value = masterPriceGet(row, name);
-            const inputType = type === 'datetime-local' ? 'datetime-local' : (type === 'number' ? 'number' : 'text');
-            const isInternalCode = name === 'CHR_INTERNAL_PART_CODE';
-            const common = `class="form-control form-control-sm" name="${name}" ${readonly || isInternalCode ? 'readonly' : ''}`;
-            if (type === 'checkbox') return `<div class="col-12 col-md-3 master-price-field"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="${name}" ${value ? 'checked' : ''}><label class="form-check-label">${escape(label)}</label></div></div>`;
-            if (type === 'textarea') return `<div class="col-12 col-md-6 master-price-field"><label class="form-label small">${escape(label)}</label><textarea ${common}>${escape(value)}</textarea></div>`;
-            if (name === 'NVCHR_QTN_LINK' || name === 'NVCHR_QTN_EXCEL_LINK') return `<div class="col-12 col-md-6 master-price-field"><label class="form-label small">${escape(label)}</label><input type="file" class="form-control form-control-sm master-price-file-input" data-link-field="${name}" accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.zip,.csv"><input type="text" ${common} value="${escape(value)}" placeholder="Chưa có file hoặc chưa chọn file" readonly></div>`;
-            return `<div class="col-12 col-md-4 master-price-field"><label class="form-label small">${escape(label)}</label><input type="${inputType}" ${common} value="${escape(type === 'datetime-local' ? masterPriceDateInput(value) : value)}"></div>`;
-        }).join('');
+        container.classList.toggle('master-price-add-mode', !includeAuditFields);
+        container.querySelectorAll('[data-master-price-audit]').forEach(field => field.hidden = !includeAuditFields);
+        container.querySelectorAll('[name]').forEach(input => {
+            const value = masterPriceGet(row, input.name);
+            if (input.type === 'checkbox') input.checked = Boolean(value);
+            else if (input.type === 'datetime-local') input.value = masterPriceDateInput(value);
+            else if (input.type !== 'file') input.value = value ?? '';
+        });
+        const internalCodeInput = container.querySelector('[name="CHR_INTERNAL_PART_CODE"]');
+        if (internalCodeInput && internalPartCode) internalCodeInput.value = internalPartCode;
+        const vendorSelect = container.querySelector('[name="CHR_VENDOR_CODE"]');
+        const vendorNameInput = container.querySelector('[name="NVCHR_VENDOR_NAME"]');
+        if (vendorSelect && vendorNameInput) {
+            vendorSelect.addEventListener('change', () => {
+                const selected = vendorSelect.options[vendorSelect.selectedIndex];
+                vendorNameInput.value = selected?.textContent.split(' - ').slice(1).join(' - ').trim() || '';
+            });
+        }
+        initEnhancements(container);
         container.querySelectorAll('.master-price-file-input').forEach(fileInput => fileInput.addEventListener('change', () => {
             const linkInput = container.querySelector(`[name="${fileInput.dataset.linkField}"]`);
             if (linkInput && fileInput.files?.[0]) linkInput.value = fileInput.files[0].name;
         }));
+    }
+
+    async function loadMaterialInfoForMasterPrice(internalPartCode) {
+        const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/GetMaterialInfo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(internalPartCode)
+        });
+        if (!response.ok) throw new Error(await response.text() || 'Không thể tải thông tin linh kiện');
+
+        const result = await response.json();
+        const material = result?.data;
+        if (!material) throw new Error('Không tìm thấy thông tin linh kiện');
+        return material;
+    }
+
+    function fillMasterPriceFromMaterial(material) {
+        const get = (...names) => names.map(name => material?.[name]).find(value => value !== undefined && value !== null) ?? '';
+        const values = {
+            CHR_INTERNAL_PART_CODE: get('material_Code', 'Material_Code'),
+            NVCHR_PART_NAME_VN: get('material_Name_VN', 'Material_Name_VN', 'nameVI', 'NameVI'),
+            NVCHR_PART_NAME_EN: get('material_Name_EN', 'Material_Name_EN'),
+            NVCHR_UNIT: get('unit', 'Unit'),
+            CHR_VENDOR_PART_CODE: get('Code_Suppiler','code_Suppiler')
+            //NVCHR_OTHER_REQUIREMENT: get('tenMoThuTuc', 'TenMoThuTuc')
+        };
+
+        Object.entries(values).forEach(([name, value]) => {
+            const input = document.querySelector(`#masterPriceEditFields [name="${name}"]`);
+            if (input && value !== '') input.value = value;
+        });
     }
 
     async function uploadMasterPriceFiles(dto) {
@@ -181,13 +222,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function readMasterPriceEdit() {
         const form = document.getElementById('masterPriceEditForm');
         const dto = {};
-        masterPriceFields.forEach(([name, , type]) => {
-            const input = form?.elements.namedItem(name);
-            if (!input) return;
-            if (type === 'checkbox') dto[name] = input.checked;
-            else if (type === 'number') dto[name] = input.value === '' ? null : Number(input.value);
-            else if (type === 'datetime-local') dto[name] = input.value ? new Date(input.value).toISOString() : null;
-            else dto[name] = input.value || null;
+        form?.querySelectorAll('[name]').forEach(input => {
+            if (input.type === 'file') return;
+            if (input.type === 'checkbox') dto[input.name] = input.checked;
+            else if (input.type === 'number') dto[input.name] = input.value === '' ? null : Number(input.value);
+            else if (input.type === 'datetime-local') dto[input.name] = input.value ? new Date(input.value).toISOString() : null;
+            else dto[input.name] = input.value || null;
         });
         return dto;
     }
@@ -404,8 +444,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('masterPriceEditTitle').textContent = 'Nhập master giá mới';
                 document.getElementById('masterPriceEditSubtitle').textContent = `Mã hàng nội bộ: ${code}`;
                 document.getElementById('masterPriceSaveButton').innerHTML = '<i class="fas fa-plus me-1"></i>Thêm master giá';
-                renderMasterPriceEdit(blank, code);
+                renderMasterPriceEdit(blank, code, false);
                 masterPriceOverlay('edit', true);
+                try {
+                    const material = await loadMaterialInfoForMasterPrice(code);
+                    if (masterPriceModalState.mode === 'add' && masterPriceModalState.code === code) {
+                        fillMasterPriceFromMaterial(material);
+                    }
+                } catch (error) {
+                    showDialog({ title: 'Thông báo', message: error.message || 'Không thể tải thông tin linh kiện.', type: 'error' });
+                }
                 return;
             }
             masterPriceModalState.mode = 'edit';

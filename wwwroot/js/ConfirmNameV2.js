@@ -191,7 +191,7 @@
         els.pageInfo.textContent = `${state.pageIndex}/${totalPages}`;
 
         if (!rows.length) {
-            els.tbody.innerHTML = `<tr><td colspan="11" class="text-center text-muted py-4">${T.NoData || 'Không có dữ liệu'}</td></tr>`;
+            els.tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4">${T.NoData || 'Không có dữ liệu'}</td></tr>`;
             updateSelectedCount();
             syncSelectAll();
             return;
@@ -250,9 +250,8 @@
                     <td style="min-width:240px; vertical-align:top;">${tenRecommentCell}</td>
                     ${TenRCCell}
                     <td style="min-width:200px; vertical-align:top;">${tenEnCell}</td>
-                    <td class="text-center" style="vertical-align:top;">${escapeHtml(r.VCHR_CreateBy || '')}</td>
-                    <td style="vertical-align:top;">${formatDate(r.DTM_CreateDate)}</td>
-                    <td class="text-center" style="vertical-align:top;">${escapeHtml(r.VCHR_UpdateBy || r.VCHR_UserPUR || r.VCHR_UserShip || '-')}</td>
+                    <td class="text-center" style="vertical-align:top;">${escapeHtml(r.VCHR_CreateBy || '')} </br> ${formatDate(r.DTM_CreateDate)}</td>
+                    <td class="text-center" style="vertical-align:top;">${escapeHtml(r.VCHR_UpdateBy || r.VCHR_UserPUR || r.VCHR_UserShip || '-')} </br> ${r.VCHR_UpdateBy === null ? '' : formatDate(r.DTM_UpdateDate)}</td>
                     ${lydoCell}
                     <td style="vertical-align:top;">${statusBadge(getDisplayStatus(r))}</td>
                     <td class="text-center" style="vertical-align:top;"><div class="d-flex gap-1 justify-content-center">${actions}</div></td>

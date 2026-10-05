@@ -280,7 +280,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NVCHR_ADJUSTMENT_REASON = dto.NVCHR_ADJUSTMENT_REASON,
                 NVCHR_QTN_LINK = dto.NVCHR_QTN_LINK,
                 NVCHR_QTN_EXCEL_LINK = dto.NVCHR_QTN_EXCEL_LINK,
-                BIT_USE_LEAVE_RATE = dto.BIT_USE_LEAVE_RATE,
                 CHR_CRT_USERID = GetCurrentUserId(),
                 DTM_CREATE = now
             };
@@ -291,6 +290,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(result.Message);
             }
 
+            return Ok(result);
+        }
+        // thông tin hàng hóa
+        [HttpPost]
+        public async Task<IActionResult> GetMaterialInfo([FromBody] string internalPartCode)
+        {
+            if (string.IsNullOrWhiteSpace(internalPartCode))
+            {
+                return BadRequest("Mã hàng nội bộ không được để trống.");
+            }
+            var result = await _materialService.GetByMaHangAsync(internalPartCode.Trim());
+            if (result == null)
+            {
+                return NotFound($"Không tìm thấy thông tin hàng hóa với mã: {internalPartCode}");
+            }
             return Ok(result);
         }
 
@@ -337,7 +351,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 NVCHR_ADJUSTMENT_REASON = dto.NVCHR_ADJUSTMENT_REASON,
                 NVCHR_QTN_LINK = dto.NVCHR_QTN_LINK,
                 NVCHR_QTN_EXCEL_LINK = dto.NVCHR_QTN_EXCEL_LINK,
-                BIT_USE_LEAVE_RATE = dto.BIT_USE_LEAVE_RATE,
+               // BIT_USE_LEAVE_RATE = dto.BIT_USE_LEAVE_RATE,
                 CHR_CRT_USERID = dto.CHR_CRT_USERID,
                 DTM_CREATE = dto.DTM_CREATE,
                 CHR_UPD_USERID = GetCurrentUserId(),

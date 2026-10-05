@@ -17,12 +17,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _repo = repository;
         }
         // Lay tien chuyen doi
-        public async Task<GenericResponse<float>> GetExchangeRate()
+        public async Task<GenericResponse<float>> GetExchangeRate(string currency)
         {
             var response = new GenericResponse<float>();
             try
             {
-                var exchangeRate = await _repo.GetExchangeRate();
+                var exchangeRate = await _repo.GetExchangeRate(currency);
                 response.Data = exchangeRate;
                 response.Success = true;
             }

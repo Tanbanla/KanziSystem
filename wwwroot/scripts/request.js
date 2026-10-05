@@ -13,7 +13,7 @@ const ROUTES = {
     updateRequest: '/ipcs/Request/_update_request',
     updateRequestGA: '/ipcs/Request/_update_request_GA',
     updateDongyTatCa: '/ipcs/Request/_update_dongytatca',
-    updateDongyTatCaGA: '/ipcs/Request/_uate_dongytatca_GA',
+    updateDongyTatCaGA: '/ipcs/Request/_update_dongytatca_GA',
     reject: '/ipcs/Request/_reject',
     rejectGA: '/ipcs/Request/_reject_GA',
     huydonProd: '/ipcs/Request/_huydon_prod',

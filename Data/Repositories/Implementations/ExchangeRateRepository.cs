@@ -15,10 +15,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             _context = context;
         }
         // Lay tien chuyen doi
-        public async Task<float> GetExchangeRate()
+        public async Task<float> GetExchangeRate(string currency)
         {
             var exchangeRate = await _context.EXCHANGE_RATEs
-                .Where(c => c.Currency == "VND" && c.DateApply.Month == DateTime.Now.Month && c.DateApply.Year == DateTime.Now.Year)
+                .Where(c => c.Currency == currency && c.DateApply.Month == DateTime.Now.Month && c.DateApply.Year == DateTime.Now.Year)
                 .OrderByDescending(e => e.Id).FirstOrDefaultAsync();
             if (exchangeRate != null)
             {

@@ -123,7 +123,16 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                     if (!isFileAlreadyInUploadFolder)
                     {
-                        File.Delete(p);
+                        try
+                        {
+                            File.Delete(p);
+                        }
+                        catch (IOException)
+                        {
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                        }
                     }
 
                     var baseUrl = (_configuration["ApiSettings:BaseUpload"] ?? string.Empty).TrimEnd('/');

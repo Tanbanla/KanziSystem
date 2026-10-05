@@ -56,7 +56,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (file == null || file.Length == 0)
                     return BadRequest("Không có file được tải lên");
 
-                var exchangeRateResponse = await _exchangeRateService.GetExchangeRate();
+                var exchangeRateResponse = await _exchangeRateService.GetExchangeRate("VND");
                 if (exchangeRateResponse == null || !exchangeRateResponse.Success)
                     return BadRequest("Không thể lấy tỷ giá tiền tệ");
 
@@ -259,11 +259,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
         // lấy giá tiền USD sang VND
         [HttpGet]
-        public async Task<IActionResult> GetExchangeRate()
+        public async Task<IActionResult> GetExchangeRate(string currency)
         {
             try
             {
-                var result = await _exchangeRateService.GetExchangeRate();
+                var result = await _exchangeRateService.GetExchangeRate(currency);
                 if (!result.Success)
                     return BadRequest(result.Message);
                 return Ok(result.Data);

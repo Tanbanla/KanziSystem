@@ -35,7 +35,7 @@ namespace PRJ_WAREHOUSE_BIVN.DTO
         public string? NVCHR_ADJUSTMENT_REASON { get; set; }
         public string? NVCHR_QTN_LINK { get; set; }
         public string? NVCHR_QTN_EXCEL_LINK { get; set; }
-        public bool BIT_USE_LEAVE_RATE { get; set; }
+        //public bool BIT_USE_LEAVE_RATE { get; set; }
         public string? CHR_CRT_USERID { get; set; }
         public DateTime DTM_CREATE { get; set; }
         public string? CHR_UPD_USERID { get; set; }

@@ -5,6 +5,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
     public interface IExchangeRateRepository: IBaseRepository<EXCHANGE_RATE, int>
     {
         // Lay tien chuyen doi
-        public Task<float> GetExchangeRate();
+        public Task<float> GetExchangeRate(string currency);
     }
 }

@@ -2074,9 +2074,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 {
                     // Tính số ngày còn lại (dùng Date để bỏ phần giờ)
                     var daysLeft = (item.DTM_KyHan.Value.Date - now.Date).TotalDays;
-                    if (daysLeft <= 5)
+
+                    var dayCount = item.CHR_Gap.ToLower() == "true" ? 3 : 5;
+                    if (daysLeft <= dayCount)
                     {
-                        item.DTM_KyHan = item.DTM_KyHan.Value.AddDays(5);
+                        item.DTM_KyHan = item.DTM_KyHan.Value.AddDays(dayCount);
                         item.DTM_UpdateLater = now;
                     }
                 }
