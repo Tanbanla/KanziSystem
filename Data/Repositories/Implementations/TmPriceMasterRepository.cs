@@ -7,19 +7,19 @@ using System.Globalization;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
-    public class TmPriceMasterRepository: BaseRepository<TM_PRICE_MASTER, int>, ITmPriceMasterRepository
+    public class TmPriceMasterRepository: BaseRepository<TM_PRICE_MASTER, long>, ITmPriceMasterRepository
     {
 
-        private readonly COST_MANAGEMENTContext _context;
+        private readonly COST_MANAGEMENTContext _priceMasterContext;
         public TmPriceMasterRepository(COST_MANAGEMENTContext context, IOptions<ConnectionStringOptions> options, IConfiguration configuration)
             : base(context, options, configuration)
         {
-            _context = context;
+            _priceMasterContext = context;
         }
 
         public async Task<List<TM_PRICE_MASTER>> GetByInternalPartCode(string internalPartCode)
         {
-            return await _context.TM_PRICE_MASTERs
+            return await _priceMasterContext.TM_PRICE_MASTERs
                 .Where(p => p.CHR_INTERNAL_PART_CODE == internalPartCode)
                 .OrderByDescending(p => p.DTM_UPDATE ?? p.DTM_CREATE)
                 .ThenByDescending(p => p.DTM_UPLOAD)
@@ -34,7 +34,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             var requestIds = details.Select(x => x.ID_RequestQuote).Distinct().ToList();
-            var requests = await _context.BaoGia_Request_of_Quotations
+            var requests = await _priceMasterContext.BaoGia_Request_of_Quotations
                 .Where(x => requestIds.Contains(x.ID))
                 .ToDictionaryAsync(x => x.ID);
 
@@ -111,13 +111,31 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 };
             }).ToList();
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _priceMasterContext.Database.BeginTransactionAsync();
             try
             {
-                await _context.TM_PRICE_MASTERs.AddRangeAsync(priceMasters);
-                await _context.SaveChangesAsync();
+                await _priceMasterContext.TM_PRICE_MASTERs.AddRangeAsync(priceMasters);
+                await _priceMasterContext.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return priceMasters;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task InsertImportedAsync(IReadOnlyCollection<TM_PRICE_MASTER> priceMasters)
+        {
+            if (priceMasters.Count == 0) return;
+
+            await using var transaction = await _priceMasterContext.Database.BeginTransactionAsync();
+            try
+            {
+                await _priceMasterContext.TM_PRICE_MASTERs.AddRangeAsync(priceMasters);
+                await _priceMasterContext.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch
             {
@@ -129,11 +147,11 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
         public async Task<TM_PRICE_MASTER> UpdatePriceMaster(TM_PRICE_MASTER tm)
         {
-            var existingPriceMaster = await _context.TM_PRICE_MASTERs.FindAsync(tm.ID);
+            var existingPriceMaster = await _priceMasterContext.TM_PRICE_MASTERs.FindAsync(tm.ID);
             if (existingPriceMaster != null)
             {
-                _context.Entry(existingPriceMaster).CurrentValues.SetValues(tm);
-                await _context.SaveChangesAsync();
+                _priceMasterContext.Entry(existingPriceMaster).CurrentValues.SetValues(tm);
+                await _priceMasterContext.SaveChangesAsync();
                 return existingPriceMaster;
             }
             else

@@ -1,0 +1,257 @@
+@{
+    ViewData["Title"] = "Chi tiết yêu cầu hàng hóa";
+}
+
+<style>
+    /* CSS tuỳ chỉnh cho bảng chi tiết dạng Excel */
+    .excel-table-container {
+        max-height: 80vh; /* Giới hạn chiều cao để cuộn dọc */
+        overflow: auto;
+        border: 1px solid #dee2e6;
+    }
+
+    .excel-table {
+        margin-bottom: 0;
+        white-space: nowrap; /* Ngăn xuống dòng nội dung */
+        font-size: 0.85rem;
+    }
+
+        .excel-table thead th {
+            background-color: #f8f9fa;
+            color: #0000ff; /* Chữ màu xanh dương giống hình ảnh */
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            border-bottom: 2px solid #dee2e6;
+            padding: 0.5rem;
+        }
+
+        .excel-table tbody td {
+            vertical-align: middle;
+            padding: 0.4rem;
+            border: 1px solid #dee2e6;
+        }
+
+    /* Các cột có background xám mờ giống ảnh */
+    .bg-gray-light {
+        background-color: #f2f2f2 !important;
+    }
+
+    /* Các cột có background xanh mờ giống ảnh */
+    .bg-green-light {
+        background-color: #e6f2e6 !important;
+    }
+
+    .action-link {
+        color: #0000ff;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="m-0 text-primary"><i class="fa fa-list-alt"></i> Danh sách chi tiết vật tư/hàng hóa</h5>
+        <a href="javascript:history.back()" class="btn btn-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <!-- Vùng chứa bảng có thể cuộn ngang/dọc -->
+            <div class="excel-table-container">
+                <table class="table table-bordered table-hover excel-table">
+                    <thead>
+                        <tr>
+                            <th>Thao tác</th>
+                            <th>No</th>
+                            <th>Gấp</th>
+                            <th>Lý do<br />gấp</th>
+                            <th>Loại hình tờ<br />khai</th>
+                            <th>Loại chi phí</th>
+                            <th>Hàng<br />hóa/Dịch vụ</th>
+                            <th>New/reused</th>
+                            <th>Chủng<br />loại</th>
+                            <th>Mã<br />nội bộ</th>
+                            <th>Mã<br />hàng hóa</th>
+                            <th>Tên<br />TA</th>
+                            <th>Tên<br />TV</th>
+                            <th>Hãng<br />sản xuất</th>
+                            <th>Xuất<br />xứ</th>
+                            <th>Mục đích<br />sử dụng</th>
+                            <th>Số tài khoản</th>
+                            <th>Số<br />lượng</th>
+                            <th>Đơn<br />vị</th>
+                            <th>Mã<br />NCC</th>
+                            <th>Tên<br />NCC</th>
+                            <th>Đơn<br />giá</th>
+                            <th>Đơn<br />vị tiền</th>
+                            <th>MOQ</th>
+                            <th>Lead<br />time</th>
+                            <th>VAT</th>
+                            <th>Thành<br />tiền</th>
+                            <th>Đơn giá<br />mua rẻ<br />nhất ($)</th>
+                            <th>Tỷ lệ<br />lệch<br />($)</th>
+                            <th>Lý do lệch giá</th>
+                            <th>Ngày giao<br />hàng dự kiến</th>
+                            <th>Phòng<br />chịu chi phí</th>
+                            <th>Vị trí<br />giao hàng<br />tại BIVN</th>
+                            <th>Tài sản<br />đảm bảo an ninh<br />ngoại thương</th>
+                            <th>Link báo giá</th>
+                            <th>Thủ tục hải<br />quan</th>
+                            <th>Phương<br />thức vận<br />chuyển</th>
+                            <th>Điều<br />kiện<br />giao hàng</th>
+                            <th>Nơi</th>
+                            <th>Điều<br />kiện<br />thanh toán</th>
+                            <th>Số PO</th>
+                            <th>Nhà<br />cung cấp</th>
+                            <th>Đơn<br />giá PO</th>
+                            <th>Số<br />lượng</th>
+                            <th>Hãng<br />sản xuất</th>
+                            <th>File so sánh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dòng dữ liệu mẫu 1 -->
+                        <tr>
+                            <td class="text-center"><a class="action-link">Xóa</a></td>
+                            <td class="text-center bg-gray-light"></td>
+                            <td class="text-center text-primary">O</td>
+                            <td class="bg-gray-light">Ô số 2</td>
+                            <td>Loại khác</td>
+                            <td>No need</td>
+                            <td class="bg-green-light">Hàng hóa</td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td>Nhập kho</td>
+                            <td>No need</td>
+                            <td class="bg-green-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="text-center">0%</td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-green-light">No need</td>
+                            <td class="bg-gray-light"></td>
+                            <td>No</td>
+                            <td class="bg-gray-light"></td>
+                            <td>Need</td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td><a class="action-link">No need</a></td>
+                        </tr>
+                        <!-- Dòng dữ liệu mẫu 2 -->
+                        <tr>
+                            <td class="text-center"><a class="action-link">Sửa</a></td>
+                            <td class="text-center bg-gray-light"></td>
+                            <td class="text-center text-primary">X</td>
+                            <td class="bg-gray-light">Ô số 2</td>
+                            <td>Loại khác</td>
+                            <td>No need</td>
+                            <td class="bg-green-light">Hàng hóa</td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td>Nhập kho</td>
+                            <td>No need</td>
+                            <td class="bg-green-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="text-center">0%</td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-green-light">No need</td>
+                            <td class="bg-gray-light"></td>
+                            <td>No</td>
+                            <td class="bg-gray-light"></td>
+                            <td>Need</td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td class="bg-gray-light"></td>
+                            <td><a class="action-link">No need</a></td>
+                        </tr>
+
+                        <!-- Gen thêm vài dòng trống -->
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <tr>
+                                <td></td>
+                                <td class="bg-gray-light"></td>
+                                <td></td>
+                                <td class="bg-gray-light"></td>
+                                <td>Loại khác</td>
+                                <td>No need</td>
+                                <td class="bg-green-light">Hàng hóa</td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td>Nhập kho</td>
+                                <td>No need</td>
+                                <td class="bg-green-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="text-center">0%</td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-green-light">No need</td>
+                                <td class="bg-gray-light"></td>
+                                <td>No</td>
+                                <td class="bg-gray-light"></td>
+                                <td>Need</td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td class="bg-gray-light"></td>
+                                <td><a class="action-link">No need</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

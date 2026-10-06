@@ -7,7 +7,7 @@ using PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces;
 
 namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 {
-    public class TmPriceMasterService: BaseService<TM_PRICE_MASTER, int, TM_PRICE_MASTERDTO>, ITmPriceMasterService
+    public class TmPriceMasterService: BaseService<TM_PRICE_MASTER, long, TM_PRICE_MASTERDTO>, ITmPriceMasterService
     {
         private readonly ITmPriceMasterRepository _repo;
         private readonly IMapper _mapper;
@@ -51,6 +51,25 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+
+        public async Task<GenericResponse<int>> InsertImportedAsync(IReadOnlyCollection<TM_PRICE_MASTER> priceMasters)
+        {
+            var result = new GenericResponse<int>();
+            try
+            {
+                await _repo.InsertImportedAsync(priceMasters);
+                result.Data = priceMasters.Count;
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+            }
+
+            return result;
+        }
+
         public async Task<GenericResponse<TM_PRICE_MASTERDTO>> UpdatePriceMaster(TM_PRICE_MASTERDTO tm)
         {
             var result = new GenericResponse<TM_PRICE_MASTERDTO>();

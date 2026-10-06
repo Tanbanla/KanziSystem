@@ -2,7 +2,7 @@ namespace PRJ_WAREHOUSE_BIVN.DTO
 {
     public class TM_PRICE_MASTERDTO
     {
-        public int ID { get; set; }
+        public long ID { get; set; }
         public DateTime DTM_UPLOAD { get; set; }
         public string? CHR_UPLOAD_USERID { get; set; }
         public string? CHR_QUOTATION_REQUEST_NO { get; set; }

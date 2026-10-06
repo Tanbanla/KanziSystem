@@ -148,6 +148,7 @@ function renderButton(pageNumber, currentPage) {
     const activeClass = pageNumber === currentPage ? 'btn-primary text-white' : '';
     return ` <li class="page-item"><a class="page-link  ${activeClass}"  onclick="goToPage(${pageNumber})">${pageNumber}</a></li>`;
 }
+
 function _insert_user() {
 
     var employee_code = document.getElementById("employee_code").value;
@@ -192,6 +193,7 @@ function _insert_user() {
     }
   
 }
+
 function _get_modal(id) {
     document.getElementById("ed_employee_code").value = document.getElementById("staffCode_" + id).innerHTML;
     document.getElementById("ed_employee_name").value = document.getElementById("name_" + id).innerHTML;
@@ -201,6 +203,7 @@ function _get_modal(id) {
     document.getElementById("ed_employee_role").value = document.getElementById("role_" + id).innerHTML;
     document.getElementById("modal-5").click();
 }
+
 function _update_user() {
 
     var employee_code = document.getElementById("ed_employee_code").value;

@@ -812,49 +812,55 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             }
 
             var sql = new StringBuilder(@"
-                ;WITH LatestQuotation AS
+                ;WITH MaterialPrices AS
                 (
                     SELECT
-                        m.Material_Code,
-                        rq.ID AS RequestID,
-                        rq.DTM_CreateDate AS UploadDate,
-                        dq.CHR_UpdateBy AS PICUpload,
-                        rq.CHR_MaDon AS QuotationRequestNumber,
-                        rq.CHR_MaThietBi AS EquipmentCode,
-                        dq.CHR_CodeNCC AS VendorCode,
-                        rq.NVCHR_TenNCC AS VendorName,
-                        ISNULL(rq.CHR_MaHangNoiBo, m.Material_Code) AS BIVNPartCode,
-                        dq.CHR_MaHangNCC AS VendorGoodCode,
-                        ISNULL(rq.NVCHR_NameVN, m.Material_Name_VN) AS PartNameVN,
-                        ISNULL(dq.CHR_NameEN, m.Material_Name_EN) AS PartNameEN,
-                        dq.INT_SoLuong AS Quantity,
-                        ISNULL(dq.NVCHR_DonVi, m.Unit) AS Unit,
-                        rq.NVCHR_LyDo AS OtherRequirement,
-                        dq.NVCHR_NhaSanXuat AS MakerOrigin,
-                        dq.FL_USD AS UnitPriceSupplier,
-                        ISNULL(m.Currency, 'USD') AS Currency,
-                        ISNULL(dq.FL_USD, m.Price) AS UnitPriceUSD,
-                        dq.DTM_LeadTime AS LeadTime,
-                        dq.NVCHR_MOQ AS MOQ,
-                        dq.NVCHR_DeliveryTerm AS DeliveryTerm,
-                        dq.NVCHR_PaymentTerm AS PaymentTerm,
-                        dq.DTM_EffectiveDate AS PriceEffectiveDate,
-                        m.Group_Code as GroupCode,
-                        dq.DTM_ExpiryDate AS ExpiryDate,
-                        rq.NVCHR_ChungLoai AS FilterCategory,
-                        ROW_NUMBER() OVER
-                        (
-                            PARTITION BY m.Material_Code
-                            ORDER BY
-                                CASE WHEN dq.ID IS NULL THEN 1 ELSE 0 END,
-                                ISNULL(dq.DTM_EffectiveDate, dq.DTM_CreateDate) DESC,
-                                dq.ID DESC
-                        ) AS RN
+                        m.Material_Code AS MaterialCode,
+                        p.DTM_UPLOAD AS UploadDate,
+                        p.CHR_UPLOAD_USERID AS PICUpload,
+                        p.CHR_QUOTATION_REQUEST_NO AS QuotationRequestNumber,
+                        p.CHR_EQUIPMENT_CODE AS EquipmentCode,
+                        p.CHR_VENDOR_CODE AS VendorCode,
+                        p.NVCHR_VENDOR_NAME AS VendorName,
+                        m.Material_Code AS BIVNPartCode,
+                        p.CHR_VENDOR_PART_CODE AS VendorGoodCode,
+                        COALESCE(p.NVCHR_PART_NAME_VN, m.Material_Name_VN) AS PartNameVN,
+                        COALESCE(p.NVCHR_PART_NAME_EN, m.Material_Name_EN) AS PartNameEN,
+                        p.DEC_QUANTITY AS Quantity,
+                        COALESCE(p.NVCHR_UNIT, m.Unit) AS Unit,
+                        p.NVCHR_OTHER_REQUIREMENT AS OtherRequirement,
+                        p.NVCHR_MAKER_ORIGIN AS MakerOrigin,
+                        p.DEC_UNIT_PRICE AS UnitPriceSupplier,
+                        COALESCE(p.CHR_CURRENCY, m.Currency, 'USD') AS Currency,
+                        COALESCE(p.DEC_UNIT_PRICE_USD, m.Price) AS UnitPriceUSD,
+                        p.INT_LEAD_TIME_DAY AS LeadTime,
+                        p.DEC_MOQ AS MOQ,
+                        p.NVCHR_DELIVERY_TERM AS DeliveryTerm,
+                        p.NVCHR_REMARK AS Remark,
+                        p.NVCHR_PLACE AS Place,
+                        p.NVCHR_SHIPMENT_METHOD AS ShipmentMethod,
+                        p.DEC_VAT_PERCENT AS VatPercent,
+                        p.NVCHR_PAYMENT_TERM AS PaymentTerm,
+                        p.DTM_PRICE_EFFECTIVE AS PriceEffectiveDate,
+                        m.Group_Code AS GroupCode,
+                        p.DTM_PRICE_EXPIRATION AS ExpiryDate,
+                        p.BIT_FIX_VENDOR AS FixVendor,
+                        p.NVCHR_ADJUSTMENT_REASON AS AdjustmentReason,
+                        p.INT_QUOTATION_DETAIL AS QuotationDetail,
+                        p.NVCHR_QTN_LINK AS QtnLink,
+                        p.NVCHR_QTN_EXCEL_LINK AS QtnExcelLink,
+                        COALESCE(m.Category_VN, m.GoodKind) AS FilterCategory
                     FROM MATERIAL AS m
-                    LEFT JOIN BaoGia_Request_of_Quotation AS rq
-                        ON m.Material_Code = rq.CHR_MaHangNoiBo
-                    LEFT JOIN BaoGia_Detail_of_Quotation AS dq
-                        ON rq.ID = dq.ID_RequestQuote
+                    OUTER APPLY
+                    (
+                        SELECT TOP 1 price.*
+                        FROM TM_PRICE_MASTER AS price
+                        WHERE price.CHR_INTERNAL_PART_CODE = m.Material_Code
+                        ORDER BY
+                            COALESCE(price.DTM_UPDATE, price.DTM_CREATE, price.DTM_UPLOAD) DESC,
+                            price.DTM_UPLOAD DESC,
+                            price.ID DESC
+                    ) AS p
                 )
                 SELECT
                     UploadDate,
@@ -864,7 +870,6 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     VendorCode,
                     VendorName,
                     BIVNPartCode,
-                    VendorGoodCode,
                     PartNameVN,
                     PartNameEN,
                     Quantity,
@@ -877,83 +882,23 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     LeadTime,
                     MOQ,
                     DeliveryTerm,
+                    Remark,
+                    Place,
+                    ShipmentMethod,
+                    VatPercent,
                     PaymentTerm,
                     PriceEffectiveDate,
-                    ExpiryDate
-                FROM LatestQuotation
-                WHERE RN = 1");
-
+                    ExpiryDate,
+                    FixVendor,
+                    AdjustmentReason,
+                    QuotationDetail,
+                    QtnLink,
+                    QtnExcelLink
+                FROM MaterialPrices
+                WHERE 1 = 1");
             var parameters = new DynamicParameters();
-
-            if (!string.IsNullOrWhiteSpace(vm.MaDon))
-            {
-                sql.Append(" AND QuotationRequestNumber = @MaDon");
-                parameters.Add("MaDon", vm.MaDon.Trim());
-            }
-
-            if (!string.IsNullOrWhiteSpace(vm.MaNcc))
-            {
-                sql.Append(" AND VendorCode = @MaNcc");
-                parameters.Add("MaNcc", vm.MaNcc.Trim());
-            }
-
-            if (!string.IsNullOrWhiteSpace(vm.MaThietBi))
-            {
-                sql.Append(" AND EquipmentCode LIKE '%' + @MaThietBi + '%'");
-                parameters.Add("MaThietBi", vm.MaThietBi.Trim());
-            }
-
-            if (!string.IsNullOrWhiteSpace(vm.MaHangNoiBo))
-            {
-                sql.Append(" AND BIVNPartCode = @MaHangNoiBo");
-                parameters.Add("MaHangNoiBo", vm.MaHangNoiBo.Trim());
-            }
-
-            if (!string.IsNullOrWhiteSpace(vm.MaHangNcc))
-            {
-                sql.Append(" AND VendorGoodCode LIKE '%' + @MaHangNcc + '%'");
-                parameters.Add("MaHangNcc", vm.MaHangNcc.Trim());
-            }
-
-            if (!string.IsNullOrWhiteSpace(vm.NhomHang))
-            {
-                sql.Append(" AND GroupCode = @NhomHang");
-                parameters.Add("NhomHang", vm.NhomHang.Trim());
-            }
-
-            if (!string.IsNullOrWhiteSpace(vm.TrangThai))
-            {
-                switch (vm.TrangThai.Trim())
-                {
-                    case "1": // Còn hiệu lực
-                        sql.Append(" AND ExpiryDate > GETDATE()");
-                        break;
-
-                    case "2": // Hết hiệu lực
-                        sql.Append(" AND ExpiryDate <= GETDATE()");
-                        break;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(vm.ChungLoai))
-            {
-                sql.Append(" AND FilterCategory LIKE '%' + @ChungLoai + '%'");
-                parameters.Add("ChungLoai", vm.ChungLoai.Trim());
-            }
-
-            if (vm.from.HasValue)
-            {
-                sql.Append(" AND UploadDate >= @From");
-                parameters.Add("From", vm.from.Value.Date);
-            }
-
-            if (vm.to.HasValue)
-            {
-                sql.Append(" AND UploadDate < DATEADD(DAY, 1, @To)");
-                parameters.Add("To", vm.to.Value.Date);
-            }
-
-            sql.Append(" ORDER BY Material_Code");
+            AppendMasterQuoteFilters(sql, parameters, vm);
+            sql.Append(" ORDER BY MaterialCode");
 
             if (vm.PageSize > 0 && vm.PageIndex > 0)
             {
@@ -962,52 +907,15 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 parameters.Add("PageSize", vm.PageSize);
             }
 
-            var a = sql.ToString();
-
             var result = await _conn.QueryAsync<dynamic>(sql.ToString(), parameters);
             return result.ToList();
         }
-        // count số lượng cho màn hình master báo giá
-        public async Task<int> CountMasterQuoteInfoAsync(SearchQuoteResultViewModel vm)
-        {
-            if (vm == null)
-            {
-                throw new ArgumentNullException(nameof(vm));
-            }
-            var sql = new StringBuilder(@"
-                ;WITH LatestQuotation AS
-                (
-                    SELECT
-                        m.Material_Code,
-                        rq.ID AS RequestID,
-                        rq.DTM_CreateDate AS UploadDate,
-                        rq.CHR_MaDon AS QuotationRequestNumber,
-                        rq.CHR_MaThietBi AS EquipmentCode,
-                        dq.CHR_CodeNCC AS VendorCode,
-                        ISNULL(rq.CHR_MaHangNoiBo, m.Material_Code) AS BIVNPartCode,
-                        dq.CHR_MaHangNCC AS VendorGoodCode,
-                        m.Group_Code AS GroupCode,
-                        rq.NVCHR_ChungLoai AS FilterCategory,
-                        dq.DTM_ExpiryDate AS ExpiryDate,
-                        ROW_NUMBER() OVER
-                        (
-                            PARTITION BY m.Material_Code
-                            ORDER BY
-                                CASE WHEN dq.ID IS NULL THEN 1 ELSE 0 END,
-                                ISNULL(dq.DTM_EffectiveDate, dq.DTM_CreateDate) DESC,
-                                dq.ID DESC
-                        ) AS RN
-                    FROM MATERIAL AS m
-                    LEFT JOIN BaoGia_Request_of_Quotation AS rq
-                        ON m.Material_Code = rq.CHR_MaHangNoiBo
-                    LEFT JOIN BaoGia_Detail_of_Quotation AS dq
-                        ON rq.ID = dq.ID_RequestQuote
-                )
-                SELECT COUNT(*) AS TotalCount
-                FROM LatestQuotation
-                WHERE RN = 1");
-            var parameters = new DynamicParameters();
 
+        private static void AppendMasterQuoteFilters(
+            StringBuilder sql,
+            DynamicParameters parameters,
+            SearchQuoteResultViewModel vm)
+        {
             if (!string.IsNullOrWhiteSpace(vm.MaDon))
             {
                 sql.Append(" AND QuotationRequestNumber = @MaDon");
@@ -1048,11 +956,10 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 switch (vm.TrangThai.Trim())
                 {
-                    case "1": // Còn hiệu lực
+                    case "1":
                         sql.Append(" AND ExpiryDate > GETDATE()");
                         break;
-
-                    case "2": // Hết hiệu lực
+                    case "2":
                         sql.Append(" AND ExpiryDate <= GETDATE()");
                         break;
                 }
@@ -1075,18 +982,48 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 sql.Append(" AND UploadDate < DATEADD(DAY, 1, @To)");
                 parameters.Add("To", vm.to.Value.Date);
             }
-
-            var result = await _conn.QueryAsync<int>(sql.ToString(), parameters);
-            return result.FirstOrDefault();
         }
-        // History master báo giá
-        public Task<List<dynamic>> HistoryMasterQuoteInfoAsync(string materialCode)
+
+        // count số lượng cho màn hình master báo giá
+        public async Task<int> CountMasterQuoteInfoAsync(SearchQuoteResultViewModel vm)
         {
-            if(string.IsNullOrWhiteSpace(materialCode))
-                return Task.FromResult<List<dynamic>>(null);
+            if (vm == null)
+            {
+                throw new ArgumentNullException(nameof(vm));
+            }
+            var sql = new StringBuilder(@"
+                ;WITH MaterialPrices AS
+                (
+                    SELECT
+                        m.Material_Code AS MaterialCode,
+                        p.DTM_UPLOAD AS UploadDate,
+                        p.CHR_QUOTATION_REQUEST_NO AS QuotationRequestNumber,
+                        p.CHR_EQUIPMENT_CODE AS EquipmentCode,
+                        p.CHR_VENDOR_CODE AS VendorCode,
+                        m.Material_Code AS BIVNPartCode,
+                        p.CHR_VENDOR_PART_CODE AS VendorGoodCode,
+                        m.Group_Code AS GroupCode,
+                        COALESCE(m.Category_VN, m.GoodKind) AS FilterCategory,
+                        p.DTM_PRICE_EXPIRATION AS ExpiryDate
+                    FROM MATERIAL AS m
+                    OUTER APPLY
+                    (
+                        SELECT TOP 1 price.*
+                        FROM TM_PRICE_MASTER AS price
+                        WHERE price.CHR_INTERNAL_PART_CODE = m.Material_Code
+                        ORDER BY
+                            COALESCE(price.DTM_UPDATE, price.DTM_CREATE, price.DTM_UPLOAD) DESC,
+                            price.DTM_UPLOAD DESC,
+                            price.ID DESC
+                    ) AS p
+                )
+                SELECT COUNT(*) AS TotalCount
+                FROM MaterialPrices
+                WHERE 1 = 1");
+            var parameters = new DynamicParameters();
+            AppendMasterQuoteFilters(sql, parameters, vm);
 
-
-            return null;
+            return await _conn.ExecuteScalarAsync<int>(sql.ToString(), parameters);
         }
     }
 }

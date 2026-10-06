@@ -1,3 +1,5 @@
+using PRJ_WAREHOUSE_BIVN.Models_Auto;
+
 namespace PRJ_WAREHOUSE_BIVN.View_Models.QuoteResult
 {
     public class QuoteResultModel
@@ -18,5 +20,21 @@ namespace PRJ_WAREHOUSE_BIVN.View_Models.QuoteResult
         public DateTime? to { get; set; }
         public DateTime? from { get; set; }
         public string? ChungLoai { get; set; }
+    }
+    public class PriceMasterHistoryExportRequest
+    {
+        public string InternalPartCode { get; set; } = string.Empty;
+        public string? VendorCode { get; set; }
+        public string? QuotationRequestNo { get; set; }
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
+    }
+
+    public sealed class PriceMasterImportRow
+    {
+        public int ExcelRow { get; init; }
+        public string[] Values { get; init; } = Array.Empty<string>();
+        public string Errors { get; init; } = string.Empty;
+        public TM_PRICE_MASTER? Entity { get; init; }
     }
 }

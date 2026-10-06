@@ -13,14 +13,6 @@ using Path = System.IO.Path;
 
 namespace PRJ_WAREHOUSE_BIVN.Controllers
 {
-    public class PriceMasterHistoryExportRequest
-    {
-        public string InternalPartCode { get; set; } = string.Empty;
-        public string? VendorCode { get; set; }
-        public string? QuotationRequestNo { get; set; }
-        public DateTime? From { get; set; }
-        public DateTime? To { get; set; }
-    }
 
     public class QuoteResultsController : BaseAuthController
     {
@@ -122,6 +114,92 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> ExportMasterQuote([FromBody] SearchQuoteResultViewModel search)
+        {
+            search ??= new SearchQuoteResultViewModel();
+            search.PageIndex = 0;
+            search.PageSize = 0;
+
+            var result = await _baoGiaDetailService.SearchMasterQuoteInfoAsync(search);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            var root = _env.WebRootPath ?? _env.ContentRootPath;
+            var templatePath = Path.Combine(root, "template", "MasterGia.xlsx");
+            if (!System.IO.File.Exists(templatePath))
+            {
+                return BadRequest("Không tìm thấy file mẫu MasterGia.xlsx.");
+            }
+
+            using var templateStream = System.IO.File.OpenRead(templatePath);
+            using var workbook = new XLWorkbook(templateStream);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+            if (worksheet == null)
+            {
+                return BadRequest("Không tìm thấy worksheet trong file mẫu MasterGia.xlsx.");
+            }
+
+            const int firstDataRow = 3;
+            var rows = result.Data ?? new List<dynamic>();
+            for (var index = 0; index < rows.Count; index++)
+            {
+                var row = rows[index];
+                var excelRow = firstDataRow + index;
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 1), GetDynamicValue(row, "UploadDate"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 2), GetDynamicValue(row, "PICUpload"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 3), GetDynamicValue(row, "QuotationRequestNumber"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 4), GetDynamicValue(row, "EquipmentCode"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 5), GetDynamicValue(row, "VendorCode"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 6), GetDynamicValue(row, "VendorName"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 7), GetDynamicValue(row, "BIVNPartCode"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 8), GetDynamicValue(row, "VendorGoodCode"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 9), GetDynamicValue(row, "PartNameVN"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 10), GetDynamicValue(row, "PartNameEN"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 11), GetDynamicValue(row, "Quantity"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 12), GetDynamicValue(row, "Unit"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 13), GetDynamicValue(row, "OtherRequirement"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 14), GetDynamicValue(row, "MakerOrigin"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 15), GetDynamicValue(row, "UnitPriceSupplier"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 16), GetDynamicValue(row, "Currency"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 17), GetDynamicValue(row, "UnitPriceUSD"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 18), GetDynamicValue(row, "LeadTime"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 19), GetDynamicValue(row, "MOQ"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 20), GetDynamicValue(row, "Remark"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 21), GetDynamicValue(row, "DeliveryTerm"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 22), GetDynamicValue(row, "Place"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 23), GetDynamicValue(row, "ShipmentMethod"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 24), GetDynamicValue(row, "VatPercent"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 25), GetDynamicValue(row, "PaymentTerm"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 26), GetDynamicValue(row, "PriceEffectiveDate"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 27), GetDynamicValue(row, "ExpiryDate"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 28), GetDynamicValue(row, "FixVendor") is true ? "O" : "X");
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 29), GetDynamicValue(row, "AdjustmentReason"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 30), GetDynamicValue(row, "QuotationDetail"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 31), GetDynamicValue(row, "QtnLink"));
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 32), GetDynamicValue(row, "QtnExcelLink"));
+            }
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"MasterGia_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+        }
+
+        private static object? GetDynamicValue(object row, string name)
+        {
+            if (row is IDictionary<string, object> values && values.TryGetValue(name, out var value))
+            {
+                return value;
+            }
+
+            return row.GetType().GetProperty(name)?.GetValue(row);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> GetPriceMasterHistory([FromBody] string internalPartCode)
         {
             if (string.IsNullOrWhiteSpace(internalPartCode))
@@ -170,54 +248,85 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 rows = rows.Where(x => x.DTM_UPLOAD.Date <= request.To.Value.Date).ToList();
             }
 
-            var fields = typeof(TM_PRICE_MASTERDTO).GetProperties();
-            using var workbook = new XLWorkbook();
-            var worksheet = workbook.Worksheets.Add("Lich su master gia");
-            for (var column = 0; column < fields.Length; column++)
+            var root = _env.WebRootPath ?? _env.ContentRootPath;
+            var templatePath = Path.Combine(root, "template", "MasterGia.xlsx");
+            if (!System.IO.File.Exists(templatePath))
             {
-                var header = worksheet.Cell(1, column + 1);
-                header.Value = fields[column].Name;
-                header.Style.Font.Bold = true;
-                header.Style.Fill.BackgroundColor = XLColor.LightBlue;
-                header.Style.Alignment.WrapText = true;
+                return BadRequest("Không tìm thấy file mẫu MasterGia.xlsx.");
             }
 
+            using var templateStream = System.IO.File.OpenRead(templatePath);
+            using var workbook = new XLWorkbook(templateStream);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+            if (worksheet == null)
+            {
+                return BadRequest("Không tìm thấy worksheet trong file mẫu MasterGia.xlsx.");
+            }
+
+            const int firstDataRow = 3;
             for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
             {
-                for (var column = 0; column < fields.Length; column++)
-                {
-                    var cell = worksheet.Cell(rowIndex + 2, column + 1);
-                    var value = fields[column].GetValue(rows[rowIndex]);
-                    if (value is DateTime dateValue)
-                    {
-                        cell.Value = dateValue;
-                        cell.Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
-                    }
-                    else if (value is decimal decimalValue)
-                    {
-                        cell.Value = decimalValue;
-                    }
-                    else if (value is int intValue)
-                    {
-                        cell.Value = intValue;
-                    }
-                    else if (value is bool boolValue)
-                    {
-                        cell.Value = boolValue ? "Có" : "Không";
-                    }
-                    else
-                    {
-                        cell.Value = value?.ToString() ?? string.Empty;
-                    }
-                }
+                var row = rows[rowIndex];
+                var excelRow = firstDataRow + rowIndex;
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 1), row.DTM_UPLOAD);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 2), row.CHR_UPLOAD_USERID);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 3), row.CHR_QUOTATION_REQUEST_NO);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 4), row.CHR_EQUIPMENT_CODE);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 5), row.CHR_VENDOR_CODE);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 6), row.NVCHR_VENDOR_NAME);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 7), row.CHR_INTERNAL_PART_CODE);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 8), row.CHR_VENDOR_PART_CODE);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 9), row.NVCHR_PART_NAME_VN);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 10), row.NVCHR_PART_NAME_EN);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 11), row.DEC_QUANTITY);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 12), row.NVCHR_UNIT);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 13), row.NVCHR_OTHER_REQUIREMENT);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 14), row.NVCHR_MAKER_ORIGIN);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 15), row.DEC_UNIT_PRICE);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 16), row.CHR_CURRENCY);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 17), row.DEC_UNIT_PRICE_USD);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 18), row.INT_LEAD_TIME_DAY);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 19), row.DEC_MOQ);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 20), row.NVCHR_REMARK);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 21), row.NVCHR_DELIVERY_TERM);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 22), row.NVCHR_PLACE);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 23), row.NVCHR_SHIPMENT_METHOD);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 24), row.DEC_VAT_PERCENT);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 25), row.NVCHR_PAYMENT_TERM);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 26), row.DTM_PRICE_EFFECTIVE);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 27), row.DTM_PRICE_EXPIRATION);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 28), row.BIT_FIX_VENDOR ? "O" : "X");
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 29), row.NVCHR_ADJUSTMENT_REASON);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 30), row.INT_QUOTATION_DETAIL);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 31), row.NVCHR_QTN_LINK);
+                SetPriceMasterExportCell(worksheet.Cell(excelRow, 32), row.NVCHR_QTN_EXCEL_LINK);
             }
 
-            worksheet.SheetView.FreezeRows(1);
-            worksheet.Columns().AdjustToContents();
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
-            var fileName = $"LichSuMasterGia_{request.InternalPartCode.Trim()}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            var fileName = $"MasterGia_{request.InternalPartCode.Trim()}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
             return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        private static void SetPriceMasterExportCell(IXLCell cell, object? value)
+        {
+            if (value is DateTime dateValue)
+            {
+                cell.Value = dateValue;
+                cell.Style.DateFormat.Format = "dd/MM/yyyy HH:mm:ss";
+            }
+            else if (value is decimal decimalValue)
+            {
+                cell.Value = decimalValue;
+            }
+            else if (value is int intValue)
+            {
+                cell.Value = intValue;
+            }
+            else
+            {
+                cell.Value = value?.ToString() ?? string.Empty;
+            }
         }
 
         [HttpPost]
@@ -238,6 +347,278 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> ImportPriceMaster([FromForm] IFormFile file)
+        {
+            const int startRow = 3;
+            const int columnCount = 32;
+            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            if (file == null || file.Length == 0)
+                return BadRequest("Vui lòng chọn file Excel cần nhập.");
+            if (!string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+                return BadRequest("Chỉ hỗ trợ file Excel định dạng .xlsx.");
+
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new XLWorkbook(stream);
+                var worksheet = workbook.Worksheets.FirstOrDefault();
+                if (worksheet == null)
+                    return BadRequest("Không tìm thấy worksheet trong file.");
+
+                var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? startRow - 1;
+                if (lastRow < startRow)
+                    return BadRequest("File không có dữ liệu từ dòng 3.");
+
+                var validRows = new List<TM_PRICE_MASTER>();
+                var parsedRows = new List<(int ExcelRow, string[] Values, TM_PRICE_MASTER Entity)>();
+                var invalidRows = new List<PriceMasterImportRow>();
+                var duplicateKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                for (var rowNumber = startRow; rowNumber <= lastRow; rowNumber++)
+                {
+                    var values = Enumerable.Range(1, columnCount)
+                        .Select(column => worksheet.Cell(rowNumber, column).GetFormattedString().Trim())
+                        .ToArray();
+                    if (values.All(string.IsNullOrWhiteSpace)) continue;
+
+                    var errors = new List<string>();
+                    var entity = ParsePriceMasterRow(values, rowNumber, GetCurrentUserId(), errors);
+                    if (entity != null)
+                    {
+                        // Tạm thời bỏ qua trùng
+                        //var key = $"{entity.CHR_QUOTATION_REQUEST_NO}|{entity.CHR_INTERNAL_PART_CODE}|{entity.CHR_VENDOR_CODE}|{entity.DEC_MOQ}";
+                        //if (!duplicateKeys.Add(key))
+                        //    errors.Add("Trùng mã đơn, mã hàng nội bộ, mã nhà cung cấp và MOQ trong file.");
+                    }
+
+                    if (errors.Count > 0 || entity == null)
+                    {
+                        invalidRows.Add(new PriceMasterImportRow
+                        {
+                            ExcelRow = rowNumber,
+                            Values = values,
+                            Errors = string.Join("; ", errors)
+                        });
+                    }
+                    else
+                    {
+                        validRows.Add(entity);
+                        parsedRows.Add((rowNumber, values, entity));
+                    }
+                }
+
+                if (invalidRows.Count > 0)
+                {
+                    Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+                    Response.Headers.Append("X-Import-Validation-Errors", invalidRows.Count.ToString(CultureInfo.InvariantCulture));
+                    return BuildPriceMasterImportErrorFile(invalidRows, contentType);
+                }
+
+                invalidRows.AddRange(await SaveImportedPriceMasterFilesAsync(parsedRows));
+                if (invalidRows.Count > 0)
+                {
+                    Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+                    Response.Headers.Append("X-Import-Validation-Errors", invalidRows.Count.ToString(CultureInfo.InvariantCulture));
+                    return BuildPriceMasterImportErrorFile(invalidRows, contentType);
+                }
+
+                var insertResult = await _tmPriceMasterService.InsertImportedAsync(validRows);
+                if (!insertResult.Success)
+                    return BadRequest($"Không thể lưu dữ liệu master giá: {insertResult.Message}");
+
+                return Ok(new { message = "Import master giá thành công.", totalRows = validRows.Count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi import master giá từ Excel");
+                return BadRequest($"Lỗi đọc file Excel: {ex.Message}");
+            }
+        }
+
+        private static TM_PRICE_MASTER? ParsePriceMasterRow(string[] values, int rowNumber, string? currentUserId, List<string> errors)
+        {
+            string Text(int index) => values[index - 1];
+            string? OptionalText(int index) => string.IsNullOrWhiteSpace(Text(index)) ? null : Text(index);
+
+            decimal? DecimalValue(int index, string name)
+            {
+                var value = Text(index);
+                if (string.IsNullOrWhiteSpace(value)) return null;
+                if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ||
+                    decimal.TryParse(value, NumberStyles.Any, CultureInfo.GetCultureInfo("vi-VN"), out result)) return result;
+                errors.Add($"Cột {name} không phải số hợp lệ.");
+                return null;
+            }
+
+            int? IntValue(int index, string name)
+            {
+                var value = Text(index);
+                if (string.IsNullOrWhiteSpace(value)) return null;
+                if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ||
+                    int.TryParse(value, NumberStyles.Integer, CultureInfo.GetCultureInfo("vi-VN"), out result)) return result;
+                errors.Add($"Cột {name} không phải số nguyên hợp lệ.");
+                return null;
+            }
+
+            DateTime? DateValue(int index, string name)
+            {
+                var value = Text(index);
+                if (string.IsNullOrWhiteSpace(value)) return null;
+                if (DateTime.TryParse(value, CultureInfo.GetCultureInfo("vi-VN"), DateTimeStyles.AllowWhiteSpaces, out var result) ||
+                    DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out result)) return result;
+                errors.Add($"Cột {name} không phải ngày hợp lệ.");
+                return null;
+            }
+
+            var uploadDate = DateValue(1, "Ngày upload") ?? DateTime.Now;
+            var vendorCode = Text(5);
+            var vendorName = Text(6);
+            var internalCode = Text(7);
+            if (string.IsNullOrWhiteSpace(internalCode)) errors.Add("Mã hàng nội bộ không được để trống.");
+            if (string.IsNullOrWhiteSpace(vendorCode)) errors.Add("Mã nhà cung cấp không được để trống.");
+            if (string.IsNullOrWhiteSpace(vendorName)) errors.Add("Tên nhà cung cấp không được để trống.");
+
+            var effectiveDate = DateValue(26, "Ngày hiệu lực");
+            var expirationDate = DateValue(27, "Ngày hết hạn");
+            if (effectiveDate.HasValue && expirationDate.HasValue && expirationDate < effectiveDate)
+                errors.Add("Ngày hết hạn phải lớn hơn hoặc bằng ngày hiệu lực.");
+
+            var fixedVendor = Text(28);
+            var isFixedVendor = string.IsNullOrWhiteSpace(fixedVendor) ||
+                fixedVendor.Equals("O", StringComparison.OrdinalIgnoreCase) ||
+                fixedVendor.Equals("Y", StringComparison.OrdinalIgnoreCase) ||
+                fixedVendor.Equals("TRUE", StringComparison.OrdinalIgnoreCase) ||
+                fixedVendor.Equals("Có", StringComparison.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(fixedVendor) && !isFixedVendor &&
+                !fixedVendor.Equals("X", StringComparison.OrdinalIgnoreCase) &&
+                !fixedVendor.Equals("N", StringComparison.OrdinalIgnoreCase) &&
+                !fixedVendor.Equals("FALSE", StringComparison.OrdinalIgnoreCase) &&
+                !fixedVendor.Equals("Không", StringComparison.OrdinalIgnoreCase))
+                errors.Add("Quyết định NCC chỉ nhận O/X, Có/Không hoặc TRUE/FALSE.");
+
+            var quantity = DecimalValue(11, "Số lượng");
+            var unitPrice = DecimalValue(15, "Đơn giá nhà cung cấp");
+            var unitPriceUsd = DecimalValue(17, "Đơn giá USD");
+            var leadTime = IntValue(18, "Thời gian giao hàng");
+            var moq = DecimalValue(19, "MOQ");
+            var vat = DecimalValue(24, "VAT");
+            var quotationDetail = IntValue(30, "Số chi tiết đơn yêu cầu báo giá");
+            if (errors.Count > 0) return null;
+
+            return new TM_PRICE_MASTER
+            {
+                DTM_UPLOAD = uploadDate,
+                CHR_UPLOAD_USERID = string.IsNullOrWhiteSpace(Text(2)) ? currentUserId : Text(2),
+                CHR_QUOTATION_REQUEST_NO = OptionalText(3),
+                CHR_EQUIPMENT_CODE = OptionalText(4),
+                CHR_VENDOR_CODE = vendorCode,
+                NVCHR_VENDOR_NAME = vendorName,
+                CHR_INTERNAL_PART_CODE = internalCode,
+                CHR_VENDOR_PART_CODE = OptionalText(8),
+                NVCHR_PART_NAME_VN = OptionalText(9),
+                NVCHR_PART_NAME_EN = OptionalText(10),
+                DEC_QUANTITY = quantity,
+                NVCHR_UNIT = OptionalText(12),
+                NVCHR_OTHER_REQUIREMENT = OptionalText(13),
+                NVCHR_MAKER_ORIGIN = OptionalText(14),
+                DEC_UNIT_PRICE = unitPrice,
+                CHR_CURRENCY = OptionalText(16),
+                DEC_UNIT_PRICE_USD = unitPriceUsd,
+                INT_LEAD_TIME_DAY = leadTime,
+                DEC_MOQ = moq,
+                NVCHR_REMARK = OptionalText(20),
+                NVCHR_DELIVERY_TERM = OptionalText(21),
+                NVCHR_PLACE = OptionalText(22),
+                NVCHR_SHIPMENT_METHOD = OptionalText(23),
+                DEC_VAT_PERCENT = vat,
+                NVCHR_PAYMENT_TERM = OptionalText(25),
+                DTM_PRICE_EFFECTIVE = effectiveDate,
+                DTM_PRICE_EXPIRATION = expirationDate,
+                BIT_FIX_VENDOR = isFixedVendor,
+                NVCHR_ADJUSTMENT_REASON = OptionalText(29),
+                INT_QUOTATION_DETAIL = quotationDetail,
+                NVCHR_QTN_LINK = OptionalText(31),
+                NVCHR_QTN_EXCEL_LINK = OptionalText(32),
+                CHR_CRT_USERID = currentUserId,
+                DTM_CREATE = DateTime.Now
+            };
+        }
+
+        private static FileContentResult BuildPriceMasterImportErrorFile(IReadOnlyCollection<PriceMasterImportRow> rows, string contentType)
+        {
+            var headers = new[]
+            {
+                "Excel row", "Ngày upload", "PIC upload", "Số đơn yêu cầu báo giá", "Mã thiết bị", "Vendor code", "Vendor name",
+                "Mã hàng nội bộ", "Mã hàng NCC", "Tên hàng tiếng Việt", "Tên hàng tiếng Anh", "Số lượng", "Đơn vị", "Yêu cầu khác",
+                "Nhà sản xuất/Xuất xứ", "Đơn giá nhà cung cấp", "Đơn vị tiền", "Đơn giá USD", "Thời gian giao hàng", "MOQ", "Lý do tăng giá",
+                "Điều kiện giao hàng", "Nơi giao hàng", "Phương thức giao hàng", "VAT (%)", "Phương thức thanh toán", "Ngày hiệu lực",
+                "Ngày hết hạn", "Fix Vendor", "Lý do điều chỉnh", "Số chi tiết đơn yêu cầu báo giá", "Link QTN", "Link QTN Excel", "Lỗi chi tiết"
+            };
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Du lieu loi");
+            for (var column = 0; column < headers.Length; column++)
+            {
+                worksheet.Cell(1, column + 1).Value = headers[column];
+                worksheet.Cell(1, column + 1).Style.Font.Bold = true;
+                worksheet.Cell(1, column + 1).Style.Fill.BackgroundColor = XLColor.LightYellow;
+            }
+
+            var outputRow = 2;
+            foreach (var row in rows)
+            {
+                worksheet.Cell(outputRow, 1).Value = row.ExcelRow;
+                for (var column = 0; column < row.Values.Length; column++)
+                    worksheet.Cell(outputRow, column + 2).Value = row.Values[column];
+                worksheet.Cell(outputRow, headers.Length).Value = row.Errors;
+                outputRow++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return new FileContentResult(stream.ToArray(), contentType)
+            {
+                FileDownloadName = $"ImportMasterGia_Errors_{DateTime.Now:yyyyMMddHHmmss}.xlsx"
+            };
+        }
+
+        private async Task<List<PriceMasterImportRow>> SaveImportedPriceMasterFilesAsync(
+            IReadOnlyCollection<(int ExcelRow, string[] Values, TM_PRICE_MASTER Entity)> rows)
+        {
+            var errors = new List<PriceMasterImportRow>();
+            var savedFiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var row in rows)
+            {
+                await SaveFileAsync(row.Entity.NVCHR_QTN_LINK, value => row.Entity.NVCHR_QTN_LINK = value);
+                await SaveFileAsync(row.Entity.NVCHR_QTN_EXCEL_LINK, value => row.Entity.NVCHR_QTN_EXCEL_LINK = value);
+            }
+
+            return errors;
+
+            async Task SaveFileAsync(string? sourcePath, Action<string> setValue)
+            {
+                if (string.IsNullOrWhiteSpace(sourcePath)) return;
+
+                var normalizedPath = sourcePath.Trim().Trim('"', '\'');
+                if (!savedFiles.TryGetValue(normalizedPath, out var savedPath))
+                {
+                    var saveResult = await _fileImportService.SaveFileFromPathAsync(normalizedPath, isDelete: false);
+                    if (saveResult == null || !saveResult.Success || string.IsNullOrWhiteSpace(saveResult.Data))
+                    {
+                        return;
+                    }
+
+                    savedPath = saveResult.Data;
+                    savedFiles[normalizedPath] = savedPath;
+                }
+
+                setValue(savedPath);
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> AddPriceMaster([FromBody] TM_PRICE_MASTERDTO dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.CHR_INTERNAL_PART_CODE) || string.IsNullOrWhiteSpace(dto.CHR_VENDOR_CODE))
@@ -248,7 +629,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var now = DateTime.Now;
             var entity = new TM_PRICE_MASTER
             {
-                DTM_UPLOAD = dto.DTM_UPLOAD == default ? now : dto.DTM_UPLOAD,
+                DTM_UPLOAD = now,
                 CHR_UPLOAD_USERID = GetCurrentUserId(),
                 CHR_QUOTATION_REQUEST_NO = dto.CHR_QUOTATION_REQUEST_NO,
                 INT_QUOTATION_DETAIL = dto.INT_QUOTATION_DETAIL,

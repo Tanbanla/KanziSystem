@@ -8,5 +8,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             return View();
         }
+        public IActionResult ChiTietYeuCau()
+        {
+            return View();
+        }
     }
 }

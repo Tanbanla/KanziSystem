@@ -23,7 +23,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             _configuration = configuration;
         }
 
-        public async Task<GenericResponse<string?>> SaveFileFromPathAsync(string sourcePath)
+        public async Task<GenericResponse<string?>> SaveFileFromPathAsync(string sourcePath, bool isDelete = true)
         {
             var result = new GenericResponse<string?>();
 
@@ -121,7 +121,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         await sourceStream.CopyToAsync(destStream);
                     }
 
-                    if (!isFileAlreadyInUploadFolder)
+                    if (!isFileAlreadyInUploadFolder && isDelete)
                     {
                         try
                         {
