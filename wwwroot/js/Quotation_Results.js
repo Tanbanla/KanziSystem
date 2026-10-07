@@ -951,6 +951,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const priceWarning = priceIncrease
                     ? 'Giá cao hơn giá đã đặt gần nhất trên 5%, bắt buộc nhập lý do.'
                     : '';
+                const canShowCustomsDeclaration = window.canShowCustomsDeclaration === true;
                 const customsNotificationDisabled = d.BIT_Select !== true;
                 return `
                 <tr class="text-center ${checkRefuse ? 'refuse-row' : ''} ${isCheapest ? 'cheapest-row' : ''}" data-madon="${escape(d.CHR_MaDon || '')}" data-mahang="${escape(d.CHR_MaHangNoiBo || '')}" data-vendor="${escape(d.CHR_MaNCC || '')}" data-id="${escape(d.ID || '')}" data-price-usd="${usd}" data-price-vnd="${vnd}" data-expiry="${escape(d.DTM_ExpiryDate || '')}" data-quote-link="${escape(d.NVCHR_File || '')}" data-price-increase="${priceIncrease}" style="text-align: center;">
@@ -1012,12 +1013,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             <option value="false" ${d.BIT_Select === false ? 'selected' : ''}>X</option>
                         </select>
                     </td>
-                    <td class="customs-notification-cell">
+                    ${canShowCustomsDeclaration ? `<td class="customs-notification-cell">
                         <select class="form-control form-control-sm customs-notification-choice" ${customsNotificationDisabled ? 'disabled' : ''} aria-label="Thông báo hải quan">
-                            <option value="NEED" selected>Need</option>
-                            <option value="NONEED">No need</option>
+                            <option value="NONEED" selected>No need</option>
+                            <option value="NEED">Need</option>
                         </select>
-                    </td>
+                    </td>` : ''}
                     <td class="reason-cell">
                         ${priceWarning ? `<div class="price-warning" role="alert">${priceWarning}</div>` : ''}
                         <textarea class="form-control form-control-sm reason-input" rows="2" list="${supplierReasonDatalistId}" placeholder="Nhập lý do...">${d.NVCHR_ReasonPick || ''}</textarea>
@@ -1377,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const isSelectedSupplier = supplierChoice.value === 'true';
                 customsChoice.disabled = !isSelectedSupplier;
-                if (!isSelectedSupplier) customsChoice.value = 'NEED';
+                if (!isSelectedSupplier) customsChoice.value = 'NONEED';
             });
         },
         saveTab2: async function () {
@@ -1401,7 +1402,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     const maDon = row.getAttribute('data-madon') || sel.getAttribute('data-madon') || '';
                     const maHang = row.getAttribute('data-mahang') || sel.getAttribute('data-mahang') || '';
-                    payload.push({ ID: id, BIT_Select: (val === 'true'), NVCHR_ReasonPick: reason, NVCHR_NameNCC: maDon, CHR_MaHangNCC: maHang });
+                    payload.push({
+                        ID: id,
+                        BIT_Select: (val === 'true'),
+                        CustomsDeclaration: row.querySelector('.customs-notification-choice')?.value || 'NONEED',
+                        NVCHR_ReasonPick: reason,
+                        NVCHR_NameNCC: maDon,
+                        CHR_MaHangNCC: maHang
+                    });
                 });
                 if (missingPriceReason) {
                     showDialog({
@@ -2690,11 +2698,26 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         // Kiểm tra xem step hiện tại có cần chọn người phê duyệt tiếp theo không
-                        const nextStep = master.ID_StepBaoGia;
+                        const nextStep = Number(getVal(master, 'ID_StepBaoGia', 'iD_StepBaoGia'));
                         let userApproverNext = '';
 
-                        // Nếu step = 9 (QLSC) thì cần chọn người phê duyệt tiếp theo (QLTC)
-                        if (nextStep === 9) {
+                        const flowCode = String(getVal(master, 'FlowCode', 'flowCode') || '').trim().toUpperCase();
+                        const selectedTotalVnd = details
+                            .filter(detail => getVal(detail, 'BIT_Select', 'bit_Select') === true)
+                            .reduce((total, detail) => {
+                                const totalAfterTax = Number(getVal(detail, 'FL_TotalAfterTax', 'fl_TotalAfterTax'));
+                                const totalVnd = Number(getVal(detail, 'FL_Sum', 'fl_Sum'));
+                                const unitPriceVnd = Number(getVal(detail, 'FL_VND', 'fl_vnd'));
+                                const quantity = Number(getVal(detail, 'INT_SoLuong', 'inT_SoLuong', 'soluong')) || 0;
+                                const value = Number.isFinite(totalAfterTax) && totalAfterTax > 0
+                                    ? totalAfterTax
+                                    : (Number.isFinite(totalVnd) && totalVnd > 0 ? totalVnd : unitPriceVnd * quantity);
+                                return total + (Number.isFinite(value) ? value : 0);
+                            }, 0);
+                        const gaNeedsQltc = flowCode === 'GA' && selectedTotalVnd >= 100000000;
+
+                        // PUR always continues to QLTC at step 9. GA only does so at 100 million VND or above.
+                        if (nextStep === 9 && (flowCode !== 'GA' || gaNeedsQltc)) {
                             const selectedApprover = await this.openApproverSelector(10, "");
                             if (!selectedApprover) {
                                 return; // Người dùng đã hủy chọn

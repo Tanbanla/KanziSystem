@@ -133,6 +133,33 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             await using var transaction = await _priceMasterContext.Database.BeginTransactionAsync();
             try
             {
+                var internalPartCodes = priceMasters
+                    .Where(x => !string.IsNullOrWhiteSpace(x.CHR_INTERNAL_PART_CODE))
+                    .Select(x => x.CHR_INTERNAL_PART_CODE)
+                    .Distinct()
+                    .ToList();
+
+                var materials = await _priceMasterContext.MATERIALs
+                    .Where(x => internalPartCodes.Contains(x.Material_Code))
+                    .ToDictionaryAsync(x => x.Material_Code);
+
+                foreach (var priceMaster in priceMasters)
+                {
+                    if (!materials.TryGetValue(priceMaster.CHR_INTERNAL_PART_CODE, out var material))
+                        continue;
+
+                    if (!string.IsNullOrWhiteSpace(priceMaster.NVCHR_PART_NAME_VN))
+                        material.Material_Name_VN = priceMaster.NVCHR_PART_NAME_VN;
+                    if (!string.IsNullOrWhiteSpace(priceMaster.NVCHR_PART_NAME_EN))
+                        material.Material_Name_EN = priceMaster.NVCHR_PART_NAME_EN;
+                    if (!string.IsNullOrWhiteSpace(priceMaster.NVCHR_UNIT))
+                        material.Unit = priceMaster.NVCHR_UNIT;
+                    if (priceMaster.DEC_UNIT_PRICE.HasValue)
+                        material.Price = (double)priceMaster.DEC_UNIT_PRICE.Value;
+                    if (!string.IsNullOrWhiteSpace(priceMaster.CHR_CURRENCY))
+                        material.Currency = priceMaster.CHR_CURRENCY;
+                }
+
                 await _priceMasterContext.TM_PRICE_MASTERs.AddRangeAsync(priceMasters);
                 await _priceMasterContext.SaveChangesAsync();
                 await transaction.CommitAsync();

@@ -9,6 +9,10 @@
     List<string> madons = Model.DanhSachMaDon;
     List<string> masterCategories = Model.DanhSachCategory ?? new List<string>();
     List<string> masterMaterials = Model.listMaterial ?? new List<string>();
+    string currentUserRoles = User.FindFirst("Roles")?.Value ?? string.Empty;
+    bool isGaUser = currentUserRoles
+        .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+        .Any(role => string.Equals(role, "GA", StringComparison.OrdinalIgnoreCase));
     //List<dynamic> data = Model.DanhSachBaoGiaGomNhom;
 }
 <head>
@@ -472,7 +476,7 @@
                                     <th colspan="24" class="header-group header-group-bivn">@Localizer["BivnInput"].Value</th>
                                     <th colspan="22" class="header-group header-group-vendor">@Localizer["VendorInput"].Value</th>
                                     <th colspan="1" class="header-group header-group-approval">@Localizer["SystemCalculated"].Value</th>
-                                    <th colspan="4" class="header-group header-group-approval">@Localizer["BivnPur"].Value</th>
+                                    <th colspan="@(isGaUser ? 5 : 4)" class="header-group header-group-approval">@Localizer["BivnPur"].Value</th>
                                 </tr>
                                 <tr class="text-center align-middle supplier-header-columns">
                                     <th rowspan="2"  style="min-width: 35px;background-color: #FFEDE8;">@Localizer["STT"]</th>
@@ -525,7 +529,10 @@
                                     @*  Phần phê duyệt  *@
                                     <th rowspan="2" style="min-width: 100px;background-color: #e5f2ff !important;">@Localizer["SystemCalculatedTotal"]</th>
                                     <th rowspan="2" style="min-width: 70px;background-color: #e5f2ff !important;">@Localizer["SupplierSelection"]</th>
-                                    <th rowspan="2" style="min-width: 105px;background-color: #e5f2ff !important;">Thông báo hải quan</th>
+                                    @if (isGaUser)
+                                    {
+                                        <th rowspan="2" class="customs-declaration-column" style="min-width: 105px;background-color: #e5f2ff !important;">Khai báo hải quan</th>
+                                    }
                                     <th rowspan="2" style="min-width: 220px;background-color: #e5f2ff !important;">@Localizer["SelectionReason"]</th>
                                     <th rowspan="2" style="min-width: 200px;background-color: #e5f2ff !important;">@Localizer["PriceIncreaseReason"]</th>
                                 </tr>
@@ -885,6 +892,7 @@
             }
         })();
         window.apiBaseUrl = '@ViewBag.ApiBaseUrl';
+        window.canShowCustomsDeclaration = @Json.Serialize(isGaUser);
         window.i18nQuotationResults = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
             PageTitle = Localizer["PageTitle"].Value,
             ImportFromExcel = Localizer["ImportFromExcel"].Value,

@@ -1239,7 +1239,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         _logger.LogError("Không lấy được thông tin chi tiết báo giá cho ID: " + material.ID + " Error: " + detailsResult?.Message);
                                         continue;
                                     }
-                                    if (material.ID_StepBaoGia >= 12 && detailsResult.Data.BIT_Select == true)
+                                    if (material.ID_StepBaoGia >= 12
+                                        && detailsResult.Data.BIT_Select == true
+                                        && material.RequiresCustomsNameConfirmation)
                                     {
 
 

@@ -5,6 +5,8 @@ namespace PRJ_WAREHOUSE_BIVN.DTO;
 
 public partial class BaoGia_Detail_of_QuotationDTO
 {
+    public string? CustomsDeclaration { get; set; }
+
     public int ID { get; set; }
 
     public int ID_RequestQuote { get; set; }

@@ -948,7 +948,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             sql.Append(@"
             )
-            SELECT r.*,
+            SELECT r.*, wf.FlowCode,
                 d.[CHR_CodeNCC],
                 d.[NVCHR_NameNCC],
                 d.[CHR_MaHangNCC] as CodeEquipmentNCC,
@@ -977,6 +977,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 d.NVCHR_ReasonPick,
                 d.FL_USD,
                 d.FL_VND,
+                d.FL_Sum,
+                d.FL_TotalAfterTax,
                 CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
                 CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
                 CAST(CASE WHEN r.CHR_NameEN = d.CHR_NameEN THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameEN,
@@ -1014,7 +1016,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 				FROM BaoGia_Request_of_Quotation r
 				INNER JOIN StatusCheck sc ON r.id = sc.id
 				LEFT JOIN BaoGia_Detail_of_Quotation d ON r.id = d.ID_RequestQuote
-				LEFT JOIN IM_NCC_NEW n ON r.CHR_MaNCC = n.Ma");
+                LEFT JOIN IM_NCC_NEW n ON r.CHR_MaNCC = n.Ma
+                INNER JOIN BaoGia_WorkflowDefinition wf ON r.WorkflowID = wf.WorkflowID");
 
             var data = (await _conn.QueryAsync<dynamic>(sql.ToString(), parameters)).ToList();
             return data;
@@ -1589,6 +1592,43 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var existingData = await _context.BaoGia_Request_of_Quotations
                 .Where(c => ids.Contains(c.ID) && c.ID_StepBaoGia >= 9 && c.ID_StepBaoGia <= 11)
                 .ToDictionaryAsync(c => c.ID, c => c);
+            var workflowIds = existingData.Values
+                .Where(c => c.WorkflowID.HasValue)
+                .Select(c => c.WorkflowID!.Value)
+                .Distinct()
+                .ToList();
+            var workflowCodes = await _context.BaoGia_WorkflowDefinitions
+                .Where(w => workflowIds.Contains(w.WorkflowID))
+                .ToDictionaryAsync(w => w.WorkflowID, w => w.FlowCode);
+            var selectedDetails = await _context.BaoGia_Detail_of_Quotations
+                .Where(d => ids.Contains(d.ID_RequestQuote) && d.BIT_Select == true)
+                .ToListAsync();
+            var selectedDetailIds = selectedDetails.Select(detail => detail.ID).ToList();
+            var selectionHistories = await _context.BaoGia_History_Detail_Requests
+                .Where(history => selectedDetailIds.Contains(history.ID_RQ_Detail))
+                .OrderByDescending(history => history.DTM_CreateBy)
+                .ToListAsync();
+            var customsDeclarationByRequest = new HashSet<int>();
+            foreach (var detail in selectedDetails)
+            {
+                foreach (var history in selectionHistories.Where(history => history.ID_RQ_Detail == detail.ID))
+                {
+                    try
+                    {
+                        using var json = System.Text.Json.JsonDocument.Parse(history.NVCHR_dataNew ?? "{}");
+                        if (json.RootElement.TryGetProperty("CustomsDeclaration", out var declaration)
+                            && string.Equals(declaration.GetString(), "NEED", StringComparison.OrdinalIgnoreCase))
+                        {
+                            customsDeclarationByRequest.Add(detail.ID_RequestQuote);
+                            break;
+                        }
+                    }
+                    catch (System.Text.Json.JsonException)
+                    {
+                        // Ignore history rows created before the customs declaration field existed.
+                    }
+                }
+            }
 
             var historyList = new List<BaoGia_History_Request_of_Quotation>();
             var updatedEntities = new List<BaoGia_Request_of_Quotation>();
@@ -1604,7 +1644,24 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
                 if (item.IsApproved != false)
                 {
-                    data.ID_StepBaoGia++;
+                    var currentStep = data.ID_StepBaoGia ?? 0;
+                    var isGaOrder = data.WorkflowID.HasValue
+                        && workflowCodes.TryGetValue(data.WorkflowID.Value, out var flowCode)
+                        && string.Equals(flowCode, "GA", StringComparison.OrdinalIgnoreCase);
+                    var selectedTotalVnd = selectedDetails
+                        .Where(detail => detail.ID_RequestQuote == data.ID)
+                        .Sum(detail => detail.FL_TotalAfterTax ?? detail.FL_Sum ?? ((detail.FL_VND ?? 0) * (detail.INT_SoLuong ?? 0)));
+                    var nextStep = currentStep + 1;
+
+                    // GA orders below 100 million VND do not require QLTC approval.
+                    if (isGaOrder && (currentStep == 10
+                        || currentStep == 9 && selectedTotalVnd < 100_000_000d))
+                    {
+                        nextStep = 13;
+                    }
+
+                    data.RequiresCustomsNameConfirmation = !isGaOrder || customsDeclarationByRequest.Contains(data.ID);
+                    data.ID_StepBaoGia = nextStep;
                     data.CHR_UserApproval = userNext;
                     data.DTM_UpdateLater = DateTime.Now;
                     if (data.ID_StepBaoGia >= 12)
@@ -1613,8 +1670,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                         data.ID_StepBaoGia = 13;
                     }
 
-                    var actionType = data.ID_StepBaoGia == 10 ? "QLSC_PICK_NCC" :
-                                    (data.ID_StepBaoGia == 11 ? "QLTC_PICK_NCC" : "DEFT_PICK_NCC");
+                    var actionType = currentStep == 9 ? "QLSC_PICK_NCC" :
+                                    (currentStep == 10 ? "QLTC_PICK_NCC" : "DEFT_PICK_NCC");
                     historyList.Add(new BaoGia_History_Request_of_Quotation
                     {
                         ID_RequestQuote = item.Id,
