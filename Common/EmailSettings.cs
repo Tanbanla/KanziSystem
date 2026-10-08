@@ -50,8 +50,8 @@ namespace PRJ_WAREHOUSE_BIVN.Common
 
             try
             {
-                //mail_to = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
-               // mail_cc = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                mail_to = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                mail_cc = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
 
                 using var msg = new MailMessage();
 
@@ -123,9 +123,9 @@ namespace PRJ_WAREHOUSE_BIVN.Common
                 if (string.IsNullOrWhiteSpace(fromAddress)) throw new ArgumentException("Sender address is not specified.", nameof(emailForm.mail_from));
                 msg.From = new MailAddress(fromAddress);
 
-               // emailForm.mail_to = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
-               // emailForm.mail_cc = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
-               // emailForm.mail_bcc = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                emailForm.mail_to = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                emailForm.mail_cc = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
+                emailForm.mail_bcc = "nguyenduy.khanh@brother-bivn.com.vn";//"lethiphuong.lan@brother-bivn.com.vn;dinhthithu.huyen@brother-bivn.com.vn;huongoh@brothergroup.net;huyente@brothergroup.net;";
 
                 AddAddresses(msg.To, emailForm.mail_to);
                 AddAddresses(msg.CC, emailForm.mail_cc);

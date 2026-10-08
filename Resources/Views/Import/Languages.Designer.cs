@@ -259,6 +259,42 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Đợi người dự thảo.
+        /// </summary>
+        public static string Doinguoiduthao {
+            get {
+                return ResourceManager.GetString("Doinguoiduthao", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Đợi người phê duyệt.
+        /// </summary>
+        public static string Doinguoipheduyet {
+            get {
+                return ResourceManager.GetString("Doinguoipheduyet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Đợi người thẩm tra.
+        /// </summary>
+        public static string Doinguoithamtra {
+            get {
+                return ResourceManager.GetString("Doinguoithamtra", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Đợi quản lý phòng tiếp nhận.
+        /// </summary>
+        public static string Doiquanlyphongbantiepnhan {
+            get {
+                return ResourceManager.GetString("Doiquanlyphongbantiepnhan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Đổi sang USD.
         /// </summary>
         public static string doisangusd {
@@ -1110,6 +1146,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string thanhtien {
             get {
                 return ResourceManager.GetString("thanhtien", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thanh toán.
+        /// </summary>
+        public static string Thanhtoan {
+            get {
+                return ResourceManager.GetString("Thanhtoan", resourceCulture);
             }
         }
         

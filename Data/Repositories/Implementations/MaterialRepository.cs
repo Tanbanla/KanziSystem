@@ -247,7 +247,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     m.Material_Code != null &&
                     m.Code_Suppiler == codeNcc &&
                     m.Category_VN != null &&
-                    m.Category_VN.Contains(category))
+                    m.Category_VN.Equals(category))
                 .OrderByDescending(m => m.Material_Code)
                 .Select(m => m.Material_Code)
                 .FirstOrDefaultAsync();

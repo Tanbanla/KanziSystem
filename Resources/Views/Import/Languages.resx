@@ -555,4 +555,19 @@
   <data name="Giaohang" xml:space="preserve">
     <value>Giao hàng PO</value>
   </data>
+  <data name="Doinguoiduthao" xml:space="preserve">
+    <value>Đợi người dự thảo</value>
+  </data>
+  <data name="Doinguoithamtra" xml:space="preserve">
+    <value>Đợi người thẩm tra</value>
+  </data>
+  <data name="Doinguoipheduyet" xml:space="preserve">
+    <value>Đợi người phê duyệt</value>
+  </data>
+  <data name="Doiquanlyphongbantiepnhan" xml:space="preserve">
+    <value>Đợi quản lý phòng tiếp nhận</value>
+  </data>
+  <data name="Thanhtoan" xml:space="preserve">
+    <value>Thanh toán</value>
+  </data>
 </root>

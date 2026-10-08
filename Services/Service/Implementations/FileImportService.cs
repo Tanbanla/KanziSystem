@@ -139,15 +139,18 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var fileUrl = string.IsNullOrWhiteSpace(baseUrl) ? $"/uploads/quotes/{uniqueName}" : $"{baseUrl}/{uniqueName}";
                     savedFiles.Add((candidate.Value, fileUrl));
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    result.Success = false;
-                    result.Message = ex.Message;
-                    return result;
+                    continue;
                 }
             }
 
-            if (savedFiles.Count == 0) return null;
+            if (savedFiles.Count == 0)
+            {
+                result.Success = true;
+                result.Data = sourcePath;
+                return result;
+            }
 
             var onlyQuotedPath = quoteMatches.Count == 1 &&
                 System.Text.RegularExpressions.Regex.IsMatch(sourcePath, "^\\s*([\"']).*\\1\\s*$");

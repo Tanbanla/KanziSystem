@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = Languages.Pheduyetdon;
 }
+
 <style>
     .form-control, .input-group-text, .custom-select, .custom-file-label {
         border-color: #6e75c4;
@@ -12,17 +13,15 @@
         height: 41px;
     }
 
-    /* --- CỐ ĐỊNH THANH CÔNG CỤ TRÊN CÙNG MÀN HÌNH --- */
     .card .card-header {
         position: sticky;
         top: 0;
-        background-color: #ffffff !important; /* Màu nền trắng để che chữ bên dưới khi cuộn */
-        z-index: 1060; /* Ưu tiên cao nhất để luôn nằm trên cùng */
+        background-color: #ffffff !important;
+        z-index: 1060;
         border-bottom: 1px solid #dee2e6;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    /* --- CẤU HÌNH VÙNG CHỨA BẢNG CHÍNH (THAY PX THÀNH VH) --- */
     .main-table-responsive {
         max-height: calc(100vh - 220px);
         min-height: 400px;
@@ -35,22 +34,19 @@
     .main-table-responsive .table {
         width: 100%;
         margin-bottom: 0;
-        /*  white-space: nowrap; */
     }
 
-    /* Ghim dòng tiêu đề thứ nhất (Dính ngay dưới thanh công cụ) */
     .main-table-responsive .table thead tr.header-row-1 th {
         position: sticky;
-        top: 0; /* Nếu cuộn toàn bộ trang thì đổi thành chiều cao thanh header (ví dụ: 61px) */
+        top: 0;
         background-color: #2233b0 !important;
         z-index: 1040;
         border-bottom: 1px solid #dee2e6;
     }
 
-    /* Ghim dòng tiêu đề thứ hai (Dính sát dưới dòng tiêu đề thứ nhất) */
     .main-table-responsive .table thead tr.header-row-2 th {
         position: sticky;
-        top: 38px; /* Chiều cao thực tế của tr thứ nhất */
+        top: 38px;
         background-color: #2233b0 !important;
         z-index: 1035;
         border-bottom: 1px solid #dee2e6;
@@ -135,59 +131,106 @@
 <div class="row">
     <div class="col-12">
         <div class="card card-primary">
-            <div class="card-header" style="padding-left: 0px;">
+            <div class="card-header" style="padding: 5px;">
+                <!-- Thông báo góc phải -->
                 <div id="thong-bao-goc-phai" class="alert alert-success" style="display: none; position: fixed; top: 80px; right: 20px; width: 300px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 6px;" role="alert">
                     <strong>Hoàn thành!</strong> Đã xử lý tất cả yêu cầu.
                 </div>
-                <div class="form-group" style="margin : 10px 0 0 5px">
-                    <div class="input-group mb-2">
-                        <button class="btn btn-success" style="border-radius : 0px;" onclick="_dongy_all_GA()"><i class="fa fa-check-double"></i> @Languages.Pheduyetdon</button>
-                      
-                        <button class="btn btn-info ml-1" style="border-radius : 0px;" id="modal-15" onclick="_list_view()"><i class="fa fa-eye"></i> @Languages.Xem</button>
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 50px">
-                    <div class="input-group mb-2">
-                        <select class="form-control" id="trangthaidon">
-                            <option value=""> -- @Languages.Tinhtrangdon --</option>
-                            <option value="1">Gấp</option>
-                            <option value="0">Thông thường</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <div class="input-group mb-2">
-                        <select class="form-control" id="tinhtrangdon">
-                            <option value=""> ---  @Languages.Trangthaidon ---</option>
-                            <option value="0">Đợi người dự thảo</option>
-                            <option value="1">Đợi người thẩm tra</option>
-                            <option value="2">Đợi người phê duyệt</option>
-                            <option value="3">Đợi quản lý phòng tiếp nhận</option>
-                            <option value="4">Đợi người xuất kho</option>
-                            <option value="5">Hoàn thành</option>
-                            <option value="6">Bị từ chối</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="mnl" placeholder="@Languages.mayeucau ">
-                    </div>
-                </div>
-                <div class="form-group" style="margin : 10px 0 0 10px">
-                    <div class="input-group mb-2">
-                        <select class="form-control" id="giadonhang">
-                            <option value="">---  @Languages.Giatien  ---</option>
-                            <option value="2999">Dưới 3000</option>
-                            <option value="3000">Dưới 10,000</option>
-                            <option value="10000">Trên 10,000</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-primary ml-3" onclick="_load_confirm_GA()"><i class="ion ion-ios-search-strong"></i> @Languages.timkiem</button>
-                <button type="button" class="btn btn-secondary ml-3" onclick="_reset()"><i class="ion ion-ios-refresh"></i> @Languages.Lammoi</button>
+                <input type="text" id="mnl" hidden />
+                <!-- Hàng duy nhất chứa tất cả các bộ lọc và nút -->
+                <div class="row col-12 align-items-end mt-2">
+                    <!-- Phòng ban -->
+                    <div class="col-lg-1 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
 
-                <span class="text-success ml-4">✓ : @Languages.daduyet </span> &nbsp;&nbsp;  <span class="text-warning"> ◉ : @Languages.dangdoi </span> &nbsp;&nbsp; <span class="text-danger mr-3"> × : @Languages.Tuchoi</span>
+                            <select class="form-control form-control-sm" id="phongban" onchange="filterTable()">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cost center -->
+                    <div class="col-lg-1 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
+                            <select class="form-control form-control-sm" id="costcenter" onchange="filterTable()">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Số tiền -->
+                    <div class="col-lg-1 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
+                            <select class="form-control form-control-sm" id="giadonhang" onchange="_load_confirm_GA()">
+                                <option value="">- @Languages.Sotien -</option>
+                                <option value="2999"> &lt; 3000</option>
+                                <option value="3000">3000 ~ 10,000</option>
+                                <option value="10000"> &gt; 10,000</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Phân loại hàng -->
+                    <div class="col-lg-1 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
+                            <select class="form-control form-control-sm" id="phanloaihang">
+                                <option value="">- @Languages.loaihang -</option>
+                                <option value="B">B</option>                             
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tình trạng đơn -->
+                    <div class="col-lg-1 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
+                            <select class="form-control form-control-sm" id="trangthaidon" onchange="_load_confirm_GA()">
+                                <option value=""> -- @Languages.Tinhtrangdon --</option>
+                                <option value="1">@Languages.Gap</option>
+                                <option value="0">@Languages.Thongthuong</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Trạng thái đơn -->
+                    <div class="col-lg-2 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
+                            <select class="form-control form-control-sm" id="tinhtrangdon" onchange="_load_confirm_GA()">
+                                <option value="">- @Languages.Trangthaidon -</option>
+                                <option value="0">@Languages.Doinguoiduthao</option>
+                                <option value="1">@Languages.Doinguoithamtra</option>
+                                <option value="2">@Languages.Doinguoipheduyet</option>
+                                <option value="3">@Languages.Doiquanlyphongbantiepnhan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Nút Tìm kiếm -->
+                    <div class="col-lg-1 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
+                            <button type="button" class="btn btn-primary btn-sm btn-block" style="background-color: #0033cc; border-color: #0033cc; font-size: 11px;" onclick="_load_confirm_GA()">
+                                <i class="ion ion-ios-search-strong"></i> @Languages.timkiem
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Nút Làm mới -->
+                    <div class="col-lg-1 col-md-2 col-sm-6">
+                        <div class="form-group mb-2">
+                            <button type="button" class="btn btn-secondary btn-sm btn-block" style="font-size: 11px;" onclick="_reset_GA()">
+                                <i class="ion ion-ios-refresh"></i> @Languages.Lammoi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Nút Phê duyệt -->
+                    <div class="col-lg-2 col-md-2 col-sm-12 ml-auto">
+                        <div class="form-group mb-2">
+                            <button class="btn btn-success btn-sm btn-block" style="font-size: 11px;" onclick="_dongy_all_GA()">
+                                <i class="ion ion-ios-checkmark-outline"></i> @Languages.Pheduyetdon
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
                 <div style=" border: 1px solid #dee2e6;">
@@ -195,7 +238,11 @@
                         <table class="table table-bordered">
                             <thead class="bg-primary ">
                                 <tr class="header-row-1 bg-primary">
-                                    <th rowspan="2" class="bg-white" style="text-align:center"><input type="checkbox" id="idd" /></th>
+                                    <th style="text-align:center;">
+                                        <button class="btn btn-light btn-sm btn-block mb-2" id="modal-15" style="font-size: 12px;" onclick="_list_view()">
+                                            <i class="ion ion-ios-eye-outline"></i> @Languages.Xem
+                                        </button>
+                                    </th>
                                     <th rowspan="2">@Languages.chitiet</th>
                                     <th rowspan="2">No.</th>
                                     <th rowspan="2">@Languages.Tinhtrangdon</th>
@@ -211,6 +258,7 @@
                                     <th colspan="3">@Languages.phongtiepnhan</th>
                                 </tr>
                                 <tr class="header-row-2 bg-primary">
+                                    <th class="text-center"><input type="checkbox" id="idd" /></th>
                                     <th>@Languages.nguoiduthao</th>
                                     <th>@Languages.nguoithamtra</th>
                                     <th>@Languages.nguoipheduyet</th>
@@ -232,7 +280,7 @@
 <button id="modal-7" hidden></button>
 @await Html.PartialAsync("_modal", "Approval")
 <script src="~/scripts/request.js"></script>
-
+@section Scripts {
 <script>
     let swiper; // Định nghĩa biến Swiper toàn cục
     let lst = [];
@@ -241,6 +289,7 @@
     window.onload = function() {
         var us = document.getElementById("us").innerHTML;
         _load_confirm_GA(us);
+        LoadSelectData();
     }
 
     document.addEventListener('change', function(e) {
@@ -472,4 +521,86 @@
             },
         });
     });
+
+      function LoadSelectData() {
+        $.ajax({
+            url: '/ipcs/ManagerDelivery/load_section',
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data) {
+                console.log(data);
+                var $phongban = $('#phongban');
+                $phongban.empty(); // Xóa dữ liệu cũ
+                $phongban.append('<option value="">- @Languages.Phongban -</option>'); // Dòng mặc định
+
+                // 1. Duyệt trực tiếp qua mảng data
+                $.each(data, function (index, item) {
+                    // 2. Dùng maCost và maPhong chữ 'm' viết thường theo đúng console.log
+                    $phongban.append('<option value="' + item.maCost + '">' + item.maPhong + '</option>');
+                });
+            },
+            error: function (error) {
+                console.log("Lỗi khi tải Phòng ban:", error);
+            }
+        });
+        $.ajax({
+            url: '/ipcs/ManagerDelivery/load_cost',
+            type: 'POST',
+            dataType: 'JSON',
+            success: function (data) {
+                var $costcenter = $('#costcenter');
+                $costcenter.empty();
+                $costcenter.append('<option value="">- Cost -</option>');
+
+                $.each(data, function (index, value) {
+                    $costcenter.append('<option value="' + value + '">' + value + '</option>');
+                });
+            },
+            error: function (error) {
+                console.log("Lỗi khi tải Cost Center:", error);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        // Thay đổi cách gọi sự kiện
+        $(document).on('change', '#phongban, #costcenter, #phanloaihang', function () {
+            filterTable();
+        });
+    });
+
+    function filterTable() {
+            var selectedDept = ($('#phongban').val() || "").toLowerCase().trim();
+            var selectedCost = ($('#costcenter').val() || "").toLowerCase().trim();
+            var selectedHang = ($('#phanloaihang').val() || "").toLowerCase().trim(); // Lấy giá trị 'a' hoặc 'e'
+
+            $('#list_approve tr').each(function () {
+                var $row = $(this);
+                var rowText = $row.text().toLowerCase();
+
+                // Cột index 6 là Mã hàng, Cột index 7 là Cost Center (theo thead của bạn)
+                var HangCellText = $row.find('td').eq(5).text().toLowerCase().trim();
+                var costCellText = $row.find('td').eq(6).text().toLowerCase().trim();
+
+                // 1. Lọc Phòng ban: Tìm trong toàn bộ text của dòng
+                var matchDept = (selectedDept === "") || rowText.indexOf(selectedDept) > -1;
+
+                // 2. Lọc Cost Center: CHỈ TÌM TRONG CỘT 7 (Bỏ rowText.indexOf để tránh nhiễu dữ liệu với số tiền/ngày tháng)
+                var matchCost = (selectedCost === "") || costCellText.indexOf(selectedCost) > -1;
+
+                // 3. Lọc Mã hàng (Phân loại A/E): CHỈ TÌM TRONG CỘT 6 (Bỏ rowText.indexOf)
+                // Dùng indexOf nếu mã hàng CÓ CHỨA 'A' hoặc 'E'
+                var matchHang = (selectedHang === "") || HangCellText.indexOf(selectedHang) > -1;
+
+
+
+                // 4. Ẩn/Hiện dòng theo kết quả lọc
+                if (matchDept && matchCost && matchHang) {
+                    $row.show();
+                } else {
+                    $row.hide();
+                }
+            });
+        }
 </script>
+}

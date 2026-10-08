@@ -6,10 +6,15 @@ namespace PRJ_WAREHOUSE_BIVN.DTO;
 public partial class BaoGia_Detail_of_QuotationDTO
 {
     public string? CustomsDeclaration { get; set; }
-
     public int ID { get; set; }
 
     public int ID_RequestQuote { get; set; }
+
+    public string? CHR_MaDon { get; set; }
+
+    public string? CHR_MaThietBi { get; set; }
+
+    public string? NVCHR_ChungLoai { get; set; }
 
     public string CHR_CodeNCC { get; set; } = null!;
 

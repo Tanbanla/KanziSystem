@@ -502,7 +502,7 @@ async function _load_confirm() {
                 const trangthai = `<div class="badge badge-pill badge-${config[1]} mb-1">${config[0]}</div>`;
                 return `
                 <tr>
-                    <td><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>
+                    <td class="text-center"><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>
                     <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info"></i></button></td>
                     <td>${index + 1}</td>
                     <td>${urg}</td>
@@ -586,7 +586,7 @@ async function _load_confirm_GA() {
 
                 return `
                 <tr>
-                    <td><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>                 
+                    <td class="text-center"><input type="checkbox" class="item" value="${item.code_Request}_${item.inT_STEP}"/></td>                 
                     <td class="text-center" id="${item.code_Request}" onclick="_modal_info(this.id, '${item.inT_STEP}')"><button class="btn btn-outline-primary"><i class="fa fa-info"></i></button></td>
                     <td>${index + 1}</td>
                     <td>${urg}</td>
@@ -992,6 +992,13 @@ function _reset() {
     document.getElementById("mnl").value = "";
     document.getElementById("tinhtrangdon").value = "";
     _load_confirm();
+}
+function _reset_GA() {
+    document.getElementById("trangthaidon").value = "";
+    document.getElementById("giadonhang").value = "";
+    document.getElementById("mnl").value = "";
+    document.getElementById("tinhtrangdon").value = "";
+    _load_confirm_GA();
 }
 
 function _load_account() {

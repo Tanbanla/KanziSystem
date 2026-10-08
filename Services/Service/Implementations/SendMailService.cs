@@ -20,13 +20,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
     public class SendMailService : BaseService<TM_MASTER_MAIL, int ,TM_MASTER_MAILDTO>, ISendMailService
     {
         private readonly ISendMailRepository _repo;
-        private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
-        private const string mailPICTo = "bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-gagpur@brother-bivn.com.vn";//
+        private const string mailPICToPUR = "bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-pur-indirectpart@brother-bivn.com.vn";//"bivn-gagpur@brother-bivn.com.vn";//
+        private const string mailPICToGa = "bivn-gagpur@brother-bivn.com.vn";
         public SendMailService(ISendMailRepository repository, IMapper mapper, IConfiguration configuration) : base(repository, mapper)
         {
             _repo = repository;
-            _mapper = mapper;
             _configuration = configuration;
         }
         // Gửi mail
@@ -113,6 +112,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     continue;
                 }
+                var mailPicTo = await GetPicEmailsAsync(listRq);
 
                 // Tạo file Excel tổng hợp cho nhà cung cấp này
                 string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template", "TmSendMailNew.xlsx");
@@ -235,7 +235,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                 var body = string.Format(bodyTable, dearMail, mailTk);
                 var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ?
-                    mailPICTo : mail.CHR_CC;
+                    mailPicTo : mail.CHR_CC;
 
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                 {
@@ -345,6 +345,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     continue;
                 }
+                var mailPicTo = await GetPicEmailsAsync(requests);
 
                 var temporaryFiles = new List<string>();
                 try
@@ -423,7 +424,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                         {
                             mail_from = mail.CHR_FROM,
                             mail_to = toEmail,
-                            mail_cc = string.IsNullOrEmpty(mail.CHR_CC) ? mailPICTo : mail.CHR_CC,
+                            mail_cc = string.IsNullOrEmpty(mail.CHR_CC) ? mailPicTo : mail.CHR_CC,
                             mail_bcc = mail.CHR_BCC,
                             title = batches.Count == 1 ? title : $"{title} ({batchIndex + 1}/{batches.Count})",
                             body = mailBody,
@@ -490,6 +491,35 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     ? "Mail sent successfully"
                     : $"Could not send mail to: {string.Join(", ", failedSuppliers)}"
             };
+        }
+
+        private async Task<string> GetPicEmailsAsync(IEnumerable<dynamic> requests)
+        {
+            var workflowIds = new List<int>();
+            foreach (var request in requests)
+            {
+                var workflowId = Convert.ToInt32(request.WorkflowID);
+                if (workflowId > 0 && !workflowIds.Contains(workflowId))
+                {
+                    workflowIds.Add(workflowId);
+                }
+            }
+
+            var flowCodes = await _repo.GetWorkflowFlowCodesAsync(workflowIds);
+            var emails = new List<string>();
+
+            if (flowCodes.Values.Any(flowCode => string.Equals(flowCode, "GA", StringComparison.OrdinalIgnoreCase)))
+            {
+                emails.Add(mailPICToGa);
+            }
+
+            if (flowCodes.Values.Any(flowCode => string.Equals(flowCode, "PUR", StringComparison.OrdinalIgnoreCase))
+                || emails.Count == 0)
+            {
+                emails.Add(mailPICToPUR);
+            }
+
+            return string.Join(";", emails.Distinct(StringComparer.OrdinalIgnoreCase));
         }
 
         private async Task<List<string>> GetMailAttachmentPathsAsync(IEnumerable<dynamic> requests)
@@ -602,6 +632,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     continue;
                 }
+                var mailPicTo = await GetPicEmailsAsync(listRq);
 
                 var createByIds = listRq
                     .Select(r => (string?)r.CHR_CreateBy)
@@ -723,7 +754,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                 var body = string.Format(bodyTable, dearMail, mailTk);
                 var emailCC = string.IsNullOrEmpty(mail.CHR_CC)
-                    ? mailPICTo
+                    ? mailPicTo
                     : mail.CHR_CC;
 
                 var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
@@ -830,6 +861,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 {
                     continue;
                 }
+                var mailPicTo = await GetPicEmailsAsync(rqByNCC);
 
                 // Tạo tên file với milliseconds để tránh trùng lặp
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
@@ -936,7 +968,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
                     var email = string.IsNullOrEmpty(mail.CHR_CC) ?
-                        mailPICTo : mail.CHR_CC;
+                        mailPicTo : mail.CHR_CC;
 
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
@@ -1148,6 +1180,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var toEmail = await _repo.GetSupplierEmailAsync(supplier);
                     if (string.IsNullOrEmpty(toEmail))
                         continue;
+                    var mailPicTo = await GetPicEmailsAsync(rqList);
 
                     // Tạo file Excel tổng hợp cho mã đơn này
                     string maDon = rqList.FirstOrDefault()?.CHR_MaDon ?? "UnknownMaDon";
@@ -1298,7 +1331,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var dearMail = "nhà cung cấp " + (rqList.FirstOrDefault()?.Ten ?? "") + " yêu cầu báo giá cho các mặt hàng như file đính kèm. Trân trọng cảm ơn!";
                     var bodyTable = mail.CHR_BODY + tableHtml.ToString();
                     var body = string.Format(bodyTable, dearMail);
-                    var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ? mailPICTo : mail.CHR_CC;
+                    var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ? mailPicTo : mail.CHR_CC;
 
                     var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                     {
@@ -1420,6 +1453,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                 foreach (var orderGroup in groupedByOrder)
                 {
                     var orderRq = orderGroup.ToList();
+                    var mailPicTo = await GetPicEmailsAsync(orderRq);
 
                     // Tạo file Excel tổng hợp cho nhà cung cấp này và đơn này
                     string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template", "TmSendMailNew.xlsx");
@@ -1539,7 +1573,7 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
                     var bodyTable = mail.CHR_BODY + tablePicInfo.ToString();
                     var body = string.Format(bodyTable, dearMail, mailTk);
                     var emailCC = string.IsNullOrEmpty(mail.CHR_CC) ?
-                        mailPICTo : mail.CHR_CC;
+                        mailPicTo : mail.CHR_CC;
 
                     attachmentPaths.Insert(0, tempFilePath);
 
@@ -1746,7 +1780,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
 
                         string body = string.Format(bodyTemplate, shortName, toEmail.PICName ?? vendorName, expectedDeadline);
                         string titleMail = $"{expectedDeadline} - {shortName} - Sửa tên hàng hóa trên báo giá / Please revise the part name on the quotation.";
-                        var emailCC = string.IsNullOrEmpty(mailTemplate.CHR_CC) ? mailPICTo : mailTemplate.CHR_CC;
+                        var mailPicTo = await GetPicEmailsAsync(dataVendor);
+                        var emailCC = string.IsNullOrEmpty(mailTemplate.CHR_CC) ? mailPicTo : mailTemplate.CHR_CC;
 
                         var emailForm = new EmailFormNetMailCustomSendMultiAttachFile
                         {

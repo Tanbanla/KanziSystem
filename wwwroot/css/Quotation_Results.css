@@ -420,6 +420,74 @@ td[style*="#ffecec"] {
     outline: 0;
 }
 
+#supplierQuoteTable .reason-suggestion-trigger {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    padding: 4px 6px;
+    border: 1px solid #b9cbe3;
+    border-radius: 5px;
+    background: #f3f8ff;
+    color: #1d4e89;
+    font-size: 10px;
+    text-align: left;
+    cursor: pointer;
+}
+
+#supplierQuoteTable .reason-suggestion-trigger:hover {
+    border-color: #6f9ed1;
+    background: #e4f1ff;
+}
+
+/* Readable bilingual reason suggestions in the supplier selection prompt. */
+.cm-prompt-reason-options {
+    display: grid;
+    gap: .4rem;
+    max-height: 310px;
+    margin-top: .65rem;
+    padding: .35rem;
+    overflow-y: auto;
+    border: 1px solid #dce4ef;
+    border-radius: .5rem;
+    background: #f8fafc;
+}
+
+.cm-prompt-reason-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: .55rem .7rem;
+    border: 1px solid transparent;
+    border-radius: .4rem;
+    background: #fff;
+    color: #172033;
+    text-align: left;
+    cursor: pointer;
+    line-height: 1.3;
+}
+
+.cm-prompt-reason-option:hover,
+.cm-prompt-reason-option.is-selected {
+    border-color: #8db7e8;
+    background: #eef6ff;
+}
+
+.cm-prompt-reason-en,
+.cm-prompt-reason-vi {
+    overflow-wrap: anywhere;
+}
+
+.cm-prompt-reason-en {
+    font-weight: 600;
+}
+
+.cm-prompt-reason-vi {
+    margin-top: .15rem;
+    color: #64748b;
+    font-size: .9em;
+}
+
 /* Master quotation search and data table */
 .master-quote-filter-card,
 .master-quote-table-card {

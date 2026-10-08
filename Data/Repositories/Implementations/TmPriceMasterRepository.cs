@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 {
-    public class TmPriceMasterRepository: BaseRepository<TM_PRICE_MASTER, long>, ITmPriceMasterRepository
+    public class TmPriceMasterRepository : BaseRepository<TM_PRICE_MASTER, long>, ITmPriceMasterRepository
     {
 
         private readonly COST_MANAGEMENTContext _priceMasterContext;

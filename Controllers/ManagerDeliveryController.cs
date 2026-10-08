@@ -247,14 +247,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         int batchSize = 500; // Số lượng dòng gộp lại để chạy 1 lần
                         int countProcess = 0;
 
-                        for (int row = 2; row <= rowCount; row++)
+                        for (int row = 3; row <= rowCount; row++)
                         {
                             // Tối ưu: Dùng Value?.ToString() thay vì Text sẽ xử lý nhanh hơn trong EPPlus
                             string idDetailPo = worksheet.Cells[row, 1].Text?.ToString()?.Trim() ?? "";
                             string soPO = worksheet.Cells[row, 3].Text?.ToString()?.Trim() ?? "";
-
-                            string rawNgaydieuchinh = worksheet.Cells[row, 14].Text?.ToString()?.Trim() ?? "";
                             string rawNgayGuiPo = worksheet.Cells[row, 11].Text?.ToString()?.Trim() ?? "";
+                            string rawNgaydieuchinh = worksheet.Cells[row, 14].Text?.ToString()?.Trim() ?? "";
+                           
                             string rawNgayNccXacnhanGh = worksheet.Cells[row, 15].Text?.ToString()?.Trim() ?? "";
                             string rawNgayGhChinhThuc = worksheet.Cells[row, 16].Text?.ToString()?.Trim() ?? "";
                           
@@ -271,12 +271,13 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             string ngayNccXacnhanGh = FormatSqlDate(rawNgayNccXacnhanGh);
                             string ngayGhChinhThuc = FormatSqlDate(rawNgayGhChinhThuc);
 
-                            string giogh = SafeString(worksheet.Cells[row, 17].Text?.ToString()!);
-                            string lichGiao = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 18].Text) ? null : worksheet.Cells[row, 18].Text.Trim());
-                            string anhHuongSx = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 19].Text) ? null : worksheet.Cells[row, 19].Text.Trim());
-                            string cuaGh = SafeString(worksheet.Cells[row, 20].Text?.ToString()!);
-                            string congNhanHang = SafeString(worksheet.Cells[row, 21].Text?.ToString()!);
-                            string nguoiNhanHang = worksheet.Cells[row, 22].Text?.ToString()!;
+                            string nguoiNhanHang = worksheet.Cells[row, 17].Text?.ToString()!;
+                            string giogh = SafeString(worksheet.Cells[row, 18].Text?.ToString()!);
+                            string lichGiao = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 19].Text) ? null : worksheet.Cells[row, 19].Text.Trim());
+                            string anhHuongSx = SafeString(string.IsNullOrWhiteSpace(worksheet.Cells[row, 20].Text) ? null : worksheet.Cells[row, 20].Text.Trim());
+                            string cuaGh = SafeString(worksheet.Cells[row, 21].Text?.ToString()!);
+                            string congNhanHang = SafeString(worksheet.Cells[row, 22].Text?.ToString()!);
+                        
                           
                             string Note = worksheet.Cells[row, 23].Text?.ToString()!;
 
@@ -1403,17 +1404,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     Dieuchinhlichgiao = string.IsNullOrEmpty(x.Dieuchinhlichgiao) ? (DateTime?)null : DateTime.Parse(x.Dieuchinhlichgiao),
                     ngaynccxngiao = string.IsNullOrEmpty(x.ngaynccxngiao) ? (DateTime?)null : DateTime.Parse(x.ngaynccxngiao),    
                     Ngay_GHchinhthuc = string.IsNullOrEmpty(x.Ngay_GHchinhthuc) ? (DateTime?)null : DateTime.Parse(x.Ngay_GHchinhthuc),
+                    x.Nguoi_Nhanhang,
                     x.Gio_GH,
                     x.lichgiao,
                     x.anhuongsx,
                     x.Cua_GH,
                     x.Cong_Nhanhang,
-                    x.Nguoi_Nhanhang,
                     x.Note,
                     x.DNphathanhpo
                 }).ToList();
 
-                worksheet.Cells["A2"].LoadFromCollection(exportData, false);
+                worksheet.Cells["A3"].LoadFromCollection(exportData, false);
 
                 worksheet.Column(2).Style.Numberformat.Format = "yyyy-MM-dd";
                 worksheet.Column(11).Style.Numberformat.Format = "yyyy-MM-dd";
@@ -3737,6 +3738,37 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             return Json(damnhiem);
         }
+        public JsonResult load_section()
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            var resultList = new List<object>();
+
+            // Câu lệnh SQL lấy cặp dữ liệu MaPhong và MaCost không trùng lặp
+            var lt = db.GET_DATA_FROM_SQL("SELECT DISTINCT MaPhong, MaCost FROM [DEPARTMENT_VITRI] WHERE MaPhong IS NOT NULL");
+
+            for (int i = 0; i < lt.Rows.Count; i++)
+            {
+                resultList.Add(new
+                {
+                    MaPhong = lt.Rows[i]["MaPhong"]?.ToString() ?? "",
+                    MaCost = lt.Rows[i]["MaCost"]?.ToString() ?? ""
+                });
+            }
+
+            return Json(resultList);
+        }
+        public JsonResult load_cost()
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            List<string> mp = new List<string>();
+            var lt = db.GET_DATA_FROM_SQL("select distinct([MaCost]) from [DEPARTMENT_VITRI]  ");
+            for (int i = 0; i < lt.Rows.Count; i++)
+            {
+                mp.Add(lt.Rows[i][0].ToString()!);
+            }
+            return Json(mp);
+        }
+
     }
 }
 

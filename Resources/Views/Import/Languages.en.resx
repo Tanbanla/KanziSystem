@@ -555,4 +555,19 @@
   <data name="Giaohang" xml:space="preserve">
     <value>Delivery</value>
   </data>
+  <data name="Doinguoiduthao" xml:space="preserve">
+    <value>Waiting for the drafter</value>
+  </data>
+  <data name="Doinguoithamtra" xml:space="preserve">
+    <value>Waiting for the inspector</value>
+  </data>
+  <data name="Doinguoipheduyet" xml:space="preserve">
+    <value>Waiting for approval</value>
+  </data>
+  <data name="Doiquanlyphongbantiepnhan" xml:space="preserve">
+    <value>Waiting for the front desk manager</value>
+  </data>
+  <data name="Thanhtoan" xml:space="preserve">
+    <value>Payment</value>
+  </data>
 </root>

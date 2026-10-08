@@ -230,7 +230,10 @@
                             <ul class="dropdown-menu">
                              <li><a class="nav-link" href="~/ManagerDelivery/ManageDelivery"><i class="fas fa-reply"></i>@Languages.Giaohang</a></li>
                                 <li><a class="nav-link" href="~/Delivery/DeliveryPO"><i class="ion ion-ios-cart"></i> @Languages.NhaphangPO</a></li>
-                              
+                                 @if (User.FindFirst("Roles")?.Value == "UserPUR")
+                                {
+                                    <li><a class="nav-link" href="~/ManagerDelivery/Thanhtoan"><i class="ion ion-ios-bell"></i> @Languages.Thanhtoan</a></li>
+                                }
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExportRequest"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Tainhap"><i class="fas fa-donate"></i> @Localizer["MenuWarehouseReimport"]</a></li>

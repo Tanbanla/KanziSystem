@@ -34,6 +34,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         Task<GenericResponse<IFormFile>> GetFileToLinkAsync(string filePath);
         // lấy mail người tạo đơn
         Task<string> GetRequesterEmailByAdidAsync(string adid);
+        // Lấy mã phòng ban của workflow theo các đơn báo giá
+        Task<Dictionary<int, string>> GetWorkflowFlowCodesAsync(IEnumerable<int> workflowIds);
         // The list vender not need to send mail
         Task<List<string>> SupplierNeedToSendMailAsync();
         // Lấy thông tin các đơn cần xin lại xác nhận tên hàng

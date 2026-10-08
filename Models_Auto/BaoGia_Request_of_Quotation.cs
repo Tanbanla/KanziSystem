@@ -8,7 +8,6 @@ public partial class BaoGia_Request_of_Quotation
 {
     [NotMapped]
     public bool RequiresCustomsNameConfirmation { get; set; }
-
     public int ID { get; set; }
 
     public bool BIT_IsTemplate { get; set; }

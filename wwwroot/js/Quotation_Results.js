@@ -4,17 +4,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const supplierPickReasonOptions = [
         'Cheaper price_Giá rẻ hơn',
         'Higher price_Giá cao hơn',
-        'Get quotation from only 1 vendor (Buy directly from maker)_Chỉ xin báo giá từ 1 NCC (Mua trực tiếp từ maker)',
+        'This category have 01 vendor only _Chủng loại chỉ có 1 NCC',
         'Only this vendor sent quotation_Chỉ NCC này gửi báo giá',
-        'Requesting section selected only 1 vendor to get quotation_Phòng ban chỉ chọn 1 NCC lấy báo giá',
-        'Stop selling/ producing this product_Không bán/ sản xuất mã hàng này',
+        'RQ section request QTN from 01 vendor only _ Phòng ban yêu cầu lấy giá từ 1 NCC',
+        'EOL_ NCC dừng cấp mã hàng',
         'Vendors refused to quote_NCC từ chối báo giá',
         'Vendor did not send quotation on time_NCC không gửi báo giá đúng hạn',
         "Requesting section input Incorrect vendor's good code_Phòng ban điền sai mã hàng của NCC",
         'Vendors quoted for similar alternative product_NCC báo giá cho mã thay thế',
-        'High MOQ, unsuitable for requirements_MOQ cao, không phù hợp với yêu cầu',
-        'The unit price is high but it meets the requirements_Đơn giá cao nhưng phù hợp với yêu cầu',
-        'Vendor has been closed_NCC đã giải thể'
+        'Higher price but MOQ suitable_ giá cao nhưng MOQ phù hợp',
+        'Higher price but lead time suitable_ giá cao nhưng lead time phù hợp',
+        'Vendor has been closed_NCC đã giải thể',
+        'Cheaper price but MOQ unsuitable_ giá rẻ nhưng MOQ KHÔNG phù hợp',
+        'Cheaper price but lead time unsuitable_ giá rẻ nhưng lead time DÀI'
     ];
     const supplierReasonDatalistId = 'supplierPickReasonOptionsList';
 
@@ -269,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function () {
             NVCHR_PART_NAME_VN: get('material_Name_VN', 'Material_Name_VN', 'nameVI', 'NameVI'),
             NVCHR_PART_NAME_EN: get('material_Name_EN', 'Material_Name_EN'),
             NVCHR_UNIT: get('unit', 'Unit'),
-            CHR_VENDOR_PART_CODE: get('Code_Suppiler','code_Suppiler')
+            CHR_VENDOR_PART_CODE: get('Code_Suppiler', 'code_Suppiler')
             //NVCHR_OTHER_REQUIREMENT: get('tenMoThuTuc', 'TenMoThuTuc')
         };
 
@@ -1022,6 +1024,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td class="reason-cell">
                         ${priceWarning ? `<div class="price-warning" role="alert">${priceWarning}</div>` : ''}
                         <textarea class="form-control form-control-sm reason-input" rows="2" list="${supplierReasonDatalistId}" placeholder="Nhập lý do...">${d.NVCHR_ReasonPick || ''}</textarea>
+                        <button type="button" class="reason-suggestion-trigger">
+                            <i class="fas fa-lightbulb"></i> Chọn gợi ý lý do
+                        </button>
                     </td>
                     <td class="reason-cell"><textarea class="form-control form-control-sm reason-input" rows="2" placeholder="Nhập lý do...">${d.NVCHR_Note || ''}</textarea></td>
                 </tr>
@@ -1045,6 +1050,27 @@ document.addEventListener('DOMContentLoaded', function () {
         bindEvents: function () {
             // Delegation: Toggle chi tiết nhà cung cấp và load dữ liệu khi mở
             document.addEventListener('click', (e) => {
+                const reasonSuggestionTrigger = e.target.closest('.reason-suggestion-trigger');
+                if (reasonSuggestionTrigger) {
+                    const row = reasonSuggestionTrigger.closest('tr');
+                    const reasonInput = row?.querySelector('.reason-input');
+                    if (reasonInput) {
+                        showPrompt({
+                            title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do chọn nhà cung cấp',
+                            message: 'Chọn một lý do có sẵn hoặc nhập lý do khác:',
+                            defaultValue: reasonInput.value,
+                            options: supplierPickReasonOptions,
+                            allowCustom: true
+                        }).then(value => {
+                            if (value === null) return;
+                            reasonInput.value = value;
+                            reasonInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            reasonInput.focus();
+                        });
+                    }
+                    return;
+                }
+
                 const btn = e.target.closest('.toggle-sup');
                 if (btn) {
                     this.toggleSupplierDetails(btn);
@@ -1407,8 +1433,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         BIT_Select: (val === 'true'),
                         CustomsDeclaration: row.querySelector('.customs-notification-choice')?.value || 'NONEED',
                         NVCHR_ReasonPick: reason,
-                        NVCHR_NameNCC: maDon,
-                        CHR_MaHangNCC: maHang
+                        NVCHR_NameNCC: row.getAttribute('data-vendor') || '',
+                        CHR_MaHangNCC: maHang,
+                        CHR_MaDon: maDon,
+                        CHR_MaThietBi: row.querySelector('td:nth-child(4)')?.textContent?.trim() || '',
+                        NVCHR_ChungLoai: row.querySelector('td:nth-child(8)')?.textContent?.trim() || '',
+                        FL_USD: Number(row.getAttribute('data-price-usd') || 0) || null,
+                        FL_VND: Number(row.getAttribute('data-price-vnd') || 0) || null,
+                        DTM_ExpiryDate: row.getAttribute('data-expiry') || null,
+                        NVCHR_File: row.getAttribute('data-quote-link') || null
                     });
                 });
                 if (missingPriceReason) {
@@ -1808,6 +1841,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 a.click();
                                 document.body.removeChild(a);
                                 window.URL.revokeObjectURL(url);
+                                try { hideLoading(); } catch { }
                                 showDialog({ title: T.Notification || 'Thông báo', message: (T.FileHasErrorsDownloaded || 'File có lỗi. Đã tải xuống file lỗi để kiểm tra.'), type: 'warning' });
                             });
                         } else {
@@ -1927,6 +1961,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         row: { dataset: { madon: item.maDon || '', mahang: item.maHangNoiBo || '', vendor: item.vendorCode || '' } },
                                         reason: item.reason || ''
                                     }));
+                                    try { hideLoading(); } catch { }
                                     const action = await showSupplierValidationDialog(warnings);
                                     if (action === 'export') exportSupplierWarnings(warnings);
                                     if (action !== 'continue') return;
@@ -1950,6 +1985,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .catch(error => {
                         const T = window.i18nQuotationResults || {};
+                        try { hideLoading(); } catch { }
                         showDialog({ title: T.Notification || 'Thông báo', message: (error && error.message) ? error.message : (T.ErrorPrefix || 'Không thể xuất file'), type: 'error' });
                     })
                     .finally(() => {
@@ -3236,18 +3272,48 @@ function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotati
                 inp = document.createElement('input');
                 inp.type = 'text';
                 inp.className = 'form-control';
-                inp.placeholder = placeholder || '';
+                inp.placeholder = placeholder || 'Nhập hoặc chọn lý do';
                 inp.value = defaultValue || '';
-                const listId = 'cmPromptReasonOptions';
-                inp.setAttribute('list', listId);
-                const dl = document.createElement('datalist');
-                dl.id = listId;
-                options.forEach(opt => {
-                    const optionEl = document.createElement('option');
-                    optionEl.value = opt;
-                    dl.appendChild(optionEl);
+                inp.setAttribute('aria-label', 'Lý do chọn nhà cung cấp');
+                container.appendChild(inp);
+
+                const optionsPanel = document.createElement('div');
+                optionsPanel.className = 'cm-prompt-reason-options';
+                optionsPanel.setAttribute('role', 'listbox');
+                const optionButtons = options.map(opt => {
+                    const button = document.createElement('button');
+                    const parts = String(opt).split('_');
+                    const english = parts.shift() || '';
+                    const vietnamese = parts.join('_');
+                    button.type = 'button';
+                    button.className = 'cm-prompt-reason-option';
+                    button.setAttribute('role', 'option');
+                    button.dataset.value = opt;
+                    const englishEl = document.createElement('span');
+                    englishEl.className = 'cm-prompt-reason-en';
+                    englishEl.textContent = english;
+                    button.appendChild(englishEl);
+                    if (vietnamese) {
+                        const vietnameseEl = document.createElement('span');
+                        vietnameseEl.className = 'cm-prompt-reason-vi';
+                        vietnameseEl.textContent = vietnamese;
+                        button.appendChild(vietnameseEl);
+                    }
+                    button.addEventListener('click', () => {
+                        inp.value = opt;
+                        optionButtons.forEach(item => item.classList.toggle('is-selected', item === button));
+                        inp.focus();
+                    });
+                    optionsPanel.appendChild(button);
+                    return button;
                 });
-                container.appendChild(dl);
+                inp.addEventListener('input', () => {
+                    const query = inp.value.trim().toLowerCase();
+                    optionButtons.forEach(button => {
+                        button.hidden = query && !button.dataset.value.toLowerCase().includes(query);
+                    });
+                });
+                container.appendChild(optionsPanel);
             } else {
                 inp = document.createElement('select');
                 inp.className = 'form-select';

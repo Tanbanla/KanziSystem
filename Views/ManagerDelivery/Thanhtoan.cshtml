@@ -6,7 +6,10 @@
         max-height: 70vh;
         overflow-y: auto;
     }
-
+    .table:not(.table-sm) thead th {
+        background-color: #ecf0ff;
+        color: #2335b7;
+    }
     .table thead th {
         position: sticky;
         top: 0;
@@ -18,118 +21,392 @@
         user-select: none;
     }
 
-    .table thead th:hover:not(:first-child) {
-        background-color: #e2e6ea;
-    }
+        .table thead th:hover:not(:first-child) {
+            background-color: #e2e6ea;
+        }
 
-    /* Định dạng icon sắp xếp */
-    .table thead th .sort-icon {
-        margin-left: 5px;
-        font-size: 0.75rem;
-        color: #6c757d;
-    }
+        .table thead th .sort-icon {
+            margin-left: 5px;
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
 
     .table tbody td {
         font-size: 0.85rem;
         vertical-align: middle;
     }
+
+    .table-responsive {
+        position: relative;
+    }
+
+    #dataGridList th:nth-child(1), #dataGridList td:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        width: 35px;
+        min-width: 35px;
+    }
+
+    #dataGridList th:nth-child(2), #dataGridList td:nth-child(2) {
+        position: sticky;
+        left: 40px;
+        z-index: 2;
+        width: 80px;
+        min-width: 80px;
+    }
+
+    #dataGridList th:nth-child(3), #dataGridList td:nth-child(3) {
+        position: sticky;
+        left: 120px;
+        z-index: 2;
+        width: 70px;
+        min-width: 70px;
+    }
+
+    #dataGridList th:nth-child(4), #dataGridList td:nth-child(4) {
+        position: sticky;
+        left: 190px;
+        z-index: 2;
+        width: 90px;
+        min-width: 90px;
+    }
+
+    #dataGridList th:nth-child(5),
+    #dataGridList td:nth-child(5) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        position: sticky;
+        left: 280px;
+        z-index: 2;
+        width: 100px;
+        min-width: 100px;
+    }
+
+    #dataGridList th:nth-child(6), #dataGridList td:nth-child(6) {
+        position: sticky;
+        left: 380px;
+        z-index: 2;
+        width: 100px;
+        min-width: 100px;
+    }
+
+    #dataGridList th:nth-child(7), #dataGridList td:nth-child(7) {
+        position: sticky;
+        left: 480px;
+        z-index: 2;
+        width: 120px;
+        min-width: 120px;
+    }
+
+    #dataGridList th:nth-child(8), #dataGridList td:nth-child(8) {
+        position: sticky;
+        left: 600px;
+        z-index: 2;
+        width: 130px;
+        min-width: 130px;
+    }
+
+    #dataGridList th:nth-child(9), #dataGridList td:nth-child(9) {
+        position: sticky;
+        left: 730px;
+        z-index: 2;
+        width: 140px;
+        min-width: 140px;
+    }
+
+    #dataGridList th:nth-child(19), #dataGridList td:nth-child(19) {
+        width: 120px;
+        min-width: 120px;
+    }
+
+    #dataGridList th:nth-child(20), #dataGridList td:nth-child(20) {
+        width: 130px;
+        min-width: 130px;
+    }
+
+    #dataGridList td:nth-child(-n+9) {
+        background-color: #fff;
+    }
+
+    #dataGridList tbody tr:hover td:nth-child(-n+9) {
+        background-color: #f1f1f1;
+    }
+
+    #dataGridList thead th:nth-child(-n+9) {
+        z-index: 3 !important;
+        background-color: #2335b7;
+        color: #fff;
+    }
+
+    #dataGridList th:nth-child(9), #dataGridList td:nth-child(9) {
+        border-right: 2px solid #dee2e6 !important;
+    }
+
+    #dataGridList tbody tr.selected-row td {
+        background-color: #fff3cd !important;
+    }
+
+        #dataGridList tbody tr.selected-row td:nth-child(-n+9) {
+            background-color: #fff3cd !important;
+        }
+
+    #dataGridList tbody tr.selected-row:hover td {
+        background-color: #ffe8a1 !important;
+    }
+
+    #dataGridList td:nth-child(10),
+    #dataGridList td:nth-child(11),
+    #dataGridList td:nth-child(12),
+    #dataGridList td:nth-child(19),
+    #dataGridList td:nth-child(20),
+    #dataGridList td:nth-child(21),
+    #dataGridList td:nth-child(28),
+    #dataGridList td:nth-child(29) {
+        text-align: right;
+        padding-right: 10px;
+    }
+
+    /* Warning tab table styles */
+    #warningGridList th:nth-child(1), #warningGridList td:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        width: 40px;
+        min-width: 40px;
+    }
+
+    #warningGridList th:nth-child(2), #warningGridList td:nth-child(2) {
+        position: sticky;
+        left: 45px;
+        z-index: 2;
+        width: 100px;
+        min-width: 100px;
+    }
+
+    #warningGridList thead th:nth-child(-n+2) {
+        z-index: 3 !important;
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    #warningGridList th:nth-child(2), #warningGridList td:nth-child(2) {
+        border-right: 2px solid #dee2e6 !important;
+    }
 </style>
 
-<div class="container-fluid py-3">
-    <!-- Header Controls -->
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-            <div class="row d-flex justify-content-between align-items-center">
+<div class="container-fluid">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <!-- Các tab cũ của bạn -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#content-nhap" type="button" role="tab"><i class="ion ion-ios-list"></i>Danh sách PO</button>
+        </li>
 
-                <!-- Cụm bên trái: Tìm kiếm -->
-                <div class="col-md-7 d-flex align-items-start gap-2">
-                    <div class="d-flex flex-column">
-                        <div class="input-group">
-                            <span class="input-group-text">Số PO:</span>
-                            <input type="text" id="txtPO" class="form-control" placeholder="(1604-0001,1604-0002,...)">
+        <!-- Tab mới thêm -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link text-primary fw-bold" id="warning-tab" data-bs-toggle="tab" data-bs-target="#content-warning" type="button" role="tab" aria-controls="content-warning">
+                Cảnh báo hoàn thành ĐNTT / Hóa đơn lỗi
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="paymentTabContent">
+        <!-- Tab 1: Nhập Invoice / ĐNTT -->
+        <div class="tab-pane fade show active" id="content-nhap" role="tabpanel" aria-labelledby="main-tab">
+            <!-- Header Controls -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="row d-flex justify-content-between align-items-center">
+
+                        <!-- Cụm bên trái: Tìm kiếm -->
+                        <div class="col-md-7 d-flex align-items-start gap-2">
+                            <div class="d-flex flex-column">
+                                <div class="input-group">
+                                    <span class="input-group-text">Số PO:</span>
+                                    <input type="text" id="txtPO" class="form-control" placeholder="(1604-0001,1604-0002,...)">
+                                </div>
+                            </div>
+                            <button class="btn btn-success ml-3" id="btnTimkiem"><i class="fa fa-search"></i> Tìm kiếm</button>
+                            <button class="btn btn-secondary ml-2" id="btnReset">Reset</button>
+                        </div>
+
+                        <!-- Cụm bên phải: Cập nhật -->
+                        <div class="col-md-5 d-flex justify-content-end align-items-start gap-2">
+                            <div class="input-group" style="width: auto;">
+                                <select id="cmbLoainhap" class="form-control">
+                                    <option value="Số Invoice">Số Invoice</option>
+                                    <option value="Đề nghị thanh toán">Đề nghị thanh toán</option>
+                                </select>
+                            </div>
+                            <input type="text" id="txtDulieu" class="form-control" style="width: 150px;">
+                            <button class="btn btn-primary px-4" id="btnNhapkho"><i class="fa fa-save"></i> Nhập</button>
                         </div>
                     </div>
-                    <button class="btn btn-success ml-3" id="btnTimkiem"><i class="fa fa-search"></i> Tìm kiếm</button>
-                    <button class="btn btn-secondary ml-2" id="btnReset">Reset</button>
                 </div>
+            </div>
 
-                <!-- Cụm bên phải: Cập nhật -->
-                <div class="col-md-5 d-flex justify-content-end align-items-start gap-2">
-                    <div class="input-group" style="width: auto;">
-                        <select id="cmbLoainhap" class="form-control">
-                            <option value="Số Invoice">Số Invoice</option>
-                            <option value="Đề nghị thanh toán">Đề nghị thanh toán</option>
-                        </select>
+            <!-- Data Grid (Table) -->
+            <div class="card shadow-sm">
+                <div class="card-body p-0 table-responsive">
+                    <table class="table table-bordered table-hover mb-0" id="dataGridList">
+                        <thead class="bg-primary text-dark">
+                            <tr>
+                                <th class="text-center" style="cursor: default;"><input type="checkbox" id="ckChonAll"></th>
+                                <th>PO Detail ID <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Id Gốc <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Bên xác nhận trước <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Số PO <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Mã hàng <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Mã sản phẩm <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Tên tiếng Anh <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Tên tiếng Việt <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Số lượng <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Lượng làm hải quan <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Lượng về kho <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Ngày nhập kho (Lượng về) <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Invoice PO <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Đề nghị thanh toán <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Ngày nhập Invoice <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Người nhập Invoice <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Đơn vị <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Đơn giá <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Số tiền <i class="fa fa-sort sort-icon"></i></th>
+                                <th>VAT <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Mã phòng yêu cầu <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Tên phòng yêu cầu <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Ngày giao hàng dự kiến <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Thời gian thanh toán <i class="fa fa-sort sort-icon"></i></th>
+                                <th>ID Request Detail <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Loại tiền <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Tỷ giá <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Đổi sang USD <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Danh mục <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Code Request <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Tình trạng PO <i class="fa fa-sort sort-icon"></i></th>
+                                <th>Tình trạng tờ khai <i class="fa fa-sort sort-icon"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Dữ liệu render qua JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Cảnh báo hoàn thành ĐNTT / Hóa đơn -->
+        <div class="tab-pane fade" id="content-warning" role="tabpanel" aria-labelledby="warning-tab">
+            <!-- Search Controls -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text">Số PO:</span>
+                                <input type="text" id="warnTxtPO" class="form-control" placeholder="1604-0001">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text">Mã hàng:</span>
+                                <input type="text" id="warnTxtMahang" class="form-control" placeholder="Mã hàng">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text">Nhà cung cấp:</span>
+                                <input type="text" id="warnTxtSupplier" class="form-control" placeholder="Tên nhà cung cấp">
+                            </div>
+                        </div>
                     </div>
-                    <input type="text" id="txtDulieu" class="form-control" style="width: 150px;">
-                    <button class="btn btn-primary px-4" id="btnNhapkho"><i class="fa fa-save"></i> Nhập</button>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text">Từ ngày:</span>
+                                <input type="date" id="warnDateFrom" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text">Đến ngày:</span>
+                                <input type="date" id="warnDateTo" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end gap-2">
+                            <button class="btn btn-success" id="btnWarningSearch"><i class="fa fa-search"></i> Tìm kiếm</button>
+                            <button class="btn btn-secondary" id="btnWarningReset">Reset</button>
+                            <button class="btn btn-info" id="btnWarningExport"><i class="fa fa-download"></i> Xuất Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Data Grid -->
+            <div class="card shadow-sm">
+                <div class="card-body p-0 table-responsive">
+                    <table class="table table-bordered table-hover mb-0" id="warningGridList">
+                        <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>Số PO</th>
+                                <th>Mã hàng</th>
+                                <th>Tên tiếng Việt</th>
+                                <th>Nhà cung cấp</th>
+                                <th class="text-right">Số lượng</th>
+                                <th class="text-right">Lượng về kho</th>
+                                <th>Ngày nhập kho</th>
+                                <th>Invoice PO</th>
+                                <th>Đề nghị thanh toán</th>
+                                <th class="text-right">Đơn giá</th>
+                                <th class="text-right">Số tiền</th>
+                                <th class="text-right">VAT</th>
+                                <th>Loại tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="warningTableBody">
+                            <!-- Dữ liệu render qua JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Data Grid (Table) -->
-    <div class="card shadow-sm">
-        <div class="card-body p-0 table-responsive">
-            <table class="table table-bordered table-hover mb-0" id="dataGridList">
-                <thead class="bg-primary text-dark">
-                    <tr>
-                        <th class="text-center" style="cursor: default;"><input type="checkbox" id="ckChonAll"></th>
-                        <th>PO Detail ID <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Id Gốc <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Bên xác nhận trước <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Số PO <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Mã hàng <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Mã sản phẩm <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Tên tiếng Anh <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Tên tiếng Việt <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Số lượng <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Lượng thực tế <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Lượng về kho <i class="fa fa-sort sort-icon"></i></th>
-                       @*  <th>Lượng về kho cũ <i class="fa fa-sort sort-icon"></i></th> *@
-                        <th>Ngày nhập kho (Lượng về) <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Invoice PO <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Invoice Đề nghị thanh toán <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Invoice Ngày nhập <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Invoice Người nhập <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Đơn vị <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Đơn giá <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Điều kiện giao hàng <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Địa điểm giao hàng <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Phương thức vận chuyển <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Số tiền <i class="fa fa-sort sort-icon"></i></th>
-                        <th>VAT <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Mã phòng yêu cầu <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Tên phòng yêu cầu <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Ngày giao hàng dự kiến <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Nơi giao dự kiến <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Thời gian thanh toán <i class="fa fa-sort sort-icon"></i></th>
-                        <th>ID Request Detail <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Loại tiền <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Tỷ giá <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Đổi sang USD <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Danh mục <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Code Request <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Tình trạng PO <i class="fa fa-sort sort-icon"></i></th>
-                        <th>Tình trạng tờ khai <i class="fa fa-sort sort-icon"></i></th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Dữ liệu render qua JavaScript -->
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
+
 @section Scripts {
     <script>
-        // 1. Xử lý khi click vào nút Check All trên Table Header
+        function formatCurrency(value, currencyType = '') {
+            if (!value || isNaN(value)) return value || '';
+
+            let num = parseFloat(value);
+            let formatted = '';
+
+            if (currencyType === 'USD' || currencyType.includes('USD')) {
+                formatted = num.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+            else {
+                formatted = num.toLocaleString('vi-VN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            return formatted;
+        }
+
         $('#ckChonAll').change(function() {
             var isChecked = $(this).prop('checked');
-            $('.row-checkbox').prop('checked', isChecked);
+            $('.row-checkbox').prop('checked', isChecked).each(function() {
+                updateRowHighlight($(this));
+            });
         });
 
-        // 2. Xử lý khi click vào từng Checkbox của từng dòng
         $(document).on('change', '.row-checkbox', function() {
             var totalCheckboxes = $('.row-checkbox').length;
             var checkedCheckboxes = $('.row-checkbox:checked').length;
@@ -139,22 +416,21 @@
             } else {
                 $('#ckChonAll').prop('checked', false);
             }
+
+            updateRowHighlight($(this));
         });
 
-        // 3. Tính năng Sort cho Header của Bảng kèm đổi icon FontAwesome
-        $(document).on('click', '#dataGridList th', function () {
+        $(document).on('click', '#dataGridList th, #warningGridList th', function () {
             let thIndex = $(this).index();
-            if (thIndex === 0) return; // Bỏ qua cột checkbox
+            if (thIndex === 0) return;
 
             let table = $(this).parents('table').eq(0);
             let rows = table.find('tbody tr:has(td)').toArray();
             let asc = $(this).hasClass('sorted-asc');
 
-            // Reset tất cả icon và class sort về mặc định
-            $('#dataGridList th').removeClass('sorted-asc sorted-desc');
-            $('#dataGridList th .sort-icon').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
+            table.find('th').removeClass('sorted-asc sorted-desc');
+            table.find('th .sort-icon').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
 
-            // Xác định chiều sắp xếp mới
             let icon = $(this).find('.sort-icon');
             if (asc) {
                 $(this).addClass('sorted-desc');
@@ -185,11 +461,22 @@
             });
         });
 
+        $(document).on('click', '#dataGridList tbody tr, #warningGridList tbody tr', function(e) {
+            if ($(e.target).is('input[type="checkbox"]')) {
+                return;
+            }
+
+            let $checkbox = $(this).find('.row-checkbox');
+            if ($checkbox.length > 0) {
+                let isChecked = $checkbox.prop('checked');
+                $checkbox.prop('checked', !isChecked).trigger('change');
+            }
+        });
+
         function getCellValue(row, index) {
             return $(row).children('td').eq(index).text().trim();
         }
 
-        // Nút Tìm kiếm
         $('#btnTimkiem').click(function() {
             let poText = $('#txtPO').val();
 
@@ -207,24 +494,38 @@
                         alert(data.error);
                         return;
                     }
-                    console.log(data);
                     renderTable(data);
                 },
                 error: function (err) {
                     alert("Lỗi khi tải dữ liệu! Mã lỗi: " + err.status);
-                    console.log(err);
                 }
             });
         });
 
-        // Hàm render dữ liệu ra bảng
+        $('#btnReset').click(function() {
+            $('#txtPO').val('');
+            $('#tableBody').empty();
+            $('#ckChonAll').prop('checked', false);
+        });
+
+        function updateRowHighlight($checkbox) {
+            let $row = $checkbox.closest('tr');
+            if ($checkbox.is(':checked')) {
+                $row.addClass('selected-row');
+            } else {
+                $row.removeClass('selected-row');
+            }
+        }
+
         function renderTable(data) {
             let tbody = $('#tableBody');
-            tbody.empty(); // Xóa dữ liệu cũ
+            tbody.empty();
 
             if (data && data.length > 0) {
                 data.forEach(function (item) {
-                    let id = item.p_Detail_Id || item.po_Detail_Id || item.PO_Detail_Id || '';
+                    let loaiTien = item.loaitien || item.Loaitien || '';
+                    let donGiaFormatted = formatCurrency(item.dongia || item.Dongia || 0, loaiTien);
+                    let soTienFormatted = formatCurrency(item.sotien || item.Sotien || 0, loaiTien);
 
                     let tr = `
                         <tr>
@@ -241,26 +542,22 @@
                             <td>${item.tentiengviet || item.Tentiengviet || ''}</td>
                             <td>${item.soluong || item.Soluong || 0}</td>
                             <td>${item.luongvethucte || item.Luongvethucte || 0}</td>
-                            <td>${item.luongvekho || item.Luongvekho || 0}</td>                        
+                            <td>${item.luongvekho || item.Luongvekho || 0}</td>
                             <td>${formatDate(item.luongvekhoNgaynhap || item.LuongvekhoNgaynhap)}</td>
                             <td>${item.invoicePO || item.InvoicePO || ''}</td>
                             <td>${item.invoicePODenghithanhtoan || item.InvoicePODenghithanhtoan || ''}</td>
                             <td>${formatDate(item.invoicePONgaynhap || item.InvoicePONgaynhap)}</td>
                             <td>${item.invoicePONguoinhap || item.InvoicePONguoinhap || ''}</td>
                             <td>${item.dovi || item.Dovi || ''}</td>
-                            <td>${item.dongia || item.Dongia || 0}</td>
-                            <td>${item.dieukiengiaohang || item.Dieukiengiaohang || ''}</td>
-                            <td>${item.diadiemgiaohang || item.Diadiemgiaohang || ''}</td>
-                            <td>${item.phuongthucvanchuyen || item.Phuongthucvanchuyen || ''}</td>
-                            <td>${item.sotien || item.Sotien || 0}</td>
+                            <td>${donGiaFormatted}</td>
+                            <td>${soTienFormatted}</td>
                             <td>${item.vat || item.Vat || 0}</td>
                             <td>${item.maphongyeucau || item.Maphongyeucau || ''}</td>
                             <td>${item.tenphongyeucau || item.Tenphongyeucau || ''}</td>
                             <td>${formatDate(item.ngaygiaohangdukien || item.Ngaygiaohangdukien)}</td>
-                            <td>${item.noigiaodukien || item.Noigiaodukien || ''}</td>
                             <td>${item.thoigianthanhtoan || item.Thoigianthanhtoan || ''}</td>
                             <td>${item.id_RequestDetail || item.Id_RequestDetail || ''}</td>
-                            <td>${item.loaitien || item.Loaitien || ''}</td>
+                            <td>${loaiTien}</td>
                             <td>${item.tygia || item.Tygia || 0}</td>
                             <td>${item.doisangUSD || item.DoisangUSD || 0}</td>
                             <td>${item.danhmuc || item.Danhmuc || ''}</td>
@@ -272,13 +569,12 @@
                     tbody.append(tr);
                 });
             } else {
-                tbody.append('<tr><td colspan="38" class="text-center">Không tìm thấy dữ liệu</td></tr>');
+                tbody.append('<tr><td colspan="33" class="text-center">Không tìm thấy dữ liệu</td></tr>');
             }
 
             $('#ckChonAll').prop('checked', false);
         }
 
-        // Format ngày tháng (DD/MM/YYYY)
         function formatDate(dateString) {
             if (!dateString) return '';
             let date = new Date(dateString);
@@ -290,7 +586,6 @@
             return `${d}/${m}/${y}`;
         }
 
-        // Sự kiện nút Nhập
         $('#btnNhapkho').click(function () {
             let loaiNhap = $('#cmbLoainhap').val();
             let duLieu = $('#txtDulieu').val().trim();
@@ -306,30 +601,153 @@
             }
 
             $.ajax({
-            url: '@Url.Action("UpdateInvoice", "ManagerDelivery")',
-            type: 'POST',
-            // 1. Thêm contentType này để báo cho Backend biết đang gửi JSON
-            contentType: 'application/json; charset=utf-8',
-            // 2. Dùng JSON.stringify để nén toàn bộ object thành chuỗi
-            data: JSON.stringify({
-                ids: selectedIds,
-                loaiNhap: loaiNhap,
-                duLieu: duLieu
-            }),
-            success: function (res) {
-                if (res.success) {
-                    alert("Cập nhật dữ liệu thành công!");
-                    $('#txtDulieu').val('');
-                    $('#btnTimkiem').click();
-                } else {
-                    alert("Lỗi: " + res.error);
+                url: '@Url.Action("UpdateInvoice", "ManagerDelivery")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    ids: selectedIds,
+                    loaiNhap: loaiNhap,
+                    duLieu: duLieu
+                }),
+                success: function (res) {
+                    if (res.success) {
+                        alert("Cập nhật dữ liệu thành công!");
+                        $('#txtDulieu').val('');
+                        $('#btnTimkiem').click();
+                    } else {
+                        alert("Lỗi: " + res.error);
+                    }
+                },
+                error: function (err) {
+                    alert("Lỗi kết nối khi cập nhật! " + err.statusText);
                 }
-            },
-            error: function (err) {
-                alert("Lỗi kết nối khi cập nhật! " + err.statusText);
-                console.log(err);
+            });
+        });
+
+        // Warning Tab Functions
+        $('#btnWarningSearch').click(function() {
+            let soPO = $('#warnTxtPO').val().trim();
+            let mahang = $('#warnTxtMahang').val().trim();
+            let supplier = $('#warnTxtSupplier').val().trim();
+            let dateFrom = $('#warnDateFrom').val();
+            let dateTo = $('#warnDateTo').val();
+
+            // Validate dates: if provided, ensure from <= to
+            if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
+                alert('Ngày "Từ ngày" phải nhỏ hơn hoặc bằng "Đến ngày".');
+                return;
             }
+
+            $.ajax({
+                url: '@Url.Action("SearchIncompletePayment", "ManagerDelivery")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    soPO: soPO,
+                    mahang: mahang,
+                    supplier: supplier,
+                    dateFrom: dateFrom,
+                    dateTo: dateTo
+                }),
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    renderWarningTable(data);
+                },
+                error: function (err) {
+                    alert("Lỗi khi tải dữ liệu! Mã lỗi: " + err.status);
+                }
+            });
         });
+
+        $('#btnWarningReset').click(function() {
+            $('#warnTxtPO').val('');
+            $('#warnTxtMahang').val('');
+            $('#warnTxtSupplier').val('');
+            $('#warnDateFrom').val('');
+            $('#warnDateTo').val('');
+            $('#warningTableBody').empty();
         });
+
+        function renderWarningTable(data) {
+            let tbody = $('#warningTableBody');
+            tbody.empty();
+
+            if (data && data.length > 0) {
+                data.forEach(function (item, index) {
+
+                    let tr = `
+                        <tr>
+                            <td class="text-center">${index + 1}</td>
+                            <td>${item.soPO || item.SoPO || ''}</td>
+                            <td>${item.mahang || item.Mahang || ''}</td>
+                            <td>${item.tentiengviet || item.Tentiengviet || ''}</td>
+                            <td>${item.nhaCungCap || item.NhaCungCap || ''}</td>
+                            <td class="text-right">${item.soluong || item.Soluong || 0}</td>
+                            <td class="text-right">${item.luongvekho || item.Luongvekho || 0}</td>
+                            <td>${formatDate(item.luongvekhoNgaynhap || item.LuongvekhoNgaynhap)}</td>
+                            <td>${item.invoicePO || item.InvoicePO || '-'}</td>
+                            <td>${item.invoicePODenghithanhtoan || item.InvoicePODenghithanhtoan || '-'}</td>
+                            <td class="text-right">${formatCurrency(item.dongia || item.Dongia || 0, item.loaitien)}</td>
+                            <td class="text-right">${formatCurrency(item.sotien || item.Sotien || 0, item.loaitien)}</td>
+                            <td class="text-right">${item.vat || item.Vat || 0}</td>
+                            <td>${item.loaitien || item.Loaitien || ''}</td>
+                        </tr>
+                    `;
+                    tbody.append(tr);
+                });
+            } else {
+                tbody.append('<tr><td colspan="14" class="text-center">Không tìm thấy dữ liệu cảnh báo</td></tr>');
+            }
+        }
+
+        $('#btnWarningExport').click(function() {
+            let soPO = $('#warnTxtPO').val().trim();
+            let mahang = $('#warnTxtMahang').val().trim();
+            let supplier = $('#warnTxtSupplier').val().trim();
+            let dateFrom = $('#warnDateFrom').val();
+            let dateTo = $('#warnDateTo').val();
+
+            // Export request will return { fileName: '...', fileContent: 'base64...' }
+            $.ajax({
+                url: '@Url.Action("ExportIncompletePayment", "ManagerDelivery")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    soPO: soPO,
+                    mahang: mahang,
+                    supplier: supplier,
+                    dateFrom: dateFrom,
+                    dateTo: dateTo
+                }),
+                success: function (response) {
+                    if (!response || !response.fileContent) {
+                        alert('Không có dữ liệu để xuất.');
+                        return;
+                    }
+                    let link = document.createElement('a');
+                    link.href = 'data:application/octet-stream;base64,' + response.fileContent;
+                    link.download = response.fileName || 'IncompletePayment.xlsx';
+                    link.click();
+                },
+                error: function (err) {
+                    alert("Lỗi khi xuất Excel! " + err.statusText);
+                }
+            });
+        });
+
+        function formatCurrency(value, currencyType = '') {
+            if (value === null || value === undefined || value === '' || isNaN(value)) return '0.00';
+
+            let num = parseFloat(value);
+
+            // Sử dụng locale 'en-US' để định dạng chuẩn (VD: 1,650,000.00)
+            return num.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
     </script>
 }

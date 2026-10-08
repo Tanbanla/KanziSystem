@@ -284,6 +284,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var email = await _conn.QueryFirstOrDefaultAsync<string>(sql, parameter);
             return string.IsNullOrWhiteSpace(email) ? string.Empty : email.Trim();
         }
+           public async Task<Dictionary<int, string>> GetWorkflowFlowCodesAsync(IEnumerable<int> workflowIds)
+           {
+               var ids = workflowIds.Distinct().ToList();
+               if (ids.Count == 0)
+               {
+                   return new Dictionary<int, string>();
+               }
+
+               return await _context.BaoGia_WorkflowDefinitions
+                   .Where(workflow => ids.Contains(workflow.WorkflowID))
+                   .ToDictionaryAsync(workflow => workflow.WorkflowID, workflow => workflow.FlowCode);
+           }
         // The list vender not need to send mail
         public async Task<List<string>> SupplierNeedToSendMailAsync()
         {

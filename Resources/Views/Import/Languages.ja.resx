@@ -555,4 +555,19 @@
   <data name="Giaohang" xml:space="preserve">
     <value>配達する</value>
   </data>
+  <data name="Doinguoiduthao" xml:space="preserve">
+    <value>起案者待ち</value>
+  </data>
+  <data name="Doinguoithamtra" xml:space="preserve">
+    <value>審査者待ち</value>
+  </data>
+  <data name="Doinguoipheduyet" xml:space="preserve">
+    <value>承認者待ち</value>
+  </data>
+  <data name="Doiquanlyphongbantiepnhan" xml:space="preserve">
+    <value>受入部門管理者待ち</value>
+  </data>
+  <data name="Thanhtoan" xml:space="preserve">
+    <value>支払い</value>
+  </data>
 </root>

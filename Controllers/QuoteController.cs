@@ -102,7 +102,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             }
             catch
             {
-                // ignore failures here; client JS can request approvers on-demand
+                return BadRequest("không lấy được approver");
             }
             return View(vm);
         }

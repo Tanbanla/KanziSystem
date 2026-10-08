@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -8,7 +8,6 @@ public partial class BaoGia_Detail_of_Quotation
 {
     [NotMapped]
     public string? CustomsDeclaration { get; set; }
-
     public int ID { get; set; }
 
     public int ID_RequestQuote { get; set; }

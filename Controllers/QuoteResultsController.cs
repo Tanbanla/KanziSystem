@@ -445,6 +445,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 var value = Text(index);
                 if (string.IsNullOrWhiteSpace(value)) return null;
+                // Bỏ ký tự %
+                value = value.Trim().Replace("%", "");
                 if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ||
                     decimal.TryParse(value, NumberStyles.Any, CultureInfo.GetCultureInfo("vi-VN"), out result)) return result;
                 errors.Add($"Cột {name} không phải số hợp lệ.");
@@ -752,6 +754,17 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         [HttpPost]
         public async Task<IActionResult> SavePickSupplier([FromBody] SaveQuotationResultsModel vm)
         {
+            if (vm?.listPick == null || vm.listPick.Count == 0)
+            {
+                return BadRequest("Không có dữ liệu nhà cung cấp được chọn.");
+            }
+
+            var validationErrors = ValidateSupplierSelections(vm.listPick);
+            if (validationErrors.Count > 0)
+            {
+                return BadRequest(string.Join("; ", validationErrors.Distinct()));
+            }
+
             var check = vm.listPick.Where(c => (c.BIT_Select == true || c.BIT_Select == false) && c.NVCHR_ReasonPick == "").ToList();
             if (check.Any())
             {
@@ -804,10 +817,88 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             });
             return Ok(result.Data);
         }
+
+        private static List<string> ValidateSupplierSelections(IReadOnlyCollection<BaoGia_Detail_of_QuotationDTO> selections)
+        {
+            var errors = new List<string>();
+            var rows = selections
+                .Where(x => !string.IsNullOrWhiteSpace(x.CHR_MaDon) && !string.IsNullOrWhiteSpace(x.CHR_MaHangNCC))
+                .ToList();
+            var selected = rows.Where(x => x.BIT_Select == true).ToList();
+
+            foreach (var group in rows.GroupBy(x => $"{x.CHR_MaDon}|{x.CHR_MaHangNCC}"))
+            {
+                if (group.Any(x => x.FL_USD.GetValueOrDefault() > 0 || x.FL_VND.GetValueOrDefault() > 0) &&
+                    !group.Any(x => x.BIT_Select == true))
+                {
+                    errors.Add($"Đơn {group.First().CHR_MaDon}, mã hàng {group.First().CHR_MaHangNCC} chưa chọn NCC (O).");
+                }
+            }
+
+            foreach (var group in selected.GroupBy(x => $"{x.CHR_MaDon}|{x.CHR_MaHangNCC}"))
+            {
+                if (group.Select(x => x.NVCHR_NameNCC).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1)
+                {
+                    errors.Add($"Trong đơn {group.First().CHR_MaDon}, mã hàng {group.First().CHR_MaHangNCC} chỉ được chọn một NCC.");
+                }
+
+                var pricedRows = rows.Where(x => x.CHR_MaDon == group.First().CHR_MaDon && x.CHR_MaHangNCC == group.First().CHR_MaHangNCC)
+                    .Select(GetComparablePrice).Where(x => x.HasValue).Select(x => x!.Value).ToList();
+                foreach (var item in group)
+                {
+                    var price = GetComparablePrice(item);
+                    if (price.HasValue && pricedRows.Count > 1 && price.Value > pricedRows.Min())
+                    {
+                        errors.Add($"NCC {item.NVCHR_NameNCC} của mã hàng {item.CHR_MaHangNCC} chưa có giá thấp nhất.");
+                    }
+                }
+            }
+
+            foreach (var group in selected.GroupBy(x => $"{x.CHR_MaThietBi}|{x.NVCHR_ChungLoai}"))
+            {
+                if (string.IsNullOrWhiteSpace(group.First().CHR_MaThietBi) ||
+                    group.Select(x => x.NVCHR_NameNCC).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).Count() <= 1)
+                {
+                    continue;
+                }
+
+                errors.Add($"Thiết bị {group.First().CHR_MaThietBi}, chủng loại {group.First().NVCHR_ChungLoai} không được chọn nhiều NCC.");
+            }
+
+            foreach (var group in rows.GroupBy(x => $"{x.CHR_MaDon}|{x.CHR_MaHangNCC}|{x.NVCHR_NameNCC}"))
+            {
+                var prices = group.Select(GetComparablePrice).Where(x => x.HasValue).Select(x => x!.Value).Distinct().ToList();
+                if (prices.Count > 1)
+                {
+                    errors.Add($"Đơn {group.First().CHR_MaDon}, mã hàng {group.First().CHR_MaHangNCC}, NCC {group.First().NVCHR_NameNCC} có nhiều đơn giá khác nhau.");
+                }
+            }
+
+            foreach (var item in selected)
+            {
+                if (GetComparablePrice(item) is null or <= 0)
+                    errors.Add($"NCC {item.NVCHR_NameNCC} của mã hàng {item.CHR_MaHangNCC} có đơn giá bằng 0.");
+                if (string.IsNullOrWhiteSpace(item.NVCHR_File))
+                    errors.Add($"NCC {item.NVCHR_NameNCC} của mã hàng {item.CHR_MaHangNCC} chưa nhập link báo giá.");
+                if (item.DTM_ExpiryDate.HasValue && item.DTM_ExpiryDate.Value.Date < DateTime.Today.AddDays(4))
+                    errors.Add($"Báo giá của NCC {item.NVCHR_NameNCC} cho mã hàng {item.CHR_MaHangNCC} đã hết hạn hoặc còn dưới 4 ngày.");
+            }
+
+            return errors;
+
+            static decimal? GetComparablePrice(BaoGia_Detail_of_QuotationDTO item)
+            {
+                if (item.FL_USD.GetValueOrDefault() > 0) return (decimal)item.FL_USD.GetValueOrDefault();
+                if (item.FL_VND.GetValueOrDefault() > 0) return (decimal)item.FL_VND.GetValueOrDefault();
+                return 0m;
+            }
+        }
         [HttpPost]
         public async Task<IActionResult> GetListApprovel([FromBody] SearchApprovalModel sr)
         {
-            var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 2, sr.SectionCost ?? "");
+            //var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 2, sr.SectionCost ?? "");
+
+            var result = await _approverService.GetApproverByPicDepartmentsAsync(GetRolesUser() ?? "");
             if (!result.Success)
             {
                 return BadRequest(_localizer["ApproverListError", result.Message].Value);
@@ -1239,9 +1330,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                                         _logger.LogError("Không lấy được thông tin chi tiết báo giá cho ID: " + material.ID + " Error: " + detailsResult?.Message);
                                         continue;
                                     }
-                                    if (material.ID_StepBaoGia >= 12
-                                        && detailsResult.Data.BIT_Select == true
-                                        && material.RequiresCustomsNameConfirmation)
+                                    if (material.ID_StepBaoGia >= 12 && detailsResult.Data.BIT_Select == true && material.RequiresCustomsNameConfirmation)
                                     {
 
 
@@ -1498,7 +1587,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         {
                             if ((item.Row.DonGiaUSD ?? 0) <= 0 && (item.Row.DonGiaVND ?? 0) <= 0)
                                 result.Add(new { Row = item.Row.Row, MaDon = item.Row.MaDon, MaHangNoiBo = item.Row.MaHangNoiBo, VendorCode = item.Row.CodeVender, Reason = "Đã chọn NCC nhưng giá báo giá bằng 0." });
-                            if (item.Expiry.HasValue && item.Expiry.Value.Date < DateTime.Today)
+                            if (item.Expiry.HasValue && item.Expiry.Value.Date < DateTime.Today.AddDays(4))
                                 result.Add(new { Row = item.Row.Row, MaDon = item.Row.MaDon, MaHangNoiBo = item.Row.MaHangNoiBo, VendorCode = item.Row.CodeVender, Reason = "Đã chọn NCC nhưng báo giá đã hết hiệu lực." });
                             if (string.IsNullOrWhiteSpace(item.Link))
                                 result.Add(new { Row = item.Row.Row, MaDon = item.Row.MaDon, MaHangNoiBo = item.Row.MaHangNoiBo, VendorCode = item.Row.CodeVender, Reason = "Đã chọn NCC nhưng link báo giá đang để trống." });
@@ -1542,7 +1631,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             BIT_Select = item.BIT_Select,
                             DonGiaUSD = item.DonGiaUSD,
                             NVCHR_ReasonPick = item.NVCHR_ReasonPick,
-                            Errors = _localizer["NotAllSuppliersQuoted", item.MaDon, item.MaHangNoiBo].Value
+                            Errors = _localizer["NotAllSuppliersQuoted", item.MaDon ?? string.Empty, item.MaHangNoiBo ?? string.Empty].Value
                         });
                     }
                     isErrors = true;
@@ -1571,15 +1660,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         var NVCHR_Note = rowData.NVCHR_Note;
 
                         var vendorCodesForSameProduct = allRowsData
-                            .Where(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O") && x.MaThietBi == maThietBi)
+                            .Where(x => x.MaDon == maDon && x.MaHangNoiBo == maHangNB && (x.BIT_Select ?? string.Empty).Contains("O") && x.MaThietBi == maThietBi)
                             .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
                             .Where(v => !string.IsNullOrEmpty(v))
                             .Distinct()
                             .Count();
 
-                        if (vendorCodesForSameProduct >= 2 && bitSelect.Contains("O"))
+                        if (vendorCodesForSameProduct >= 2 && (bitSelect ?? string.Empty).Contains("O"))
                         {
-                            errors.Add(_localizer["VendorCodeMultipleSelected", maHangNB, vendorCodesForSameProduct].Value);
+                            errors.Add(_localizer["VendorCodeMultipleSelected", maHangNB ?? string.Empty, vendorCodesForSameProduct].Value);
                         }
                         // Kiểm tra nếu có chọn 'O' thì phải có ít nhất 1 dòng khác cùng mã hàng nội bộ cũng chọn 'O'
                         //var hasAnySelect = allRowsData.Any(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"));
@@ -1589,18 +1678,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         //}
 
                         var vendorsForEquipmentAndCategory = allRowsData
-                            .Where(x => (x.MaThietBi == maThietBi
+                            .Where(x => (x.MaDon == maDon && x.MaThietBi == maThietBi
                             && x.ChungLoaiHang == chungLoaiHang
-                            && x.BIT_Select.Contains("O") && x.MaHangNCC_BIVN == maHangNCC)
+                            && (x.BIT_Select ?? string.Empty).Contains("O") && x.MaHangNCC_BIVN == maHangNCC)
                             && !string.IsNullOrEmpty(maThietBi))
                             .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
                             .Where(v => !string.IsNullOrEmpty(v))
                             .Distinct()
                             .Count();
 
-                        if (vendorsForEquipmentAndCategory > 1 && bitSelect.Contains("O"))
+                        if (vendorsForEquipmentAndCategory > 1 && (bitSelect ?? string.Empty).Contains("O"))
                         {
-                            errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi, chungLoaiHang, vendorsForEquipmentAndCategory].Value);
+                            errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi ?? string.Empty, chungLoaiHang ?? string.Empty, vendorsForEquipmentAndCategory].Value);
                         }
 
                         //var tenHangList = allRowsData
@@ -1614,24 +1703,20 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         //    errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
                         //}
 
-                        //if (bitSelect.Contains("O"))
-                        //{
-                        //    var allPricesForProduct = allRowsData
-                        //        .Where(x => x.MaHangNoiBo == maHangNB && x.DonGiaUSD > 0 && x.DonGiaVND > 0)
-                        //        .Select(x => new { x.DonGiaUSD, x.DonGiaVND })
-                        //        .ToList();
-
-                        //    if (allPricesForProduct.Any() && allPricesForProduct.Count > 1)
-                        //    {
-                        //        decimal minPriceUSD = (decimal)allPricesForProduct.Min(x => x.DonGiaUSD);
-                        //        decimal currentPriceUSD = (decimal)donGiaUSD;
-
-                        //        if (Math.Abs(currentPriceUSD - minPriceUSD) > 0.01m)
-                        //        {
-                        //            errors.Add($"Đơn giá được chọn (USD: {currentPriceUSD:N2}) không phải giá thấp nhất (USD: {minPriceUSD:N2})");
-                        //        }
-                        //    }
-                        //}
+                        if ((bitSelect ?? string.Empty).Contains("O"))
+                        {
+                            var comparablePrices = allRowsData
+                                .Where(x => x.MaDon == maDon && x.MaHangNoiBo == maHangNB)
+                                .Select(x => x.DonGiaUSD.GetValueOrDefault() > 0 ? x.DonGiaUSD : x.DonGiaVND)
+                                .Where(x => x.HasValue && x.Value > 0)
+                                .Select(x => x!.Value)
+                                .ToList();
+                            var selectedPrice = donGiaUSD.GetValueOrDefault() > 0 ? donGiaUSD : donGiaVND;
+                            if (selectedPrice.HasValue && comparablePrices.Count > 1 && selectedPrice.Value > comparablePrices.Min())
+                            {
+                                errors.Add($"Đơn giá được chọn ({selectedPrice.Value:N2}) không phải giá thấp nhất ({comparablePrices.Min():N2}).");
+                            }
+                        }
 
                         var duplicatePrice = allRowsData
                             .Where(x => x.MaHangNoiBo == maHangNB &&
@@ -1643,21 +1728,21 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                         if (duplicatePrice > 1)
                         {
-                            errors.Add(_localizer["DuplicatePriceForVendor", maHangNB, maHangNCC].Value);
+                            errors.Add(_localizer["DuplicatePriceForVendor", maHangNB ?? string.Empty, maHangNCC ?? string.Empty].Value);
                         }
 
                         // check lựa chọn nhà cung cấp bắt buộc phải lựa chọn O và X
-                        if (!bitSelect.Contains("O") && !bitSelect.Contains("X"))
+                        if (!(bitSelect ?? string.Empty).Contains("O") && !(bitSelect ?? string.Empty).Contains("X"))
                         {
                             errors.Add(_localizer["InvalidSelection", 52].Value);
                         }
                         // check reason pick
-                        if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
+                        if ((bitSelect ?? string.Empty).Contains("O") && string.IsNullOrEmpty(reason))
                         {
                             errors.Add(_localizer["SelectedVendorNoReasonColumn", 52].Value);
                         }
                         // check reason remark
-                        if (bitSelect.Contains("X") && string.IsNullOrEmpty(reason))
+                        if ((bitSelect ?? string.Empty).Contains("X") && string.IsNullOrEmpty(reason))
                         {
                             errors.Add(_localizer["RejectedVendorNoRemarkColumn", 53].Value);
                         }
@@ -1716,7 +1801,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             items.Add(new
                             {
                                 ID = id,
-                                BIT_Select = bitSelect.Contains("O"),
+                                BIT_Select = (bitSelect ?? string.Empty).Contains("O"),
                                 NVCHR_ReasonPick = reason,
                                 CHR_MaDon = maDon,
                                 CHR_MaHangNoiBo = maHangNB,
@@ -1902,31 +1987,31 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     // Kiểm tra lỗi
                     var vendorCodesForSameProduct = allRowsData
-                        .Where(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O") && x.MaThietBi == maThietBi)
+                        .Where(x => x.MaDon == maDon && x.MaHangNoiBo == maHangNB && (x.BIT_Select ?? string.Empty).Contains("O") && x.MaThietBi == maThietBi)
                         .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
                         .Where(v => !string.IsNullOrEmpty(v))
                         .Distinct()
                         .Count();
 
-                    if (vendorCodesForSameProduct >= 2 && bitSelect.Contains("O"))
+                    if (vendorCodesForSameProduct >= 2 && (bitSelect ?? string.Empty).Contains("O"))
                     {
                         errors.Add(_localizer["VendorCodeMultipleSelected", maHangNB, vendorCodesForSameProduct].Value);
                     }
 
-                    var hasAnySelect = allRowsData.Any(x => x.MaHangNoiBo == maHangNB && x.BIT_Select.Contains("O"));
+                    var hasAnySelect = allRowsData.Any(x => x.MaDon == maDon && x.MaHangNoiBo == maHangNB && (x.BIT_Select ?? string.Empty).Contains("O"));
                     if (!hasAnySelect && !string.IsNullOrEmpty(maHangNB))
                     {
                         errors.Add(_localizer["VendorCodeNotSelected", maHangNB].Value);
                     }
 
                     var vendorsForEquipmentAndCategory = allRowsData
-                        .Where(x => (x.MaThietBi == maThietBi && x.ChungLoaiHang == chungLoaiHang && x.BIT_Select.Contains("O")) && !string.IsNullOrEmpty(maThietBi))
+                        .Where(x => (x.MaDon == maDon && x.MaThietBi == maThietBi && x.ChungLoaiHang == chungLoaiHang && (x.BIT_Select ?? string.Empty).Contains("O")) && !string.IsNullOrEmpty(maThietBi))
                         .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
                         .Where(v => !string.IsNullOrEmpty(v))
                         .Distinct()
                         .Count();
 
-                    if (vendorsForEquipmentAndCategory > 1 && bitSelect.Contains("O"))
+                    if (vendorsForEquipmentAndCategory > 1 && (bitSelect ?? string.Empty).Contains("O"))
                     {
                         errors.Add(_localizer["EquipmentCategoryMultipleVendors", maThietBi, chungLoaiHang, vendorsForEquipmentAndCategory].Value);
                     }
@@ -1942,7 +2027,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     //    errors.Add(_localizer["MaterialNameMismatch", maHangNB, string.Join(", ", tenHangList.Select(x => x.TenEng))]);
                     //}
 
-                    if (bitSelect.Contains("O"))
+                    if ((bitSelect ?? string.Empty).Contains("O"))
                     {
                         var allPricesForProduct = allRowsData
                             .Where(x => x.MaHangNoiBo == maHangNB && x.DonGiaUSD > 0)
@@ -1971,10 +2056,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                     if (duplicatePrice > 1)
                     {
-                        errors.Add(_localizer["DuplicatePriceForVendor", maHangNB, maHangNCC].Value);
+                        errors.Add(_localizer["DuplicatePriceForVendor", maHangNB ?? string.Empty, maHangNCC ?? string.Empty].Value);
                     }
 
-                    if (bitSelect.Contains("O") && string.IsNullOrEmpty(reason))
+                    if ((bitSelect ?? string.Empty).Contains("O") && string.IsNullOrEmpty(reason))
                     {
                         errors.Add(_localizer["SelectedVendorNoReason"].Value);
                     }
