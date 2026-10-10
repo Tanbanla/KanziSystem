@@ -447,6 +447,57 @@
             });
         });
     }
+    function showImportChoiceDialog({
+        title = 'Xác nhận',
+        message = '',
+        updateText = 'Cập nhật thông tin',
+        reapproveText = 'Chọn lại nhà cung cấp',
+        cancelText = 'Hủy'
+    } = {}) {
+        return new Promise((resolve) => {
+            const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
+
+            if (!overlay) {
+                resolve(window.confirm(message) ? 'reapprove' : 'cancel');
+                return;
+            }
+
+            titleEl.textContent = title;
+            bodyEl.innerHTML = `
+                <div class="d-flex align-items-start gap-2">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    <div>${message}</div>
+                </div>
+            `;
+            footerEl.innerHTML = '';
+
+            const createButton = (text, className, result) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = className;
+                button.textContent = text;
+                button.addEventListener('click', () => closeDialog(result), { once: true });
+                return button;
+            };
+
+            const closeDialog = (result) => {
+                hideDialog();
+                resolve(result);
+            };
+
+            footerEl.appendChild(createButton(cancelText, 'cm-btn cm-btn-outline', 'cancel'));
+            footerEl.appendChild(createButton(updateText, 'cm-btn cm-btn-success', 'update'));
+            footerEl.appendChild(createButton(reapproveText, 'cm-btn cm-btn-primary', 'reapprove'));
+
+            overlay.setAttribute('aria-hidden', 'false');
+            overlay.style.display = 'flex';
+
+            const closeBtns = overlay.querySelectorAll('[data-cm-action="close"],[data-cm-action="overlay"]');
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => closeDialog('cancel'), { once: true });
+            });
+        });
+    }
     function showLoading(message = window.i18nInputQuote?.ExportLoading || 'Exporting to Excel, please wait...') {
 
         let loading = document.getElementById('globalLoadingExport');
@@ -657,16 +708,24 @@
                                 </div>
                             `;
 
-                        const confirmed = await showConfirmDialog({
+                        const action = await showImportChoiceDialog({
                             title: window.i18nInputQuote.Notification || 'Notification',
                             message: message,
-                            confirmText: window.i18nInputQuote.ContinueImport || 'Continue',
-                            cancelText: window.i18nInputQuote.Close || 'Cancel'
+                            updateText: window.i18nInputQuote.UpdateQuotationInfo || 'Cập nhật thông tin',
+                            reapproveText: window.i18nInputQuote.ReapproveQuotation || 'Chọn lại nhà cung cấp',
+                            cancelText: window.i18nInputQuote.Close || 'Hủy'
                         });
 
-                        if (!confirmed) {
+                        if (action === 'cancel') {
                             return;
                         }
+
+                        var importUrl = action === 'update'
+                            ? '/InputQuotation/ImportUpdateQuotation'
+                            : '/InputQuotation/ImportExcelInputQuote';
+                    }
+                    else {
+                        var importUrl = '/InputQuotation/ImportExcelInputQuote';
                     }
 
                     const importFormData = new FormData();
@@ -679,7 +738,7 @@
                     }
 
                     const response = await fetch(
-                        (window.apiBaseUrl || '') + '/InputQuotation/ImportExcelInputQuote',
+                        (window.apiBaseUrl || '') + importUrl,
                         {
                             method: 'POST',
                             body: importFormData

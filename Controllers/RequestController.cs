@@ -296,15 +296,15 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Json(vitri);
         }
         [HttpPost]
-        public JsonResult _get_confirm( string us, string Urgent, double Total, string Code_Request, string INT_STEP)
+        public JsonResult _get_confirm( string us, string Urgent, double Total, string Code_Request, string INT_STEP, string costcenter, string mahang)
         {
-            var cf = REQUEST_PROCESS.get_requestconfirm(us, Urgent, Total, Code_Request, INT_STEP);
+            var cf = REQUEST_PROCESS.get_requestconfirm(us, Urgent, Total, Code_Request, INT_STEP, costcenter, mahang);
             return Json(cf);
         }
         [HttpPost]
-        public JsonResult _get_confirm_GA(string us, string Urgent, double Total, string Code_Request, string INT_STEP)
+        public JsonResult _get_confirm_GA(string us, string Urgent, double Total, string Code_Request, string INT_STEP, string costcenter)
         {
-            var cf = REQUEST_PROCESS_GA.get_requestconfirm(us, Urgent, Total, Code_Request, INT_STEP);
+            var cf = REQUEST_PROCESS_GA.get_requestconfirm(us, Urgent, Total, Code_Request, INT_STEP,costcenter);
             return Json(cf);
         }
         public JsonResult _get_request(string cost_request)

@@ -213,4 +213,32 @@
   <data name="CannotSelectSupplierForItems" xml:space="preserve">
     <value>The order does not have sufficient quotations from suppliers and cannot be selected. List: {0}</value>
   </data>
+  <data name="InternalAndVendorCodeRequired" xml:space="preserve"><value>Internal material code and supplier code are required.</value></data>
+  <data name="InternalCodeRequired" xml:space="preserve"><value>Internal material code is required.</value></data>
+  <data name="MaterialNotFound" xml:space="preserve"><value>Material information was not found for code: {0}</value></data>
+  <data name="InvalidMasterPriceData" xml:space="preserve"><value>Invalid master price data.</value></data>
+  <data name="NoSupplierSelectionData" xml:space="preserve"><value>No supplier selection data was provided.</value></data>
+  <data name="SupplierNotSelectedForItem" xml:space="preserve"><value>Order {0}, item {1} has no selected supplier (O).</value></data>
+  <data name="MultipleSuppliersForItem" xml:space="preserve"><value>Order {0}, item {1} can have only one selected supplier.</value></data>
+  <data name="SelectedSupplierNotLowest" xml:space="preserve"><value>Supplier {0} for item {1} does not have the lowest price.</value></data>
+  <data name="MultiplePricesForSupplier" xml:space="preserve"><value>Order {0}, item {1}, supplier {2} has multiple different prices.</value></data>
+  <data name="SupplierZeroPrice" xml:space="preserve"><value>Supplier {0} for item {1} has a quotation price of zero.</value></data>
+  <data name="SupplierQuotationLinkRequired" xml:space="preserve"><value>Supplier {0} for item {1} has no quotation link.</value></data>
+  <data name="SupplierQuotationExpired" xml:space="preserve"><value>The quotation from supplier {0} for item {1} has expired or expires within 4 days.</value></data>
+  <data name="MultipleSuppliersForEquipmentCategory" xml:space="preserve"><value>Equipment {0}, category {1} cannot have multiple selected suppliers.</value></data>
+  <data name="UploadFileRequired" xml:space="preserve"><value>Please select a file to upload.</value></data>
+  <data name="ImportFileRequired" xml:space="preserve"><value>Please select an Excel file to import.</value></data>
+  <data name="ExcelFileOnly" xml:space="preserve"><value>Only .xlsx Excel files are supported.</value></data>
+  <data name="ImportDataRequired" xml:space="preserve"><value>The file contains no data from row 3.</value></data>
+  <data name="MasterPriceImportSaveError" xml:space="preserve"><value>Unable to save master price data: {0}</value></data>
+  <data name="MasterPriceImportSuccess" xml:space="preserve"><value>Master price imported successfully.</value></data>
+  <data name="MasterPriceImportReadError" xml:space="preserve"><value>Unable to read the Excel file: {0}</value></data>
+  <data name="MasterPriceInvalidNumber" xml:space="preserve"><value>Column {0} is not a valid number.</value></data>
+  <data name="MasterPriceInvalidInteger" xml:space="preserve"><value>Column {0} is not a valid integer.</value></data>
+  <data name="MasterPriceInvalidDate" xml:space="preserve"><value>Column {0} is not a valid date.</value></data>
+  <data name="MasterPriceInternalCodeRequired" xml:space="preserve"><value>Internal material code is required.</value></data>
+  <data name="MasterPriceVendorCodeRequired" xml:space="preserve"><value>Supplier code is required.</value></data>
+  <data name="MasterPriceVendorNameRequired" xml:space="preserve"><value>Supplier name is required.</value></data>
+  <data name="MasterPriceExpirationInvalid" xml:space="preserve"><value>Expiration date must be on or after the effective date.</value></data>
+  <data name="MasterPriceSupplierDecisionInvalid" xml:space="preserve"><value>Supplier decision accepts only O/X, Yes/No, or TRUE/FALSE.</value></data>
 </root>

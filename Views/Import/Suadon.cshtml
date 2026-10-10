@@ -284,68 +284,7 @@
             });
         });
     }
-         // Đảm bảo dùng jQuery chính xác
-           // Đảm bảo dùng jQuery chính xác
-    // (function($) {
-    //     "use strict";
-
-    //     document.getElementById('btn-add-row').addEventListener('click', function() {
-    //         const tbody = document.querySelector('#dynamic-table tbody');
-    //         const firstRow = tbody.querySelector('.input-row');
-
-    //         // 1. Clone dòng đầu tiên (Đã bao gồm đầy đủ danh sách option của stk và pcp)
-    //         const newRow = firstRow.cloneNode(true);
-    //         const lastRow = tbody.querySelector('.input-row:last-child');
-
-    //         // Xóa bỏ container Select2 cũ bị clone theo (nếu có) để select2 khởi tạo lại sạch sẽ
-    //         $(newRow).find('.select2-container').remove();
-    //         $(newRow).find('select').show(); // Đảm bảo select ẩn của select2 hiện lại để khởi tạo lại
-
-    //         // 2. Kế thừa dữ liệu phòng chịu phí và mục đích từ dòng cuối cùng
-    //         if (lastRow) {
-    //             const lastPcpValue = $(lastRow).find('.pcp').val();
-    //             $(newRow).find('.pcp').val(lastPcpValue);
-
-    //             const lastmdValue = $(lastRow).find('.md').val();
-    //             $(newRow).find('.md').val(lastmdValue);
-
-    //             // Có thể kế thừa luôn số tài khoản của dòng cuối cho tiện nếu muốn:
-    //             const lastStkValue = $(lastRow).find('.stk').val();
-    //             $(newRow).find('.stk').val(lastStkValue);
-    //         }
-
-    //         // 3. Đặt lại giá trị rỗng cho các ô nhập số lượng, đơn giá, thành tiền
-    //         const $elements = $(newRow).find('select, input, textarea');
-    //         $elements.each(function() {
-    //             const $el = $(this);
-    //             const id = $el.attr('id') || '';
-    //             // Nếu là các ô nhập liệu số lượng, thành tiền, đơn giá thì xóa trống text
-    //             if (id.includes('sl_') || id.includes('dv_') || id.includes('dg_') || id.includes('nt_') || id.includes('tcp_')) {
-    //                 $el.val('');
-    //             }
-    //         });
-
-    //         // 4. Hiển thị nút xóa cho dòng mới
-    //         const removeBtn = newRow.querySelector('.btn-remove');
-    //         if (removeBtn) {
-    //             removeBtn.style.display = 'inline-block';
-    //         }
-
-    //         // 5. Thêm dòng mới vào bảng
-    //         tbody.appendChild(newRow);
-
-    //         // 6. Cập nhật số thứ tự STT và ID gán hậu tố _i (ví dụ: stk_2, stk_3)
-    //         updateRowNumbers();
-
-    //         // 7. Khởi tạo lại Select2 cho dòng vừa mới thêm
-    //         if ($.fn.select2) {
-    //             $(newRow).find('.select2, .pcp, .stk').select2({
-    //                 width: '100%',
-    //             });
-    //         }
-    //     });
-
-    // })(jQuery);
+      
 
     function caculator(id) {
         // Lấy số thứ tự dòng từ ID (ví dụ: sl_1 -> 1)
@@ -487,48 +426,7 @@
                     document.getElementById("gap").checked = true;
                 }
 
-                // // Gọi _load_material sau khi gr và lcp đã có giá trị
-                // $.ajax({
-                //     url: '/Import/_load_material',
-                //     type: 'POST',
-                //     dataType: 'JSON',
-                //     data: {
-                //         group_code: gr,
-                //         loaichiphi: lcp
-                //     },
-                //      success: function (response) {
-                //         console.log(response);
-
-                //         // Tìm tất cả các ô select tên hàng đang có trên màn hình
-                //         const allTenHangSelects = document.querySelectorAll('.tenhang');
-
-                //         allTenHangSelects.forEach(select => {
-                //             // Giữ lại giá trị hiện tại của dòng đó (giá trị từ database đổ ra)
-                //             const currentValue = select.value;
-
-                //             // Xóa trắng để nạp lại, giữ lại item hiện tại làm mặc định
-                //             select.innerHTML = currentValue ? `<option selected>${currentValue}</option>` : '';
-
-                //             // Duyệt qua danh sách nguyên liệu trả về từ API để nạp vào select
-                //             for(var i = 0 ; i < response.length; i++){
-                //                 // Tránh add trùng tên mặt hàng hiện tại đã add ở trên
-                //                 if (response[i] !== currentValue) {
-                //                     select.innerHTML += `<option value="${response[i]}">${response[i]}</option>`;
-                //                 }
-                //             }
-                //         });
-
-                //         // Sau khi nạp dữ liệu xong, kích hoạt (hoặc refresh) lại Select2 để cập nhật giao diện
-                //         if ($.fn.select2) {
-                //             $('.tenhang').select2({
-                //                 width: '100%'
-                //             });
-                //         }
-                //     },
-                //     error: function (xhr, status, err) {
-                //         console.error('AJAX error', status, err);
-                //     }
-                // });
+               
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
@@ -594,52 +492,7 @@
     }
 }
 
-//     async function _load_material_1(Material_Code, id) {
 
-//     let idd = id.split('_')[1];
-//     var groupcode = document.getElementById("group_code").value;
-//     const params = new URLSearchParams();
-//     params.append('Material_Code', Material_Code);
-//     params.append('Material_Name_VN', '');
-//     params.append('Account_Name_VN', '');
-//     params.append('Group_Code', groupcode);
-
-//     fetch('/Import/_info_material', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/x-www-form-urlencoded',
-//         },
-//         body: params.toString()
-//     })
-//         .then(response => {
-//             if (!response.ok) {
-//                 throw new Error(`HTTP error! status: ${response.status}`);
-//             }
-//             return response.json();
-//         })
-//         .then(data => {
-//             console.log(data);
-//             console.log(id);
-//             document.getElementById("stk_" + idd).value = data[0].account_Code + ":" + data[0].account_Name_EN;
-//             if (data[0].unit_Note == "" || data[0].unit_Note == "-") {
-//                 document.getElementById("dv_" + idd).value = data[0].unit;
-//             }
-//             else {
-//                 document.getElementById("dv_" + idd).value = data[0].unit + "(" + data[0].unit_Note + ")";
-//             }
-//             document.getElementById("dg_" + idd).value = data[0].price;
-//             document.getElementById("nt_" + idd).value = data[0].currency;
-//                 if (document.getElementById("sl_" + idd).value != "") {
-//                 var pr = parseFloat(data[0].price) || 0;
-//                 var sq = parseFloat(document.getElementById("sl_" + idd).value) || 0;
-//                 document.getElementById("tcp_" + idd).value = (pr * sq).toFixed(2);
-//              }
-//                 tinhTongTatCa();
-//         })
-//         .catch(error => {
-//             console.error('There was a problem with the fetch operation:', error);
-//         });
-// }
 
     function _luu(){
     var x = confirm("Bạn có muốn sửa đơn không ?");
@@ -647,7 +500,24 @@
         let dataList = [];
         // Chọn tất cả các dòng có class 'input-row'
         const rows = document.querySelectorAll('.input-row');
+        var wrn = "";
         rows.forEach((row) => {
+            const pcpEll = row.querySelector('.pcp');
+            if (!pcpEll || pcpEll.value.trim() === "") {
+                alert("Vui lòng chọn phòng chịu chi phí cho tất cả các dòng!");
+                // close any open modals if needed (keep original behavior minimal)
+                document.querySelectorAll('.close').forEach(button => button.click());
+                wrn = "Error";
+                return; // stop processing and do not submit
+            }
+            const stkEll = row.querySelector('.stk');
+            if (!stkEll || stkEll.value.trim() === "" || stkEll.value.trim() === ":" ) {
+                alert("Vui lòng chọn số tài khoản cho tất cả các dòng!");
+                // close any open modals if needed (keep original behavior minimal)
+                document.querySelectorAll('.close').forEach(button => button.click());
+                wrn = "Error";
+                return; // stop processing and do not submit
+            }
             // Safely query elements inside row
             const idrq_dt = row.querySelector('.idrq_dt');
             const tenhangEl = row.querySelector('.tenhang');
@@ -737,33 +607,21 @@
                     Note : mucdichkhac
                 },
                 success: function (response) {
-                    alert(response);
-                    location.href = "/ipcs/Approval/Condition"
+                    if(wrn == "Error"){
+                        alert("Chưa điền đủ thông tin !");
+                    }
+                    else
+                    {
+                        alert(response);
+                        location.href = "/ipcs/Approval/Condition";
+                    }                  
                 }
             })
 
         }
     }
 }
-    // function _xoadong(id_rq){
-    //     var x = confirm("Xóa mã sẽ mất mã linh kiện trong đơn. Bạn có muốn xóa không ? ")
-    //     if(x){
-    //         $.ajax({
-    //         url: '/Request/_Xoadong',
-    //         type: 'POST',
-    //         dataType: 'JSON',
-
-    //         data: {
-    //                 id: id_rq,
-    //         },
-    //         success: function (response) {
-    //             tinhTongTatCa();
-    //         }
-    //         })
-    //     }
-                
-    // }
-
+    
     async function _load_name_inv1(group_code) {
     const params = new URLSearchParams({ group_code: group_code, loaichiphi: document.getElementById("loaichiphi").value });
         fetch('/ipcs/Import/_load_material', {

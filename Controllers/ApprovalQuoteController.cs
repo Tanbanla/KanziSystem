@@ -95,7 +95,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
             if (step == 5)
             {
-                var picDepartmentResult = await _approverService.GetApproverByPicDepartmentsAsync(GetRolesUser() ?? "");
+                var picDepartmentResult = await _approverService.GetApproverByPicDepartmentsAsync(GetRolesUser() ?? "", step);
                 if (!picDepartmentResult.Success)
                 {
                     return BadRequest("Error list Approver: " + picDepartmentResult.Message);
@@ -939,7 +939,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if(itemsOK.Any())
                     {
                         var picDepartmentResult = await _approverService
-                            .GetApproverByPicDepartmentsAsync(GetRolesUser() ?? string.Empty);
+                            .GetApproverByPicDepartmentsAsync(GetRolesUser() ?? string.Empty, 5);
                         if (!picDepartmentResult.Success)
                         {
                             return BadRequest("Error list Approver: " + picDepartmentResult.Message);

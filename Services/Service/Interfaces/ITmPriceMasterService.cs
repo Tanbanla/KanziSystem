@@ -10,6 +10,8 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
 
         Task<GenericResponse<List<TM_PRICE_MASTERDTO>>> InsertByDetailQuotation(List<BaoGia_Detail_of_Quotation> details);
 
+        Task<GenericResponse<List<TM_PRICE_MASTERDTO>>> InsertByDetailQuotationAsync(List<BaoGia_Detail_of_QuotationDTO> details);
+
         Task<GenericResponse<int>> InsertImportedAsync(IReadOnlyCollection<TM_PRICE_MASTER> priceMasters);
 
         Task<GenericResponse<TM_PRICE_MASTERDTO>> UpdatePriceMaster(TM_PRICE_MASTERDTO tm);

@@ -17,6 +17,9 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Interfaces
         public Task<GenericResponse<BaoGia_Detail_of_QuotationDTO>> GetByIdRequestQuoteAsync(int idRequest);
         // Update list thông tin ghi nhập báo giá
         public Task<GenericResponse<bool>> UpdateListThongTinNhapBaoGiaAsync(List<BaoGia_Detail_of_QuotationDTO> listDto);
+
+        // update infor
+        Task<GenericResponse<bool>> UpdateQuotationNotRQAsync(List<BaoGia_Detail_of_QuotationDTO> listDto);
         // lấy id của đơn báo giá
         public Task<GenericResponse<int?>> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNB, string maNcc, string NameHQ);
         // update thông tin lựa chọn nhà  cung cấp

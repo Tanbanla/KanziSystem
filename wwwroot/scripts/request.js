@@ -60,27 +60,49 @@ function _insert_request() {
     let dataList = [];
     // Chọn tất cả các dòng có class 'input-row'
     const rows = document.querySelectorAll('.input-row');
-    rows.forEach((row) => {
+
+    // Validate Phongchiuchiphi for each row while building dataList
+    for (const row of rows) {
+        const pcpEl = row.querySelector('.pcp');
+        if (!pcpEl || pcpEl.value.trim() === "") {
+            alert("Vui lòng chọn phòng chịu chi phí cho tất cả các dòng!");
+            // close any open modals if needed (keep original behavior minimal)
+            document.querySelectorAll('.close').forEach(button => button.click());
+            return; // stop processing and do not submit
+        }
+        const stkEl = row.querySelector('.stk');
+        if (!stkEl || stkEl.value.trim() === "" || stkEl.value.trim() === ":" ) {
+            alert("Vui lòng chọn số tài khoản cho tất cả các dòng!");
+            // close any open modals if needed (keep original behavior minimal)
+            document.querySelectorAll('.close').forEach(button => button.click());
+            return; // stop processing and do not submit
+        }
         // Lấy dữ liệu từ các phần tử bên trong dòng hiện tại
+        let tenhangVal = (row.querySelector('.tenhang') && row.querySelector('.tenhang').value) || "";
+        let stkVal = (row.querySelector('.stk') && row.querySelector('.stk').value) || "";
+        let dgVal = row.querySelector('.dg') ? row.querySelector('.dg').value : "0";
+        let tcpVal = row.querySelector('.tcp') ? row.querySelector('.tcp').value : "0";
+
         let rowData = {
-            Material_Code: (row.querySelector('.tenhang').value).split(':')[0],
-            Material_Name: (row.querySelector('.tenhang').value).split(':')[1],
-            Account_Code: (row.querySelector('.stk').value).split(':')[0],
-            Account_Name: (row.querySelector('.stk').value).split(':')[1],
-            Amount: row.querySelector('.sl').value,
-            Unit: row.querySelector('.dv').value,
-            Price: parseFloat(row.querySelector('.dg').value),
-            Currency: row.querySelector('.nt').value,
-            Total_exchange: parseFloat(row.querySelector('.tcp').value),
-            Total: parseFloat(row.querySelector('.tcp').value),
-            Aim: row.querySelector('.md').value,
-            Phongchiuchiphi: (row.querySelector('.pcp').value).split(':')[0],
-            Vitri: row.querySelector('.vt').value,
-            Poisition: row.querySelector('.gc').value
+            Material_Code: tenhangVal.split(':')[0],
+            Material_Name: tenhangVal.split(':')[1],
+            Account_Code: stkVal.split(':')[0],
+            Account_Name: stkVal.split(':')[1],
+            Amount: row.querySelector('.sl') ? row.querySelector('.sl').value : "",
+            Unit: row.querySelector('.dv') ? row.querySelector('.dv').value : "",
+            Price: parseFloat(dgVal),
+            Currency: row.querySelector('.nt') ? row.querySelector('.nt').value : "",
+            Total_exchange: parseFloat(tcpVal),
+            Total: parseFloat(tcpVal),
+            Aim: row.querySelector('.md') ? row.querySelector('.md').value : "",
+            Phongchiuchiphi: pcpEl.value.split(':')[0],
+            Vitri: row.querySelector('.vt') ? row.querySelector('.vt').value : "",
+            Poisition: row.querySelector('.gc') ? row.querySelector('.gc').value : ""
         };
         // Thêm đối tượng vào danh sách tổng
         dataList.push(rowData);
-    });
+    }
+
     var mucdichkhac = "";
     if (document.getElementById('mdk') && document.getElementById('mdk').checked == true) {
         mucdichkhac = "OTHER AIM";
@@ -190,25 +212,44 @@ function _insert_request_GA() {
     // truyền list
     let dataList = [];
     const rows = document.querySelectorAll('.input-row');
-    rows.forEach((row) => {
+
+    // Validate Phongchiuchiphi for each row while building dataList
+    for (const row of rows) {
+        const pcpEl = row.querySelector('.pcp');
+        if (!pcpEl || pcpEl.value.trim() === "") {
+            alert("Vui lòng chọn phòng chịu chi phí cho tất cả các dòng!");
+            return; // stop processing and do not submit
+        }
+        const stkEl = row.querySelector('.stk');
+        if (!stkEl || stkEl.value.trim() === "" || stkEl.value.trim() === ":") {
+            alert("Vui lòng chọn số tài khoản cho tất cả các dòng!");
+            // close any open modals if needed (keep original behavior minimal)
+            document.querySelectorAll('.close').forEach(button => button.click());
+            return; // stop processing and do not submit
+        }
+        let tenhangVal = (row.querySelector('.tenhang') && row.querySelector('.tenhang').value) || "";
+        let stkVal = (row.querySelector('.stk') && row.querySelector('.stk').value) || "";
+        let dgVal = row.querySelector('.dg') ? row.querySelector('.dg').value : "0";
+        let tcpVal = row.querySelector('.tcp') ? row.querySelector('.tcp').value : "0";
+
         let rowData = {
-            Material_Code: (row.querySelector('.tenhang').value).split(':')[0],
-            Material_Name: (row.querySelector('.tenhang').value).split(':')[1],
-            Account_Code: (row.querySelector('.stk').value).split(':')[0],
-            Account_Name: (row.querySelector('.stk').value).split(':')[1],
-            Amount: row.querySelector('.sl').value,
-            Unit: row.querySelector('.dv').value,
-            Price: row.querySelector('.dg').value,
-            Currency: row.querySelector('.nt').value,
-            Total_exchange: row.querySelector('.tcp').value,
-            Total: row.querySelector('.tcp').value,
-            Aim: row.querySelector('.md').value,
-            Phongchiuchiphi: (row.querySelector('.pcp').value).split(':')[0],
-            Vitri: row.querySelector('.vt').value,
-            Poisition: row.querySelector('.gc').value,
+            Material_Code: tenhangVal.split(':')[0],
+            Material_Name: tenhangVal.split(':')[1],
+            Account_Code: stkVal.split(':')[0],
+            Account_Name: stkVal.split(':')[1],
+            Amount: row.querySelector('.sl') ? row.querySelector('.sl').value : "",
+            Unit: row.querySelector('.dv') ? row.querySelector('.dv').value : "",
+            Price: row.querySelector('.dg') ? row.querySelector('.dg').value : "",
+            Currency: row.querySelector('.nt') ? row.querySelector('.nt').value : "",
+            Total_exchange: tcpVal,
+            Total: tcpVal,
+            Aim: row.querySelector('.md') ? row.querySelector('.md').value : "",
+            Phongchiuchiphi: pcpEl.value.split(':')[0],
+            Vitri: row.querySelector('.vt') ? row.querySelector('.vt').value : "",
+            Poisition: row.querySelector('.gc') ? row.querySelector('.gc').value : "",
         };
         dataList.push(rowData);
-    });
+    }
 
     var mucdichkhac = "";
     if (document.getElementById('mdk') && document.getElementById('mdk').checked == true) {
@@ -448,6 +489,8 @@ async function _load_confirm() {
     var Total = document.getElementById("giadonhang").value;
     var Code_Request = document.getElementById("mnl").value;
     var INT_STEP = document.getElementById("tinhtrangdon").value;
+    var costcenter = document.getElementById("costcenter").value;
+    var mahang = document.getElementById("phanloaihang").value;
 
     var us = document.getElementById("us").innerHTML;
     const formData = new URLSearchParams();
@@ -456,6 +499,8 @@ async function _load_confirm() {
     formData.append('Total', Total);
     formData.append('Code_Request', Code_Request);
     formData.append('INT_STEP', INT_STEP);
+    formData.append('costcenter', costcenter);
+    formData.append('mahang', mahang);
 
 
     fetch(ROUTES.getConfirm, {
@@ -531,6 +576,7 @@ async function _load_confirm_GA() {
     var Total = document.getElementById("giadonhang").value;
     var Code_Request = document.getElementById("mnl").value;
     var INT_STEP = document.getElementById("tinhtrangdon").value;
+    var costcenter = document.getElementById("costcenter").value;
 
     var us = document.getElementById("us").innerHTML;
     const formData = new URLSearchParams();
@@ -539,6 +585,7 @@ async function _load_confirm_GA() {
     formData.append('Total', Total);
     formData.append('Code_Request', Code_Request);
     formData.append('INT_STEP', INT_STEP);
+    formData.append('costcenter', costcenter);
 
     fetch(ROUTES.getConfirmGA, {
         method: 'POST',
@@ -991,6 +1038,8 @@ function _reset() {
     document.getElementById("giadonhang").value = "";
     document.getElementById("mnl").value = "";
     document.getElementById("tinhtrangdon").value = "";
+    document.getElementById("costcenter").value = "";
+    document.getElementById("phongban").value = "";
     _load_confirm();
 }
 function _reset_GA() {
@@ -998,6 +1047,8 @@ function _reset_GA() {
     document.getElementById("giadonhang").value = "";
     document.getElementById("mnl").value = "";
     document.getElementById("tinhtrangdon").value = "";
+    document.getElementById("costcenter").value = "";
+    document.getElementById("phongban").value = "";
     _load_confirm_GA();
 }
 

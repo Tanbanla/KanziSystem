@@ -110,6 +110,23 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             }
             return result;
         }
+        // update infor
+        public async Task<GenericResponse<bool>> UpdateQuotationNotRQAsync(List<BaoGia_Detail_of_QuotationDTO> listDto)
+        {
+            var result = new GenericResponse<bool>();
+            try
+            {
+                var listModel = _mapper.Map<List<BaoGia_Detail_of_Quotation>>(listDto);
+                result.Data = await _repo.UpdateQuotationNotRQAsync(listModel);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message;
+                result.Success = false;
+            }
+            return result;
+        }
         // lấy id của đơn báo giá
         public async Task<GenericResponse<int?>> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNB, string maNcc, string NameHQ)
         {

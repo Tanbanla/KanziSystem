@@ -100,12 +100,12 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return response;
         }
 
-        public async Task<GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>> GetApproverByPicDepartmentsAsync(string role)
+        public async Task<GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>> GetApproverByPicDepartmentsAsync(string role, int step)
         {
             var response = new GenericResponse<List<BaoGia_Master_Approver_Send_MailDTO>>();
             try
             {
-                var data = await _repo.GetApproverByPicDepartmentsAsync(role);
+                var data = await _repo.GetApproverByPicDepartmentsAsync(role, step);
                 response.Data = _mapper.Map<List<BaoGia_Master_Approver_Send_MailDTO>>(data);
                 response.Success = true;
             }

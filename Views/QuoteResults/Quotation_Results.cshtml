@@ -42,6 +42,9 @@
                             <option value="">@Localizer["SelectPlaceholder"]</option>
                         </select>
                     </div>
+                    <div id="selectApproverQltcNotice" class="alert alert-warning py-2 mb-0 small" role="alert" hidden>
+                        @Localizer["HighValueApproverNotice"]
+                    </div>
                     <div id="selectApproverNotice" class="text-danger small" style="display:none;">@Localizer["SelectApproverRequired"].Value</div>
                 </div>
                 <div class="modal-footer">
@@ -260,7 +263,7 @@
             <button class="nav-link" id="supplier-input-tab" data-bs-toggle="tab" data-bs-target="#supplier-input" type="button" role="tab" aria-controls="supplier-input" aria-selected="false">@Localizer["SupplierSelectionTabTitle"]</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="input-quotation-tab" data-bs-toggle="tab" data-bs-target="#input-quotation" type="button" role="tab" aria-controls="input-quotation" aria-selected="false">Master giá</button>
+            <button class="nav-link" id="input-quotation-tab" data-bs-toggle="tab" data-bs-target="#input-quotation" type="button" role="tab" aria-controls="input-quotation" aria-selected="false">@Localizer["MasterPriceTab"]</button>
         </li>
     </ul>
     <div class="tab-content" id="quotationResultsTabsContent" style="background-color: #ffffff; padding: 16px; border: 1px solid #dee2e6; border-top: 0; border-radius: 0 0 .25rem .25rem;">
@@ -531,7 +534,7 @@
                                     <th rowspan="2" style="min-width: 70px;background-color: #e5f2ff !important;">@Localizer["SupplierSelection"]</th>
                                     @if (isGaUser)
                                     {
-                                        <th rowspan="2" class="customs-declaration-column" style="min-width: 105px;background-color: #e5f2ff !important;">Khai báo hải quan</th>
+                                        <th rowspan="2" class="customs-declaration-column" style="min-width: 105px;background-color: #e5f2ff !important;">@Localizer["CustomsDeclaration"]</th>
                                     }
                                     <th rowspan="2" style="min-width: 220px;background-color: #e5f2ff !important;">@Localizer["SelectionReason"]</th>
                                     <th rowspan="2" style="min-width: 200px;background-color: #e5f2ff !important;">@Localizer["PriceIncreaseReason"]</th>
@@ -582,17 +585,17 @@
             <div class="card shadow-sm mb-3 master-quote-filter-card">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="mb-1 text-secondary master-quote-section-title">Tìm kiếm master giá</h6>
-                        <small class="text-muted">Lọc theo thông tin đơn hàng, hàng hóa và trạng thái</small>
+                        <h6 class="mb-1 text-secondary master-quote-section-title">@Localizer["MasterPriceSearchTitle"]</h6>
+                        <small class="text-muted">@Localizer["MasterPriceSearchDescription"]</small>
                     </div>
-                    <span class="badge bg-light text-primary border px-3 py-2">Master giá</span>
+                    <span class="badge bg-light text-primary border px-3 py-2">@Localizer["MasterPriceTab"]</span>
                 </div>
                 <div class="card-body p-3">
                     <form id="masterQuoteFilterForm" class="row g-3 align-items-end">
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteMaDon" class="form-label">Mã đơn</label>
+                            <label for="masterQuoteMaDon" class="form-label">@Localizer["OrderCode"]</label>
                             <select id="masterQuoteMaDon" class="form-select searchable-select">
-                                <option value="">Chọn mã đơn</option>
+                                <option value="">@Localizer["SelectOrderCode"]</option>
                                 @foreach (var item in madons.Distinct())
                                 {
                                     <option value="@item">@item</option>
@@ -600,9 +603,9 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteMaNcc" class="form-label">Mã nhà cung cấp</label>
+                            <label for="masterQuoteMaNcc" class="form-label">@Localizer["SupplierCode"]</label>
                             <select id="masterQuoteMaNcc" class="form-select searchable-select">
-                                <option value="">Chọn nhà cung cấp</option>
+                                <option value="">@Localizer["SelectSupplier"]</option>
                                 @foreach (var item in listNCC)
                                 {
                                     <option value="@item.Ma">@item.Ma - @item.Ten</option>
@@ -610,13 +613,13 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteMaThietBi" class="form-label">Mã thiết bị</label>
-                            <input type="text" id="masterQuoteMaThietBi" class="form-control" placeholder="Nhập mã thiết bị" />
+                            <label for="masterQuoteMaThietBi" class="form-label">@Localizer["EquipmentCode"]</label>
+                            <input type="text" id="masterQuoteMaThietBi" class="form-control" placeholder="@Localizer["EnterEquipmentCode"]" />
                         </div>
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteChungLoai" class="form-label">Chủng loại</label>
+                            <label for="masterQuoteChungLoai" class="form-label">@Localizer["Category"]</label>
                             <select id="masterQuoteChungLoai" class="form-select searchable-select">
-                                <option value="">Chọn chủng loại</option>
+                                <option value="">@Localizer["SelectCategory"]</option>
                                 @foreach (var item in masterCategories.Distinct())
                                 {
                                     <option value="@item">@item</option>
@@ -624,9 +627,9 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteMaHangNoiBo" class="form-label">Mã hàng nội bộ</label>
+                            <label for="masterQuoteMaHangNoiBo" class="form-label">@Localizer["InternalMaterialCode"]</label>
                             <select id="masterQuoteMaHangNoiBo" class="form-select searchable-select" data-remote="true" data-api="/Material/SearchMaterialView" data-page-size="500">
-                                <option value="">Chọn mã hàng nội bộ</option>
+                                <option value="">@Localizer["SelectInternalMaterialCode"]</option>
                                 @foreach (var item in masterMaterials.Distinct())
                                 {
                                     <option value="@item">@item</option>
@@ -634,29 +637,29 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteMaHangNcc" class="form-label">Mã hàng NCC</label>
-                            <input type="text" id="masterQuoteMaHangNcc" class="form-control" placeholder="Nhập mã hàng NCC" />
+                            <label for="masterQuoteMaHangNcc" class="form-label">@Localizer["SupplierItemCode"]</label>
+                            <input type="text" id="masterQuoteMaHangNcc" class="form-control" placeholder="@Localizer["EnterSupplierItemCode"]" />
                         </div>
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteFrom" class="form-label">Từ ngày</label>
+                            <label for="masterQuoteFrom" class="form-label">@Localizer["FromDate"]</label>
                             <input type="date" id="masterQuoteFrom" class="form-control" />
                         </div>
                         <div class="col-12 col-md-6 col-xl-3">
-                            <label for="masterQuoteTo" class="form-label">Đến ngày</label>
+                            <label for="masterQuoteTo" class="form-label">@Localizer["ToDate"]</label>
                             <input type="date" id="masterQuoteTo" class="form-control" />
                         </div>
                         <div class="col-12 col-md-6 col-xl-3" style="margin-top: 4px;">
-                            <label for="masterQuoteTrangThai" class="form-label">Trạng thái</label>
+                            <label for="masterQuoteTrangThai" class="form-label">@Localizer["Status"]</label>
                             <select id="masterQuoteTrangThai" class="form-select">
-                                <option value="">Tất cả</option>
-                                <option value="1">Còn hiệu lực</option>
-                                <option value="2">Hết hiệu lực</option>
+                                <option value="">@Localizer["SelectAll"]</option>
+                                <option value="1">@Localizer["Effective"]</option>
+                                <option value="2">@Localizer["Expired"]</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6 col-xl-3" style="margin-top: 4px;">
-                            <label for="masterQuoteNhomHang" class="form-label">Nhóm hàng</label>
+                            <label for="masterQuoteNhomHang" class="form-label">@Localizer["MaterialGroup"]</label>
                             <select id="masterQuoteNhomHang" class="form-select">
-                                <option value="">Tất cả</option>
+                                <option value="">@Localizer["SelectAll"]</option>
                                 <option value="PROD">PROD</option>
                                 <option value="GA">GA</option>
                                 <option value="IT">IT</option>
@@ -666,15 +669,15 @@
 
                         <div class="col-12 col-xl-6 d-flex gap-2 master-quote-filter-actions">
                             <button type="submit" id="masterQuoteSearchBtn" class="btn btn-primary">
-                                <i class="fas fa-search me-1"></i> Tìm kiếm
+                                <i class="fas fa-search me-1"></i> @Localizer["Search"]
                             </button>
                             <div style="margin-left: 6px;"></div>
                             <button type="reset" id="masterQuoteExpTemBtn" class="btn btn-success">
-                                <i class="fas fa-file-excel"></i> File mẫu
+                                <i class="fas fa-file-excel"></i> @Localizer["SampleFile"]
                             </button>
                             <div style="margin-left: 6px;"></div>
                             <button type="reset" id="masterQuoteClearBtn" class="btn btn-outline-secondary">
-                                <i class="fas fa-eraser me-1"></i> Xóa bộ lọc
+                                <i class="fas fa-eraser me-1"></i> @Localizer["ClearFilters"]
                             </button>
                         </div>
                     </form>
@@ -684,61 +687,61 @@
             <div class="card shadow-sm master-quote-table-card">
                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                         <h6 class="mb-0 text-secondary master-quote-section-title">Danh sách master giá</h6>
+                         <h6 class="mb-0 text-secondary master-quote-section-title">@Localizer["MasterPriceListTitle"]</h6>
                         <div class="d-flex align-items-center gap-1">
                             <button type="button" class="btn"
                                     id="btnImportfile"
                                     style="color:cadetblue; background-color:white">
-                                <i class="fas fa-file-excel"></i> Import file Excel
+                                <i class="fas fa-file-excel"></i> @Localizer["ImportExcelFile"]
                             </button>
                             <input type="file" id="masterPriceImportFile" accept=".xlsx" hidden />
                             <button type="button" class="btn"
                                     id="btnExportfile"  style="color:burlywood; background-color:white">
-                                Xuất dữ liệu <i class="fas fa-file-download"></i>
+                                @Localizer["ExportData"] <i class="fas fa-file-download"></i>
                             </button>
                         </div>
                     </div>
-                    <small class="text-muted" id="masterQuoteSummaryText">Số chi tiết đơn yêu cầu báo giá: 0</small>
+                     <small class="text-muted" id="masterQuoteSummaryText">@Localizer["QuotationDetailCount", 0]</small>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive master-quote-table-wrapper">
                         <table class="table table-sm table-bordered table-hover align-middle mb-0" id="masterQuoteTable">
                             <thead>
                                 <tr class="text-center align-middle">
-                                    <th style="max-width:20px !important;">No</th>
-                                    <th>Hành động</th>
-                                    <th>Ngày upload</th>
-                                    <th>PIC upload</th>
-                                    <th>Số đơn yêu cầu báo giá</th>
-                                    <th>Mã thiết bị</th>          
-                                    <th>Mã nhà cung cấp</th>
-                                    <th>Tên nhà cung cấp</th>
-                                    <th>Mã hàng nội bộ</th>
-                                    <th>Mã hàng nhà cung cấp</th>
-                                    <th>Tên hàng tiếng Việt</th>
-                                    <th>Tên hàng tiếng Anh</th>
-                                    <th>Số lượng</th>
-                                    <th>Đơn vị</th>
-                                    <th>Yêu cầu khác</th>
-                                    <th>Nhà Sản xuất/Xuất xứ</th>
-                                    <th>Đơn giá (nhà cung cấp)</th>
-                                    <th>Đơn vị tiền</th>
-                                    <th>Đơn giá (USD)</th>
-                                    <th>Thời gian giao hàng</th>
+                                    <th style="max-width:20px !important;">@Localizer["NoLabel"]</th>
+                                    <th>@Localizer["Action"]</th>
+                                    <th>@Localizer["UploadDate"]</th>
+                                    <th>@Localizer["PICUpload"]</th>
+                                    <th>@Localizer["QuotationRequestNumber"]</th>
+                                    <th>@Localizer["EquipmentCode"]</th>
+                                    <th>@Localizer["SupplierCode"]</th>
+                                    <th>@Localizer["SupplierName"]</th>
+                                    <th>@Localizer["InternalMaterialCode"]</th>
+                                    <th>@Localizer["SupplierItemCode"]</th>
+                                    <th>@Localizer["ItemNameVN"]</th>
+                                    <th>@Localizer["ItemNameEN"]</th>
+                                    <th>@Localizer["Quantity"]</th>
+                                    <th>@Localizer["Unit"]</th>
+                                    <th>@Localizer["OtherRequirement"]</th>
+                                    <th>@Localizer["ManufacturerOrigin"]</th>
+                                    <th>@Localizer["SupplierUnitPrice"]</th>
+                                    <th>@Localizer["Currency"]</th>
+                                    <th>@Localizer["UnitPriceUSD"]</th>
+                                    <th>@Localizer["LeadTime"]</th>
                                     <th>MOQ</th>
-                                    <th>Phương thức giao hàng</th>
-                                    <th>Phương thức thanh toán</th>
-                                    <th>Hiệu lực báo giá</th>
-                                    <th>Ngày hết hạn báo giá</th>
-                                    <th>Quyết định NCC</th>
-                                    <th>Lý do điều chỉnh</th>
+                                    <th>@Localizer["DeliveryMethod"]</th>
+                                    <th>@Localizer["PaymentTerms"]</th>
+                                    <th>@Localizer["PriceEffectiveDate"]</th>
+                                    <th>@Localizer["PriceExpirationDate"]</th>
+                                    <th>@Localizer["SupplierDecision"]</th>
+                                    <th>@Localizer["AdjustmentReason"]</th>
                                 </tr>
                             </thead>
                             <tbody id="masterQuoteTableBody">
                                 <tr>
                                     <td colspan="27" class="text-center text-muted py-5">
                                         <i class="fas fa-table fa-2x mb-2 d-block"></i>
-                                        Chưa có dữ liệu
+                                         @Localizer["NoData"]
                                     </td>
                                 </tr>
                             </tbody>
@@ -748,7 +751,7 @@
             </div>
             <div class="master-quote-pagination p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div class="d-flex align-items-center gap-2">
-                    <label for="masterQuotePageSize" class="small text-muted mb-0">Số dòng/trang</label>
+                    <label for="masterQuotePageSize" class="small text-muted mb-0">@Localizer["RowsPerPage"]</label>
                     <select id="masterQuotePageSize" class="form-select form-select-sm">
                         <option value="10">10</option>
                         <option value="20" selected>20</option>
@@ -770,31 +773,31 @@
     <div class="master-price-modal master-price-history-modal" role="dialog" aria-modal="true" aria-labelledby="masterPriceHistoryTitle">
         <div class="master-price-modal-header">
             <div>
-                <h5 id="masterPriceHistoryTitle" class="mb-1">Lịch sử master giá</h5>
+                <h5 id="masterPriceHistoryTitle" class="mb-1">@Localizer["MasterPriceHistoryTitle"]</h5>
                 <small id="masterPriceHistorySubtitle" class="text-muted"></small>
             </div>
-                            <button type="button" class="btn btn-light master-price-close" data-master-price-close="history" aria-label="Đóng"><i class="fas fa-times"></i></button>
+                            <button type="button" class="btn btn-light master-price-close" data-master-price-close="history" aria-label="@Localizer["Close"]"><i class="fas fa-times"></i></button>
         </div>
         <div class="master-price-modal-body">
             <form id="masterPriceHistoryFilter" class="row g-2 align-items-end mb-3">
-                <div class="col-12 col-md-3"><label for="historyVendorCode" class="form-label small">Mã nhà cung cấp</label><input id="historyVendorCode" class="form-control form-control-sm" /></div>
-                <div class="col-12 col-md-3"><label for="historyQuotationNo" class="form-label small">Số đơn yêu cầu báo giá</label><input id="historyQuotationNo" class="form-control form-control-sm" /></div>
-                <div class="col-12 col-md-2"><label for="historyFrom" class="form-label small">Từ ngày</label><input id="historyFrom" type="date" class="form-control form-control-sm" /></div>
-                <div class="col-12 col-md-2"><label for="historyTo" class="form-label small">Đến ngày</label><input id="historyTo" type="date" class="form-control form-control-sm" /></div>
-                <div class="col-12 col-md-2 d-flex gap-2"><button class="btn btn-primary btn-sm flex-grow-1" type="submit"><i class="fas fa-search"></i> Lọc</button><button class="btn btn-outline-secondary btn-sm" type="reset" title="Xóa lọc"><i class="fas fa-eraser"></i></button></div>
+                <div class="col-12 col-md-3"><label for="historyVendorCode" class="form-label small">@Localizer["SupplierCode"]</label><input id="historyVendorCode" class="form-control form-control-sm" /></div>
+                <div class="col-12 col-md-3"><label for="historyQuotationNo" class="form-label small">@Localizer["QuotationRequestNumber"]</label><input id="historyQuotationNo" class="form-control form-control-sm" /></div>
+                <div class="col-12 col-md-2"><label for="historyFrom" class="form-label small">@Localizer["FromDate"]</label><input id="historyFrom" type="date" class="form-control form-control-sm" /></div>
+                <div class="col-12 col-md-2"><label for="historyTo" class="form-label small">@Localizer["ToDate"]</label><input id="historyTo" type="date" class="form-control form-control-sm" /></div>
+                <div class="col-12 col-md-2 d-flex gap-2"><button class="btn btn-primary btn-sm flex-grow-1" type="submit"><i class="fas fa-search"></i> @Localizer["Filter"]</button><button class="btn btn-outline-secondary btn-sm" type="reset" title="@Localizer["ClearFilters"]"><i class="fas fa-eraser"></i></button></div>
             </form>
             <div class="table-responsive master-price-history-table-wrap">
                 <table class="table table-sm table-bordered table-hover align-middle" id="masterPriceHistoryTable">
-                    <thead id="masterPriceHistoryHead"><tr><th>STT</th><th>ID</th><th>Ngày upload</th><th>Người upload</th><th>Số đơn yêu cầu báo giá</th><th>ID chi tiết báo giá</th><th>Mã thiết bị</th><th>Mã hàng nội bộ</th><th>Mã hàng nhà cung cấp</th><th>Tên hàng tiếng Việt</th><th>Tên hàng tiếng Anh</th><th>Đơn vị</th><th>Yêu cầu khác</th><th>Nhà sản xuất/Xuất xứ</th><th>Số lượng</th><th>Mã nhà cung cấp</th><th>Tên nhà cung cấp</th><th>Đơn giá nhà cung cấp</th><th>Đơn vị tiền</th><th>Đơn giá USD</th><th>Thời gian giao hàng (ngày)</th><th>MOQ</th><th>Ghi chú</th><th>Điều kiện giao hàng</th><th>Địa điểm giao hàng</th><th>Phương thức giao hàng</th><th>VAT (%)</th><th>Phương thức thanh toán</th><th>Ngày hiệu lực</th><th>Ngày hết hạn</th><th>Cố định nhà cung cấp</th><th>Lý do điều chỉnh</th><th>Link báo giá</th><th>Link file Excel báo giá</th><th>Người tạo</th><th>Ngày tạo</th><th>Người cập nhật</th><th>Ngày cập nhật</th></tr></thead>
-                    <tbody id="masterPriceHistoryBody"><tr><td colspan="39" class="text-center text-muted">Chưa có dữ liệu</td></tr></tbody>
+                     <thead id="masterPriceHistoryHead" class="table-header-custom"><tr><th>@Localizer["STT"]</th><th>ID</th><th>@Localizer["UploadDate"]</th><th>@Localizer["Uploader"]</th><th>@Localizer["QuotationRequestNumber"]</th><th>@Localizer["QuotationDetailId"]</th><th>@Localizer["EquipmentCode"]</th><th>@Localizer["InternalMaterialCode"]</th><th>@Localizer["SupplierItemCode"]</th><th>@Localizer["ItemNameVN"]</th><th>@Localizer["ItemNameEN"]</th><th>@Localizer["Unit"]</th><th>@Localizer["OtherRequirement"]</th><th>@Localizer["ManufacturerOrigin"]</th><th>@Localizer["Quantity"]</th><th>@Localizer["SupplierCode"]</th><th>@Localizer["SupplierName"]</th><th>@Localizer["SupplierUnitPrice"]</th><th>@Localizer["Currency"]</th><th>@Localizer["UnitPriceUSD"]</th><th>@Localizer["LeadTimeDays"]</th><th>MOQ</th><th>@Localizer["Note"]</th><th>@Localizer["DeliveryTerm"]</th><th>@Localizer["DeliveryPlace"]</th><th>@Localizer["DeliveryMethod"]</th><th>VAT (%)</th><th>@Localizer["PaymentTerms"]</th><th>@Localizer["EffectiveDate"]</th><th>@Localizer["ExpirationDate"]</th><th>@Localizer["FixedSupplier"]</th><th>@Localizer["AdjustmentReason"]</th><th>@Localizer["QuotationLink"]</th><th>@Localizer["QuotationExcelLink"]</th><th>@Localizer["CreatedBy"]</th><th>@Localizer["CreatedDate"]</th><th>@Localizer["UpdatedBy"]</th><th>@Localizer["UpdatedDate"]</th></tr></thead>
+                     <tbody id="masterPriceHistoryBody"><tr><td colspan="39" class="text-center text-muted">@Localizer["NoData"]</td></tr></tbody>
                 </table>
             </div>
         </div>
         <div class="master-price-modal-footer">
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-success btn-sm" id="masterPriceHistoryExport"><i class="fas fa-file-excel me-1"></i>Xuất Excel</button>
+                 <button type="button" class="btn btn-success btn-sm" id="masterPriceHistoryExport"><i class="fas fa-file-excel me-1"></i>@Localizer["ExportExcel"]</button>
                 <div style="margin-right: 6px;"></div>
-                <button type="button" class="btn btn-secondary" data-master-price-close="history">Đóng</button>
+                 <button type="button" class="btn btn-secondary" data-master-price-close="history">@Localizer["Close"]</button>
             </div>
         </div>
     </div>
@@ -803,50 +806,50 @@
 
 <div id="masterPriceEditOverlay" class="master-price-overlay" aria-hidden="true">
     <div class="master-price-modal master-price-edit-modal" role="dialog" aria-modal="true" aria-labelledby="masterPriceEditTitle">
-        <div class="master-price-modal-header"><div><h5 id="masterPriceEditTitle" class="mb-1">Chỉnh sửa master giá</h5><small id="masterPriceEditSubtitle" class="text-muted">Đang hiển thị bản ghi mới nhất</small></div><button type="button" class="btn btn-light master-price-close" data-master-price-close="edit" aria-label="Đóng"><i class="fas fa-times"></i></button></div>
+        <div class="master-price-modal-header"><div><h5 id="masterPriceEditTitle" class="mb-1">@Localizer["MasterPriceEditTitle"]</h5><small id="masterPriceEditSubtitle" class="text-muted">@Localizer["MasterPriceLatestRecord"]</small></div><button type="button" class="btn btn-light master-price-close" data-master-price-close="edit" aria-label="@Localizer["Close"]"><i class="fas fa-times"></i></button></div>
         <form id="masterPriceEditForm">
             <div class="master-price-modal-body">
                 <div id="masterPriceEditFields" class="row g-3">
                     <div class="col-12 col-md-3 master-price-field"><label class="form-label small">ID</label><input class="form-control form-control-sm" name="ID" type="number" readonly></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Ngày upload</label><input class="form-control form-control-sm" name="DTM_UPLOAD" type="datetime-local"></div>
-                    <div class="col-12 col-md-3 master-price-field" data-master-price-audit hidden><label class="form-label small">Người upload</label><input class="form-control form-control-sm" name="CHR_UPLOAD_USERID"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Số đơn yêu cầu báo giá</label><input class="form-control form-control-sm" name="CHR_QUOTATION_REQUEST_NO"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">ID chi tiết báo giá</label><input class="form-control form-control-sm" name="INT_QUOTATION_DETAIL" type="number"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Mã thiết bị</label><input class="form-control form-control-sm" name="CHR_EQUIPMENT_CODE"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Mã hàng nội bộ<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="CHR_INTERNAL_PART_CODE" readonly></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Mã hàng nhà cung cấp</label><input class="form-control form-control-sm" name="CHR_VENDOR_PART_CODE"></div>
-                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">Tên hàng tiếng Việt<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="NVCHR_PART_NAME_VN"></div>
-                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">Tên hàng tiếng Anh</label><input class="form-control form-control-sm" name="NVCHR_PART_NAME_EN"></div>
-                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">Đơn vị <span class="text-danger">*</span></label><input class="form-control form-control-sm" name="NVCHR_UNIT"></div>
-                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">Yêu cầu khác</label><textarea class="form-control form-control-sm" name="NVCHR_OTHER_REQUIREMENT"></textarea></div>
-                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">Nhà sản xuất/Xuất xứ</label><input class="form-control form-control-sm" name="NVCHR_MAKER_ORIGIN"></div>
-                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">Số lượng</label><input class="form-control form-control-sm" name="DEC_QUANTITY" type="number"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Mã nhà cung cấp<span class="text-danger">*</span></label><select class="form-select form-select-sm searchable-select" name="CHR_VENDOR_CODE"><option value="">Chọn mã nhà cung cấp</option>@foreach (var vendor in listNCC) { <option value="@vendor.Ma">@vendor.Ma - @(vendor.ShortName == null ? vendor.Ten : vendor.ShortName) </option> }</select></div>
-                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">Tên nhà cung cấp</label><input class="form-control form-control-sm" name="NVCHR_VENDOR_NAME"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Đơn giá nhà cung cấp<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="DEC_UNIT_PRICE" type="number"></div>
-                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">Đơn vị tiền<span class="text-danger">*</span></label><br><select class="form-select form-select-sm" name="CHR_CURRENCY"><option value="">Chọn tiền</option><option>VND</option><option>JPY</option><option>USD</option></select></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Đơn giá USD</label><input class="form-control form-control-sm" name="DEC_UNIT_PRICE_USD" type="number" readonly></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Thời gian giao hàng (ngày)</label><input class="form-control form-control-sm" name="INT_LEAD_TIME_DAY" type="number"></div>
-                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">MOQ</label><input class="form-control form-control-sm" name="DEC_MOQ" type="number"></div>
-                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">Ghi chú</label><textarea class="form-control form-control-sm" name="NVCHR_REMARK"></textarea></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Điều kiện giao hàng</label><input class="form-control form-control-sm" name="NVCHR_DELIVERY_TERM"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Địa điểm giao hàng</label><input class="form-control form-control-sm" name="NVCHR_PLACE"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Phương thức giao hàng</label><input class="form-control form-control-sm" name="NVCHR_SHIPMENT_METHOD"></div>
-                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">VAT (%)</label><input class="form-control form-control-sm" name="DEC_VAT_PERCENT" type="number"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Phương thức thanh toán</label><input class="form-control form-control-sm" name="NVCHR_PAYMENT_TERM"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Ngày hiệu lực<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="DTM_PRICE_EFFECTIVE" type="datetime-local"></div>
-                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">Ngày hết hạn<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="DTM_PRICE_EXPIRATION" type="datetime-local"></div>
-                    <div class="col-12 col-md-3 master-price-field"><div class="form-check mt-4"><input class="form-check-input" name="BIT_FIX_VENDOR" type="checkbox"><label class="form-check-label">Cố định nhà cung cấp</label></div></div>
-                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">Lý do điều chỉnh</label><textarea class="form-control form-control-sm" name="NVCHR_ADJUSTMENT_REASON"></textarea></div>
-                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">Link báo giá<span class="text-danger">*</span></label><input type="file" class="form-control form-control-sm master-price-file-input" style="min-height: 36px;" data-link-field="NVCHR_QTN_LINK" accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.zip,.csv"><input class="form-control form-control-sm mt-1" name="NVCHR_QTN_LINK" placeholder="Chưa có file hoặc chưa chọn file" readonly></div>
-                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">Link file Excel báo giá<span class="text-danger">*</span></label><input type="file" class="form-control form-control-sm master-price-file-input" style="min-height: 36px;" data-link-field="NVCHR_QTN_EXCEL_LINK" accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.zip,.csv"><input class="form-control form-control-sm mt-1" name="NVCHR_QTN_EXCEL_LINK" placeholder="Chưa có file hoặc chưa chọn file" readonly></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["UploadDate"]</label><input class="form-control form-control-sm" name="DTM_UPLOAD" type="datetime-local"></div>
+                    <div class="col-12 col-md-3 master-price-field" data-master-price-audit hidden><label class="form-label small">@Localizer["Uploader"]</label><input class="form-control form-control-sm" name="CHR_UPLOAD_USERID"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["QuotationRequestNumber"]</label><input class="form-control form-control-sm" name="CHR_QUOTATION_REQUEST_NO"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["QuotationDetailId"]</label><input class="form-control form-control-sm" name="INT_QUOTATION_DETAIL" type="number"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["EquipmentCode"]</label><input class="form-control form-control-sm" name="CHR_EQUIPMENT_CODE"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["InternalMaterialCode"]<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="CHR_INTERNAL_PART_CODE" readonly></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["SupplierItemCode"]</label><input class="form-control form-control-sm" name="CHR_VENDOR_PART_CODE"></div>
+                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">@Localizer["ItemNameVN"]<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="NVCHR_PART_NAME_VN"></div>
+                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">@Localizer["ItemNameEN"]</label><input class="form-control form-control-sm" name="NVCHR_PART_NAME_EN"></div>
+                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">@Localizer["Unit"] <span class="text-danger">*</span></label><input class="form-control form-control-sm" name="NVCHR_UNIT"></div>
+                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">@Localizer["OtherRequirement"]</label><textarea class="form-control form-control-sm" name="NVCHR_OTHER_REQUIREMENT"></textarea></div>
+                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">@Localizer["ManufacturerOrigin"]</label><input class="form-control form-control-sm" name="NVCHR_MAKER_ORIGIN"></div>
+                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">@Localizer["Quantity"]</label><input class="form-control form-control-sm" name="DEC_QUANTITY" type="number"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["SupplierCode"]<span class="text-danger">*</span></label><select class="form-select form-select-sm searchable-select" name="CHR_VENDOR_CODE"><option value="">@Localizer["SelectSupplier"]</option>@foreach (var vendor in listNCC) { <option value="@vendor.Ma">@vendor.Ma - @(vendor.ShortName == null ? vendor.Ten : vendor.ShortName) </option> }</select></div>
+                    <div class="col-12 col-md-4 master-price-field"><label class="form-label small">@Localizer["SupplierName"]</label><input class="form-control form-control-sm" name="NVCHR_VENDOR_NAME"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["SupplierUnitPrice"]<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="DEC_UNIT_PRICE" type="number"></div>
+                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">@Localizer["Currency"]<span class="text-danger">*</span></label><br><select class="form-select form-select-sm" name="CHR_CURRENCY"><option value="">@Localizer["SelectCurrency"]</option><option>VND</option><option>JPY</option><option>USD</option></select></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["UnitPriceUSD"]</label><input class="form-control form-control-sm" name="DEC_UNIT_PRICE_USD" type="number" readonly></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["LeadTimeDays"]</label><input class="form-control form-control-sm" name="INT_LEAD_TIME_DAY" type="number"></div>
+                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">@Localizer["MOQ"]</label><input class="form-control form-control-sm" name="DEC_MOQ" type="number"></div>
+                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">@Localizer["Note"]</label><textarea class="form-control form-control-sm" name="NVCHR_REMARK"></textarea></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["DeliveryTerm"]</label><input class="form-control form-control-sm" name="NVCHR_DELIVERY_TERM"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["DeliveryPlace"]</label><input class="form-control form-control-sm" name="NVCHR_PLACE"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["DeliveryMethod"]</label><input class="form-control form-control-sm" name="NVCHR_SHIPMENT_METHOD"></div>
+                    <div class="col-12 col-md-2 master-price-field"><label class="form-label small">@Localizer["VATPercent"]</label><input class="form-control form-control-sm" name="DEC_VAT_PERCENT" type="number"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["PaymentTerms"]</label><input class="form-control form-control-sm" name="NVCHR_PAYMENT_TERM"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["EffectiveDate"]<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="DTM_PRICE_EFFECTIVE" type="datetime-local"></div>
+                    <div class="col-12 col-md-3 master-price-field"><label class="form-label small">@Localizer["ExpirationDate"]<span class="text-danger">*</span></label><input class="form-control form-control-sm" name="DTM_PRICE_EXPIRATION" type="datetime-local"></div>
+                    <div class="col-12 col-md-3 master-price-field"><div class="form-check mt-4"><input class="form-check-input" name="BIT_FIX_VENDOR" type="checkbox"><label class="form-check-label">@Localizer["FixedSupplier"]</label></div></div>
+                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">@Localizer["AdjustmentReason"]</label><textarea class="form-control form-control-sm" name="NVCHR_ADJUSTMENT_REASON"></textarea></div>
+                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">@Localizer["QuotationLink"]<span class="text-danger">*</span></label><input type="file" class="form-control form-control-sm master-price-file-input" style="min-height: 36px;" data-link-field="NVCHR_QTN_LINK" accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.zip,.csv"><input class="form-control form-control-sm mt-1" name="NVCHR_QTN_LINK" placeholder="@Localizer["NoFileSelected"]" readonly></div>
+                    <div class="col-12 col-md-6 master-price-field"><label class="form-label small">@Localizer["QuotationExcelLink"]<span class="text-danger">*</span></label><input type="file" class="form-control form-control-sm master-price-file-input" style="min-height: 36px;" data-link-field="NVCHR_QTN_EXCEL_LINK" accept=".pdf,.doc,.docx,.xls,.xlsx,.dwg,.zip,.csv"><input class="form-control form-control-sm mt-1" name="NVCHR_QTN_EXCEL_LINK" placeholder="@Localizer["NoFileSelected"]" readonly></div>
                     <div class="col-12 col-md-3 master-price-field" data-master-price-audit hidden><label class="form-label small">Người tạo</label><input class="form-control form-control-sm" name="CHR_CRT_USERID"></div>
                     <div class="col-12 col-md-3 master-price-field" data-master-price-audit hidden><label class="form-label small">Ngày tạo</label><input class="form-control form-control-sm" name="DTM_CREATE" type="datetime-local"></div>
                     <div class="col-12 col-md-3 master-price-field" data-master-price-audit hidden><label class="form-label small">Người cập nhật</label><input class="form-control form-control-sm" name="CHR_UPD_USERID"></div>
                     <div class="col-12 col-md-3 master-price-field" data-master-price-audit hidden><label class="form-label small">Ngày cập nhật</label><input class="form-control form-control-sm" name="DTM_UPDATE" type="datetime-local"></div>
                 </div>
             </div>
-            <div class="master-price-modal-footer"><button type="button" class="btn btn-secondary" data-master-price-close="edit">Hủy</button><button type="submit" class="btn btn-primary" id="masterPriceSaveButton"><i class="fas fa-save me-1"></i>Lưu thay đổi</button></div>
+            <div class="master-price-modal-footer"><button type="button" class="btn btn-secondary" data-master-price-close="edit">@Localizer["Cancel"]</button><button type="submit" class="btn btn-primary" id="masterPriceSaveButton"><i class="fas fa-save me-1"></i>@Localizer["MasterPriceSaveButton"]</button></div>
         </form>
     </div>
     <div class="master-price-backdrop" data-master-price-close="edit"></div>
@@ -1061,10 +1064,71 @@
             ,HideDetails = Localizer["HideDetails"].Value
             , UnHideDetail = Localizer["UnHideDetail"].Value
             , ShowDetails = Localizer["ShowDetails"].Value
-            , SupplierValidationWarningTitle = "Cảnh báo lựa chọn nhà cung cấp"
-            , SupplierValidationContinue = "Tiếp tục"
-            , SupplierValidationClose = "Đóng"
-            , SupplierValidationExport = "Xuất dữ liệu lỗi"
+            , SupplierValidationWarningTitle = Localizer["SupplierValidationWarningTitle"].Value
+            , SupplierValidationContinue = Localizer["SupplierValidationContinue"].Value
+            , SupplierValidationClose = Localizer["SupplierValidationClose"].Value
+            , SupplierValidationExport = Localizer["SupplierValidationExport"].Value
+             , MasterPriceTab = Localizer["MasterPriceTab"].Value
+             , MasterPriceSearchTitle = Localizer["MasterPriceSearchTitle"].Value
+             , MasterPriceListTitle = Localizer["MasterPriceListTitle"].Value
+             , MasterPriceHistoryTitle = Localizer["MasterPriceHistoryTitle"].Value
+             , SampleFile = Localizer["SampleFile"].Value
+             , Effective = Localizer["Effective"].Value
+             , Expired = Localizer["Expired"].Value
+             , QuotationDetailCount = Localizer["QuotationDetailCount", "{0}"].Value
+             , Filter = Localizer["Filter"].Value
+             , ExportData = Localizer["ExportData"].Value
+             , EnterRequiredFields = Localizer["EnterRequiredFields"].Value
+             , NoMatchingData = Localizer["NoMatchingData"].Value
+             , MasterPriceLoading = Localizer["MasterPriceLoading"].Value
+             , MasterPriceSaveSuccess = Localizer["MasterPriceSaveSuccess"].Value
+             , MasterPriceAddSuccess = Localizer["MasterPriceAddSuccess"].Value
+             , MasterPriceSaveError = Localizer["MasterPriceSaveError"].Value
+               , MasterPriceExchangeRateError = Localizer["MasterPriceExchangeRateError"].Value
+               , MasterPriceHistoryLoadError = Localizer["MasterPriceHistoryLoadError"].Value
+               , MasterPriceHistoryExportError = Localizer["MasterPriceHistoryExportError"].Value
+               , MasterPriceMaterialLoadError = Localizer["MasterPriceMaterialLoadError"].Value
+               , MasterPriceMaterialNotFound = Localizer["MasterPriceMaterialNotFound"].Value
+               , MasterPriceCodeLabel = Localizer["MasterPriceCodeLabel", "{0}"].Value
+               , MasterPriceNoRecord = Localizer["MasterPriceNoRecord"].Value
+               , MasterPriceLoadError = Localizer["MasterPriceLoadError"].Value
+               , MasterPriceTemplateLoading = Localizer["MasterPriceTemplateLoading"].Value
+               , MasterPriceTemplateNotFound = Localizer["MasterPriceTemplateNotFound", "MasterGia.xlsx"].Value
+               , MasterPriceTemplateLoadError = Localizer["MasterPriceTemplateLoadError", "MasterGia.xlsx"].Value
+               , MasterPriceExportLoading = Localizer["MasterPriceExportLoading"].Value
+               , MasterPriceExportError = Localizer["MasterPriceExportError"].Value
+               , MasterPriceCountError = Localizer["MasterPriceCountError"].Value
+               , PriceIncreaseReasonRequired = Localizer["PriceIncreaseReasonRequired"].Value
+               , ReasonPlaceholder = Localizer["ReasonPlaceholder"].Value
+               , ReasonSuggestion = Localizer["ReasonSuggestion"].Value
+               , CustomsNoNeed = Localizer["CustomsNoNeed"].Value
+               , CustomsNeed = Localizer["CustomsNeed"].Value
+               , MasterPriceImportSuccess = Localizer["MasterPriceImportSuccess"].Value
+               , MasterPriceImportSaveError = Localizer["MasterPriceImportSaveError"].Value
+               , MasterPriceImportReadError = Localizer["MasterPriceImportReadError"].Value
+               , MasterPriceInvalidNumber = Localizer["MasterPriceInvalidNumber"].Value
+               , MasterPriceInvalidInteger = Localizer["MasterPriceInvalidInteger"].Value
+               , MasterPriceInvalidDate = Localizer["MasterPriceInvalidDate"].Value
+               , MasterPriceInternalCodeRequired = Localizer["MasterPriceInternalCodeRequired"].Value
+               , MasterPriceVendorCodeRequired = Localizer["MasterPriceVendorCodeRequired"].Value
+               , MasterPriceVendorNameRequired = Localizer["MasterPriceVendorNameRequired"].Value
+               , MasterPriceExpirationInvalid = Localizer["MasterPriceExpirationInvalid"].Value
+               , MasterPriceSupplierDecisionInvalid = Localizer["MasterPriceSupplierDecisionInvalid"].Value
+               , CustomsDeclaration = Localizer["CustomsDeclaration"].Value
+               , MasterPriceEditTitle = Localizer["MasterPriceEditTitle"].Value
+               , MasterPriceLatestRecord = Localizer["MasterPriceLatestRecord"].Value
+               , MasterPriceAddTitle = Localizer["MasterPriceAddTitle"].Value
+               , MasterPriceAddButton = Localizer["MasterPriceAddButton"].Value
+               , MasterPriceSaveButton = Localizer["MasterPriceSaveButton"].Value
+               , SelectCurrency = Localizer["SelectCurrency"].Value
+               , NoFileSelected = Localizer["NoFileSelected"].Value
+               , SupplierValidationDetected = Localizer["SupplierValidationDetected"].Value
+               , SupplierValidationNoSelection = Localizer["SupplierValidationNoSelection"].Value
+               , SupplierValidationZeroPrice = Localizer["SupplierValidationZeroPrice"].Value
+               , SupplierValidationExpired = Localizer["SupplierValidationExpired"].Value
+               , SupplierValidationMissingLink = Localizer["SupplierValidationMissingLink"].Value
+               , SelectReason = Localizer["SelectReason"].Value
+               ,EnterSelect = Localizer["EnterSelect"].Value
         }));
     </script>
 }

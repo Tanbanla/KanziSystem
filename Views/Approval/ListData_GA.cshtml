@@ -140,29 +140,31 @@
                 <!-- Hàng duy nhất chứa tất cả các bộ lọc và nút -->
                 <div class="row col-12 align-items-end mt-2">
                     <!-- Phòng ban -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
-
-                            <select class="form-control form-control-sm" id="phongban" onchange="filterTable()">
+                            <label>@Languages.Phongban :</label>
+                            <select class="form-control form-control-sm" id="phongban" onchange="Load_cost(this.value)">
                                 <option value=""></option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Cost center -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
-                            <select class="form-control form-control-sm" id="costcenter" onchange="filterTable()">
-                                <option value=""></option>
+                            <label>Cost Center :</label>
+                            <select class="form-control form-control-sm" id="costcenter" onchange="_load_confirm_GA()">
+                                <option value="">-- @Languages.chon --</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Số tiền -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
+                            <label>@Languages.Sotien :</label>
                             <select class="form-control form-control-sm" id="giadonhang" onchange="_load_confirm_GA()">
-                                <option value="">- @Languages.Sotien -</option>
+                                <option value="">-- @Languages.chon --</option>
                                 <option value="2999"> &lt; 3000</option>
                                 <option value="3000">3000 ~ 10,000</option>
                                 <option value="10000"> &gt; 10,000</option>
@@ -171,20 +173,22 @@
                     </div>
 
                     <!-- Phân loại hàng -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
+                            <label>@Languages.loaihang :</label>
                             <select class="form-control form-control-sm" id="phanloaihang">
-                                <option value="">- @Languages.loaihang -</option>
+                                <option value="">-- @Languages.chon --</option>
                                 <option value="B">B</option>                             
                             </select>
                         </div>
                     </div>
 
                     <!-- Tình trạng đơn -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
+                            <label>@Languages.Phanloaiyeucau</label>
                             <select class="form-control form-control-sm" id="trangthaidon" onchange="_load_confirm_GA()">
-                                <option value=""> -- @Languages.Tinhtrangdon --</option>
+                                <option value="">-- @Languages.chon --</option>
                                 <option value="1">@Languages.Gap</option>
                                 <option value="0">@Languages.Thongthuong</option>
                             </select>
@@ -192,10 +196,11 @@
                     </div>
 
                     <!-- Trạng thái đơn -->
-                    <div class="col-lg-2 col-md-2 col-sm-6">
+                    <div class="col-lg-2 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
+                            <label>@Languages.Tinhtrangpheduyet :</label>
                             <select class="form-control form-control-sm" id="tinhtrangdon" onchange="_load_confirm_GA()">
-                                <option value="">- @Languages.Trangthaidon -</option>
+                                <option value="">-- @Languages.chon --</option>
                                 <option value="0">@Languages.Doinguoiduthao</option>
                                 <option value="1">@Languages.Doinguoithamtra</option>
                                 <option value="2">@Languages.Doinguoipheduyet</option>
@@ -205,7 +210,7 @@
                     </div>
 
                     <!-- Nút Tìm kiếm -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
                             <button type="button" class="btn btn-primary btn-sm btn-block" style="background-color: #0033cc; border-color: #0033cc; font-size: 11px;" onclick="_load_confirm_GA()">
                                 <i class="ion ion-ios-search-strong"></i> @Languages.timkiem
@@ -214,7 +219,7 @@
                     </div>
 
                     <!-- Nút Làm mới -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
                             <button type="button" class="btn btn-secondary btn-sm btn-block" style="font-size: 11px;" onclick="_reset_GA()">
                                 <i class="ion ion-ios-refresh"></i> @Languages.Lammoi
@@ -286,11 +291,13 @@
     let lst = [];
     const checkAll = document.getElementById('idd');
 
-    window.onload = function() {
-        var us = document.getElementById("us").innerHTML;
-        _load_confirm_GA(us);
-        LoadSelectData();
-    }
+        window.onload = function() {
+            var usElem = document.getElementById("us");
+            var us = usElem ? usElem.innerHTML : "";
+            _load_confirm_GA(us);
+            LoadSelectData();
+            Load_cost_first();
+        }
 
     document.addEventListener('change', function(e) {
         // 1. Xử lý logic Click vào nút "Chọn tất cả" (Check All)
@@ -522,7 +529,7 @@
         });
     });
 
-      function LoadSelectData() {
+    function LoadSelectData() {
         $.ajax({
             url: '/ipcs/ManagerDelivery/load_section',
             type: 'GET',
@@ -531,7 +538,7 @@
                 console.log(data);
                 var $phongban = $('#phongban');
                 $phongban.empty(); // Xóa dữ liệu cũ
-                $phongban.append('<option value="">- @Languages.Phongban -</option>'); // Dòng mặc định
+                $phongban.append('<option value="">-- @Languages.chon --</option>'); // Dòng mặc định
 
                 // 1. Duyệt trực tiếp qua mảng data
                 $.each(data, function (index, item) {
@@ -543,14 +550,17 @@
                 console.log("Lỗi khi tải Phòng ban:", error);
             }
         });
+       
+    }
+    function Load_cost(a){
         $.ajax({
             url: '/ipcs/ManagerDelivery/load_cost',
             type: 'POST',
             dataType: 'JSON',
+            data: { maCost: a },
             success: function (data) {
-                var $costcenter = $('#costcenter');
-                $costcenter.empty();
-                $costcenter.append('<option value="">- Cost -</option>');
+                var $costcenter =$('#costcenter');
+                $costcenter.empty();$costcenter.append('<option value="">-- @Languages.chon --</option>');
 
                 $.each(data, function (index, value) {
                     $costcenter.append('<option value="' + value + '">' + value + '</option>');
@@ -561,46 +571,84 @@
             }
         });
     }
+    function Load_cost_first(){
+        $.ajax({
+            url: '/ipcs/ManagerDelivery/load_cost_first',
+            type: 'POST',
+            dataType: 'JSON',
+            success: function (data) {
+                var $costcenter =$('#costcenter');
+                $costcenter.empty();$costcenter.append('<option value="">-- @Languages.chon --</option>');
 
+                $.each(data, function (index, value) {
+                    $costcenter.append('<option value="' + value + '">' + value + '</option>');
+                });
+            },
+
+            error: function (error) {
+                console.log("Lỗi khi tải Cost Center:", error);
+            }
+        });
+    }
     $(document).ready(function () {
-        // Thay đổi cách gọi sự kiện
-        $(document).on('change', '#phongban, #costcenter, #phanloaihang', function () {
+        $(document).on('change', '#costcenter, #phanloaihang', function () {
             filterTable();
+        });
+
+        // Lắng nghe mọi request Ajax hoàn thành
+        $(document).ajaxComplete(function(event, xhr, settings) {
+            // Nếu ajax request đó chứa đường dẫn lấy dữ liệu bảng (ví dụ url lấy danh sách đơn)
+            // Lưu ý: Cần điều chỉnh URL string này khớp với url API trong file request.js
+            if (settings.url.indexOf('_load_confirm_GA') !== -1 || settings.url.indexOf('Your_API_Get_List_Endpoint') !== -1) {
+                sortTableByTotalDesc();
+            }
         });
     });
 
     function filterTable() {
-            var selectedDept = ($('#phongban').val() || "").toLowerCase().trim();
-            var selectedCost = ($('#costcenter').val() || "").toLowerCase().trim();
-            var selectedHang = ($('#phanloaihang').val() || "").toLowerCase().trim(); // Lấy giá trị 'a' hoặc 'e'
+        var selectedCost = ($('#costcenter').val() || "").toLowerCase().trim();
+        var selectedHang = ($('#phanloaihang').val() || "").toLowerCase().trim();
 
-            $('#list_approve tr').each(function () {
-                var $row = $(this);
-                var rowText = $row.text().toLowerCase();
+        $('#list_approve tr').each(function () {
+            var $row =$(this);
+            var HangCellText = $row.find('td').eq(6).text().toLowerCase().trim();
+            var costCellText = $row.find('td').eq(7).text().toLowerCase().trim();
 
-                // Cột index 6 là Mã hàng, Cột index 7 là Cost Center (theo thead của bạn)
-                var HangCellText = $row.find('td').eq(5).text().toLowerCase().trim();
-                var costCellText = $row.find('td').eq(6).text().toLowerCase().trim();
+            var matchCost = (selectedCost === "") || costCellText.indexOf(selectedCost) > -1;
+            var matchHang = (selectedHang === "") || HangCellText.indexOf(selectedHang) > -1;
 
-                // 1. Lọc Phòng ban: Tìm trong toàn bộ text của dòng
-                var matchDept = (selectedDept === "") || rowText.indexOf(selectedDept) > -1;
+            if (matchCost && matchHang) {
+                $row.show();
+            } else {
+                $row.hide();
+            }
+            sortTableByTotalDesc();
+        });
+    }
 
-                // 2. Lọc Cost Center: CHỈ TÌM TRONG CỘT 7 (Bỏ rowText.indexOf để tránh nhiễu dữ liệu với số tiền/ngày tháng)
-                var matchCost = (selectedCost === "") || costCellText.indexOf(selectedCost) > -1;
+    function sortTableByTotalDesc() {
 
-                // 3. Lọc Mã hàng (Phân loại A/E): CHỈ TÌM TRONG CỘT 6 (Bỏ rowText.indexOf)
-                // Dùng indexOf nếu mã hàng CÓ CHỨA 'A' hoặc 'E'
-                var matchHang = (selectedHang === "") || HangCellText.indexOf(selectedHang) > -1;
+        let rows = $('#list_approve tr').get();
 
+        rows.sort(function(a, b) {
 
+            let aVal = parseFloat(
+                $(a).find('td').eq(10).text()
+                    .replace(/,/g, '')
+                    .trim()
+            ) || 0;
 
-                // 4. Ẩn/Hiện dòng theo kết quả lọc
-                if (matchDept && matchCost && matchHang) {
-                    $row.show();
-                } else {
-                    $row.hide();
-                }
-            });
-        }
+            let bVal = parseFloat(
+                $(b).find('td').eq(10).text()
+                    .replace(/,/g, '')
+                    .trim()
+            ) || 0;
+
+            return bVal - aVal;
+        });
+
+        $('#list_approve').append(rows);
+    }
+
 </script>
 }

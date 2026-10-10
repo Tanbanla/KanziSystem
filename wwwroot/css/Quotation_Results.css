@@ -211,6 +211,14 @@
     z-index: 10;
 }
 
+#masterPriceHistoryHead th {
+    background-color: #2335b7 !important;
+    color: #fff !important;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
     .table-header-custom:hover {
         background-color: #1a2a9a !important;
         color: white !important;
@@ -831,7 +839,7 @@ td[style*="#ffecec"] {
 .master-price-edit-modal > form > .master-price-modal-body { flex: 1 1 auto; }
 .master-price-history-table-wrap { max-height: 66vh; overflow: auto; border: 1px solid #dbe4ef; border-radius: .35rem; background: #f8fafc; }
 .master-price-history-table-wrap table { min-width: 3300px; margin: 0; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
-.master-price-history-table-wrap thead th { position: sticky; top: 0; z-index: 2; height: 42px; padding: .55rem .45rem; white-space: normal; vertical-align: middle; text-align: center; background: #eaf2ff; color: #1e3a8a; border-bottom: 2px solid #b9cbe3; font-size: .73rem; line-height: 1.2; }
+.master-price-history-table-wrap thead th { position: sticky; top: 0; z-index: 3; height: 56px; padding: .55rem .45rem; white-space: normal; vertical-align: middle; text-align: center; background: #2335b7 !important; color: #fff !important; border-bottom: 2px solid #1a2a9a; font-size: .73rem; line-height: 1.2; }
 .master-price-history-table-wrap tbody td { min-height: 38px; padding: .45rem .5rem; vertical-align: middle; white-space: normal; overflow-wrap: anywhere; word-break: break-word; font-size: .74rem; line-height: 1.35; border-color: #e2e8f0; }
 .master-price-history-table-wrap tbody tr:nth-child(even) td { background: #fbfdff; }
 .master-price-history-table-wrap tbody tr:hover td { background: #eef6ff; }
@@ -840,7 +848,7 @@ td[style*="#ffecec"] {
 .master-price-history-table-wrap th:nth-child(3), .master-price-history-table-wrap td:nth-child(3) { width: 145px; }
 .master-price-history-table-wrap th:nth-child(4), .master-price-history-table-wrap td:nth-child(4) { width: 105px; }
 .master-price-history-table-wrap th:nth-child(5), .master-price-history-table-wrap td:nth-child(5) { width: 150px; }
-.master-price-history-table-wrap th:nth-child(6), .master-price-history-table-wrap td:nth-child(6) { width: 92px; text-align: center; }
+.master-price-history-table-wrap th:nth-child(6), .master-price-history-table-wrap td:nth-child(6) { width: 155px; min-width: 155px; text-align: center; }
 .master-price-history-table-wrap th:nth-child(7), .master-price-history-table-wrap td:nth-child(7) { width: 115px; }
 .master-price-history-table-wrap th:nth-child(8), .master-price-history-table-wrap td:nth-child(8) { width: 145px; }
 .master-price-history-table-wrap th:nth-child(9), .master-price-history-table-wrap td:nth-child(9) { width: 145px; }

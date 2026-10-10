@@ -52,6 +52,25 @@ namespace PRJ_WAREHOUSE_BIVN.Services.Service.Implementations
             return result;
         }
 
+        public async Task<GenericResponse<List<TM_PRICE_MASTERDTO>>> InsertByDetailQuotationAsync(List<BaoGia_Detail_of_QuotationDTO> details)
+        {
+            var result = new GenericResponse<List<TM_PRICE_MASTERDTO>>();
+            try
+            {
+                var entities = _mapper.Map<List<BaoGia_Detail_of_Quotation>>(details);
+                var data = await _repo.InsertByDetailQuotation(entities);
+                result.Data = _mapper.Map<List<TM_PRICE_MASTERDTO>>(data);
+                result.Success = true;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+            }
+
+            return result;
+        }
+
         public async Task<GenericResponse<int>> InsertImportedAsync(IReadOnlyCollection<TM_PRICE_MASTER> priceMasters)
         {
             var result = new GenericResponse<int>();

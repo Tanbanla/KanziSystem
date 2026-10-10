@@ -623,4 +623,13 @@
   <data name="TotalAfterTax" xml:space="preserve"><value>Tổng tiền sau thuế</value></data>
   <data name="Warranty" xml:space="preserve"><value>Bảo hành</value></data>
   <data name="Manufacturer" xml:space="preserve"><value>Nhà sản xuất</value></data>
+  <data name="UpdateQuotation" xml:space="preserve">
+    <value>Cập nhật BG</value>
+  </data>
+  <data name="UpdateQuotationInfo" xml:space="preserve">
+    <value>Cập nhật thông tin</value>
+  </data>
+  <data name="ReapproveQuotation" xml:space="preserve">
+    <value>Chọn lại nhà cung cấp</value>
+  </data>
 </root>

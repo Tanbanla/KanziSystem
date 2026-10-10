@@ -64,7 +64,18 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     throw new InvalidOperationException(
                         $"Quotation detail {detail.ID} does not have complete vendor information.");
                 }
+                // Tổng hợp Other request từ các trường ROHS, COCQ, MSDS, AnToan
+                var otherRequestList = new List<string>();
+                if (!string.IsNullOrEmpty(request.NVCHR_Rohs))
+                    otherRequestList.Add($"ROHS: {request.NVCHR_Rohs}");
+                if (!string.IsNullOrEmpty(request.NVCHR_COCQ))
+                    otherRequestList.Add($"COCQ: {request.NVCHR_COCQ}");
+                if (!string.IsNullOrEmpty(request.NVCHR_MSDS))
+                    otherRequestList.Add($"MSDS: {request.NVCHR_MSDS}");
+                if (!string.IsNullOrEmpty(request.NVCHR_AnToan))
+                    otherRequestList.Add($"An toàn: {request.NVCHR_AnToan}");
 
+                string otherRequest = string.Join(" & ", otherRequestList);
                 return new TM_PRICE_MASTER
                 {
                     DTM_UPLOAD = now,
@@ -77,7 +88,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     NVCHR_PART_NAME_VN = detail.NVCHR_TenHangHQ ?? request.NVCHR_NameVN,
                     NVCHR_PART_NAME_EN = detail.CHR_NameEN,
                     NVCHR_UNIT = detail.NVCHR_DonVi ?? request.NVCHR_DonVi,
-                    NVCHR_OTHER_REQUIREMENT = detail.NVCHR_Note,
+                    NVCHR_OTHER_REQUIREMENT = otherRequest,
                     NVCHR_MAKER_ORIGIN = request.NVCHR_NhaSanXuat,
                     DEC_QUANTITY = detail.INT_SoLuong ?? request.INT_SoLuong,
                     CHR_VENDOR_CODE = detail.CHR_CodeNCC,
@@ -106,7 +117,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     DTM_PRICE_EFFECTIVE = detail.DTM_EffectiveDate,
                     DTM_PRICE_EXPIRATION = detail.DTM_ExpiryDate ?? detail.DTM_EndDate,
                     NVCHR_QTN_LINK = detail.NVCHR_File,
-                    CHR_CRT_USERID = detail.CHR_CreateBy,
+                    CHR_CRT_USERID = "system",
                     DTM_CREATE = now
                 };
             }).ToList();

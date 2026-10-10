@@ -623,4 +623,13 @@
   <data name="TotalAfterTax" xml:space="preserve"><value>Total after tax</value></data>
   <data name="Warranty" xml:space="preserve"><value>Warranty</value></data>
   <data name="Manufacturer" xml:space="preserve"><value>Manufacturer</value></data>
+  <data name="UpdateQuotation" xml:space="preserve">
+    <value>Update Quotation</value>
+  </data>
+  <data name="UpdateQuotationInfo" xml:space="preserve">
+    <value>Update Quotation Infor</value>
+  </data>
+  <data name="ReapproveQuotation" xml:space="preserve">
+    <value>Reselect supplier</value>
+  </data>
 </root>

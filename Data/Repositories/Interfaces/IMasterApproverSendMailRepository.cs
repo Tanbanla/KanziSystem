@@ -15,7 +15,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Interfaces
         // Lấy thông tin phê duyệt step của phòng ban
         public Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByStepAndSectionAsync(int idStep, string sectionCode);
         // Lấy approver step 5 theo phòng ban PIC có role PUR/GA
-        public Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByPicDepartmentsAsync(string role);
+        public Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByPicDepartmentsAsync(string role, int step);
         public Task<List<dynamic>> GetApproverByAgrentAsync(int idStep, string sectionCode, string role);
         // Inser thông tin và đăng ký user đăng nhập
         public Task<bool> InsertMasterApproverSendMailAsync(List<BaoGia_Master_Approver_Send_Mail> dtos);

@@ -623,4 +623,13 @@
   <data name="TotalAfterTax" xml:space="preserve"><value>税込合計</value></data>
   <data name="Warranty" xml:space="preserve"><value>保証</value></data>
   <data name="Manufacturer" xml:space="preserve"><value>メーカー</value></data>
+  <data name="UpdateQuotation" xml:space="preserve">
+    <value>見積もりを更新する</value>
+  </data>
+  <data name="UpdateQuotationInfo" xml:space="preserve">
+    <value>見積もり情報の更新</value>
+  </data>
+  <data name="ReapproveQuotation" xml:space="preserve">
+    <value>サプライヤーを再選択する</value>
+  </data>
 </root>

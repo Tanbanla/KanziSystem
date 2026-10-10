@@ -3744,31 +3744,71 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var resultList = new List<object>();
 
             // Câu lệnh SQL lấy cặp dữ liệu MaPhong và MaCost không trùng lặp
-            var lt = db.GET_DATA_FROM_SQL("SELECT DISTINCT MaPhong, MaCost FROM [DEPARTMENT_VITRI] WHERE MaPhong IS NOT NULL");
+            var lt = db.GET_DATA_FROM_SQL("select [CHR_CODE],[CHR_NAME] from [Section] order by CHR_NAME ");
 
             for (int i = 0; i < lt.Rows.Count; i++)
             {
                 resultList.Add(new
                 {
-                    MaPhong = lt.Rows[i]["MaPhong"]?.ToString() ?? "",
-                    MaCost = lt.Rows[i]["MaCost"]?.ToString() ?? ""
+                    MaPhong = lt.Rows[i]["CHR_NAME"]?.ToString() ?? "",
+                    MaCost = lt.Rows[i]["CHR_CODE"]?.ToString() ?? ""
                 });
             }
 
             return Json(resultList);
         }
-        public JsonResult load_cost()
+        public JsonResult load_cost(string macost)
         {
             SQL_Connect_DB20 db = new SQL_Connect_DB20();
             List<string> mp = new List<string>();
-            var lt = db.GET_DATA_FROM_SQL("select distinct([MaCost]) from [DEPARTMENT_VITRI]  ");
+            var lt = db.GET_DATA_FROM_SQL($"select b.Cost_Center from [Section] as a left join DEPARTMENT as b on a.CHR_CODE = b.CHR_Section_Code where CHR_Section_Code = '{macost}' ");
             for (int i = 0; i < lt.Rows.Count; i++)
             {
                 mp.Add(lt.Rows[i][0].ToString()!);
             }
             return Json(mp);
         }
+        public JsonResult load_cost_first()
+        {
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+            List<string> mp = new List<string>();
+            var lt = db.GET_DATA_FROM_SQL($"select b.Cost_Center from [Section] as a left join DEPARTMENT as b on a.CHR_CODE = b.CHR_Section_Code order by b.Cost_Center");
+            for (int i = 0; i < lt.Rows.Count; i++)
+            {
+                mp.Add(lt.Rows[i][0].ToString()!);
+            }
+            return Json(mp);
+        }
+        public IActionResult SET_DONE()
+        {
+            return View();
+        }
+        [HttpPost]
+        public JsonResult UpdateStatus(string poid)
+        {
 
+            if (string.IsNullOrWhiteSpace(poid))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Vui lòng nhập PO"
+                });
+            }
+            var us = User.FindFirst("UserId")?.Value;
+            SQL_Connect_DB20 db = new SQL_Connect_DB20();
+
+            string query = @$"UPDATE [COST_MANAGEMENT].[dbo].[PO]
+                        SET TinhtrangPO = 'HOANTHANH'
+                        WHERE SoPO = '{poid}'";
+            db.EXECUTE_SQL(query);
+            db.EXECUTE_SQL($"INSERT INTO PE_LOG_PODONE (DTM,USERID,SoPO) values ('{DateTime.Now}','{us}','{poid}')");
+            return Json(new
+            {
+                success = true,
+                message = $"Đã cập nhật PO '{poid}' thành DONE thành công!"
+            });                        
+        }
     }
 }
 

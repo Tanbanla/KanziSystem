@@ -570,4 +570,10 @@
   <data name="Thanhtoan" xml:space="preserve">
     <value>Payment</value>
   </data>
+  <data name="Phanloaiyeucau" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="Tinhtrangpheduyet" xml:space="preserve">
+    <value>Approval Status</value>
+  </data>
 </root>

@@ -268,7 +268,7 @@
     <value>Tên hàng VN</value>
   </data>
   <data name="ItemNameEN" xml:space="preserve">
-    <value>Tên hàng EN</value>
+    <value>Tên hàng tiếng Anh</value>
   </data>
   <data name="Shape" xml:space="preserve">
     <value>Hình dáng</value>
@@ -616,13 +616,19 @@
     <value>Quy trình phê duyệt</value>
   </data>
   <data name="ApprovalFlowLine1" xml:space="preserve">
-    <value>• Dưới 3,000 USD (66 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Phó trưởng bộ phận.</value>
+    <value>• Luồng hàng hóa :
+     • PUR: Người phụ trách → Quản lý sơ cấp → Quản lý trung cấp → Quản lý cao cấp → Xác nhận tên hải quan.
+     • GA : Người phụ trách → Quản lý sơ cấp → (trên 100tr) Quản lý trung cấp → Xác nhận tên hải quan.
+     </value>
   </data>
   <data name="ApprovalFlowLine2" xml:space="preserve">
-    <value>• Dưới 10,000 USD (220 triệu VNĐ) : Người phụ trách → Quản lý trung cấp → Trưởng bộ phận.</value>
+    <value>• Luồng dịch vụ :
+    •  PUR: Người phụ trách → Quản lý sơ cấp → Quản lý trung cấp → Quản lý cao cấp → Xác nhận tên hải quan.
+    •  GA : Người phụ trách → Quản lý sơ cấp → (trên 100tr) Quản lý trung cấp → Xác nhận tên hải quan.</value>
   </data>
   <data name="ApprovalFlowLine3" xml:space="preserve">
-    <value>• Từ 10,000 USD (220 triệu VNĐ) trở lên : Quản lý trung cấp → Trưởng bộ phận/Phó trưởng bộ phận → Tổng Giám đốc/Giám đốc.</value>
+    <value>• Luồng công trình dịch vụ :
+ •  (GA) Người phụ trách → Quản lý sơ cấp → Quản lý trung cấp → Xác nhận tên hải quan.</value>
   </data>
   <data name="ApprovalFlowLine4" xml:space="preserve">
     <value>→ Phê duyệt xuất kho (PR1-MC): Quản lý sơ cấp/quản lý trung cấp → Kho Kanzai</value>
@@ -825,5 +831,293 @@
   </data>
   <data name="RequestList" xml:space="preserve">
     <value>Danh sách đơn</value>
+  </data>
+  <data name="MasterPriceTab" xml:space="preserve">
+    <value>Master giá</value>
+  </data>
+  <data name="MasterPriceSearchTitle" xml:space="preserve">
+    <value>Tìm kiếm master giá</value>
+  </data>
+  <data name="MasterPriceSearchDescription" xml:space="preserve">
+    <value>Lọc theo thông tin đơn hàng, hàng hóa và trạng thái</value>
+  </data>
+  <data name="EnterEquipmentCode" xml:space="preserve">
+    <value>Nhập mã thiết bị</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>Chọn chủng loại</value>
+  </data>
+  <data name="EnterSupplierItemCode" xml:space="preserve">
+    <value>Nhập mã hàng NCC</value>
+  </data>
+  <data name="FromDate" xml:space="preserve">
+    <value>Từ ngày</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>Đến ngày</value>
+  </data>
+  <data name="Effective" xml:space="preserve">
+    <value>Còn hiệu lực</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>Hết hiệu lực</value>
+  </data>
+  <data name="MaterialGroup" xml:space="preserve">
+    <value>Nhóm hàng</value>
+  </data>
+  <data name="SampleFile" xml:space="preserve">
+    <value>File mẫu</value>
+  </data>
+  <data name="MasterPriceListTitle" xml:space="preserve">
+    <value>Danh sách master giá</value>
+  </data>
+  <data name="ImportExcelFile" xml:space="preserve">
+    <value>Nhập file Excel</value>
+  </data>
+  <data name="ExportData" xml:space="preserve">
+    <value>Xuất dữ liệu</value>
+  </data>
+  <data name="QuotationDetailCount" xml:space="preserve">
+    <value>Số chi tiết đơn yêu cầu báo giá: {0}</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Hành động</value>
+  </data>
+  <data name="UploadDate" xml:space="preserve">
+    <value>Ngày upload</value>
+  </data>
+  <data name="PICUpload" xml:space="preserve">
+    <value>PIC upload</value>
+  </data>
+  <data name="QuotationRequestNumber" xml:space="preserve">
+    <value>Số đơn yêu cầu báo giá</value>
+  </data>
+  <data name="OtherRequirement" xml:space="preserve">
+    <value>Yêu cầu khác</value>
+  </data>
+  <data name="ManufacturerOrigin" xml:space="preserve">
+    <value>Nhà sản xuất/Xuất xứ</value>
+  </data>
+  <data name="SupplierUnitPrice" xml:space="preserve">
+    <value>Đơn giá nhà cung cấp</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Đơn vị tiền</value>
+  </data>
+  <data name="UnitPriceUSD" xml:space="preserve">
+    <value>Đơn giá USD</value>
+  </data>
+  <data name="PriceEffectiveDate" xml:space="preserve">
+    <value>Hiệu lực báo giá</value>
+  </data>
+  <data name="PriceExpirationDate" xml:space="preserve">
+    <value>Ngày hết hạn báo giá</value>
+  </data>
+  <data name="SupplierDecision" xml:space="preserve">
+    <value>Quyết định NCC</value>
+  </data>
+  <data name="AdjustmentReason" xml:space="preserve">
+    <value>Lý do điều chỉnh</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Lọc</value>
+  </data>
+  <data name="MasterPriceHistoryTitle" xml:space="preserve">
+    <value>Lịch sử master giá</value>
+  </data>
+  <data name="Uploader" xml:space="preserve">
+    <value>Người upload</value>
+  </data>
+  <data name="QuotationDetailId" xml:space="preserve">
+    <value>ID chi tiết báo giá</value>
+  </data>
+  <data name="LeadTimeDays" xml:space="preserve">
+    <value>Thời gian giao hàng (ngày)</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Ghi chú</value>
+  </data>
+  <data name="DeliveryTerm" xml:space="preserve">
+    <value>Điều kiện giao hàng</value>
+  </data>
+  <data name="DeliveryPlace" xml:space="preserve">
+    <value>Địa điểm giao hàng</value>
+  </data>
+  <data name="EffectiveDate" xml:space="preserve">
+    <value>Ngày hiệu lực</value>
+  </data>
+  <data name="ExpirationDate" xml:space="preserve">
+    <value>Ngày hết hạn</value>
+  </data>
+  <data name="FixedSupplier" xml:space="preserve">
+    <value>Cố định nhà cung cấp</value>
+  </data>
+  <data name="QuotationLink" xml:space="preserve">
+    <value>Link báo giá</value>
+  </data>
+  <data name="QuotationExcelLink" xml:space="preserve">
+    <value>Link file Excel báo giá</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>Người tạo</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>Ngày tạo</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>Người cập nhật</value>
+  </data>
+  <data name="UpdatedDate" xml:space="preserve">
+    <value>Ngày cập nhật</value>
+  </data>
+  <data name="EnterRequiredFields" xml:space="preserve">
+    <value>Vui lòng nhập đầy đủ các trường bắt buộc: {0}.</value>
+  </data>
+  <data name="NoMatchingData" xml:space="preserve">
+    <value>Chưa có dữ liệu phù hợp</value>
+  </data>
+  <data name="MasterPriceLoading" xml:space="preserve">
+    <value>Đang tải dữ liệu...</value>
+  </data>
+  <data name="MasterPriceSaveSuccess" xml:space="preserve">
+    <value>Đã cập nhật master giá.</value>
+  </data>
+  <data name="MasterPriceAddSuccess" xml:space="preserve">
+    <value>Đã thêm master giá.</value>
+  </data>
+  <data name="MasterPriceSaveError" xml:space="preserve">
+    <value>Không thể lưu master giá.</value>
+  </data>
+  <data name="CustomsDeclaration" xml:space="preserve">
+    <value>Khai báo hải quan</value>
+  </data>
+  <data name="MasterPriceEditTitle" xml:space="preserve">
+    <value>Chỉnh sửa master giá</value>
+  </data>
+  <data name="MasterPriceLatestRecord" xml:space="preserve">
+    <value>Đang hiển thị bản ghi mới nhất</value>
+  </data>
+  <data name="MasterPriceAddTitle" xml:space="preserve">
+    <value>Nhập master giá mới</value>
+  </data>
+  <data name="MasterPriceAddButton" xml:space="preserve">
+    <value>Thêm master giá</value>
+  </data>
+  <data name="MasterPriceSaveButton" xml:space="preserve">
+    <value>Lưu thay đổi</value>
+  </data>
+  <data name="VATPercent" xml:space="preserve">
+    <value>VAT (%)</value>
+  </data>
+  <data name="SelectCurrency" xml:space="preserve">
+    <value>Chọn tiền</value>
+  </data>
+  <data name="NoFileSelected" xml:space="preserve">
+    <value>Chưa có file hoặc chưa chọn file</value>
+  </data>
+  <data name="SupplierValidationWarningTitle" xml:space="preserve">
+    <value>Cảnh báo lựa chọn nhà cung cấp</value>
+  </data>
+  <data name="SupplierValidationDetected" xml:space="preserve">
+    <value>Phát hiện {0} lỗi. Bạn có muốn tiếp tục gửi dữ liệu không?</value>
+  </data>
+  <data name="SupplierValidationContinue" xml:space="preserve">
+    <value>Tiếp tục</value>
+  </data>
+  <data name="SupplierValidationExport" xml:space="preserve">
+    <value>Xuất dữ liệu lỗi</value>
+  </data>
+  <data name="SupplierValidationClose" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="SupplierValidationNoSelection" xml:space="preserve">
+    <value>Có NCC báo giá nhưng toàn bộ NCC đang tick X, chưa chọn NCC nào.</value>
+  </data>
+  <data name="SupplierValidationZeroPrice" xml:space="preserve">
+    <value>Đã chọn NCC nhưng giá báo giá bằng 0.</value>
+  </data>
+  <data name="SupplierValidationExpired" xml:space="preserve">
+    <value>Đã chọn NCC nhưng báo giá đã hết hiệu lực.</value>
+  </data>
+  <data name="SupplierValidationMissingLink" xml:space="preserve">
+    <value>Đã chọn NCC nhưng link báo giá đang để trống.</value>
+  </data>
+  <data name="HighValueApproverNotice" xml:space="preserve">
+    <value>Có đơn hàng trên 100 triệu, vui lòng chọn QLTC để phê duyệt bước tiếp theo.</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Có</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="MasterPriceExchangeRateError" xml:space="preserve">
+    <value>Không thể lấy tỷ giá.</value>
+  </data>
+  <data name="MasterPriceHistoryLoading" xml:space="preserve">
+    <value>Đang tải lịch sử master giá...</value>
+  </data>
+  <data name="MasterPriceHistoryLoadError" xml:space="preserve">
+    <value>Không thể tải lịch sử master giá.</value>
+  </data>
+  <data name="MasterPriceHistoryExportError" xml:space="preserve">
+    <value>Không thể xuất lịch sử master giá.</value>
+  </data>
+  <data name="MasterPriceMaterialLoadError" xml:space="preserve">
+    <value>Không thể tải thông tin linh kiện.</value>
+  </data>
+  <data name="MasterPriceMaterialNotFound" xml:space="preserve">
+    <value>Không tìm thấy thông tin linh kiện.</value>
+  </data>
+  <data name="MasterPriceCodeLabel" xml:space="preserve">
+    <value>Mã hàng nội bộ: {0}</value>
+  </data>
+  <data name="MasterPriceNoRecord" xml:space="preserve">
+    <value>Không tìm thấy bản ghi master giá cho mã hàng này.</value>
+  </data>
+  <data name="MasterPriceLoadError" xml:space="preserve">
+    <value>Không thể tải master giá.</value>
+  </data>
+  <data name="MasterPriceTemplateLoading" xml:space="preserve">
+    <value>Đang tải file mẫu master giá...</value>
+  </data>
+  <data name="MasterPriceTemplateNotFound" xml:space="preserve">
+    <value>Không tìm thấy file mẫu {0}</value>
+  </data>
+  <data name="MasterPriceTemplateLoadError" xml:space="preserve">
+    <value>Không thể tải file mẫu {0}</value>
+  </data>
+  <data name="MasterPriceExportLoading" xml:space="preserve">
+    <value>Đang xuất dữ liệu master giá...</value>
+  </data>
+  <data name="MasterPriceExportError" xml:space="preserve">
+    <value>Không thể xuất dữ liệu master giá.</value>
+  </data>
+  <data name="MasterPriceCountError" xml:space="preserve">
+    <value>Không thể đếm dữ liệu.</value>
+  </data>
+  <data name="LatestPriceLoadError" xml:space="preserve">
+    <value>Không thể lấy giá gần nhất.</value>
+  </data>
+  <data name="PriceIncreaseReasonRequired" xml:space="preserve">
+    <value>Giá cao hơn giá đã đặt gần nhất trên 5%, bắt buộc nhập lý do.</value>
+  </data>
+  <data name="ReasonPlaceholder" xml:space="preserve">
+    <value>Nhập lý do...</value>
+  </data>
+  <data name="ReasonSuggestion" xml:space="preserve">
+    <value>Chọn gợi ý lý do</value>
+  </data>
+  <data name="CustomsNoNeed" xml:space="preserve">
+    <value>Không cần</value>
+  </data>
+  <data name="CustomsNeed" xml:space="preserve">
+    <value>Cần</value>
+  </data>
+  <data name="SelectReason" xml:space="preserve">
+    <value>Chọn một lý do có sẵn hoặc nhập lý do khác:</value>
+  </data>
+  <data name="EnterSelect" xml:space="preserve">
+    <value>Nhập hoặc chọn lý do</value>
   </data>
 </root>

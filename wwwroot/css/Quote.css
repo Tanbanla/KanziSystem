@@ -278,6 +278,12 @@
     border-color: #0d6efd;
 }
 
+.cm-btn.cm-btn-success {
+    background: #198754;
+    color: #fff;
+    border-color: #198754;
+}
+
 .cm-btn.cm-btn-outline {
     background: transparent;
     border: none;

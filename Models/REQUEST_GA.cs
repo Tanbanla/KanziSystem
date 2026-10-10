@@ -187,7 +187,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 "VALUES ('" + id_request + "','" + adid_dt + "','" + adid_tt + "','" + adid_pheduyet + "','" + adid_qlsc + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','0','" + mail_dt + "','" + mail_tt + "','" + mail_pd + "',N'" + ten_dt + "',N'" + ten_tt + "',N'" + ten_pd + "','" + adid_xk + "','" + mail_xk + "',N'" + ten_xk + "',N'" + ten_qlsc + "','" + mail_qlsc + "','0','0','0','0','" + nguoitao + "','" + mailnguoitao + "','" + adid_qltc + "',N'" + ten_qltc + "','" + mail_qltc + "','0','0')");
             return "OK";
         }
-        public static List<PE_REQUEST_CONFIRM_GA> get_requestconfirm(string us, string Urgent, double Total, string Code_Request, string INT_STEP)
+        public static List<PE_REQUEST_CONFIRM_GA> get_requestconfirm(string us, string Urgent, double Total, string Code_Request, string INT_STEP, string costcenter)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM_GA> pe_ = new List<PE_REQUEST_CONFIRM_GA>();
@@ -211,7 +211,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 "OR (a.INT_STEP = 3 AND CHR_ADID_XUATKHO = '" + us + "' ) " +
                 "OR (a.INT_STEP = 4 AND CHR_ADID_QLSC = '" + us + "') " +
                 "OR (a.INT_STEP = 5 AND CHR_ADID_QLTC = '" + us + "' AND QLTC_XACNHAN = '0' )) and INT_STEP < 6 " +
-                $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%'");
+                $"and Urgent like '%{Urgent}%' {gia} and b.Code_Request like '%{Code_Request}%' and a.INT_STEP like '%{INT_STEP}%' AND b.Cost_Center like '%{costcenter}%' order by Total desc");
             for (int i = 0; i < list.Rows.Count; i++)
             {
                 pe_.Add(new PE_REQUEST_CONFIRM_GA  

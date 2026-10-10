@@ -106,7 +106,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             var approvers = await query.ToListAsync();
             return approvers;
         }
-        public async Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByPicDepartmentsAsync(string role)
+        public async Task<List<BaoGia_Master_Approver_Send_Mail>> GetApproverByPicDepartmentsAsync(string role, int step)
         {
             const string sql = @"
                 WITH CTE AS
@@ -120,7 +120,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     FROM BaoGia_Master_Approver_Send_Mail m
                     INNER JOIN BaoGia_RoleUser r
                         ON m.CHR_UserAdid = r.UserAdid
-                    WHERE m.ID_BaoGiaStep = 5
+                    WHERE m.ID_BaoGiaStep = @Step
                         AND r.IsUsing = 1
                         AND r.Role = @Role
                 )
@@ -131,7 +131,7 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 
             var result = await _conn.QueryAsync<BaoGia_Master_Approver_Send_Mail>(
                 sql,
-                new { Role = role }
+                new { Role = role, Step = step }
             );
 
             return result.ToList();

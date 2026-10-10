@@ -451,13 +451,16 @@
     <value>承認フロー</value>
   </data>
   <data name="ApprovalFlowLine1" xml:space="preserve">
-    <value>• 3,000USD（6,600万VND）未満：担当者 → 中間管理職 → 部門副長。</value>
+    <value>• 商品フロー：
+ 担当者 → 一次管理者 → 中間管理者 → 購買部担当者（PIC） → 購買部一次管理者</value>
   </data>
   <data name="ApprovalFlowLine2" xml:space="preserve">
-    <value>• 10,000USD（2億2千万VND）未満：担当者 → 中間管理職 → 部門長。</value>
+    <value>• サービスフロー：
+ 担当者 → 一次管理者 → 中間管理者 → 購買部担当者（PIC） → 購買部一次管理者</value>
   </data>
   <data name="ApprovalFlowLine3" xml:space="preserve">
-    <value>• 10,000USD（2億2千万VND）以上：中間管理職 → 部門長/副部門長 → 総支配人/ディレクター。</value>
+    <value>• サービス工事フロー：
+ 担当者 → 一次管理者 → 中間管理者 → 購買部担当者（PIC） → 購買部一次管理者</value>
   </data>
   <data name="ApprovalFlowLine4" xml:space="preserve">
     <value>→ 出庫承認（PR1-MC）：初級/中級管理職 → 管財倉庫</value>

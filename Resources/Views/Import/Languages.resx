@@ -570,4 +570,10 @@
   <data name="Thanhtoan" xml:space="preserve">
     <value>Thanh toán</value>
   </data>
+  <data name="Phanloaiyeucau" xml:space="preserve">
+    <value>Phân loại yêu cầu</value>
+  </data>
+  <data name="Tinhtrangpheduyet" xml:space="preserve">
+    <value>Tình trạng phê duyệt</value>
+  </data>
 </root>

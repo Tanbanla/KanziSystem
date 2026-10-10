@@ -87,7 +87,7 @@ namespace PRJ_WAREHOUSE_BIVN.Common
 
                     await emailClient.SendMailAsync(msg);
                 }
-                catch (SmtpException ex) when (ex.Message != null && ex.Message.Contains("does not support secure connections", StringComparison.OrdinalIgnoreCase))
+                catch (SmtpException ex) when (IsSslNegotiationError(ex))
                 {
                     using var emailClientFallback = new System.Net.Mail.SmtpClient(_emailSettings.SmtpServer, _emailSettings.SmtpPort)
                     {
@@ -159,7 +159,7 @@ namespace PRJ_WAREHOUSE_BIVN.Common
                     emailClient.EnableSsl = true;
                     await emailClient.SendMailAsync(msg);
                 }
-                catch (SmtpException ex) when (ex.Message != null && ex.Message.Contains("does not support secure connections", StringComparison.OrdinalIgnoreCase))
+                catch (SmtpException ex) when (IsSslNegotiationError(ex))
                 {
                     using var fallback = new System.Net.Mail.SmtpClient(_emailSettings.SmtpServer, _emailSettings.SmtpPort)
                     {
@@ -178,6 +178,14 @@ namespace PRJ_WAREHOUSE_BIVN.Common
             }
 
             return result;
+        }
+
+        private static bool IsSslNegotiationError(SmtpException exception)
+        {
+            var message = exception.Message ?? string.Empty;
+            return message.Contains("does not support secure connections", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("syntax error, command unrecognized", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("STARTTLS", StringComparison.OrdinalIgnoreCase);
         }
 
         // Giải mã hóa để lấy thông tin gửi mail (lấy mật khẩu đã mã hóa từ AGENTDB)

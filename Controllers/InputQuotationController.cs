@@ -271,6 +271,209 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi lấy tỷ giá");
+
+                return BadRequest(ex.Message);
+            }
+        }
+        // Cập nhật thông tin đơn báo giá không đổi bước báo giá
+         [HttpPost]
+        public async Task<IActionResult> ImportUpdateQuotation([FromForm] IFormFile file, List<int> idChecks)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("Không có file được tải lên");
+
+                var exchangeRateResponse = await _exchangeRateService.GetExchangeRate("VND");
+                if (exchangeRateResponse == null || !exchangeRateResponse.Success)
+                    return BadRequest("Không thể lấy tỷ giá tiền tệ");
+
+                var exchangeRate = exchangeRateResponse.Data;
+                var items = new List<BaoGia_Detail_of_QuotationDTO>();
+                var hasErrors = false;
+
+                using var stream = file.OpenReadStream();
+                using var workbook = new ClosedXML.Excel.XLWorkbook(stream);
+                var ws = workbook.Worksheets.FirstOrDefault();
+                if (ws == null)
+                    return BadRequest("Không tìm thấy worksheet trong file");
+
+                int lastRow = ws.LastRowUsed()?.RowNumber() ?? 13;
+
+                for (int r = 13; r <= lastRow; r++)
+                {
+                    var col1Val = ws.Cell(r, 1).GetString();
+                    if (string.IsNullOrWhiteSpace(col1Val)) break;
+
+                    var col16 = ws.Cell(r, 16).GetString();
+                    var col17 = ws.Cell(r, 17).GetString();
+                    int? qty2 = ConvertHelper.ParseInt(ws.Cell(r, 14).GetString());
+                    var nameVN = ws.Cell(r, 12).GetString();
+                    var nameEN = ws.Cell(r, 13).GetString();
+
+                    if (qty2 == null)
+                    {
+                        ws.Cell(r, 35).SetValue("INT_SoLuong (cột 14) phải là số hợp lệ");
+                        ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
+                        hasErrors = true;
+                        continue;
+                    }
+
+                    bool isRefuse = col16.Contains("refuse", StringComparison.OrdinalIgnoreCase) ||
+                                    col17.Contains("refuse", StringComparison.OrdinalIgnoreCase);
+
+                    if (!isRefuse)
+                    {
+                        if ((string.IsNullOrEmpty(col16) && string.IsNullOrEmpty(col17)) || (col16 == "0" && col17 == "0"))
+                            break;
+
+                        var errors = new List<string>();
+                        if (string.IsNullOrWhiteSpace(ws.Cell(r, 22).GetString())) errors.Add("Cột 22 (VCHR_CamKet) bắt buộc");
+                        if (string.IsNullOrWhiteSpace(ws.Cell(r, 23).GetString())) errors.Add("Cột 23 (Delivery Term) bắt buộc");
+                        if (string.IsNullOrWhiteSpace(ws.Cell(r, 24).GetString())) errors.Add("Cột 24 (Payment Term) bắt buộc");
+
+                        var date = ConvertHelper.ParseDate(ws.Cell(r, 26).GetString());
+                        if (date != null && date < DateTime.Now) errors.Add("Cột 26 (DTM_NgayMuonNhan) không phải ngày hợp lệ");
+
+                        var ship = ConvertHelper.ParseDate(ws.Cell(r, 21).GetString());
+                        var reqDate = ConvertHelper.ParseDate(ws.Cell(r, 28).GetString());
+                        if (ship == null) errors.Add("Cột 21 (DTM_ShipTime) không phải ngày hợp lệ");
+                        if (reqDate == null) errors.Add("Cột 28 (DTM_NgayMuonNhan yêu cầu) không phải ngày hợp lệ");
+
+                        if (errors.Any())
+                        {
+                            ws.Cell(r, 35).SetValue(string.Join("; ", errors));
+                            ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
+                            hasErrors = true;
+                            continue;
+                        }
+                        if (string.IsNullOrEmpty(nameEN) && string.IsNullOrEmpty(nameVN))
+                        {
+                            ws.Cell(r, 35).SetValue("Tên hàng không được để trống");
+                            ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
+                            hasErrors = true;
+                            continue;
+                        }
+                    }
+
+                    int idRequestQuote = 0;
+                    string reason = ws.Cell(r, 34).GetString();
+                    var col32Val = ws.Cell(r, 32).GetString();
+
+                    if (!string.IsNullOrEmpty(col32Val))
+                    {
+                        var checkRQ = await _baoGiaDetailService.GetIdDetailAsync(ConvertHelper.ParseInt(col32Val));
+                        if (checkRQ.Success && checkRQ.Data != 0)
+                            idRequestQuote = checkRQ.Data;
+                    }
+                    else
+                    {
+                        var checkRQ = await _baoGiaDetailService.GetIdOfQuotationAsync(
+                            col1Val, ws.Cell(r, 4).GetString(), ws.Cell(r, 3).GetString(),
+                            ws.Cell(r, 10).GetString(), ws.Cell(r, 2).GetString());
+
+                        if (checkRQ.Success && checkRQ.Data.HasValue)
+                            idRequestQuote = checkRQ.Data.Value;
+                    }
+
+                    if (idRequestQuote == 0)
+                    {
+                        ws.Cell(r, 35).SetValue("Không tìm thấy đơn hàng tương ứng trong hệ thống");
+                        ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
+                        hasErrors = true;
+                        continue;
+                    }
+
+                    // Kiểm tra đơn đã có lý do nêus up lại hay chưa
+                    if (int.TryParse(col32Val, out var id) && idChecks.Contains(id) && reason == "")
+                    {
+                        ws.Cell(r, 35).SetValue("Đơn đã nhập trước đó! Voi lòng nhập lý do sửa vào cột 34");
+                        ws.Row(r).Style.Fill.BackgroundColor = XLColor.Yellow;
+                        hasErrors = true;
+                        continue;
+                    }
+
+                    var agree = ws.Cell(r, 22).GetString();
+                    double costUSD = ConvertHelper.ParseDouble(col16) ?? 0;
+                    double costVND = ConvertHelper.ParseDouble(col17) ?? 0;
+
+                    items.Add(new BaoGia_Detail_of_QuotationDTO
+                    {
+                        ID = idRequestQuote,
+                        CHR_MaHangNCC = ws.Cell(r, 11).GetString(),
+                        NVCHR_TenHangHQ = nameVN,
+                        CHR_NameEN = nameEN,
+                        INT_SoLuong = qty2,
+                        NVCHR_DonVi = ws.Cell(r, 15).GetString(),
+                        FL_USD = isRefuse ? null : (costUSD != 0 ? costUSD : ConvertHelper.ParseVNDtoUSD(costVND, true, exchangeRate)),
+                        FL_VND = isRefuse ? null : (costVND != 0 ? costVND : ConvertHelper.ParseVNDtoUSD(costUSD, false, exchangeRate)),
+                        NVCHR_MOQ = isRefuse ? null : ConvertHelper.ParseInt(ws.Cell(r, 18).GetString())?.ToString(),
+                        NVCHR_Packing = isRefuse ? null : ws.Cell(r, 19).GetString(),
+                        DTM_LeadTime = isRefuse ? null : ws.Cell(r, 20).GetString(),
+                        DTM_ShipTime = isRefuse ? null : ConvertHelper.ParseDate(ws.Cell(r, 21).GetString()),
+                        VCHR_Rohs = isRefuse ? null : (agree.Contains("Đồng ý (accept)") ? "OK" : "NG"),
+                        VCHR_COCQ = isRefuse ? null : (agree.Contains("Đồng ý (accept)") ? "OK" : "NG"),
+                        VCHR_MSDS = isRefuse ? null : (agree.Contains("Đồng ý (accept)") ? "OK" : "NG"),
+                        VCHR_AnToan = isRefuse ? null : (agree.Contains("Đồng ý (accept)") ? "OK" : "NG"),
+                        VCHR_CamKet = isRefuse ? null : agree,
+                        NVCHR_DeliveryTerm = isRefuse ? null : ws.Cell(r, 23).GetString(),
+                        NVCHR_PaymentTerm = isRefuse ? null : ws.Cell(r, 24).GetString(),
+                        DTM_EffectiveDate = isRefuse ? null : ConvertHelper.ParseDate(ws.Cell(r, 25).GetString()),
+                        DTM_ExpiryDate = isRefuse ? null : ConvertHelper.ParseDate(ws.Cell(r, 26).GetString()),
+                        CHR_UpdateBy = GetCurrentUserId(),
+                        NVCHR_File = ws.Cell(r, 30).GetString()?.Trim(),
+                        CHR_Status = isRefuse ? "Refuse" : null,
+                        NVCHR_ReasonUpdate = reason
+                    });
+                }
+
+                if (hasErrors)
+                {
+                    using var outStream = new MemoryStream();
+                    workbook.SaveAs(outStream);
+                    return File(outStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ImportErrors_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+                }
+                if (!items.Any())
+                    return BadRequest("Không có dữ liệu hợp lệ để cập nhật");
+
+                var uniqueFiles = items.Select(c => c.NVCHR_File)
+                                       .Where(f => !string.IsNullOrWhiteSpace(f))
+                                       .Distinct(StringComparer.OrdinalIgnoreCase)
+                                       .ToList();
+
+                var savedMap = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+                foreach (var src in uniqueFiles)
+                {
+                    try
+                    {
+                        var saveRes = await _fileImportService.SaveFileFromPathAsync(src);
+                        savedMap[src] = (saveRes != null && saveRes.Success) ? saveRes.Data : null;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed saving link {Link}", src);
+                        return BadRequest($"Lỗi khi lưu file từ đường dẫn: {src}. Chi tiết: {ex.Message}");
+                    }
+                }
+
+                foreach (var dto in items.Where(d => !string.IsNullOrWhiteSpace(d.NVCHR_File)))
+                {
+                    if (savedMap.TryGetValue(dto.NVCHR_File, out var saved) && !string.IsNullOrWhiteSpace(saved))
+                    {
+                        dto.NVCHR_dataOld = dto.NVCHR_File; // Lưu giá trị cũ trước khi thay đổi
+                        dto.NVCHR_File = saved;
+                    }
+                }
+
+                var result = await _baoGiaDetailService.UpdateQuotationNotRQAsync(items);
+                if (!result.Success)
+                    return BadRequest(result.Message);
+
+                return Ok(result.Data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi hệ thống khi Import Excel");
                 return BadRequest(ex.Message);
             }
         }
@@ -426,8 +629,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     ws.Cell(row, 3).Value = item.CHR_MaHangNoiBo ?? "";
                     ws.Cell(row, 4).Value = item.CHR_MaHangNCC ?? "";
                     ws.Cell(row, 5).Value = item.NVCHR_NameVN ?? "";
-                    ws.Cell(row, 6).Value = item.INT_SoLuong ?? string.Empty;                  // Quantity
-                    ws.Cell(row, 7).Value = item.NVCHR_DonVi ?? string.Empty;                  // Unit
+                    ws.Cell(row, 6).Value = item.slBivn ?? string.Empty;                  // Quantity
+                    ws.Cell(row, 7).Value = item.donViBivn ?? string.Empty;                  // Unit
                     ws.Cell(row, 8).Value = otherRequest;
                     ws.Cell(row, 9).Value = item.NVCHR_NhaSanXuat ?? "";
 

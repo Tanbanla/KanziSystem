@@ -233,6 +233,7 @@
                                  @if (User.FindFirst("Roles")?.Value == "UserPUR")
                                 {
                                     <li><a class="nav-link" href="~/ManagerDelivery/Thanhtoan"><i class="ion ion-ios-bell"></i> @Languages.Thanhtoan</a></li>
+                                 
                                 }
                                 <li><a class="nav-link" href="~/Import/Import_material"><i class="fas fa-home"></i> @Localizer["MenuWarehouseStock"]</a></li>
                                 <li><a class="nav-link" href="~/Import/Export_material"><i class="fas fa-file-export"></i> @Localizer["MenuWarehouseExportRequest"]</a></li>
@@ -261,6 +262,7 @@
                                 <li><a class="dropdown-item py-2" href="~/ManagerDelivery/Giaonhanhang_Master"><i class="fas fa-book-reader"></i>Quản lý tồn kho </a></li>
                                 @if (User.FindFirst("Roles")?.Value == "PUR" || User.FindFirst("Roles")?.Value == "GA")
                                 {
+                                    <li><a class="nav-link" href="~/ManagerDelivery/SET_DONE"><i class="ion ion-ios-bell"></i> Cài PO hoàn thành</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/Category"><i class="ion ion-android-options"></i> @Localizer["MenuMasterCategory"]</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/SendApprover"><i class="fas fa-sitemap me-2"></i> @Localizer["MenuMasterSendMail"]</a></li>
                                     <li><a class="dropdown-item py-2" href="~/Master/SupplierMana"><i class="fas fa-handshake"></i> @Localizer["MenuMasterSupplierManage"]</a></li>

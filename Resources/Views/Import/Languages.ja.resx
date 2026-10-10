@@ -570,4 +570,10 @@
   <data name="Thanhtoan" xml:space="preserve">
     <value>支払い</value>
   </data>
+  <data name="Phanloaiyeucau" xml:space="preserve">
+    <value>要求分類</value>
+  </data>
+  <data name="Tinhtrangpheduyet" xml:space="preserve">
+    <value>承認状況</value>
+  </data>
 </root>

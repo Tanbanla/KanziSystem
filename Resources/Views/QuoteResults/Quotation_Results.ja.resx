@@ -268,7 +268,7 @@
     <value>品目名（VN）</value>
   </data>
   <data name="ItemNameEN" xml:space="preserve">
-    <value>品目名（EN）</value>
+    <value>品目名（英語）</value>
   </data>
   <data name="Shape" xml:space="preserve">
     <value>形状</value>
@@ -616,13 +616,18 @@
     <value>承認フロー</value>
   </data>
   <data name="ApprovalFlowLine1" xml:space="preserve">
-    <value>• 3,000USD（6,600万VND）未満：担当者 → 中間管理職 → 部門副長。</value>
+    <value>• 商品フロー：
+PUR: 担当者 → 一次管理者 → 中間管理者 → 上級管理者 → 通関名称確認
+GA: 担当者 → 一次管理者 → （1億VND超の場合）中間管理者 → 通関名称確認</value>
   </data>
   <data name="ApprovalFlowLine2" xml:space="preserve">
-    <value>• 10,000USD（2億2千万VND）未満：担当者 → 中間管理職 → 部門長。</value>
+    <value>• サービスフロー：
+PUR: 担当者 → 一次管理者 → 中間管理者 → 上級管理者 → 通関名称確認
+GA: 担当者 → 一次管理者 → （1億VND超の場合）中間管理者 → 通関名称確認</value>
   </data>
   <data name="ApprovalFlowLine3" xml:space="preserve">
-    <value>• 10,000USD（2億2千万VND）以上：中間管理職 → 部門長/副部門長 → 総支配人/ディレクター。</value>
+    <value>• サービス工事フロー：
+(GA) 担当者 → 一次管理者 → 中間管理者 → 通関名称確認</value>
   </data>
   <data name="ApprovalFlowLine4" xml:space="preserve">
     <value>→ 出庫承認（PR1-MC）：初級/中級管理職 → 管財倉庫</value>
@@ -825,5 +830,293 @@
   </data>
   <data name="RequestList" xml:space="preserve">
     <value>依頼一覧</value>
+  </data>
+  <data name="MasterPriceTab" xml:space="preserve">
+    <value>マスタ価格</value>
+  </data>
+  <data name="MasterPriceSearchTitle" xml:space="preserve">
+    <value>マスタ価格を検索</value>
+  </data>
+  <data name="MasterPriceSearchDescription" xml:space="preserve">
+    <value>注文、品目、ステータスで絞り込み</value>
+  </data>
+  <data name="EnterEquipmentCode" xml:space="preserve">
+    <value>設備コードを入力</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>カテゴリを選択</value>
+  </data>
+  <data name="EnterSupplierItemCode" xml:space="preserve">
+    <value>仕入先品目コードを入力</value>
+  </data>
+  <data name="FromDate" xml:space="preserve">
+    <value>開始日</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>終了日</value>
+  </data>
+  <data name="Effective" xml:space="preserve">
+    <value>有効</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>期限切れ</value>
+  </data>
+  <data name="MaterialGroup" xml:space="preserve">
+    <value>品目グループ</value>
+  </data>
+  <data name="SampleFile" xml:space="preserve">
+    <value>サンプルファイル</value>
+  </data>
+  <data name="MasterPriceListTitle" xml:space="preserve">
+    <value>マスタ価格一覧</value>
+  </data>
+  <data name="ImportExcelFile" xml:space="preserve">
+    <value>Excelファイルをインポート</value>
+  </data>
+  <data name="ExportData" xml:space="preserve">
+    <value>データを出力</value>
+  </data>
+  <data name="QuotationDetailCount" xml:space="preserve">
+    <value>見積依頼詳細件数: {0}</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="UploadDate" xml:space="preserve">
+    <value>アップロード日</value>
+  </data>
+  <data name="PICUpload" xml:space="preserve">
+    <value>アップロード担当</value>
+  </data>
+  <data name="QuotationRequestNumber" xml:space="preserve">
+    <value>見積依頼番号</value>
+  </data>
+  <data name="OtherRequirement" xml:space="preserve">
+    <value>その他の要件</value>
+  </data>
+  <data name="ManufacturerOrigin" xml:space="preserve">
+    <value>メーカー/原産地</value>
+  </data>
+  <data name="SupplierUnitPrice" xml:space="preserve">
+    <value>仕入先単価</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>通貨</value>
+  </data>
+  <data name="UnitPriceUSD" xml:space="preserve">
+    <value>単価（USD）</value>
+  </data>
+  <data name="PriceEffectiveDate" xml:space="preserve">
+    <value>見積有効期間</value>
+  </data>
+  <data name="PriceExpirationDate" xml:space="preserve">
+    <value>見積有効期限</value>
+  </data>
+  <data name="SupplierDecision" xml:space="preserve">
+    <value>仕入先決定</value>
+  </data>
+  <data name="AdjustmentReason" xml:space="preserve">
+    <value>調整理由</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>絞り込み</value>
+  </data>
+  <data name="MasterPriceHistoryTitle" xml:space="preserve">
+    <value>マスタ価格履歴</value>
+  </data>
+  <data name="Uploader" xml:space="preserve">
+    <value>アップロード者</value>
+  </data>
+  <data name="QuotationDetailId" xml:space="preserve">
+    <value>見積詳細ID</value>
+  </data>
+  <data name="LeadTimeDays" xml:space="preserve">
+    <value>リードタイム（日）</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>備考</value>
+  </data>
+  <data name="DeliveryTerm" xml:space="preserve">
+    <value>納入条件</value>
+  </data>
+  <data name="DeliveryPlace" xml:space="preserve">
+    <value>納入場所</value>
+  </data>
+  <data name="EffectiveDate" xml:space="preserve">
+    <value>有効開始日</value>
+  </data>
+  <data name="ExpirationDate" xml:space="preserve">
+    <value>有効期限</value>
+  </data>
+  <data name="FixedSupplier" xml:space="preserve">
+    <value>仕入先を固定</value>
+  </data>
+  <data name="QuotationLink" xml:space="preserve">
+    <value>見積リンク</value>
+  </data>
+  <data name="QuotationExcelLink" xml:space="preserve">
+    <value>見積Excelリンク</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>作成者</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>作成日</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>更新者</value>
+  </data>
+  <data name="UpdatedDate" xml:space="preserve">
+    <value>更新日</value>
+  </data>
+  <data name="EnterRequiredFields" xml:space="preserve">
+    <value>必須項目を入力してください: {0}。</value>
+  </data>
+  <data name="NoMatchingData" xml:space="preserve">
+    <value>一致するデータがありません</value>
+  </data>
+  <data name="MasterPriceLoading" xml:space="preserve">
+    <value>データを読み込み中...</value>
+  </data>
+  <data name="MasterPriceSaveSuccess" xml:space="preserve">
+    <value>マスタ価格を更新しました。</value>
+  </data>
+  <data name="MasterPriceAddSuccess" xml:space="preserve">
+    <value>マスタ価格を追加しました。</value>
+  </data>
+  <data name="MasterPriceSaveError" xml:space="preserve">
+    <value>マスタ価格を保存できません。</value>
+  </data>
+  <data name="CustomsDeclaration" xml:space="preserve">
+    <value>税関申告</value>
+  </data>
+  <data name="MasterPriceEditTitle" xml:space="preserve">
+    <value>マスタ価格を編集</value>
+  </data>
+  <data name="MasterPriceLatestRecord" xml:space="preserve">
+    <value>最新のレコードを表示しています</value>
+  </data>
+  <data name="MasterPriceAddTitle" xml:space="preserve">
+    <value>新しいマスタ価格を追加</value>
+  </data>
+  <data name="MasterPriceAddButton" xml:space="preserve">
+    <value>マスタ価格を追加</value>
+  </data>
+  <data name="MasterPriceSaveButton" xml:space="preserve">
+    <value>変更を保存</value>
+  </data>
+  <data name="VATPercent" xml:space="preserve">
+    <value>VAT（%）</value>
+  </data>
+  <data name="SelectCurrency" xml:space="preserve">
+    <value>通貨を選択</value>
+  </data>
+  <data name="NoFileSelected" xml:space="preserve">
+    <value>ファイルがないか、選択されていません</value>
+  </data>
+  <data name="SupplierValidationWarningTitle" xml:space="preserve">
+    <value>仕入先選定の警告</value>
+  </data>
+  <data name="SupplierValidationDetected" xml:space="preserve">
+    <value>{0}件のエラーが見つかりました。データの送信を続行しますか？</value>
+  </data>
+  <data name="SupplierValidationContinue" xml:space="preserve">
+    <value>続行</value>
+  </data>
+  <data name="SupplierValidationExport" xml:space="preserve">
+    <value>エラーを出力</value>
+  </data>
+  <data name="SupplierValidationClose" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="SupplierValidationNoSelection" xml:space="preserve">
+    <value>仕入先から見積がありますが、すべてXで選択されており、選択された仕入先がありません。</value>
+  </data>
+  <data name="SupplierValidationZeroPrice" xml:space="preserve">
+    <value>選択した仕入先の見積価格が0です。</value>
+  </data>
+  <data name="SupplierValidationExpired" xml:space="preserve">
+    <value>選択した仕入先の見積期限が切れています。</value>
+  </data>
+  <data name="SupplierValidationMissingLink" xml:space="preserve">
+    <value>選択した仕入先の見積リンクがありません。</value>
+  </data>
+  <data name="HighValueApproverNotice" xml:space="preserve">
+    <value>1億ドンを超える注文の場合は、次の承認ステップにQLTCを選択してください。</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>はい</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="MasterPriceExchangeRateError" xml:space="preserve">
+    <value>為替レートを取得できません。</value>
+  </data>
+  <data name="MasterPriceHistoryLoading" xml:space="preserve">
+    <value>マスタ価格の履歴を読み込み中...</value>
+  </data>
+  <data name="MasterPriceHistoryLoadError" xml:space="preserve">
+    <value>マスタ価格の履歴を読み込めません。</value>
+  </data>
+  <data name="MasterPriceHistoryExportError" xml:space="preserve">
+    <value>マスタ価格の履歴を出力できません。</value>
+  </data>
+  <data name="MasterPriceMaterialLoadError" xml:space="preserve">
+    <value>部品情報を読み込めません。</value>
+  </data>
+  <data name="MasterPriceMaterialNotFound" xml:space="preserve">
+    <value>部品情報が見つかりません。</value>
+  </data>
+  <data name="MasterPriceCodeLabel" xml:space="preserve">
+    <value>社内品目コード: {0}</value>
+  </data>
+  <data name="MasterPriceNoRecord" xml:space="preserve">
+    <value>この品目のマスタ価格レコードが見つかりません。</value>
+  </data>
+  <data name="MasterPriceLoadError" xml:space="preserve">
+    <value>マスタ価格を読み込めません。</value>
+  </data>
+  <data name="MasterPriceTemplateLoading" xml:space="preserve">
+    <value>マスタ価格テンプレートを読み込み中...</value>
+  </data>
+  <data name="MasterPriceTemplateNotFound" xml:space="preserve">
+    <value>テンプレート {0} が見つかりません。</value>
+  </data>
+  <data name="MasterPriceTemplateLoadError" xml:space="preserve">
+    <value>テンプレート {0} を読み込めません。</value>
+  </data>
+  <data name="MasterPriceExportLoading" xml:space="preserve">
+    <value>マスタ価格データを出力中...</value>
+  </data>
+  <data name="MasterPriceExportError" xml:space="preserve">
+    <value>マスタ価格データを出力できません。</value>
+  </data>
+  <data name="MasterPriceCountError" xml:space="preserve">
+    <value>データ件数を取得できません。</value>
+  </data>
+  <data name="LatestPriceLoadError" xml:space="preserve">
+    <value>最新価格を取得できません。</value>
+  </data>
+  <data name="PriceIncreaseReasonRequired" xml:space="preserve">
+    <value>最新の選択価格より5%以上高い価格には理由の入力が必要です。</value>
+  </data>
+  <data name="ReasonPlaceholder" xml:space="preserve">
+    <value>理由を入力...</value>
+  </data>
+  <data name="ReasonSuggestion" xml:space="preserve">
+    <value>理由の候補を選択</value>
+  </data>
+  <data name="CustomsNoNeed" xml:space="preserve">
+    <value>不要</value>
+  </data>
+  <data name="CustomsNeed" xml:space="preserve">
+    <value>必要</value>
+  </data>
+  <data name="SelectReason" xml:space="preserve">
+    <value>既存の理由を選択するか、その他の理由を入力してください。</value>
+  </data>
+  <data name="EnterSelect" xml:space="preserve">
+    <value>理由を入力または選択してください。</value>
   </data>
 </root>

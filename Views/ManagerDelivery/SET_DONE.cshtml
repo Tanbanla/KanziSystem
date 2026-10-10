@@ -1,0 +1,63 @@
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Update PO Status to DONE</h2>
+            <hr />
+
+            <!-- Vùng hiển thị thông báo lỗi/thành công từ AJAX -->
+            <div id="alertMessage" class="mt-3"></div>
+
+           <p>PO sẽ được chuyển trạng thái sang Hoàn thành</p>
+                <div class="mb-3">
+                    <label for="poid" class="form-label">PO ID</label>
+                    <input type="text" class="form-control" id="poid" name="poid" required placeholder="Enter PO ID">
+                </div>
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary" onclick="updatee()">Update to DONE</button>
+                    <a href="/" class="btn btn-secondary">Cancel</a>
+                </div>
+        
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updatee() {
+            const poidValue = document.getElementById('poid').value;
+            const alertBox = document.getElementById('alertMessage');
+
+        fetch('@Url.Action("UpdateStatus", "ManagerDelivery")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                poid: poidValue
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            alertBox.innerHTML =
+                `<div class="alert alert-${data.success ? 'success' : 'danger'}">
+                    ${data.message}
+                </div>`;
+
+            if (data.success) {
+                document.getElementById('poid').value = '';
+            }
+
+            setTimeout(() => {
+                alertBox.innerHTML = '';
+            }, 5000);
+        })
+        .catch(error => {
+            alertBox.innerHTML =
+                `<div class="alert alert-danger">
+                    ${error.message}
+                </div>`;
+        });
+    }
+    </script>
+}

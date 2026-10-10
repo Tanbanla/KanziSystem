@@ -268,7 +268,7 @@
     <value>Item name (VN)</value>
   </data>
   <data name="ItemNameEN" xml:space="preserve">
-    <value>Item name (EN)</value>
+    <value>Item name (English)</value>
   </data>
   <data name="Shape" xml:space="preserve">
     <value>Shape</value>
@@ -616,13 +616,18 @@
     <value>Approval flow</value>
   </data>
   <data name="ApprovalFlowLine1" xml:space="preserve">
-    <value>• Under 3,000 USD (66M VND): PIC → Middle manager → Deputy section manager.</value>
+    <value>• Goods Flow:
+PUR: Person in Charge → First-level Manager → Mid-level Manager → Senior Manager → Customs Declaration Name Confirmation.
+GA: Person in Charge → First-level Manager → (For amounts over 100 million VND) Mid-level Manager → Customs Declaration Name Confirmation.</value>
   </data>
   <data name="ApprovalFlowLine2" xml:space="preserve">
-    <value>• Under 10,000 USD (220M VND): PIC → Middle manager → Section manager.</value>
+    <value>• Service Flow:
+PUR: Person in Charge → First-level Manager → Mid-level Manager → Senior Manager → Customs Declaration Name Confirmation.
+GA: Person in Charge → First-level Manager → (For amounts over 100 million VND) Mid-level Manager → Customs Declaration Name Confirmation.</value>
   </data>
   <data name="ApprovalFlowLine3" xml:space="preserve">
-    <value>• From 10,000 USD (220M VND) and above: Middle manager → Section/Deputy manager → General Director/Director.</value>
+    <value>• Service Construction Flow:
+(GA) Person in Charge → First-level Manager → Mid-level Manager → Customs Declaration Name Confirmation.</value>
   </data>
   <data name="ApprovalFlowLine4" xml:space="preserve">
     <value>→ Warehouse issue approval (PR1-MC): Junior/Middle manager → Kanzai warehouse</value>
@@ -825,5 +830,293 @@
   </data>
   <data name="RequestList" xml:space="preserve">
     <value>Request List</value>
+  </data>
+  <data name="MasterPriceTab" xml:space="preserve">
+    <value>Master price</value>
+  </data>
+  <data name="MasterPriceSearchTitle" xml:space="preserve">
+    <value>Search master price</value>
+  </data>
+  <data name="MasterPriceSearchDescription" xml:space="preserve">
+    <value>Filter by order, item, and status</value>
+  </data>
+  <data name="EnterEquipmentCode" xml:space="preserve">
+    <value>Enter equipment code</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>Select category</value>
+  </data>
+  <data name="EnterSupplierItemCode" xml:space="preserve">
+    <value>Enter supplier item code</value>
+  </data>
+  <data name="FromDate" xml:space="preserve">
+    <value>From date</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>To date</value>
+  </data>
+  <data name="Effective" xml:space="preserve">
+    <value>Effective</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>Expired</value>
+  </data>
+  <data name="MaterialGroup" xml:space="preserve">
+    <value>Material group</value>
+  </data>
+  <data name="SampleFile" xml:space="preserve">
+    <value>Sample file</value>
+  </data>
+  <data name="MasterPriceListTitle" xml:space="preserve">
+    <value>Master price list</value>
+  </data>
+  <data name="ImportExcelFile" xml:space="preserve">
+    <value>Import Excel file</value>
+  </data>
+  <data name="ExportData" xml:space="preserve">
+    <value>Export data</value>
+  </data>
+  <data name="QuotationDetailCount" xml:space="preserve">
+    <value>Quotation detail count: {0}</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="UploadDate" xml:space="preserve">
+    <value>Upload date</value>
+  </data>
+  <data name="PICUpload" xml:space="preserve">
+    <value>Upload PIC</value>
+  </data>
+  <data name="QuotationRequestNumber" xml:space="preserve">
+    <value>Quotation request number</value>
+  </data>
+  <data name="OtherRequirement" xml:space="preserve">
+    <value>Other requirement</value>
+  </data>
+  <data name="ManufacturerOrigin" xml:space="preserve">
+    <value>Manufacturer/Origin</value>
+  </data>
+  <data name="SupplierUnitPrice" xml:space="preserve">
+    <value>Supplier unit price</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Currency</value>
+  </data>
+  <data name="UnitPriceUSD" xml:space="preserve">
+    <value>Unit price (USD)</value>
+  </data>
+  <data name="PriceEffectiveDate" xml:space="preserve">
+    <value>Quotation validity</value>
+  </data>
+  <data name="PriceExpirationDate" xml:space="preserve">
+    <value>Quotation expiry date</value>
+  </data>
+  <data name="SupplierDecision" xml:space="preserve">
+    <value>Supplier decision</value>
+  </data>
+  <data name="AdjustmentReason" xml:space="preserve">
+    <value>Adjustment reason</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="MasterPriceHistoryTitle" xml:space="preserve">
+    <value>Master price history</value>
+  </data>
+  <data name="Uploader" xml:space="preserve">
+    <value>Uploader</value>
+  </data>
+  <data name="QuotationDetailId" xml:space="preserve">
+    <value>Quotation detail ID</value>
+  </data>
+  <data name="LeadTimeDays" xml:space="preserve">
+    <value>Lead time (days)</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="DeliveryTerm" xml:space="preserve">
+    <value>Delivery term</value>
+  </data>
+  <data name="DeliveryPlace" xml:space="preserve">
+    <value>Delivery place</value>
+  </data>
+  <data name="EffectiveDate" xml:space="preserve">
+    <value>Effective date</value>
+  </data>
+  <data name="ExpirationDate" xml:space="preserve">
+    <value>Expiration date</value>
+  </data>
+  <data name="FixedSupplier" xml:space="preserve">
+    <value>Fixed supplier</value>
+  </data>
+  <data name="QuotationLink" xml:space="preserve">
+    <value>Quotation link</value>
+  </data>
+  <data name="QuotationExcelLink" xml:space="preserve">
+    <value>Quotation Excel link</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>Created by</value>
+  </data>
+  <data name="CreatedDate" xml:space="preserve">
+    <value>Created date</value>
+  </data>
+  <data name="UpdatedBy" xml:space="preserve">
+    <value>Updated by</value>
+  </data>
+  <data name="UpdatedDate" xml:space="preserve">
+    <value>Updated date</value>
+  </data>
+  <data name="EnterRequiredFields" xml:space="preserve">
+    <value>Please complete the required fields: {0}.</value>
+  </data>
+  <data name="NoMatchingData" xml:space="preserve">
+    <value>No matching data</value>
+  </data>
+  <data name="MasterPriceLoading" xml:space="preserve">
+    <value>Loading data...</value>
+  </data>
+  <data name="MasterPriceSaveSuccess" xml:space="preserve">
+    <value>Master price updated successfully.</value>
+  </data>
+  <data name="MasterPriceAddSuccess" xml:space="preserve">
+    <value>Master price added successfully.</value>
+  </data>
+  <data name="MasterPriceSaveError" xml:space="preserve">
+    <value>Unable to save master price.</value>
+  </data>
+  <data name="CustomsDeclaration" xml:space="preserve">
+    <value>Customs declaration</value>
+  </data>
+  <data name="MasterPriceEditTitle" xml:space="preserve">
+    <value>Edit master price</value>
+  </data>
+  <data name="MasterPriceLatestRecord" xml:space="preserve">
+    <value>Showing the latest record</value>
+  </data>
+  <data name="MasterPriceAddTitle" xml:space="preserve">
+    <value>Add new master price</value>
+  </data>
+  <data name="MasterPriceAddButton" xml:space="preserve">
+    <value>Add master price</value>
+  </data>
+  <data name="MasterPriceSaveButton" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="VATPercent" xml:space="preserve">
+    <value>VAT (%)</value>
+  </data>
+  <data name="SelectCurrency" xml:space="preserve">
+    <value>Select currency</value>
+  </data>
+  <data name="NoFileSelected" xml:space="preserve">
+    <value>No file or file not selected</value>
+  </data>
+  <data name="SupplierValidationWarningTitle" xml:space="preserve">
+    <value>Supplier selection warning</value>
+  </data>
+  <data name="SupplierValidationDetected" xml:space="preserve">
+    <value>{0} errors were found. Do you want to continue submitting the data?</value>
+  </data>
+  <data name="SupplierValidationContinue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="SupplierValidationExport" xml:space="preserve">
+    <value>Export errors</value>
+  </data>
+  <data name="SupplierValidationClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="SupplierValidationNoSelection" xml:space="preserve">
+    <value>Suppliers have quoted, but all suppliers are marked X and none is selected.</value>
+  </data>
+  <data name="SupplierValidationZeroPrice" xml:space="preserve">
+    <value>The selected supplier has a quotation price of zero.</value>
+  </data>
+  <data name="SupplierValidationExpired" xml:space="preserve">
+    <value>The selected supplier quotation has expired.</value>
+  </data>
+  <data name="SupplierValidationMissingLink" xml:space="preserve">
+    <value>The selected supplier has no quotation link.</value>
+  </data>
+  <data name="HighValueApproverNotice" xml:space="preserve">
+    <value>For orders over 100 million, please select QLTC for the next approval step.</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="MasterPriceExchangeRateError" xml:space="preserve">
+    <value>Unable to get the exchange rate.</value>
+  </data>
+  <data name="MasterPriceHistoryLoading" xml:space="preserve">
+    <value>Loading master price history...</value>
+  </data>
+  <data name="MasterPriceHistoryLoadError" xml:space="preserve">
+    <value>Unable to load master price history.</value>
+  </data>
+  <data name="MasterPriceHistoryExportError" xml:space="preserve">
+    <value>Unable to export master price history.</value>
+  </data>
+  <data name="MasterPriceMaterialLoadError" xml:space="preserve">
+    <value>Unable to load material information.</value>
+  </data>
+  <data name="MasterPriceMaterialNotFound" xml:space="preserve">
+    <value>Material information was not found.</value>
+  </data>
+  <data name="MasterPriceCodeLabel" xml:space="preserve">
+    <value>Internal material code: {0}</value>
+  </data>
+  <data name="MasterPriceNoRecord" xml:space="preserve">
+    <value>No master price record was found for this item.</value>
+  </data>
+  <data name="MasterPriceLoadError" xml:space="preserve">
+    <value>Unable to load master price.</value>
+  </data>
+  <data name="MasterPriceTemplateLoading" xml:space="preserve">
+    <value>Loading master price template...</value>
+  </data>
+  <data name="MasterPriceTemplateNotFound" xml:space="preserve">
+    <value>Template {0} was not found.</value>
+  </data>
+  <data name="MasterPriceTemplateLoadError" xml:space="preserve">
+    <value>Unable to load template {0}.</value>
+  </data>
+  <data name="MasterPriceExportLoading" xml:space="preserve">
+    <value>Exporting master price data...</value>
+  </data>
+  <data name="MasterPriceExportError" xml:space="preserve">
+    <value>Unable to export master price data.</value>
+  </data>
+  <data name="MasterPriceCountError" xml:space="preserve">
+    <value>Unable to count data.</value>
+  </data>
+  <data name="LatestPriceLoadError" xml:space="preserve">
+    <value>Unable to load the latest price.</value>
+  </data>
+  <data name="PriceIncreaseReasonRequired" xml:space="preserve">
+    <value>Prices more than 5% above the latest selected price require a reason.</value>
+  </data>
+  <data name="ReasonPlaceholder" xml:space="preserve">
+    <value>Enter a reason...</value>
+  </data>
+  <data name="ReasonSuggestion" xml:space="preserve">
+    <value>Choose a reason suggestion</value>
+  </data>
+  <data name="CustomsNoNeed" xml:space="preserve">
+    <value>Not required</value>
+  </data>
+  <data name="CustomsNeed" xml:space="preserve">
+    <value>Required</value>
+  </data>
+  <data name="SelectReason" xml:space="preserve">
+    <value>Select an existing reason or enter a different reason:</value>
+  </data>
+  <data name="EnterSelect" xml:space="preserve">
+    <value>Enter or select a reason.</value>
   </data>
 </root>

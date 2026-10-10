@@ -898,6 +898,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Phân loại yêu cầu.
+        /// </summary>
+        public static string Phanloaiyeucau {
+            get {
+                return ResourceManager.GetString("Phanloaiyeucau", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Phê duyệt đơn.
         /// </summary>
         public static string Pheduyetdon {
@@ -1254,6 +1263,15 @@ namespace PRJ_WAREHOUSE_BIVN.Language {
         public static string tinhtranghaiquan {
             get {
                 return ResourceManager.GetString("tinhtranghaiquan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tình trạng phê duyệt.
+        /// </summary>
+        public static string Tinhtrangpheduyet {
+            get {
+                return ResourceManager.GetString("Tinhtrangpheduyet", resourceCulture);
             }
         }
         

@@ -16,13 +16,13 @@
     .card .card-header {
         position: sticky;
         top: 0;
-        background-color: #ffffff !important; /* Màu nền trắng để che chữ bên dưới khi cuộn */
-        z-index: 1060; /* Ưu tiên cao nhất để luôn nằm trên cùng */
+        background-color: #ffffff !important;
+        z-index: 1060;
         border-bottom: 1px solid #dee2e6;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    /* --- CẤU HÌNH VÙNG CHỨA BẢNG CHÍNH (THAY PX THÀNH VH) --- */
+    /* --- CẤU HÌNH VÙNG CHỨA BẢNG CHÍNH --- */
     .main-table-responsive {
         max-height: calc(100vh - 220px);
         min-height: 400px;
@@ -35,22 +35,21 @@
         .main-table-responsive .table {
             width: 100%;
             margin-bottom: 0;
-          /*   white-space: nowrap; */
         }
 
-            /* Ghim dòng tiêu đề thứ nhất (Dính ngay dưới thanh công cụ) */
+            /* Ghim dòng tiêu đề thứ nhất */
             .main-table-responsive .table thead tr.header-row-1 th {
                 position: sticky;
-                top: 0; /* Nếu cuộn toàn bộ trang thì đổi thành chiều cao thanh header (ví dụ: 61px) */
+                top: 0;
                 background-color: #2233b0 !important;
                 z-index: 1040;
                 border-bottom: 1px solid #dee2e6;
             }
 
-            /* Ghim dòng tiêu đề thứ hai (Dính sát dưới dòng tiêu đề thứ nhất) */
+            /* Ghim dòng tiêu đề thứ hai */
             .main-table-responsive .table thead tr.header-row-2 th {
                 position: sticky;
-                top: 38px; /* Chiều cao thực tế của tr thứ nhất */
+                top: 38px;
                 background-color: #2233b0 !important;
                 z-index: 1035;
                 border-bottom: 1px solid #dee2e6;
@@ -105,7 +104,6 @@
         color: white !important;
     }
 
-    /* LƯU Ý: Đã thêm dấu chấm (.) sửa lỗi cú pháp class của bạn trước đó */
     .table-responsive-custom {
         max-height: calc(100vh - 350px);
         min-height: 300px;
@@ -131,15 +129,14 @@
         background-color: #e8f3ff !important;
         z-index: 999;
     }
-    /* Hiệu ứng khi di chuột (hover) vào dòng */
+
     .table tbody tr:hover td {
         background-color: #dce8ff !important;
         cursor: pointer;
     }
 
-    /* Hiệu ứng đổi màu khi click/focus vào dòng */
     .table tbody tr.selected-row td {
-        background-color: #fff9ad94 !important; /* Màu xanh biển nhạt */
+        background-color: #fff9ad94 !important;
         transition: background-color 0.1s ease-in-out;
     }
 </style>
@@ -148,37 +145,35 @@
     <div class="col-12">
         <div class="card card-primary">
             <div class="card-header" style="padding: 5px;">
-                <!-- Thông báo góc phải -->
                 <div id="thong-bao-goc-phai" class="alert alert-success" style="display: none; position: fixed; top: 80px; right: 20px; width: 300px; z-index: 9999; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 6px;" role="alert">
                     <strong>Hoàn thành!</strong> Đã xử lý tất cả yêu cầu.
                 </div>
                 <input type="text" id="mnl" hidden />
-                <!-- Hàng duy nhất chứa tất cả các bộ lọc và nút -->
                 <div class="row col-12 align-items-end mt-2">
                     <!-- Phòng ban -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
-                        
-                            <select class="form-control form-control-sm" id="phongban" onchange="filterTable()">
+                            <label>@Languages.Phongban </label>
+                            <select class="form-control form-control-sm" id="phongban" onchange="Load_cost(this.value)">
                                 <option value=""></option>
                             </select>
                         </div>
                     </div>
-
                     <!-- Cost center -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
-                            <select class="form-control form-control-sm" id="costcenter" onchange="filterTable()">
-                                <option value=""></option>
+                            <label>Cost Center </label>
+                            <select class="form-control form-control-sm" id="costcenter" onchange="_load_confirm()">
+                                <option value="">-- @Languages.chon --</option>
                             </select>
                         </div>
                     </div>
-
                     <!-- Số tiền -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
+                            <label>@Languages.Sotien </label>
                             <select class="form-control form-control-sm" id="giadonhang" onchange="_load_confirm()">
-                                <option value="">- @Languages.Sotien -</option>
+                                <option value=""> -- @Languages.chon --</option>
                                 <option value="2999"> &lt; 3000</option>
                                 <option value="3000">3000 ~ 10,000</option>
                                 <option value="10000"> &gt; 10,000</option>
@@ -186,11 +181,12 @@
                         </div>
                     </div>
 
-                    <!-- Phân loại hàng -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <!-- Phân loại hàng --> 
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
-                            <select class="form-control form-control-sm" id="phanloaihang" onchange="filterTable()">
-                                <option value="">- @Languages.loaihang -</option>
+                            <label>@Languages.loaihang </label>
+                            <select class="form-control form-control-sm" id="phanloaihang" onchange="_load_confirm()">
+                                <option value="">-- @Languages.chon --</option>
                                 <option value="A">A</option>
                                 <option value="E">E</option>
                             </select>
@@ -198,10 +194,11 @@
                     </div>
 
                     <!-- Tình trạng đơn -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
+                            <label>@Languages.Phanloaiyeucau</label>
                             <select class="form-control form-control-sm" id="trangthaidon" onchange="_load_confirm()">
-                                <option value=""> -- @Languages.Tinhtrangdon --</option>
+                                <option value=""> -- @Languages.chon --</option>
                                 <option value="1">@Languages.Gap</option>
                                 <option value="0">@Languages.Thongthuong</option>
                             </select>
@@ -209,10 +206,11 @@
                     </div>
 
                     <!-- Trạng thái đơn -->
-                    <div class="col-lg-2 col-md-2 col-sm-6">
+                    <div class="col-lg-2 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
+                            <label>@Languages.Tinhtrangpheduyet </label>
                             <select class="form-control form-control-sm" id="tinhtrangdon" onchange="_load_confirm()">
-                                <option value="">- @Languages.Trangthaidon -</option>
+                                <option value="">-- @Languages.chon --</option>
                                 <option value="0">@Languages.Doinguoiduthao</option>
                                 <option value="1">@Languages.Doinguoithamtra</option>
                                 <option value="2">@Languages.Doinguoipheduyet</option>
@@ -222,7 +220,7 @@
                     </div>
 
                     <!-- Nút Tìm kiếm -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
                             <button type="button" class="btn btn-primary btn-sm btn-block" style="background-color: #0033cc; border-color: #0033cc; font-size: 11px;" onclick="_load_confirm()">
                                 <i class="ion ion-ios-search-strong"></i> @Languages.timkiem
@@ -231,7 +229,7 @@
                     </div>
 
                     <!-- Nút Làm mới -->
-                    <div class="col-lg-1 col-md-2 col-sm-6">
+                    <div class="col-lg-1 col-md-2 col-sm-6" style="padding-right:0px">
                         <div class="form-group mb-2">
                             <button type="button" class="btn btn-secondary btn-sm btn-block" style="font-size: 11px;" onclick="_reset()">
                                 <i class="ion ion-ios-refresh"></i> @Languages.Lammoi
@@ -253,8 +251,8 @@
                 <div class="table-responsive main-table-responsive card" style="border: none;">
                     <div style="border: 1px solid #dee2e6; height: 100%;">
                         <table class="table table-bordered">
-                            <thead class="bg-primary ">                            
-                                <tr class="header-row-1 bg-primary">                            
+                            <thead class="bg-primary">
+                                <tr class="header-row-1 bg-primary">
                                     <th style="text-align:center;">
                                         <button class="btn btn-light btn-sm btn-block mb-2" id="modal-15" style="font-size: 12px;" onclick="_list_view()">
                                             <i class="ion ion-ios-eye-outline"></i> @Languages.Xem
@@ -282,8 +280,6 @@
                                     <th>@Languages.nguoipheduyet</th>
                                     <th>@Languages.dongyboi</th>
                                     <th>@Languages.Damnhiem</th>
-                                   
-                                    @* <th>@Languages.dongyboi QLTC</th> *@
                                 </tr>
                             </thead>
                             <tbody id="list_approve"></tbody>
@@ -298,246 +294,249 @@
 <button id="modal-7" hidden></button>
 @await Html.PartialAsync("_modal", "Approval")
 <script src="~/scripts/request.js"></script>
+
 @section Scripts {
-<script>
-    let swiper; // Biến toàn cục quản lý Swiper
-    let lst = [];
-    const checkAll = document.getElementById('idd');
+    <script>
+        let swiper;
+        let lst = [];
+        const checkAll = document.getElementById('idd');
 
-    window.onload = function() {
-        var us = document.getElementById("us").innerHTML;
-        _load_confirm(us);
-        LoadSelectData();
-    }
+        window.onload = function() {
+            var usElem = document.getElementById("us");
+            var us = usElem ? usElem.innerHTML : "";
+            _load_confirm(us);
+            LoadSelectData();
+            Load_cost_first();
+        }
 
-    document.addEventListener('change', function(e) {
-        // 1. Xử lý logic Click vào nút "Chọn tất cả" (Check All)
-        if (e.target && e.target.id === 'idd') {
-            const checkboxes = document.querySelectorAll('.item');
-            checkboxes.forEach(cb => {
-                cb.checked = e.target.checked;
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.id === 'idd') {
+                const checkboxes = document.querySelectorAll('.item');
+                checkboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+            }
+
+            const allItems = document.querySelectorAll('.item');
+            const checkedItems = document.querySelectorAll('.item:checked');
+
+            if (checkAll) {
+                checkAll.checked = (allItems.length > 0 && allItems.length === checkedItems.length);
+                checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
+            }
+
+            lst = Array.from(checkedItems).map(cb => cb.value);
+            console.log("Danh sách giá trị hiện tại:", lst);
+        });
+
+        function _list_view() {
+            document.getElementById('slider').innerHTML = "";
+            let ajaxPromises = [];
+
+            for(let i = 0; i < lst.length; i++){
+                var mayeucau = lst[i].split('_')[0];
+                var buoc = lst[i].split('_')[1];
+
+                document.getElementById('slider').innerHTML += `
+                <div class="swiper-slide p-3">
+                    <table class="table table-bordered" style="text-align:center">
+                        <tr hidden>
+                            <td>Id_request : <i id="id_request${i}"></i></td>
+                            <td>Bước : <i id="step${i}"></i></td>
+                            <td>Regency : <i id="regency${i}"></i></td>
+                            <td>Urgent : <i id="urgent${i}"></i></td>
+                        </tr>
+                        <tr>
+                            <th rowspan="2" colspan="4" style="font-size:18px;background-color:#e8f3ff">
+                                Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
+                                物品依頼書（共通間材・比例間材用・消耗品）
+                            </th>
+                            <th id="madonhang${i}" style="background-color:#e8f3ff; font-size:18px"></th>
+                            <th><button type="button" class="btn btn-primary" onclick="_dlxuatkho_trangthai('_${i}')">Tải xuống</button></th>
+                        </tr>
+                        <tr>
+                            <th>Phòng tiếp nhận 受け部門：</th>
+                            <td style="background-color:#e8f3ff" id="khoi${i}"></td>
+                        </tr>
+                        <tr>
+                            <td>※Mã bộ phận yêu cầu<br />依頼部門 コード</td>
+                            <td>※ Mã phòng ban yêu cầu<br />依頼部門コストセンター</td>
+                            <td>※ Tên phòng ban<br />依頼部門名</td>
+                            <td>※Chuyền<br />ライン</td>
+                            <td>※Ngày yêu cầu<br />依頼日</td>
+                            <td>※Thời hạn mong muốn<br />希望期限</td>
+                        </tr>
+                        <tr style="height:38px; background-color : #e8f3ff">
+                            <td id="mbp${i}"></td>
+                            <td id="mpb_yc${i}"></td>
+                            <td id="tenphongban${i}"></td>
+                            <td id="chuyen${i}"></td>
+                            <td id="nyc${i}"></td>
+                            <td id="thmm${i}"></td>
+                        </tr>
+                    </table>
+                    <div class="table-responsive-custom">
+                        <table class="table table-bordered">
+                            <thead style="position: sticky; top: 0; background: #e8f3ff; z-index: 999;">
+                                <tr class="bg-white">
+                                    <td colspan="8" class="text-right">Tổng tiền 合計</td>
+                                    <td id="tongtien_${i}" class="bg-warning"></td>
+                                    <td colspan="4" class="text-center">
+                                       <div id="cls_${i}">
+                                            <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_PROD_Slide('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
+                                            <button type="button" class="btn btn-danger btn-icon icon-left id="modal-8_${i}"><i class="ion ion-android-close"></i> Từ chối </button>
+                                       </div>
+                                    </td>
+                                </tr>
+                                <tr style="background: #e8f3ff;" class="text-center">
+                                    <td rowspan="2">No</td>
+                                    <td rowspan="2">※ Mã đơn <br />システムコード</td>
+                                    <td rowspan="2">※ Tên hàng <br />品名</td>
+                                    <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
+                                    <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
+                                    <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
+                                    <td colspan="2">Yêu cầu <br />依頼</td>
+                                    <td colspan="2">Già thành<br />単価</td>
+                                    <td rowspan="2">Tổng chi phí <br />金額合計</td>
+                                    <td rowspan="2">※ Mục đích <br />目的</td>
+                                    <td rowspan="2">※ Ghi chú <br />備考</td>
+                                </tr>
+                                <tr style="background: #e8f3ff;" class="text-center">
+                                    <td>※ Số lượng <br />数量</td>
+                                    <td>Đơn vị<br />単位</td>
+                                    <td>Đơn giá<br />単価</td>
+                                    <td>Đơn vị tiền tệ <br />通貨単位</td>
+                                </tr>
+                            </thead>
+                            <tbody id="load_detail${i}"></tbody>
+                        </table>
+                    </div>
+                    <br />
+                </div>`;
+
+                let ajaxRequest = $.ajax({
+                    url: '/ipcs/Request/_get_request',
+                    type: 'POST',
+                    dataType: 'JSON',
+                    data: { cost_request: mayeucau },
+                    success: function (response) {
+                        if(!response || response.length === 0) return;
+
+                        document.getElementById("load_detail" + i).innerHTML = "";
+                        document.getElementById("madonhang" + i).innerHTML = "*" + response[0].code_Request + "*";
+                        document.getElementById("mbp" + i).innerHTML = response[0].cost_Center_Group;
+                        document.getElementById("mpb_yc" + i).innerHTML = response[0].cost_Center;
+                        document.getElementById("tenphongban" + i).innerHTML = response[0].name_Dept;
+                        document.getElementById("nyc" + i).innerHTML = response[0].creat_Date ? response[0].creat_Date.split(' ')[0] : '';
+                        document.getElementById("thmm" + i).innerHTML = response[0].dealine ? response[0].dealine.split(' ')[0] : '';
+                        document.getElementById("khoi" + i).innerHTML = response[0].group_Code ? response[0].group_Code.split(' ')[0] : '';
+                        document.getElementById("id_request" + i).innerHTML = response[0].id_Request;
+                        document.getElementById("urgent" + i).innerHTML = response[0].urgent;
+                        document.getElementById("step" + i).innerHTML = buoc;
+                        document.getElementById("chuyen" + i).innerHTML = response[0].place;
+
+                        if (buoc == "0") document.getElementById("regency" + i).innerHTML = "NGUOIYEUCAU";
+                        if (buoc == "1") document.getElementById("regency" + i).innerHTML = "NGUOITHAMTRA";
+                        if (buoc == "2") document.getElementById("regency" + i).innerHTML = "NGUOIPHEDUYET";
+                        if (buoc == "3") document.getElementById("regency" + i).innerHTML = "XACNHAN";
+                        if (buoc == "4") document.getElementById("regency" + i).innerHTML = "XUATKHO";
+
+                        var tongdon = 0;
+                        for (var a = 0; a < response.length; a++) {
+                            var tongtien = response[a].total_exchange || 0;
+                            document.getElementById("load_detail" + i).innerHTML += `<tr><td>${a + 1}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td class="text-right">${response[a].amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td><td>${response[a].unit}</td><td class="text-right">${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td class="text-right">${tongtien.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td></tr>`;
+                            tongdon += parseFloat(tongtien);
+                        }
+                        document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    }
+                });
+                ajaxPromises.push(ajaxRequest);
+            }
+
+            $.when.apply($, ajaxPromises).then(function() {
+                if (swiper) {
+                    swiper.destroy(true, true);
+                }
+
+                swiper = new Swiper(".mySwiper", {
+                    slidesPerView: 1,
+                    spaceBetween: 30,
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                    },
+                    pagination: {
+                        el: ".swiper-pagination",
+                        type: "fraction",
+                    },
+                    mousewheel: true,
+                    keyboard: {
+                        enabled: true,
+                        pageUpDown: false,
+                    },
+                });
             });
         }
 
-        // 2. Cập nhật trạng thái hiển thị cho nút "Check All"
-        const allItems = document.querySelectorAll('.item');
-        const checkedItems = document.querySelectorAll('.item:checked');
+        document.addEventListener('click', function (e) {
+            const tr = e.target.closest('tbody tr');
+            if (!tr) return;
 
-        if (checkAll) {
-            checkAll.checked = (allItems.length > 0 && allItems.length === checkedItems.length);
-            checkAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
-        }
+            const tbody = tr.closest('tbody');
+            if (tbody) {
+                tbody.querySelectorAll('tr').forEach(row => {
+                    row.classList.remove('selected-row');
+                });
+                tr.classList.add('selected-row');
+            }
+        });
 
-        // 3. GÁN GIÁ TRỊ VÀO LST
-        lst = Array.from(checkedItems).map(cb => cb.value);
-        console.log("Danh sách giá trị hiện tại:", lst);
-    });
-
-    function _list_view() {
-        document.getElementById('slider').innerHTML = "";
-        let ajaxPromises = []; // Mảng chứa các Promise của AJAX
-
-        // 1. Vòng lặp đồng bộ tạo khung Slide HTML ban đầu
-        for(let i = 0; i < lst.length; i++){
-            var mayeucau = lst[i].split('_')[0];
-            var buoc = lst[i].split('_')[1];
-
-            document.getElementById('slider').innerHTML += `
-            <div class="swiper-slide p-3">
-                <table class="table table-bordered" style="text-align:center">
-                    <tr hidden>
-                        <td>Id_request : <i id="id_request${i}"></i></td>
-                        <td>Bước : <i id="step${i}"></i></td>
-                        <td>Regency : <i id="regency${i}"></i></td>
-                        <td>Urgent : <i id="urgent${i}"></i></td>
-                    </tr>
-                    <tr>
-                        <th rowspan="2" colspan="4" style="font-size:18px;background-color:#e8f3ff">
-                            Phiếu yêu cầu hàng hóa (hàng trong danh mục chung, nguyên liệu phụ và vật tư tiêu hao) <br />
-                            物品依頼書（共通間材・比例間材用・消耗品）　
-                        </th>
-                        <th id="madonhang${i}" style="background-color:#e8f3ff; font-size:18px"></th>
-                        <th><button type="button" class="btn btn-primary" onclick="_dlxuatkho_trangthai('_${i}')">Tải xuống</button></th>
-                    </tr>
-                    <tr>
-                        <th>Phòng tiếp nhận 受け部門：</th>
-                        <td style="background-color:#e8f3ff" id="khoi${i}"></td>
-                    </tr>
-                    <tr>
-                        <td>※Mã bộ phận yêu cầu<br />依頼部門 コード</td>
-                        <td>※ Mã phòng ban yêu cầu<br />依頼部門コストセンター</td>
-                        <td>※ Tên phòng ban<br />依頼部門名</td>
-                        <td>※Chuyền<br />ライン</td>
-                        <td>※Ngày yêu cầu<br />依頼日</td>
-                        <td>※Thời hạn mong muốn<br />希望期限</td>
-                    </tr>
-                    <tr style="height:38px; background-color : #e8f3ff">
-                        <td id="mbp${i}"></td>
-                        <td id="mpb_yc${i}"></td>
-                        <td id="tenphongban${i}"></td>
-                        <td id="chuyen${i}"></td>
-                        <td id="nyc${i}"></td>
-                        <td id="thmm${i}"></td>
-                    </tr>
-                </table>
-                <div class="table-responsive-custom">
-                    <table class="table table-bordered">
-                        <thead style="position: sticky; top: 0; background: #e8f3ff; z-index: 999;">
-                            <tr class="bg-white">
-                                <td colspan="8" class="text-right">Tổng tiền 合計</td>
-                                <td id="tongtien_${i}" class="bg-warning"></td>
-                                <td colspan="4" class="text-center">
-                                   <div id="cls_${i}">
-                                        <button type="button" class="btn btn-success btn-icon icon-left" onclick="_update_request_PROD_Slide('${i}')"><i class="ion ion-android-done-all"></i> Phê duyệt</button>
-                                        <button type="button" class="btn btn-danger btn-icon icon-left" id="modal-8"><i class="ion ion-android-close"></i> Từ chối </button>
-                                   </div>
-                                </td>
-                            </tr>
-                            <tr style="background: #e8f3ff;" class="text-center">
-                                <td rowspan="2">No</td>
-                                <td rowspan="2">※ Mã đơn <br />システムコード</td>
-                                <td rowspan="2">※ Tên hàng <br />品名</td>
-                                <td rowspan="2">※ Đơn vị đóng gói <br />梱包単位</td>
-                                <td rowspan="2">※ Số tài khoản<br />アカウントコスト</td>
-                                <td rowspan="2">※ Tên tài khoản<br />アカウント名</td>
-                                <td colspan="2">Yêu cầu <br />依頼</td>
-                                <td colspan="2">Già thành<br />単価</td>
-                                <td rowspan="2">Tổng chi phí <br />金額合計</td>
-                                <td rowspan="2">※ Mục đích <br />目的</td>
-                                <td rowspan="2">※ Ghi chú <br />備考</td>
-                            </tr>
-                            <tr style="background: #e8f3ff;" class="text-center">
-                                <td>※ Số lượng <br />数量</td>
-                                <td>Đơn vị<br />単位</td>
-                                <td>Đơn giá<br />単価</td>
-                                <td>Đơn vị tiền tệ <br />通貨単位</td>
-                            </tr>
-                        </thead>
-                        <tbody id="load_detail${i}"></tbody>
-                    </table>
-                </div>
-                <br />
-            </div>`;
-
-            // 2. Đẩy AJAX vào hàng đợi Promise để đồng bộ hóa dữ liệu
-            let ajaxRequest = $.ajax({
-                url: '/ipcs/Request/_get_request',
-                //url: '/Request/_get_request',
-                type: 'POST',
+        function LoadSelectData() {
+            $.ajax({
+                url: '/ipcs/ManagerDelivery/load_section',
+                type: 'GET',
                 dataType: 'JSON',
-                data: { cost_request: mayeucau },
-                success: function (response) {
-                    document.getElementById("load_detail" + i).innerHTML = "";
-                    document.getElementById("madonhang" + i).innerHTML = "*" + response[0].code_Request + "*";
-                    document.getElementById("mbp" + i).innerHTML = response[0].cost_Center_Group;
-                    document.getElementById("mpb_yc" + i).innerHTML = response[0].cost_Center;
-                    document.getElementById("tenphongban" + i).innerHTML = response[0].name_Dept;
-                    document.getElementById("nyc" + i).innerHTML = response[0].creat_Date.split(' ')[0];
-                    document.getElementById("thmm" + i).innerHTML = response[0].dealine.split(' ')[0];
-                    document.getElementById("khoi" + i).innerHTML = response[0].group_Code.split(' ')[0];
-                    document.getElementById("id_request" + i).innerHTML = response[0].id_Request;
-                    document.getElementById("urgent" + i).innerHTML = response[0].urgent;
-                    document.getElementById("step" + i).innerHTML = buoc;
-                    document.getElementById("chuyen" + i).innerHTML = response[0].place;
+                success: function (data) {
+                    var $phongban =$('#phongban');
+                    $phongban.empty();$phongban.append('<option value="">-- @Languages.chon --</option>');
 
-                    if (buoc == "0") document.getElementById("regency" + i).innerHTML = "NGUOIYEUCAU";
-                    if (buoc == "1") document.getElementById("regency" + i).innerHTML = "NGUOITHAMTRA";
-                    if (buoc == "2") document.getElementById("regency" + i).innerHTML = "NGUOIPHEDUYET";
-                    if (buoc == "3") document.getElementById("regency" + i).innerHTML = "XACNHAN";
-                    if (buoc == "4") document.getElementById("regency" + i).innerHTML = "XUATKHO";
-
-                    var tongdon = 0;
-                    for (var a = 0; a < response.length; a++) {
-                        var tongtien = response[a].total_exchange;
-                      document.getElementById("load_detail" + i).innerHTML += `<tr><td>${a + 1}</td><td>${response[a].material_Code}</td><td>${response[a].material_Name}</td><td>${response[a].unit}</td><td>${response[a].account_Code}</td><td>${response[a].account_Name}</td><td class="text-right">${response[a].amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td><td>${response[a].unit}</td><td class="text-right">${response[a].price.toLocaleString('en-US')}</td><td>${response[a].currency}</td><td class="text-right">${tongtien.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td><td>${response[a].aim}</td><td>${response[a].poisition}</td></tr>`;
-                        tongdon += parseFloat(tongtien);
-                    }
-                    document.getElementById("tongtien_" + i).innerHTML = tongdon.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    $.each(data, function (index, item) {
+                        $phongban.append('<option value="' + item.maCost + '">' + item.maPhong + '</option>');
+                    });
+                },
+                error: function (error) {
+                    console.log("Lỗi khi tải Phòng ban:", error);
                 }
             });
-            ajaxPromises.push(ajaxRequest);
         }
 
-             // 3. CHỈ KHỞI TẠO SWIPER KHI TẤT CẢ AJAX ĐÃ TRẢ VỀ KẾT QUẢ THÀNH CÔNG
-        $.when.apply($, ajaxPromises).then(function() {
-            // Huỷ Swiper cũ nếu có để tránh tràn bộ nhớ hoặc lỗi điều hướng
-            if (swiper) {
-                swiper.destroy(true, true);
-            }
+        function Load_cost(a){
+            $.ajax({
+                url: '/ipcs/ManagerDelivery/load_cost',
+                type: 'POST',
+                dataType: 'JSON',
+                data: { maCost: a },
+                success: function (data) {
+                    var $costcenter =$('#costcenter');
+                    $costcenter.empty();$costcenter.append('<option value="">-- @Languages.chon --</option>');
 
-            // Khởi tạo Swiper mới với cài đặt dạng số phân trang (fraction)
-            swiper = new Swiper(".mySwiper", {
-                slidesPerView: 1,
-                spaceBetween: 30,
-                navigation: {
-                    nextEl: ".swiper-button-next",
-                    prevEl: ".swiper-button-prev",
+                    $.each(data, function (index, value) {
+                        $costcenter.append('<option value="' + value + '">' + value + '</option>');
+                    });
                 },
-                pagination: {
-                    el: ".swiper-pagination",
-                    type: "fraction", // Chuyển đổi thành số trang dạng: X / Y
-                },
-                mousewheel: true,
-
-                // SỬA LẠI PHẦN KEYBOARD TẠI ĐÂY:
-                keyboard: {
-                    enabled: true,
-                    pageUpDown: false, // Bật tính năng chuyển slide bằng PgUp / PgDn
-                },
+                error: function (error) {
+                    console.log("Lỗi khi tải Cost Center:", error);
+                }
             });
-        });
-    }
-    // Xử lý sự kiện click để focus màu dòng trong table
-    document.addEventListener('click', function (e) {
-        // Tìm thẻ <tr> gần nhất chứa phần tử vừa click
-        const tr = e.target.closest('tbody tr');
-
-        // Nếu không click vào dòng trong thẻ <tbody> thì bỏ qua
-        if (!tr) return;
-
-        // Tìm <tbody> chứa dòng đó
-        const tbody = tr.closest('tbody');
-        if (tbody) {
-            // Xóa class 'selected-row' ở tất cả các dòng cùng thuộc <tbody> này
-            tbody.querySelectorAll('tr').forEach(row => {
-                row.classList.remove('selected-row');
-            });
-
-            // Thêm class 'selected-row' cho dòng vừa click
-            tr.classList.add('selected-row');
         }
-    });
-        // Hàm load dữ liệu phòng ban và cost center
-   
-    function LoadSelectData() {
+        function Load_cost_first(){
         $.ajax({
-            url: '/ipcs/ManagerDelivery/load_section',
-            type: 'GET',
-            dataType: 'JSON',
-            success: function (data) {
-                console.log(data);
-                var $phongban = $('#phongban');
-                $phongban.empty(); // Xóa dữ liệu cũ
-                $phongban.append('<option value="">- @Languages.Phongban -</option>'); // Dòng mặc định
-
-                // 1. Duyệt trực tiếp qua mảng data
-                $.each(data, function (index, item) {
-                    // 2. Dùng maCost và maPhong chữ 'm' viết thường theo đúng console.log
-                    $phongban.append('<option value="' + item.maCost + '">' + item.maPhong + '</option>');
-                });
-            },
-            error: function (error) {
-                console.log("Lỗi khi tải Phòng ban:", error);
-            }
-        });
-        $.ajax({
-            url: '/ipcs/ManagerDelivery/load_cost',
+            url: '/ipcs/ManagerDelivery/load_cost_first',
             type: 'POST',
             dataType: 'JSON',
             success: function (data) {
-                var $costcenter = $('#costcenter');
-                $costcenter.empty();
-                $costcenter.append('<option value="">- Cost -</option>');
+                var $costcenter =$('#costcenter');
+                $costcenter.empty();$costcenter.append('<option value="">-- @Languages.chon --</option>');
 
                 $.each(data, function (index, value) {
                     $costcenter.append('<option value="' + value + '">' + value + '</option>');
@@ -548,46 +547,65 @@
             }
         });
     }
+        $(document).ready(function () {
+            $(document).on('change', '#costcenter, #phanloaihang', function () {
+                filterTable();
+            });
 
-    $(document).ready(function () {
-        // Thay đổi cách gọi sự kiện
-        $(document).on('change', '#phongban, #costcenter, #phanloaihang', function () {
-            filterTable();
+            // Lắng nghe mọi request Ajax hoàn thành
+            $(document).ajaxComplete(function(event, xhr, settings) {
+                // Nếu ajax request đó chứa đường dẫn lấy dữ liệu bảng (ví dụ url lấy danh sách đơn)
+                // Lưu ý: Cần điều chỉnh URL string này khớp với url API trong file request.js
+                if (settings.url.indexOf('_load_confirm') !== -1 || settings.url.indexOf('Your_API_Get_List_Endpoint') !== -1) {
+                    sortTableByTotalDesc();
+                }
+            });
         });
-    });
 
-    function filterTable() {
-            var selectedDept = ($('#phongban').val() || "").toLowerCase().trim();
+        function filterTable() {
             var selectedCost = ($('#costcenter').val() || "").toLowerCase().trim();
-            var selectedHang = ($('#phanloaihang').val() || "").toLowerCase().trim(); // Lấy giá trị 'a' hoặc 'e'
+            var selectedHang = ($('#phanloaihang').val() || "").toLowerCase().trim();
 
             $('#list_approve tr').each(function () {
-                var $row = $(this);
-                var rowText = $row.text().toLowerCase();
-
-                // Cột index 6 là Mã hàng, Cột index 7 là Cost Center (theo thead của bạn)
+                var $row =$(this);
                 var HangCellText = $row.find('td').eq(6).text().toLowerCase().trim();
                 var costCellText = $row.find('td').eq(7).text().toLowerCase().trim();
 
-                // 1. Lọc Phòng ban: Tìm trong toàn bộ text của dòng
-                var matchDept = (selectedDept === "") || rowText.indexOf(selectedDept) > -1;
-
-                // 2. Lọc Cost Center: CHỈ TÌM TRONG CỘT 7 (Bỏ rowText.indexOf để tránh nhiễu dữ liệu với số tiền/ngày tháng)
                 var matchCost = (selectedCost === "") || costCellText.indexOf(selectedCost) > -1;
-
-                // 3. Lọc Mã hàng (Phân loại A/E): CHỈ TÌM TRONG CỘT 6 (Bỏ rowText.indexOf)
-                // Dùng indexOf nếu mã hàng CÓ CHỨA 'A' hoặc 'E'
                 var matchHang = (selectedHang === "") || HangCellText.indexOf(selectedHang) > -1;
 
-            
-
-                // 4. Ẩn/Hiện dòng theo kết quả lọc
-                if (matchDept && matchCost && matchHang) {
+                if (matchCost && matchHang) {
                     $row.show();
                 } else {
                     $row.hide();
                 }
+                sortTableByTotalDesc();
             });
         }
-</script>
+
+        function sortTableByTotalDesc() {
+
+            let rows = $('#list_approve tr').get();
+
+            rows.sort(function(a, b) {
+
+                let aVal = parseFloat(
+                    $(a).find('td').eq(10).text()
+                        .replace(/,/g, '')
+                        .trim()
+                ) || 0;
+
+                let bVal = parseFloat(
+                    $(b).find('td').eq(10).text()
+                        .replace(/,/g, '')
+                        .trim()
+                ) || 0;
+
+                return bVal - aVal;
+            });
+
+            $('#list_approve').append(rows);
+        }
+
+    </script>
 }

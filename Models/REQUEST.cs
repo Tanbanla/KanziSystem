@@ -337,7 +337,7 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 "VALUES ('" + id_request + "','" + adid_dt + "','" + adid_tt + "','" + adid_pheduyet + "','" + adid_qlsc + "','" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "','0','" + mail_dt + "','" + mail_tt + "','" + mail_pd + "',N'" + ten_dt + "',N'" + ten_tt + "',N'" + ten_pd + "','" + adid_xk + "','" + mail_xk + "',N'" + ten_xk + "',N'" + ten_qlsc + "','" + mail_qlsc + "','0','0','0','0','" + nguoitao + "','" + mailnguoitao + "','" + adid_qltc + "','" + ten_qltc + "','" + mail_qltc + "','0')");
             return "OK";
         }
-        public static List<PE_REQUEST_CONFIRM> get_requestconfirm(string us, string Urgent, double Total, string Code_Request, string INT_STEP)
+        public static List<PE_REQUEST_CONFIRM> get_requestconfirm(string us, string Urgent, double Total, string Code_Request, string INT_STEP, string costcenter, string mahang)
         {
             SQL_Connect_DB20 _db = new SQL_Connect_DB20();
             List<PE_REQUEST_CONFIRM> pe_ = new List<PE_REQUEST_CONFIRM>();
@@ -384,6 +384,9 @@ namespace PRJ_WAREHOUSE_BIVN.Models
                 AND Urgent LIKE '%{Urgent}%' {gia} 
                 AND b.Code_Request LIKE '%{Code_Request}%' 
                 AND a.INT_STEP LIKE '%{INT_STEP}%'
+                AND b.Cost_Center LIKE '%{costcenter}%'
+                AND d.Material_Type like '%{mahang}%'
+                order by Total desc
             ";
 
             var list = _db.GET_DATA_FROM_SQL(sqlQuery);

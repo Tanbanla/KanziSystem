@@ -110,6 +110,8 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
 					r.NVCHR_FileThietKe,
 					r.DTM_NgayMuonNhan,
 					r.DTM_KyHan,
+                    r.INT_SoLuong as slBivn,
+                    r.NVCHR_DonVi as donViBivn,
 
                     CAST(CASE WHEN r.CHR_MaHangNCC = d.CHR_MaHangNCC THEN 1 ELSE 0 END AS BIT) AS IsMatch_MaHangNCC,
                     CAST(CASE WHEN r.NVCHR_NameVN = d.NVCHR_TenHangHQ THEN 1 ELSE 0 END AS BIT) AS IsMatch_NameVN,
@@ -474,7 +476,119 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                 throw;
             }
         }
+        // update infor
+        public async Task<bool> UpdateQuotationNotRQAsync(List<BaoGia_Detail_of_Quotation> listDto)
+        {
+            if (listDto == null || listDto.Count == 0)
+            {
+                return false;
+            }
 
+            var now = DateTime.Now;
+            await using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var detailIds = listDto
+                    .Select(dto => dto.ID)
+                    .Distinct()
+                    .ToList();
+
+                var baoGiaDetails = await _context.BaoGia_Detail_of_Quotations
+                    .Where(d => detailIds.Contains(d.ID))
+                    .ToListAsync();
+
+                if (!baoGiaDetails.Any())
+                {
+                    throw new Exception("Không tìm thấy dữ liệu báo giá");
+                }
+
+                var detailById = baoGiaDetails.ToDictionary(d => d.ID);
+                var requestQuoteIds = baoGiaDetails
+                    .Select(d => d.ID_RequestQuote)
+                    .Distinct()
+                    .ToList();
+
+                var baoGiaRequests = await _context.BaoGia_Request_of_Quotations
+                    .Where(r => requestQuoteIds.Contains(r.ID))
+                    .ToListAsync();
+                if (!baoGiaRequests.Any())
+                {
+                    throw new Exception("Không tìm thấy dữ liệu báo giá");
+                }
+
+                var historyList = new List<BaoGia_History_Detail_Request>(listDto.Count);
+
+                // update thông tin detail
+                foreach (var item in listDto)
+                {
+                    if (!detailById.TryGetValue(item.ID, out var detail))
+                    {
+                        continue;
+                    }
+                    // lưu lịch sử thay đổi
+                    var history = new BaoGia_History_Detail_Request
+                    {
+                        ID = 0,
+                        ID_RQ_Detail = detail.ID,
+                        NVCHR_dataOld = System.Text.Json.JsonSerializer.Serialize(detail),
+                        NVCHR_dataNew = System.Text.Json.JsonSerializer.Serialize(item),
+                        CHR_CreateBy = item.CHR_UpdateBy,
+                        DTM_CreateBy = now,
+                        NVCHR_ReasonUpdate = item.NVCHR_ReasonUpdate
+                    };
+                    historyList.Add(history);
+
+                    detail.CHR_MaHangNCC = item.CHR_MaHangNCC;
+                    detail.NVCHR_TenHangHQ = item.NVCHR_TenHangHQ;
+                    detail.FL_USD = item.FL_USD;
+                    detail.FL_VND = item.FL_VND;
+                    detail.DTM_EndDate = item.DTM_EndDate;
+                    detail.NVCHR_MOQ = item.NVCHR_MOQ;
+                    detail.DTM_LeadTime = item.DTM_LeadTime;
+                    detail.DTM_ShipTime = item.DTM_ShipTime;
+                    detail.NVCHR_Packing = item.NVCHR_Packing;
+                    detail.NVCHR_Note = item.NVCHR_Note;
+                    detail.NVCHR_File = item.NVCHR_File;
+                    detail.FL_ExchangeRate = item.FL_ExchangeRate;
+                    detail.FL_TaxRate = item.FL_TaxRate;
+                    detail.FL_TaxAmount = item.FL_TaxAmount;
+                    detail.FL_TotalAfterTax = item.FL_TotalAfterTax;
+                    detail.NVCHR_PaymentTerm = item.NVCHR_PaymentTerm;
+                    detail.NVCHR_Warranty = item.NVCHR_Warranty;
+                    detail.NVCHR_DeliveryTerm = item.NVCHR_DeliveryTerm;
+                    detail.CHR_UpdateBy = item.CHR_UpdateBy;
+                    detail.DTM_UpdateDate = now;
+                    detail.INT_NumberEdit = detail.INT_NumberEdit != null ? detail.INT_NumberEdit + 1 : 1;
+                    detail.INT_SoLuong = item.INT_SoLuong;
+                    detail.FL_Sum = (item.FL_VND != null && item.INT_SoLuong != null) ? item.FL_VND * item.INT_SoLuong : null;
+                    detail.VCHR_Rohs = item.VCHR_Rohs;
+                    detail.VCHR_COCQ = item.VCHR_COCQ;
+                    detail.VCHR_MSDS = item.VCHR_MSDS;
+                    detail.VCHR_AnToan = item.VCHR_AnToan;
+                    detail.VCHR_CamKet = item.VCHR_CamKet;
+                    detail.CHR_NameEN = item.CHR_NameEN;
+                    detail.NVCHR_DonVi = item.NVCHR_DonVi;
+                    detail.DTM_EffectiveDate = item.DTM_EffectiveDate;
+                    detail.DTM_ExpiryDate = item.DTM_ExpiryDate;
+                    //detail.BIT_Select = null;
+                    detail.CHR_Status = item.CHR_Status;
+                    detail.NVCHR_dataOld = item.NVCHR_dataOld;
+                    detail.NVCHR_ReasonUpdate = item.NVCHR_ReasonUpdate;
+
+                }
+
+                await _context.BaoGia_History_Detail_Requests.AddRangeAsync(historyList);
+                await _context.SaveChangesAsync();
+
+                await tran.CommitAsync();
+                return true;
+            }
+            catch
+            {
+                await tran.RollbackAsync();
+                throw;
+            }
+        }
         // lấy id của đơn báo giá
         public async Task<int?> GetIdOfQuotationAsync(string maDon, string maVatTu, string maNB, string maNcc, string NameHQ)
         {
@@ -853,8 +967,42 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
                     FROM MATERIAL AS m
                     OUTER APPLY
                     (
-                        SELECT TOP 1 price.*
-                        FROM TM_PRICE_MASTER AS price
+                        SELECT TOP 1
+                            price.DTM_UPLOAD,
+                            price.CHR_UPLOAD_USERID,
+                            price.CHR_QUOTATION_REQUEST_NO,
+                            price.CHR_EQUIPMENT_CODE,
+                            price.CHR_VENDOR_CODE,
+                            price.NVCHR_VENDOR_NAME,
+                            price.CHR_VENDOR_PART_CODE,
+                            price.NVCHR_PART_NAME_VN,
+                            price.NVCHR_PART_NAME_EN,
+                            price.DEC_QUANTITY,
+                            price.NVCHR_UNIT,
+                            price.NVCHR_OTHER_REQUIREMENT,
+                            price.NVCHR_MAKER_ORIGIN,
+                            price.DEC_UNIT_PRICE,
+                            price.CHR_CURRENCY,
+                            price.DEC_UNIT_PRICE_USD,
+                            price.INT_LEAD_TIME_DAY,
+                            price.DEC_MOQ,
+                            price.NVCHR_DELIVERY_TERM,
+                            price.NVCHR_REMARK,
+                            price.NVCHR_PLACE,
+                            price.NVCHR_SHIPMENT_METHOD,
+                            price.DEC_VAT_PERCENT,
+                            price.NVCHR_PAYMENT_TERM,
+                            price.DTM_PRICE_EFFECTIVE,
+                            price.DTM_PRICE_EXPIRATION,
+                            price.BIT_FIX_VENDOR,
+                            price.NVCHR_ADJUSTMENT_REASON,
+                            price.INT_QUOTATION_DETAIL,
+                            price.NVCHR_QTN_LINK,
+                            price.NVCHR_QTN_EXCEL_LINK,
+                            price.DTM_UPDATE,
+                            price.DTM_CREATE,
+                            price.ID
+                        FROM dbo.TM_PRICE_MASTER AS price
                         WHERE price.CHR_INTERNAL_PART_CODE = m.Material_Code
                         ORDER BY
                             COALESCE(price.DTM_UPDATE, price.DTM_CREATE, price.DTM_UPLOAD) DESC,
@@ -991,39 +1139,60 @@ namespace PRJ_WAREHOUSE_BIVN.Data.Repositories.Implementations
             {
                 throw new ArgumentNullException(nameof(vm));
             }
+
             var sql = new StringBuilder(@"
-                ;WITH MaterialPrices AS
+                ;WITH LatestPrice AS
+                (
+                    SELECT *
+                    FROM
+                    (
+                        SELECT
+                            p.CHR_INTERNAL_PART_CODE,
+                            p.CHR_QUOTATION_REQUEST_NO,
+                            p.CHR_EQUIPMENT_CODE,
+                            p.CHR_VENDOR_CODE,
+                            p.CHR_VENDOR_PART_CODE,
+                            p.DTM_PRICE_EXPIRATION,
+                            ROW_NUMBER() OVER
+                            (
+                                PARTITION BY p.CHR_INTERNAL_PART_CODE
+                                ORDER BY
+                                    COALESCE(p.DTM_UPDATE, p.DTM_CREATE, p.DTM_UPLOAD) DESC,
+                                    p.DTM_UPLOAD DESC,
+                                    p.ID DESC
+                            ) AS RN
+                        FROM dbo.TM_PRICE_MASTER p
+                    ) X
+                    WHERE RN = 1
+                ),
+                MaterialPrices AS
                 (
                     SELECT
                         m.Material_Code AS MaterialCode,
-                        p.DTM_UPLOAD AS UploadDate,
+                        p.DTM_PRICE_EXPIRATION AS ExpiryDate,
                         p.CHR_QUOTATION_REQUEST_NO AS QuotationRequestNumber,
                         p.CHR_EQUIPMENT_CODE AS EquipmentCode,
                         p.CHR_VENDOR_CODE AS VendorCode,
-                        m.Material_Code AS BIVNPartCode,
                         p.CHR_VENDOR_PART_CODE AS VendorGoodCode,
                         m.Group_Code AS GroupCode,
-                        COALESCE(m.Category_VN, m.GoodKind) AS FilterCategory,
-                        p.DTM_PRICE_EXPIRATION AS ExpiryDate
-                    FROM MATERIAL AS m
-                    OUTER APPLY
-                    (
-                        SELECT TOP 1 price.*
-                        FROM TM_PRICE_MASTER AS price
-                        WHERE price.CHR_INTERNAL_PART_CODE = m.Material_Code
-                        ORDER BY
-                            COALESCE(price.DTM_UPDATE, price.DTM_CREATE, price.DTM_UPLOAD) DESC,
-                            price.DTM_UPLOAD DESC,
-                            price.ID DESC
-                    ) AS p
+                        COALESCE(m.Category_VN, m.GoodKind) AS FilterCategory
+                    FROM MATERIAL m
+                    LEFT JOIN LatestPrice p
+                        ON p.CHR_INTERNAL_PART_CODE = m.Material_Code
                 )
-                SELECT COUNT(*) AS TotalCount
+                SELECT COUNT(1)
                 FROM MaterialPrices
-                WHERE 1 = 1");
+                WHERE 1 = 1 ");
+
             var parameters = new DynamicParameters();
+
             AppendMasterQuoteFilters(sql, parameters, vm);
 
-            return await _conn.ExecuteScalarAsync<int>(sql.ToString(), parameters);
+            sql.Append(" OPTION (RECOMPILE)");
+
+            return await _conn.ExecuteScalarAsync<int>(
+                sql.ToString(),
+                parameters);
         }
     }
 }

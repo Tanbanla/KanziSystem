@@ -213,4 +213,32 @@
   <data name="CannotSelectSupplierForItems" xml:space="preserve">
     <value>仕入先見積不足のため、受注を選択できません。対象：{0}</value>
   </data>
+  <data name="InternalAndVendorCodeRequired" xml:space="preserve"><value>社内品目コードと仕入先コードは必須です。</value></data>
+  <data name="InternalCodeRequired" xml:space="preserve"><value>社内品目コードは必須です。</value></data>
+  <data name="MaterialNotFound" xml:space="preserve"><value>品目コード {0} の情報が見つかりません。</value></data>
+  <data name="InvalidMasterPriceData" xml:space="preserve"><value>マスタ価格データが無効です。</value></data>
+  <data name="NoSupplierSelectionData" xml:space="preserve"><value>仕入先選定データがありません。</value></data>
+  <data name="SupplierNotSelectedForItem" xml:space="preserve"><value>注文 {0}、品目 {1} に仕入先（O）が選択されていません。</value></data>
+  <data name="MultipleSuppliersForItem" xml:space="preserve"><value>注文 {0}、品目 {1} には1社の仕入先のみ選択できます。</value></data>
+  <data name="SelectedSupplierNotLowest" xml:space="preserve"><value>品目 {1} の仕入先 {0} は最安値ではありません。</value></data>
+  <data name="MultiplePricesForSupplier" xml:space="preserve"><value>注文 {0}、品目 {1}、仕入先 {2} に複数の異なる価格があります。</value></data>
+  <data name="SupplierZeroPrice" xml:space="preserve"><value>品目 {1} の仕入先 {0} の見積価格が0です。</value></data>
+  <data name="SupplierQuotationLinkRequired" xml:space="preserve"><value>品目 {1} の仕入先 {0} に見積リンクがありません。</value></data>
+  <data name="SupplierQuotationExpired" xml:space="preserve"><value>品目 {1} の仕入先 {0} の見積期限が切れているか、4日以内に期限切れになります。</value></data>
+  <data name="MultipleSuppliersForEquipmentCategory" xml:space="preserve"><value>設備 {0}、カテゴリ {1} には複数の仕入先を選択できません。</value></data>
+  <data name="UploadFileRequired" xml:space="preserve"><value>アップロードするファイルを選択してください。</value></data>
+  <data name="ImportFileRequired" xml:space="preserve"><value>インポートするExcelファイルを選択してください。</value></data>
+  <data name="ExcelFileOnly" xml:space="preserve"><value>.xlsx形式のExcelファイルのみ対応しています。</value></data>
+  <data name="ImportDataRequired" xml:space="preserve"><value>3行目以降にデータがありません。</value></data>
+  <data name="MasterPriceImportSaveError" xml:space="preserve"><value>マスタ価格データを保存できません: {0}</value></data>
+  <data name="MasterPriceImportSuccess" xml:space="preserve"><value>マスタ価格を正常にインポートしました。</value></data>
+  <data name="MasterPriceImportReadError" xml:space="preserve"><value>Excelファイルを読み込めません: {0}</value></data>
+  <data name="MasterPriceInvalidNumber" xml:space="preserve"><value>列 {0} は有効な数値ではありません。</value></data>
+  <data name="MasterPriceInvalidInteger" xml:space="preserve"><value>列 {0} は有効な整数ではありません。</value></data>
+  <data name="MasterPriceInvalidDate" xml:space="preserve"><value>列 {0} は有効な日付ではありません。</value></data>
+  <data name="MasterPriceInternalCodeRequired" xml:space="preserve"><value>社内品目コードは必須です。</value></data>
+  <data name="MasterPriceVendorCodeRequired" xml:space="preserve"><value>仕入先コードは必須です。</value></data>
+  <data name="MasterPriceVendorNameRequired" xml:space="preserve"><value>仕入先名は必須です。</value></data>
+  <data name="MasterPriceExpirationInvalid" xml:space="preserve"><value>有効期限は有効開始日以降である必要があります。</value></data>
+  <data name="MasterPriceSupplierDecisionInvalid" xml:space="preserve"><value>仕入先の選択は O/X、はい/いいえ、または TRUE/FALSE のみ対応しています。</value></data>
 </root>

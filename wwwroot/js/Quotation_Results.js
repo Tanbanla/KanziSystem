@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const i18n = (key, fallback) => window.i18nQuotationResults?.[key] || fallback;
     window._quotationResultsState = window._quotationResultsState || { openGroups: {}, showAdditionalColumns: true };
 
     const supplierPickReasonOptions = [
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const value = masterPriceGet(row, name);
         const displayValue =
             type === 'checkbox'
-                ? (value ? 'Có' : 'Không')
+                ? (value ? i18n('Yes', 'Yes') : i18n('No', 'No'))
                 : (type === 'datetime-local'
                     ? date(value)
                     : value);
@@ -136,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
             usdInput.value = String(Number((price / rate).toFixed(4)));
         } catch (error) {
             usdInput.value = '';
-            showDialog({ title: 'Thông báo', message: error.message || 'Không thể lấy tỷ giá.', type: 'error' });
+            showDialog({ title: i18n('Notification', 'Notification'), message: error.message || i18n('MasterPriceExchangeRateError', 'Unable to get exchange rate.'), type: 'error' });
         }
     }
 
@@ -151,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function loadMasterPriceHistory(code) {
         const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/GetPriceMasterHistory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(code) });
-        if (!response.ok) throw new Error(await response.text() || 'Không thể tải lịch sử master giá');
+        if (!response.ok) throw new Error(await response.text() || i18n('MasterPriceHistoryLoadError', 'Unable to load master price history.'));
         const result = await response.json();
         return Array.isArray(result?.data) ? result.data : [];
     }
@@ -161,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!code) return;
         const button = document.getElementById('masterPriceHistoryExport');
         if (button) button.disabled = true;
-        showLoading('Đang tải lịch sử master giá...');
+        showLoading(i18n('MasterPriceHistoryLoading', 'Loading master price history...'));
         try {
             const payload = {
                 internalPartCode: code,
@@ -171,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 to: document.getElementById('historyTo')?.value || null
             };
             const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ExportPriceMasterHistory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) throw new Error(await response.text() || 'Không thể xuất lịch sử master giá');
+            if (!response.ok) throw new Error(await response.text() || i18n('MasterPriceHistoryExportError', 'Unable to export master price history.'));
             const blob = await response.blob();
             const contentDisposition = response.headers.get('Content-Disposition') || '';
             const fileNameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
@@ -185,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
             link.remove();
             URL.revokeObjectURL(url);
         } catch (error) {
-            showDialog({ title: 'Thông báo', message: error.message || 'Không thể xuất lịch sử master giá.', type: 'error' });
+            showDialog({ title: i18n('Notification', 'Notification'), message: error.message || i18n('MasterPriceHistoryExportError', 'Unable to export master price history.'), type: 'error' });
         } finally {
             if (button) button.disabled = false;
             hideLoading();
@@ -209,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ${masterPriceHistoryCell(row, 'dtM_PRICE_EFFECTIVE', 'datetime-local')}${masterPriceHistoryCell(row, 'dtM_PRICE_EXPIRATION', 'datetime-local')}
             ${masterPriceHistoryCell(row, 'biT_FIX_VENDOR', 'checkbox')}${masterPriceHistoryCell(row, 'nvchR_ADJUSTMENT_REASON')}
             ${masterPriceHistoryCell(row, 'nvchR_QTN_LINK')}${masterPriceHistoryCell(row, 'nvchR_QTN_EXCEL_LINK')}
-            ${masterPriceHistoryCell(row, 'chR_CRT_USERID')}${masterPriceHistoryCell(row, 'dtM_CREATE', 'datetime-local')}${masterPriceHistoryCell(row, 'chR_UPD_USERID')}${masterPriceHistoryCell(row, 'dtM_UPDATE', 'datetime-local')}</tr>`).join('') : '<tr><td colspan="39" class="text-center text-muted py-4">Không có dữ liệu phù hợp</td></tr>';
+            ${masterPriceHistoryCell(row, 'chR_CRT_USERID')}${masterPriceHistoryCell(row, 'dtM_CREATE', 'datetime-local')}${masterPriceHistoryCell(row, 'chR_UPD_USERID')}${masterPriceHistoryCell(row, 'dtM_UPDATE', 'datetime-local')}</tr>`).join('') : `<tr><td colspan="39" class="text-center text-muted py-4">${i18n('NoMatchingData', 'No matching data')}</td></tr>`;
     }
 
     function renderMasterPriceEdit(row, internalPartCode = '', includeAuditFields = true) {
@@ -256,11 +257,11 @@ document.addEventListener('DOMContentLoaded', function () {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(internalPartCode)
         });
-        if (!response.ok) throw new Error(await response.text() || 'Không thể tải thông tin linh kiện');
+        if (!response.ok) throw new Error(await response.text() || i18n('MasterPriceMaterialLoadError', 'Unable to load material information.'));
 
         const result = await response.json();
         const material = result?.data;
-        if (!material) throw new Error('Không tìm thấy thông tin linh kiện');
+        if (!material) throw new Error(i18n('MasterPriceMaterialNotFound', 'Material information was not found.'));
         return material;
     }
 
@@ -370,20 +371,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const quoted = items.some(item => Number(item.row.dataset.priceUsd) > 0 || Number(item.row.dataset.priceVnd) > 0);
             const selected = items.filter(item => item.choice === 'true');
             if (quoted && selected.length === 0) {
-                warnings.push({ row: items[0].row, reason: 'Có NCC báo giá nhưng toàn bộ NCC đang tick X, chưa chọn NCC nào.' });
+                warnings.push({ row: items[0].row, reason: i18n('SupplierValidationNoSelection', 'Suppliers have quoted, but none is selected.') });
             }
             selected.forEach(item => {
                 const row = item.row;
                 if (Number(row.dataset.priceUsd) <= 0 && Number(row.dataset.priceVnd) <= 0) {
-                    warnings.push({ row, reason: 'Đã chọn NCC nhưng giá báo giá bằng 0.' });
+                    warnings.push({ row, reason: i18n('SupplierValidationZeroPrice', 'The selected supplier has a quotation price of zero.') });
                 }
                 const expiry = row.dataset.expiry ? new Date(row.dataset.expiry) : null;
                 if (expiry && !Number.isNaN(expiry.getTime())) {
                     expiry.setHours(0, 0, 0, 0);
-                    if (expiry < today) warnings.push({ row, reason: 'Đã chọn NCC nhưng báo giá đã hết hiệu lực.' });
+                    if (expiry < today) warnings.push({ row, reason: i18n('SupplierValidationExpired', 'The selected supplier quotation has expired.') });
                 }
                 if (!row.dataset.quoteLink?.trim()) {
-                    warnings.push({ row, reason: 'Đã chọn NCC nhưng link báo giá đang để trống.' });
+                    warnings.push({ row, reason: i18n('SupplierValidationMissingLink', 'The selected supplier has no quotation link.') });
                 }
             });
         });
@@ -411,8 +412,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const { overlay, titleEl, bodyEl, footerEl } = getDialogEls();
             if (!overlay) { resolve('close'); return; }
             const T = window.i18nQuotationResults || {};
-            titleEl.textContent = T.SupplierValidationWarningTitle || 'Cảnh báo lựa chọn nhà cung cấp';
-            bodyEl.innerHTML = `<div class="text-danger mb-2">Phát hiện ${warnings.length} lỗi. Bạn có muốn tiếp tục gửi dữ liệu không?</div><ul>${warnings.map(x => `<li>${escape(x.row.dataset.madon)} / ${escape(x.row.dataset.mahang)}: ${escape(x.reason)}</li>`).join('')}</ul>`;
+            titleEl.textContent = T.SupplierValidationWarningTitle || i18n('SupplierValidationWarningTitle', 'Supplier selection warning');
+            bodyEl.innerHTML = `<div class="text-danger mb-2">${escape((T.SupplierValidationDetected || '{0} errors were found. Do you want to continue submitting the data?').replace('{0}', warnings.length))}</div><ul>${warnings.map(x => `<li>${escape(x.row.dataset.madon)} / ${escape(x.row.dataset.mahang)}: ${escape(x.reason)}</li>`).join('')}</ul>`;
             footerEl.innerHTML = '';
             const addButton = (text, action, className) => {
                 const button = document.createElement('button');
@@ -422,9 +423,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 button.onclick = () => { hideDialog(); resolve(action); };
                 footerEl.appendChild(button);
             };
-            addButton(T.SupplierValidationClose || 'Đóng', 'close', 'cm-btn cm-btn-outline');
-            addButton(T.SupplierValidationExport || 'Xuất dữ liệu lỗi', 'export', 'cm-btn cm-btn-outline');
-            addButton(T.SupplierValidationContinue || 'Tiếp tục', 'continue', 'cm-btn cm-btn-primary');
+            addButton(T.SupplierValidationClose || i18n('SupplierValidationClose', 'Close'), 'close', 'cm-btn cm-btn-outline');
+            addButton(T.SupplierValidationExport || i18n('SupplierValidationExport', 'Export errors'), 'export', 'cm-btn cm-btn-outline');
+            addButton(T.SupplierValidationContinue || i18n('SupplierValidationContinue', 'Continue'), 'continue', 'cm-btn cm-btn-primary');
             overlay.setAttribute('aria-hidden', 'false');
             overlay.style.display = 'flex';
             attachDialogCloseHandlers();
@@ -555,15 +556,15 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         openMasterPriceModal: async function (code, kind) {
             const title = document.getElementById(kind === 'history' ? 'masterPriceHistorySubtitle' : 'masterPriceEditTitle');
-            if (title && kind === 'history') title.textContent = `Mã hàng nội bộ: ${code}`;
+            if (title && kind === 'history') title.textContent = i18n('MasterPriceCodeLabel', 'Internal material code: {0}').replace('{0}', code);
             if (kind === 'add') {
                 masterPriceModalState.code = code;
                 masterPriceModalState.mode = 'add';
                 const now = new Date().toISOString();
                 const blank = { CHR_INTERNAL_PART_CODE: code, DTM_UPLOAD: now, DTM_CREATE: now, BIT_FIX_VENDOR: false, BIT_USE_LEAVE_RATE: false };
-                document.getElementById('masterPriceEditTitle').textContent = 'Nhập master giá mới';
-                document.getElementById('masterPriceEditSubtitle').textContent = `Mã hàng nội bộ: ${code}`;
-                document.getElementById('masterPriceSaveButton').innerHTML = '<i class="fas fa-plus me-1"></i>Thêm master giá';
+                document.getElementById('masterPriceEditTitle').textContent = i18n('MasterPriceAddTitle', 'Add new master price');
+                document.getElementById('masterPriceEditSubtitle').textContent = i18n('MasterPriceCodeLabel', 'Internal material code: {0}').replace('{0}', code);
+                document.getElementById('masterPriceSaveButton').innerHTML = `<i class="fas fa-plus me-1"></i>${i18n('MasterPriceAddButton', 'Add master price')}`;
                 renderMasterPriceEdit(blank, code, false);
                 masterPriceOverlay('edit', true);
                 try {
@@ -572,14 +573,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         fillMasterPriceFromMaterial(material);
                     }
                 } catch (error) {
-                    showDialog({ title: 'Thông báo', message: error.message || 'Không thể tải thông tin linh kiện.', type: 'error' });
+                    showDialog({ title: i18n('Notification', 'Notification'), message: error.message || i18n('MasterPriceMaterialLoadError', 'Unable to load material information.'), type: 'error' });
                 }
                 return;
             }
             masterPriceModalState.mode = 'edit';
-            document.getElementById('masterPriceEditTitle').textContent = 'Chỉnh sửa master giá';
-            document.getElementById('masterPriceEditSubtitle').textContent = 'Đang hiển thị bản ghi mới nhất';
-            document.getElementById('masterPriceSaveButton').innerHTML = '<i class="fas fa-save me-1"></i>Lưu thay đổi';
+            document.getElementById('masterPriceEditTitle').textContent = i18n('MasterPriceEditTitle', 'Edit master price');
+            document.getElementById('masterPriceEditSubtitle').textContent = i18n('MasterPriceLatestRecord', 'Showing the latest record');
+            document.getElementById('masterPriceSaveButton').innerHTML = `<i class="fas fa-save me-1"></i>${i18n('MasterPriceSaveButton', 'Save changes')}`;
             masterPriceOverlay(kind, true);
             if (kind === 'history') renderMasterPriceHistory([]);
             try {
@@ -592,11 +593,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     renderMasterPriceEdit(rows[0]);
                 } else {
                     masterPriceOverlay('edit', false);
-                    showDialog({ title: 'Thông báo', message: 'Không tìm thấy bản ghi master giá cho mã hàng này.', type: 'error' });
+                    showDialog({ title: i18n('Notification', 'Notification'), message: i18n('MasterPriceNoRecord', 'No master price record was found for this item.'), type: 'error' });
                 }
             } catch (error) {
                 masterPriceOverlay(kind, false);
-                showDialog({ title: 'Thông báo', message: error.message || 'Không thể tải master giá.', type: 'error' });
+                showDialog({ title: i18n('Notification', 'Notification'), message: error.message || i18n('MasterPriceLoadError', 'Unable to load master price.'), type: 'error' });
             }
         },
         loadLatestSelectedPrices: async function (items) {
@@ -610,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(codes)
                 });
-                if (!response.ok) throw new Error(await response.text() || 'Không thể lấy giá gần nhất');
+                if (!response.ok) throw new Error(await response.text() || i18n('LatestPriceLoadError', 'Unable to load the latest price.'));
                 const result = await response.json();
                 const prices = Array.isArray(result?.data) ? result.data : [];
                 prices.forEach(price => {
@@ -642,7 +643,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const payload = this.getMasterQuoteSearchPayload();
 
             const tbody = document.getElementById('masterQuoteTableBody');
-            if (tbody) tbody.innerHTML = '<tr><td colspan="27" class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
+            const T = window.i18nQuotationResults || {};
+            if (tbody) tbody.innerHTML = `<tr><td colspan="27" class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>${T.MasterPriceLoading || T.LoadingData || 'Loading data...'}</td></tr>`;
 
             try {
                 const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/SearchMasterQuoteInfo', {
@@ -650,7 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                if (!response.ok) throw new Error(await response.text() || 'Không thể tải dữ liệu');
+                if (!response.ok) throw new Error(await response.text() || T.SupplierDataLoadError || 'Unable to load data');
                 const result = await response.json();
                 const rows = Array.isArray(result?.data) ? result.data : [];
                 if (!rows.length && masterQuoteState.pageIndex > 1) {
@@ -663,21 +665,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 masterQuoteState.lastPage = masterQuoteState.pageIndex >= masterQuoteState.totalPages;
                 this.renderMasterQuoteTable(rows);
                 const summary = document.getElementById('masterQuoteSummaryText');
-                if (summary) summary.textContent = `Số dữ liệu: ${count}`;
+                if (summary) summary.textContent = `${T.Sum || 'Total'}: ${count}`;
                 this.renderMasterQuotePaginationControls();
             } catch (error) {
                 console.error('Load master quote data failed', error);
-                if (tbody) tbody.innerHTML = '<tr><td colspan="27" class="text-center text-danger py-5"><i class="fas fa-exclamation-circle me-2"></i>Không thể tải dữ liệu</td></tr>';
+                if (tbody) tbody.innerHTML = `<tr><td colspan="27" class="text-center text-danger py-5"><i class="fas fa-exclamation-circle me-2"></i>${T.SupplierDataLoadError || 'Unable to load data'}</td></tr>`;
             }
         },
         ExpTemplateExcel: async function () {
             const templateUrl = `${window.location.origin}/template/MasterGia.xlsx`;
             const templateFileName = 'MasterGia.xlsx';
 
-            showLoading('Đang tải file mẫu master giá...');
+            showLoading(i18n('MasterPriceTemplateLoading', 'Loading master price template...'));
             try {
                 const response = await fetch(templateUrl);
-                if (!response.ok) throw new Error('Không tìm thấy file mẫu MasterGia.xlsx');
+                if (!response.ok) throw new Error(i18n('MasterPriceTemplateNotFound', 'MasterGia.xlsx template was not found.'));
 
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -691,8 +693,8 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
                 const T = window.i18nQuotationResults || {};
                 showDialog({
-                    title: T.Notification || 'Thông báo',
-                    message: error.message || 'Không thể tải file mẫu MasterGia.xlsx',
+                    title: T.Notification || 'Notification',
+                    message: error.message || T.MasterPriceTemplateLoadError || 'Unable to load the MasterGia.xlsx template.',
                     type: 'error'
                 });
             } finally {
@@ -702,7 +704,7 @@ document.addEventListener('DOMContentLoaded', function () {
         exportMasterQuote: async function () {
             const button = document.getElementById('btnExportfile');
             if (button) button.disabled = true;
-            showLoading('Đang xuất dữ liệu master giá...');
+            showLoading(i18n('MasterPriceExportLoading', 'Exporting master price data...'));
 
             try {
                 const response = await fetch((window.apiBaseUrl || '') + '/QuoteResults/ExportMasterQuote', {
@@ -710,7 +712,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(this.getMasterQuoteSearchPayload(false))
                 });
-                if (!response.ok) throw new Error(await response.text() || 'Không thể xuất dữ liệu master giá.');
+                if (!response.ok) throw new Error(await response.text() || i18n('MasterPriceExportError', 'Unable to export master price data.'));
 
                 const blob = await response.blob();
                 const contentDisposition = response.headers.get('Content-Disposition') || '';
@@ -727,7 +729,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 link.remove();
                 URL.revokeObjectURL(url);
             } catch (error) {
-                showDialog({ title: 'Thông báo', message: error.message || 'Không thể xuất dữ liệu master giá.', type: 'error' });
+                showDialog({ title: i18n('Notification', 'Notification'), message: error.message || i18n('MasterPriceExportError', 'Unable to export master price data.'), type: 'error' });
             } finally {
                 if (button) button.disabled = false;
                 hideLoading();
@@ -739,7 +741,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (!response.ok) throw new Error(await response.text() || 'Không thể đếm dữ liệu');
+            if (!response.ok) throw new Error(await response.text() || i18n('MasterPriceCountError', 'Unable to count data.'));
             const result = await response.json();
             return Number(result?.data || 0);
         },
@@ -806,46 +808,52 @@ document.addEventListener('DOMContentLoaded', function () {
             const tbody = document.getElementById('masterQuoteTableBody');
             if (!tbody) return;
             if (!rows.length) {
-                tbody.innerHTML = '<tr><td colspan="27" class="text-center text-muted py-5"><i class="fas fa-table fa-2x mb-2 d-block"></i>Chưa có dữ liệu phù hợp</td></tr>';
+                const T = window.i18nQuotationResults || {};
+                tbody.innerHTML = `<tr><td colspan="27" class="text-center text-muted py-5"><i class="fas fa-table fa-2x mb-2 d-block"></i>${T.NoMatchingData || T.NoData || 'No matching data'}</td></tr>`;
                 return;
             }
 
-            const get = (row, ...names) => {
-                for (const name of names) if (row[name] !== undefined && row[name] !== null) return row[name];
-                return '';
-            };
+            const get = (row, name) => row[name] ?? row[name.charAt(0).toLowerCase() + name.slice(1)] ?? '';
             const decimal4 = value => {
                 if (value === null || value === undefined || value === '') return '';
                 const number = Number(value);
                 return Number.isFinite(number) ? Number(number.toFixed(4)).toString() : value;
             };
-            let stt = 1;
+            const actionLabel = escape('Actions');
+            const viewHistoryTitle = escape('View history');
+            const editTitle = escape('Edit');
+            const addPriceTitle = escape(i18n('MasterPriceAddTitle', 'Add new master price'));
 
-            tbody.innerHTML = rows.map(row => `<tr>
-                <td class ="text-center">${stt++}</td>
+            tbody.innerHTML = rows.map((row, index) => {
+                const partCode = get(row, 'BIVNPartCode');
+                const vendorCode = get(row, 'VendorCode');
+                const escapedPartCode = escape(partCode);
+
+                return `<tr>
+                <td class ="text-center">${index + 1}</td>
                 <td>
-                    <div class="action-buttons" role="group" aria-label="${escape('Actions')}">
+                    <div class="action-buttons" role="group" aria-label="${actionLabel}">
                         <button
                             type="button"
                             class="btn btn-view-history"
-                            title="${escape('View history')}"
-                            data-bivncode="${escape(get(row, 'BIVNPartCode'))}">
+                            title="${viewHistoryTitle}"
+                            data-bivncode="${escapedPartCode}">
                             <i class="fas fa-history"></i>
                         </button>
 
                         <button hidden
                             type="button"
                             class="btn btn-edit-history"
-                            title="${escape('Edit')}"
-                            data-bivncode="${escape(get(row, 'BIVNPartCode'))}">
+                            title="${editTitle}"
+                            data-bivncode="${escapedPartCode}">
                             <i class="fas fa-edit text-primary"></i>
                         </button>
 
                         <button
                             type="button"
                             class="btn btn-add-price"
-                            title="${escape('Nhập master giá mới')}"
-                            data-bivncode="${escape(get(row, 'BIVNPartCode'))}">
+                            title="${addPriceTitle}"
+                            data-bivncode="${escapedPartCode}">
                             <i class="fas fa-plus text-success"></i>
                         </button>
                     </div>
@@ -854,9 +862,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${cell(get(row, 'PICUpload'))}
                 ${cell(get(row, 'QuotationRequestNumber'))}
                 ${cell(get(row, 'EquipmentCode'))}
-                ${cell(get(row, 'VendorCode'))}
+                ${cell(vendorCode)}
                 ${cell(get(row, 'VendorName'))}
-                ${cell(get(row, 'BIVNPartCode'))}
+                ${cell(partCode)}
                 ${cell(get(row, 'VendorGoodCode'))}
                 ${cell(get(row, 'PartNameVN'))}
                 ${cell(get(row, 'PartNameEN'))}
@@ -873,9 +881,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${cell(get(row, 'PaymentTerm'))}
                 ${cell(date(get(row, 'PriceEffectiveDate')))}
                 ${cell(date(get(row, 'ExpiryDate')))}
-                ${cell(get(row, 'VendorCode'))}
+                ${cell(vendorCode)}
                 <td></td>
-            </tr>`).join('');
+            </tr>`;
+            }).join('');
         },
         renderSupplierTable: function (data) {
             const tbody = document.getElementById('supplierQuoteBody');
@@ -951,7 +960,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     && previousPrice.value > 0
                     && currentPrice.value > previousPrice.value * 1.05;
                 const priceWarning = priceIncrease
-                    ? 'Giá cao hơn giá đã đặt gần nhất trên 5%, bắt buộc nhập lý do.'
+                    ? i18n('PriceIncreaseReasonRequired', 'Prices more than 5% above the latest selected price require a reason.')
                     : '';
                 const canShowCustomsDeclaration = window.canShowCustomsDeclaration === true;
                 const customsNotificationDisabled = d.BIT_Select !== true;
@@ -1016,19 +1025,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         </select>
                     </td>
                     ${canShowCustomsDeclaration ? `<td class="customs-notification-cell">
-                        <select class="form-control form-control-sm customs-notification-choice" ${customsNotificationDisabled ? 'disabled' : ''} aria-label="Thông báo hải quan">
-                            <option value="NONEED" selected>No need</option>
-                            <option value="NEED">Need</option>
+                        <select class="form-control form-control-sm customs-notification-choice" ${customsNotificationDisabled ? 'disabled' : ''} aria-label="${escape(i18n('CustomsDeclaration', 'Customs declaration'))}">
+                            <option value="NONEED" selected>${escape(i18n('CustomsNoNeed', 'Not required'))}</option>
+                            <option value="NEED">${escape(i18n('CustomsNeed', 'Required'))}</option>
                         </select>
                     </td>` : ''}
                     <td class="reason-cell">
                         ${priceWarning ? `<div class="price-warning" role="alert">${priceWarning}</div>` : ''}
-                        <textarea class="form-control form-control-sm reason-input" rows="2" list="${supplierReasonDatalistId}" placeholder="Nhập lý do...">${d.NVCHR_ReasonPick || ''}</textarea>
+                        <textarea class="form-control form-control-sm reason-input" rows="2" list="${supplierReasonDatalistId}" placeholder="${escape(i18n('ReasonPlaceholder', 'Enter a reason...'))}">${d.NVCHR_ReasonPick || ''}</textarea>
                         <button type="button" class="reason-suggestion-trigger">
-                            <i class="fas fa-lightbulb"></i> Chọn gợi ý lý do
+                            <i class="fas fa-lightbulb"></i> ${escape(i18n('ReasonSuggestion', 'Choose a reason suggestion'))}
                         </button>
                     </td>
-                    <td class="reason-cell"><textarea class="form-control form-control-sm reason-input" rows="2" placeholder="Nhập lý do...">${d.NVCHR_Note || ''}</textarea></td>
+                    <td class="reason-cell"><textarea class="form-control form-control-sm reason-input" rows="2" placeholder="${escape(i18n('ReasonPlaceholder', 'Enter a reason...'))}">${d.NVCHR_Note || ''}</textarea></td>
                 </tr>
             `;
             }).join('');
@@ -1057,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (reasonInput) {
                         showPrompt({
                             title: (window.i18nQuotationResults && window.i18nQuotationResults.Reason) || 'Lý do chọn nhà cung cấp',
-                            message: 'Chọn một lý do có sẵn hoặc nhập lý do khác:',
+                            message: i18n('SelectReason') || 'Chọn một lý do có sẵn hoặc nhập lý do khác:',
                             defaultValue: reasonInput.value,
                             options: supplierPickReasonOptions,
                             allowCustom: true
@@ -1491,13 +1500,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         },
 
-        openApproverSelector: function (stepNumber, sectionCode) {
+        openApproverSelector: function (stepNumber, sectionCode, options = {}) {
             return new Promise(async (resolve, reject) => {
                 try {
                     const modal = document.getElementById('selectApproverModal');
                     const sel = document.getElementById('selectNextApprover');
                     const notice = document.getElementById('selectApproverNotice');
+                    const qltcNotice = document.getElementById('selectApproverQltcNotice');
                     if (!modal || !sel) return resolve(null);
+                    if (qltcNotice) qltcNotice.hidden = !options.showQltcNotice;
                     // clear
                     sel.innerHTML = '';
                     const placeholderOpt = document.createElement('option');
@@ -2754,11 +2765,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         // PUR always continues to QLTC at step 9. GA only does so at 100 million VND or above.
                         if (nextStep === 9 && (flowCode !== 'GA' || gaNeedsQltc)) {
-                            const selectedApprover = await this.openApproverSelector(10, "");
+                            const selectedApprover = await this.openApproverSelector(10, "", {
+                                showQltcNotice: flowCode === 'GA' && gaNeedsQltc
+                            });
                             if (!selectedApprover) {
                                 return; // Người dùng đã hủy chọn
                             }
-                            userApproverNext = selectedApprover.chR_UserAdid;
+                            userApproverNext = selectedApprover.chR_UserAdid
+                                ?? selectedApprover.CHR_UserAdid
+                                ?? selectedApprover.chR_Adid
+                                ?? selectedApprover.CHR_Adid
+                                ?? selectedApprover.ADID
+                                ?? selectedApprover.Id
+                                ?? selectedApprover.id
+                                ?? '';
                         }
 
                         try {
@@ -3272,7 +3292,7 @@ function showPrompt({ title = (window.i18nQuotationResults && window.i18nQuotati
                 inp = document.createElement('input');
                 inp.type = 'text';
                 inp.className = 'form-control';
-                inp.placeholder = placeholder || 'Nhập hoặc chọn lý do';
+                inp.placeholder = placeholder || window.i18nQuotationResults.EnterSelect || 'Nhập hoặc chọn lý do';
                 inp.value = defaultValue || '';
                 inp.setAttribute('aria-label', 'Lý do chọn nhà cung cấp');
                 container.appendChild(inp);

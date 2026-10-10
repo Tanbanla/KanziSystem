@@ -627,9 +627,11 @@
             if (groupCode === "GA") {
                 document.getElementById("modal-20").style.display = '';
                 document.getElementById("modal-6").style.display = 'none';
+                tinhTongTatCa();
             } else if (groupCode === "PROD") {
                 document.getElementById("modal-20").style.display = 'none';
                 document.getElementById("modal-6").style.display = '';
+                tinhTongTatCa();
             }
                 })
                 .catch(error => {

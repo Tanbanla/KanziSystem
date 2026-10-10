@@ -130,7 +130,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var templatePath = Path.Combine(root, "template", "MasterGia.xlsx");
             if (!System.IO.File.Exists(templatePath))
             {
-                return BadRequest("Không tìm thấy file mẫu MasterGia.xlsx.");
+                return BadRequest(_localizer["TemplateNotFound", "MasterGia.xlsx"].Value);
             }
 
             using var templateStream = System.IO.File.OpenRead(templatePath);
@@ -138,7 +138,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var worksheet = workbook.Worksheets.FirstOrDefault();
             if (worksheet == null)
             {
-                return BadRequest("Không tìm thấy worksheet trong file mẫu MasterGia.xlsx.");
+                return BadRequest(_localizer["WorksheetNotFound"].Value);
             }
 
             const int firstDataRow = 3;
@@ -204,7 +204,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (string.IsNullOrWhiteSpace(internalPartCode))
             {
-                return BadRequest("Mã hàng nội bộ không được để trống.");
+                return BadRequest(_localizer["InternalCodeRequired"].Value);
             }
 
             var result = await _tmPriceMasterService.GetByInternalPartCode(internalPartCode.Trim());
@@ -221,7 +221,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (request == null || string.IsNullOrWhiteSpace(request.InternalPartCode))
             {
-                return BadRequest("Mã hàng nội bộ không được để trống.");
+                return BadRequest(_localizer["InternalCodeRequired"].Value);
             }
 
             var result = await _tmPriceMasterService.GetByInternalPartCode(request.InternalPartCode.Trim());
@@ -252,7 +252,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var templatePath = Path.Combine(root, "template", "MasterGia.xlsx");
             if (!System.IO.File.Exists(templatePath))
             {
-                return BadRequest("Không tìm thấy file mẫu MasterGia.xlsx.");
+                return BadRequest(_localizer["TemplateNotFound", "MasterGia.xlsx"].Value);
             }
 
             using var templateStream = System.IO.File.OpenRead(templatePath);
@@ -260,7 +260,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var worksheet = workbook.Worksheets.FirstOrDefault();
             if (worksheet == null)
             {
-                return BadRequest("Không tìm thấy worksheet trong file mẫu MasterGia.xlsx.");
+                return BadRequest(_localizer["WorksheetNotFound"].Value);
             }
 
             const int firstDataRow = 3;
@@ -334,7 +334,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest("Vui lòng chọn file cần tải lên.");
+                return BadRequest(_localizer["UploadFileRequired"].Value);
             }
 
             var result = await _fileImportService.SaveQuotationFileAsync(file, kind);
@@ -354,9 +354,9 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
             if (file == null || file.Length == 0)
-                return BadRequest("Vui lòng chọn file Excel cần nhập.");
+                return BadRequest(_localizer["ImportFileRequired"].Value);
             if (!string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
-                return BadRequest("Chỉ hỗ trợ file Excel định dạng .xlsx.");
+                return BadRequest(_localizer["ExcelFileOnly"].Value);
 
             try
             {
@@ -364,11 +364,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 using var workbook = new XLWorkbook(stream);
                 var worksheet = workbook.Worksheets.FirstOrDefault();
                 if (worksheet == null)
-                    return BadRequest("Không tìm thấy worksheet trong file.");
+                    return BadRequest(_localizer["WorksheetNotFound"].Value);
 
                 var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? startRow - 1;
                 if (lastRow < startRow)
-                    return BadRequest("File không có dữ liệu từ dòng 3.");
+                    return BadRequest(_localizer["ImportDataRequired"].Value);
 
                 var validRows = new List<TM_PRICE_MASTER>();
                 var parsedRows = new List<(int ExcelRow, string[] Values, TM_PRICE_MASTER Entity)>();
@@ -383,7 +383,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     if (values.All(string.IsNullOrWhiteSpace)) continue;
 
                     var errors = new List<string>();
-                    var entity = ParsePriceMasterRow(values, rowNumber, GetCurrentUserId(), errors);
+                    var entity = ParsePriceMasterRow(values, GetCurrentUserId(), errors);
                     if (entity != null)
                     {
                         // Tạm thời bỏ qua trùng
@@ -425,18 +425,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
 
                 var insertResult = await _tmPriceMasterService.InsertImportedAsync(validRows);
                 if (!insertResult.Success)
-                    return BadRequest($"Không thể lưu dữ liệu master giá: {insertResult.Message}");
+                    return BadRequest(_localizer["MasterPriceImportSaveError", insertResult.Message].Value);
 
-                return Ok(new { message = "Import master giá thành công.", totalRows = validRows.Count });
+                return Ok(new { message = _localizer["MasterPriceImportSuccess"].Value, totalRows = validRows.Count });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi import master giá từ Excel");
-                return BadRequest($"Lỗi đọc file Excel: {ex.Message}");
+                return BadRequest(_localizer["MasterPriceImportReadError", ex.Message].Value);
             }
         }
 
-        private static TM_PRICE_MASTER? ParsePriceMasterRow(string[] values, int rowNumber, string? currentUserId, List<string> errors)
+        private TM_PRICE_MASTER? ParsePriceMasterRow(string[] values, string? currentUserId, List<string> errors)
         {
             string Text(int index) => values[index - 1];
             string? OptionalText(int index) => string.IsNullOrWhiteSpace(Text(index)) ? null : Text(index);
@@ -449,7 +449,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 value = value.Trim().Replace("%", "");
                 if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ||
                     decimal.TryParse(value, NumberStyles.Any, CultureInfo.GetCultureInfo("vi-VN"), out result)) return result;
-                errors.Add($"Cột {name} không phải số hợp lệ.");
+                errors.Add(_localizer["MasterPriceInvalidNumber", name].Value);
                 return null;
             }
 
@@ -459,7 +459,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (string.IsNullOrWhiteSpace(value)) return null;
                 if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result) ||
                     int.TryParse(value, NumberStyles.Integer, CultureInfo.GetCultureInfo("vi-VN"), out result)) return result;
-                errors.Add($"Cột {name} không phải số nguyên hợp lệ.");
+                errors.Add(_localizer["MasterPriceInvalidInteger", name].Value);
                 return null;
             }
 
@@ -469,7 +469,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (string.IsNullOrWhiteSpace(value)) return null;
                 if (DateTime.TryParse(value, CultureInfo.GetCultureInfo("vi-VN"), DateTimeStyles.AllowWhiteSpaces, out var result) ||
                     DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out result)) return result;
-                errors.Add($"Cột {name} không phải ngày hợp lệ.");
+                errors.Add(_localizer["MasterPriceInvalidDate", name].Value);
                 return null;
             }
 
@@ -477,14 +477,14 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             var vendorCode = Text(5);
             var vendorName = Text(6);
             var internalCode = Text(7);
-            if (string.IsNullOrWhiteSpace(internalCode)) errors.Add("Mã hàng nội bộ không được để trống.");
-            if (string.IsNullOrWhiteSpace(vendorCode)) errors.Add("Mã nhà cung cấp không được để trống.");
-            if (string.IsNullOrWhiteSpace(vendorName)) errors.Add("Tên nhà cung cấp không được để trống.");
+            if (string.IsNullOrWhiteSpace(internalCode)) errors.Add(_localizer["MasterPriceInternalCodeRequired"].Value);
+            if (string.IsNullOrWhiteSpace(vendorCode)) errors.Add(_localizer["MasterPriceVendorCodeRequired"].Value);
+            if (string.IsNullOrWhiteSpace(vendorName)) errors.Add(_localizer["MasterPriceVendorNameRequired"].Value);
 
             var effectiveDate = DateValue(26, "Ngày hiệu lực");
             var expirationDate = DateValue(27, "Ngày hết hạn");
             if (effectiveDate.HasValue && expirationDate.HasValue && expirationDate < effectiveDate)
-                errors.Add("Ngày hết hạn phải lớn hơn hoặc bằng ngày hiệu lực.");
+                errors.Add(_localizer["MasterPriceExpirationInvalid"].Value);
 
             var fixedVendor = Text(28);
             var isFixedVendor = string.IsNullOrWhiteSpace(fixedVendor) ||
@@ -497,7 +497,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 !fixedVendor.Equals("N", StringComparison.OrdinalIgnoreCase) &&
                 !fixedVendor.Equals("FALSE", StringComparison.OrdinalIgnoreCase) &&
                 !fixedVendor.Equals("Không", StringComparison.OrdinalIgnoreCase))
-                errors.Add("Quyết định NCC chỉ nhận O/X, Có/Không hoặc TRUE/FALSE.");
+                errors.Add(_localizer["MasterPriceSupplierDecisionInvalid"].Value);
 
             var quantity = DecimalValue(11, "Số lượng");
             var unitPrice = DecimalValue(15, "Đơn giá nhà cung cấp");
@@ -625,7 +625,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.CHR_INTERNAL_PART_CODE) || string.IsNullOrWhiteSpace(dto.CHR_VENDOR_CODE))
             {
-                return BadRequest("Mã hàng nội bộ và mã nhà cung cấp không được để trống.");
+                return BadRequest(_localizer["InternalAndVendorCodeRequired"].Value);
             }
 
             var now = DateTime.Now;
@@ -681,12 +681,12 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (string.IsNullOrWhiteSpace(internalPartCode))
             {
-                return BadRequest("Mã hàng nội bộ không được để trống.");
+                return BadRequest(_localizer["InternalCodeRequired"].Value);
             }
             var result = await _materialService.GetByMaHangAsync(internalPartCode.Trim());
             if (result == null)
             {
-                return NotFound($"Không tìm thấy thông tin hàng hóa với mã: {internalPartCode}");
+                return NotFound(_localizer["MaterialNotFound", internalPartCode].Value);
             }
             return Ok(result);
         }
@@ -696,7 +696,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (dto == null || dto.ID <= 0 || string.IsNullOrWhiteSpace(dto.CHR_INTERNAL_PART_CODE))
             {
-                return BadRequest("Dữ liệu master giá không hợp lệ.");
+                return BadRequest(_localizer["InvalidMasterPriceData"].Value);
             }
 
             var entity = new TM_PRICE_MASTER
@@ -756,7 +756,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             if (vm?.listPick == null || vm.listPick.Count == 0)
             {
-                return BadRequest("Không có dữ liệu nhà cung cấp được chọn.");
+                return BadRequest(_localizer["NoSupplierSelectionData"].Value);
             }
 
             var validationErrors = ValidateSupplierSelections(vm.listPick);
@@ -765,7 +765,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 return BadRequest(string.Join("; ", validationErrors.Distinct()));
             }
 
-            var check = vm.listPick.Where(c => (c.BIT_Select == true || c.BIT_Select == false) && c.NVCHR_ReasonPick == "").ToList();
+            var check = vm.listPick.Where(c => (c.BIT_Select == true) && c.NVCHR_ReasonPick == "").ToList(); //c.BIT_Select == false ||
             if (check.Any())
             {
                 return BadRequest(_localizer["ReasonRequiredForItems"].Value);
@@ -818,7 +818,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             return Ok(result.Data);
         }
 
-        private static List<string> ValidateSupplierSelections(IReadOnlyCollection<BaoGia_Detail_of_QuotationDTO> selections)
+        private List<string> ValidateSupplierSelections(IReadOnlyCollection<BaoGia_Detail_of_QuotationDTO> selections)
         {
             var errors = new List<string>();
             var rows = selections
@@ -831,7 +831,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 if (group.Any(x => x.FL_USD.GetValueOrDefault() > 0 || x.FL_VND.GetValueOrDefault() > 0) &&
                     !group.Any(x => x.BIT_Select == true))
                 {
-                    errors.Add($"Đơn {group.First().CHR_MaDon}, mã hàng {group.First().CHR_MaHangNCC} chưa chọn NCC (O).");
+                    errors.Add(_localizer["SupplierNotSelectedForItem", group.First().CHR_MaDon ?? string.Empty, group.First().CHR_MaHangNCC ?? string.Empty].Value);
                 }
             }
 
@@ -839,7 +839,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 if (group.Select(x => x.NVCHR_NameNCC).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1)
                 {
-                    errors.Add($"Trong đơn {group.First().CHR_MaDon}, mã hàng {group.First().CHR_MaHangNCC} chỉ được chọn một NCC.");
+                    errors.Add(_localizer["MultipleSuppliersForItem", group.First().CHR_MaDon ?? string.Empty, group.First().CHR_MaHangNCC ?? string.Empty].Value);
                 }
 
                 var pricedRows = rows.Where(x => x.CHR_MaDon == group.First().CHR_MaDon && x.CHR_MaHangNCC == group.First().CHR_MaHangNCC)
@@ -849,7 +849,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     var price = GetComparablePrice(item);
                     if (price.HasValue && pricedRows.Count > 1 && price.Value > pricedRows.Min())
                     {
-                        errors.Add($"NCC {item.NVCHR_NameNCC} của mã hàng {item.CHR_MaHangNCC} chưa có giá thấp nhất.");
+                        errors.Add(_localizer["SelectedSupplierNotLowest", item.NVCHR_NameNCC ?? string.Empty, item.CHR_MaHangNCC ?? string.Empty].Value);
                     }
                 }
             }
@@ -862,7 +862,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     continue;
                 }
 
-                errors.Add($"Thiết bị {group.First().CHR_MaThietBi}, chủng loại {group.First().NVCHR_ChungLoai} không được chọn nhiều NCC.");
+                errors.Add(_localizer["MultipleSuppliersForEquipmentCategory", group.First().CHR_MaThietBi ?? string.Empty, group.First().NVCHR_ChungLoai ?? string.Empty].Value);
             }
 
             foreach (var group in rows.GroupBy(x => $"{x.CHR_MaDon}|{x.CHR_MaHangNCC}|{x.NVCHR_NameNCC}"))
@@ -870,18 +870,18 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var prices = group.Select(GetComparablePrice).Where(x => x.HasValue).Select(x => x!.Value).Distinct().ToList();
                 if (prices.Count > 1)
                 {
-                    errors.Add($"Đơn {group.First().CHR_MaDon}, mã hàng {group.First().CHR_MaHangNCC}, NCC {group.First().NVCHR_NameNCC} có nhiều đơn giá khác nhau.");
+                    errors.Add(_localizer["MultiplePricesForSupplier", group.First().CHR_MaDon ?? string.Empty, group.First().CHR_MaHangNCC ?? string.Empty, group.First().NVCHR_NameNCC ?? string.Empty].Value);
                 }
             }
 
             foreach (var item in selected)
             {
                 if (GetComparablePrice(item) is null or <= 0)
-                    errors.Add($"NCC {item.NVCHR_NameNCC} của mã hàng {item.CHR_MaHangNCC} có đơn giá bằng 0.");
+                    errors.Add(_localizer["SupplierZeroPrice", item.NVCHR_NameNCC ?? string.Empty, item.CHR_MaHangNCC ?? string.Empty].Value);
                 if (string.IsNullOrWhiteSpace(item.NVCHR_File))
-                    errors.Add($"NCC {item.NVCHR_NameNCC} của mã hàng {item.CHR_MaHangNCC} chưa nhập link báo giá.");
+                    errors.Add(_localizer["SupplierQuotationLinkRequired", item.NVCHR_NameNCC ?? string.Empty, item.CHR_MaHangNCC ?? string.Empty].Value);
                 if (item.DTM_ExpiryDate.HasValue && item.DTM_ExpiryDate.Value.Date < DateTime.Today.AddDays(4))
-                    errors.Add($"Báo giá của NCC {item.NVCHR_NameNCC} cho mã hàng {item.CHR_MaHangNCC} đã hết hạn hoặc còn dưới 4 ngày.");
+                    errors.Add(_localizer["SupplierQuotationExpired", item.NVCHR_NameNCC ?? string.Empty, item.CHR_MaHangNCC ?? string.Empty].Value);
             }
 
             return errors;
@@ -890,7 +890,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
             {
                 if (item.FL_USD.GetValueOrDefault() > 0) return (decimal)item.FL_USD.GetValueOrDefault();
                 if (item.FL_VND.GetValueOrDefault() > 0) return (decimal)item.FL_VND.GetValueOrDefault();
-                return 0m;
+                return null;
             }
         }
         [HttpPost]
@@ -898,7 +898,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
         {
             //var result = await _approverService.GetApproverByStepAndSectionAsync(sr.Step ?? 2, sr.SectionCost ?? "");
 
-            var result = await _approverService.GetApproverByPicDepartmentsAsync(GetRolesUser() ?? "");
+            var result = await _approverService.GetApproverByPicDepartmentsAsync(GetRolesUser() ?? "", sr.Step ?? 5);
             if (!result.Success)
             {
                 return BadRequest(_localizer["ApproverListError", result.Message].Value);
@@ -1297,6 +1297,42 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 var userSend = UserApproverNext;
                 var listOk = req.Where(c => c.ID_Status != null && !c.ID_Status.Contains("RETURN")).ToList();
                 var listNG = req.Where(c => c.ID_Status != null && c.ID_Status.Contains("RETURN")).ToList();
+
+                var completedRequestIds = listOk
+                    .Where(c => string.Equals(c.ID_Status, "DONE", StringComparison.OrdinalIgnoreCase)
+                        && c.ID_StepBaoGia == 13)
+                    .Select(c => c.ID)
+                    .Distinct()
+                    .ToList();
+                if (completedRequestIds.Count > 0)
+                {
+                    var selectedDetails = new List<BaoGia_Detail_of_QuotationDTO>();
+                    foreach (var requestId in completedRequestIds)
+                    {
+                        var detailResult = await _baoGiaDetailService.GetByIdRequestQuoteAsync(requestId);
+                        if (!detailResult.Success || detailResult.Data == null)
+                        {
+                            _logger.LogError("Không lấy được báo giá đã chọn cho request {RequestId}: {Message}", requestId, detailResult.Message);
+                            continue;
+                        }
+
+                        if (detailResult.Data.BIT_Select == true)
+                        {
+                            selectedDetails.Add(detailResult.Data);
+                        }
+                    }
+
+                    if (selectedDetails.Count > 0)
+                    {
+                        var priceMasterResult = await _tmPriceMasterService.InsertByDetailQuotationAsync(selectedDetails);
+                        if (!priceMasterResult.Success)
+                        {
+                            _logger.LogError("Không thể cập nhật TM_PRICE_MASTER sau khi phê duyệt nhà cung cấp: {Message}", priceMasterResult.Message);
+                            return BadRequest(_localizer["ApprovalError", priceMasterResult.Message].Value);
+                        }
+                    }
+                }
+
                 // Send mail Approval ok
                 if (listOk.Any())
                 {
@@ -1596,24 +1632,6 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                     })
                     .ToList();
 
-                if (warningRows.Any())
-                {
-                    var confirmationItems = allRowsData.Select(item => new BaoGia_Detail_of_QuotationDTO
-                    {
-                        ID = item.ID,
-                        BIT_Select = (item.BIT_Select ?? string.Empty).Contains("O"),
-                        NVCHR_ReasonPick = item.NVCHR_ReasonPick ?? string.Empty,
-                        NVCHR_Note = item.NVCHR_Note ?? string.Empty
-                    }).ToList();
-                    return Ok(new
-                    {
-                        RequiresWarning = true,
-                        Warnings = warningRows,
-                        Items = confirmationItems,
-                        UserNextApproval = vm.userNextApproval
-                    });
-                }
-
                 // Kiểm tra đơn hàng + mã hàng nội bộ đều đã báo giá hết chưa, nếu chưa thì báo lỗi
                 var requestCheck = await _baoGiaService.CheckPermissionSelectSupplierAsync(allRowsData);
 
@@ -1660,8 +1678,8 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         var NVCHR_Note = rowData.NVCHR_Note;
 
                         var vendorCodesForSameProduct = allRowsData
-                            .Where(x => x.MaDon == maDon && x.MaHangNoiBo == maHangNB && (x.BIT_Select ?? string.Empty).Contains("O") && x.MaThietBi == maThietBi)
-                            .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
+                            .Where(x => x.MaDon == maDon && x.MaHangNoiBo == maHangNB && (x.BIT_Select ?? string.Empty).Contains("O"))
+                            .Select(x => x.CodeVender)
                             .Where(v => !string.IsNullOrEmpty(v))
                             .Distinct()
                             .Count();
@@ -1678,11 +1696,11 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         //}
 
                         var vendorsForEquipmentAndCategory = allRowsData
-                            .Where(x => (x.MaDon == maDon && x.MaThietBi == maThietBi
+                            .Where(x => x.MaThietBi == maThietBi
                             && x.ChungLoaiHang == chungLoaiHang
-                            && (x.BIT_Select ?? string.Empty).Contains("O") && x.MaHangNCC_BIVN == maHangNCC)
-                            && !string.IsNullOrEmpty(maThietBi))
-                            .Select(x => !string.IsNullOrEmpty(x.MaHangNCC_Vendor) ? x.MaHangNCC_Vendor : x.MaHangNCC_BIVN)
+                            && (x.BIT_Select ?? string.Empty).Contains("O")
+                            && !string.IsNullOrEmpty(x.MaThietBi))
+                            .Select(x => x.CodeVender)
                             .Where(v => !string.IsNullOrEmpty(v))
                             .Distinct()
                             .Count();
@@ -1719,9 +1737,7 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                         }
 
                         var duplicatePrice = allRowsData
-                            .Where(x => x.MaHangNoiBo == maHangNB &&
-                                   ((!string.IsNullOrEmpty(x.MaHangNCC_Vendor) && x.MaHangNCC_Vendor == maHangNCC) ||
-                                    (!string.IsNullOrEmpty(x.MaHangNCC_BIVN) && x.MaHangNCC_BIVN == maHangNCC)) && x.CodeVender == codeVender && x.MaThietBi == maThietBi)
+                            .Where(x => x.MaDon == maDon && x.MaHangNoiBo == maHangNB && x.CodeVender == codeVender)
                             .Select(x => new { x.DonGiaUSD, x.DonGiaVND })
                             .Distinct()
                             .Count();
@@ -1742,10 +1758,10 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                             errors.Add(_localizer["SelectedVendorNoReasonColumn", 52].Value);
                         }
                         // check reason remark
-                        if ((bitSelect ?? string.Empty).Contains("X") && string.IsNullOrEmpty(reason))
-                        {
-                            errors.Add(_localizer["RejectedVendorNoRemarkColumn", 53].Value);
-                        }
+                        //if ((bitSelect ?? string.Empty).Contains("X") && string.IsNullOrEmpty(reason))
+                        //{
+                        //    errors.Add(_localizer["RejectedVendorNoRemarkColumn", 53].Value);
+                        //}
 
                         if (errors.Any())
                         {
@@ -1856,6 +1872,24 @@ namespace PRJ_WAREHOUSE_BIVN.Controllers
                 }
                 else
                 {
+                    if (warningRows.Any())
+                    {
+                        var confirmationItems = allRowsData.Select(item => new BaoGia_Detail_of_QuotationDTO
+                        {
+                            ID = item.ID,
+                            BIT_Select = (item.BIT_Select ?? string.Empty).Contains("O"),
+                            NVCHR_ReasonPick = item.NVCHR_ReasonPick ?? string.Empty,
+                            NVCHR_Note = item.NVCHR_Note ?? string.Empty
+                        }).ToList();
+                        return Ok(new
+                        {
+                            RequiresWarning = true,
+                            Warnings = warningRows,
+                            Items = confirmationItems,
+                            UserNextApproval = vm.userNextApproval
+                        });
+                    }
+
                     var dtoList = items.Select(i => new BaoGia_Detail_of_QuotationDTO
                     {
                         ID = int.Parse(i.ID.ToString()),
